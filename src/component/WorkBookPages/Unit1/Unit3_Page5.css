@@ -1,0 +1,155 @@
+.input-wrapper-wb-unit1-page8-q1 {
+  width: 30px;
+  position: relative;
+}
+
+.unscramble-row-wb-unit1-p8-q1 {
+  display: grid;
+  gap: 50px;
+  justify-content: space-around;
+  width: 100%;
+  margin-top: 30px;
+  grid-template-columns: repeat(3, 1fr);
+}
+.img-box-wb-unit1-p8-q1 img {
+  width: 90px;
+  height: 90px;
+  /* object-fit: fill; */
+}
+
+.WB-unit1-p8-q1-input {
+  flex: 1;
+  min-width: 35px; /* 🔥 كبر العرض */
+  min-height: 28px; /* 🔥 كبر الارتفاع */
+  border-bottom: 3px solid #000;
+  display: inline-flex;
+  align-items: center;
+  font-weight: 600;
+  font-size: 20px;
+  padding: 2px 4px;
+  position: relative;
+  width: 100%;
+}
+.input-row-wb-unit1-p8-q1 {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.error-icon-wb-unit1-p8-q1 {
+  position: absolute;
+  right: -12px; /* يظهر بجانب الصندوق */
+  top: -3%;
+  transform: translateY(-50%);
+  width: 21px;
+  height: 21px;
+  border-radius: 50%;
+  background: red;
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  border: 2px solid white;
+  font-size: 14px;
+  font-weight: bold;
+}
+.wrong-line {
+  border-bottom: 3px solid red;
+}
+.wb-unit7-p2-q2{
+  top: 100px;
+  position: fixed!important; 
+}
+
+.q1-1 {
+position: absolute !important;
+    padding: 5px !important;
+    top: 14% !important;
+    left: 34.5% !important;
+}
+
+.q2-1 {
+ position: absolute !important;
+    padding: 5px !important;
+    top: 47% !important;
+    left: 50.5% !important;
+}
+
+
+.q3-1 {
+  position: absolute !important;
+    padding: 5px !important;
+    top: 3% !important;
+    left: 60.5% !important;
+}
+
+.q4-1{
+position: absolute !important;
+    padding: 5px !important;
+    top: 40.5% !important;
+    left: 30.5% !important;
+}
+
+.q5-1 {
+position: absolute !important;
+    padding: 5px !important;
+    top: 3% !important;
+    left: 60.5% !important;
+}
+
+.q6-1 {
+position: absolute !important;
+    padding: 5px !important;
+    top: 58.5% !important;
+    left: 33.5% !important;
+}
+
+.q7-1 {
+    position: absolute !important;
+    padding: 5px !important;
+    top: 3% !important;
+    left: 39.5% !important;
+}
+
+.q8-1 {
+    position: absolute !important;
+    padding: 5px !important;
+    top: 48% !important;
+    left: 43.5% !important;
+}
+
+.q9-1 {
+  position: absolute !important;
+  padding: 5px !important;
+  top: 3% !important;
+  left: 56.5% !important;
+}
+
+.q10-1 {
+ position: absolute !important;
+    padding: 5px !important;
+    top: 50.5% !important;
+    left: 73% !important;
+}
+
+.q11-1 {
+    position: absolute !important;
+    padding: 5px !important;
+    top: 9% !important;
+    left: 45% !important;
+}
+
+.q12-1 {
+position: absolute !important;
+    padding: 5px !important;
+    top: 44% !important;
+    left: 33% !important;
+}
+
+.q13-1{
+    position: absolute !important;
+    padding: 5px !important;
+    top: 70% !important;
+    left: 41% !important;
+}

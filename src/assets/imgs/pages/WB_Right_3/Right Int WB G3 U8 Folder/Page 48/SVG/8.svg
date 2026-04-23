@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_2" data-name="Layer 2" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 194.16 125.46">
+  <defs>
+    <style>
+      .cls-1, .cls-2 {
+        fill: none;
+      }
+
+      .cls-2 {
+        stroke: #231f20;
+        stroke-width: .37px;
+      }
+
+      .cls-3 {
+        clip-path: url(#clippath);
+      }
+    </style>
+    <clipPath id="clippath">
+      <rect class="cls-1" width="194.16" height="125.46"/>
+    </clipPath>
+  </defs>
+  <g id="Layer_1-2" data-name="Layer 1">
+    <polygon class="cls-2" points="1.1 56.55 8.37 59.97 56.11 11.62 101.84 61.2 108.54 59.44 55.41 1.1 1.1 56.55"/>
+    <polyline class="cls-2" points="55.41 1.1 147.25 6.09 192.87 51.2 193.06 59.22 106.73 57.6"/>
+    <polyline class="cls-2" points="19.03 49.14 19.2 114.99 29.37 115.16"/>
+    <polygon class="cls-2" points="34.9 108.19 29.33 114.11 29.59 123.01 78.43 124.37 78.34 113.63 71.94 108.85 34.9 108.19"/>
+    <line class="cls-2" x1="78.3" y1="113.67" x2="29.37" y2="114.37"/>
+    <polyline class="cls-2" points="78.47 114.11 94.87 114.2 94.87 53.7"/>
+    <g class="cls-3">
+      <path class="cls-2" d="M94.78,111.04c.35.09,79.35,0,79.35,0l1.23-51.99"/>
+    </g>
+    <line class="cls-2" x1="101.69" y1="51.78" x2="192.89" y2="53.17"/>
+  </g>
+</svg>
