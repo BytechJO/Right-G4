@@ -1,321 +1,323 @@
 import React, { useState } from "react";
 import Button from "../Button";
 import ValidationAlert from "../../Popup/ValidationAlert";
+import swingImg from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U2 Folder/Page 13/SVG/Asset 7.svg";
 
-import tuneImg from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U2 Folder/Page 14/SVG/Asset 1.svg";
-import gumImg from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U2 Folder/Page 14/SVG/Asset 2.svg";
-import runImg from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U2 Folder/Page 14/SVG/Asset 3.svg";
-import cupImg from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U2 Folder/Page 14/SVG/Asset 7.svg";
-import busImg from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U2 Folder/Page 14/SVG/Asset 6.svg";
-import tubeImg from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U2 Folder/Page 14/SVG/Asset 5.svg";
-import upImg from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U2 Folder/Page 14/SVG/Asset 4.svg";
-import sunImg from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U2 Folder/Page 14/SVG/Asset 8.svg";
-import sueImg from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U2 Folder/Page 14/SVG/Asset 9.svg";
-import juneImg from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U2 Folder/Page 14/SVG/Asset 11.svg";
-import glueImg from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U2 Folder/Page 14/SVG/Asset 10.svg";
+// ─────────────────────────────────────────────
+//  🎨  COLORS
+// ─────────────────────────────────────────────
+const WORD_BANK_BORDER        = "#2096a6";
+const WORD_BANK_TEXT          = "#2b2b2b";
+const INPUT_UNDERLINE_DEFAULT = "#3f3f3f";
+const INPUT_UNDERLINE_WRONG   = "#ef4444";
+const INPUT_TEXT_COLOR        = "#2b2b2b";
+const INPUT_ANSWER_COLOR      = "#c81e1e";
+const WRONG_BADGE_BG          = "#ef4444";
+const WRONG_BADGE_TEXT        = "#ffffff";
 
-const CIRCLE_COLOR = "#d62828";
-const BORDER_COLOR = "#a9a9a9";
-const WRONG_COLOR = "#ef4444";
-const TEXT_COLOR = "#111";
+// ─────────────────────────────────────────────
+//  📝  WORD BANK
+// ─────────────────────────────────────────────
+const WORD_BANK = ["visit", "mall", "sure", "week", "kangaroos", "I know"];
 
-const SECTIONS = [
+// ─────────────────────────────────────────────
+//  📝  POEM DATA
+//  Each line: array of strings and blank objects
+// ─────────────────────────────────────────────
+const POEM_1 = [
   {
-    id: "short-u",
-    title: "short u",
-    items: [
-      { id: "s1", img: tuneImg, text: "tune", correct: false },
-      { id: "s2", img: gumImg, text: "gum", correct: true },
-      { id: "s3", img: runImg, text: "run", correct: true },
-      { id: "s4", img: cupImg, text: "cup", correct: false },
-      { id: "s5", img: busImg, text: "bus", falseText: false, correct: false },
-      { id: "s6", img: tubeImg, text: "tube", correct: false },
-      { id: "s7", img: upImg, text: "up", correct: true },
+    parts: [
+      "I'm going to go to the ",
+      { id: 1, answer: "mall", width: 120 },
+      ",",
     ],
   },
+  { parts: ["But I'm waiting for my cousin to call."] },
   {
-    id: "long-u",
-    title: "long u",
-    items: [
-      { id: "l1", img: sunImg, text: "sun", correct: false },
-      { id: "l2", img: tuneImg, text: "tune", correct: true },
-      { id: "l3", img: sueImg, text: "sue", correct: true },
-      { id: "l4", img: upImg, text: "up", correct: false },
-      { id: "l5", img: runImg, text: "run", correct: false },
-      { id: "l6", img: juneImg, text: "June", correct: true },
-      { id: "l7", img: glueImg, text: "glue", correct: true },
+    parts: [
+      "She's going to be staying here for a ",
+      { id: 2, answer: "week", width: 100 },
+      ".",
     ],
   },
+  { parts: ["She traveled here from Mozambique."] },
+  {
+    parts: [
+      'You ask me, "Are you excited?" I say, "I ',
+      { id: 3, answer: "sure", width: 90 },
+      ' am."',
+    ],
+  },
+  { parts: ['She\'s my favorite cousin. Her name is Pam."'] },
+  {
+    parts: [
+      "We'll have a great time, ",
+      { id: 4, answer: "I know", width: 110 },
+      ".",
+    ],
+  },
+  { parts: ["But I'll be sad when she has to go."] },
 ];
 
-const styles = {
-  pageWrap: {
-    width: "100%",
+const POEM_2 = [
+  {
+    parts: [
+      "Australia has its ",
+      { id: 5, answer: "kangaroos", width: 120 },
+      ",",
+    ],
   },
-
-  sectionsWrap: {
-    display: "grid",
-    gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
-    gap: "clamp(16px, 2vw, 34px)",
-    width: "100%",
+  { parts: ["And India has its tigers."] },
+  { parts: ["In Alaska you can take a cruise,"] },
+  { parts: ["And Europe's known for its hikers."] },
+  {
+    parts: [
+      "There are so many places in the world to ",
+      { id: 6, answer: "visit", width: 90 },
+      ".",
+    ],
   },
+  { parts: ["But no matter where I roam,"] },
+  { parts: ["There's always one place I want to be. I'm sure to miss it."] },
+  { parts: ["There's just no place like home!"] },
+];
 
-  sectionBox: {
-    position: "relative",
-    border: `2px solid ${BORDER_COLOR}`,
-    borderRadius: "clamp(12px, 1.4vw, 18px)",
-    background: "#fff",
-    padding: "clamp(18px, 2.3vw, 30px) clamp(12px, 1.6vw, 18px) clamp(12px, 1.6vw, 18px)",
-    boxSizing: "border-box",
-    minHeight: "clamp(260px, 38vw, 430px)",
-  },
+// ─────────────────────────────────────────────
+//  🔧  NORMALIZE
+// ─────────────────────────────────────────────
+const normalize = (str) =>
+  str.toLowerCase().replace(/[^a-z0-9\s]/g, "").replace(/\s+/g, " ").trim();
 
-  badge: {
-    position: "absolute",
-    top: "clamp(-18px, -1.8vw, -12px)",
-    left: "50%",
-    transform: "translateX(-50%)",
-    minWidth: "clamp(84px, 10vw, 120px)",
-    height: "clamp(34px, 4vw, 42px)",
-    padding: "0 clamp(10px, 1vw, 16px)",
-    borderRadius: "clamp(12px, 1.2vw, 16px)",
-    border: `2px solid ${BORDER_COLOR}`,
-    background: "#fff",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    fontSize: "clamp(18px, 2vw, 26px)",
-    fontWeight: 500,
-    color: TEXT_COLOR,
-    boxSizing: "border-box",
-  },
+const isCorrect = (userVal, answer) =>
+  normalize(userVal) === normalize(answer);
 
-  itemsGrid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
-    gap: "clamp(12px, 2vw, 22px) clamp(8px, 1.4vw, 18px)",
-    alignItems: "end",
-    width: "100%",
-  },
+// collect all blanks
+const ALL_BLANKS = [...POEM_1, ...POEM_2]
+  .flatMap((line) => line.parts.filter((p) => typeof p === "object"));
 
-  itemBox: {
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    justifyContent: "flex-end",
-    gap: "clamp(6px, 0.8vw, 10px)",
-    minWidth: 0,
-  },
-
-  imgWrap: {
-    width: "100%",
-    height: "clamp(72px, 12vw, 120px)",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    padding: "2px",
-    boxSizing: "border-box",
-  },
-
-  img: {
-    maxWidth: "100%",
-    maxHeight: "100%",
-    width: "auto",
-    height: "auto",
-    objectFit: "contain",
-    display: "block",
-  },
-
-  wordBtn: {
-    position: "relative",
-    minHeight: "clamp(34px, 4vw, 46px)",
-    padding: "0 clamp(10px, 1.1vw, 16px)",
-    display: "inline-flex",
-    alignItems: "center",
-    justifyContent: "center",
-    borderRadius: "999px",
-    border: "3px solid transparent",
-    background: "transparent",
-    color: TEXT_COLOR,
-    fontSize: "clamp(18px, 2.2vw, 26px)",
-    fontWeight: 500,
-    lineHeight: 1.1,
-    cursor: "pointer",
-    boxSizing: "border-box",
-    textAlign: "center",
-    maxWidth: "100%",
-    wordBreak: "break-word",
-  },
-
-  wrongBadge: {
-    position: "absolute",
-    top: "clamp(-8px, -1vw, -4px)",
-    right: "clamp(-8px, -1vw, -4px)",
-    width: "clamp(18px, 2vw, 24px)",
-    height: "clamp(18px, 2vw, 24px)",
-    borderRadius: "50%",
-    backgroundColor: WRONG_COLOR,
-    color: "#fff",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    fontSize: "clamp(10px, 1vw, 12px)",
-    fontWeight: 700,
-    border: "2px solid #fff",
-    boxShadow: "0 2px 6px rgba(0,0,0,0.18)",
-    zIndex: 2,
-  },
-
-  buttonsWrap: {
-    display: "flex",
-    justifyContent: "center",
-    marginTop: "4px",
-  },
-};
-
-export default function WB_Unit1_Page9_QA() {
-  const [answers, setAnswers] = useState({});
+// ─────────────────────────────────────────────
+//  COMPONENT
+// ─────────────────────────────────────────────
+export default function WB_ReadAndWrite_J() {
+  const [inputs,      setInputs]      = useState({});
   const [showResults, setShowResults] = useState(false);
-  const [showAns, setShowAns] = useState(false);
+  const [showAns,     setShowAns]     = useState(false);
 
-  const allItems = SECTIONS.flatMap((section) => section.items);
+  const isLocked = showResults || showAns;
 
-  const handleSelect = (itemId) => {
-    if (showAns) return;
-
-    setAnswers((prev) => ({
-      ...prev,
-      [itemId]: !prev[itemId],
-    }));
-
-    setShowResults(false);
+  // ── handlers ──────────────────────────────
+  const handleChange = (id, value) => {
+    if (isLocked) return;
+    setInputs((prev) => ({ ...prev, [id]: value }));
   };
 
   const handleCheck = () => {
-    if (showAns) return;
-
-    const total = allItems.length;
-    let score = 0;
-
-    allItems.forEach((item) => {
-      const selected = !!answers[item.id];
-      if (selected === item.correct) {
-        score += 1;
-      }
-    });
-
-    setShowResults(true);
-
-    if (score === total) {
-      ValidationAlert.success(`Score: ${score} / ${total}`);
-    } else if (score > 0) {
-      ValidationAlert.warning(`Score: ${score} / ${total}`);
-    } else {
-      ValidationAlert.error(`Score: ${score} / ${total}`);
+    if (isLocked) return;
+    const allFilled = ALL_BLANKS.every((b) => inputs[b.id]?.trim());
+    if (!allFilled) {
+      ValidationAlert.info("Please fill in all the blanks first.");
+      return;
     }
+    let score = 0;
+    ALL_BLANKS.forEach((b) => {
+      if (isCorrect(inputs[b.id] || "", b.answer)) score++;
+    });
+    const total = ALL_BLANKS.length;
+    setShowResults(true);
+    if (score === total)  ValidationAlert.success(`Score: ${score} / ${total}`);
+    else if (score > 0)   ValidationAlert.warning(`Score: ${score} / ${total}`);
+    else                  ValidationAlert.error(`Score: ${score} / ${total}`);
   };
 
   const handleShowAnswer = () => {
-    const filled = {};
-
-    allItems.forEach((item) => {
-      filled[item.id] = item.correct;
-    });
-
-    setAnswers(filled);
-    setShowResults(true);
+    const ans = {};
+    ALL_BLANKS.forEach((b) => { ans[b.id] = b.answer; });
+    setInputs(ans);
+    setShowResults(false);
     setShowAns(true);
   };
 
   const handleReset = () => {
-    setAnswers({});
+    setInputs({});
     setShowResults(false);
     setShowAns(false);
   };
 
-  const isSelected = (itemId) => !!answers[itemId];
-
-  const isWrong = (item) => {
+  // ── helpers ───────────────────────────────
+  const isWrong = (id, answer) => {
     if (!showResults || showAns) return false;
-    return !!answers[item.id] !== item.correct && !!answers[item.id];
+    return !isCorrect(inputs[id] || "", answer);
   };
 
+  // ── render one poem line ──────────────────
+  const renderLine = (line, idx) => (
+    <div key={idx} className="rw-line">
+      {line.parts.map((part, i) => {
+        if (typeof part === "string") return <span key={i}>{part}</span>;
+        const wrong = isWrong(part.id, part.answer);
+        return (
+          <span key={i} className="rw-blank-wrap">
+            <input
+              type="text"
+              className={[
+                "rw-blank",
+                wrong   ? "rw-blank--wrong"  : "",
+                showAns ? "rw-blank--answer" : "",
+              ].filter(Boolean).join(" ")}
+              style={{ width: part.width }}
+              value={inputs[part.id] || ""}
+              disabled={isLocked}
+              onChange={(e) => handleChange(part.id, e.target.value)}
+              spellCheck={false}
+              autoComplete="off"
+            />
+            {wrong && <span className="rw-badge">✕</span>}
+          </span>
+        );
+      })}
+    </div>
+  );
+
+  // ── render ────────────────────────────────
   return (
     <div className="main-container-component">
       <style>{`
-        .wb-a-root * {
-          box-sizing: border-box !important;
+        /* ── Word bank ── */
+        .rw-bank {
+          display: flex;
+          gap: clamp(10px, 1.6vw, 18px);
+          flex-wrap: wrap;
+          justify-content: center;
+          margin-bottom: clamp(10px, 1.6vw, 18px);
+        }
+        .rw-bank-word {
+          border: 2px solid ${WORD_BANK_BORDER};
+          border-radius: 8px;
+          padding: clamp(5px, 0.7vw, 9px) clamp(12px, 1.6vw, 20px);
+          font-size: clamp(15px, 1.9vw, 22px);
+          color: ${WORD_BANK_TEXT};
+          background: #fff;
+          user-select: none;
         }
 
-        @media (max-width: 900px) {
-          .wb-a-sections {
-            grid-template-columns: 1fr !important;
-          }
+        /* ── Poem block ── */
+        .rw-poem {
+          display: flex;
+          flex-direction: column;
+          gap: clamp(6px, 0.9vw, 12px);
+        }
+
+        /* ── Line ── */
+        .rw-line {
+font-size: clamp(15px, 1.9vw, 22px);
+          color: #2b2b2b;
+          line-height:1.5;
+          display: flex;
+          align-items: baseline;
+          flex-wrap: wrap;
+        }
+
+        /* ── Blank ── */
+        .rw-blank-wrap {
+          position: relative;
+          display: inline-flex;
+          align-items: flex-end;
+        }
+        .rw-blank {
+          border: none;
+          border-bottom: 2px solid ${INPUT_UNDERLINE_DEFAULT};
+          background: transparent;
+          outline: none;
+font-size: clamp(15px, 1.9vw, 22px);
+          color: ${INPUT_TEXT_COLOR};
+          text-align: center;
+          line-height: 1.6;
+          transition: border-color 0.2s;
+          min-width: 60px;
+        }
+        .rw-blank:disabled   { opacity: 1; cursor: default; }
+        .rw-blank--wrong     { border-bottom-color: ${INPUT_UNDERLINE_WRONG}; }
+        .rw-blank--answer    { color: ${INPUT_ANSWER_COLOR}; font-weight: 700; }
+
+        /* ✕ badge */
+        .rw-badge {
+          position: absolute;
+          top: -6px; right: -10px;
+          width: clamp(15px, 1.7vw, 20px);
+          height: clamp(15px, 1.7vw, 20px);
+          border-radius: 50%;
+          background: ${WRONG_BADGE_BG};
+          color: ${WRONG_BADGE_TEXT};
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: clamp(8px, 0.9vw, 11px);
+          font-weight: 700;
+          border: 2px solid #fff;
+          box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+          pointer-events: none;
+          z-index: 2;
+        }
+
+        /* ── Buttons ── */
+        .rw-buttons {
+          display: flex;
+          justify-content: center;
+          margin-top: clamp(8px, 1.6vw, 18px);
         }
       `}</style>
 
       <div
-        className="div-forall wb-a-root"
+        className="div-forall"
         style={{
           display: "flex",
           flexDirection: "column",
-          gap: "18px",
+          gap: "clamp(14px, 2vw, 22px)",
           maxWidth: "1100px",
           margin: "0 auto",
         }}
       >
+        {/* ── Header ── */}
         <h1
           className="WB-header-title-page8"
-          style={{
-            margin: 0,
-            display: "flex",
-            alignItems: "center",
-            gap: "12px",
-            flexWrap: "wrap",
-          }}
+          style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
         >
-          <span className="WB-ex-A">A</span>
-          Does it have a <b>short u</b> or <b>long u</b> sound? Read and circle.
+          <span className="WB-ex-A">J</span>
+          Read and write.
         </h1>
 
-        <div style={styles.pageWrap}>
-          <div style={styles.sectionsWrap} className="wb-a-sections">
-            {SECTIONS.map((section) => (
-              <div key={section.id} style={styles.sectionBox}>
-                <div style={styles.badge}>{section.title}</div>
-
-                <div style={styles.itemsGrid}>
-                  {section.items.map((item) => {
-                    const selected = isSelected(item.id);
-                    const wrong = isWrong(item);
-
-                    return (
-                      <div key={item.id} style={styles.itemBox}>
-                        <div style={styles.imgWrap}>
-                          <img src={item.img} alt={item.text} style={styles.img} />
-                        </div>
-
-                        <div
-                          onClick={() => handleSelect(item.id)}
-                          style={{
-                            ...styles.wordBtn,
-                            borderColor: selected ? CIRCLE_COLOR : "transparent",
-                            cursor: showAns ? "default" : "pointer",
-                          }}
-                        >
-                          {item.text}
-                          {wrong && <div style={styles.wrongBadge}>✕</div>}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            ))}
-          </div>
+        {/* ── Word bank ── */}
+        <div className="rw-bank">
+          {WORD_BANK.map((word) => (
+            <div key={word} className="rw-bank-word">{word}</div>
+          ))}
         </div>
 
-        <div style={styles.buttonsWrap}>
+        {/* ── Poem 1 ── */}
+        <div className="rw-poem">
+          {POEM_1.map((line, idx) => renderLine(line, idx))}
+        </div>
+
+        {/* ── Poem 2 ── */}
+        <div className="rw-poem">
+          {POEM_2.map((line, idx) => renderLine(line, idx))}
+        </div>
+{/* ── Image ── */}
+{/* ── Image ── */}
+<div style={{ display: "flex", justifyContent: "center" }}>
+  <img
+    src={swingImg}
+    alt="children on swing"
+    style={{
+      width: "70%",
+      height : "70%",
+      borderRadius: "12px",
+      display: "block",
+    }}
+  />
+</div>
+        {/* ── Buttons ── */}
+        <div className="rw-buttons">
           <Button
             checkAnswers={handleCheck}
             handleShowAnswer={handleShowAnswer}

@@ -32,7 +32,7 @@ const WB_Unit1_Page4 = ({ openPopup }) => {
           width="22"
           height="22"
           viewBox="0 0 90 90"
-          onClick={() => openPopup("exercise", { startIndex: 15 })}
+          onClick={() => openPopup("exercise", { startIndex: 14 })}
           style={{ overflow: "visible" }}
         >
           <image className="svg-img"
@@ -55,7 +55,7 @@ const WB_Unit1_Page4 = ({ openPopup }) => {
           width="22"
           height="22"
           viewBox="0 0 90 90"
-          onClick={() => openPopup("exercise", { startIndex: 16 })}
+          onClick={() => openPopup("exercise", { startIndex: 15 })}
           style={{ overflow: "visible" }}
         >
           <image className="svg-img"

@@ -1,262 +1,445 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import Button from "../Button";
 import ValidationAlert from "../../Popup/ValidationAlert";
 
-import img1 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U2 Folder/Page 9/SVG/Asset 1.svg";
-import img2 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U2 Folder/Page 9/SVG/Asset 2.svg";
-import img4 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U2 Folder/Page 9/SVG/Asset 5.svg";
-import img3 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U2 Folder/Page 9/SVG/Asset 4.svg";
+// ─────────────────────────────────────────────
+//  🎨  COLORS — كلها قابلة للتعديل
+// ─────────────────────────────────────────────
+const CELL_BG             = "#ffffff";   // خلفية الخلية العادية
+const CELL_BORDER         = "#2096a6";   // بوردر الخلية
+const CELL_HIGHLIGHT_BG   = "#d4f1f4";   // خلفية الكلمة المحددة
+const CELL_ACTIVE_BG      = "#2096a6";   // خلفية الخلية النشطة (للكتابة)
+const CELL_ACTIVE_TEXT    = "#ffffff";   // لون حرف الخلية النشطة
+const CELL_TEXT           = "#2b2b2b";   // لون حرف عادي
+const CELL_WRONG_TEXT     = "#ef4444";   // لون حرف غلط
+const CELL_ANSWER_TEXT    = "#c81e1e";   // لون حرف Show Answer
+const NUMBER_COLOR        = "#000000ff";   // لون رقم الخلية
+const CLUE_NUM_COLOR      = "#2b2b2b";   // لون رقم التلميح
+const CLUE_TEXT_COLOR     = "#2b2b2b";   // لون نص التلميح
+const CLUE_ACTIVE_BG      = "#d4f1f4";   // خلفية التلميح المحدد
+const CELL_SIZE           = 36;          // حجم الخلية بالـ px
 
-const WRONG_COLOR = "#ef4444";
-const BORDER_COLOR = "#f39b42";
-
-const OPTIONS = [
-  "take a taxi",
-  "take a subway",
-  "take a bus",
-  "ride a bike",
+// ─────────────────────────────────────────────
+//  📝  EXERCISE DATA
+// ─────────────────────────────────────────────
+//
+// Layout (verified, no conflicts):
+// word1 DOWN  "icantbelieveit" : col=5, rows 0-13
+// word2 DOWN  "howaboutyou"    : col=9, rows 1-11
+// word3 DOWN  "sure"           : col=0, rows 6-9
+// word3 ACROSS "samehere"      : row=6, cols 0-7
+// word4 ACROSS "saycheese"     : row=11, cols 0-8
+//
+// Intersections (no conflicts):
+//  (6,5)  'e' → icantbelieveit ∩ samehere
+//  (6,0)  's' → sure           ∩ samehere
+//  (11,5) 'e' → icantbelieveit ∩ saycheese
+//
+const WORDS = [
+  {
+    id: 1,   numberId: 1, dir: "down",
+    answer:  "icantbelieveit",
+    display: "I can't believe it!",
+    row: 0,  col: 5,
+    clueDir: "Down",
+    clue:    "that's amazing; it's hard to believe",
+  },
+  {
+    id: 2,   numberId: 2, dir: "down",
+    answer:  "howaboutyou",
+    display: "How about you?",
+    row: 1,  col: 7,
+    clueDir: "Down",
+    clue:    "asking another person what they are doing",
+  },
+  {
+    id: "3d", numberId: 3, dir: "down",
+    answer:  "isuream",
+    display: "Sure!",
+    row: 3,  col: 3,
+    clueDir: "Down",
+    clue:    "definitely; when you will certainly do something",
+  },
+  {
+    id: "3a", numberId: 3, dir: "across",
+    answer:  "iknow",
+    display: "i know",
+    row: 3,  col: 3,
+    clueDir: "Across",
+    clue:    "said when you have the same information",
+  },
+  {
+    id: 4,   numberId: 4, dir: "across",
+    answer:  "saycheese",
+    display: "Say cheese!",
+    row:7, col: -5,
+    clueDir: "Across",
+    clue:    "said when taking a picture to get people to smile a little",
+  },
 ];
 
-const ANSWERS = [
-  { id: 1, correct: "take a subway", img: img1 },
-  { id: 2, correct: "ride a bike",   img: img2 },
-  { id: 3, correct: "take a bus",    img: img3 },
-  { id: 4, correct: "take a taxi",   img: img4 },
-];
+// ── Build cell map ────────────────────────────
+const buildCellMap = () => {
+  const map   = {};
+  const nums  = {};   // cellKey → number label
+  WORDS.forEach((w) => {
+    const startKey = `${w.row}-${w.col}`;
+    if (!nums[startKey]) nums[startKey] = w.numberId;
 
-export default function WB_Transport_Dropdown() {
-  const [selected, setSelected]     = useState({ 1: "", 2: "", 3: "", 4: "" });
-  const [showResults, setShowResults] = useState(false);
-  const [showAns, setShowAns]       = useState(false);
+    for (let i = 0; i < w.answer.length; i++) {
+      const r = w.dir === "down"   ? w.row + i : w.row;
+      const c = w.dir === "across" ? w.col + i : w.col;
+      const k = `${r}-${c}`;
+      if (!map[k]) map[k] = { letter: w.answer[i], r, c, wordIds: [] };
+      if (!map[k].wordIds.includes(w.id)) map[k].wordIds.push(w.id);
+    }
+  });
+  Object.entries(nums).forEach(([k, n]) => {
+    if (map[k]) map[k].number = n;
+  });
+  return map;
+};
 
-  const handleChange = (id, value) => {
-    if (showAns) return;
-    setSelected((prev) => ({ ...prev, [id]: value }));
-    setShowResults(false);
+const CELL_MAP = buildCellMap();
+
+// grid bounding box
+const ALL_R = Object.values(CELL_MAP).map((c) => c.r);
+const ALL_C = Object.values(CELL_MAP).map((c) => c.c);
+const MIN_R = Math.min(...ALL_R);
+const MAX_R = Math.max(...ALL_R);
+const MIN_C = Math.min(...ALL_C);
+const MAX_C = Math.max(...ALL_C);
+const GRID_W = (MAX_C - MIN_C + 1) * CELL_SIZE;
+const GRID_H = (MAX_R - MIN_R + 1) * CELL_SIZE;
+
+// get all cell keys for a word
+const getWordCells = (word) => {
+  const cells = [];
+  for (let i = 0; i < word.answer.length; i++) {
+    const r = word.dir === "down"   ? word.row + i : word.row;
+    const c = word.dir === "across" ? word.col + i : word.col;
+    cells.push(`${r}-${c}`);
+  }
+  return cells;
+};
+
+// ─────────────────────────────────────────────
+//  COMPONENT
+// ─────────────────────────────────────────────
+export default function WB_Crossword_QA() {
+  const [userInput,    setUserInput]    = useState({});
+  const [activeWordId, setActiveWordId] = useState(null);
+  const [showResults,  setShowResults]  = useState(false);
+  const [showAns,      setShowAns]      = useState(false);
+
+  const isLocked = showResults || showAns;
+
+  const activeWord      = WORDS.find((w) => w.id === activeWordId) || null;
+  const activeWordCells = activeWord ? new Set(getWordCells(activeWord)) : new Set();
+
+  // ── click on cell ─────────────────────────
+  const handleCellClick = (cellKey) => {
+    if (isLocked) return;
+    const cell = CELL_MAP[cellKey];
+    if (!cell || cell.wordIds.length === 0) return;
+    if (cell.wordIds.includes(activeWordId)) {
+      // cycle between words sharing this cell
+      const idx = cell.wordIds.indexOf(activeWordId);
+      setActiveWordId(cell.wordIds[(idx + 1) % cell.wordIds.length]);
+    } else {
+      setActiveWordId(cell.wordIds[0]);
+    }
   };
 
-  const handleCheck = () => {
-    if (showAns) return;
-    const allAnswered = ANSWERS.every((a) => selected[a.id]);
-    if (!allAnswered) {
-      ValidationAlert.info("Please answer all questions first.");
+  // ── click on clue ─────────────────────────
+  const handleClueClick = (wordId) => {
+    if (isLocked) return;
+    setActiveWordId(wordId);
+  };
+
+  // ── keyboard input ────────────────────────
+  const handleKeyDown = useCallback((e) => {
+    if (isLocked || !activeWord) return;
+    const cells = getWordCells(activeWord);
+
+    if (e.key === "Backspace") {
+      e.preventDefault();
+      for (let i = cells.length - 1; i >= 0; i--) {
+        if (userInput[cells[i]]) {
+          setUserInput((prev) => { const n = {...prev}; delete n[cells[i]]; return n; });
+          return;
+        }
+      }
       return;
     }
+    if (e.key === "Tab") {
+      e.preventDefault();
+      const idx = WORDS.findIndex((w) => w.id === activeWordId);
+      setActiveWordId(WORDS[(idx + 1) % WORDS.length].id);
+      return;
+    }
+    if (e.key.length === 1 && /[a-zA-Z]/.test(e.key)) {
+      e.preventDefault();
+      const letter     = e.key.toLowerCase();
+      const firstEmpty = cells.findIndex((k) => !userInput[k]);
+      if (firstEmpty !== -1) {
+        setUserInput((prev) => ({ ...prev, [cells[firstEmpty]]: letter }));
+      }
+    }
+  }, [isLocked, activeWord, activeWordId, userInput]);
+
+  // ── check / answer / reset ────────────────
+  const handleCheck = () => {
+    if (isLocked) return;
+    const allFilled = WORDS.every((w) => getWordCells(w).every((k) => userInput[k]));
+    if (!allFilled) { ValidationAlert.info("Please fill in all words first."); return; }
     let score = 0;
-    ANSWERS.forEach((a) => { if (selected[a.id] === a.correct) score++; });
+    WORDS.forEach((w) => {
+      const typed = getWordCells(w).map((k) => userInput[k] || "").join("");
+      if (typed === w.answer) score++;
+    });
     setShowResults(true);
-    if (score === ANSWERS.length)    ValidationAlert.success(`Score: ${score} / ${ANSWERS.length}`);
-    else if (score > 0)              ValidationAlert.warning(`Score: ${score} / ${ANSWERS.length}`);
-    else                             ValidationAlert.error(`Score: ${score} / ${ANSWERS.length}`);
+    if (score === WORDS.length)   ValidationAlert.success(`Score: ${score} / ${WORDS.length}`);
+    else if (score > 0)           ValidationAlert.warning(`Score: ${score} / ${WORDS.length}`);
+    else                          ValidationAlert.error(`Score: ${score} / ${WORDS.length}`);
   };
 
   const handleShowAnswer = () => {
     const filled = {};
-    ANSWERS.forEach((a) => { filled[a.id] = a.correct; });
-    setSelected(filled);
-    setShowResults(true);
+    Object.entries(CELL_MAP).forEach(([k, cell]) => { filled[k] = cell.letter; });
+    setUserInput(filled);
+    setShowResults(false);
     setShowAns(true);
+    setActiveWordId(null);
   };
 
-  const handleStartAgain = () => {
-    setSelected({ 1: "", 2: "", 3: "", 4: "" });
+  const handleReset = () => {
+    setUserInput({});
     setShowResults(false);
     setShowAns(false);
+    setActiveWordId(null);
   };
 
-  const isWrong = (item) =>
-    showResults && selected[item.id] !== item.correct;
+  // ── cell status (after check) ─────────────
+  const getCellStatus = (cellKey) => {
+    if (!showResults || showAns) return null;
+    const cell  = CELL_MAP[cellKey];
+    if (!cell)  return null;
+    return (userInput[cellKey] || "") === cell.letter ? "correct" : "wrong";
+  };
 
+  // ── current typing position ───────────────
+  const getTypingCell = () => {
+    if (!activeWord) return null;
+    const cells     = getWordCells(activeWord);
+    const firstEmpty = cells.findIndex((k) => !userInput[k]);
+    return firstEmpty !== -1 ? cells[firstEmpty] : cells[cells.length - 1];
+  };
+  const typingCell = getTypingCell();
+
+  // ── render ────────────────────────────────
   return (
-    <div className="main-container-component">
+    <div
+      className="main-container-component"
+      onKeyDown={handleKeyDown}
+      tabIndex={0}
+      style={{ outline: "none" }}
+    >
+      <style>{`
+        .cw-body {
+          display: flex;
+          gap: clamp(20px, 3vw, 48px);
+          align-items: flex-start;
+          flex-wrap: wrap;
+        }
+
+        /* ── Clues ── */
+        .cw-clues {
+          flex: 1 1 200px;
+          display: flex;
+          flex-direction: column;
+          gap: clamp(14px, 2vw, 22px);
+          min-width: 180px;
+        }
+        .cw-clue-dir {
+          font-size: clamp(15px, 1.8vw, 20px);
+          font-weight: 700;
+          color: ${CLUE_NUM_COLOR};
+          margin-bottom: 4px;
+        }
+        .cw-clue-list {
+          display: flex;
+          flex-direction: column;
+          gap: clamp(8px, 1.2vw, 14px);
+        }
+        .cw-clue-item {
+          display: flex;
+          gap: 8px;
+          align-items: flex-start;
+          padding: 6px 8px;
+          border-radius: 8px;
+          cursor: pointer;
+          transition: background 0.15s;
+        }
+        .cw-clue-item:hover        { background: rgba(32,150,166,0.08); }
+        .cw-clue-item--active      { background: ${CLUE_ACTIVE_BG}; }
+        .cw-clue-num {
+          font-size: clamp(14px, 1.6vw, 18px);
+          font-weight: 700;
+          color: ${CLUE_NUM_COLOR};
+          flex-shrink: 0;
+          min-width: 18px;
+        }
+        .cw-clue-text {
+          font-size: clamp(13px, 1.5vw, 17px);
+          color: ${CLUE_TEXT_COLOR};
+          line-height: 1.5;
+        }
+
+        /* ── Grid ── */
+        .cw-grid-wrap { flex-shrink: 0; }
+        .cw-grid      { position: relative; 
+         }
+
+        /* ── Grid background — black with cells on top ── */
+        .cw-grid {
+  background: transparent;        
+  
+          border-radius: 3px;
+        }
+
+        /* ── Cell ── */
+        .cw-cell {
+          position: absolute;
+          box-sizing: border-box;
+          border: 1.5px solid ${CELL_BORDER};
+          background: ${CELL_BG};
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          transition: background 0.1s;
+        }
+        .cw-cell--highlight { background: ${CELL_HIGHLIGHT_BG}; }
+        .cw-cell--typing    { background: ${CELL_ACTIVE_BG}; }
+        .cw-cell--typing .cw-letter { color: ${CELL_ACTIVE_TEXT}; }
+        .cw-cell--wrong  .cw-letter { color: ${CELL_WRONG_TEXT}; }
+        .cw-cell--answer .cw-letter { color: ${CELL_ANSWER_TEXT}; }
+
+        .cw-num {
+          position: absolute;
+          top: 1px; left: 2px;
+          font-size: clamp(7px, 0.8vw, 10px);
+          font-weight: 700;
+          color: ${NUMBER_COLOR};
+          line-height: 1;
+        }
+        .cw-letter {
+          font-size: clamp(13px, 1.5vw, 18px);
+          font-weight: 700;
+          color: ${CELL_TEXT};
+          text-transform: uppercase;
+          line-height: 1;
+        }
+
+        /* ── Buttons ── */
+        .cw-buttons {
+          display: flex;
+          justify-content: center;
+          margin-top: clamp(8px, 1.6vw, 18px);
+        }
+
+        @media (max-width: 640px) {
+          .cw-body { flex-direction: column-reverse; }
+        }
+      `}</style>
+
       <div
         className="div-forall"
         style={{
           display: "flex",
           flexDirection: "column",
-          gap: "18px",
+          gap: "clamp(14px, 2vw, 24px)",
           maxWidth: "1100px",
           margin: "0 auto",
         }}
       >
-        {/* Title */}
+        {/* ── Header ── */}
         <h1
           className="WB-header-title-page8"
           style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
         >
-          <span className="WB-ex-A">A</span> Look and write.
+          <span className="WB-ex-A">A</span>
+          Write the expression for each definition.
         </h1>
 
-        {/* ── Main layout: word bank LEFT  |  grid RIGHT ── */}
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "minmax(140px, 0.65fr) minmax(0, 1fr)",
-            gap: "clamp(16px, 2vw, 28px)",
-            alignItems: "start",
-            width: "100%",
-          }}
-        >
-          {/* Word Bank */}
-          <div style={{ display: "flex", justifyContent: "center" }}>
-            <div
-              style={{
-                width: "100%",
-                maxWidth: "clamp(160px, 20vw, 230px)",
-                border: `2px solid ${BORDER_COLOR}`,
-                borderRadius: "clamp(12px, 1.4vw, 18px)",
-                padding: "clamp(12px, 1.8vw, 22px) clamp(10px, 1.4vw, 16px)",
-                boxSizing: "border-box",
-                display: "flex",
-                flexDirection: "column",
-                gap: "clamp(8px, 1vw, 12px)",
-                background: "#fff",
-              }}
-            >
-              {OPTIONS.map((opt) => (
-                <div
-                  key={opt}
-                  style={{
-                    textAlign: "center",
-                    fontSize: "clamp(14px, 1.6vw, 22px)",
-                    fontWeight: 500,
-                    color: "#222",
-                    lineHeight: 1.3,
-                  }}
-                >
-                  {opt}
+        <div className="cw-body">
+
+          {/* ── Clues ── */}
+          <div className="cw-clues">
+            {["Down", "Across"].map((dir) => (
+              <div key={dir}>
+                <div className="cw-clue-dir">{dir}</div>
+                <div className="cw-clue-list">
+                  {WORDS.filter((w) => w.clueDir === dir).map((w) => (
+                    <div
+                      key={w.id}
+                      className={`cw-clue-item ${activeWordId === w.id ? "cw-clue-item--active" : ""}`}
+                      onClick={() => handleClueClick(w.id)}
+                    >
+                      <span className="cw-clue-num">{w.numberId}</span>
+                      <span className="cw-clue-text">{w.clue}</span>
+                    </div>
+                  ))}
                 </div>
-              ))}
+              </div>
+            ))}
+          </div>
+
+          {/* ── Grid ── */}
+          <div className="cw-grid-wrap">
+            <div className="cw-grid" style={{ width: `${GRID_W}px`, height: `${GRID_H}px` }}>
+              {Object.entries(CELL_MAP).map(([k, cell]) => {
+                const { r, c, number } = cell;
+                const status    = getCellStatus(k);
+                const isInWord  = activeWordCells.has(k);
+                const isTyping  = isInWord && k === typingCell;
+                const letter    = userInput[k] || "";
+
+                let cls = "cw-cell";
+                if (isTyping)               cls += " cw-cell--typing";
+                else if (isInWord)          cls += " cw-cell--highlight";
+                if (status === "wrong")     cls += " cw-cell--wrong";
+                if (showAns)                cls += " cw-cell--answer";
+
+                return (
+                  <div
+                    key={k}
+                    className={cls}
+                    style={{
+                      left:   `${(c - MIN_C) * CELL_SIZE}px`,
+                      top:    `${(r - MIN_R) * CELL_SIZE}px`,
+                      width:  `${CELL_SIZE}px`,
+                      height: `${CELL_SIZE}px`,
+                    }}
+                    onClick={() => handleCellClick(k)}
+                  >
+                    {number && <span className="cw-num">{number}</span>}
+                    <span className="cw-letter">{letter}</span>
+                  </div>
+                );
+              })}
             </div>
           </div>
 
-          {/* 2×2 Grid */}
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
-              gap: "clamp(24px, 3.5vw, 48px) clamp(16px, 2.5vw, 36px)",
-              width: "100%",
-            }}
-          >
-            {ANSWERS.map((item) => {
-              const wrong = isWrong(item);
-              return (
-                <div
-                  key={item.id}
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "flex-start",
-                    gap: "clamp(8px, 1.2vw, 14px)",
-                    minWidth: 0,
-                  }}
-                >
-                  {/* Number + Image row */}
-                  <div style={{ display: "flex", alignItems: "flex-start", gap: "clamp(6px, 0.8vw, 12px)", width: "100%" }}>
-                    <span
-                      style={{
-                        fontSize: "clamp(18px, 2.2vw, 30px)",
-                        fontWeight: "700",
-                        color: "#111",
-                        lineHeight: 1,
-                        paddingTop: "2px",
-                        flexShrink: 0,
-                      }}
-                    >
-                      {item.id}
-                    </span>
-
-                    <div
-                      style={{
-                        flex: 1,
-                        borderRadius: "clamp(10px, 1.2vw, 18px)",
-                        overflow: "hidden",
-                        border: `2px solid ${BORDER_COLOR}`,
-                        background: "#f7f7f7",
-                        aspectRatio: "1.85 / 1",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                      }}
-                    >
-                      <img
-                        src={item.img}
-                        alt={`transport-${item.id}`}
-                        style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
-                      />
-                    </div>
-                  </div>
-
-                  {/* Dropdown answer */}
-                  <div style={{ width: "100%", position: "relative" }}>
-                    <select
-                      disabled={showAns}
-                      value={selected[item.id]}
-                      onChange={(e) => handleChange(item.id, e.target.value)}
-                      style={{
-                        width: "100%",
-                        borderTop: "none",
-                        borderLeft: "none",
-                        borderRight: "none",
-                        borderBottom: `3px solid ${wrong ? WRONG_COLOR : "#3f3f3f"}`,
-                        borderRadius: 0,
-                        outline: "none",
-                        fontSize: "clamp(16px, 2vw, 26px)",
-                        fontWeight: 500,
-                        color: "#000" ,
-                        padding: "4px clamp(4px, 0.8vw, 10px) 4px 2px",
-                        background: "transparent",
-                        cursor: showAns ? "default" : "pointer",
-                        appearance: "auto",
-                        boxSizing: "border-box",
-                      }}
-                    >
-                      <option value="" disabled hidden></option>
-                      {OPTIONS.map((opt) => (
-                        <option key={opt} value={opt}>
-                          {opt}
-                        </option>
-                      ))}
-                    </select>
-
-                    {/* Wrong badge */}
-                    {wrong && (
-                      <div
-                        style={{
-                          position: "absolute",
-                          top: "50%",
-                          right: "clamp(18px, 2.2vw, 28px)",
-                          transform: "translateY(-50%)",
-                          width: "clamp(16px, 1.8vw, 22px)",
-                          height: "clamp(16px, 1.8vw, 22px)",
-                          borderRadius: "50%",
-                          backgroundColor: WRONG_COLOR,
-                          color: "#fff",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          fontSize: "clamp(9px, 0.9vw, 12px)",
-                          fontWeight: 700,
-                          boxShadow: "0 1px 4px rgba(0,0,0,0.2)",
-                        }}
-                      >
-                        ✕
-                      </div>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
         </div>
 
-        {/* Buttons */}
-        <div style={{ display: "flex", justifyContent: "center", marginTop: "clamp(8px, 1.5vw, 14px)" }}>
+        {/* ── Buttons ── */}
+        <div className="cw-buttons">
           <Button
             checkAnswers={handleCheck}
             handleShowAnswer={handleShowAnswer}
-            handleStartAgain={handleStartAgain}
+            handleStartAgain={handleReset}
           />
         </div>
       </div>

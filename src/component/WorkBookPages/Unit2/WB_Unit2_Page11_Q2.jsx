@@ -1,525 +1,455 @@
-import React, { useRef, useState } from "react";
+import React, { useState } from "react";
 import Button from "../Button";
 import ValidationAlert from "../../Popup/ValidationAlert";
 
-import img1 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U2 Folder/Page 11/SVG/Asset 5.svg";
-import img2 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U2 Folder/Page 11/SVG/Asset 6.svg";
-import img3 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U2 Folder/Page 11/SVG/Asset 7.svg";
-import img4 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U2 Folder/Page 11/SVG/Asset 8.svg";
-const ACTIVE_COLOR = "#f39b42";
-const SOFT_COLOR = "#ffca94";
-const BORDER_COLOR = "#d9d9d9";
-const ANSWER_COLOR = "#000000ff";
-const WRONG_COLOR = "#ef4444";
-const LINE_COLOR = "#3f3f3f";
+// ─────────────────────────────────────────────
+//  🎨  COLORS
+// ─────────────────────────────────────────────
+const TABLE_BORDER_COLOR      = "#2096a6";
+const INPUT_UNDERLINE_DEFAULT = "#3f3f3f";
+const INPUT_UNDERLINE_WRONG   = "#ef4444";
+const INPUT_ANSWER_COLOR      = "#c81e1e";
+const WRONG_BADGE_BG          = "#ef4444";
+const WRONG_BADGE_TEXT        = "#ffffff";
 
+// ─────────────────────────────────────────────
+//  📝  EXERCISE DATA
+//
+//  Each item in `parts` is either:
+//    { type: "fixed",  text: "p" }   → shown as plain letter
+//    { type: "blank",  id: "2-1" }   → one-letter input box
+//  `answer` = the full correct word (used for checking & show answer)
+// ─────────────────────────────────────────────
 const ITEMS = [
   {
     id: 1,
-    img: img1,
-    example: true,
-    question: "How often does she iron clothes?",
-    answer: "She usually irons clothes.",
+    // p_i_c_t_u_r_e  → blanks on: i, t, u, r, e  (positions 1,3,4,5,6 zero-indexed)
+    parts: [
+      { type: "fixed", text: "p" },
+      { type: "blank", id: "1-1" },
+      { type: "fixed", text: "c" },
+      { type: "blank", id: "1-2" },
+      { type: "fixed", text: "u" },
+      { type: "blank", id: "1-3" },
+      { type: "blank", id: "1-4" },
+    ],
+    blanks: { "1-1": "i", "1-2": "t", "1-3": "r", "1-4": "e" },
+    word: "picture",
   },
   {
     id: 2,
-    img: img2,
-    example: false,
-    question: "How often does he read the newspaper?",
-    answer: "He sometimes reads the newspaper.",
+    // k__g__r___s  → k_an_g_ar_oo_s
+    parts: [
+      { type: "fixed", text: "k" },
+      { type: "blank", id: "2-1" },
+      { type: "blank", id: "2-2" },
+      { type: "fixed", text: "g" },
+      { type: "blank", id: "2-3" },
+      { type: "fixed", text: "r" },
+      { type: "blank", id: "2-4" },
+      { type: "blank", id: "2-5" },
+      { type: "fixed", text: "s" },
+    ],
+    blanks: { "2-1": "a", "2-2": "n", "2-3": "a", "2-4": "o", "2-5": "o" },
+    word: "kangaroos",
   },
   {
     id: 3,
-    img: img3,
-    example: false,
-    question: "How often does he play chess?",
-    answer: "He never plays chess.",
+    // __mm__  → s_u_mm_e_r
+    parts: [
+      { type: "blank", id: "3-1" },
+      { type: "blank", id: "3-2" },
+      { type: "fixed", text: "mm" },
+      { type: "blank", id: "3-3" },
+      { type: "blank", id: "3-4" },
+    ],
+    blanks: { "3-1": "s", "3-2": "u", "3-3": "e", "3-4": "r" },
+    word: "summer",
   },
   {
     id: 4,
-    img: img4,
-    example: false,
-    question: "How often does she go to bed?",
-    answer: "She always goes to bed.",
+    // __e____ve  → b_e_l_i_e_ve
+    parts: [
+      { type: "blank", id: "4-1" },
+      { type: "fixed", text: "e" },
+      { type: "blank", id: "4-2" },
+      { type: "blank", id: "4-3" },
+      { type: "blank", id: "4-4" },
+      { type: "fixed", text: "ve" },
+    ],
+    blanks: { "4-1": "b", "4-2": "l", "4-3": "i", "4-4": "e" },
+    word: "believe",
+  },
+  {
+    id: 5,
+    // I ____  am.  → I _s_u_r_e_ am.
+    prefix: "I ",
+    suffix: " am.",
+    parts: [
+      { type: "blank", id: "5-1" },
+      { type: "blank", id: "5-2" },
+      { type: "blank", id: "5-3" },
+      { type: "blank", id: "5-4" },
+    ],
+    blanks: { "5-1": "s", "5-2": "u", "5-3": "r", "5-4": "e" },
+    word: "sure",
+  },
+  {
+    id: 6,
+    // I k___.  → I k_n_o_w_.
+    prefix: "I k",
+    suffix: ".",
+    parts: [
+      { type: "blank", id: "6-1" },
+      { type: "blank", id: "6-2" },
+      { type: "blank", id: "6-3" },
+    ],
+    blanks: { "6-1": "n", "6-2": "o", "6-3": "w" },
+    word: "know",
+  },
+  {
+    id: 7,
+    // __ c__n'__ be____v__ i__!  → I can't believe it!
+    parts: [
+      { type: "blank", id: "7-1" },
+      { type: "fixed", text: " c" },
+      { type: "blank", id: "7-2" },
+      { type: "fixed", text: "n'" },
+      { type: "blank", id: "7-3" },
+      { type: "fixed", text: " be" },
+      { type: "blank", id: "7-4" },
+      { type: "blank", id: "7-5" },
+      { type: "blank", id: "7-6" },
+      { type: "fixed", text: "v" },
+      { type: "blank", id: "7-7" },
+      { type: "fixed", text: " i" },
+      { type: "blank", id: "7-8" },
+      { type: "fixed", text: "!" },
+    ],
+    blanks: { "7-1": "I", "7-2": "a", "7-3": "t", "7-4": "l", "7-5": "i", "7-6": "e", "7-7": "e", "7-8": "t" },
+    word: "I can't believe it",
+  },
+  {
+    id: 8,
+    // __ee__  → W_ee_k
+    parts: [
+      { type: "blank", id: "8-1" },
+      { type: "fixed", text: "ee" },
+      { type: "blank", id: "8-2" },
+    ],
+    blanks: { "8-1": "w", "8-2": "k" },
+    word: "week",
+  },
+  {
+    id: 9,
+    // ____w ab___ yo__?  → How about you?
+    parts: [
+      { type: "blank", id: "9-1" },
+      { type: "blank", id: "9-2" },
+      { type: "fixed", text: "w ab" },
+      { type: "blank", id: "9-3" },
+      { type: "blank", id: "9-4" },
+      { type: "blank", id: "9-5" },
+      { type: "fixed", text: " yo" },
+      { type: "blank", id: "9-6" },
+      { type: "fixed", text: "?" },
+    ],
+    blanks: { "9-1": "H", "9-2": "o", "9-3": "o", "9-4": "u", "9-5": "t", "9-6": "u" },
+    word: "How about you?",
+  },
+  {
+    id: 10,
+    // v__s__t  → v_i_s_i_t
+    parts: [
+      { type: "fixed", text: "v" },
+      { type: "blank", id: "10-1" },
+      { type: "fixed", text: "s" },
+      { type: "blank", id: "10-2" },
+      { type: "fixed", text: "t" },
+    ],
+    blanks: { "10-1": "i", "10-2": "i" },
+    word: "visit",
+  },
+  {
+    id: 11,
+    // S___ __h___s__!  → Say cheese!
+    parts: [
+      { type: "fixed", text: "S" },
+      { type: "blank", id: "11-1" },
+      { type: "blank", id: "11-2" },
+      { type: "fixed", text: " " },
+      { type: "blank", id: "11-3" },
+      { type: "fixed", text: "h" },
+      { type: "blank", id: "11-4" },
+      { type: "blank", id: "11-5" },
+      { type: "fixed", text: "s" },
+      { type: "blank", id: "11-6" },
+      { type: "fixed", text: "!" },
+    ],
+    blanks: { "11-1": "a", "11-2": "y", "11-3": "c", "11-4": "e", "11-5": "e", "11-6": "e" },
+    word: "Say cheese",
+  },
+  {
+    id: 12,
+    // __ap__  → J_ap_a_n
+    parts: [
+      { type: "blank", id: "12-1" },
+      { type: "fixed", text: "ap" },
+      { type: "blank", id: "12-2" },
+      { type: "blank", id: "12-3" },
+    ],
+    blanks: { "12-1": "J", "12-2": "a", "12-3": "n" },
+    word: "Japan",
   },
 ];
 
-const QUESTION_DRAG_ITEMS = ITEMS.filter((item) => !item.example).map((item) => ({
-  id: `q-${item.id}`,
-  type: "question",
-  value: item.question,
-}));
+// ─────────────────────────────────────────────
+//  🔧  HELPERS
+// ─────────────────────────────────────────────
+// Check all blanks of one item
+const isItemCorrect = (item, inputs) =>
+  Object.entries(item.blanks).every(
+    ([id, answer]) =>
+      (inputs[id] || "").toLowerCase().trim() === answer.toLowerCase()
+  );
 
-const ANSWER_DRAG_ITEMS = ITEMS.filter((item) => !item.example).map((item) => ({
-  id: `a-${item.id}`,
-  type: "answer",
-  value: item.answer,
-}));
-
-export default function WB_Unit2_Page11_QF() {
-  const [answers, setAnswers] = useState({});
-  const [draggedItem, setDraggedItem] = useState(null);
-  const [touchItem, setTouchItem] = useState(null);
-  const [touchPos, setTouchPos] = useState({ x: 0, y: 0 });
+// ─────────────────────────────────────────────
+//  COMPONENT
+// ─────────────────────────────────────────────
+export default function WB_MissingLetters_F() {
+  const [inputs,      setInputs]      = useState({});
   const [showResults, setShowResults] = useState(false);
-  const [showAns, setShowAns] = useState(false);
+  const [showAns,     setShowAns]     = useState(false);
 
-  const dropRefs = useRef({});
+  const isLocked = showResults || showAns;
 
-  const usedDragIds = Object.values(answers)
-    .filter(Boolean)
-    .map((entry) => entry.dragId);
-
-  const applyDrop = (boxKey, item) => {
-    const newAnswers = { ...answers };
-
-    Object.keys(newAnswers).forEach((key) => {
-      if (newAnswers[key]?.dragId === item.id) {
-        delete newAnswers[key];
-      }
-    });
-
-    newAnswers[boxKey] = {
-      dragId: item.id,
-      value: item.value,
-      type: item.type,
-    };
-
-    setAnswers(newAnswers);
-    setShowResults(false);
-  };
-
-  const handleDragStart = (item) => {
-    if (showAns || usedDragIds.includes(item.id)) return;
-    setDraggedItem(item);
-  };
-
-  const handleDrop = (boxKey, expectedType) => {
-    if (showAns || !draggedItem) return;
-    if (draggedItem.type !== expectedType) {
-      setDraggedItem(null);
-      return;
-    }
-
-    applyDrop(boxKey, draggedItem);
-    setDraggedItem(null);
-  };
-
-  const handleTouchStart = (e, item) => {
-    if (showAns || usedDragIds.includes(item.id)) return;
-
-    const touch = e.touches[0];
-    setTouchItem(item);
-    setTouchPos({ x: touch.clientX, y: touch.clientY });
-  };
-
-  const handleTouchMove = (e) => {
-    if (!touchItem) return;
-    const touch = e.touches[0];
-    setTouchPos({ x: touch.clientX, y: touch.clientY });
-  };
-
-  const handleTouchEnd = () => {
-    if (!touchItem) return;
-
-    Object.entries(dropRefs.current).forEach(([key, ref]) => {
-      if (!ref) return;
-
-      const expectedType = ref.dataset.type;
-      const rect = ref.getBoundingClientRect();
-
-      if (
-        touchPos.x >= rect.left &&
-        touchPos.x <= rect.right &&
-        touchPos.y >= rect.top &&
-        touchPos.y <= rect.bottom &&
-        touchItem.type === expectedType
-      ) {
-        applyDrop(key, touchItem);
-      }
-    });
-
-    setTouchItem(null);
-  };
-
-  const handleRemoveAnswer = (boxKey) => {
-    if (showAns) return;
-
-    setAnswers((prev) => {
-      const updated = { ...prev };
-      delete updated[boxKey];
-      return updated;
-    });
-
-    setShowResults(false);
+  // ── handlers ──────────────────────────────
+  const handleChange = (id, value) => {
+    if (isLocked) return;
+    // allow only 1 letter
+    const val = value.slice(-1);
+    setInputs((prev) => ({ ...prev, [id]: val }));
   };
 
   const handleCheck = () => {
-    if (showAns) return;
-
-    const editableItems = ITEMS.filter((item) => !item.example);
-
-    const allAnswered = editableItems.every(
-      (item) => answers[`q-${item.id}`]?.value && answers[`a-${item.id}`]?.value
+    if (isLocked) return;
+    const allFilled = ITEMS.every((item) =>
+      Object.keys(item.blanks).every((id) => inputs[id]?.trim())
     );
-
-    if (!allAnswered) {
-      ValidationAlert.info("Please complete all answers first.");
+    if (!allFilled) {
+      ValidationAlert.info("Please fill in all the blanks first.");
       return;
     }
-
     let score = 0;
-    const total = editableItems.length * 2;
-
-    editableItems.forEach((item) => {
-      if (answers[`q-${item.id}`]?.value === item.question) score++;
-      if (answers[`a-${item.id}`]?.value === item.answer) score++;
-    });
-
+    ITEMS.forEach((item) => { if (isItemCorrect(item, inputs)) score++; });
+    const total = ITEMS.length;
     setShowResults(true);
-
-    if (score === total) {
-      ValidationAlert.success(`Score: ${score} / ${total}`);
-    } else if (score > 0) {
-      ValidationAlert.warning(`Score: ${score} / ${total}`);
-    } else {
-      ValidationAlert.error(`Score: ${score} / ${total}`);
-    }
+    if (score === total)  ValidationAlert.success(`Score: ${score} / ${total}`);
+    else if (score > 0)   ValidationAlert.warning(`Score: ${score} / ${total}`);
+    else                  ValidationAlert.error(`Score: ${score} / ${total}`);
   };
 
   const handleShowAnswer = () => {
-    const filled = {};
-
-    ITEMS.filter((item) => !item.example).forEach((item) => {
-      const matchedQuestion = QUESTION_DRAG_ITEMS.find((d) => d.value === item.question);
-      const matchedAnswer = ANSWER_DRAG_ITEMS.find((d) => d.value === item.answer);
-
-      filled[`q-${item.id}`] = {
-        dragId: matchedQuestion?.id ?? `q-${item.id}`,
-        value: item.question,
-        type: "question",
-      };
-
-      filled[`a-${item.id}`] = {
-        dragId: matchedAnswer?.id ?? `a-${item.id}`,
-        value: item.answer,
-        type: "answer",
-      };
+    const ans = {};
+    ITEMS.forEach((item) => {
+      Object.entries(item.blanks).forEach(([id, letter]) => { ans[id] = letter; });
     });
-
-    setAnswers(filled);
-    setShowResults(true);
+    setInputs(ans);
+    setShowResults(false);
     setShowAns(true);
   };
 
-  const handleStartAgain = () => {
-    setAnswers({});
-    setDraggedItem(null);
-    setTouchItem(null);
+  const handleReset = () => {
+    setInputs({});
     setShowResults(false);
     setShowAns(false);
   };
 
-  const isWrong = (item, field) => {
+  // ── helpers ───────────────────────────────
+  const isItemWrong = (item) => {
     if (!showResults || showAns) return false;
-
-    if (field === "question") {
-      return answers[`q-${item.id}`]?.value !== item.question;
-    }
-
-    return answers[`a-${item.id}`]?.value !== item.answer;
+    return !isItemCorrect(item, inputs);
   };
 
-  const renderDropBox = (boxKey, expectedType, wrong, isAnswerLine = false) => {
-    const value = answers[boxKey]?.value || "";
-
+  // ── render one item ───────────────────────
+  const renderItem = (item) => {
+    const wrong = isItemWrong(item);
     return (
-      <div
-        ref={(el) => {
-          dropRefs.current[boxKey] = el;
-        }}
-        data-type={expectedType}
-        onDragOver={(e) => e.preventDefault()}
-        onDrop={() => handleDrop(boxKey, expectedType)}
-        onClick={() => handleRemoveAnswer(boxKey)}
-        style={{
-          width: "100%",
-          minHeight: isAnswerLine ? "clamp(28px, 3.8vw, 44px)" : "clamp(28px, 3.8vw, 44px)",
-          borderBottom: `2px solid ${LINE_COLOR}`,
-          display: "flex",
-          alignItems: "flex-end",
-          justifyContent: "flex-start",
-          fontSize: "clamp(14px, 2vw, 28px)",
-          lineHeight: 1.15,
-          color: value ? ANSWER_COLOR : "#111",
-          padding: "0 4px 3px",
-          boxSizing: "border-box",
-          position: "relative",
-          fontWeight: 500,
-          cursor: value && !showAns ? "pointer" : "default",
-          userSelect: "none",
-          wordBreak: "break-word",
-        }}
-      >
-        {value}
+      <div key={item.id} className="ml-item">
+        {/* number */}
+        <span className="ml-num">{item.id}</span>
 
-        {wrong && (
-          <div
-            style={{
-              position: "absolute",
-              top: "clamp(-8px, -1vw, -4px)",
-              right: "clamp(-8px, -1vw, -4px)",
-              width: "clamp(16px, 2vw, 22px)",
-              height: "clamp(16px, 2vw, 22px)",
-              borderRadius: "50%",
-              backgroundColor: WRONG_COLOR,
-              color: "#fff",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: "clamp(9px, 1vw, 11px)",
-              fontWeight: 700,
-              boxShadow: "0 1px 4px rgba(0,0,0,0.2)",
-            }}
-          >
-            ✕
-          </div>
-        )}
+        {/* word display */}
+        <span className="ml-word-wrap">
+          {item.prefix && <span className="ml-fixed">{item.prefix}</span>}
+          {item.parts.map((part, i) => {
+            if (part.type === "fixed") {
+              return <span key={i} className="ml-fixed">{part.text}</span>;
+            }
+            // blank
+            const val    = inputs[part.id] || "";
+            const isAns  = showAns;
+            return (
+              <input
+                key={i}
+                type="text"
+                maxLength={1}
+                className={[
+                  "ml-input",
+                  wrong  ? "ml-input--wrong"  : "",
+                  isAns  ? "ml-input--answer" : "",
+                ].filter(Boolean).join(" ")}
+                value={val}
+                disabled={isLocked}
+                onChange={(e) => handleChange(part.id, e.target.value)}
+                spellCheck={false}
+                autoComplete="off"
+              />
+            );
+          })}
+          {item.suffix && <span className="ml-fixed">{item.suffix}</span>}
+        </span>
+
+        {/* ✕ badge */}
+        {wrong && <span className="ml-badge">✕</span>}
       </div>
     );
   };
 
-  const renderDragItem = (item) => {
-    const isUsed = usedDragIds.includes(item.id);
-
-    return (
-      <div
-        key={item.id}
-        draggable={!isUsed && !showAns}
-        onDragStart={() => handleDragStart(item)}
-        onTouchStart={(e) => handleTouchStart(e, item)}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
-        style={{
-          padding: "clamp(7px, 1vw, 10px) clamp(10px, 1.3vw, 16px)",
-          borderRadius: "clamp(10px, 1vw, 14px)",
-          border: `1.5px solid ${isUsed ? BORDER_COLOR : ACTIVE_COLOR}`,
-          backgroundColor: isUsed ? "#eeeeee" : SOFT_COLOR,
-          color: isUsed ? "#999" : "#222",
-          cursor: isUsed || showAns ? "not-allowed" : "grab",
-          opacity: isUsed ? 0.6 : 1,
-          userSelect: "none",
-          fontSize: "clamp(12px, 1.55vw, 18px)",
-          fontWeight: 500,
-          boxShadow: isUsed ? "none" : "0 2px 8px rgba(0,0,0,0.06)",
-          transition: "0.2s ease",
-          touchAction: "none",
-          lineHeight: 1.2,
-          textAlign: "center",
-        }}
-      >
-        {item.value}
-      </div>
-    );
-  };
-
+  // ── render ────────────────────────────────
   return (
     <div className="main-container-component">
+      <style>{`
+        /* ── Grid ── */
+        .ml-grid {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: clamp(12px, 1.8vw, 22px) clamp(20px, 3vw, 48px);
+          align-items: center;
+        }
+        @media (max-width: 600px) {
+          .ml-grid { grid-template-columns: 1fr; }
+        }
+
+        /* ── Item ── */
+        .ml-item {
+          display: flex;
+          align-items: center;
+          gap: clamp(6px, 0.8vw, 10px);
+          position: relative;
+        }
+
+        .ml-num {
+          font-size: clamp(14px, 1.6vw, 19px);
+          font-weight: 700;
+          color: #2b2b2b;
+          min-width: 20px;
+          flex-shrink: 0;
+        }
+
+        .ml-word-wrap {
+          display: flex;
+          align-items: flex-end;
+          flex-wrap: wrap;
+          gap: 0;
+font-size: clamp(15px, 1.9vw, 22px);
+
+color: #2b2b2b;
+          line-height: 1.8;
+        }
+
+        .ml-fixed {
+font-size: clamp(15px, 1.9vw, 22px);
+          color: #2b2b2b;
+          line-height: 1.5;
+          white-space: pre;
+        }
+
+        /* Single-letter input */
+        .ml-input {
+          width: clamp(20px, 2.4vw, 30px);
+          border: none;
+          border-bottom: 1.5px solid ${INPUT_UNDERLINE_DEFAULT};
+          background: transparent;
+          outline: none;
+          text-align: center;
+font-size: clamp(15px, 1.9vw, 22px);
+          color: #2b2b2b;
+          line-height: 1.5;
+          transition: border-color 0.2s;
+          box-sizing: border-box;
+        }
+        .ml-input:disabled      { opacity: 1; cursor: default; }
+        .ml-input--wrong        { border-bottom-color: ${INPUT_UNDERLINE_WRONG}; }
+        .ml-input--answer       { color: ${INPUT_ANSWER_COLOR}; }
+
+        /* ✕ badge */
+        .ml-badge {
+          width: clamp(16px, 1.8vw, 21px);
+          height: clamp(16px, 1.8vw, 21px);
+          border-radius: 50%;
+          background: ${WRONG_BADGE_BG};
+          color: ${WRONG_BADGE_TEXT};
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          font-size: clamp(8px, 0.9vw, 11px);
+          font-weight: 700;
+          border: 2px solid #fff;
+          box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+          flex-shrink: 0;
+          margin-left: 4px;
+        }
+
+        /* Buttons */
+        .ml-buttons {
+          display: flex;
+          justify-content: center;
+          margin-top: clamp(8px, 1.6vw, 18px);
+        }
+      `}</style>
+
       <div
         className="div-forall"
         style={{
           display: "flex",
           flexDirection: "column",
-          gap: "18px",
+          gap: "clamp(14px, 2vw, 22px)",
           maxWidth: "1100px",
           margin: "0 auto",
         }}
       >
+        {/* ── Header ── */}
         <h1
           className="WB-header-title-page8"
-          style={{
-            margin: 0,
-            display: "flex",
-            alignItems: "center",
-            gap: "12px",
-            flexWrap: "wrap",
-          }}
+          style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
         >
           <span className="WB-ex-A">F</span>
-          Look at Exercise E. Write the questions and answers.
+          Write the missing letters.
         </h1>
 
-        {/* question bank */}
-        <div
-          style={{
-            display: "flex",
-            gap: "clamp(8px, 1vw, 10px)",
-            flexWrap: "wrap",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          {QUESTION_DRAG_ITEMS.map(renderDragItem)}
+        {/* ── Two-column grid — odd ids left, even ids right ── */}
+        <div className="ml-grid">
+          {ITEMS.filter((_, i) => i % 2 === 0).map((item, rowIdx) => {
+            const rightItem = ITEMS[rowIdx * 2 + 1];
+            return (
+              <React.Fragment key={item.id}>
+                {renderItem(item)}
+                {rightItem ? renderItem(rightItem) : <div />}
+              </React.Fragment>
+            );
+          })}
         </div>
 
-        {/* answer bank */}
-        <div
-          style={{
-            display: "flex",
-            gap: "clamp(8px, 1vw, 10px)",
-            flexWrap: "wrap",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          {ANSWER_DRAG_ITEMS.map(renderDragItem)}
-        </div>
-
-        {/* rows */}
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            gap: "clamp(14px, 2vw, 26px)",
-            width: "100%",
-          }}
-        >
-          {ITEMS.map((item) => (
-            <div
-              key={item.id}
-              style={{
-                display: "grid",
-                gridTemplateColumns: "clamp(24px, 4vw, 40px) clamp(54px, 9vw, 92px) minmax(0, 1fr)",
-                gap: "clamp(8px, 1.3vw, 16px)",
-                alignItems: "start",
-                width: "100%",
-              }}
-            >
-              <div
-                style={{
-                  fontSize: "clamp(18px, 2vw, 32px)",
-                  fontWeight: 700,
-                  color: "#111",
-                  lineHeight: 1,
-                  paddingTop: "clamp(8px, 1.4vw, 16px)",
-                  textAlign: "center",
-                }}
-              >
-                {item.id}
-              </div>
-
-              <div
-                style={{
-                  width: "clamp(50px, 8vw, 88px)",
-                  height: "clamp(50px, 8vw, 88px)",
-                  display: "flex",
-                  alignItems: "flex-start",
-                  justifyContent: "center",
-                  paddingTop: "clamp(2px, 0.4vw, 4px)",
-                  boxSizing: "border-box",
-                }}
-              >
-                <img
-                  src={item.img}
-                  alt={`person-${item.id}`}
-                  style={{
-                    width: "100%",
-                    height: "100%",
-                    objectFit: "contain",
-                    display: "block",
-                  }}
-                />
-              </div>
-
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: "clamp(8px, 1vw, 12px)",
-                  minWidth: 0,
-                }}
-              >
-                {item.example ? (
-                  <>
-                    <div
-                      style={{
-                        width: "100%",
-                        borderBottom: `2px solid ${LINE_COLOR}`,
-                        paddingBottom: "3px",
-                        fontSize: "clamp(14px, 2vw, 28px)",
-                        lineHeight: 1.2,
-                        color: "#111",
-                        wordBreak: "break-word",
-                      }}
-                    >
-                      {item.question}
-                    </div>
-
-                    <div
-                      style={{
-                        width: "100%",
-                        borderBottom: `2px solid ${LINE_COLOR}`,
-                        paddingBottom: "3px",
-                        fontSize: "clamp(14px, 2vw, 28px)",
-                        lineHeight: 1.2,
-                        color: ANSWER_COLOR,
-                        wordBreak: "break-word",
-                      }}
-                    >
-                      {item.answer}
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    {renderDropBox(`q-${item.id}`, "question", isWrong(item, "question"))}
-                    {renderDropBox(`a-${item.id}`, "answer", isWrong(item, "answer"), true)}
-                  </>
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* buttons */}
-        <div
-          style={{
-            marginTop: "6px",
-            display: "flex",
-            justifyContent: "center",
-          }}
-        >
+        {/* ── Buttons ── */}
+        <div className="ml-buttons">
           <Button
             checkAnswers={handleCheck}
             handleShowAnswer={handleShowAnswer}
-            handleStartAgain={handleStartAgain}
+            handleStartAgain={handleReset}
           />
         </div>
       </div>
-
-      {/* floating preview on touch */}
-      {touchItem && (
-        <div
-          style={{
-            position: "fixed",
-            left: touchPos.x - 60,
-            top: touchPos.y - 20,
-            background: "#fff",
-            padding: "8px 12px",
-            borderRadius: "10px",
-            boxShadow: "0 4px 10px rgba(0,0,0,0.2)",
-            pointerEvents: "none",
-            zIndex: 9999,
-            fontSize: "clamp(12px, 1.4vw, 18px)",
-            fontWeight: 600,
-            color: "#222",
-            maxWidth: "min(320px, 70vw)",
-            textAlign: "center",
-            lineHeight: 1.2,
-          }}
-        >
-          {touchItem.value}
-        </div>
-      )}
     </div>
   );
 }
