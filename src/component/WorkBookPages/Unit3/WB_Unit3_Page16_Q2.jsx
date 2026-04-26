@@ -2,296 +2,295 @@ import React, { useState } from "react";
 import Button from "../Button";
 import ValidationAlert from "../../Popup/ValidationAlert";
 
-import img1 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U3 Folder/Page 16/Ex D 1.svg";
-import img2 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U3 Folder/Page 16/Ex D 2.svg";
-import img3 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U3 Folder/Page 16/Ex D 3.svg";
-import img4 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U3 Folder/Page 16/Ex D 4.svg";
+import img1 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U3 Folder/Page 16/SVG/Asset 13.svg";
+import img2 from"../../../assets/imgs/pages/Activity Book/Right Int WB G4 U3 Folder/Page 16/SVG/Asset 14.svg";
+import img3 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U3 Folder/Page 16/SVG/Asset 15.svg";
+import img4 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U3 Folder/Page 16/SVG/Asset 16.svg";
+import img5 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U3 Folder/Page 16/SVG/Asset 17.svg";
+import img6 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U3 Folder/Page 16/SVG/Asset 18.svg";
 
+// ─────────────────────────────────────────────
+//  🎨  COLORS
+// ─────────────────────────────────────────────
+const BORDER_COLOR     = "#2096a6";
+const CHECK_BG         = "#ef4444";
+const CROSS_BG         = "#ef4444";
+const SELECTED_CHECK   = "#22c55e";
+const SELECTED_CROSS   = "#ef4444";
+const WRONG_BADGE_BG   = "#ef4444";
+const WRONG_BADGE_TEXT = "#ffffff";
+
+// ─────────────────────────────────────────────
+//  📝  EXERCISE DATA
+// ─────────────────────────────────────────────
 const ITEMS = [
-  {
-    id: 1,
-    img: img1,
-    question: "Do they have any vegetables?",
-    options: ["Yes, they do have some.", "No, they don’t have any."],
-    correct: "No, they don’t have any.",
-  },
-  {
-    id: 2,
-    img: img2,
-    question: "Does she have any hats?",
-    options: ["Yes, she has some.", "No, she hasn’t any."],
-    correct: "Yes, she has some.",
-  },
-  {
-    id: 3,
-    img: img3,
-    question: "Do they have any drinks?",
-    options: ["Yes, they do have some.", "No, they don’t have any."],
-    correct: "Yes, they do have some.",
-  },
-  {
-    id: 4,
-    img: img4,
-    question: "Does she have any ice cream?",
-    options: ["Yes, she has some.", "No, she hasn’t any."],
-    correct: "Yes, she has some.",
-  },
+  { id: 1, imageSrc: img1, sentence: "He had a radio.",      correct: "✓" },
+  { id: 2, imageSrc: img2, sentence: "He had a bike.",       correct: "✗" },
+  { id: 3, imageSrc: img3, sentence: "He had a violin.",     correct: "✓" },
+  { id: 4, imageSrc: img4, sentence: "She had a pen.",       correct: "✗" },
+  { id: 5, imageSrc: img5, sentence: "She had a doll.",      correct: "✓" },
+  { id: 6, imageSrc: img6, sentence: "He had a motorcycle.", correct: "✗" },
 ];
 
-export default function WB_Unit3_Page16_QC() {
-  const [answers, setAnswers] = useState({});
+// ─────────────────────────────────────────────
+//  COMPONENT
+// ─────────────────────────────────────────────
+export default function WB_LookReadWriteCheckX_C() {
+  const [selected,    setSelected]    = useState({});  // { id: "✓" | "✗" }
   const [showResults, setShowResults] = useState(false);
-  const [showAns, setShowAns] = useState(false);
+  const [showAns,     setShowAns]     = useState(false);
 
+  const isLocked = showResults || showAns;
+
+  // ── handlers ──────────────────────────────
   const handleSelect = (id, value) => {
-    if (showAns) return;
-
-    setAnswers((prev) => ({
-      ...prev,
-      [id]: value,
-    }));
-
-    setShowResults(false);
+    if (isLocked) return;
+    setSelected((prev) => ({ ...prev, [id]: value }));
   };
 
   const handleCheck = () => {
-    if (showAns) return;
-
-    const allAnswered = ITEMS.every((item) => answers[item.id]);
-
+    if (isLocked) return;
+    const allAnswered = ITEMS.every((item) => selected[item.id]);
     if (!allAnswered) {
-      ValidationAlert.info("Please answer all questions first.");
+      ValidationAlert.info("Please answer all items first.");
       return;
     }
-
     let score = 0;
-
     ITEMS.forEach((item) => {
-      if (answers[item.id] === item.correct) {
-        score++;
-      }
+      if (selected[item.id] === item.correct) score++;
     });
-
+    const total = ITEMS.length;
     setShowResults(true);
-
-    if (score === ITEMS.length) {
-      ValidationAlert.success(`Score: ${score} / ${ITEMS.length}`);
-    } else if (score > 0) {
-      ValidationAlert.warning(`Score: ${score} / ${ITEMS.length}`);
-    } else {
-      ValidationAlert.error(`Score: ${score} / ${ITEMS.length}`);
-    }
+    if (score === total)  ValidationAlert.success(`Score: ${score} / ${total}`);
+    else if (score > 0)   ValidationAlert.warning(`Score: ${score} / ${total}`);
+    else                  ValidationAlert.error(`Score: ${score} / ${total}`);
   };
 
   const handleShowAnswer = () => {
-    const correctMap = {};
-    ITEMS.forEach((item) => {
-      correctMap[item.id] = item.correct;
-    });
-
-    setAnswers(correctMap);
-    setShowResults(true);
+    const ans = {};
+    ITEMS.forEach((item) => { ans[item.id] = item.correct; });
+    setSelected(ans);
+    setShowResults(false);
     setShowAns(true);
   };
 
   const handleReset = () => {
-    setAnswers({});
+    setSelected({});
     setShowResults(false);
     setShowAns(false);
   };
 
+  // ── helpers ───────────────────────────────
   const isWrong = (item) => {
-    if (!showResults) return false;
-    return answers[item.id] !== item.correct;
+    if (!showResults || showAns) return false;
+    return selected[item.id] !== item.correct;
   };
 
-  const renderOption = (item, option) => {
-    const selected = answers[item.id] === option;
-    const wrong = isWrong(item) && selected;
+  // ── render one card ───────────────────────
+  const renderCard = (item) => {
+    const wrong       = isWrong(item);
+    const selCheck    = selected[item.id] === "✓";
+    const selCross    = selected[item.id] === "✗";
+    const ansCheck    = showAns && item.correct === "✓";
+    const ansCross    = showAns && item.correct === "✗";
+
+    const checkActive = selCheck || ansCheck;
+    const crossActive = selCross || ansCross;
+    const checkWrong  = wrong && selCheck;
+    const crossWrong  = wrong && selCross;
 
     return (
-      <div
-        onClick={() => handleSelect(item.id, option)}
-        className={`wb-d16-option ${selected ? "selected" : ""} ${
-          wrong ? "wrong" : ""
-        }`}
-        style={{
-          cursor: showAns ? "default" : "pointer",
-        }}
-      >
-        {option}
+      <div key={item.id} className="lrwx-card">
 
-        {wrong && <div className="wb-d16-wrong-badge">✕</div>}
+        {/* Number */}
+        <span className="lrwx-num">{item.id}</span>
+
+        {/* Image */}
+        <div className="lrwx-img-wrap">
+          <img src={item.imageSrc} alt={`item ${item.id}`} className="lrwx-img" />
+        </div>
+
+        {/* Sentence + two boxes */}
+        <div className="lrwx-bottom">
+          <span className="lrwx-sentence">{item.sentence}</span>
+
+          <div className="lrwx-boxes">
+
+            {/* ✓ box */}
+            <div className="lrwx-box-wrap">
+              <div
+                className={[
+                  "lrwx-box",
+                  checkActive ? "lrwx-box--check-active" : "lrwx-box--idle",
+                  checkWrong  ? "lrwx-box--wrong"        : "",
+                ].filter(Boolean).join(" ")}
+                onClick={() => handleSelect(item.id, "✓")}
+                style={{ cursor: isLocked ? "default" : "pointer" }}
+              >
+                {checkActive && <span className="lrwx-symbol">✓</span>}
+              </div>
+              {checkWrong && <div className="lrwx-badge">✕</div>}
+            </div>
+
+            {/* ✗ box */}
+            <div className="lrwx-box-wrap">
+              <div
+                className={[
+                  "lrwx-box",
+                  crossActive ? "lrwx-box--cross-active" : "lrwx-box--idle",
+                  crossWrong  ? "lrwx-box--wrong"        : "",
+                ].filter(Boolean).join(" ")}
+                onClick={() => handleSelect(item.id, "✗")}
+                style={{ cursor: isLocked ? "default" : "pointer" }}
+              >
+                {crossActive && <span className="lrwx-symbol">✗</span>}
+              </div>
+              {crossWrong && <div className="lrwx-badge">✕</div>}
+            </div>
+
+          </div>
+        </div>
+
       </div>
     );
   };
 
+  // ── render ────────────────────────────────
   return (
     <div className="main-container-component">
       <style>{`
-        .wb-d16-wrap {
-          display: flex;
-          flex-direction: column;
-          gap: clamp(20px, 2.4vw, 28px);
-          width: 100%;
-        }
-
-        .wb-d16-list {
-          display: flex;
-          flex-direction: column;
-          gap: clamp(18px, 2.2vw, 26px);
-          width: 100%;
-        }
-
-        .wb-d16-row {
+        /* ── 3-column grid ── */
+        .lrwx-grid {
           display: grid;
-          grid-template-columns:
-            clamp(26px, 3vw, 38px)
-            minmax(150px, clamp(220px, 27vw, 330px))
-            minmax(0, 1fr);
-          gap: clamp(12px, 1.8vw, 18px);
-          align-items: center;
-          width: 100%;
+          grid-template-columns: repeat(3, 1fr);
+          gap: clamp(20px, 3vw, 40px) clamp(16px, 2.4vw, 32px);
+        }
+        @media (max-width: 640px) {
+          .lrwx-grid { grid-template-columns: 1fr 1fr; }
+        }
+        @media (max-width: 400px) {
+          .lrwx-grid { grid-template-columns: 1fr; }
         }
 
-        .wb-d16-num {
-          font-size: clamp(18px, 2vw, 22px);
+        /* ── Card ── */
+        .lrwx-card {
+          display: flex;
+          flex-direction: column;
+          gap: clamp(6px, 0.9vw, 12px);
+        }
+
+        /* Number */
+        .lrwx-num {
+          font-size: clamp(15px, 1.9vw, 22px);
           font-weight: 700;
-          color: #222;
+          color: #2b2b2b;
+        }
+
+        /* Image */
+        .lrwx-img-wrap {
+          width: 100%;
+          border-radius: 10px;
+          overflow: hidden;
+        }
+        .lrwx-img {
+          width: 100%;
+          height: clamp(130px, 16vw, 200px);
+د          display: block;
+        }
+
+        /* Bottom row */
+        .lrwx-bottom {
+          display: flex;
+          align-items: center;
+          gap: clamp(6px, 1vw, 14px);
+          flex-wrap: nowrap;
+        }
+        .lrwx-sentence {
+          font-size: clamp(13px, 1.6vw, 19px);
+          color: #2b2b2b;
+          flex: 1;
+          line-height: 1.4;
+        }
+
+        /* Two boxes side by side */
+        .lrwx-boxes {
+          display: flex;
+          gap: clamp(6px, 0.8vw, 10px);
+          flex-shrink: 0;
+        }
+
+        /* Box wrap for badge */
+        .lrwx-box-wrap {
+          position: relative;
+        }
+
+        /* Box base */
+        .lrwx-box {
+          width: clamp(34px, 4vw, 48px);
+          height: clamp(34px, 4vw, 48px);
+          border-radius: 8px;
+          border: 2px solid ${BORDER_COLOR};
+          background: #fff;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: background 0.15s, border-color 0.15s;
+          user-select: none;
+        }
+
+        /* Idle — empty box */
+        .lrwx-box--idle { background: #fff; }
+
+        /* ✓ selected */
+        .lrwx-box--check-active {
+          background: ${CHECK_BG};
+          border-color: ${CHECK_BG};
+        }
+
+        /* ✗ selected */
+        .lrwx-box--cross-active {
+          background: ${CROSS_BG};
+          border-color: ${CROSS_BG};
+        }
+
+        /* Wrong border override */
+        .lrwx-box--wrong {
+          border-color: ${WRONG_BADGE_BG} !important;
+        }
+
+        /* Symbol inside box */
+        .lrwx-symbol {
+          font-size: clamp(16px, 2.2vw, 26px);
+          font-weight: 700;
+          color: #fff;
           line-height: 1;
         }
 
-        .wb-d16-img {
-          width: clamp(150px, 26vw, 320px);
-          height: clamp(90px, 15vw, 170px);
-          object-fit: contain;
-          display: block;
-          justify-self: start;
-                              border: 2px solid #f39b42;
-object-fit: cover;
-        }
-
-        .wb-d16-content {
-          display: flex;
-          flex-direction: column;
-          gap: clamp(10px, 1.4vw, 12px);
-          justify-content: center;
-          min-width: 0;
-        }
-
-        .wb-d16-question {
-          font-size: clamp(16px, 2vw, 20px);
-          color: #111;
-          line-height: 1.4;
-          margin-bottom: 2px;
-          word-break: break-word;
-        }
-
-        .wb-d16-options {
-          display: flex;
-          flex-wrap: wrap;
-          gap: clamp(10px, 1.5vw, 16px);
-          align-items: center;
-        }
-
-        .wb-d16-option {
-          position: relative;
-          padding: clamp(8px, 1vw, 10px) clamp(12px, 1.8vw, 18px);
-          border-radius: 999px;
-          border: 2px solid transparent;
-          background-color: transparent;
-          color: #111;
-          font-size: clamp(14px, 1.5vw, 16px);
-          font-weight: 500;
-          transition: all 0.2s ease;
-          box-sizing: border-box;
-          min-width: fit-content;
-          line-height: 1.35;
-        }
-
-        .wb-d16-option.selected {
-          border-color: #f39b42;
-        }
-
-        .wb-d16-option.wrong {
-          border-color: #dc2626;
-        }
-
-        .wb-d16-wrong-badge {
+        /* ✕ badge */
+        .lrwx-badge {
           position: absolute;
-          top: clamp(-8px, -0.8vw, -6px);
-          right: clamp(-8px, -0.8vw, -6px);
-          width: clamp(18px, 2vw, 20px);
-          height: clamp(18px, 2vw, 20px);
+          top: -8px; right: -8px;
+          width: clamp(15px, 1.7vw, 20px);
+          height: clamp(15px, 1.7vw, 20px);
           border-radius: 50%;
-          background-color: #ef4444;
-          color: #fff;
+          background: ${WRONG_BADGE_BG};
+          color: ${WRONG_BADGE_TEXT};
           display: flex;
           align-items: center;
           justify-content: center;
-          font-size: clamp(10px, 1vw, 11px);
+          font-size: clamp(8px, 0.9vw, 11px);
           font-weight: 700;
           border: 2px solid #fff;
-          box-shadow: 0 2px 6px rgba(0,0,0,0.18);
+          box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+          pointer-events: none;
+          z-index: 2;
         }
 
-        .wb-d16-buttons {
+        /* Buttons */
+        .lrwx-buttons {
           display: flex;
           justify-content: center;
-          margin-top: clamp(4px, 0.8vw, 6px);
-        }
-
-        @media (max-width: 900px) {
-          .wb-d16-row {
-            grid-template-columns:
-              clamp(24px, 3vw, 34px)
-              minmax(130px, clamp(180px, 30vw, 260px))
-              minmax(0, 1fr);
-            gap: 14px;
-          }
-
-          .wb-d16-img {
-            width: clamp(140px, 28vw, 250px);
-            height: clamp(90px, 18vw, 145px);
-          }
-        }
-
-        @media (max-width: 700px) {
-          .wb-d16-row {
-            grid-template-columns: 1fr;
-            gap: 12px;
-          }
-
-          .wb-d16-num {
-            font-size: clamp(18px, 4.8vw, 21px);
-          }
-
-          .wb-d16-img {
-            justify-self: center;
-            width: clamp(160px, 52vw, 280px);
-            height: clamp(100px, 34vw, 170px);
-          }
-
-          .wb-d16-content {
-            align-items: flex-start;
-          }
-        }
-
-        @media (max-width: 480px) {
-          .wb-d16-question {
-            font-size: clamp(15px, 4.2vw, 18px);
-          }
-
-          .wb-d16-option {
-            width: 100%;
-            text-align: center;
-            font-size: clamp(14px, 3.8vw, 15px);
-          }
-
-          .wb-d16-options {
-            width: 100%;
-            gap: 10px;
-          }
+          margin-top: clamp(8px, 1.6vw, 18px);
         }
       `}</style>
 
@@ -300,49 +299,35 @@ object-fit: cover;
         style={{
           display: "flex",
           flexDirection: "column",
-          gap: "28px",
+          gap: "clamp(14px, 2vw, 22px)",
           maxWidth: "1100px",
           margin: "0 auto",
         }}
       >
-        <h1 className="WB-header-title-page8" style={{ margin: 0 }}>
-          <span className="WB-ex-A">C</span> Look, circle, and answer.
+        {/* ── Header ── */}
+        <h1
+          className="WB-header-title-page8"
+          style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
+        >
+          <span className="WB-ex-A">C</span>
+          Look, read, and write{" "}
+          <span style={{ color: "#ef4444", fontWeight: 700 }}>✓</span>
+          {" "}or{" "}
+          <span style={{ color: "#ef4444", fontWeight: 700 }}>✗</span>.
         </h1>
 
-        <div className="wb-d16-wrap">
-          <div className="wb-d16-list">
-            {ITEMS.map((item) => (
-              <div key={item.id} className="wb-d16-row">
-                <div className="wb-d16-num">{item.id}</div>
+        {/* ── Grid ── */}
+        <div className="lrwx-grid">
+          {ITEMS.map((item) => renderCard(item))}
+        </div>
 
-                <img
-                  src={item.img}
-                  alt={`question-${item.id}`}
-                  className="wb-d16-img"
-                />
-
-                <div className="wb-d16-content">
-                  <div className="wb-d16-question">{item.question}</div>
-
-                  <div className="wb-d16-options">
-                    {item.options.map((option) => (
-                      <React.Fragment key={option}>
-                        {renderOption(item, option)}
-                      </React.Fragment>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <div className="wb-d16-buttons">
-            <Button
-              checkAnswers={handleCheck}
-              handleShowAnswer={handleShowAnswer}
-              handleStartAgain={handleReset}
-            />
-          </div>
+        {/* ── Buttons ── */}
+        <div className="lrwx-buttons">
+          <Button
+            checkAnswers={handleCheck}
+            handleShowAnswer={handleShowAnswer}
+            handleStartAgain={handleReset}
+          />
         </div>
       </div>
     </div>

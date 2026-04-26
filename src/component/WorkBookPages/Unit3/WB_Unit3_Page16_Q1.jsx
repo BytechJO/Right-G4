@@ -1,414 +1,295 @@
-import React, { useRef, useState } from "react";
+import React, { useState } from "react";
 import Button from "../Button";
 import ValidationAlert from "../../Popup/ValidationAlert";
 
-import img1 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U3 Folder/Page 16/Ex C 1.svg";
-import img2 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U3 Folder/Page 16/Ex C 2.svg";
-import img3 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U3 Folder/Page 16/Ex C 3.svg";
+// ─────────────────────────────────────────────
+//  🎨  COLORS
+// ─────────────────────────────────────────────
+const TABLE_BORDER_COLOR      = "#2096a6";
+const INPUT_UNDERLINE_DEFAULT = "#3f3f3f";
+const INPUT_UNDERLINE_WRONG   = "#ef4444";
+const INPUT_ANSWER_COLOR      = "#c81e1e";
+const WRONG_BADGE_BG          = "#ef4444";
+const WRONG_BADGE_TEXT        = "#ffffff";
 
-const ACTIVE_COLOR = "#f39b42";
-const SOFT_COLOR = "#ffca94";
-const BORDER_COLOR = "#d9d9d9";
-
+// ─────────────────────────────────────────────
+//  📝  EXERCISE DATA
+//
+//  Each item in `parts` is either:
+//    { type: "fixed",  text: "p" }   → shown as plain letter
+//    { type: "blank",  id: "2-1" }   → one-letter input box
+//  `answer` = the full correct word (used for checking & show answer)
+// ─────────────────────────────────────────────
 const ITEMS = [
   {
     id: 1,
-    img: img1,
-    prefix: "They have some",
-    correct: "fruits.",
+    // ye__ __e__d__ __  → yesterday
+    parts: [
+      { type: "fixed", text: "ye" },
+      { type: "blank", id: "1-1" },
+      { type: "blank", id: "1-2" },
+      { type: "fixed", text: "e" },
+      { type: "blank", id: "1-3" },
+      { type: "fixed", text: "d" },
+      { type: "blank", id: "1-4" },
+      { type: "blank", id: "1-5" },
+    ],
+    blanks: { "1-1": "s", "1-2": "t", "1-3": "r", "1-4": "a", "1-5": "y" },
+    word: "yesterday",
   },
   {
     id: 2,
-    img: img2,
-    prefix: "They have some",
-    correct: "caps.",
+    // w__ __ __er__ __ __  → wonderful
+    parts: [
+      { type: "fixed", text: "w" },
+      { type: "blank", id: "2-1" },
+      { type: "blank", id: "2-2" },
+      { type: "blank", id: "2-3" },
+      { type: "fixed", text: "er" },
+      { type: "blank", id: "2-4" },
+      { type: "blank", id: "2-5" },
+      { type: "blank", id: "2-6" },
+    ],
+    blanks: { "2-1": "o", "2-2": "n", "2-3": "d", "2-4": "f", "2-5": "u", "2-6": "l" },
+    word: "wonderful",
   },
   {
     id: 3,
-    img: img3,
-    prefix: "They have some",
-    correct: "sweets.",
+    // b__ __th__ __ __  → birthday
+    parts: [
+      { type: "fixed", text: "b" },
+      { type: "blank", id: "3-1" },
+      { type: "blank", id: "3-2" },
+      { type: "fixed", text: "th" },
+      { type: "blank", id: "3-3" },
+      { type: "blank", id: "3-4" },
+      { type: "blank", id: "3-5" },
+    ],
+    blanks: { "3-1": "i", "3-2": "r", "3-3": "d", "3-4": "a", "3-5": "y" },
+    word: "birthday",
+  },
+  {
+    id: 4,
+    // d__l__c__ __ __s  → delicious
+    parts: [
+      { type: "fixed", text: "d" },
+      { type: "blank", id: "4-1" },
+      { type: "fixed", text: "l" },
+      { type: "blank", id: "4-2" },
+      { type: "fixed", text: "c" },
+      { type: "blank", id: "4-3" },
+      { type: "blank", id: "4-4" },
+      { type: "blank", id: "4-5" },
+      { type: "fixed", text: "s" },
+    ],
+    blanks: { "4-1": "e", "4-2": "i", "4-3": "i", "4-4": "o", "4-5": "u" },
+    word: "delicious",
   },
 ];
 
-const DRAG_ITEMS = [
-  { id: 1, value: "fruits." },
-  { id: 2, value: "caps." },
-  { id: 3, value: "sweets." },
-];
+// ─────────────────────────────────────────────
+//  🔧  HELPERS
+// ─────────────────────────────────────────────
+// Check all blanks of one item
+const isItemCorrect = (item, inputs) =>
+  Object.entries(item.blanks).every(
+    ([id, answer]) =>
+      (inputs[id] || "").toLowerCase().trim() === answer.toLowerCase()
+  );
 
-export default function WB_Unit3_Page16_QC() {
-  const [answers, setAnswers] = useState({});
-  const [draggedItem, setDraggedItem] = useState(null);
-  const [touchItem, setTouchItem] = useState(null);
-  const [touchPos, setTouchPos] = useState({ x: 0, y: 0 });
+// ─────────────────────────────────────────────
+//  COMPONENT
+// ─────────────────────────────────────────────
+export default function WB_MissingLetters_F() {
+  const [inputs,      setInputs]      = useState({});
   const [showResults, setShowResults] = useState(false);
-  const [showAns, setShowAns] = useState(false);
+  const [showAns,     setShowAns]     = useState(false);
 
-  const dropRefs = useRef({});
+  const isLocked = showResults || showAns;
 
-  const usedDragIds = Object.values(answers)
-    .filter(Boolean)
-    .map((entry) => entry.dragId);
-
-  const applyDrop = (boxKey, item) => {
-    const newAnswers = { ...answers };
-
-    Object.keys(newAnswers).forEach((key) => {
-      if (newAnswers[key]?.dragId === item.id) {
-        delete newAnswers[key];
-      }
-    });
-
-    newAnswers[boxKey] = {
-      dragId: item.id,
-      value: item.value,
-    };
-
-    setAnswers(newAnswers);
-    setDraggedItem(null);
-    setTouchItem(null);
-    setShowResults(false);
-  };
-
-  const handleDragStart = (item) => {
-    if (showAns || usedDragIds.includes(item.id)) return;
-    setDraggedItem(item);
-  };
-
-  const handleDragEnd = () => {
-    setDraggedItem(null);
-  };
-
-  const handleDrop = (boxKey) => {
-    if (showAns || !draggedItem) return;
-    applyDrop(boxKey, draggedItem);
-  };
-
-  const handleTouchStart = (e, item) => {
-    if (showAns || usedDragIds.includes(item.id)) return;
-
-    const touch = e.touches[0];
-    setTouchItem(item);
-    setDraggedItem(item);
-    setTouchPos({ x: touch.clientX, y: touch.clientY });
-  };
-
-  const handleTouchMove = (e) => {
-    if (!touchItem) return;
-    e.preventDefault();
-
-    const touch = e.touches[0];
-    setTouchPos({ x: touch.clientX, y: touch.clientY });
-  };
-
-  const handleTouchEnd = () => {
-    if (!touchItem) return;
-
-    let dropped = false;
-
-    Object.entries(dropRefs.current).forEach(([key, ref]) => {
-      if (!ref || dropped) return;
-
-      const rect = ref.getBoundingClientRect();
-
-      if (
-        touchPos.x >= rect.left &&
-        touchPos.x <= rect.right &&
-        touchPos.y >= rect.top &&
-        touchPos.y <= rect.bottom
-      ) {
-        applyDrop(key, touchItem);
-        dropped = true;
-      }
-    });
-
-    setTouchItem(null);
-    setDraggedItem(null);
+  // ── handlers ──────────────────────────────
+  const handleChange = (id, value) => {
+    if (isLocked) return;
+    // allow only 1 letter
+    const val = value.slice(-1);
+    setInputs((prev) => ({ ...prev, [id]: val }));
   };
 
   const handleCheck = () => {
-    if (showAns) return;
-
-    const allAnswered = ITEMS.every((item) => answers[`a-${item.id}`]?.value);
-
-    if (!allAnswered) {
-      ValidationAlert.info("Please complete all answers first.");
+    if (isLocked) return;
+    const allFilled = ITEMS.every((item) =>
+      Object.keys(item.blanks).every((id) => inputs[id]?.trim())
+    );
+    if (!allFilled) {
+      ValidationAlert.info("Please fill in all the blanks first.");
       return;
     }
-
     let score = 0;
+    ITEMS.forEach((item) => { if (isItemCorrect(item, inputs)) score++; });
     const total = ITEMS.length;
-
-    ITEMS.forEach((item) => {
-      if (answers[`a-${item.id}`]?.value === item.correct) {
-        score++;
-      }
-    });
-
     setShowResults(true);
-
-    if (score === total) {
-      ValidationAlert.success(`Score: ${score} / ${total}`);
-    } else if (score > 0) {
-      ValidationAlert.warning(`Score: ${score} / ${total}`);
-    } else {
-      ValidationAlert.error(`Score: ${score} / ${total}`);
-    }
+    if (score === total)  ValidationAlert.success(`Score: ${score} / ${total}`);
+    else if (score > 0)   ValidationAlert.warning(`Score: ${score} / ${total}`);
+    else                  ValidationAlert.error(`Score: ${score} / ${total}`);
   };
 
   const handleShowAnswer = () => {
-    const filled = {};
-
+    const ans = {};
     ITEMS.forEach((item) => {
-      const matchedAnswer = DRAG_ITEMS.find(
-        (drag) => drag.value === item.correct
-      );
-
-      filled[`a-${item.id}`] = {
-        dragId: matchedAnswer?.id ?? `a-${item.id}`,
-        value: item.correct,
-      };
+      Object.entries(item.blanks).forEach(([id, letter]) => { ans[id] = letter; });
     });
-
-    setAnswers(filled);
-    setShowResults(true);
+    setInputs(ans);
+    setShowResults(false);
     setShowAns(true);
-    setDraggedItem(null);
-    setTouchItem(null);
   };
 
-  const handleStartAgain = () => {
-    setAnswers({});
-    setDraggedItem(null);
-    setTouchItem(null);
+  const handleReset = () => {
+    setInputs({});
     setShowResults(false);
     setShowAns(false);
   };
 
-  const handleRemoveAnswer = (boxKey) => {
-    if (showAns) return;
-
-    setAnswers((prev) => {
-      const updated = { ...prev };
-      delete updated[boxKey];
-      return updated;
-    });
-
-    setShowResults(false);
+  // ── helpers ───────────────────────────────
+  const isItemWrong = (item) => {
+    if (!showResults || showAns) return false;
+    return !isItemCorrect(item, inputs);
   };
 
-  const isWrongAnswer = (item) => {
-    if (!showResults) return false;
-    return answers[`a-${item.id}`]?.value !== item.correct;
-  };
-
-  const renderDropBox = (boxKey, isWrong) => {
-    const value = answers[boxKey]?.value || "";
-
+  // ── render one item ───────────────────────
+  const renderItem = (item) => {
+    const wrong = isItemWrong(item);
     return (
-      <div
-        ref={(el) => (dropRefs.current[boxKey] = el)}
-        onDragOver={(e) => e.preventDefault()}
-        onDrop={() => handleDrop(boxKey)}
-        onClick={() => handleRemoveAnswer(boxKey)}
-        className="wb-c16-drop-box"
-        style={{
-          color: showAns ? "#d93025" : "#111",
-          backgroundColor: isWrong ? "rgba(217, 48, 37, 0.08)" : "transparent",
-          cursor: value && !showAns ? "pointer" : showAns ? "default" : "pointer",
-        }}
-      >
-        {value}
+      <div key={item.id} className="ml-item">
+        {/* number */}
+        <span className="ml-num">{item.id}</span>
 
-        {isWrong && <div className="wb-c16-wrong">✕</div>}
+        {/* word display */}
+        <span className="ml-word-wrap">
+          {item.prefix && <span className="ml-fixed">{item.prefix}</span>}
+          {item.parts.map((part, i) => {
+            if (part.type === "fixed") {
+              return <span key={i} className="ml-fixed">{part.text}</span>;
+            }
+            // blank
+            const val    = inputs[part.id] || "";
+            const isAns  = showAns;
+            return (
+              <input
+                key={i}
+                type="text"
+                maxLength={1}
+                className={[
+                  "ml-input",
+                  wrong  ? "ml-input--wrong"  : "",
+                  isAns  ? "ml-input--answer" : "",
+                ].filter(Boolean).join(" ")}
+                value={val}
+                disabled={isLocked}
+                onChange={(e) => handleChange(part.id, e.target.value)}
+                spellCheck={false}
+                autoComplete="off"
+              />
+            );
+          })}
+          {item.suffix && <span className="ml-fixed">{item.suffix}</span>}
+        </span>
+
+        {/* ✕ badge */}
+        {wrong && <span className="ml-badge">✕</span>}
       </div>
     );
   };
 
+  // ── render ────────────────────────────────
   return (
     <div className="main-container-component">
       <style>{`
-        .wb-c16-bank {
-          display: flex;
-          flex-wrap: wrap;
-          gap: clamp(8px, 1.2vw, 12px);
-          justify-content: center;
-          align-items: center;
-          padding: clamp(4px, 0.8vw, 6px) 0 0;
-        }
-
-        .wb-c16-chip {
-          padding: clamp(8px, 1vw, 10px) clamp(12px, 1.5vw, 16px);
-          border-radius: clamp(10px, 1.4vw, 14px);
-          font-size: clamp(14px, 1.6vw, 16px);
-          font-weight: 500;
-          box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-          transition: 0.2s ease;
-          user-select: none;
-          touch-action: none;
-          text-align: center;
-        }
-
-        .wb-c16-list {
-          display: flex;
-          flex-direction: column;
-          gap: clamp(14px, 2vw, 18px);
-          width: 100%;
-        }
-
-        .wb-c16-row {
+        /* ── Grid ── */
+        .ml-grid {
           display: grid;
-          grid-template-columns: clamp(24px, 3vw, 34px) clamp(180px, 29vw, 320px) minmax(0, 1fr);
-          gap: clamp(10px, 1.5vw, 14px);
+          grid-template-columns: 1fr 1fr;
+          gap: clamp(12px, 1.8vw, 22px) clamp(20px, 3vw, 48px);
           align-items: center;
-          width: 100%;
+        }
+        @media (max-width: 600px) {
+          .ml-grid { grid-template-columns: 1fr; }
         }
 
-        .wb-c16-num {
-          font-size: clamp(18px, 2vw, 22px);
-          font-weight: 700;
-          color: #222;
-          line-height: 1;
-        }
-
-        .wb-c16-img {
-          width: 100%;
-          max-width: clamp(220px, 31vw, 310px);
-          height: clamp(120px, 16vw, 170px);
-          object-fit: contain;
-          display: block;
-                    border: 2px solid #f39b42;
-object-fit: cover;
-
-        }
-
-        .wb-c16-sentence-wrap {
-          width: 100%;
+        /* ── Item ── */
+        .ml-item {
           display: flex;
-          flex-direction: column;
-          gap: clamp(6px, 1vw, 8px);
-          justify-content: center;
-          min-width: 0;
+          align-items: center;
+          gap: clamp(6px, 0.8vw, 10px);
+          position: relative;
         }
 
-        .wb-c16-sentence-line {
+        .ml-num {
+          font-size: clamp(14px, 1.6vw, 19px);
+          font-weight: 700;
+          color: #2b2b2b;
+          min-width: 20px;
+          flex-shrink: 0;
+        }
+
+        .ml-word-wrap {
           display: flex;
           align-items: flex-end;
-          gap: clamp(8px, 1vw, 10px);
           flex-wrap: wrap;
-          position: relative;
-          min-width: 0;
+          gap: 0;
+font-size: clamp(15px, 1.9vw, 22px);
+
+color: #2b2b2b;
+          line-height: 1.8;
         }
 
-        .wb-c16-prefix {
-          font-size: clamp(18px, 2.4vw, 24px);
-          color: #222;
-          line-height: 1.2;
+        .ml-fixed {
+font-size: clamp(15px, 1.9vw, 22px);
+          color: #2b2b2b;
+          line-height: 1.5;
+          white-space: pre;
         }
 
-        .wb-c16-drop-box {
-          width: min(100%, clamp(150px, 22vw, 190px));
-          min-height: clamp(38px, 5vw, 42px);
-          border-bottom: 2px solid #444;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-size: clamp(18px, 2.4vw, 24px);
-          color: #111;
-          border-radius: 8px 8px 0 0;
-          padding: 0 8px 4px;
-          box-sizing: border-box;
-          position: relative;
+        /* Single-letter input */
+        .ml-input {
+          width: clamp(20px, 2.4vw, 30px);
+          border: none;
+          border-bottom: 1.5px solid ${INPUT_UNDERLINE_DEFAULT};
+          background: transparent;
+          outline: none;
           text-align: center;
-          word-break: break-word;
-          transition: 0.2s ease;
+font-size: clamp(15px, 1.9vw, 22px);
+          color: #2b2b2b;
+          line-height: 1.5;
+          transition: border-color 0.2s;
+          box-sizing: border-box;
         }
+        .ml-input:disabled      { opacity: 1; cursor: default; }
+        .ml-input--wrong        { border-bottom-color: ${INPUT_UNDERLINE_WRONG}; }
+        .ml-input--answer       { color: ${INPUT_ANSWER_COLOR}; }
 
-        .wb-c16-long-line {
-          width: 100%;
-          border-bottom: 2px solid #555;
-          height: 12px;
-        }
-
-        .wb-c16-wrong {
-          position: absolute;
-          top: -10px;
-          right: -10px;
-          width: 22px;
-          height: 22px;
+        /* ✕ badge */
+        .ml-badge {
+          width: clamp(16px, 1.8vw, 21px);
+          height: clamp(16px, 1.8vw, 21px);
           border-radius: 50%;
-          background-color: #ef4444;
-          color: #fff;
-          display: flex;
+          background: ${WRONG_BADGE_BG};
+          color: ${WRONG_BADGE_TEXT};
+          display: inline-flex;
           align-items: center;
           justify-content: center;
-          font-size: 12px;
+          font-size: clamp(8px, 0.9vw, 11px);
           font-weight: 700;
           border: 2px solid #fff;
-          box-shadow: 0 2px 6px rgba(0,0,0,0.18);
+          box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+          flex-shrink: 0;
+          margin-left: 4px;
         }
 
-        .wb-c16-buttons {
+        /* Buttons */
+        .ml-buttons {
           display: flex;
           justify-content: center;
-          margin-top: 4px;
-        }
-
-        .wb-c16-touch-preview {
-          position: fixed;
-          background: #fff;
-          padding: 8px 12px;
-          border-radius: 10px;
-          box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-          pointer-events: none;
-          z-index: 9999;
-          font-size: clamp(15px, 1.7vw, 18px);
-          font-weight: 600;
-          color: #222;
-          max-width: 180px;
-          text-align: center;
-        }
-
-        @media (max-width: 900px) {
-          .wb-c16-row {
-            grid-template-columns: clamp(24px, 3vw, 34px) clamp(160px, 32vw, 280px) minmax(0, 1fr);
-          }
-        }
-
-        @media (max-width: 760px) {
-          .wb-c16-row {
-            grid-template-columns: 1fr;
-            gap: 12px;
-          }
-
-          .wb-c16-num {
-            margin-bottom: -4px;
-          }
-
-          .wb-c16-img {
-            max-width: clamp(220px, 56vw, 320px);
-            height: clamp(120px, 34vw, 190px);
-          }
-
-          .wb-c16-sentence-wrap {
-            width: 100%;
-          }
-        }
-
-        @media (max-width: 480px) {
-          .wb-c16-chip {
-            width: 100%;
-          }
-
-          .wb-c16-prefix,
-          .wb-c16-drop-box {
-            font-size: clamp(16px, 4.4vw, 18px);
-          }
-
-          .wb-c16-drop-box {
-            width: min(100%, 170px);
-          }
+          margin-top: clamp(8px, 1.6vw, 18px);
         }
       `}</style>
 
@@ -417,86 +298,42 @@ object-fit: cover;
         style={{
           display: "flex",
           flexDirection: "column",
-          gap: "28px",
+          gap: "clamp(14px, 2vw, 22px)",
           maxWidth: "1100px",
           margin: "0 auto",
         }}
       >
-        <h1 className="WB-header-title-page8" style={{ margin: 0 }}>
-          <span className="WB-ex-A">C</span> Look and complete the sentences.
+        {/* ── Header ── */}
+        <h1
+          className="WB-header-title-page8"
+          style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
+        >
+          <span className="WB-ex-A">F</span>
+          Write the missing letters.
         </h1>
 
-        <div className="wb-c16-bank">
-          {DRAG_ITEMS.map((item) => {
-            const isUsed = usedDragIds.includes(item.id);
-
+        {/* ── Two-column grid — odd ids left, even ids right ── */}
+        <div className="ml-grid" style={{marginTop : "50px"}}>
+          {ITEMS.filter((_, i) => i % 2 === 0).map((item, rowIdx) => {
+            const rightItem = ITEMS[rowIdx * 2 + 1];
             return (
-              <div
-                key={item.id}
-                draggable={!isUsed && !showAns}
-                onDragStart={() => handleDragStart(item)}
-                onDragEnd={handleDragEnd}
-                onTouchStart={(e) => handleTouchStart(e, item)}
-                onTouchMove={handleTouchMove}
-                onTouchEnd={handleTouchEnd}
-                className="wb-c16-chip"
-                style={{
-                  border: `1.5px solid ${isUsed ? BORDER_COLOR : ACTIVE_COLOR}`,
-                  backgroundColor: isUsed ? "#efefef" : SOFT_COLOR,
-                  color: isUsed ? "#9a9a9a" : "#222",
-                  cursor: isUsed || showAns ? "not-allowed" : "grab",
-                  opacity: isUsed ? 0.55 : 1,
-                  boxShadow: isUsed ? "none" : "0 2px 8px rgba(0,0,0,0.06)",
-                }}
-              >
-                {item.value}
-              </div>
+              <React.Fragment key={item.id}>
+                {renderItem(item)}
+                {rightItem ? renderItem(rightItem) : <div />}
+              </React.Fragment>
             );
           })}
         </div>
 
-        <div className="wb-c16-list">
-          {ITEMS.map((item) => (
-            <div key={item.id} className="wb-c16-row">
-              <div className="wb-c16-num">{item.id}</div>
-
-              <img
-                src={item.img}
-                alt={`sentence-${item.id}`}
-                className="wb-c16-img"
-              />
-
-              <div className="wb-c16-sentence-wrap">
-                <div className="wb-c16-sentence-line">
-                  <span className="wb-c16-prefix">{item.prefix}</span>
-                  {renderDropBox(`a-${item.id}`, isWrongAnswer(item))}
-                </div>
-
-              </div>
-            </div>
-          ))}
-        </div>
-
-        <div className="wb-c16-buttons">
+        {/* ── Buttons ── */}
+        <div className="ml-buttons">
           <Button
-            handleShowAnswer={handleShowAnswer}
-            handleStartAgain={handleStartAgain}
             checkAnswers={handleCheck}
+            handleShowAnswer={handleShowAnswer}
+            handleStartAgain={handleReset}
           />
         </div>
       </div>
-
-      {touchItem && (
-        <div
-          className="wb-c16-touch-preview"
-          style={{
-            left: touchPos.x - 60,
-            top: touchPos.y - 22,
-          }}
-        >
-          {touchItem.value}
-        </div>
-      )}
     </div>
   );
 }

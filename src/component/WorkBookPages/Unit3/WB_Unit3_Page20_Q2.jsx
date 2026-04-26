@@ -2,97 +2,102 @@ import React, { useState } from "react";
 import Button from "../Button";
 import ValidationAlert from "../../Popup/ValidationAlert";
 
-import img1a from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U3 Folder/Page 20/Ex A  4.svg";
-import img1b from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U3 Folder/Page 20/1.svg";
-import img2a from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U3 Folder/Page 20/Ex B  3.svg";
-import img2b from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U3 Folder/Page 20/Ex B  4.svg";
-import img3a from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U3 Folder/Page 20/Ex B  2.svg";
-import img3b from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U3 Folder/Page 20/Ex B  6.svg";
-import img4a from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U3 Folder/Page 20/Ex B  7.svg";
-import img4b from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U3 Folder/Page 20/Ex B  8.svg";
+// ─────────────────────────────────────────────
+//  🖼️  IMAGES
+// ─────────────────────────────────────────────
+import img1 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U3 Folder/Page 20/Asset 30.svg"; // tractor
+import img2 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U3 Folder/Page 20/Asset 31.svg"; // sandwich
+import img3 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U3 Folder/Page 20/Asset 32.svg"; // car
+import img4 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U3 Folder/Page 20/Asset 33.svg"; // umbrella
 
+// ─────────────────────────────────────────────
+//  🎨  COLORS
+// ─────────────────────────────────────────────
+const INPUT_UNDERLINE_DEFAULT = "#3f3f3f";
+const INPUT_UNDERLINE_WRONG   = "#ef4444";
+const INPUT_TEXT_COLOR        = "#2b2b2b";
+const INPUT_ANSWER_COLOR      = "#c81e1e";
+const NUMBER_COLOR            = "#2b2b2b";
+const PREFIX_TEXT_COLOR       = "#2b2b2b";
+const IMG_BORDER_COLOR        = "#2096a6";
+const WRONG_BADGE_BG          = "#ef4444";
+const WRONG_BADGE_TEXT        = "#ffffff";
+
+// ─────────────────────────────────────────────
+//  📝  EXERCISE DATA
+// ─────────────────────────────────────────────
 const ITEMS = [
   {
-    id: 1,
-    leftImg: img1a,
-    rightImg: img1b,
-    correct: "✕",
+    id:      1,
+    src:     img1,
+    prefix:  "The farmer",
+    correct: ["had a tractor.", "had a tractor"],
+    answer:  "had a tractor.",
   },
   {
-    id: 2,
-    leftImg: img2a,
-    rightImg: img2b,
-    correct: "✓",
+    id:      2,
+    src:     img2,
+    prefix:  "You",
+    correct: ["had a sandwich.", "had a sandwich"],
+    answer:  "had a sandwich.",
   },
   {
-    id: 3,
-    leftImg: img3a,
-    rightImg: img3b,
-    correct: "✓",
+    id:      3,
+    src:     img3,
+    prefix:  "We",
+    correct: ["had a car.", "had a car"],
+    answer:  "had a car.",
   },
   {
-    id: 4,
-    leftImg: img4a,
-    rightImg: img4b,
-    correct: "✕",
+    id:      4,
+    src:     img4,
+    prefix:  "They",
+    correct: ["had an umbrella.", "had an umbrella"],
+    answer:  "had an umbrella.",
   },
 ];
 
-const OPTIONS = ["✓", "✕"];
+// ─────────────────────────────────────────────
+//  🔧  NORMALIZE
+// ─────────────────────────────────────────────
+const normalize = (str) =>
+  str.toLowerCase().replace(/[^a-z0-9\s]/g, "").replace(/\s+/g, " ").trim();
 
-export default function WB_Unit3_Page18_QB() {
-  const [answers, setAnswers] = useState({});
+const isCorrect = (userVal, correctArr) =>
+  correctArr.some((c) => normalize(userVal) === normalize(c));
+
+// ─────────────────────────────────────────────
+//  COMPONENT
+// ─────────────────────────────────────────────
+export default function WB_LookReadWrite_QM() {
+  const [answers,     setAnswers]     = useState({});
   const [showResults, setShowResults] = useState(false);
-  const [showAns, setShowAns] = useState(false);
+  const [showAns,     setShowAns]     = useState(false);
 
-  const handleSelect = (id, value) => {
-    if (showAns) return;
+  const isLocked = showResults || showAns;
 
-    setAnswers((prev) => ({
-      ...prev,
-      [id]: value,
-    }));
-
-    setShowResults(false);
+  const handleChange = (id, value) => {
+    if (isLocked) return;
+    setAnswers((prev) => ({ ...prev, [id]: value }));
   };
 
   const handleCheck = () => {
-    if (showAns) return;
-
-    const allAnswered = ITEMS.every((item) => answers[item.id]);
-
-    if (!allAnswered) {
-      ValidationAlert.info("Please answer all questions first.");
-      return;
-    }
-
+    if (isLocked) return;
+    const allAnswered = ITEMS.every((item) => answers[item.id]?.trim());
+    if (!allAnswered) { ValidationAlert.info("Please complete all answers first."); return; }
     let score = 0;
-
-    ITEMS.forEach((item) => {
-      if (answers[item.id] === item.correct) {
-        score++;
-      }
-    });
-
+    ITEMS.forEach((item) => { if (isCorrect(answers[item.id] || "", item.correct)) score++; });
     setShowResults(true);
-
-    if (score === ITEMS.length) {
-      ValidationAlert.success(`Score: ${score} / ${ITEMS.length}`);
-    } else if (score > 0) {
-      ValidationAlert.warning(`Score: ${score} / ${ITEMS.length}`);
-    } else {
-      ValidationAlert.error(`Score: ${score} / ${ITEMS.length}`);
-    }
+    if (score === ITEMS.length)   ValidationAlert.success(`Score: ${score} / ${ITEMS.length}`);
+    else if (score > 0)           ValidationAlert.warning(`Score: ${score} / ${ITEMS.length}`);
+    else                          ValidationAlert.error(`Score: ${score} / ${ITEMS.length}`);
   };
 
   const handleShowAnswer = () => {
-    const correctMap = {};
-    ITEMS.forEach((item) => {
-      correctMap[item.id] = item.correct;
-    });
-
-    setAnswers(correctMap);
-    setShowResults(true);
+    const filled = {};
+    ITEMS.forEach((item) => { filled[item.id] = item.answer; });
+    setAnswers(filled);
+    setShowResults(false);
     setShowAns(true);
   };
 
@@ -103,259 +108,192 @@ export default function WB_Unit3_Page18_QB() {
   };
 
   const isWrong = (item) => {
-    if (!showResults) return false;
-    return answers[item.id] !== item.correct;
-  };
-
-  const renderChoice = (item, value) => {
-    const selected = answers[item.id] === value;
-    const wrong = isWrong(item) && selected;
-    const correctSelected = showAns && item.correct === value;
-
-    return (
-      <div
-        onClick={() => handleSelect(item.id, value)}
-        style={{
-          position: "relative",
-          width: "58px",
-          height: "58px",
-          borderRadius: "14px",
-          border: selected || correctSelected ? "2px solid #f39b42" : "2px solid #cfcfcf",
-          background: "#fff",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          cursor: showAns ? "default" : "pointer",
-          boxSizing: "border-box",
-          userSelect: "none",
-        }}
-      >
-        <span
-          style={{
-            fontSize: "34px",
-            fontWeight: "700",
-            color:
-              value === "✓"
-                ? "#000000ff"
-                : "#000000ff",
-            lineHeight: 1,
-          }}
-        >
-          {value}
-        </span>
-
-        {wrong && (
-          <div
-            style={{
-              position: "absolute",
-              top: "-8px",
-              right: "-8px",
-              width: "22px",
-              height: "22px",
-              borderRadius: "50%",
-              backgroundColor: "#ff0000ff",
-              color: "#fff",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: "12px",
-              fontWeight: "700",
-              border: "2px solid #f39b42",
-              boxShadow: "0 2px 6px rgba(0,0,0,0.18)",
-            }}
-          >
-            ✕
-          </div>
-        )}
-      </div>
-    );
+    if (!showResults || showAns) return false;
+    return !isCorrect(answers[item.id] || "", item.correct);
   };
 
   return (
     <div className="main-container-component">
       <style>{`
-        .wb-b-wrapper {
-          display: flex !important;
-          flex-direction: column !important;
-          gap: 20px !important;
-          width: 100% !important;
-          max-width: 1120px !important;
-          margin: 0 auto !important;
-          padding: 8px 14px 20px !important;
-          box-sizing: border-box !important;
+        /* ── List ── */
+        .lrm-list {
+          display: flex;
+          flex-direction: column;
+          gap: clamp(12px, 1.8vw, 22px);
+          width: 100%;
         }
 
-        .wb-b-grid {
-          display: grid !important;
-          grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-          column-gap: 44px !important;
-          row-gap: 18px !important;
-          width: 100% !important;
-          align-items: start !important;
+        /* ── Single row: num | img | prefix + input ── */
+        .lrm-row {
+          display: grid;
+          grid-template-columns:
+            clamp(16px, 1.8vw, 24px)
+            clamp(90px, 12vw, 150px)
+            1fr;
+          gap: clamp(10px, 1.6vw, 24px);
+          align-items: center;
         }
 
-        .wb-b-item {
-          display: flex !important;
-          align-items: flex-start !important;
-          gap: 14px !important;
-          width: 100% !important;
+        /* Number */
+        .lrm-num {
+          font-size: clamp(15px, 1.8vw, 22px);
+          font-weight: 700;
+          color: ${NUMBER_COLOR};
+          line-height: 1.5;
+          align-self: center;
         }
 
-        .wb-b-num {
-          font-size: 22px !important;
-          font-weight: 700 !important;
-          color: #222 !important;
-          line-height: 1 !important;
-          min-width: 24px !important;
-          padding-top: 10px !important;
+        /* Image */
+        .lrm-img-wrap {
+          overflow: hidden;
+          width: 100%;
+        }
+        .lrm-img {
+          width: 100%;
+          height: clamp(75px, 10vw, 130px);
+          display: block;
         }
 
-        .wb-b-card {
-          width: 100% !important;
-          max-width: 430px !important;
-          border: 2px solid #f39b42 !important;
-          border-radius: 18px !important;
-          background: #fff !important;
-          display: grid !important;
-          grid-template-columns: 1fr 1fr !important;
-          position: relative !important;
-          overflow: visible !important;
-          box-sizing: border-box !important;
+        /* Right: prefix + input */
+        .lrm-right {
+          display: flex;
+          align-items: flex-end;
+          gap: clamp(4px, 0.7vw, 10px);
+          min-width: 0;
         }
 
-        .wb-b-half {
-          min-height: 170px !important;
-          display: flex !important;
-          align-items: center !important;
-          justify-content: center !important;
-          padding: 12px !important;
-          box-sizing: border-box !important;
+        .lrm-prefix {
+          font-size: clamp(15px, 1.8vw, 22px);
+          color: ${PREFIX_TEXT_COLOR};
+          white-space: nowrap;
+          padding-bottom: 5px;
+          flex-shrink: 0;
+          line-height: 1.5;
         }
 
-        .wb-b-half:first-child {
-          border-right: 2px solid #f39b42 !important;
+        /* Input wrap */
+        .lrm-input-wrap {
+          position: relative;
+          flex: 1;
+          min-width: 0;
         }
 
-        .wb-b-img {
-          max-width: 100% !important;
-          max-height: 140px !important;
-          width: auto !important;
-          height: auto !important;
-          object-fit: contain !important;
-          display: block !important;
+        .lrm-input {
+          width: 100%;
+          background: transparent;
+          border: none;
+          border-bottom: 2px solid ${INPUT_UNDERLINE_DEFAULT};
+          outline: none;
+          font-size: clamp(15px, 1.8vw, 22px);
+          color: ${INPUT_TEXT_COLOR};
+          line-height: 1.5;
+          box-sizing: border-box;
+          transition: border-color 0.2s;
+        }
+        .lrm-input:disabled    { opacity: 1; cursor: default; }
+        .lrm-input--wrong      { border-bottom-color: ${INPUT_UNDERLINE_WRONG}; }
+        .lrm-input--answer     { color: ${INPUT_ANSWER_COLOR}; }
+
+        /* ✕ badge */
+        .lrm-badge {
+          position: absolute;
+          top: -8px; right: 0;
+          width: clamp(17px, 1.9vw, 22px);
+          height: clamp(17px, 1.9vw, 22px);
+          border-radius: 50%;
+          background: ${WRONG_BADGE_BG};
+          color: ${WRONG_BADGE_TEXT};
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: clamp(9px, 1vw, 12px);
+          font-weight: 700;
+          border: 2px solid #fff;
+          box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+          pointer-events: none;
+          z-index: 2;
         }
 
-        .wb-b-answer-box {
-          position: absolute !important;
-          left: 50% !important;
-          bottom: -2px !important;
-          transform: translateX(-50%) !important;
-          width: 54px !important;
-          height: 42px !important;
-          border: 2px solid #f39b42 !important;
-          border-radius: 8px !important;
-          background: #fff !important;
-          display: flex !important;
-          align-items: center !important;
-          justify-content: center !important;
-          box-sizing: border-box !important;
-          z-index: 2 !important;
+        /* Buttons */
+        .lrm-buttons {
+          display: flex;
+          justify-content: center;
+          margin-top: clamp(8px, 1.6vw, 18px);
         }
 
-        .wb-b-answer-text {
-          font-size: 34px !important;
-          font-weight: 700 !important;
-          color: #000000ff !important;
-          line-height: 1 !important;
-        }
-
-        .wb-b-options-row {
-          display: flex !important;
-          justify-content: center !important;
-          gap: 14px !important;
-          margin-top: 8px !important;
-        }
-
-        .wb-b-buttons {
-          display: flex !important;
-          justify-content: center !important;
-          margin-top: 8px !important;
-        }
-
-        @media (max-width: 900px) {
-          .wb-b-grid {
-            grid-template-columns: 1fr !important;
-          }
+        @media (max-width: 500px) {
+          .lrm-row { grid-template-columns: clamp(16px,4vw,22px) 1fr; }
+          .lrm-img-wrap { display: none; }
         }
       `}</style>
 
-       <div
+      <div
         className="div-forall"
-            style={{
+        style={{
           display: "flex",
           flexDirection: "column",
-          gap: "28px",
+          gap: "clamp(14px, 2vw, 22px)",
           maxWidth: "1100px",
           margin: "0 auto",
         }}
       >
-        <h1    className="WB-header-title-page8"
-          style={{
-            margin: 0,
-          }}>
-          <span className="WB-ex-A">B</span> Do they both have the same sound? Write ✓ or ✕.
+        {/* ── Header ── */}
+        <h1
+          className="WB-header-title-page8"
+          style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
+        >
+          <span className="WB-ex-A">M</span>
+          Look, read, and write.
         </h1>
 
-        <div className="wb-b-grid">
-          {ITEMS.map((item) => (
-            <div
-              key={item.id}
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                gap: "10px",
-              }}
-            >
-              <div className="wb-b-item">
-                <div className="wb-b-num">{item.id}</div>
+        {/* ── Items ── */}
+        <div className="lrm-list">
+          {ITEMS.map((item) => {
+            const wrong  = isWrong(item);
+            const value  = answers[item.id] || "";
+            const tColor = showAns ? INPUT_ANSWER_COLOR : INPUT_TEXT_COLOR;
+            const uColor = wrong ? INPUT_UNDERLINE_WRONG : INPUT_UNDERLINE_DEFAULT;
 
-                <div className="wb-b-card">
-                  <div className="wb-b-half">
-                    <img
-                      src={item.leftImg}
-                      alt={`left-${item.id}`}
-                      className="wb-b-img"
-                    />
-                  </div>
+            return (
+              <div key={item.id} className="lrm-row">
 
-                  <div className="wb-b-half">
-                    <img
-                      src={item.rightImg}
-                      alt={`right-${item.id}`}
-                      className="wb-b-img"
-                    />
-                  </div>
+                {/* Number */}
+                <span className="lrm-num">{item.id}</span>
 
-                  {(answers[item.id] || showAns) && (
-                    <div className="wb-b-answer-box">
-                      <span className="wb-b-answer-text">
-                        {answers[item.id]}
-                      </span>
-                    </div>
-                  )}
+                {/* Image */}
+                <div className="lrm-img-wrap">
+                  <img src={item.src} alt={`scene-${item.id}`} className="lrm-img" />
                 </div>
-              </div>
 
-              <div className="wb-b-options-row">
-                {OPTIONS.map((option) => (
-                  <div key={option}>{renderChoice(item, option)}</div>
-                ))}
+                {/* Prefix + Input */}
+                <div className="lrm-right">
+                  <span className="lrm-prefix">{item.prefix}</span>
+                  <div className="lrm-input-wrap">
+                    <input
+                      type="text"
+                      className={[
+                        "lrm-input",
+                        wrong   ? "lrm-input--wrong"  : "",
+                        showAns ? "lrm-input--answer" : "",
+                      ].filter(Boolean).join(" ")}
+                      value={value}
+                      disabled={isLocked}
+                      onChange={(e) => handleChange(item.id, e.target.value)}
+                      style={{ borderBottomColor: uColor, color: tColor }}
+                      spellCheck={false}
+                      autoComplete="off"
+                    />
+                    {wrong && <div className="lrm-badge">✕</div>}
+                  </div>
+                </div>
+
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
-        <div className="wb-b-buttons">
+        {/* ── Buttons ── */}
+        <div className="lrm-buttons">
           <Button
             checkAnswers={handleCheck}
             handleShowAnswer={handleShowAnswer}

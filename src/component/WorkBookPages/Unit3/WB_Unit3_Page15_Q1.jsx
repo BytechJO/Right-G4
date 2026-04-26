@@ -1,434 +1,419 @@
-import React, { useLayoutEffect, useRef, useState } from "react";
+import React, { useState } from "react";
 import Button from "../Button";
 import ValidationAlert from "../../Popup/ValidationAlert";
-import char1 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U3 Folder/Page 15/Ex A 1.svg";
-import char2 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U3 Folder/Page 15/Ex A 2.svg";
-import char3 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U3 Folder/Page 15/Ex A 3.svg";
-import char4 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U3 Folder/Page 15/Ex A 4.svg";
 
+import img1 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U3 Folder/Page 15/SVG/Asset 7.svg";
+import img2 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U3 Folder/Page 15/SVG/Asset 8.svg";
+import img3 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U3 Folder/Page 15/SVG/Asset 9.svg";
+import img4 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U3 Folder/Page 15/SVG/Asset 10.svg";
+import img5 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U3 Folder/Page 15/SVG/Asset 11.svg";
+import img6 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U3 Folder/Page 15/SVG/Asset 12.svg";
 
-const DOT_COLOR = "#9ca3af";
-const ACTIVE_COLOR = "#f39b42";
-const BORDER_COLOR = "#e0e0e0";
-const WRONG_COLOR = "#ef4444";
-const PATH_COLOR = "#f39b42";
-const TEXT_COLOR = "#111";
+// ─────────────────────────────────────────────
+//  🎨  COLORS
+// ─────────────────────────────────────────────
+const SELECTED_CIRCLE_COLOR = "#2096a6";
+const WRONG_CIRCLE_COLOR    = "#ef4444";
+const WRONG_BADGE_BG        = "#ef4444";
+const WRONG_BADGE_TEXT      = "#ffffff";
+const INPUT_ANSWER_COLOR    = "#c81e1e";
+const INPUT_UNDERLINE       = "#3f3f3f";
+const INPUT_UNDERLINE_WRONG = "#ef4444";
 
-const LEFT_ITEMS = [
-  { id: 1, img: char1, text: "Does he have any ink?" },
-  { id: 2, img: char2, text: "Does she have any paper?" },
-  { id: 3, img: char3, text: "Does he have any eggplants?" },
-  { id: 4, img: char4, text: "Does he have any grapes?" },
+// ─────────────────────────────────────────────
+//  📝  EXERCISE DATA
+// ─────────────────────────────────────────────
+const ITEMS = [
+  {
+    id: 1,
+    sentenceBefore: "The muffins are",
+    sentenceAfter:  ".",
+    imageSrc: img1,
+    options: ["delicious", "ate", "party"],
+    correct: "delicious",
+  },
+  {
+    id: 2,
+    sentenceBefore: "There are many",
+    sentenceAfter:  " on the table.",
+    imageSrc: img2,
+    options: ["gifts", "birthday", "wonderful"],
+    correct: "gifts",
+  },
+  {
+    id: 3,
+    sentenceBefore: "We went to the museum",
+    sentenceAfter:  ".",
+    imageSrc: img3,
+    options: ["wonderful", "yesterday", "friends"],
+    correct: "yesterday",
+  },
+  {
+    id: 4,
+    sentenceBefore: "We had a fun",
+    sentenceAfter:  ".",
+    imageSrc: img4,
+    options: ["party", "ate", "gifts"],
+    correct: "party",
+  },
+  {
+    id: 5,
+    sentenceBefore: "She had a large",
+    sentenceAfter:  ".",
+    imageSrc: img5,
+    options: ["wonderful", "made", "family"],
+    correct: "family",
+  },
+  {
+    id: 6,
+    sentenceBefore: "I had a",
+    sentenceAfter:  " time.",
+    imageSrc: img6,
+    options: ["gifts", "yesterday", "wonderful"],
+    correct: "wonderful",
+  },
 ];
 
-const RIGHT_ITEMS = [
-  { id: 1, text: "Yes, he has some." },
-  { id: 2, text: "No, he hasn't any." },
-  { id: 3, text: "Yes, she has some." },
-  { id: 4, text: "Yes, he has a little." },
-];
+// ─────────────────────────────────────────────
+//  🔧  NORMALIZE
+// ─────────────────────────────────────────────
+const normalize = (str) =>
+  str.toLowerCase().replace(/[^a-z0-9\s]/g, "").replace(/\s+/g, " ").trim();
 
-const CORRECT_MATCHES = { 1: 2, 2: 3, 3: 1, 4: 4 };
+const isCorrectAnswer = (userVal, correct) =>
+  normalize(userVal) === normalize(correct);
 
-export default function WB_ReadLookMatch_PageA() {
-  const [selectedLeft, setSelectedLeft] = useState(null);
-  const [matches, setMatches] = useState({});
+// ─────────────────────────────────────────────
+//  COMPONENT
+// ─────────────────────────────────────────────
+export default function WB_ReadLookCircleWrite_A() {
+  const [selected,    setSelected]    = useState({});  // { id: "optionValue" }
+  const [written,     setWritten]     = useState({});  // { id: "typed text" }
   const [showResults, setShowResults] = useState(false);
-  const [showAns, setShowAns] = useState(false);
-  const [paths, setPaths] = useState([]);
+  const [showAns,     setShowAns]     = useState(false);
 
-  const boardRef = useRef(null);
-  const pointRefs = useRef({});
+  const isLocked = showResults || showAns;
 
-  useLayoutEffect(() => {
-    const update = () => {
-      if (!boardRef.current) return;
-      const br = boardRef.current.getBoundingClientRect();
-
-      const newPaths = Object.entries(matches).map(([leftId, rightId]) => {
-        const s = pointRefs.current[`left-${leftId}`];
-        const e = pointRefs.current[`right-${rightId}`];
-        if (!s || !e) return null;
-
-        const sr = s.getBoundingClientRect();
-        const er = e.getBoundingClientRect();
-        const x1 = sr.right - br.left;               // ← من يمين الـ dot اليسار
-        const y1 = sr.top + sr.height / 2 - br.top;
-        const x2 = er.left - br.left;                // ← من يسار الـ dot اليمين
-        const y2 = er.top + er.height / 2 - br.top;
-        const dx = Math.abs(x2 - x1);
-        const isWrong =
-          showResults && matches[leftId] !== CORRECT_MATCHES[Number(leftId)];
-
-        return {
-          id: `path-${leftId}-${rightId}`,
-          d: `M ${x1} ${y1} C ${x1 + dx * 0.42} ${y1}, ${x2 - dx * 0.42} ${y2}, ${x2} ${y2}`,
-          color: isWrong ? WRONG_COLOR : PATH_COLOR,
-        };
-      }).filter(Boolean);
-
-      setPaths(newPaths);
-    };
-
-    update();
-    window.addEventListener("resize", update);
-    let obs;
-    if (boardRef.current && typeof ResizeObserver !== "undefined") {
-      obs = new ResizeObserver(update);
-      obs.observe(boardRef.current);
-    }
-    return () => {
-      window.removeEventListener("resize", update);
-      obs?.disconnect();
-    };
-  }, [matches, showResults]);
-
-  const handleLeftSelect = (id) => {
-    if (showAns) return;
-    setSelectedLeft((prev) => (prev === id ? null : id));
-    setShowResults(false);
+  // ── handlers ──────────────────────────────
+  const handleSelect = (id, option) => {
+    if (isLocked) return;
+    setSelected((prev) => ({ ...prev, [id]: option }));
   };
 
-  const handleRightSelect = (rightId) => {
-    if (showAns || selectedLeft === null) return;
-    const upd = { ...matches };
-    Object.keys(upd).forEach((k) => { if (upd[k] === rightId) delete upd[k]; });
-    upd[selectedLeft] = rightId;
-    setMatches(upd);
-    setSelectedLeft(null);
-    setShowResults(false);
+  const handleWrite = (id, value) => {
+    if (isLocked) return;
+    setWritten((prev) => ({ ...prev, [id]: value }));
   };
 
   const handleCheck = () => {
-    if (showAns) return;
-    const allConnected = LEFT_ITEMS.every((i) => matches[i.id]);
-    if (!allConnected) {
-      ValidationAlert.info("Please connect all items first.");
+    if (isLocked) return;
+    const allAnswered = ITEMS.every(
+      (item) => selected[item.id] && written[item.id]?.trim()
+    );
+    if (!allAnswered) {
+      ValidationAlert.info("Please circle an answer and write it for all items first.");
       return;
     }
     let score = 0;
-    LEFT_ITEMS.forEach((i) => {
-      if (matches[i.id] === CORRECT_MATCHES[i.id]) score++;
+    ITEMS.forEach((item) => {
+      const circleOk = selected[item.id] === item.correct;
+      const writeOk  = isCorrectAnswer(written[item.id] || "", item.correct);
+      if (circleOk && writeOk) score++;
     });
+    const total = ITEMS.length;
     setShowResults(true);
-    const total = LEFT_ITEMS.length;
-    if (score === total) ValidationAlert.success(`Score: ${score} / ${total}`);
-    else if (score > 0) ValidationAlert.warning(`Score: ${score} / ${total}`);
-    else ValidationAlert.error(`Score: ${score} / ${total}`);
+    if (score === total)  ValidationAlert.success(`Score: ${score} / ${total}`);
+    else if (score > 0)   ValidationAlert.warning(`Score: ${score} / ${total}`);
+    else                  ValidationAlert.error(`Score: ${score} / ${total}`);
   };
 
   const handleShowAnswer = () => {
-    setMatches({ ...CORRECT_MATCHES });
-    setShowResults(true);
+    const sel = {}, wri = {};
+    ITEMS.forEach((item) => {
+      sel[item.id] = item.correct;
+      wri[item.id] = item.correct;
+    });
+    setSelected(sel);
+    setWritten(wri);
+    setShowResults(false);
     setShowAns(true);
-    setSelectedLeft(null);
   };
 
-  const handleStartAgain = () => {
-    setSelectedLeft(null);
-    setMatches({});
+  const handleReset = () => {
+    setSelected({});
+    setWritten({});
     setShowResults(false);
     setShowAns(false);
-    setPaths([]);
   };
 
-  const getLeftConn  = (id) => !!matches[id];
-  const getRightConn = (id) => Object.values(matches).includes(id);
-  const isWrongMatch = (leftId) =>
-    showResults &&
-    !showAns &&
-    !!matches[leftId] &&
-    matches[leftId] !== CORRECT_MATCHES[leftId];
-
-  const WrongBadge = () => (
-    <div
-      style={{
-        position: "absolute",
-        top: "-8px",
-        right: "-8px",
-        width: "clamp(16px,1.8vw,22px)",
-        height: "clamp(16px,1.8vw,22px)",
-        borderRadius: "50%",
-        border: "1px solid #fff",
-        backgroundColor: WRONG_COLOR,
-        color: "#fff",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        fontSize: "clamp(9px,0.9vw,12px)",
-        fontWeight: 700,
-        boxShadow: "0 1px 4px rgba(0,0,0,0.25)",
-        zIndex: 5,
-        pointerEvents: "none",
-      }}
-    >
-      ✕
-    </div>
-  );
-
-  /* ─────────────────────────────────────────────
-     Grid layout (6 cols):
-     [num] [img] [left-sentence] [left-dot]   [right-dot] [right-sentence]
-     ↑auto  ↑auto  ↑1fr           ↑dot-col      ↑dot-col    ↑1fr
-
-     المشكلة الأصلية: الـ dot-cols كانوا "auto" بدون gap كافي بينهم
-     الحل: نعطي المنطقة الوسطى عرض ثابت clamp يحكم المسافة بين النقطتين
-  ───────────────────────────────────────────── */
-  const GRID = {
-    display: "grid",
-    gridTemplateColumns:
-      "auto auto 1fr clamp(14px,2vw,22px) clamp(40px,5vw,72px) clamp(14px,2vw,22px) 1fr",
-    /*                                    ↑ left-dot             ↑ gap spacer          ↑ right-dot  */
-    columnGap: "clamp(8px,1.2vw,16px)",
-    rowGap: "clamp(14px,2vw,28px)",
-    alignItems: "center",
-    width: "100%",
+  // ── helpers ───────────────────────────────
+  const isWrong = (item) => {
+    if (!showResults || showAns) return false;
+    const circleOk = selected[item.id] === item.correct;
+    const writeOk  = isCorrectAnswer(written[item.id] || "", item.correct);
+    return !(circleOk && writeOk);
   };
 
+  // ── render one card ───────────────────────
+  const renderCard = (item) => {
+    const wrong      = isWrong(item);
+    const writeValue = showAns ? item.correct : (written[item.id] || "");
+    const writeWrong = showResults && !showAns &&
+      !isCorrectAnswer(written[item.id] || "", item.correct);
+
+    return (
+      <div key={item.id} className="rlcw-card">
+
+        {/* ── Number + Sentence + Blank — all in one line ── */}
+        <div className="rlcw-sentence-line">
+          <span className="rlcw-num">{item.id}</span>
+          <span className="rlcw-sentence-text">{item.sentenceBefore} </span>
+          <span className="rlcw-blank-wrap">
+            <input
+              type="text"
+              className={[
+                "rlcw-blank",
+                writeWrong ? "rlcw-blank--wrong"  : "",
+                showAns    ? "rlcw-blank--answer" : "",
+              ].filter(Boolean).join(" ")}
+              value={writeValue}
+              disabled={isLocked}
+              onChange={(e) => handleWrite(item.id, e.target.value)}
+              spellCheck={false}
+              autoComplete="off"
+            />
+            {writeWrong && <span className="rlcw-badge">✕</span>}
+          </span>
+          <span className="rlcw-sentence-text">{item.sentenceAfter}</span>
+        </div>
+
+        {/* ── Image ── */}
+        <div className="rlcw-img-wrap">
+          <img src={item.imageSrc} alt={`item ${item.id}`} className="rlcw-img" />
+        </div>
+
+        {/* ── Options ── */}
+        <div className="rlcw-options">
+          {item.options.map((opt, i) => {
+            const isSelected   = selected[item.id] === opt;
+            const isWrongOpt   = showResults && !showAns && isSelected && selected[item.id] !== item.correct;
+            const isCorrectOpt = showAns && opt === item.correct;
+            const circled      = isSelected || isCorrectOpt;
+
+            return (
+              <div
+                key={opt}
+                className="rlcw-option-wrap"
+                onClick={() => handleSelect(item.id, opt)}
+                style={{ cursor: isLocked ? "default" : "pointer" }}
+              >
+                <span className="rlcw-opt-letter">
+                  {String.fromCharCode(97 + i)}
+                </span>
+                <span
+                  className={[
+                    "rlcw-opt-text",
+                    circled    ? "rlcw-opt--circled" : "",
+                    isWrongOpt ? "rlcw-opt--wrong"   : "",
+                  ].filter(Boolean).join(" ")}
+                >
+                  {opt}
+                </span>
+                {isWrongOpt && <span className="rlcw-opt-badge">✕</span>}
+              </div>
+            );
+          })}
+        </div>
+
+      </div>
+    );
+  };
+
+  // ── render ────────────────────────────────
   return (
     <div className="main-container-component">
+      <style>{`
+
+        /* ── 2-column grid ── */
+        .rlcw-grid {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: clamp(20px, 3vw, 40px) clamp(24px, 4vw, 56px);
+          align-items: start;
+        }
+        @media (max-width: 580px) {
+          .rlcw-grid { grid-template-columns: 1fr; }
+        }
+
+        /* ── Card ── */
+        .rlcw-card {
+          display: flex;
+          flex-direction: column;
+          gap: clamp(8px, 1.2vw, 14px);
+        }
+
+        /* ── Sentence line: num + text + blank + suffix ── */
+        .rlcw-sentence-line {
+          display: flex;
+          align-items: baseline;
+          flex-wrap: wrap;
+          gap: 4px;
+          line-height: 1.5;
+        }
+
+        /* Number — على نفس السطر */
+        .rlcw-num {
+          font-size: clamp(15px, 1.9vw, 22px);
+          font-weight: 700;
+          color: #2b2b2b;
+          flex-shrink: 0;
+          margin-right: 4px;
+        }
+
+        .rlcw-sentence-text {
+          font-size: clamp(20px, 1.9vw, 25px);
+          color: #2b2b2b;
+          white-space: pre;
+        }
+
+        /* ── Blank — يكتب فيه المستخدم ── */
+        .rlcw-blank-wrap {
+          position: relative;
+          display: inline-flex;
+          align-items: flex-end;
+        }
+        .rlcw-blank {
+          border: none;
+          border-bottom: 2px solid ${INPUT_UNDERLINE};
+          background: transparent;
+          outline: none;
+          font-size: clamp(15px, 1.9vw, 22px);
+          color: #2b2b2b;
+          text-align: center;
+          min-width: 110px;
+          transition: border-color 0.2s;
+        }
+        .rlcw-blank:disabled   { opacity: 1; cursor: default; }
+        .rlcw-blank--wrong     { border-bottom-color: ${INPUT_UNDERLINE_WRONG}; }
+        .rlcw-blank--answer    { color: ${INPUT_ANSWER_COLOR}; font-weight: 700; }
+
+        /* ✕ badge on blank */
+        .rlcw-badge {
+          position: absolute;
+          top: -6px; right: -10px;
+          width: clamp(15px, 1.7vw, 20px);
+          height: clamp(15px, 1.7vw, 20px);
+          border-radius: 50%;
+          background: ${WRONG_BADGE_BG};
+          color: ${WRONG_BADGE_TEXT};
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: clamp(8px, 0.9vw, 11px);
+          font-weight: 700;
+          border: 2px solid #fff;
+          box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+          pointer-events: none;
+          z-index: 2;
+        }
+
+        /* ── Image ── */
+        .rlcw-img-wrap {
+          width: 100%;
+          overflow: hidden;
+        }
+        .rlcw-img {
+          width: 100%;
+          height: clamp(140px, 18vw, 220px);
+          display: block;
+        }
+
+        /* ── Options ── */
+        .rlcw-options {
+          display: flex;
+          flex-direction: column;
+          gap: clamp(4px, 0.6vw, 8px);
+        }
+        .rlcw-option-wrap {
+          display: flex;
+          align-items: center;
+          gap: clamp(6px, 0.8vw, 10px);
+          position: relative;
+        }
+        .rlcw-opt-letter {
+          font-size: clamp(15px, 1.9vw, 22px);
+          font-weight: 700;
+          color: #2b2b2b;
+          flex-shrink: 0;
+          min-width: 16px;
+        }
+        .rlcw-opt-text {
+          font-size: clamp(15px, 1.9vw, 22px);
+          color: #2b2b2b;
+          padding: clamp(2px, 0.3vw, 4px) clamp(8px, 1vw, 14px);
+          border-radius: 999px;
+          border: 2.5px solid transparent;
+          transition: border-color 0.15s;
+          user-select: none;
+        }
+        .rlcw-opt--circled { border-color: ${SELECTED_CIRCLE_COLOR}; }
+        .rlcw-opt--wrong   { border-color: ${WRONG_CIRCLE_COLOR};    }
+
+        /* ✕ badge on option */
+        .rlcw-opt-badge {
+          width: clamp(15px, 1.7vw, 20px);
+          height: clamp(15px, 1.7vw, 20px);
+          border-radius: 50%;
+          background: ${WRONG_BADGE_BG};
+          color: ${WRONG_BADGE_TEXT};
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          font-size: clamp(8px, 0.9vw, 11px);
+          font-weight: 700;
+          border: 2px solid #fff;
+          box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+          flex-shrink: 0;
+        }
+
+        /* ── Buttons ── */
+        .rlcw-buttons {
+          display: flex;
+          justify-content: center;
+          margin-top: clamp(8px, 1.6vw, 18px);
+        }
+      `}</style>
+
       <div
         className="div-forall"
         style={{
           display: "flex",
           flexDirection: "column",
-          gap: "18px",
+          gap: "clamp(14px, 2vw, 22px)",
           maxWidth: "1100px",
           margin: "0 auto",
         }}
       >
-        {/* Title */}
+        {/* ── Header ── */}
         <h1
           className="WB-header-title-page8"
-          style={{
-            margin: 0,
-            display: "flex",
-            alignItems: "center",
-            gap: "12px",
-            flexWrap: "wrap",
-          }}
+          style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
         >
-          <span className="WB-ex-A">A</span> Read, look, and match.
+          <span className="WB-ex-A">A</span>
+          Read, look, and circle. Write.
         </h1>
 
-        {/* Board */}
-        <div ref={boardRef} style={{ position: "relative", width: "100%" }}>
-
-          {/* SVG lines */}
-          <svg
-            style={{
-              position: "absolute",
-              inset: 0,
-              width: "100%",
-              height: "100%",
-              pointerEvents: "none",
-              overflow: "visible",
-              zIndex: 1,
-            }}
-          >
-            {paths.map((p) => (
-              <path
-                key={p.id}
-                d={p.d}
-                fill="none"
-                stroke={p.color}
-                strokeWidth="2.4"
-                strokeLinecap="round"
-              />
-            ))}
-          </svg>
-
-          <div style={GRID}>
-            {LEFT_ITEMS.map((lItem, idx) => {
-              const rItem    = RIGHT_ITEMS[idx];
-              const lConn    = getLeftConn(lItem.id);
-              const rConn    = getRightConn(rItem.id);
-              const lSelected = selectedLeft === lItem.id;
-              const wrong    = isWrongMatch(lItem.id);
-
-              return (
-                <React.Fragment key={lItem.id}>
-
-                  {/* col 1 – number */}
-                  <span
-                    style={{
-                      fontSize: "clamp(16px,1.9vw,26px)",
-                      fontWeight: 700,
-                      color: TEXT_COLOR,
-                      lineHeight: 1,
-                      flexShrink: 0,
-                      zIndex: 2,
-                    }}
-                  >
-                    {lItem.id}
-                  </span>
-
-                  {/* col 2 – image */}
-                  <div
-                    onClick={() => handleLeftSelect(lItem.id)}
-                    style={{
-                      width: "clamp(52px,7vw,90px)",
-                      aspectRatio: "1 / 1",
-                      flexShrink: 0,
-                      zIndex: 2,
-                      cursor: showAns ? "default" : "pointer",
-                      overflow: "hidden",
-                      borderRadius: "clamp(6px,0.8vw,12px)",
-                      border: `2px solid ${lSelected ? ACTIVE_COLOR : BORDER_COLOR}`,
-                      background: "#f7f7f7",
-                      transition: "border-color 0.2s",
-                      boxSizing: "border-box",
-                    }}
-                  >
-                    <img
-                      src={lItem.img}
-                      alt={`img-${lItem.id}`}
-                      style={{
-                        width: "100%",
-                        height: "100%",
-                        objectFit: "cover",
-                        display: "block",
-                        userSelect: "none",
-                        pointerEvents: "none",
-                      }}
-                    />
-                  </div>
-
-                  {/* col 3 – left sentence */}
-                  <div
-                    onClick={() => handleLeftSelect(lItem.id)}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      minWidth: 0,
-                      zIndex: 2,
-                      padding: "clamp(4px,0.6vw,8px) clamp(8px,1vw,14px)",
-                      borderRadius: "clamp(8px,1vw,12px)",
-                      border: lSelected
-                        ? `2.5px solid ${ACTIVE_COLOR}`
-                        : "2px solid transparent",
-                      background: lSelected
-                        ? "rgba(243,155,66,0.08)"
-                        : "transparent",
-                      cursor: showAns ? "default" : "pointer",
-                      transition: "border-color 0.2s, background 0.2s",
-                      userSelect: "none",
-                      position: "relative",
-                    }}
-                  >
-                    <span
-                      style={{
-                        fontSize: "clamp(13px,1.6vw,21px)",
-                        fontWeight: 500,
-                        color: wrong
-                          ? WRONG_COLOR
-                          : lSelected
-                          ? ACTIVE_COLOR
-                          : TEXT_COLOR,
-                        lineHeight: 1.3,
-                        wordBreak: "break-word",
-                        transition: "color 0.2s",
-                      }}
-                    >
-                      {lItem.text}
-                    </span>
-                    {wrong && <WrongBadge />}
-                  </div>
-
-                  {/* col 4 – left dot */}
-                  <div
-                    ref={(el) => (pointRefs.current[`left-${lItem.id}`] = el)}
-                    onClick={() => handleLeftSelect(lItem.id)}
-                    style={{
-                      width: "clamp(10px,1.3vw,16px)",
-                      height: "clamp(10px,1.3vw,16px)",
-                      borderRadius: "50%",
-                      justifySelf: "end",       // ← يلتصق بيمين الخلية
-                      flexShrink: 0,
-                      background: lSelected
-                        ? ACTIVE_COLOR
-                        : lConn
-                        ? wrong
-                          ? WRONG_COLOR
-                          : ACTIVE_COLOR
-                        : DOT_COLOR,
-                      cursor: showAns ? "default" : "pointer",
-                      transition: "background 0.2s",
-                      boxShadow: lSelected
-                        ? "0 0 0 3px rgba(243,155,66,0.3)"
-                        : "none",
-                      zIndex: 2,
-                    }}
-                  />
-
-                  {/* col 5 – spacer (المسافة الفعلية بين النقطتين) */}
-                  <div style={{ height: "100%" }} />
-
-                  {/* col 6 – right dot */}
-                  <div
-                    ref={(el) => (pointRefs.current[`right-${rItem.id}`] = el)}
-                    onClick={() => handleRightSelect(rItem.id)}
-                    style={{
-                      width: "clamp(10px,1.3vw,16px)",
-                      height: "clamp(10px,1.3vw,16px)",
-                      borderRadius: "50%",
-                      justifySelf: "start",     // ← يلتصق بيسار الخلية
-                      flexShrink: 0,
-                      background: rConn ? ACTIVE_COLOR : DOT_COLOR,
-                      cursor:
-                        showAns || selectedLeft === null ? "default" : "pointer",
-                      transition: "background 0.2s",
-                      zIndex: 2,
-                    }}
-                  />
-
-                  {/* col 7 – right sentence */}
-                  <div
-                    onClick={() => handleRightSelect(rItem.id)}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      minWidth: 0,
-                      zIndex: 2,
-                      padding:
-                        "clamp(4px,0.6vw,8px) clamp(8px,1vw,14px)",
-                      cursor:
-                        showAns || selectedLeft === null ? "default" : "pointer",
-                      userSelect: "none",
-                    }}
-                  >
-                    <span
-                      style={{
-                        fontSize: "clamp(13px,1.6vw,21px)",
-                        fontWeight: 500,
-                        color: TEXT_COLOR,
-                        lineHeight: 1.3,
-                        wordBreak: "break-word",
-                      }}
-                    >
-                      {rItem.text}
-                    </span>
-                  </div>
-
-                </React.Fragment>
-              );
-            })}
-          </div>
+        {/* ── Grid ── */}
+        <div className="rlcw-grid">
+          {ITEMS.map((item) => renderCard(item))}
         </div>
 
-        {/* Buttons */}
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            marginTop: "clamp(8px,1.5vw,16px)",
-            zIndex: 100,
-          }}
-        >
+        {/* ── Buttons ── */}
+        <div className="rlcw-buttons">
           <Button
             checkAnswers={handleCheck}
             handleShowAnswer={handleShowAnswer}
-            handleStartAgain={handleStartAgain}
+            handleStartAgain={handleReset}
           />
         </div>
       </div>

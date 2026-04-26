@@ -24,14 +24,14 @@ const WB_Unit1_Page4 = ({ openPopup }) => {
         style={{ backgroundImage: `url(${page2})` }}
       >
         <div
-          className="q3-3 hover:scale-110 transition "
+          className="q2-3 hover:scale-110 transition "
           style={{ overflow: "visible" }}
         >
           <svg
             width="22"
             height="22"
             viewBox="0 0 90 90"
-            onClick={() => openPopup("exercise", { startIndex: 28 })}
+            onClick={() => openPopup("exercise", { startIndex: 22 })}
             style={{ overflow: "visible" }}
             // className="click-icon-page8-2 hover:scale-110 transition"
           >
@@ -48,6 +48,29 @@ const WB_Unit1_Page4 = ({ openPopup }) => {
         </div>
   
         <div
+          className="q3-3 hover:scale-110 transition "
+          style={{ overflow: "visible" }}
+        >
+          <svg
+            width="22"
+            height="22"
+            viewBox="0 0 90 90"
+            onClick={() => openPopup("exercise", { startIndex: 23 })}
+            style={{ overflow: "visible" }}
+            // className="click-icon-page8-2 hover:scale-110 transition"
+          >
+            <image
+              className="svg-img"
+              href={arrowBtn}
+              x="0"
+              y="0"
+              width="100%"
+              height="100%"
+              preserveAspectRatio="xMidYMid meet"
+            />
+          </svg>
+        </div>
+         <div
           className="q4-3 hover:scale-110 transition "
           style={{ overflow: "visible" }}
         >
@@ -55,7 +78,7 @@ const WB_Unit1_Page4 = ({ openPopup }) => {
             width="22"
             height="22"
             viewBox="0 0 90 90"
-            onClick={() => openPopup("exercise", { startIndex: 29 })}
+            onClick={() => openPopup("exercise", { startIndex: 24 })}
             style={{ overflow: "visible" }}
             // className="click-icon-page8-2 hover:scale-110 transition"
           >
