@@ -15,7 +15,7 @@ import FlashCardViewer from "./FlashCardPages/FlashCardPages";
 
 // === POPUP ===
 import Popup from "./Popup/Popup";
-import LessonNavigator from "./StudentPages/LessonNavigator";
+// import LessonNavigator from "./StudentPages/LessonNavigator";
 // import teacherPdf from "../../public/Right International TB G2-Apple’s iMac (3).pdf";
 const teacherPdf = "../../public/Teacher Book 3-Apple’s iMac (3) (1).pdf"
 // === ASSETS ===
@@ -35,7 +35,6 @@ import arrowBtn from "../assets/Page 01/Arrow.svg";
 import pauseBtn from "../assets/Page 01/Right Video Button.svg";
 // === PAGES DATA ===
 import {
-  studentPages,
   workbookPages,
   teacherPages,
   flashPages,
@@ -75,7 +74,7 @@ export default function Book() {
   //                 📌 PAGE LIST SELECTOR
   // ===========================================================
   const pages = {
-    student: studentPages(openPopup, goToUnit),
+    // student: studentPages(openPopup, goToUnit),
     work: workbookPages(openPopup, goToUnit),
     teacher: teacherPages.map((t) => <TeacherBook teacher={t} />),
     flash: flashPages,
@@ -457,7 +456,7 @@ export default function Book() {
   const studentBookInfo = {
     cover: stbookCover,
     title: `Right 1 Class Book`,
-    pages: studentPages().length,
+    // pages: studentPages().length,
   };
 
   const workbookInfo = {
