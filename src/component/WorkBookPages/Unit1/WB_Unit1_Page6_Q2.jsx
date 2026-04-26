@@ -1,633 +1,368 @@
-import React, { useMemo, useRef, useState } from "react";
+import React, { useState } from "react";
 import Button from "../Button";
 import ValidationAlert from "../../Popup/ValidationAlert";
 
-import img1 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U1 Folder/Page 6/SVG/00.svg";
-import img2 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U1 Folder/Page 6/SVG/0000.svg";
-import img3 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U1 Folder/Page 6/SVG/00000.svg";
-import img4 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U1 Folder/Page 6/SVG/Asset 12.svg";
+// ─────────────────────────────────────────────
+//  🖼️  IMAGES — غيّر المسارات حسب مشروعك
+// ─────────────────────────────────────────────
+import sarahImg  from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U1 Folder/Page 6/SVG/Asset 5.svg";
+import stellaImg from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U1 Folder/Page 6/SVG/image.png";
+import johnImg   from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U1 Folder/Page 6/SVG/jack.png";
+import hanselImg from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U1 Folder/Page 6/SVG/joan.png";
 
-const WORDS = [
-  { id: 1, text: "scoreboard" },
-  { id: 2, text: "referee" },
-  { id: 3, text: "whistle" },
-  { id: 4, text: "bike" },
+// بيانات الشخصيات — الترتيب: Sarah يسار فوق | John يمين فوق | Stella يسار تحت | Hansel يمين تحت
+const CHARACTERS = [
+  { name: "Sarah",  img: null, position: "top-left"     },
+  { name: "John",   img: null, position: "top-right"    },
+  { name: "Stella", img: null, position: "bottom-left"  },
+  { name: "Hansel", img: null, position: "bottom-right" },
 ];
 
-const IMAGES = [
-  { id: 3, img: img2, alt: "whistle" },
-  { id: 1, img: img1, alt: "scoreboard" },
-  { id: 2, img: img3, alt: "referee" },
-  { id: 4, img: img4, alt: "bike" },
+// ─────────────────────────────────────────────
+//  🎨  COLORS — كلها قابلة للتعديل
+// ─────────────────────────────────────────────
+const SELECTED_CIRCLE_COLOR   = "#2096a6";   // لون الدائرة حول الكلمة المختارة
+const SELECTED_TEXT_COLOR     = "#2096a6";   // لون نص الكلمة المختارة
+const WRONG_CIRCLE_COLOR      = "#ef4444";   // لون الدائرة عند الخطأ — أحمر
+const DEFAULT_TEXT_COLOR      = "#2b2b2b";   // لون نص true/false العادي
+const SENTENCE_TEXT_COLOR     = "#2b2b2b";   // لون نص الجملة
+const NUMBER_COLOR            = "#2b2b2b";   // لون الأرقام (bold فقط)
+
+const WRONG_BADGE_BG          = "#ef4444";   // خلفية badge الخطأ
+const WRONG_BADGE_TEXT_COLOR  = "#ffffff";   // نص badge الخطأ
+
+
+// ─────────────────────────────────────────────
+//  📝  EXERCISE DATA
+//  correct: "true" | "false"
+// ─────────────────────────────────────────────
+const ITEMS = [
+  { id: 1, text: "Sarah will go to the beach. She won't ride a bike.",  correct: "true"  },
+  { id: 2, text: "Stella won't fly a kite. She will read a book.",      correct: "false" },
+  { id: 3, text: "John won't read a book. He will run in a race.",      correct: "false" },
+  { id: 4, text: "Hansel will play soccer. He won't read a book.",      correct: "true"  },
 ];
 
-const CORRECT_ANSWERS = {
-  1: 1,
-  2: 2,
-  3: 3,
-  4: 4,
-};
+// ─────────────────────────────────────────────
+//  COMPONENT
+// ─────────────────────────────────────────────
+export default function WB_LookReadCircleTrueFalse_QH() {
+  const [answers,     setAnswers]     = useState({});
+  const [showResults, setShowResults] = useState(false);
+  const [showAns,     setShowAns]     = useState(false);
 
-const DRAG_NUMBERS = [1, 2, 3, 4];
+  const isLocked = showResults || showAns;
 
-export default function WB_Vocabulary_Page213_H() {
-  const [imageAnswers, setImageAnswers] = useState({});
-  const [draggedNumber, setDraggedNumber] = useState(null);
-  const [touchItem, setTouchItem] = useState(null);
-  const [touchPos, setTouchPos] = useState({ x: 0, y: 0 });
-  const [checked, setChecked] = useState(false);
-  const [showAns, setShowAns] = useState(false);
-
-  const dropRefs = useRef({});
-
-  const usedNumbers = useMemo(() => Object.values(imageAnswers), [imageAnswers]);
-
-  const applyDrop = (imageId, num) => {
-    const updated = { ...imageAnswers };
-
-    Object.keys(updated).forEach((key) => {
-      if (updated[key] === num) {
-        delete updated[key];
-      }
-    });
-
-    updated[imageId] = num;
-    setImageAnswers(updated);
-    setDraggedNumber(null);
-  };
-
-  const handleDragStart = (num) => {
-    if (showAns || usedNumbers.includes(num)) return;
-    setDraggedNumber(num);
-  };
-
-  const handleDrop = (imageId) => {
-    if (showAns || draggedNumber === null) return;
-    applyDrop(imageId, draggedNumber);
-  };
-
-  const handleTouchStart = (e, num) => {
-    if (showAns || usedNumbers.includes(num)) return;
-
-    const touch = e.touches[0];
-    setTouchItem(num);
-    setDraggedNumber(num);
-    setTouchPos({ x: touch.clientX, y: touch.clientY });
-  };
-
-  const handleTouchMove = (e) => {
-    if (touchItem === null) return;
-
-    const touch = e.touches[0];
-    setTouchPos({ x: touch.clientX, y: touch.clientY });
-  };
-
-  const handleTouchEnd = () => {
-    if (touchItem === null) return;
-
-    Object.entries(dropRefs.current).forEach(([key, ref]) => {
-      if (!ref) return;
-
-      const rect = ref.getBoundingClientRect();
-
-      if (
-        touchPos.x >= rect.left &&
-        touchPos.x <= rect.right &&
-        touchPos.y >= rect.top &&
-        touchPos.y <= rect.bottom
-      ) {
-        applyDrop(Number(key), touchItem);
-      }
-    });
-
-    setTouchItem(null);
-    setDraggedNumber(null);
-  };
-
-  const handleRemoveNumber = (imageId) => {
-    if (showAns) return;
-
-    setImageAnswers((prev) => {
-      const updated = { ...prev };
-      delete updated[imageId];
-      return updated;
-    });
-  };
-
-  const getScore = () => {
-    let score = 0;
-
-    Object.keys(CORRECT_ANSWERS).forEach((imageId) => {
-      if (imageAnswers[imageId] === CORRECT_ANSWERS[imageId]) {
-        score += 1;
-      }
-    });
-
-    return score;
+  // ── handlers ──────────────────────────────
+  const handleSelect = (id, value) => {
+    if (isLocked) return;
+    setAnswers((prev) => ({ ...prev, [id]: value }));
   };
 
   const handleCheck = () => {
-    if (showAns) return;
-
-    const allAnswered = Object.keys(CORRECT_ANSWERS).every(
-      (itemId) => imageAnswers[itemId]
-    );
-
+    if (isLocked) return;
+    const allAnswered = ITEMS.every((item) => answers[item.id]);
     if (!allAnswered) {
-      ValidationAlert.info("Please complete all answers first.");
+      ValidationAlert.info("Please answer all items first.");
       return;
     }
-
-    const total = Object.keys(CORRECT_ANSWERS).length;
-    const score = getScore();
-
-    setChecked(true);
-
-    if (score === total) {
-      ValidationAlert.success(`Score: ${score} / ${total}`);
-    } else if (score > 0) {
-      ValidationAlert.warning(`Score: ${score} / ${total}`);
-    } else {
-      ValidationAlert.error(`Score: ${score} / ${total}`);
-    }
+    let score = 0;
+    ITEMS.forEach((item) => {
+      if (answers[item.id] === item.correct) score++;
+    });
+    setShowResults(true);
+    if (score === ITEMS.length)   ValidationAlert.success(`Score: ${score} / ${ITEMS.length}`);
+    else if (score > 0)           ValidationAlert.warning(`Score: ${score} / ${ITEMS.length}`);
+    else                          ValidationAlert.error(`Score: ${score} / ${ITEMS.length}`);
   };
 
   const handleShowAnswer = () => {
-    setImageAnswers(CORRECT_ANSWERS);
-    setChecked(true);
+    const filled = {};
+    ITEMS.forEach((item) => { filled[item.id] = item.correct; });
+    setAnswers(filled);
+    setShowResults(false);
     setShowAns(true);
-    setDraggedNumber(null);
-    setTouchItem(null);
   };
 
   const handleReset = () => {
-    setImageAnswers({});
-    setDraggedNumber(null);
-    setTouchItem(null);
-    setChecked(false);
+    setAnswers({});
+    setShowResults(false);
     setShowAns(false);
   };
 
-  const isImageWrong = (imageId) => {
-    if (!checked) return false;
-    return imageAnswers[imageId] !== CORRECT_ANSWERS[imageId];
+  // ── helpers ───────────────────────────────
+  const isWrong = (item) => {
+    if (!showResults || showAns) return false;
+    return answers[item.id] !== item.correct;
   };
 
+  // ── render one option (true or false) ─────
+  const renderOption = (item, optionValue) => {
+    const selected    = answers[item.id] === optionValue;
+    const wrong       = isWrong(item) && selected;
+    const showCorrect = showAns && item.correct === optionValue;
+    const isCircled   = selected || showCorrect;
+
+    return (
+      <div
+        key={optionValue}
+        className="ltf-option-wrap"
+        onClick={() => handleSelect(item.id, optionValue)}
+        style={{ cursor: isLocked ? "default" : "pointer" }}
+      >
+        <span
+          className={`ltf-option ${isCircled ? "ltf-option--circled" : ""} ${wrong ? "ltf-option--wrong" : ""}`}
+        >
+          {optionValue}
+        </span>
+
+        {/* ✕ badge على الاختيار الغلط */}
+        {wrong && <div className="ltf-badge">✕</div>}
+      </div>
+    );
+  };
+
+  // ── render ────────────────────────────────
   return (
     <div className="main-container-component">
+      <style>{`
+        /* ── Characters Scene ── */
+        .ltf-scene {
+          width: 100%;
+          max-width: clamp(400px, 72vw, 800px);
+          margin: 0 auto;
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          grid-template-rows: auto auto;
+          row-gap: 0;
+          column-gap: clamp(20px, 4vw, 60px);
+        }
+
+        /* كل شخصية: صورة + اسم */
+        .ltf-char {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: clamp(2px, 0.4vw, 6px);
+        }
+
+        /* Sarah: top-left — تتحرك شوي لليسار */
+        .ltf-char--sarah  { justify-self: start;  padding-left: clamp(10px, 3vw, 40px); }
+        /* John: top-right — تتحرك شوي لليمين */
+        .ltf-char--john   { justify-self: end;    padding-right: clamp(10px, 3vw, 40px); }
+        /* Stella: bottom-left — في المنتصف بين sarah وjohn */
+        .ltf-char--stella { justify-self: center; margin-top: clamp(15px, -3vw, -40px); }
+        /* Hansel: bottom-right */
+        .ltf-char--hansel { justify-self: center; margin-top: clamp(-10px, -2vw, -20px); }
+
+        .ltf-char-img {
+          width: clamp(130px, 18vw, 220px);
+          height: auto;
+          object-fit: contain;
+          display: block;
+        }
+
+        .ltf-char-name {
+          font-size: clamp(14px, 1.8vw, 20px);
+          font-weight: 700;
+          color: #2b2b2b;
+          text-align: center;
+          line-height: 1;
+        }
+
+        /* ── Items list ── */
+        .ltf-list {
+          display: flex;
+          flex-direction: column;
+          gap: clamp(12px, 2vw, 22px);
+          width: 100%;
+        }
+
+        /* ── Single row: num | sentence | true | false ── */
+        .ltf-row {
+          display: grid;
+          grid-template-columns:
+            clamp(18px, 2vw, 26px)    /* number */
+            minmax(0, 1fr)             /* sentence */
+            clamp(50px, 7vw, 80px)    /* true */
+            clamp(56px, 8vw, 90px);   /* false */
+          gap: clamp(8px, 1.2vw, 16px);
+          align-items: center;
+          width: 100%;
+        }
+
+        /* Number — bold فقط */
+        .ltf-num {
+          font-size: clamp(15px, 1.9vw, 22px);
+          font-weight: 700;
+          color: ${NUMBER_COLOR};
+          line-height: 1;
+        }
+
+        /* Sentence — no bold */
+        .ltf-sentence {
+          font-size: clamp(15px, 1.9vw, 22px);
+          font-weight: 400;
+          color: ${SENTENCE_TEXT_COLOR};
+          line-height: 1.5;
+        }
+
+        /* Option wrapper — for badge positioning */
+        .ltf-option-wrap {
+          position: relative;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        /* true / false text */
+        .ltf-option {
+          font-size: clamp(15px, 1.9vw, 22px);
+          font-weight: 400;
+          line-height: 1;
+          padding: clamp(3px, 0.5vw, 6px) clamp(8px, 1.2vw, 14px);
+          border-radius: 999px;
+          border: 2.5px solid transparent;
+          user-select: none;
+          white-space: nowrap;
+          transition: border-color 0.15s, color 0.15s;
+          display: inline-block;
+        }
+
+        /* Circled — correct selection or show answer */
+        .ltf-option--circled {
+          border-color: ${SELECTED_CIRCLE_COLOR};
+        }
+
+        /* Wrong selection */
+        .ltf-option--wrong {
+          border-color: ${WRONG_CIRCLE_COLOR};
+        }
+
+        /* ✕ badge */
+        .ltf-badge {
+          position: absolute;
+          top: -8px;
+          right: -6px;
+          width: clamp(16px, 1.8vw, 21px);
+          height: clamp(16px, 1.8vw, 21px);
+          border-radius: 50%;
+          background: ${WRONG_BADGE_BG};
+          color: ${WRONG_BADGE_TEXT_COLOR};
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: clamp(9px, 1vw, 11px);
+          font-weight: 700;
+          border: 2px solid #fff;
+          box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+          pointer-events: none;
+          z-index: 2;
+        }
+
+        /* Buttons */
+        .ltf-buttons {
+          display: flex;
+          justify-content: center;
+          margin-top: clamp(8px, 1.6vw, 18px);
+        }
+
+        /* ── Responsive ── */
+        @media (max-width: 640px) {
+          .ltf-row {
+            grid-template-columns:
+              clamp(16px, 3vw, 20px)
+              minmax(0, 1fr)
+              clamp(44px, 12vw, 65px)
+              clamp(48px, 13vw, 70px);
+            gap: 6px;
+          }
+          .ltf-sentence { font-size: 14px; }
+          .ltf-option   { font-size: 14px; padding: 3px 8px; }
+        }
+      `}</style>
+
       <div
         className="div-forall"
         style={{
           display: "flex",
           flexDirection: "column",
-          gap: "18px",
+          gap: "clamp(14px, 2vw, 22px)",
           maxWidth: "1100px",
           margin: "0 auto",
         }}
       >
+        {/* ── Header ── */}
         <h1
           className="WB-header-title-page8"
-          style={{
-            margin: 0,
-            display: "flex",
-            alignItems: "center",
-            gap: "12px",
-            flexWrap: "wrap",
-          }}
+          style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
         >
           <span className="WB-ex-A">H</span>
-          Read, look, and number.
+          Look, read, and circle{" "}
+          <span style={{ color: "#f89631", fontStyle: "italic", fontWeight: 400 }}>true</span>
+          {" "}or{" "}
+          <span style={{ color: "#f89631", fontStyle: "italic", fontWeight: 400 }}>false</span>.
         </h1>
 
-        <div className="wb-content-grid">
-          <div className="wb-words-list">
-            {WORDS.map((word) => (
-              <div key={word.id} className="wb-word-row">
-                <div className="wb-word-box">
-                  <span className="wb-word-number-inline">{word.id}</span>
-                  <span className="wb-word-text">{word.text}</span>
-                </div>
-              </div>
-            ))}
+        {/* ── Characters Scene: 2x2 grid ── */}
+        <div className="ltf-scene">
+
+          {/* Sarah — top left */}
+          <div className="ltf-char ltf-char--sarah">
+            <img src={sarahImg} alt="Sarah" className="ltf-char-img" />
+            <span className="ltf-char-name">Sarah</span>
           </div>
 
-          <div className="wb-images-grid">
-            {IMAGES.map((item) => (
-              <div
-                key={item.id}
-                ref={(el) => (dropRefs.current[item.id] = el)}
-                className={`wb-image-card ${
-                  draggedNumber !== null ? "wb-image-card--active" : ""
-                }`}
-                onDragOver={(e) => e.preventDefault()}
-                onDrop={() => handleDrop(item.id)}
-              >
-                <img
-                  src={item.img}
-                  alt={item.alt}
-                  className="wb-image"
-                  draggable={false}
-                />
-
-                <button
-                  type="button"
-                  className={`wb-corner-number ${
-                    imageAnswers[item.id] ? "wb-corner-number--filled" : ""
-                  }`}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleRemoveNumber(item.id);
-                  }}
-                  disabled={!imageAnswers[item.id] || showAns}
-                >
-                  {imageAnswers[item.id] || ""}
-                </button>
-
-                {isImageWrong(item.id) && (
-                  <span className="wb-wrong-badge">✕</span>
-                )}
-              </div>
-            ))}
+          {/* John — top right */}
+          <div className="ltf-char ltf-char--john">
+            <img src={johnImg} alt="John" className="ltf-char-img" />
+            <span className="ltf-char-name">John</span>
           </div>
+
+          {/* Stella — bottom left-center */}
+          <div className="ltf-char ltf-char--stella">
+            <img src={stellaImg} alt="Stella" className="ltf-char-img" />
+            <span className="ltf-char-name">Stella</span>
+          </div>
+
+          {/* Hansel — bottom right-center */}
+          <div className="ltf-char ltf-char--hansel">
+            <img src={hanselImg} alt="Hansel" className="ltf-char-img" />
+            <span className="ltf-char-name">Hansel</span>
+          </div>
+
         </div>
 
-        <div className="wb-drag-numbers">
-          {DRAG_NUMBERS.map((num) => {
-            const disabled = usedNumbers.includes(num);
-            const selected = draggedNumber === num || touchItem === num;
+        {/* ── Items ── */}
+        <div className="ltf-list">
+          {ITEMS.map((item) => (
+            <div key={item.id} className="ltf-row">
 
-            return (
-              <div
-                key={num}
-                draggable={!disabled && !showAns}
-                onDragStart={() => handleDragStart(num)}
-                onTouchStart={(e) => handleTouchStart(e, num)}
-                onTouchMove={handleTouchMove}
-                onTouchEnd={handleTouchEnd}
-                className={`wb-drag-circle ${
-                  disabled || showAns ? "wb-drag-circle--disabled" : ""
-                } ${selected ? "wb-drag-circle--selected" : ""}`}
-              >
-                {num}
-              </div>
-            );
-          })}
+              {/* Number */}
+              <span className="ltf-num">{item.id}</span>
+
+              {/* Sentence */}
+              <span className="ltf-sentence">{item.text}</span>
+
+              {/* true */}
+              {renderOption(item, "true")}
+
+              {/* false */}
+              {renderOption(item, "false")}
+
+            </div>
+          ))}
         </div>
 
-        <div className="wb-buttons-wrap">
+        {/* ── Buttons ── */}
+        <div className="ltf-buttons">
           <Button
+            checkAnswers={handleCheck}
             handleShowAnswer={handleShowAnswer}
             handleStartAgain={handleReset}
-            checkAnswers={handleCheck}
           />
         </div>
       </div>
-
-      {touchItem !== null && (
-        <div
-          className="wb-touch-preview"
-          style={{
-            left: touchPos.x - 24,
-            top: touchPos.y - 24,
-          }}
-        >
-          {touchItem}
-        </div>
-      )}
-
-      <style jsx>{`
-        .wb-content-grid {
-          display: grid;
-          grid-template-columns: minmax(250px, 320px) 1fr;
-          gap: 30px;
-          align-items: start;
-        }
-
-        .wb-words-list {
-          display: flex;
-          flex-direction: column;
-          gap: 56px;
-          padding-top: 10px;
-        }
-
-        .wb-word-row {
-          display: flex;
-          align-items: center;
-        }
-
-        .wb-word-box {
-          min-height: 44px;
-          padding: 0 12px;
-          border: 2px solid #f39b42;
-          border-radius: 12px;
-          background: #fff;
-          display: inline-flex;
-          align-items: center;
-          box-sizing: border-box;
-          width: 170px;
-          gap: 10px;
-        }
-
-        .wb-word-number-inline {
-          font-size: 18px;
-          font-weight: 700;
-          color: #111;
-          line-height: 1;
-          flex-shrink: 0;
-        }
-
-        .wb-word-text {
-          font-size: 18px;
-          font-weight: 500;
-          line-height: 1.1;
-          color: #222;
-          text-transform: lowercase;
-        }
-
-        .wb-images-grid {
-          display: grid;
-          grid-template-columns: repeat(2, minmax(190px, 1fr));
-          gap: 18px 28px;
-          align-items: start;
-        }
-
-        .wb-image-card {
-          position: relative;
-          min-height: 154px;
-          border: 2px solid #ec9b32;
-          border-radius: 14px;
-          background: #fff;
-          overflow: hidden;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          padding: 10px;
-          box-sizing: border-box;
-          transition: 0.2s ease;
-        }
-
-        .wb-image-card--active {
-          box-shadow: 0 0 0 3px rgba(141, 141, 147, 0.12);
-        }
-
-        .wb-image {
-          width: 100%;
-          height: 100%;
-          max-height: 130px;
-          object-fit: contain;
-          display: block;
-          user-select: none;
-          pointer-events: none;
-        }
-
-        .wb-corner-number {
-          position: absolute;
-          top: 0;
-          right: 0;
-          width: 38px;
-          height: 38px;
-          border: none;
-          border-left: 2px solid #ec9b32;
-          border-bottom: 2px solid #ec9b32;
-          border-bottom-left-radius: 10px;
-          background: #fff;
-          color: #000000;
-          font-size: 22px;
-          font-weight: 500;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          cursor: pointer;
-          line-height: 1;
-        }
-
-        .wb-corner-number:disabled {
-          cursor: default;
-          opacity: 1;
-        }
-
-        .wb-wrong-badge {
-          position: absolute;
-          top: 38px;
-          right: 0;
-          width: 22px;
-          height: 22px;
-          border-radius: 50%;
-          background-color: #ef4444;
-          color: #fff;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-size: 12px;
-          font-weight: 700;
-          border: 2px solid #fff;
-          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.18);
-          z-index: 11111;
-          pointer-events: none;
-        }
-
-        .wb-drag-numbers {
-          display: flex;
-          justify-content: center;
-          flex-wrap: wrap;
-          gap: 14px;
-          margin-top: 8px;
-        }
-
-        .wb-drag-circle {
-          width: 48px;
-          height: 48px;
-          border-radius: 50%;
-          background: #ec9b32;
-          color: #fff;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-size: 22px;
-          font-weight: 700;
-          cursor: grab;
-          user-select: none;
-          transition: 0.2s ease;
-          -webkit-tap-highlight-color: transparent;
-          touch-action: none;
-        }
-
-        .wb-drag-circle--selected {
-          transform: scale(1.08);
-          box-shadow: 0 0 0 3px rgba(141, 141, 147, 0.2);
-        }
-
-        .wb-drag-circle--disabled {
-          background: #cfcfd4;
-          cursor: not-allowed;
-          opacity: 0.6;
-        }
-
-        .wb-buttons-wrap {
-          display: flex;
-          justify-content: center;
-          margin-top: 4px;
-        }
-
-        .wb-touch-preview {
-          position: fixed;
-          width: 48px;
-          height: 48px;
-          border-radius: 50%;
-          background: #8d8d93;
-          color: #fff;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-size: 22px;
-          font-weight: 700;
-          pointer-events: none;
-          z-index: 9999;
-          box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-        }
-
-        @media (min-width: 768px) and (max-width: 1024px) {
-          .ipad-header {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            height: 56px;
-            background: #232323;
-            color: #fff;
-            font-size: 20px;
-            font-weight: 700;
-            margin-bottom: 12px;
-          }
-
-          .WB-header-title-page8 {
-            font-size: 26px;
-          }
-
-          .wb-content-grid {
-            grid-template-columns: minmax(220px, 290px) 1fr;
-            gap: 24px;
-          }
-
-          .wb-words-list {
-            gap: 42px;
-          }
-
-          .wb-word-box {
-            width: 160px;
-            min-height: 42px;
-          }
-
-          .wb-word-text,
-          .wb-word-number-inline {
-            font-size: 17px;
-          }
-
-          .wb-images-grid {
-            grid-template-columns: repeat(2, minmax(160px, 1fr));
-            gap: 18px 22px;
-          }
-
-          .wb-image-card {
-            min-height: 140px;
-          }
-
-          .wb-image {
-            max-height: 118px;
-          }
-
-          .wb-corner-number {
-            width: 36px;
-            height: 36px;
-            font-size: 20px;
-          }
-
-          .wb-drag-circle,
-          .wb-touch-preview {
-            width: 46px;
-            height: 46px;
-            font-size: 20px;
-          }
-        }
-
-        @media (max-width: 767px) {
-          .WB-header-title-page8 {
-            font-size: 23px;
-          }
-
-          .WB-ex-A {
-            width: 32px;
-            height: 32px;
-            min-width: 32px;
-            font-size: 20px;
-          }
-
-          .wb-content-grid {
-            grid-template-columns: 1fr;
-            gap: 20px;
-          }
-
-          .wb-words-list {
-            gap: 16px;
-            padding-top: 0;
-          }
-
-          .wb-word-box {
-            width: 100%;
-            max-width: 220px;
-            min-height: 42px;
-          }
-
-          .wb-word-number-inline,
-          .wb-word-text {
-            font-size: 16px;
-          }
-
-          .wb-images-grid {
-            grid-template-columns: repeat(2, minmax(130px, 1fr));
-            gap: 14px;
-          }
-
-          .wb-image-card {
-            min-height: 125px;
-            padding: 8px;
-          }
-
-          .wb-image {
-            max-height: 100px;
-          }
-
-          .wb-corner-number {
-            width: 32px;
-            height: 32px;
-            font-size: 18px;
-          }
-
-          .wb-drag-circle,
-          .wb-touch-preview {
-            width: 42px;
-            height: 42px;
-            font-size: 19px;
-          }
-        }
-
-        @media (max-width: 520px) {
-          .wb-images-grid {
-            grid-template-columns: 1fr;
-          }
-
-          .wb-word-box {
-            max-width: 100%;
-          }
-
-          .wb-image-card {
-            min-height: 150px;
-          }
-
-          .wb-image {
-            max-height: 120px;
-          }
-        }
-      `}</style>
     </div>
   );
 }

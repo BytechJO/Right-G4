@@ -2,381 +2,369 @@ import React, { useState } from "react";
 import Button from "../Button";
 import ValidationAlert from "../../Popup/ValidationAlert";
 
-import img1 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U1 Folder/Page 4/SVG/Asset 1.svg";
-import img2 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U1 Folder/Page 4/SVG/Asset 2.svg";
-import img3 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U1 Folder/Page 4/SVG/Asset 3.svg";
-import img4 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U1 Folder/Page 4/SVG/Asset 4.svg";
+// ─────────────────────────────────────────────
+//  🖼️  IMAGE — غيّر المسار حسب مشروعك
+// ─────────────────────────────────────────────
+import chefImg from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U1 Folder/Page 4/SVG/1.svg";
+
+// ─────────────────────────────────────────────
+//  🎨  COLORS — كلها قابلة للتعديل
+// ─────────────────────────────────────────────
+const PARAGRAPH_TEXT_COLOR     = "#2b2b2b";   // لون نص الفقرة
+const PARAGRAPH_BG_COLOR       = "transparent"; // خلفية منطقة الفقرة
+
+const INPUT_UNDERLINE_DEFAULT  = "#3f3f3f";   // خط input الفارغ
+const INPUT_UNDERLINE_WRONG    = "#ef4444";   // خط input عند الخطأ
+const INPUT_UNDERLINE_CORRECT  = "#3f3f3f";   // خط input عند الصواب
+
+const INPUT_TEXT_COLOR         = "#2b2b2b";   // لون نص المستخدم
+const INPUT_ANSWER_TEXT_COLOR  = "#c81e1e";   // لون الإجابة عند Show Answer
+
+const WRONG_BADGE_BG           = "#ef4444";   // خلفية badge الخطأ
+const WRONG_BADGE_TEXT_COLOR   = "#ffffff";   // نص badge الخطأ
+
+const SENTENCE_TEXT_COLOR      = "#2b2b2b";   // لون نص الجمل
+const NUMBER_COLOR             = "#2b2b2b";   // لون الأرقام
+
+const IMG_BORDER_RADIUS        = "12px";
+const IMG_WIDTH                = "clamp(160px, 24vw, 280px)";
+const IMG_HEIGHT               = "clamp(160px, 24vw, 280px)";
+
+// ─────────────────────────────────────────────
+//  📝  EXERCISE DATA
+// ─────────────────────────────────────────────
+const PARAGRAPH = `Henry will go to the grocery store near his house tomorrow. He won't go to one that is far away. He is inviting friends over to his house for dinner. He will buy some eggplants, zucchini, and carrots to make a vegetarian spaghetti dish. He won't buy green peppers. He will need to pick up some garlic bread to go with his spaghetti, too. For dessert, he will buy some fruit to make a fruit salad. He will also get some milk, flour, and chocolate chips, so he will be able to make some chocolate chip cookies. Finally, he will buy bottled water and juice. He won't buy soda because he doesn't think it is very healthy.`;
+
+// الخيارين المتاحين فقط
+const OPTIONS = ["will", "won't"];
+
+// correctAnswers: array بكل الصياغات المقبولة لكل إجابة
+const WILL_ANSWERS  = ["will"];
+const WONT_ANSWERS  = ["won't", "wont", "will not", "willnot"];
 
 const ITEMS = [
-  {
-    id: 1,
-    img: img1,
-    pairs: ["slow fast", "young old"],
-    correct: "slow fast",
-  },
-  {
-    id: 2,
-    img: img2,
-    pairs: ["old young", "big small"],
-    correct: "big small",
-  },
-  {
-    id: 3,
-    img: img3,
-    pairs: ["fast slow", "short tall"],
-    correct: "short tall",
-  },
-  {
-    id: 4,
-    img: img4,
-    pairs: ["short tall", "heavy light"],
-    correct: "heavy light",
-  },
+  { id: 1, before: "He",     after: "buy fruit to make fruit salad.",  correctAnswers: WILL_ANSWERS },
+  { id: 2, before: "He",     after: "buy some carrots and zucchini.",  correctAnswers: WILL_ANSWERS },
+  { id: 3, before: "Henry",  after: "go to the store far away.",       correctAnswers: WONT_ANSWERS },
+  { id: 4, before: "He",     after: "buy bottled water and juice.",    correctAnswers: WILL_ANSWERS },
+  { id: 5, before: "He",     after: "buy green peppers.",              correctAnswers: WONT_ANSWERS },
+  { id: 6, before: "He",     after: "also get milk and flour.",        correctAnswers: WILL_ANSWERS },
 ];
 
-export default function WB_Unit3_Page6_QC() {
-  const [answers, setAnswers] = useState({});
+// ─────────────────────────────────────────────
+//  🔧  NORMALIZE + CHECK
+// ─────────────────────────────────────────────
+const normalize = (str) =>
+  str
+    .toLowerCase()
+    .replace(/'/g, "'")        // normalize smart apostrophe → straight
+    .replace(/[^a-z' ]/g, "") // يبقي حروف + apostrophe + مسافة فقط
+    .replace(/\s+/g, " ")
+    .trim();
+
+// يرجع true إذا الإجابة مقبولة (أي قيمة من الـ array)
+const isCorrect = (userAnswer, correctAnswers) =>
+  correctAnswers.some((ans) => normalize(userAnswer) === normalize(ans));
+
+// الإجابة الأولى في الـ array هي اللي تتعرض في Show Answer
+const getDisplayAnswer = (item) => item.correctAnswers[0];
+
+// ─────────────────────────────────────────────
+//  COMPONENT
+// ─────────────────────────────────────────────
+export default function WB_Unit1_Page4_Q1() {
+  const [answers,     setAnswers]     = useState({});
   const [showResults, setShowResults] = useState(false);
-  const [showAns, setShowAns] = useState(false);
+  const [showAns,     setShowAns]     = useState(false);
 
-  const handleSelect = (id, value) => {
-    if (showAns) return;
+  // 🔒 بعد check أو show answer — inputs مقفولة
+  const isLocked = showResults || showAns;
 
-    setAnswers((prev) => ({
-      ...prev,
-      [id]: value,
-    }));
-
-    setShowResults(false);
+  // ── handlers ──────────────────────────────
+  const handleChange = (id, value) => {
+    if (isLocked) return;
+    // يقبل أي شي — الـ normalize تتكفل بالمقارنة
+    setAnswers((prev) => ({ ...prev, [id]: value }));
   };
 
   const handleCheck = () => {
-    if (showAns) return;
-
-    const allAnswered = ITEMS.every((item) => answers[item.id]);
-
+    if (isLocked) return;
+    const allAnswered = ITEMS.every(
+      (item) => answers[item.id] && answers[item.id].trim() !== ""
+    );
     if (!allAnswered) {
-      ValidationAlert.info("Please answer all questions first.");
+      ValidationAlert.info("Please complete all answers first.");
       return;
     }
-
     let score = 0;
-
     ITEMS.forEach((item) => {
-      if (answers[item.id] === item.correct) {
-        score++;
-      }
+      if (isCorrect(answers[item.id] || "", item.correctAnswers)) score++;
     });
-
-    setShowResults(true);
-
-    if (score === ITEMS.length) {
-      ValidationAlert.success(`Score: ${score} / ${ITEMS.length}`);
-    } else if (score > 0) {
-      ValidationAlert.warning(`Score: ${score} / ${ITEMS.length}`);
-    } else {
-      ValidationAlert.error(`Score: ${score} / ${ITEMS.length}`);
-    }
+    setShowResults(true); // 🔒 lock
+    if (score === ITEMS.length)   ValidationAlert.success(`Score: ${score} / ${ITEMS.length}`);
+    else if (score > 0)           ValidationAlert.warning(`Score: ${score} / ${ITEMS.length}`);
+    else                          ValidationAlert.error(`Score: ${score} / ${ITEMS.length}`);
   };
 
   const handleShowAnswer = () => {
-    const correctMap = {};
-
-    ITEMS.forEach((item) => {
-      correctMap[item.id] = item.correct;
-    });
-
-    setAnswers(correctMap);
-    setShowResults(true);
+    const filled = {};
+    ITEMS.forEach((item) => { filled[item.id] = getDisplayAnswer(item); });
+    setAnswers(filled);
+    setShowResults(false);
     setShowAns(true);
   };
 
   const handleReset = () => {
     setAnswers({});
     setShowResults(false);
-    setShowAns(false);
+    setShowAns(false); // 🔓 unlock
   };
 
-  const renderPair = (item, pair) => {
-    const selected = answers[item.id] === pair;
-    const isCorrect = pair === item.correct;
-
-    let borderStyle = "2px solid transparent";
-
-    if (selected && !showResults) {
-      borderStyle = "4px solid #f39d66";
-    }
-
-    if (showResults) {
-      if (selected && isCorrect) {
-        borderStyle = "4px solid #f39d66";
-      } else if (selected && !isCorrect) {
-        borderStyle = "4px solid #ef4444";
-      }
-    }
-
-    return (
-      <div
-        onClick={() => handleSelect(item.id, pair)}
-        style={{
-          position: "relative",
-          display: "inline-flex",
-          alignItems: "center",
-          justifyContent: "center",
-          minWidth: "180px",
-          minHeight: "52px",
-          padding: "8px 18px",
-          border: borderStyle,
-          borderRadius: "999px",
-          background: "#fff",
-          color: "#222",
-          fontSize: "20px",
-          fontWeight: "500",
-          lineHeight: "1.2",
-          cursor: showAns ? "default" : "pointer",
-          boxSizing: "border-box",
-          userSelect: "none",
-          transition: "all 0.25s ease",
-          whiteSpace: "nowrap",
-        }}
-      >
-        {pair}
-
-        {showResults && selected && !isCorrect && (
-          <div
-            style={{
-              position: "absolute",
-              top: "-8px",
-              right: "-8px",
-              width: "22px",
-              height: "22px",
-              borderRadius: "50%",
-              backgroundColor: "#ef4444",
-              color: "#fff",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: "12px",
-              fontWeight: "700",
-              border: "2px solid #fff",
-              boxShadow: "0 2px 6px rgba(0,0,0,0.18)",
-            }}
-          >
-            ✕
-          </div>
-        )}
-      </div>
-    );
+  // ── helpers ───────────────────────────────
+  const isWrong = (item) => {
+    if (!showResults || showAns) return false;
+    return !isCorrect(answers[item.id] || "", item.correctAnswers);
   };
 
+  const getUnderlineColor = (item) => {
+    if (!showResults || showAns) return INPUT_UNDERLINE_DEFAULT;
+    return isWrong(item) ? INPUT_UNDERLINE_WRONG : INPUT_UNDERLINE_CORRECT;
+  };
+
+  // ── render ────────────────────────────────
   return (
- <div className="main-container-component">
-<div
+    <div className="main-container-component">
+      <style>{`
+        /* ── Paragraph — full width ── */
+        .www-paragraph {
+font-size: clamp(15px, 1.9vw, 22px);
+          line-height: 1.5;
+          color: ${PARAGRAPH_TEXT_COLOR};
+          background: ${PARAGRAPH_BG_COLOR};
+          text-align: justify;
+          margin: 0;
+          width: 100%;
+        }
+
+        /* ── Questions area: list LEFT | image RIGHT ── */
+        .www-questions {
+          display: grid;
+          grid-template-columns: minmax(0, 1fr) ${IMG_WIDTH};
+          gap: clamp(16px, 2.4vw, 28px);
+          align-items: start;
+          width: 100%;
+        }
+
+        .www-list {
+          display: flex;
+          flex-direction: column;
+          gap: clamp(6px, 1.2vw, 12px);
+        }
+
+        /* ── Single question row: num | sentence-line ── */
+        .www-row {
+          display: grid;
+          grid-template-columns: clamp(18px, 2vw, 26px) minmax(0, 1fr);
+          gap: clamp(6px, 1vw, 12px);
+          align-items: center;
+        }
+
+        .www-num {
+font-size: clamp(15px, 1.9vw, 22px);       
+          color: ${NUMBER_COLOR};
+          line-height: 1;
+          align-self: center;
+        }
+
+        /* sentence = before + input + after — همسطر ومع بعض */
+        .www-sentence-line {
+          display: flex;
+          align-items: flex-end;
+          flex-wrap: nowrap;
+          gap: clamp(4px, 0.6vw, 8px);
+          min-width: 0;
+        }
+
+        .www-text {
+font-size: clamp(15px, 1.9vw, 22px);          
+          color: ${SENTENCE_TEXT_COLOR};
+          line-height: 1.5;
+          white-space: nowrap;
+          padding-bottom: 4px;
+          flex-shrink: 0;
+        }
+
+        .www-img-box {
+          width: 100%;
+
+          height: ${IMG_HEIGHT};
+          overflow: hidden;
+        }
+        .www-img {
+          width: 100%;
+          height: 100%;
+          display: block;
+        }
+
+        /* Input wrapper */
+        .www-input-wrap {
+          position: relative;
+          display: inline-flex;
+          align-items: flex-end;
+          flex-shrink: 0;
+        }
+
+        /* Input — underline only */
+        .www-input {
+          background: transparent;
+          border: none;
+          border-bottom: 2px solid ${INPUT_UNDERLINE_DEFAULT};
+          outline: none;
+font-size: clamp(15px, 1.9vw, 22px);
+          color: ${INPUT_TEXT_COLOR};
+          width: clamp(80px, 10vw, 130px);
+          text-align: center;
+          line-height: 1.5;
+          box-sizing: border-box;
+        }
+        .www-input:disabled {
+          cursor: default;
+        }
+
+        /* ✕ Wrong badge */
+        .www-badge {
+          position: absolute;
+          top: -9px;
+          right: -11px;
+          width: clamp(17px, 1.9vw, 22px);
+          height: clamp(17px, 1.9vw, 22px);
+          border-radius: 50%;
+          background: ${WRONG_BADGE_BG};
+          color: ${WRONG_BADGE_TEXT_COLOR};
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: clamp(9px, 1vw, 12px);
+          font-weight: 700;
+          border: 2px solid #fff;
+          box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+          pointer-events: none;
+          z-index: 2;
+        }
+
+        /* Spacer column (right side under questions — empty) */
+        .www-spacer { width: 100%; }
+
+        /* Buttons */
+        .www-buttons {
+          display: flex;
+          justify-content: center;
+          margin-top: clamp(8px, 1.6vw, 18px);
+        }
+
+        /* ── Responsive ── */
+        @media (max-width: 760px) {
+          .www-questions {
+            grid-template-columns: 1fr;
+          }
+          .www-img-box {
+            width: 100%;
+            max-width: 340px;
+            margin: 0 auto;
+          }
+
+          .www-text { white-space: normal; }
+        }
+
+        @media (max-width: 480px) {
+          .www-input { width: clamp(70px, 28vw, 110px); }
+        }
+      `}</style>
+
+      <div
         className="div-forall"
         style={{
           display: "flex",
           flexDirection: "column",
-          gap: "18px",
+          gap: "clamp(14px, 2vw, 22px)",
           maxWidth: "1100px",
           margin: "0 auto",
         }}
       >
-     
-        <style>{`
-          .wb-c6-grid {
-            display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 32px 36px;
-            width: 100%;
-            align-items: start;
-          }
-
-          .wb-c6-item {
-            display: flex;
-            align-items: flex-start;
-            gap: 14px;
-            min-width: 0;
-          }
-
-          .wb-c6-num {
-            font-size: 22px;
-            font-weight: 700;
-            color: #222;
-            line-height: 1;
-            min-width: 18px;
-            margin-top: 10px;
-            flex-shrink: 0;
-          }
-
-          .wb-c6-body {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 14px;
-            width: 100%;
-            min-width: 0;
-          }
-
-          .wb-c6-img-frame {
-            width: 100%;
-            max-width: 470px;
-            height: 185px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-            box-sizing: border-box;
-            background: transparent;
-            border: none;
-            border-radius: 0;
-            box-shadow: none;
-          }
-
-          .wb-c6-img {
-            max-width: 100%;
-            max-height: 100%;
-            width: auto;
-            height: auto;
-            object-fit: contain;
-            display: block;
-            border: none;
-            box-shadow: none;
-          }
-
-          .wb-c6-pairs {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 12px 16px;
-            width: 100%;
-            padding-left: 0;
-          }
-
-          .wb-c6-buttons {
-            display: flex;
-            justify-content: center;
-            margin-top: 6px;
-            width: 100%;
-          }
-
-          @media (max-width: 950px) {
-            .wb-c6-grid {
-              grid-template-columns: 1fr;
-              gap: 28px;
-            }
-
-            .wb-c6-img-frame {
-              max-width: 100%;
-              height: 170px;
-            }
-          }
-
-          @media (max-width: 768px) {
-            .div-forall {
-              padding: 0 20px;
-            }
-
-            .wb-c6-item {
-              gap: 10px;
-            }
-
-            .wb-c6-num {
-              font-size: 20px;
-              margin-top: 8px;
-            }
-
-            .wb-c6-img-frame {
-              height: 155px;
-            }
-
-            .wb-c6-pairs {
-              gap: 10px 12px;
-            }
-          }
-
-          @media (max-width: 600px) {
-            .div-forall {
-              padding: 0 16px;
-            }
-
-            .wb-c6-item {
-              gap: 8px;
-            }
-
-            .wb-c6-body {
-              gap: 12px;
-            }
-
-            .wb-c6-img-frame {
-              height: 145px;
-            }
-
-            .wb-c6-pairs {
-              flex-direction: column;
-              align-items: stretch;
-              gap: 10px;
-            }
-
-            .wb-c6-pairs > * {
-              width: 100%;
-            }
-          }
-
-          @media (max-width: 420px) {
-            .div-forall {
-              padding: 0 12px;
-            }
-
-            .wb-c6-num {
-              font-size: 18px;
-              min-width: 14px;
-            }
-
-            .wb-c6-img-frame {
-              height: 125px;
-            }
-          }
-        `}</style>
-
- <h1
+        {/* ── Header ── */}
+        <h1
           className="WB-header-title-page8"
-          style={{
-            margin: 0,
-            display: "flex",
-            alignItems: "center",
-            gap: "12px",
-            flexWrap: "wrap",
-          }}
-        >          <span className="WB-ex-A">C</span>
-          Look and read. Circle the correct pair.
+          style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
+        >
+          <span className="WB-ex-A">C</span>
+          Read and write{" "}
+          <span style={{ color: "#f89631", fontStyle: "italic" }}>will</span>
+          {" "}or{" "}
+          <span style={{ color: "#f89631", fontStyle: "italic" }}>won't</span>.
         </h1>
 
-        <div className="wb-c6-grid">
-          {ITEMS.map((item) => (
-            <div key={item.id} className="wb-c6-item">
-              <div className="wb-c6-num">{item.id}</div>
+        {/* ── Paragraph — full width ── */}
+        <p className="www-paragraph">{PARAGRAPH}</p>
 
-              <div className="wb-c6-body">
-                <div className="wb-c6-img-frame">
-                  <img
-                    src={item.img}
-                    alt={`question-${item.id}`}
-                    className="wb-c6-img"
-                  />
-                </div>
+        {/* ── Bottom: questions LEFT | image RIGHT ── */}
+        <div className="www-questions">
+          <div className="www-list">
+            {ITEMS.map((item) => {
+              const wrong  = isWrong(item);
+              const value  = answers[item.id] || "";
+              const uColor = getUnderlineColor(item);
+              const tColor = showAns ? INPUT_ANSWER_TEXT_COLOR : INPUT_TEXT_COLOR;
 
-                <div className="wb-c6-pairs">
-                  {item.pairs.map((pair) => (
-                    <React.Fragment key={pair}>
-                      {renderPair(item, pair)}
-                    </React.Fragment>
-                  ))}
+              return (
+                <div key={item.id} className="www-row">
+
+                  {/* Number */}
+                  <span className="www-num">{item.id}</span>
+
+                  {/* Sentence: before + input + after — all on one line */}
+                  <div className="www-sentence-line">
+
+                    {item.before && (
+                      <span className="www-text">{item.before}</span>
+                    )}
+
+                    {/* Input + badge */}
+                    <div className="www-input-wrap">
+                      <input
+                        type="text"
+                        className="www-input"
+                        value={value}
+                        disabled={isLocked}
+                        onChange={(e) => handleChange(item.id, e.target.value)}
+                        style={{
+                          borderBottomColor: uColor,
+                          color: tColor,
+                          cursor: isLocked ? "default" : "text",
+                        }}
+                        spellCheck={false}
+                        autoComplete="off"
+                      />
+                      {wrong && <div className="www-badge">✕</div>}
+                    </div>
+
+                    {item.after && (
+                      <span className="www-text">{item.after}</span>
+                    )}
+
+                  </div>
                 </div>
-              </div>
-            </div>
-          ))}
+              );
+            })}
+          </div>
+
+          {/* Image — bottom right */}
+          <div className="www-img-box">
+            <img src={chefImg} alt="chef cooking" className="www-img" />
+          </div>
         </div>
 
-        <div className="wb-c6-buttons">
+        {/* ── Buttons ── */}
+        <div className="www-buttons">
           <Button
             checkAnswers={handleCheck}
             handleShowAnswer={handleShowAnswer}

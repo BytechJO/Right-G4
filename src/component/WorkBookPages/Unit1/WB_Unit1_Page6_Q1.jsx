@@ -2,304 +2,256 @@ import React, { useState } from "react";
 import Button from "../Button";
 import ValidationAlert from "../../Popup/ValidationAlert";
 
-import img1 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U1 Folder/Page 6/SVG/Asset 1.svg";
-import img2 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U1 Folder/Page 6/SVG/Asset 2.svg";
-import img3 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U1 Folder/Page 6/SVG/Asset 3.svg";
-import img4 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U1 Folder/Page 6/SVG/Asset 4.svg";
-import img5 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U1 Folder/Page 6/SVG/Asset 5.svg";
-import img6 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U1 Folder/Page 6/SVG/Asset 6.svg";
+// ─────────────────────────────────────────────
+//  🖼️  IMAGES — غيّر المسارات حسب مشروعك
+// ─────────────────────────────────────────────
+import img1 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U1 Folder/Page 6/SVG/Asset 1.svg";
+import img2 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U1 Folder/Page 6/SVG/Asset 2.svg";
+import img3 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U1 Folder/Page 6/SVG/Asset 3.svg";
+import img4 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U1 Folder/Page 6/SVG/Asset 4.svg";
 
-const ACTIVE_COLOR = "#f39b42";
-const WRONG_COLOR = "#ef4444";
+// ─────────────────────────────────────────────
+//  🎨  COLORS — كلها قابلة للتعديل
+// ─────────────────────────────────────────────
+const WORD_BANK_BORDER_COLOR  = "#2096a6";   // بوردر الـ word bank box
+const WORD_BANK_BG_COLOR      = "#ffffff";   // خلفية الـ word bank box
+const WORD_BANK_TEXT_COLOR    = "#2b2b2b";   // نص الـ word bank
+const WORD_BANK_DIVIDER_COLOR = "#3a3a3a";   // لون الـ | بين الكلمات
 
-const ITEMS = [
-  {
-    id: 1,
-    img: img1,
-    options: ["giraffe", "bear"],
-    correct: "giraffe",
-  },
-  {
-    id: 2,
-    img: img2,
-    options: ["basketball", "football"],
-    correct: "basketball",
-  },
-  {
-    id: 3,
-    img: img3,
-    options: ["snake", "elephant"],
-    correct: "snake",
-  },
-  {
-    id: 4,
-    img: img4,
-    options: ["big", "small"],
-    correct: "big",
-  },
-  {
-    id: 5,
-    img: img5,
-    options: ["light", "heavy"],
-    correct: "light",
-  },
-  {
-    id: 6,
-    img: img6,
-    options: ["slow", "fast"],
-    correct: "fast",
-  },
+const INPUT_UNDERLINE_DEFAULT = "#3f3f3f";   // خط الـ input الفارغ / صح
+const INPUT_UNDERLINE_WRONG   = "#ef4444";   // خط الـ input عند الخطأ
+
+const INPUT_TEXT_COLOR        = "#2b2b2b";   // لون نص المستخدم
+const INPUT_ANSWER_TEXT_COLOR = "#c81e1e";   // لون الإجابة عند Show Answer
+
+const WRONG_BADGE_BG          = "#ef4444";   // خلفية badge الخطأ
+const WRONG_BADGE_TEXT_COLOR  = "#ffffff";   // نص badge الخطأ
+
+const NUMBER_COLOR            = "#2b2b2b";   // لون الأرقام
+
+const IMG_BORDER_RADIUS       = "10px";
+const IMG_HEIGHT              = "clamp(140px, 20vw, 220px)";
+
+// ─────────────────────────────────────────────
+//  📝  EXERCISE DATA
+// ─────────────────────────────────────────────
+const WORD_BANK = [
+  "play with the cats",
+  "draw a picture",
+  "watch the horses",
+  "look at the ducks",
 ];
 
-export default function WB_Unit3_Page6_QG() {
-  const [answers, setAnswers] = useState({});
+const ITEMS = [
+  { id: 1, img: img1, correct: "She will watch the horses."    },
+  { id: 2, img: img2, correct: "She will draw a picture."      },
+  { id: 3, img: img3, correct: "He will look at the ducks."    },
+  { id: 4, img: img4, correct: "They will play with the cats." },
+];
+
+// ─────────────────────────────────────────────
+//  🔧  NORMALIZE
+// ─────────────────────────────────────────────
+const normalize = (str) =>
+  str.toLowerCase().replace(/[^a-z0-9\s']/g, "").replace(/\s+/g, " ").trim();
+
+// correctAnswers array لكل سؤال — يقبل بوجود نقطة أو بدونها
+const getCorrectAnswers = (correct) => [
+  correct,
+  correct.replace(/\.$/, ""),   // بدون نقطة
+];
+
+// ─────────────────────────────────────────────
+//  COMPONENT
+// ─────────────────────────────────────────────
+export default function WB_LookReadWriteSentences_QG() {
+  const [answers,     setAnswers]     = useState({});
   const [showResults, setShowResults] = useState(false);
-  const [showAns, setShowAns] = useState(false);
+  const [showAns,     setShowAns]     = useState(false);
 
-  const handleSelect = (id, value) => {
-    if (showAns) return;
+  const isLocked = showResults || showAns;
 
-    setAnswers((prev) => ({
-      ...prev,
-      [id]: value,
-    }));
-
-    setShowResults(false);
+  // ── handlers ──────────────────────────────
+  const handleChange = (id, value) => {
+    if (isLocked) return;
+    setAnswers((prev) => ({ ...prev, [id]: value }));
   };
 
   const handleCheck = () => {
-    if (showAns) return;
-
-    const allAnswered = ITEMS.every((item) => answers[item.id]);
-
+    if (isLocked) return;
+    const allAnswered = ITEMS.every(
+      (item) => answers[item.id] && answers[item.id].trim() !== ""
+    );
     if (!allAnswered) {
-      ValidationAlert.info("Please answer all questions first.");
+      ValidationAlert.info("Please complete all answers first.");
       return;
     }
-
     let score = 0;
-
     ITEMS.forEach((item) => {
-      if (answers[item.id] === item.correct) {
-        score++;
-      }
+      const accepted = getCorrectAnswers(item.correct);
+      if (accepted.some((ans) => normalize(answers[item.id] || "") === normalize(ans))) score++;
     });
-
-    setShowResults(true);
-
-    if (score === ITEMS.length) {
-      ValidationAlert.success(`Score: ${score} / ${ITEMS.length}`);
-    } else if (score > 0) {
-      ValidationAlert.warning(`Score: ${score} / ${ITEMS.length}`);
-    } else {
-      ValidationAlert.error(`Score: ${score} / ${ITEMS.length}`);
-    }
+    setShowResults(true); // 🔒
+    if (score === ITEMS.length)   ValidationAlert.success(`Score: ${score} / ${ITEMS.length}`);
+    else if (score > 0)           ValidationAlert.warning(`Score: ${score} / ${ITEMS.length}`);
+    else                          ValidationAlert.error(`Score: ${score} / ${ITEMS.length}`);
   };
 
   const handleShowAnswer = () => {
     const filled = {};
-    ITEMS.forEach((item) => {
-      filled[item.id] = item.correct;
-    });
-
+    ITEMS.forEach((item) => { filled[item.id] = item.correct; });
     setAnswers(filled);
-    setShowResults(true);
-    setShowAns(true);
+    setShowResults(false);
+    setShowAns(true); // 🔒
   };
 
-  const handleStartAgain = () => {
+  const handleReset = () => {
     setAnswers({});
     setShowResults(false);
-    setShowAns(false);
+    setShowAns(false); // 🔓
   };
 
+  // ── helpers ───────────────────────────────
   const isWrong = (item) => {
     if (!showResults || showAns) return false;
-    return answers[item.id] && answers[item.id] !== item.correct;
+    const accepted = getCorrectAnswers(item.correct);
+    return !accepted.some((ans) => normalize(answers[item.id] || "") === normalize(ans));
   };
 
-  const renderOption = (item, option) => {
-    const selected = answers[item.id] === option;
-    const wrong = isWrong(item) && selected;
-    const showCorrectAsSelected = showAns && item.correct === option;
-
-    return (
-      <div
-        onClick={() => handleSelect(item.id, option)}
-        className={`wb-g6-option ${
-          selected || showCorrectAsSelected ? "selected" : ""
-        } ${wrong ? "wrong" : ""} ${showAns ? "disabled" : ""}`}
-      >
-        {option}
-
-        {wrong && <div className="wb-g6-wrong-badge">✕</div>}
-      </div>
-    );
+  const getUnderlineColor = (item) => {
+    if (!showResults || showAns) return INPUT_UNDERLINE_DEFAULT;
+    return isWrong(item) ? INPUT_UNDERLINE_WRONG : INPUT_UNDERLINE_DEFAULT;
   };
 
+  // ── render ────────────────────────────────
   return (
     <div className="main-container-component">
       <style>{`
-        .wb-g6-wrap {
+        /* ── Word Bank ── */
+        .lws-bank {
+          width: 100%;
+          border: 2px solid ${WORD_BANK_BORDER_COLOR};
+          border-radius: 10px;
+          background: ${WORD_BANK_BG_COLOR};
+          padding: clamp(8px, 1.2vw, 14px) clamp(12px, 2vw, 24px);
           display: flex;
-          flex-direction: column;
-          gap: clamp(20px, 2.4vw, 28px);
-          width: 100%;
-        }
-
-        .wb-g6-grid {
-          display: grid;
-          grid-template-columns: repeat(2, minmax(0, 1fr));
-          column-gap: clamp(28px, 4vw, 46px);
-          row-gap: clamp(18px, 2.4vw, 28px);
-          width: 100%;
-          align-items: start;
-        }
-
-        .wb-g6-item {
-          display: grid;
-          grid-template-columns: clamp(20px, 2.4vw, 28px) clamp(70px, 11vw, 115px) minmax(0, 1fr);
-          gap: clamp(10px, 1.6vw, 18px);
-          align-items: center;
-          width: 100%;
-        }
-
-        .wb-g6-number {
-          font-size: clamp(18px, 2vw, 22px);
-          font-weight: 700;
-          color: #222;
-          line-height: 1;
-        }
-
-        .wb-g6-image-wrap {
-          display: flex;
+          flex-wrap: wrap;
           align-items: center;
           justify-content: center;
-          min-height: clamp(72px, 11vw, 120px);
+          gap: clamp(6px, 1vw, 12px);
+          box-sizing: border-box;
         }
 
-        .wb-g6-image {
-          max-width: 100%;
-          max-height: clamp(72px, 11vw, 120px);
-          width: auto;
-          height: auto;
-          object-fit: contain;
-          display: block;
+        .lws-word {
+font-size: clamp(15px, 1.9vw, 22px);       
+          color: ${WORD_BANK_TEXT_COLOR};
+          white-space: nowrap;
         }
 
-        .wb-g6-options {
+        .lws-divider {
+          color: ${WORD_BANK_DIVIDER_COLOR};
+font-size: clamp(15px, 1.9vw, 22px);          u
+ser-select: none;
+        }
+
+        /* ── 2-column grid ── */
+        .lws-grid {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: clamp(16px, 2.6vw, 32px) clamp(20px, 3vw, 40px);
+          width: 100%;
+        }
+
+        /* ── Single card: num + img + input ── */
+        .lws-card {
           display: flex;
           flex-direction: column;
-          gap: clamp(8px, 1vw, 12px);
+          gap: clamp(8px, 1.2vw, 14px);
           min-width: 0;
         }
 
-        .wb-g6-option {
+        /* Number row */
+        .lws-num-row {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+        }
+
+        .lws-num {
+font-size: clamp(15px, 1.9vw, 22px);          font-weight: 700;
+          color: ${NUMBER_COLOR};
+          line-height: 1;
+        }
+
+        /* Image */
+        .lws-img-box {
+          width: 100%;
+          height: ${IMG_HEIGHT};
+          border-radius: ${IMG_BORDER_RADIUS};
+          border:2px solid #2096a6;
+          overflow: hidden;
+        }
+        .lws-img {
+          width: 100%;
+          height: 100%;
+          
+          object-fit: cover;
+          display: block;
+        }
+
+        /* Input row — full width underline */
+        .lws-input-wrap {
           position: relative;
-          width: fit-content;
-          max-width: 100%;
-          padding: clamp(4px, 0.6vw, 6px) clamp(16px, 2vw, 26px);
-          border: 3px solid transparent;
-          border-radius: 999px;
+          width: 100%;
+        }
+
+        .lws-input {
+          width: 100%;
           background: transparent;
-          color: #222;
-          font-size: clamp(16px, 2vw, 20px);
-          font-weight: 500;
-          line-height: 1.2;
-          cursor: pointer;
-          transition: all 0.2s ease;
-          user-select: none;
+          border: none;
+          border-bottom: 2px solid ${INPUT_UNDERLINE_DEFAULT};
+          outline: none;
+font-size: clamp(15px, 1.9vw, 22px);         
+          color: ${INPUT_TEXT_COLOR};
+                       line-height: 1.5;
           box-sizing: border-box;
-          white-space: normal;
-          word-break: break-word;
         }
-
-        .wb-g6-option.selected {
-          border-color: ${ACTIVE_COLOR};
-        }
-
-        .wb-g6-option.wrong {
-          border-color: ${WRONG_COLOR};
-        }
-
-        .wb-g6-option.disabled {
+        .lws-input:disabled {
           cursor: default;
         }
 
-        .wb-g6-wrong-badge {
+        /* ✕ wrong badge */
+        .lws-badge {
           position: absolute;
-          top: clamp(-8px, -0.8vw, -6px);
-          right: clamp(-8px, -0.8vw, -6px);
-          width: clamp(18px, 2vw, 22px);
-          height: clamp(18px, 2vw, 22px);
+          top: -9px;
+          right: -2px;
+          width: clamp(17px, 1.9vw, 22px);
+          height: clamp(17px, 1.9vw, 22px);
           border-radius: 50%;
-          background: ${WRONG_COLOR};
-          color: #fff;
+          background: ${WRONG_BADGE_BG};
+          color: ${WRONG_BADGE_TEXT_COLOR};
           display: flex;
           align-items: center;
           justify-content: center;
-          font-size: clamp(10px, 1vw, 12px);
+          font-size: clamp(9px, 1vw, 12px);
           font-weight: 700;
           border: 2px solid #fff;
-          box-shadow: 0 2px 6px rgba(0,0,0,0.18);
-          box-sizing: border-box;
+          box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+          pointer-events: none;
+          z-index: 2;
         }
 
-        .wb-g6-buttons {
+        /* Buttons */
+        .lws-buttons {
           display: flex;
           justify-content: center;
-          margin-top: clamp(2px, 0.8vw, 6px);
+          margin-top: clamp(8px, 1.6vw, 18px);
         }
 
-        @media (max-width: 900px) {
-          .wb-g6-grid {
-            column-gap: 22px;
-            row-gap: 20px;
-          }
-
-          .wb-g6-item {
-            grid-template-columns: 22px clamp(62px, 10vw, 90px) minmax(0, 1fr);
-            gap: 10px;
-          }
-
-          .wb-g6-option {
-            font-size: clamp(14px, 1.8vw, 18px);
-          }
-        }
-
-        @media (max-width: 650px) {
-          .wb-g6-grid {
+        /* ── Responsive ── */
+        @media (max-width: 560px) {
+          .lws-grid {
             grid-template-columns: 1fr;
-            row-gap: 18px;
-          }
-
-          .wb-g6-item {
-            grid-template-columns: 22px clamp(70px, 16vw, 90px) minmax(0, 1fr);
-          }
-
-          .wb-g6-image-wrap {
-            min-height: 76px;
-          }
-
-          .wb-g6-image {
-            max-height: 76px;
-          }
-        }
-
-        @media (max-width: 430px) {
-          .wb-g6-item {
-            grid-template-columns: 18px 58px minmax(0, 1fr);
-            gap: 8px;
-          }
-
-          .wb-g6-option {
-            font-size: 14px;
-            padding: 4px 14px;
-            border-width: 2px;
-          }
-
-          .wb-g6-number {
-            font-size: 17px;
           }
         }
       `}</style>
@@ -309,45 +261,84 @@ export default function WB_Unit3_Page6_QG() {
         style={{
           display: "flex",
           flexDirection: "column",
-          gap: "28px",
+          gap: "clamp(14px, 2vw, 22px)",
           maxWidth: "1100px",
           margin: "0 auto",
         }}
       >
-        <h1 className="WB-header-title-page8" style={{ margin: 0 }}>
-          <span className="WB-ex-A">G</span> Look, read, and circle.
+        {/* ── Header ── */}
+        <h1
+          className="WB-header-title-page8"
+          style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
+        >
+          <span className="WB-ex-A">G</span>
+          Look, read, and write sentences.
         </h1>
 
-        <div className="wb-g6-wrap">
-          <div className="wb-g6-grid">
-            {ITEMS.map((item) => (
-              <div key={item.id} className="wb-g6-item">
-                <div className="wb-g6-number">{item.id}</div>
+        {/* ── Word Bank ── */}
+        <div className="lws-bank">
+          {WORD_BANK.map((word, i) => (
+            <React.Fragment key={word}>
+              <span className="lws-word">{word}</span>
+              {i < WORD_BANK.length - 1 && (
+                <span className="lws-divider">|</span>
+              )}
+            </React.Fragment>
+          ))}
+        </div>
 
-                <div className="wb-g6-image-wrap">
-                  <img
-                    src={item.img}
-                    alt={`question-${item.id}`}
-                    className="wb-g6-image"
+        {/* ── 2-column grid ── */}
+        <div className="lws-grid">
+          {ITEMS.map((item) => {
+            const wrong  = isWrong(item);
+            const value  = answers[item.id] || "";
+            const uColor = getUnderlineColor(item);
+            const tColor = showAns ? INPUT_ANSWER_TEXT_COLOR : INPUT_TEXT_COLOR;
+
+            return (
+              <div key={item.id} className="lws-card">
+
+                {/* Number */}
+                <div className="lws-num-row">
+                  <span className="lws-num">{item.id}</span>
+                </div>
+
+                {/* Image */}
+                <div className="lws-img-box">
+                  <img src={item.img} alt={`q${item.id}`} className="lws-img" />
+                </div>
+
+                {/* Input */}
+                <div className="lws-input-wrap">
+                  <input
+                    type="text"
+                    className="lws-input"
+                    value={value}
+                    disabled={isLocked}
+                    onChange={(e) => handleChange(item.id, e.target.value)}
+                    style={{
+                      borderBottomColor: uColor,
+                      color: tColor,
+                      cursor: isLocked ? "default" : "text",
+                    }}
+                    spellCheck={false}
+                    autoComplete="off"
                   />
+                  {wrong && <div className="lws-badge">✕</div>}
                 </div>
 
-                <div className="wb-g6-options">
-                  {item.options.map((option) => (
-                    <div key={option}>{renderOption(item, option)}</div>
-                  ))}
-                </div>
               </div>
-            ))}
-          </div>
+            );
+          })}
+        </div>
 
-          <div className="wb-g6-buttons">
-            <Button
-              checkAnswers={handleCheck}
-              handleShowAnswer={handleShowAnswer}
-              handleStartAgain={handleStartAgain}
-            />
-          </div>
+        {/* ── Buttons ── */}
+        <div className="lws-buttons">
+          <Button
+            checkAnswers={handleCheck}
+            handleShowAnswer={handleShowAnswer}
+            handleStartAgain={handleReset}
+          />
         </div>
       </div>
     </div>

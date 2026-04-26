@@ -1,692 +1,389 @@
-import { useState, useRef, useLayoutEffect, useEffect } from "react";
-import ValidationAlert from "../../Popup/ValidationAlert";
+import React, { useState } from "react";
 import Button from "../Button";
-import { TbMessageCircle } from "react-icons/tb";
-import { FaPlay, FaPause } from "react-icons/fa";
-import { IoMdSettings } from "react-icons/io";
+import ValidationAlert from "../../Popup/ValidationAlert";
 
-import sound from "../../../assets/audio/ClassBook/Grade 3/cd1pg8instruction-adult-lady_nlyjQBM0.mp3"; // ← غيّر المسار حسب ملف الأوديو
+// ─────────────────────────────────────────────
+//  🖼️  IMAGES — غيّر المسارات حسب مشروعك
+// ─────────────────────────────────────────────
+import img1 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U1 Folder/Page 8/SVG/Asset 1.svg"; // boy delivering milk
+import img2 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U1 Folder/Page 8/SVG/Asset 2.svg"; // girl feeding chickens
+import img3 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U1 Folder/Page 8/SVG/Asset 3.svg"; // boys running in race
+import img4 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U1 Folder/Page 8/SVG/Asset 4.svg"; // girl riding horse
+import img5 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U1 Folder/Page 8/SVG/Asset 5.svg"; // girl eating bread
+import img6 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U1 Folder/Page 8/SVG/Asset 6.svg"; // boys flying kite
 
-import img1 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U1 Folder/Page8/SVG/Asset 1.svg";
-import img2 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U1 Folder/Page8/SVG/Asset 2.svg";
-import img3 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U1 Folder/Page8/SVG/Asset 3.svg";
-import img4 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U1 Folder/Page8/SVG/Asset 4.svg";
-import img5 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U1 Folder/Page8/SVG/Asset 5.svg";
-import img6 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U1 Folder/Page8/SVG/Asset 6.svg";
+// ─────────────────────────────────────────────
+//  🎨  COLORS — كلها قابلة للتعديل
+// ─────────────────────────────────────────────
+const IMG_BORDER_COLOR        = "#2096a6";   // بوردر إطار الصور
+const CHECK_ICON_COLOR        = "#c81e1e";   // لون علامة ✓ في الصورة
+const CROSS_ICON_COLOR        = "#c81e1e";   // لون علامة ✗ في الصورة
+const ICON_BG_COLOR           = "#ffffff";   // خلفية أيقونة ✓ / ✗
+const ICON_BORDER_COLOR       = "#2096a6";   // بوردر أيقونة ✓ / ✗
 
-const ACTIVE_COLOR = "#f39b42";
-const LINE_COLOR = "#f39b42";
-const INACTIVE_COLOR = "#a3a3a3";
-const WRONG_COLOR = "#ef4444";
+const INPUT_BG_DEFAULT        = "#ffffff";   // خلفية مربع الرقم فارغ
+const INPUT_BG_CORRECT        = "#ffffff";   // خلفية مربع الرقم صح
+const INPUT_BG_WRONG          = "#ffffff";   // خلفية مربع الرقم غلط
+const INPUT_BORDER_DEFAULT    = "#2096a6";   // بوردر مربع الرقم
+const INPUT_TEXT_COLOR        = "#2b2b2b";   // لون رقم المستخدم
+const INPUT_ANSWER_COLOR      = "#c81e1e";   // لون الرقم عند Show Answer
 
-const EXERCISE_DATA = {
-  top: [
-    { id: 1, img: img1 },
-    { id: 2, img: img2 },
-    { id: 3, img: img3 },
-    { id: 4, img: img4 },
-    { id: 5, img: img5 },
-    { id: 6, img: img6 },
-  ],
+const WRONG_BADGE_BG          = "#ef4444";   // خلفية badge الخطأ
+const WRONG_BADGE_TEXT_COLOR  = "#ffffff";   // نص badge الخطأ
 
-  bottom: [
-    { id: 1, text: "long i" },
-    { id: 2, text: "short a" },
-    { id: 3, text: "long e" },
-    { id: 4, text: "short u" },
-    { id: 5, text: "long u" },
-    { id: 6, text: "long o" },
-  ],
+const SENTENCE_NUM_COLOR      = "#2b2b2b";   // لون أرقام الجمل
+const SENTENCE_TEXT_COLOR     = "#2b2b2b";   // لون نص الجمل
 
-  correctMatches: {
-    1: 5,
-    2: 6,
-    3: 2,
-    4: 3,
-    5: 4,
-    6: 1,
-  },
-};
+// ─────────────────────────────────────────────
+//  📝  EXERCISE DATA
+// ─────────────────────────────────────────────
 
-const styles = {
-  matchArea: {
-    position: "relative",
-    width: "100%",
-    minHeight: "clamp(260px, 42vw, 430px)",
-    display: "flex",
-    flexDirection: "column",
-    gap: "clamp(18px, 3vw, 34px)",
-  },
-
-  topRow: {
-    display: "grid",
-    gridTemplateColumns: "repeat(6, minmax(0, 1fr))",
-    gap: "clamp(8px, 1.8vw, 22px)",
-    alignItems: "start",
-    zIndex: 2,
-    width: "100%",
-  },
-
-  topItem: {
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    gap: "clamp(8px, 1.3vw, 10px)",
-    position: "relative",
-    minWidth: 0,
-  },
-
-  topNumber: {
-    width: "100%",
-    paddingLeft: "clamp(2px, 0.5vw, 6px)",
-    boxSizing: "border-box",
-    fontSize: "clamp(16px, 2vw, 22px)",
-    fontWeight: "700",
-    color: "#111",
-    lineHeight: 1,
-  },
-
-  topImageBox: {
-    width: "clamp(42px, 9vw, 120px)",
-    aspectRatio: "1 / 1",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    cursor: "pointer",
-    borderRadius: "clamp(8px, 1vw, 14px)",
-    border: "2px solid transparent",
-    transition: "0.2s ease",
-    boxSizing: "border-box",
-    padding: "4px",
-    maxWidth: "100%",
-  },
-
-  topImage: {
-    width: "100%",
-    height: "100%",
-    objectFit: "contain",
-    display: "block",
-  },
-
-  dot: {
-    width: "clamp(10px, 1.4vw, 16px)",
-    height: "clamp(10px, 1.4vw, 16px)",
-    borderRadius: "50%",
-    cursor: "pointer",
-    flexShrink: 0,
-  },
-
-  bottomRow: {
-    display: "grid",
-    gridTemplateColumns: "repeat(6, minmax(0, 1fr))",
-    gap: "clamp(8px, 1.8vw, 22px)",
-    alignItems: "start",
-    zIndex: 2,
-    marginTop: "clamp(8px, 2vw, 26px)",
-    width: "100%",
-  },
-
-  bottomItem: {
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    gap: "clamp(8px, 1.3vw, 10px)",
-    position: "relative",
-    minWidth: 0,
-  },
-
-  bottomLabel: {
-    width: "100%",
-    minHeight: "clamp(34px, 5vw, 54px)",
-    padding: "0 clamp(4px, 1vw, 10px)",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    fontSize: "clamp(12px, 2.1vw, 26px)",
-    fontWeight: "500",
-    color: "#222",
-    textAlign: "center",
-    lineHeight: 1.1,
-    borderRadius: "clamp(8px, 1vw, 14px)",
-    border: "2px solid transparent",
-    cursor: "pointer",
-    boxSizing: "border-box",
-    background: "transparent",
-    wordBreak: "break-word",
-    overflowWrap: "anywhere",
-  },
-
-  wrongBadge: {
-    position: "absolute",
-    width: "clamp(16px, 2vw, 22px)",
-    height: "clamp(16px, 2vw, 22px)",
-    borderRadius: "50%",
-    backgroundColor: WRONG_COLOR,
-    color: "#fff",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    fontSize: "clamp(9px, 1vw, 12px)",
-    fontWeight: "700",
-    border: "2px solid #fff",
-    boxShadow: "0 2px 6px rgba(0,0,0,0.18)",
-  },
-
-  buttonsWrap: {
-    display: "flex",
-    justifyContent: "center",
-    marginTop: "4px",
-    width: "100%",
-  },
-};
-
-const WB_Unit3_Page215_QB = () => {
-  // ─── Matching state ───────────────────────────────────────────────
-  const [selectedTop, setSelectedTop] = useState(null);
-  const [matches, setMatches] = useState({});
-  const [showResults, setShowResults] = useState(false);
-  const [showAns, setShowAns] = useState(false);
-  const [lines, setLines] = useState([]);
-
-  const containerRef = useRef(null);
-  const elementRefs = useRef({});
-
-  // ─── Audio state ──────────────────────────────────────────────────
-  const audioRef = useRef(null);
-  const settingsRef = useRef(null);
-  const stopAtSecond = 6.35; // ← غيّر هذه القيمة حسب الأوديو الجديد
-
-  const [isPlaying, setIsPlaying] = useState(true);
-  const [paused, setPaused] = useState(false);
-  const [current, setCurrent] = useState(0);
-  const [duration, setDuration] = useState(0);
-  const [showContinue, setShowContinue] = useState(false);
-  const [showCaption, setShowCaption] = useState(false);
-  const [activeIndex, setActiveIndex] = useState(null);
-  const [showSettings, setShowSettings] = useState(false);
-  const [volume, setVolume] = useState(1);
-  const [forceRender, setForceRender] = useState(0);
-
-  // ─── Captions ─────────────────────────────────────────────────────
-  // ← عدّل النصوص والتوقيتات حسب أوديو هذا التمرين
-const captions = [
-  { start: 0.60, end: 3.44, text: "Page eight. Phonics exercise B." },
-  { start: 4.48, end: 5.68, text: "Listen and match." },
-  { start: 6.74, end: 9.10, text: "1- tube." },
-  { start: 9.10, end: 11.62, text: "2- coat." },
-  { start: 11.62, end: 13.34, text: "3- jam." },
-  { start: 13.34, end: 15.98, text: "4- bee." },
-  { start: 15.98, end: 18.78, text: "5- nuts." },
-  { start: 19.80, end: 21.56, text: "6- kite." },
+// الجمل المرقمة في الأعلى
+const SENTENCES = [
+  { id: 1, text: "He won't deliver the milk tonight." },
+  { id: 2, text: "She will eat some bread."           },
+  { id: 3, text: "They won't fly a kite."             },
+  { id: 4, text: "She will feed the chickens."        },
+  { id: 5, text: "She won't ride the horse."          },
+  { id: 6, text: "They will run in the race."         },
 ];
-  const updateCaption = (time) => {
-    const index = captions.findIndex(
-      (cap) => time >= cap.start && time <= cap.end
+
+// الصور مع إجاباتها الصحيحة (الرقم الصح لكل صورة)
+// mark: "check" = ✓  |  "cross" = ✗
+const IMAGES = [
+  { key: "img-a", src: img1, correct: 1, mark: "cross" }, // boy delivering milk   → جملة 1 (won't)
+  { key: "img-b", src: img2, correct: 4, mark: "check" }, // girl feeding chickens → جملة 4 (will)
+  { key: "img-c", src: img3, correct: 6, mark: "check" }, // boys running          → جملة 6 (will)
+  { key: "img-d", src: img4, correct: 5, mark: "cross" }, // girl riding horse     → جملة 5 (won't)
+  { key: "img-e", src: img5, correct: 2, mark: "check" }, // girl eating bread     → جملة 2 (will)
+  { key: "img-f", src: img6, correct: 3, mark: "cross" }, // boys flying kite      → جملة 3 (won't)
+];
+
+// الأرقام الصحيحة المقبولة
+const VALID_NUMBERS = ["1","2","3","4","5","6"];
+
+// ─────────────────────────────────────────────
+//  🔧  NORMALIZE
+// ─────────────────────────────────────────────
+const normalize = (val) => val.trim();
+
+const isCorrectAnswer = (userVal, correct) =>
+  normalize(userVal) === String(correct);
+
+// ─────────────────────────────────────────────
+//  COMPONENT
+// ─────────────────────────────────────────────
+export default function WB_ReadLookNumber_QL() {
+  const [answers,     setAnswers]     = useState({});
+  const [showResults, setShowResults] = useState(false);
+  const [showAns,     setShowAns]     = useState(false);
+
+  const isLocked = showResults || showAns;
+
+  // ── handlers ──────────────────────────────
+  const handleChange = (key, value) => {
+    if (isLocked) return;
+    // يقبل رقم واحد بس (1-6)
+    if (value !== "" && !VALID_NUMBERS.includes(value)) return;
+    setAnswers((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const handleCheck = () => {
+    if (isLocked) return;
+    const allAnswered = IMAGES.every(
+      (img) => answers[img.key] && answers[img.key].trim() !== ""
     );
-    setActiveIndex(index);
-  };
-
-  // ─── Auto-play on mount + stop at intro ───────────────────────────
-  useEffect(() => {
-    const audio = audioRef.current;
-    if (!audio) return;
-
-    audio.currentTime = 0;
-    audio.play();
-
-    const interval = setInterval(() => {
-      if (audio.currentTime >= stopAtSecond) {
-        audio.pause();
-        setPaused(true);
-        setIsPlaying(false);
-        setShowContinue(true);
-        clearInterval(interval);
-      }
-    }, 100);
-
-    const handleEnded = () => {
-      audio.currentTime = 0;
-      setIsPlaying(false);
-      setPaused(false);
-      setActiveIndex(null);
-      setShowContinue(true);
-    };
-
-    audio.addEventListener("ended", handleEnded);
-
-    return () => {
-      clearInterval(interval);
-      audio.removeEventListener("ended", handleEnded);
-    };
-  }, []);
-
-  // ─── Caption scroll + force re-render ────────────────────────────
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setForceRender((prev) => prev + 1);
-    }, 1000);
-
-    if (activeIndex !== -1 && activeIndex !== null) {
-      const el = document.getElementById(`caption-${activeIndex}`);
-      if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
-    }
-
-    return () => clearInterval(timer);
-  }, [activeIndex]);
-
-  const togglePlay = () => {
-    const audio = audioRef.current;
-    if (!audio) return;
-
-    if (audio.paused) {
-      audio.play();
-      setPaused(false);
-      setIsPlaying(true);
-    } else {
-      audio.pause();
-      setPaused(true);
-      setIsPlaying(false);
-    }
-  };
-
-  // ─── Lines layout ─────────────────────────────────────────────────
-  useLayoutEffect(() => {
-    const updateLines = () => {
-      if (!containerRef.current) return;
-
-      const containerRect = containerRef.current.getBoundingClientRect();
-
-      const newLines = Object.entries(matches)
-        .map(([topId, bottomId]) => {
-          const topEl = elementRefs.current[`top-dot-${topId}`];
-          const bottomEl = elementRefs.current[`bottom-dot-${bottomId}`];
-          if (!topEl || !bottomEl) return null;
-
-          const topRect = topEl.getBoundingClientRect();
-          const bottomRect = bottomEl.getBoundingClientRect();
-
-          return {
-            id: `line-${topId}-${bottomId}`,
-            x1: topRect.left + topRect.width / 2 - containerRect.left,
-            y1: topRect.top + topRect.height / 2 - containerRect.top,
-            x2: bottomRect.left + bottomRect.width / 2 - containerRect.left,
-            y2: bottomRect.top + bottomRect.height / 2 - containerRect.top,
-          };
-        })
-        .filter(Boolean);
-
-      setLines(newLines);
-    };
-
-    const rafUpdate = () => requestAnimationFrame(updateLines);
-    rafUpdate();
-    window.addEventListener("resize", rafUpdate);
-
-    let resizeObserver;
-    if (containerRef.current && typeof ResizeObserver !== "undefined") {
-      resizeObserver = new ResizeObserver(rafUpdate);
-      resizeObserver.observe(containerRef.current);
-    }
-
-    return () => {
-      window.removeEventListener("resize", rafUpdate);
-      if (resizeObserver) resizeObserver.disconnect();
-    };
-  }, [matches, showAns, showResults]);
-
-  // ─── Matching handlers ────────────────────────────────────────────
-  const handleTopClick = (id) => {
-    if (showAns) return;
-    setSelectedTop(id);
-    setShowResults(false);
-  };
-
-  const handleBottomClick = (bottomId) => {
-    if (showAns || selectedTop === null) return;
-
-    const newMatches = { ...matches };
-    Object.keys(newMatches).forEach((key) => {
-      if (newMatches[key] === bottomId) delete newMatches[key];
-    });
-    newMatches[selectedTop] = bottomId;
-
-    setMatches(newMatches);
-    setSelectedTop(null);
-    setShowResults(false);
-  };
-
-  const checkAnswers = () => {
-    if (showAns) return;
-    const allConnected = EXERCISE_DATA.top.every((item) => matches[item.id]);
-    if (!allConnected) {
-      ValidationAlert.info("Please connect all items first.");
+    if (!allAnswered) {
+      ValidationAlert.info("Please number all pictures first.");
       return;
     }
-
-    setShowResults(true);
     let score = 0;
-    const total = EXERCISE_DATA.top.length;
-    Object.keys(EXERCISE_DATA.correctMatches).forEach((topId) => {
-      if (matches[topId] === EXERCISE_DATA.correctMatches[topId]) score++;
+    IMAGES.forEach((img) => {
+      if (isCorrectAnswer(answers[img.key] || "", img.correct)) score++;
     });
-
-    if (score === total) ValidationAlert.success(`Score: ${score} / ${total}`);
-    else if (score > 0) ValidationAlert.warning(`Score: ${score} / ${total}`);
-    else ValidationAlert.error(`Score: ${score} / ${total}`);
+    setShowResults(true);
+    if (score === IMAGES.length)   ValidationAlert.success(`Score: ${score} / ${IMAGES.length}`);
+    else if (score > 0)            ValidationAlert.warning(`Score: ${score} / ${IMAGES.length}`);
+    else                           ValidationAlert.error(`Score: ${score} / ${IMAGES.length}`);
   };
 
   const handleShowAnswer = () => {
-    setMatches(EXERCISE_DATA.correctMatches);
-    setShowResults(true);
+    const filled = {};
+    IMAGES.forEach((img) => { filled[img.key] = String(img.correct); });
+    setAnswers(filled);
+    setShowResults(false);
     setShowAns(true);
-    setSelectedTop(null);
   };
 
-  const handleStartAgain = () => {
-    setMatches({});
-    setSelectedTop(null);
+  const handleReset = () => {
+    setAnswers({});
     setShowResults(false);
     setShowAns(false);
-    setLines([]);
   };
 
-  // ─── Color helpers ────────────────────────────────────────────────
-  const getTopDotColor = (topId) =>
-    selectedTop === topId || matches[topId] ? ACTIVE_COLOR : INACTIVE_COLOR;
-
-  const getBottomDotColor = (bottomId) => {
-    const isConnected = Object.values(matches).includes(bottomId);
-    const isSelected = selectedTop !== null && matches[selectedTop] === bottomId;
-    return isSelected || isConnected ? ACTIVE_COLOR : INACTIVE_COLOR;
+  // ── helpers ───────────────────────────────
+  const isWrong = (img) => {
+    if (!showResults || showAns) return false;
+    return !isCorrectAnswer(answers[img.key] || "", img.correct);
   };
 
-  const isWrongMatch = (topId) =>
-    showResults &&
-    !!matches[topId] &&
-    matches[topId] !== EXERCISE_DATA.correctMatches[topId];
+  // ── render icon (✓ or ✗) ─────────────────
+  const renderIcon = (type) => (
+    <div className="rln-icon">
+      {type === "check" ? (
+        <svg viewBox="0 0 24 24" className="rln-icon-svg" fill="none">
+          <polyline points="4,13 9,18 20,6"
+            stroke={CHECK_ICON_COLOR} strokeWidth="3"
+            strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+      ) : (
+        <svg viewBox="0 0 24 24" className="rln-icon-svg" fill="none">
+          <line x1="5" y1="5" x2="19" y2="19" stroke={CROSS_ICON_COLOR} strokeWidth="3" strokeLinecap="round"/>
+          <line x1="19" y1="5" x2="5" y2="19" stroke={CROSS_ICON_COLOR} strokeWidth="3" strokeLinecap="round"/>
+        </svg>
+      )}
+    </div>
+  );
 
-  // ─── Render ───────────────────────────────────────────────────────
+  // ── render one image card ─────────────────
+  const renderImageCard = (img) => {
+    const wrong   = isWrong(img);
+    const value   = answers[img.key] || "";
+    const tColor  = showAns ? INPUT_ANSWER_COLOR : INPUT_TEXT_COLOR;
+    const bgColor = wrong ? INPUT_BG_WRONG : INPUT_BG_DEFAULT;
+
+    return (
+      <div key={img.key} className="rln-card">
+
+        {/* Number input box — top-right corner */}
+        <div className="rln-num-box-wrap">
+          <input
+            type="text"
+            inputMode="numeric"
+            maxLength={1}
+            className={`rln-num-box ${wrong ? "rln-num-box--wrong" : ""} ${showAns ? "rln-num-box--answer" : ""}`}
+            value={value}
+            disabled={isLocked}
+            onChange={(e) => handleChange(img.key, e.target.value)}
+            style={{ color: tColor, background: bgColor }}
+            spellCheck={false}
+            autoComplete="off"
+          />
+          {wrong && <div className="rln-badge">✕</div>}
+        </div>
+
+        {/* Image */}
+        <img src={img.src} alt={`scene-${img.key}`} className="rln-img" />
+
+        {/* ✓ / ✗ icon — bottom-right corner */}
+        {renderIcon(img.mark)}
+
+      </div>
+    );
+  };
+
+  // ── render ────────────────────────────────
   return (
     <div className="main-container-component">
+      <style>{`
+        /* ── Sentences ── */
+        .rln-sentences {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: clamp(4px, 0.8vw, 10px) clamp(16px, 3vw, 48px);
+          width: 100%;
+        }
+
+        .rln-sentence-row {
+          display: flex;
+          align-items: baseline;
+          gap: clamp(6px, 1vw, 12px);
+        }
+
+        .rln-s-num {
+          font-size: clamp(14px, 1.7vw, 20px);
+          font-weight: 700;
+          color: ${SENTENCE_NUM_COLOR};
+          flex-shrink: 0;
+          min-width: clamp(14px, 1.8vw, 22px);
+        }
+
+        .rln-s-text {
+          font-size: clamp(14px, 1.7vw, 20px);
+          font-weight: 400;
+          color: ${SENTENCE_TEXT_COLOR};
+          line-height: 1.5;
+        }
+
+        /* ── Images grid: 3 cols × 2 rows ── */
+        .rln-img-grid {
+          display: grid;
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+          gap: clamp(12px, 2vw, 24px);
+          width: 100%;
+        }
+
+        /* ── Single card — square ── */
+        .rln-card {
+          position: relative;
+          border: 2px solid ${IMG_BORDER_COLOR};
+          border-radius: 10px;
+          overflow: hidden;
+          display: block;
+          background: #fff;
+          width: 70%;
+          aspect-ratio: 1 / 1;
+        }
+
+        /* Image fills card completely */
+        .rln-img {
+          position: absolute;
+          inset: 0;
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          display: block;
+          border-radius: 0;
+        }
+
+        /* ── Number input box — top-right inside image ── */
+        .rln-num-box-wrap {
+          position: absolute;
+          top: 8px;
+          right: 8px;
+          z-index: 3;
+        }
+
+        .rln-num-box {
+          width:  clamp(28px, 3.2vw, 40px);
+          height: clamp(28px, 3.2vw, 40px);
+          border: 2px solid ${INPUT_BORDER_DEFAULT};
+          border-radius: 6px;
+          background: ${INPUT_BG_DEFAULT};
+          text-align: center;
+          font-size: clamp(14px, 1.8vw, 21px);
+          font-weight: 700;
+          color: ${INPUT_TEXT_COLOR};
+          outline: none;
+          cursor: text;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 0;
+          line-height: 1;
+          font-family: inherit;
+          transition: border-color 0.2s;
+          -moz-appearance: textfield;
+        }
+        .rln-num-box::-webkit-inner-spin-button,
+        .rln-num-box::-webkit-outer-spin-button { -webkit-appearance: none; }
+        .rln-num-box:disabled { opacity: 1; cursor: default; }
+
+        /* Wrong state — red border */
+        .rln-num-box--wrong {
+          border-color: #ef4444 !important;
+        }
+
+        /* Show answer — red number */
+        .rln-num-box--answer {
+          color: ${INPUT_ANSWER_COLOR} !important;
+        }
+
+        /* ✕ wrong badge */
+        .rln-badge {
+          position: absolute;
+          top: -8px;
+          right: -8px;
+          width: clamp(16px, 1.8vw, 20px);
+          height: clamp(16px, 1.8vw, 20px);
+          border-radius: 50%;
+          background: ${WRONG_BADGE_BG};
+          color: ${WRONG_BADGE_TEXT_COLOR};
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: clamp(8px, 0.9vw, 11px);
+          font-weight: 700;
+          border: 2px solid #fff;
+          box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+          pointer-events: none;
+          z-index: 4;
+        }
+
+        /* ── ✓ / ✗ icon — bottom-right corner ── */
+        .rln-icon {
+          position: absolute;
+          bottom: 6px;
+          right: 6px;
+          width: clamp(24px, 2.8vw, 34px);
+          height: clamp(24px, 2.8vw, 34px);
+          background: ${ICON_BG_COLOR};
+          border: 1.5px solid ${ICON_BORDER_COLOR};
+          border-radius: 6px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          z-index: 2;
+        }
+        .rln-icon-svg { width: 60%; height: 60%; }
+
+        /* Buttons */
+        .rln-buttons {
+          display: flex;
+          justify-content: center;
+          margin-top: clamp(8px, 1.6vw, 18px);
+        }
+
+        /* ── Responsive ── */
+        @media (max-width: 580px) {
+          .rln-sentences  { grid-template-columns: 1fr; }
+          .rln-img-grid   { grid-template-columns: repeat(2, 1fr); }
+        }
+      `}</style>
+
       <div
         className="div-forall"
         style={{
           display: "flex",
           flexDirection: "column",
-          gap: "18px",
+          gap: "clamp(14px, 2vw, 22px)",
           maxWidth: "1100px",
           margin: "0 auto",
         }}
       >
-        {/* Title */}
+        {/* ── Header ── */}
         <h1
           className="WB-header-title-page8"
-          style={{
-            margin: 0,
-            display: "flex",
-            alignItems: "center",
-            gap: "12px",
-            flexWrap: "wrap",
-          }}
+          style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
         >
-          <span className="WB-ex-A">B</span> Listen and match.
+          <span className="WB-ex-A">L</span>
+          Read, look, and number.
         </h1>
 
-        {/* ── Audio Player ── */}
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            margin: "30px 0px",
-            width: "100%",
-          }}
-        >
-          <div className="audio-popup-read" style={{ width: "50%" }}>
-            <div className="audio-inner player-ui">
-              <audio
-                ref={audioRef}
-                src={sound}
-                onTimeUpdate={(e) => {
-                  const time = e.target.currentTime;
-                  setCurrent(time);
-                  updateCaption(time);
-                }}
-                onLoadedMetadata={(e) => setDuration(e.target.duration)}
-              />
-
-              {/* Slider row */}
-              <div className="top-row">
-                <span className="audio-time">
-                  {new Date(current * 1000).toISOString().substring(14, 19)}
-                </span>
-
-                <input
-                  type="range"
-                  className="audio-slider"
-                  min="0"
-                  max={duration}
-                  value={current}
-                  onChange={(e) => {
-                    audioRef.current.currentTime = e.target.value;
-                    updateCaption(Number(e.target.value));
-                  }}
-                  style={{
-                    background: `linear-gradient(to right, #430f68 ${
-                      (current / duration) * 100
-                    }%, #d9d9d9ff ${(current / duration) * 100}%)`,
-                  }}
-                />
-
-                <span className="audio-time">
-                  {new Date(duration * 1000).toISOString().substring(14, 19)}
-                </span>
-              </div>
-
-              {/* Buttons row */}
-              <div className="bottom-row">
-                {/* Caption bubble */}
-                <div
-                  className={`round-btn ${showCaption ? "active" : ""}`}
-                  style={{ position: "relative" }}
-                  onClick={() => setShowCaption(!showCaption)}
-                >
-                  <TbMessageCircle size={36} />
-                  <div
-                    className={`caption-inPopup ${showCaption ? "show" : ""}`}
-                    style={{ top: "100%", left: "10%" }}
-                  >
-                    {captions.map((cap, i) => (
-                      <p
-                        key={i}
-                        id={`caption-${i}`}
-                        className={`caption-inPopup-line2 ${
-                          activeIndex === i ? "active" : ""
-                        }`}
-                      >
-                        {cap.text}
-                      </p>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Play / Pause */}
-                <button className="play-btn2" onClick={togglePlay}>
-                  {isPlaying ? <FaPause size={26} /> : <FaPlay size={26} />}
-                </button>
-
-                {/* Settings */}
-                <div className="settings-wrapper" ref={settingsRef}>
-                  <button
-                    className={`round-btn ${showSettings ? "active" : ""}`}
-                    onClick={() => setShowSettings(!showSettings)}
-                  >
-                    <IoMdSettings size={36} />
-                  </button>
-
-                  {showSettings && (
-                    <div className="settings-popup">
-                      <label>Volume</label>
-                      <input
-                        type="range"
-                        min="0"
-                        max="1"
-                        step="0.05"
-                        value={volume}
-                        onChange={(e) => {
-                          setVolume(e.target.value);
-                          audioRef.current.volume = e.target.value;
-                        }}
-                      />
-                    </div>
-                  )}
-                </div>
-              </div>
+        {/* ── Sentences (2 columns) ── */}
+        <div className="rln-sentences">
+          {SENTENCES.map((s) => (
+            <div key={s.id} className="rln-sentence-row">
+              <span className="rln-s-num">{s.id}</span>
+              <span className="rln-s-text">{s.text}</span>
             </div>
-          </div>
+          ))}
         </div>
 
-        {/* ── Matching Exercise ── */}
-        <div ref={containerRef} style={styles.matchArea}>
-          <svg
-            style={{
-              position: "absolute",
-              inset: 0,
-              width: "100%",
-              height: "100%",
-              pointerEvents: "none",
-              overflow: "visible",
-              zIndex: 1,
-            }}
-          >
-            {lines.map((line) => (
-              <line
-                key={line.id}
-                x1={line.x1}
-                y1={line.y1}
-                x2={line.x2}
-                y2={line.y2}
-                stroke={LINE_COLOR}
-                strokeWidth="4"
-                strokeLinecap="round"
-              />
-            ))}
-          </svg>
-
-          {/* Top row (images) */}
-          <div style={styles.topRow}>
-            {EXERCISE_DATA.top.map((item) => {
-              const wrong = isWrongMatch(item.id);
-              const isSelected = selectedTop === item.id;
-              const isConnected = !!matches[item.id];
-
-              return (
-                <div key={item.id} style={styles.topItem}>
-                  <div style={styles.topNumber}>{item.id}</div>
-
-                  <div
-                    onClick={() => handleTopClick(item.id)}
-                    style={{
-                      ...styles.topImageBox,
-                      border: isSelected
-                        ? `3px solid ${ACTIVE_COLOR}`
-                        : isConnected
-                        ? "2px solid #f5d0a8"
-                        : "2px solid transparent",
-                      background: isSelected
-                        ? "rgba(243,155,66,0.08)"
-                        : "transparent",
-                      cursor: showAns ? "default" : "pointer",
-                    }}
-                  >
-                    <img
-                      src={item.img}
-                      alt={`top-${item.id}`}
-                      style={styles.topImage}
-                    />
-                  </div>
-
-                  <div
-                    ref={(el) =>
-                      (elementRefs.current[`top-dot-${item.id}`] = el)
-                    }
-                    onClick={() => handleTopClick(item.id)}
-                    style={{
-                      ...styles.dot,
-                      backgroundColor: getTopDotColor(item.id),
-                      cursor: showAns ? "default" : "pointer",
-                    }}
-                  />
-
-                  {wrong && (
-                    <div
-                      style={{
-                        ...styles.wrongBadge,
-                        right: "clamp(0px, 0.8vw, 10px)",
-                        top: "clamp(20px, 3vw, 34px)",
-                      }}
-                    >
-                      ✕
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-
-          {/* Bottom row (text labels) */}
-          <div style={styles.bottomRow}>
-            {EXERCISE_DATA.bottom.map((item) => {
-              const isConnected = Object.values(matches).includes(item.id);
-              const isSelected =
-                selectedTop !== null && matches[selectedTop] === item.id;
-
-              return (
-                <div key={item.id} style={styles.bottomItem}>
-                  <div
-                    ref={(el) =>
-                      (elementRefs.current[`bottom-dot-${item.id}`] = el)
-                    }
-                    onClick={() => handleBottomClick(item.id)}
-                    style={{
-                      ...styles.dot,
-                      backgroundColor: getBottomDotColor(item.id),
-                      cursor:
-                        showAns || selectedTop === null ? "default" : "pointer",
-                    }}
-                  />
-
-                  <div
-                    onClick={() => handleBottomClick(item.id)}
-                    style={{
-                      ...styles.bottomLabel,
-                      border: isSelected
-                        ? `3px solid ${ACTIVE_COLOR}`
-                        : isConnected
-                        ? "2px solid #f5d0a8"
-                        : "2px solid transparent",
-                      cursor:
-                        showAns || selectedTop === null ? "default" : "pointer",
-                    }}
-                  >
-                    {item.text}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+        {/* ── Images grid ── */}
+        <div className="rln-img-grid">
+          {IMAGES.map(renderImageCard)}
         </div>
 
-        {/* Buttons */}
-        <div style={styles.buttonsWrap}>
+        {/* ── Buttons ── */}
+        <div className="rln-buttons">
           <Button
+            checkAnswers={handleCheck}
             handleShowAnswer={handleShowAnswer}
-            handleStartAgain={handleStartAgain}
-            checkAnswers={checkAnswers}
+            handleStartAgain={handleReset}
           />
         </div>
       </div>
     </div>
   );
-};
-
-export default WB_Unit3_Page215_QB;
+}

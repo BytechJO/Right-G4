@@ -1,328 +1,270 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import Button from "../Button";
 import ValidationAlert from "../../Popup/ValidationAlert";
 
-import img1 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U1 Folder/Page 4/SVG/Asset 5.svg";
-import img2 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U1 Folder/Page 4/SVG/Asset 6.svg";
-import img3 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U1 Folder/Page 4/SVG/Asset 7.svg";
-import img4 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U1 Folder/Page 4/SVG/Asset 8.svg";
+// ─────────────────────────────────────────────
+//  🎨  COLORS — كلها قابلة للتعديل
+// ─────────────────────────────────────────────
+const BOX_BORDER_COLOR        = "#2096a6";   // بوردر الـ checkbox
+const BOX_BG_EMPTY            = "#ffffff";   // خلفية الـ checkbox الفارغ
+const BOX_BG_FILLED           = "#ffffff";   // خلفية الـ checkbox بعد الاختيار
 
+const CHECK_COLOR             = "#c81e1e";   // لون علامة ✓
+const CROSS_COLOR             = "#c81e1e";   // لون علامة ✗
+
+const WRONG_BADGE_BG          = "#ef4444";   // خلفية badge الخطأ
+const WRONG_BADGE_TEXT        = "#ffffff";   // نص badge الخطأ
+
+const SENTENCE_TEXT_COLOR     = "#2b2b2b";   // لون نص الجملة
+const NUMBER_COLOR            = "#2b2b2b";   // لون الأرقام
+
+// ─────────────────────────────────────────────
+//  📝  EXERCISE DATA
+//  correct: "check" = ✓  |  "cross" = ✗
+// ─────────────────────────────────────────────
 const ITEMS = [
-  {
-    id: 1,
-    img: img1,
-    firstOptions: ["The fridge", "The TV"],
-    middle: "is bigger than",
-    lastOptions: ["the fridge.", "the TV."],
-    correctFirst: "The fridge",
-    correctLast: "the TV.",
-  },
-  {
-    id: 2,
-    img: img2,
-    firstOptions: ["The car", "The bike"],
-    middle: "is faster than",
-    lastOptions: ["the car.", "the bike."],
-    correctFirst: "The car",
-    correctLast: "the bike.",
-  },
-  {
-    id: 3,
-    img: img3,
-    firstOptions: ["Harley", "His dad"],
-    middle: "is younger than",
-    lastOptions: ["Harley.", "his dad."],
-    correctFirst: "Harley",
-    correctLast: "his dad.",
-  },
-  {
-    id: 4,
-    img: img4,
-    firstOptions: ["The ball", "The feathers"],
-    middle: "is heavier than",
-    lastOptions: ["the ball.", "the feathers."],
-    correctFirst: "The ball",
-    correctLast: "the feathers.",
-  },
+  { id: 1, text: "He will buy juice to make cookies.",          correct: "check" },
+  { id: 2, text: "Henry will go to the store near his house.",  correct: "check" },
+  { id: 3, text: "He won't buy fruit for dessert.",             correct: "cross" },
+  { id: 4, text: "Henry will go to the store next week.",       correct: "cross" },
+  { id: 5, text: "He will make a vegetarian spaghetti dish.",   correct: "check" },
+  { id: 6, text: "He will buy milk.",                           correct: "check" },
 ];
 
-export default function WB_Unit1_Page4_Q2() {
-  const [answers, setAnswers] = useState({});
-  const [checked, setChecked] = useState(false);
-  const [showAns, setShowAns] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
+// ─────────────────────────────────────────────
+//  COMPONENT
+// ─────────────────────────────────────────────
+export default function WB_ReadExerciseC_WriteCheckX_QD() {
+  const [answers,     setAnswers]     = useState({});   // { [id]: "check" | "cross" }
+  const [showResults, setShowResults] = useState(false);
+  const [showAns,     setShowAns]     = useState(false);
 
-  useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth <= 768);
-    };
-    handleResize();
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
+  // 🔒 بعد check أو show answer
+  const isLocked = showResults || showAns;
 
-  const handleChange = (id, field, value) => {
-    if (showAns) return;
-    setAnswers((prev) => ({
-      ...prev,
-      [id]: { ...prev[id], [field]: value },
-    }));
-    setChecked(false);
+  // ── handlers ──────────────────────────────
+  // الطالب يختار check أو cross مباشرة
+  const handleSelect = (id, value) => {
+    if (isLocked) return;
+    setAnswers((prev) => {
+      const updated = { ...prev };
+      // لو ضغط نفس الخيار مرتين → يلغيه
+      if (updated[id] === value) delete updated[id];
+      else updated[id] = value;
+      return updated;
+    });
   };
 
   const handleCheck = () => {
-    if (showAns) return;
-    const allAnswered = ITEMS.every(
-      (item) => answers[item.id]?.first && answers[item.id]?.last
-    );
+    if (isLocked) return;
+    const allAnswered = ITEMS.every((item) => answers[item.id] !== undefined);
     if (!allAnswered) {
-      ValidationAlert.info("Please complete all answers first.");
+      ValidationAlert.info("Please answer all items first.");
       return;
     }
     let score = 0;
     ITEMS.forEach((item) => {
-      const firstCorrect = answers[item.id]?.first === item.correctFirst;
-      const lastCorrect = answers[item.id]?.last === item.correctLast;
-      if (firstCorrect && lastCorrect) score += 1;
+      if (answers[item.id] === item.correct) score++;
     });
-    setChecked(true);
-    if (score === ITEMS.length) {
-      ValidationAlert.success(`Score: ${score} / ${ITEMS.length}`);
-    } else if (score > 0) {
-      ValidationAlert.warning(`Score: ${score} / ${ITEMS.length}`);
-    } else {
-      ValidationAlert.error(`Score: ${score} / ${ITEMS.length}`);
-    }
+    setShowResults(true); // 🔒
+    if (score === ITEMS.length)   ValidationAlert.success(`Score: ${score} / ${ITEMS.length}`);
+    else if (score > 0)           ValidationAlert.warning(`Score: ${score} / ${ITEMS.length}`);
+    else                          ValidationAlert.error(`Score: ${score} / ${ITEMS.length}`);
   };
 
   const handleShowAnswer = () => {
     const filled = {};
-    ITEMS.forEach((item) => {
-      filled[item.id] = { first: item.correctFirst, last: item.correctLast };
-    });
+    ITEMS.forEach((item) => { filled[item.id] = item.correct; });
     setAnswers(filled);
-    setChecked(true);
-    setShowAns(true);
+    setShowResults(false);
+    setShowAns(true); // 🔒
   };
 
   const handleReset = () => {
     setAnswers({});
-    setChecked(false);
-    setShowAns(false);
+    setShowResults(false);
+    setShowAns(false); // 🔓
   };
 
+  // ── helpers ───────────────────────────────
   const isWrong = (item) => {
-    if (!checked || showAns) return false;
+    if (!showResults || showAns) return false;
+    return answers[item.id] !== item.correct;
+  };
+
+  // ── render two boxes ─────────────────────
+  const renderBoxes = (item) => {
+    const val   = answers[item.id];
+    const wrong = isWrong(item);
+
+    const SingleBox = ({ type }) => {
+      const selected    = val === type;
+      const isThisWrong = wrong && selected; // الغلط على المربع المختار فقط
+
+      return (
+        <div className="wdc-single-wrap">
+          <div
+            className={`wdc-box
+              ${selected    ? "wdc-box--selected" : ""}
+              ${isThisWrong ? "wdc-box--wrong"    : ""}
+            `}
+            onClick={() => handleSelect(item.id, type)}
+            style={{ cursor: isLocked ? "default" : "pointer" }}
+          >
+            {/* ✓ */}
+            {type === "check" && selected && (
+              <svg viewBox="0 0 24 24" className="wdc-icon" fill="none">
+                <polyline
+                  points="4,13 9,18 20,6"
+                  stroke={isThisWrong ? "#ef4444" : CHECK_COLOR}
+                  strokeWidth="3.2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            )}
+
+            {/* ✗ */}
+            {type === "cross" && selected && (
+              <svg viewBox="0 0 24 24" className="wdc-icon" fill="none">
+                <line x1="5" y1="5" x2="19" y2="19"
+                  stroke={isThisWrong ? "#ef4444" : CROSS_COLOR}
+                  strokeWidth="3.2" strokeLinecap="round"/>
+                <line x1="19" y1="5" x2="5" y2="19"
+                  stroke={isThisWrong ? "#ef4444" : CROSS_COLOR}
+                  strokeWidth="3.2" strokeLinecap="round"/>
+              </svg>
+            )}
+          </div>
+
+          {/* badge على المربع المختار الغلط فقط */}
+          {isThisWrong && <div className="wdc-badge">✕</div>}
+        </div>
+      );
+    };
+
     return (
-      answers[item.id]?.first !== item.correctFirst ||
-      answers[item.id]?.last !== item.correctLast
+      <div className="wdc-boxes-wrap">
+        <SingleBox type="check" />
+        <SingleBox type="cross" />
+      </div>
     );
   };
 
-  const getValue = (itemId, field) => answers[itemId]?.[field] || "";
-
+  // ── render ────────────────────────────────
   return (
     <div className="main-container-component">
       <style>{`
-        .wd-grid {
-          display: grid;
-          grid-template-columns: repeat(2, minmax(0, 1fr));
-          gap: 28px 34px;
-          align-items: start;
-          width: 100%;
-        }
-
-        .wd-card {
+        /* ── List ── */
+        .wdc-list {
           display: flex;
           flex-direction: column;
-          gap: 14px;
+          gap: clamp(10px, 1.6vw, 18px);
           width: 100%;
-          min-width: 0;
         }
 
-        .wd-media-wrap {
+        /* ── Row: num | text | box ── */
+        .wdc-row {
+          display: grid;
+          grid-template-columns:
+            clamp(18px, 2.2vw, 28px)        /* number */
+            minmax(0, 1fr)                   /* sentence */
+            auto;                            /* two boxes */
+          gap: clamp(10px, 1.6vw, 20px);
+          align-items: center;
+          width: 100%;
+        }
+
+        /* Number */
+        .wdc-num {
+font-size: clamp(15px, 1.9vw, 22px);
+          color: ${NUMBER_COLOR};
+          line-height: 1.5;
+        }
+
+        /* Sentence */
+        .wdc-text {
+font-size: clamp(15px, 1.9vw, 22px);          color: ${SENTENCE_TEXT_COLOR};
+          line-height: 1.4;
+        }
+
+        /* Two boxes wrapper */
+        .wdc-boxes-wrap {
+          position: relative;
           display: flex;
-          align-items: flex-start;
-          gap: 12px;
-          width: 100%;
+          align-items: center;
+          gap: clamp(6px, 1vw, 12px);
+          justify-self: end;
         }
 
-        .wd-number {
-          font-size: 22px;
-          font-weight: 700;
-          color: #222;
-          line-height: 1;
-          margin-top: 8px;
-          min-width: 20px;
+        /* Wrapper for each single box — needed for badge positioning */
+        .wdc-single-wrap {
+          position: relative;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        /* Single box */
+        .wdc-box {
+          width: clamp(38px, 5vw, 56px);
+          height: clamp(38px, 5vw, 56px);
+          border: 2.5px solid ${BOX_BORDER_COLOR};
+          border-radius: clamp(6px, 0.8vw, 10px);
+          background: ${BOX_BG_EMPTY};
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: border-color 0.15s ease, background 0.15s ease;
+          box-sizing: border-box;
           flex-shrink: 0;
         }
 
-        .wd-image-box {
-          width: 100%;
-          height: 220px;
-          border-radius: 18px;
-          overflow: hidden;
-          background: #fff;
-          box-sizing: border-box;
-          flex: 1;
-          min-width: 0;
+        .wdc-box--selected {
+          border-color: ${BOX_BORDER_COLOR};
         }
 
-        .wd-image {
-          width: 100%;
-          height: 100%;
-          object-fit: contain;
+        .wdc-box--wrong {
+          border-color: #ef4444;
+          background: rgba(239,68,68,0.06);
+        }
+
+        /* SVG icon inside box */
+        .wdc-icon {
+          width: 65%;
+          height: 65%;
           display: block;
         }
 
-        .wd-answer-wrap {
-          position: relative;
-          width: 100%;
-          padding-left: 32px;
-          box-sizing: border-box;
-        }
-
-        .wd-answer-line {
-          width: 100%;
-          border-bottom: 3px solid #4a4a4a;
-          padding-bottom: 6px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: clamp(6px, 1vw, 10px);
-          flex-wrap: nowrap;
-          min-height: 58px;
-          box-sizing: border-box;
-          overflow: hidden;
-        }
-
-        .wd-select-box {
-          position: relative;
-          flex: 1 1 0;
-          min-width: 0;
-          height: 44px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          background: #fff;
-          border: 2px solid #bfbfbf;
-          border-radius: 12px;
-          box-sizing: border-box;
-          overflow: hidden;
-        }
-
-        .wd-select {
-          width: 100%;
-          height: 100%;
-          border: none;
-          outline: none;
-          background: transparent;
-          appearance: none;
-          -webkit-appearance: none;
-          -moz-appearance: none;
-          text-align: center;
-          text-align-last: center;
-          font-size: clamp(12px, 1.4vw, 18px);
-          font-weight: 500;
-          color: #222;
-          cursor: pointer;
-          padding: 0 clamp(22px, 2.5vw, 36px) 0 clamp(6px, 1vw, 14px);
-          box-sizing: border-box;
-          white-space: nowrap;
-          overflow: hidden;
-          text-overflow: ellipsis;
-        }
-
-        .wd-arrow {
+        /* ✕ wrong badge */
+        .wdc-badge {
           position: absolute;
-          right: clamp(6px, 1vw, 12px);
-          top: 50%;
-          transform: translateY(-50%);
-          font-size: clamp(8px, 1vw, 12px);
-          color: #777;
-          pointer-events: none;
-          flex-shrink: 0;
-        }
-
-        .wd-middle-text {
-          font-size: clamp(12px, 1.4vw, 20px);
-          color: #111;
-          line-height: 1.3;
-          font-weight: 500;
-          white-space: nowrap;
-          flex-shrink: 0;
-        }
-
-        .wd-wrong-badge {
-          position: absolute;
-          top: -6px;
-          right: -6px;
-          width: 22px;
-          height: 22px;
-          border-radius: 999px;
-          background: #ef4444;
-          color: #fff;
+          top: -8px;
+          right: -10px;
+          width: clamp(17px, 1.9vw, 22px);
+          height: clamp(17px, 1.9vw, 22px);
+          border-radius: 50%;
+          background: ${WRONG_BADGE_BG};
+          color: ${WRONG_BADGE_TEXT};
           display: flex;
           align-items: center;
           justify-content: center;
-          font-size: 12px;
+          font-size: clamp(9px, 1vw, 12px);
           font-weight: 700;
-          box-shadow: 0 2px 8px rgba(0,0,0,0.15);
           border: 2px solid #fff;
+          box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+          pointer-events: none;
+          z-index: 2;
         }
 
-        .wd-buttons-wrap {
+        /* Buttons */
+        .wdc-buttons {
           display: flex;
           justify-content: center;
-          margin-top: 8px;
+          margin-top: clamp(8px, 1.6vw, 18px);
         }
 
-        @media (max-width: 950px) {
-          .wd-grid {
-            grid-template-columns: 1fr;
-            gap: 28px;
-          }
-        }
 
-        @media (max-width: 768px) {
-          .wd-image-box {
-            height: 180px;
-          }
-
-          .wd-answer-wrap {
-            padding-left: 0;
-          }
-
-          .wd-answer-line {
-            flex-wrap: wrap;
-            justify-content: flex-start;
-          }
-
-          .wd-select-box {
-            flex: 1 1 40%;
-            min-width: 0;
-          }
-
-          .wd-middle-text {
-            width: 100%;
-            text-align: center;
-            font-size: 18px;
-          }
-        }
-
-        @media (max-width: 480px) {
-          .wd-image-box {
-            height: 150px;
-          }
-
-          .wd-select {
-            font-size: 12px;
-          }
-
-          .wd-answer-line {
-            gap: 8px;
-          }
-        }
       `}</style>
 
       <div
@@ -330,95 +272,42 @@ export default function WB_Unit1_Page4_Q2() {
         style={{
           display: "flex",
           flexDirection: "column",
-          gap: "28px",
+          gap: "18px",
           maxWidth: "1100px",
           margin: "0 auto",
         }}
       >
+        {/* ── Header ── */}
         <h1
           className="WB-header-title-page8"
-          style={{
-            margin: 0,
-            display: "flex",
-            alignItems: "center",
-            gap: "12px",
-            flexWrap: "wrap",
-          }}
+          style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
         >
           <span className="WB-ex-A">D</span>
-          Look and write.
+          Read Exercise C. Write{" "}
+          <span style={{ color: CHECK_COLOR }}>✓</span> or{" "}
+          <span style={{ color: CROSS_COLOR }}>✗</span>.
         </h1>
 
-        <div className="wd-grid">
+        {/* ── Items ── */}
+        <div className="wdc-list">
           {ITEMS.map((item) => (
-            <div key={item.id} className="wd-card">
-              <div className="wd-media-wrap">
-                <div className="wd-number">{item.id}</div>
-                <div className="wd-image-box">
-                  <img
-                    src={item.img}
-                    alt={`comparison-${item.id}`}
-                    className="wd-image"
-                  />
-                </div>
-              </div>
+            <div key={item.id} className="wdc-row">
 
-              <div className="wd-answer-wrap">
-                <div className="wd-answer-line">
-                  <div className="wd-select-box">
-                    <select
-                      value={getValue(item.id, "first")}
-                      disabled={showAns}
-                      onChange={(e) =>
-                        handleChange(item.id, "first", e.target.value)
-                      }
-                      className="wd-select"
-                      style={{ cursor: showAns ? "default" : "pointer" }}
-                    >
-                      <option value="" disabled hidden>
-                        Select
-                      </option>
-                      {item.firstOptions.map((option) => (
-                        <option key={option} value={option}>
-                          {option}
-                        </option>
-                      ))}
-                    </select>
-                    {!showAns && <span className="wd-arrow">▼</span>}
-                  </div>
+              {/* Number */}
+              <span className="wdc-num">{item.id}</span>
 
-                  <span className="wd-middle-text">{item.middle}</span>
+              {/* Sentence */}
+              <span className="wdc-text">{item.text}</span>
 
-                  <div className="wd-select-box">
-                    <select
-                      value={getValue(item.id, "last")}
-                      disabled={showAns}
-                      onChange={(e) =>
-                        handleChange(item.id, "last", e.target.value)
-                      }
-                      className="wd-select"
-                      style={{ cursor: showAns ? "default" : "pointer" }}
-                    >
-                      <option value="" disabled hidden>
-                        Select
-                      </option>
-                      {item.lastOptions.map((option) => (
-                        <option key={option} value={option}>
-                          {option}
-                        </option>
-                      ))}
-                    </select>
-                    {!showAns && <span className="wd-arrow">▼</span>}
-                  </div>
-                </div>
+              {/* Checkbox */}
+              {renderBoxes(item)}
 
-                {isWrong(item) && <div className="wd-wrong-badge">✕</div>}
-              </div>
             </div>
           ))}
         </div>
 
-        <div className="wd-buttons-wrap">
+        {/* ── Buttons ── */}
+        <div className="wdc-buttons">
           <Button
             checkAnswers={handleCheck}
             handleShowAnswer={handleShowAnswer}

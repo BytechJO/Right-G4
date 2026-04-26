@@ -1,417 +1,400 @@
-import React, { useRef, useState } from "react";
+import React, { useState } from "react";
 import Button from "../Button";
 import ValidationAlert from "../../Popup/ValidationAlert";
-import exerciseImg from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U1 Folder/Page 7/SVG/Asset 1.svg";
 
-const ACTIVE_COLOR = "#f39b42";
-const SOFT_COLOR = "#ffca94";
-const BORDER_COLOR = "#d9d9d9";
+import img1a from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U1 Folder/Page 7/SVG/1_1.svg";
+import img1b from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U1 Folder/Page 7/SVG/2_1.svg";
+import img2a from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U1 Folder/Page 7/SVG/3_1.svg";
+import img2b from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U1 Folder/Page 7/SVG/4_3.svg";
 
-const ANSWERS = [
-  { id: 1, correct: "tall" },
-  { id: 2, correct: "short" },
-  { id: 3, correct: "fast" },
-  { id: 4, correct: "slow" },
-  { id: 5, correct: "old" },
-  { id: 6, correct: "young" },
+// ─────────────────────────────────────────────
+//  🎨  COLORS
+// ─────────────────────────────────────────────
+const CHECK_ICON_COLOR        = "#555555";
+const CROSS_ICON_COLOR        = "#555555";
+
+const INPUT_UNDERLINE_DEFAULT = "#3f3f3f";
+const INPUT_UNDERLINE_WRONG   = "#ef4444";
+
+const INPUT_TEXT_COLOR        = "#000000";
+const INPUT_ANSWER_TEXT_COLOR = "#c81e1e";
+
+const WRONG_BADGE_BG          = "#ef4444";
+const WRONG_BADGE_TEXT_COLOR  = "#ffffff";
+
+const NUMBER_COLOR            = "#2b2b2b";
+
+// ─────────────────────────────────────────────
+//  📝  EXERCISE DATA
+//  prefix : نص ثابت يظهر قبل الـ input (للسطر 1 و 2 فقط)
+//  correct: مصفوفة من الإجابات الصحيحة المقبولة
+//           أول عنصر يُعرض عند Show Answer
+// ─────────────────────────────────────────────
+const ITEMS = [
+  {
+    id: 1,
+    images: [
+      {
+        src: img1a, mark: "check", lineKey: "1-1", prefix: "She will",
+        correct: ["wash the dishes.", "wash the dishes"],
+      },
+      {
+        src: img1b, mark: "cross", lineKey: "1-2", prefix: "She won't",
+        correct: ["go to the store.", "go to the store"],
+      },
+    ],
+  },
+  {
+    id: 2,
+    images: [
+      {
+        src: img2a, mark: "cross", lineKey: "2-1", prefix: null,
+        correct: ["She won't build a snowman.", "she will not bulid a snowman" , "she wont bulid a snowman"],
+      },
+      {
+        src: img2b, mark: "check", lineKey: "2-2", prefix: null,
+        correct: ["She will draw a picture.", "She will draw a picture"],
+      },
+    ],
+  },
 ];
 
-const DRAG_ITEMS = [
-  { id: 1, value: "tall" },
-  { id: 2, value: "short" },
-  { id: 3, value: "fast" },
-  { id: 4, value: "slow" },
-  { id: 5, value: "old" },
-  { id: 6, value: "young" },
+// أرقام تسلسلية عالمية لكل صورة: 1, 2, 3, 4
+const NUMBERED_ITEMS = (() => {
+  let c = 0;
+  return ITEMS.map((item) => ({
+    ...item,
+    images: item.images.map((img) => ({ ...img, num: ++c })),
+  }));
+})();
 
-  // distractors
-  { id: 7, value: "big" },
-  { id: 8, value: "small" },
-  { id: 9, value: "happy" },
-];
+const ALL_LINES = NUMBERED_ITEMS.flatMap((item) => item.images);
 
-export default function WB_Vocabulary_Page214_QI() {
-  const [answers, setAnswers] = useState({});
-  const [draggedItem, setDraggedItem] = useState(null);
-  const [touchItem, setTouchItem] = useState(null);
-  const [touchPos, setTouchPos] = useState({ x: 0, y: 0 });
+// ─────────────────────────────────────────────
+//  🔧  NORMALIZE
+// ─────────────────────────────────────────────
+const normalize = (str) =>
+  str.toLowerCase().replace(/[^a-z0-9\s']/g, "").replace(/\s+/g, " ").trim();
+
+// يتحقق من الإجابة مقابل كل عنصر في المصفوفة
+const isCorrectAnswer = (userVal, correctArr) =>
+  correctArr.some((c) => normalize(userVal) === normalize(c));
+
+// ─────────────────────────────────────────────
+//  COMPONENT
+// ─────────────────────────────────────────────
+export default function WB_LookWrite_QI() {
+  const [answers,     setAnswers]     = useState({});
   const [showResults, setShowResults] = useState(false);
-  const [showAns, setShowAns] = useState(false);
+  const [showAns,     setShowAns]     = useState(false);
 
-  const dropRefs = useRef({});
+  const isLocked = showResults || showAns;
 
-  const usedDragIds = Object.values(answers)
-    .filter(Boolean)
-    .map((entry) => entry.dragId);
-
-  const applyDrop = (boxKey, item) => {
-    const newAnswers = { ...answers };
-
-    Object.keys(newAnswers).forEach((key) => {
-      if (newAnswers[key]?.dragId === item.id) {
-        delete newAnswers[key];
-      }
-    });
-
-    newAnswers[boxKey] = {
-      dragId: item.id,
-      value: item.value,
-    };
-
-    setAnswers(newAnswers);
-    setShowResults(false);
-  };
-
-  // desktop drag
-  const handleDragStart = (item) => {
-    if (showAns || usedDragIds.includes(item.id)) return;
-    setDraggedItem(item);
-  };
-
-  const handleDrop = (boxKey) => {
-    if (showAns || !draggedItem) return;
-    applyDrop(boxKey, draggedItem);
-    setDraggedItem(null);
-  };
-
-  // touch for ipad/tablet
-  const handleTouchStart = (e, item) => {
-    if (showAns || usedDragIds.includes(item.id)) return;
-
-    const touch = e.touches[0];
-    setTouchItem(item);
-    setTouchPos({ x: touch.clientX, y: touch.clientY });
-  };
-
-  const handleTouchMove = (e) => {
-    if (!touchItem) return;
-    const touch = e.touches[0];
-    setTouchPos({ x: touch.clientX, y: touch.clientY });
-  };
-
-  const handleTouchEnd = () => {
-    if (!touchItem) return;
-
-    Object.entries(dropRefs.current).forEach(([key, ref]) => {
-      if (!ref) return;
-
-      const rect = ref.getBoundingClientRect();
-
-      if (
-        touchPos.x >= rect.left &&
-        touchPos.x <= rect.right &&
-        touchPos.y >= rect.top &&
-        touchPos.y <= rect.bottom
-      ) {
-        applyDrop(key, touchItem);
-      }
-    });
-
-    setTouchItem(null);
-  };
-
-  const handleRemoveAnswer = (boxKey) => {
-    if (showAns) return;
-
-    setAnswers((prev) => {
-      const updated = { ...prev };
-      delete updated[boxKey];
-      return updated;
-    });
-
-    setShowResults(false);
+  const handleChange = (key, value) => {
+    if (isLocked) return;
+    setAnswers((prev) => ({ ...prev, [key]: value }));
   };
 
   const handleCheck = () => {
-    if (showAns) return;
-
-    const allAnswered = ANSWERS.every((item) => answers[`a-${item.id}`]?.value);
-
+    if (isLocked) return;
+    const allAnswered = ALL_LINES.every(
+      (l) => answers[l.lineKey] && answers[l.lineKey].trim() !== ""
+    );
     if (!allAnswered) {
       ValidationAlert.info("Please complete all answers first.");
       return;
     }
-
     let score = 0;
-    const total = ANSWERS.length;
-
-    ANSWERS.forEach((item) => {
-      if (answers[`a-${item.id}`]?.value === item.correct) {
-        score++;
-      }
+    ALL_LINES.forEach((l) => {
+      if (isCorrectAnswer(answers[l.lineKey] || "", l.correct)) score++;
     });
-
     setShowResults(true);
-
-    if (score === total) {
-      ValidationAlert.success(`Score: ${score} / ${total}`);
-    } else if (score > 0) {
-      ValidationAlert.warning(`Score: ${score} / ${total}`);
-    } else {
-      ValidationAlert.error(`Score: ${score} / ${total}`);
-    }
+    if (score === ALL_LINES.length)   ValidationAlert.success(`Score: ${score} / ${ALL_LINES.length}`);
+    else if (score > 0)               ValidationAlert.warning(`Score: ${score} / ${ALL_LINES.length}`);
+    else                              ValidationAlert.error(`Score: ${score} / ${ALL_LINES.length}`);
   };
 
   const handleShowAnswer = () => {
     const filled = {};
-
-    ANSWERS.forEach((item) => {
-      const matched = DRAG_ITEMS.find((d) => d.value === item.correct);
-
-      filled[`a-${item.id}`] = {
-        dragId: matched?.id ?? item.id,
-        value: item.correct,
-      };
-    });
-
+    // يعرض أول إجابة في المصفوفة عند Show Answer
+    ALL_LINES.forEach((l) => { filled[l.lineKey] = l.correct[0]; });
     setAnswers(filled);
-    setShowResults(true);
+    setShowResults(false);
     setShowAns(true);
   };
 
-  const handleStartAgain = () => {
+  const handleReset = () => {
     setAnswers({});
-    setDraggedItem(null);
-    setTouchItem(null);
     setShowResults(false);
     setShowAns(false);
   };
 
-  const isWrong = (item) => {
-    if (!showResults) return false;
-    return answers[`a-${item.id}`]?.value !== item.correct;
+  const isWrong = (img) => {
+    if (!showResults || showAns) return false;
+    return !isCorrectAnswer(answers[img.lineKey] || "", img.correct);
   };
 
-  const renderDropBox = (boxKey, wrong) => {
-    const value = answers[boxKey]?.value || "";
+  // ── render ✓ / ✗ icon ─────────────────────
+  const renderIcon = (type) => (
+    <div className="lwi-icon">
+      {type === "check" ? (
+        <svg viewBox="0 0 24 24" className="lwi-icon-svg" fill="none">
+          <polyline points="4,13 9,18 20,6"
+            stroke={CHECK_ICON_COLOR} strokeWidth="3"
+            strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+      ) : (
+        <svg viewBox="0 0 24 24" className="lwi-icon-svg" fill="none">
+          <line x1="5" y1="5" x2="19" y2="19" stroke={CROSS_ICON_COLOR} strokeWidth="3" strokeLinecap="round"/>
+          <line x1="19" y1="5" x2="5" y2="19" stroke={CROSS_ICON_COLOR} strokeWidth="3" strokeLinecap="round"/>
+        </svg>
+      )}
+    </div>
+  );
+
+  // ── render image only ───────────────────────
+  const renderImageSlot = (img) => (
+    <div key={img.lineKey} className="lwi-img-slot">
+      <div className="lwi-img-wrap">
+        <img src={img.src} alt={`img-${img.lineKey}`} className="lwi-img" />
+      </div>
+    </div>
+  );
+
+  // ── render one numbered input line ───────────
+  const renderInputLine = (img) => {
+    const wrong  = isWrong(img);
+    const value  = answers[img.lineKey] || "";
+    const tColor = showAns ? INPUT_ANSWER_TEXT_COLOR : INPUT_TEXT_COLOR;
+    const uColor = !showResults || showAns
+      ? INPUT_UNDERLINE_DEFAULT
+      : wrong ? INPUT_UNDERLINE_WRONG : INPUT_UNDERLINE_DEFAULT;
 
     return (
-      <div
-        ref={(el) => (dropRefs.current[boxKey] = el)}
-        onDragOver={(e) => e.preventDefault()}
-        onDrop={() => handleDrop(boxKey)}
-        onClick={() => handleRemoveAnswer(boxKey)}
-        style={{
-          minWidth: "180px",
-          width: "100%",
-          maxWidth: "320px",
-          height: "42px",
-          borderBottom: "3px solid #3f3f3f",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "flex-start",
-          fontSize: "24px",
-          lineHeight: "1",
-          color: showAns ? "#d62828" : "#111",
-          padding: "0 4px 2px",
-          boxSizing: "border-box",
-          position: "relative",
-          fontWeight: 500,
-          cursor: value && !showAns ? "pointer" : "default",
-          userSelect: "none",
-        }}
-      >
-        {value}
+      <div key={img.lineKey} className="lwi-line-wrap">
+        <span className="lwi-line-num">{img.num}</span>
 
-        {wrong && (
-          <div
-            style={{
-              position: "absolute",
-              top: "-10px",
-              right: "-10px",
-              width: "20px",
-              height: "20px",
-              borderRadius: "50%",
-              backgroundColor: "#ef4444",
-              color: "#fff",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: "11px",
-              fontWeight: 700,
-              boxShadow: "0 1px 4px rgba(0,0,0,0.2)",
-            }}
+        {/* Prefix ثابت للسطر 1 و 2 فقط */}
+        {img.prefix && (
+          <span
+            className="lwi-prefix"
+            style={{ color: showAns ? INPUT_ANSWER_TEXT_COLOR : INPUT_TEXT_COLOR }}
           >
-            ✕
-          </div>
+            {img.prefix}
+          </span>
         )}
+
+        <input
+          type="text"
+          className="lwi-input"
+          value={value}
+          disabled={isLocked}
+          onChange={(e) => handleChange(img.lineKey, e.target.value)}
+          style={{
+            borderBottomColor: uColor,
+            color: tColor,
+            cursor: isLocked ? "default" : "text",
+          }}
+          spellCheck={false}
+          autoComplete="off"
+        />
+        {wrong && <div className="lwi-badge">✕</div>}
       </div>
     );
   };
 
   return (
     <div className="main-container-component">
-  <div
+      <style>{`
+        .lwi-grid {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: clamp(16px, 2.8vw, 36px);
+          width: 100%;
+        }
+
+        .lwi-card {
+          display: flex;
+          flex-direction: column;
+          gap: clamp(10px, 1.4vw, 16px);
+          min-width: 0;
+        }
+
+        .lwi-num-row { display: flex; align-items: center; }
+        .lwi-num {
+          font-size: clamp(17px, 2vw, 24px);
+          font-weight: 700;
+          color: ${NUMBER_COLOR};
+          line-height: 1;
+        }
+
+        .lwi-img-pair {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          width: 100%;
+        }
+
+        .lwi-img-slot {
+          display: flex;
+          flex-direction: column;
+          min-width: 0;
+        }
+
+        .lwi-img-wrap {
+          position: relative;
+          width: 100%;
+          overflow: hidden;
+        }
+
+        .lwi-img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          display: block;
+        }
+
+        .lwi-icon {
+          position: absolute;
+          top: 6px;
+          right: 6px;
+          width: clamp(22px, 2.6vw, 32px);
+          height: clamp(22px, 2.6vw, 32px);
+          background: #f5f5f5;
+          border: 1.5px solid #9e9e9e;
+          border-radius: 6px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          z-index: 2;
+        }
+        .lwi-icon-svg { width: 60%; height: 60%; }
+
+        .lwi-line-wrap {
+          position: relative;
+          display: flex;
+          align-items: flex-end;
+          gap: 6px;
+        }
+
+        .lwi-line-num {
+          font-size: clamp(13px, 1.6vw, 19px);
+          font-weight: 700;
+          color: ${NUMBER_COLOR};
+          line-height: 1;
+          padding-bottom: 6px;
+          white-space: nowrap;
+          flex-shrink: 0;
+        }
+
+        /* Prefix ثابت (She will / She won't) */
+        .lwi-prefix {
+          font-size: clamp(15px, 1.9vw, 22px);
+          font-weight: 600;
+          line-height: 1;
+          padding-bottom: 6px;
+          white-space: nowrap;
+          flex-shrink: 0;
+        }
+
+        .lwi-input {
+          flex: 1;
+          background: transparent;
+          border: none;
+          border-bottom: 2px solid ${INPUT_UNDERLINE_DEFAULT};
+          outline: none;
+          font-size: clamp(15px, 1.9vw, 22px);
+          color: ${INPUT_TEXT_COLOR};
+          line-height: 1.5;
+          box-sizing: border-box;
+          transition: border-color 0.2s;
+          min-width: 0;
+        }
+        .lwi-input:disabled { opacity: 1; cursor: default; }
+
+        .lwi-badge {
+          position: absolute;
+          top: -8px;
+          right: 0px;
+          width: clamp(17px, 1.9vw, 22px);
+          height: clamp(17px, 1.9vw, 22px);
+          border-radius: 50%;
+          background: ${WRONG_BADGE_BG};
+          color: ${WRONG_BADGE_TEXT_COLOR};
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: clamp(9px, 1vw, 12px);
+          font-weight: 700;
+          border: 2px solid #fff;
+          box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+          pointer-events: none;
+          z-index: 2;
+        }
+
+        .lwi-inputs-stack {
+          display: flex;
+          flex-direction: column;
+          gap: clamp(8px, 1.2vw, 14px);
+          width: 100%;
+        }
+
+        .lwi-buttons {
+          display: flex;
+          justify-content: center;
+          margin-top: clamp(8px, 1.6vw, 18px);
+        }
+
+        @media (max-width: 600px) {
+          .lwi-grid { grid-template-columns: 1fr; }
+        }
+      `}</style>
+
+      <div
         className="div-forall"
         style={{
           display: "flex",
           flexDirection: "column",
-          gap: "18px",
+          gap: "clamp(14px, 2vw, 22px)",
           maxWidth: "1100px",
           margin: "0 auto",
         }}
       >
         <h1
           className="WB-header-title-page8"
-          style={{
-            margin: 0,
-            display: "flex",
-            alignItems: "center",
-            gap: "12px",
-            flexWrap: "wrap",
-          }}
+          style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
         >
-          <span className="WB-ex-A">I</span>Look and write a vocabulary word.
+          <span className="WB-ex-A">I</span>
+          Look and write.
         </h1>
 
-        {/* main image */}
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            width: "100%",
-          }}
-        >
-          <div
-            style={{
-              width: "100%",
-              maxWidth: "1000px",
-            }}
-          >
-            <img
-              src={exerciseImg}
-              alt="exercise"
-              style={{
-                width: "100%",
-                height: "auto",
-                display: "block",
-                objectFit: "contain",
-                borderRadius: "12px",
-              }}
-            />
-          </div>
-        </div>
+        <div className="lwi-grid">
+          {NUMBERED_ITEMS.map((item) => (
+            <div key={item.id} className="lwi-card">
 
-        {/* drag items */}
-        <div
-          style={{
-            display: "flex",
-            gap: "10px",
-            flexWrap: "wrap",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          {DRAG_ITEMS.map((item) => {
-            const isUsed = usedDragIds.includes(item.id);
-
-            return (
-              <div
-                key={item.id}
-                draggable={!isUsed && !showAns}
-                onDragStart={() => handleDragStart(item)}
-                onTouchStart={(e) => handleTouchStart(e, item)}
-                onTouchMove={handleTouchMove}
-                onTouchEnd={handleTouchEnd}
-                style={{
-                  padding: "10px 16px",
-                  borderRadius: "14px",
-                  border: `1.5px solid ${isUsed ? BORDER_COLOR : ACTIVE_COLOR}`,
-                  backgroundColor: isUsed ? "#eeeeee" : SOFT_COLOR,
-                  color: isUsed ? "#999" : "#222",
-                  cursor: isUsed || showAns ? "not-allowed" : "grab",
-                  opacity: isUsed ? 0.6 : 1,
-                  userSelect: "none",
-                  fontSize: "18px",
-                  fontWeight: 500,
-                  boxShadow: isUsed ? "none" : "0 2px 8px rgba(0,0,0,0.06)",
-                  transition: "0.2s ease",
-                  touchAction: "none",
-                }}
-              >
-                {item.value}
+              <div className="lwi-num-row">
+                <span className="lwi-num">{item.id}</span>
               </div>
-            );
-          })}
-        </div>
 
-        {/* answer lines */}
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(2, minmax(280px, 1fr))",
-            gap: "24px 40px",
-            width: "100%",
-            maxWidth: "1000px",
-            margin: "0 auto",
-          }}
-        >
-          {ANSWERS.map((item) => (
-            <div
-              key={item.id}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "12px",
-                minWidth: 0,
-              }}
-            >
-              <span
-                style={{
-                  fontSize: "22px",
-                  fontWeight: 700,
-                  color: "#111",
-                  minWidth: "28px",
-                }}
-              >
-                {item.id}
-              </span>
-
-              <div style={{ flex: 1 }}>
-                {renderDropBox(`a-${item.id}`, isWrong(item))}
+              <div className="lwi-img-pair">
+                {item.images.map(renderImageSlot)}
               </div>
+
+              <div className="lwi-inputs-stack">
+                {item.images.map(renderInputLine)}
+              </div>
+
             </div>
           ))}
         </div>
 
-        {/* buttons */}
-        <div
-          style={{
-            marginTop: "6px",
-            display: "flex",
-            justifyContent: "center",
-          }}
-        >
+        <div className="lwi-buttons">
           <Button
             checkAnswers={handleCheck}
             handleShowAnswer={handleShowAnswer}
-            handleStartAgain={handleStartAgain}
+            handleStartAgain={handleReset}
           />
         </div>
       </div>
-
-      {/* floating preview on touch */}
-      {touchItem && (
-        <div
-          style={{
-            position: "fixed",
-            left: touchPos.x - 40,
-            top: touchPos.y - 20,
-            background: "#fff",
-            padding: "8px 12px",
-            borderRadius: "10px",
-            boxShadow: "0 4px 10px rgba(0,0,0,0.2)",
-            pointerEvents: "none",
-            zIndex: 9999,
-            fontSize: "18px",
-            fontWeight: 600,
-            color: "#222",
-          }}
-        >
-          {touchItem.value}
-        </div>
-      )}
-
     </div>
   );
 }

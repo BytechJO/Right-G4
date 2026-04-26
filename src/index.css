@@ -96,10 +96,6 @@ button {
     overflow-y: auto;
   }
 }
-input:focus {
-  border-color: gray !important ; /* هنا يصير اللون رمادي */
-  box-shadow: 0 0 4px rgba(0, 0, 0, 0.1); /* ظل خفيف لطيف */
-}
 
 .clickable-area {
   background-color: rgba(255, 255, 0, 0); /* شفاف بالأساس */
@@ -260,7 +256,7 @@ img {
 .WB-header-title-page8 {
   font-size: 25px;
   font-family: "Gill Sans MT", "Gill Sans", Calibri, "Trebuchet MS", sans-serif;
-  color: #f39b42;
+  color: #2096a6;
   font-weight: 700;
   display: flex;
   align-items: center;
@@ -268,7 +264,7 @@ img {
   white-space: nowrap;
 }
 .WB-ex-A {
-  background: #ffca94;
+  background: #99c0cb;
   font-family: "Gill Sans MT", "Gill Sans", Calibri, "Trebuchet MS", sans-serif;
   color: white;
   font-weight: 700;

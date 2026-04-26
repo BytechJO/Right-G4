@@ -1,264 +1,371 @@
-import { useState } from "react";
-import ValidationAlert from "../../Popup/ValidationAlert";
+import React, { useState } from "react";
 import Button from "../Button";
+import ValidationAlert from "../../Popup/ValidationAlert";
 
-const ACTIVE_COLOR = "#c81e1e";
-const BORDER_COLOR = "#f39b42";
-const TEXT_COLOR = "#2b2b2b";
-const HEADER_BG = "#ffffff";
+import img1 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U1 Folder/Page 3/SVG/1.svg"
+import img2 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U1 Folder/Page 3/SVG/2.svg";
+import img3 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U1 Folder/Page 3/SVG/3.svg";
+import img4 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U1 Folder/Page 3/SVG/4.svg";
 
-const EXERCISE_DATA = [
-  { id: 1, text: "The car is faster than the skateboard.",    correctAnswer: "true"  },
-  { id: 2, text: "The grandpa is younger than the grandson.", correctAnswer: "false" },
-  { id: 3, text: "The lion is larger than the cat.",          correctAnswer: "true"  },
-  { id: 4, text: "The truck is smaller than the car.",        correctAnswer: "false" },
-  { id: 5, text: "The snake is longer than the worm.",        correctAnswer: "true"  },
-  { id: 6, text: "The book is heavier than the pen.",         correctAnswer: "true"  },
+const WORD_BANK_BORDER_COLOR   = "#2096a6";   // بوردر حبوب word bank
+const WORD_BANK_BG_COLOR       = "#ffffff";   // خلفية حبوب word bank
+const WORD_BANK_TEXT_COLOR     = "#2b2b2b";   // نص حبوب word bank
+
+const INPUT_UNDERLINE_DEFAULT  = "#3f3f3f";   // خط input الفارغ / عند الصواب
+const INPUT_UNDERLINE_WRONG    = "#ef4444";   // خط input عند الخطأ
+
+const INPUT_TEXT_COLOR         = "#2b2b2b";   // لون نص المستخدم
+const INPUT_ANSWER_TEXT_COLOR  = "#ef4444";   // لون الإجابة عند Show Answer
+
+const WRONG_BADGE_BG           = "#ef4444";   // خلفية badge الخطأ
+const WRONG_BADGE_TEXT_COLOR   = "#ffffff";   // نص badge الخطأ
+
+const SENTENCE_TEXT_COLOR      = "#2b2b2b";   // لون نص الجملة
+const NUMBER_COLOR             = "#2b2b2b";   // لون الأرقام
+
+const IMG_BORDER_RADIUS        = "10px";                        // حواف الصورة
+const IMG_WIDTH                = "clamp(90px, 12vw, 148px)";   // عرض الصورة
+const IMG_HEIGHT               = "clamp(80px, 10vw, 130px)";   // ارتفاع الصورة
+
+// ─────────────────────────────────────────────
+//  📝  EXERCISE DATA
+// ─────────────────────────────────────────────
+const WORD_BANK = ["robot", "drive", "clean", "buildings"];
+
+const ITEMS = [
+  { id: 1, img: img1, before: "He will",                 after: "his room.",              correct: "clean"     },
+  { id: 2, img: img2, before: "Will he play with his",   after: "?",                      correct: "robot"     },
+  { id: 3, img: img3, before: "The city will build more",after: ".",                      correct: "buildings" },
+  { id: 4, img: img4, before: "He will",                 after: "a tractor on the farm.", correct: "drive"     },
 ];
 
-const styles = {
-  wrapper: { width: "100%", overflowX: "auto" },
+// ─────────────────────────────────────────────
+//  🔧  NORMALIZE — lowercase + strip ALL punctuation/spaces
+//      used for comparison only (not displayed)
+// ─────────────────────────────────────────────
+const normalize = (str) =>
+  str
+    .toLowerCase()                        // Robot → robot
+    .replace(/[.,!?;:'"\/\\()\[\]]/g, "") // حذف الفواصل والنقاط وكل punctuation
+    .replace(/\s+/g, " ")                 // توحيد المسافات
+    .trim();
 
-  table: {
-    width: "100%",
-    border: `2px solid ${BORDER_COLOR}`,
-    borderRadius: "clamp(10px, 1.5vw, 18px)",
-    overflow: "hidden",
-    background: "#fff",
-  },
+// تنظيف الـ input لما الطالب يكتب — يحذف الـ punctuation فوراً
+const sanitizeInput = (str) =>
+  str.replace(/[.,!?;:'"\/\\()\[\]]/g, "");
 
-  headerRow: {
-    display: "grid",
-    gridTemplateColumns: "minmax(0, 1fr) clamp(70px, 10vw, 95px) clamp(70px, 10vw, 95px)",
-    minHeight: "clamp(42px, 5vw, 58px)",
-    background: HEADER_BG,
-    borderBottom: `2px solid ${BORDER_COLOR}`,
-  },
-
-  headerCell: {
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    fontSize: "clamp(14px, 1.6vw, 20px)",
-    fontWeight: "700",
-    color: TEXT_COLOR,
-    padding: "8px",
-    boxSizing: "border-box",
-  },
-
-  bodyRow: {
-    display: "grid",
-    gridTemplateColumns: "minmax(0, 1fr) clamp(70px, 10vw, 95px) clamp(70px, 10vw, 95px)",
-    minHeight: "clamp(52px, 6vw, 78px)",
-    borderBottom: `1.5px solid ${BORDER_COLOR}`,
-  },
-
-  sentenceCell: {
-    display: "flex",
-    alignItems: "center",
-    gap: "clamp(8px, 1vw, 16px)",
-    padding: "clamp(8px, 1.2vw, 14px)",
-    boxSizing: "border-box",
-    minWidth: 0,
-  },
-
-  number: {
-    flexShrink: 0,
-    fontSize: "clamp(16px, 1.8vw, 22px)",
-    fontWeight: "700",
-    color: TEXT_COLOR,
-    width: "clamp(18px, 2vw, 26px)",
-    textAlign: "center",
-  },
-
-  sentenceText: {
-    fontSize: "clamp(14px, 2vw, 21px)",
-    fontWeight: "500",
-    color: TEXT_COLOR,
-    lineHeight: 1.25,
-    wordBreak: "break-word",
-  },
-
-  optionCell: {
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    borderLeft: `1.5px solid ${BORDER_COLOR}`,
-    padding: "6px",
-    boxSizing: "border-box",
-    cursor: "pointer",
-    position: "relative",
-    userSelect: "none",
-  },
-
-  checkMark: {
-    fontSize: "clamp(34px, 5vw, 62px)",
-    fontWeight: "900",
-    lineHeight: 1,
-    transform: "rotate(-6deg)",
-  },
-
-  buttonsWrap: {
-    display: "flex",
-    justifyContent: "center",
-    marginTop: "16px",
-  },
-};
-
-const WB_TrueFalse_Table = () => {
+// ─────────────────────────────────────────────
+//  COMPONENT
+// ─────────────────────────────────────────────
+export default function WB_Unit1_Page3_Q1() {
   const [answers,     setAnswers]     = useState({});
   const [showResults, setShowResults] = useState(false);
   const [showAns,     setShowAns]     = useState(false);
 
-  const handleSelect = (questionId, value) => {
-    if (showAns) return;
-    setAnswers((prev) => ({ ...prev, [questionId]: value }));
-    setShowResults(false);
+  // 🔒 بعد check أو show answer الـ inputs تنلوك
+  const isLocked = showResults || showAns;
+
+  // ── handlers ──────────────────────────────
+  const handleChange = (id, value) => {
+    if (isLocked) return;
+    // تنظيف الـ punctuation فوراً أثناء الكتابة
+    const clean = sanitizeInput(value);
+    setAnswers((prev) => ({ ...prev, [id]: clean }));
   };
 
-  const checkAnswers = () => {
-    if (showAns) return;
-    const allAnswered = EXERCISE_DATA.every((item) => answers[item.id]);
-    if (!allAnswered) { ValidationAlert.info("Please answer all items first."); return; }
+  const handleCheck = () => {
+    if (isLocked) return;
 
-    setShowResults(true);
+    const allAnswered = ITEMS.every(
+      (item) => answers[item.id] && answers[item.id].trim() !== ""
+    );
+    if (!allAnswered) {
+      ValidationAlert.info("Please complete all answers first.");
+      return;
+    }
 
     let score = 0;
-    const total = EXERCISE_DATA.length;
-    EXERCISE_DATA.forEach((item) => { if (answers[item.id] === item.correctAnswer) score++; });
+    ITEMS.forEach((item) => {
+      if (normalize(answers[item.id] || "") === normalize(item.correct)) score++;
+    });
 
-    if (score === total) ValidationAlert.success(`Score: ${score} / ${total}`);
-    else if (score > 0)  ValidationAlert.warning(`Score: ${score} / ${total}`);
-    else                 ValidationAlert.error(`Score: ${score} / ${total}`);
+    setShowResults(true); // 🔒 lock inputs
+
+    if (score === ITEMS.length)   ValidationAlert.success(`Score: ${score} / ${ITEMS.length}`);
+    else if (score > 0)           ValidationAlert.warning(`Score: ${score} / ${ITEMS.length}`);
+    else                          ValidationAlert.error(`Score: ${score} / ${ITEMS.length}`);
   };
 
   const handleShowAnswer = () => {
-    const correctAnswers = {};
-    EXERCISE_DATA.forEach((item) => { correctAnswers[item.id] = item.correctAnswer; });
-    setAnswers(correctAnswers);
-    setShowResults(true);
-    setShowAns(true);
+    const filled = {};
+    ITEMS.forEach((item) => { filled[item.id] = item.correct; });
+    setAnswers(filled);
+    setShowResults(false);
+    setShowAns(true); // 🔒 lock inputs
   };
 
-  const handleStartAgain = () => {
+  const handleReset = () => {
     setAnswers({});
     setShowResults(false);
-    setShowAns(false);
+    setShowAns(false); // 🔓 unlock inputs
   };
 
-  /* ── helpers ── */
-  const isWrong = (item) =>
-    showResults && !showAns && answers[item.id] && answers[item.id] !== item.correctAnswer;
-
-  const getCheckColor = (item) => (isWrong(item) ? "#ef4444" : ACTIVE_COLOR);
-
-  const renderMark = (item, optionValue) => {
-    if (answers[item.id] !== optionValue) return null;
-    return (
-      <span style={{ ...styles.checkMark, color: getCheckColor(item) }}>✓</span>
-    );
+  // ── helpers ───────────────────────────────
+  const isWrong = (item) => {
+    if (!showResults || showAns) return false;
+    return normalize(answers[item.id] || "") !== normalize(item.correct);
   };
 
+  const getUnderlineColor = (item) => {
+    if (!showResults || showAns) return INPUT_UNDERLINE_DEFAULT;
+    return isWrong(item) ? INPUT_UNDERLINE_WRONG : INPUT_UNDERLINE_DEFAULT;
+  };
+
+  // ── render ────────────────────────────────
   return (
     <div className="main-container-component">
+      <style>{`
+        /* ── Word Bank ── */
+        .wlrw-bank {
+          display: flex;
+          flex-wrap: wrap;
+          gap: clamp(8px, 1.4vw, 14px);
+          justify-content: center;
+          margin-bottom: clamp(10px, 1.8vw, 20px);
+        }
+        .wlrw-pill {
+          padding: clamp(5px, 0.7vw, 8px) clamp(18px, 2.4vw, 32px);
+          border: 2px solid ${WORD_BANK_BORDER_COLOR};
+          border-radius: 15px;
+          background: ${WORD_BANK_BG_COLOR};
+          color: ${WORD_BANK_TEXT_COLOR};
+          font-size: clamp(22px, 1.8vw, 25px);
+          user-select: none;
+          white-space: nowrap;
+        }
+
+        /* ── Items List ── */
+        .wlrw-list {
+          display: flex;
+          flex-direction: column;
+          gap: clamp(16px, 2.6vw, 28px);
+          width: 100%;
+        }
+
+        /* ── Row: [ num ] [ img ] [ sentence ] ── */
+        .wlrw-row {
+          display: grid;
+          grid-template-columns:
+            clamp(18px, 2vw, 26px)
+            ${IMG_WIDTH}
+            minmax(0, 1fr);
+          column-gap: clamp(12px, 1.8vw, 22px);
+          align-items: center;
+          width: 100%;
+        }
+
+        /* Number */
+        .wlrw-num {
+          font-size: clamp(18px, 2.2vw, 24px);
+          color: ${NUMBER_COLOR};
+          line-height: 1;
+        }
+
+        /* Image */
+        .wlrw-img-box {
+          width: ${IMG_WIDTH};
+          height: ${IMG_HEIGHT};
+          border-radius: ${IMG_BORDER_RADIUS};
+          overflow: hidden;
+        }
+        .wlrw-img {
+          width: 100%;
+          height: 100%;
+
+        }
+
+        /* Sentence wrapper */
+        .wlrw-sentence {
+          display: flex;
+          align-items: flex-end;
+          flex-wrap: wrap;
+          gap: clamp(4px, 0.7vw, 8px);
+          min-width: 0;
+        }
+
+        /* Sentence text */
+        .wlrw-text {
+          font-size: clamp(15px, 1.9vw, 22px);
+          color: ${SENTENCE_TEXT_COLOR};
+          white-space: nowrap;
+        }
+
+        /* Input wrapper — for badge positioning */
+        .wlrw-input-wrap {
+          position: relative;
+          display: inline-flex;
+          align-items: flex-end;
+          flex-shrink: 0;
+        }
+
+        /* Input — underline only, no box */
+        .wlrw-input {
+              border: 0px solid rgba(255, 255, 255, 0);
+
+          border-bottom: 2px solid ${INPUT_UNDERLINE_DEFAULT};
+          outline: none;
+          font-size: clamp(15px, 1.9vw, 22px);
+          color: ${INPUT_TEXT_COLOR};
+          width: clamp(100px, 14vw, 195px);
+          text-align: center;
+          box-sizing: border-box;
+          font-family: inherit;
+        }
+
+        
+        /* ✕ Wrong badge */
+        .wlrw-badge {
+          position: absolute;
+          top: -9px;
+          right: -11px;
+          width: clamp(18px, 2vw, 23px);
+          height: clamp(18px, 2vw, 23px);
+          border-radius: 50%;
+          background: ${WRONG_BADGE_BG};
+          color: ${WRONG_BADGE_TEXT_COLOR};
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: clamp(10px, 1.1vw, 13px);
+          font-weight: 700;
+          border: 2px solid #fff;
+          box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+          pointer-events: none;
+          z-index: 2;
+        }
+
+        /* Buttons */
+        .wlrw-buttons {
+          display: flex;
+          justify-content: center;
+          margin-top: clamp(8px, 1.6vw, 18px);
+        }
+
+        /* ── Responsive ── */
+        @media (max-width: 680px) {
+          .wlrw-row {
+            grid-template-columns:
+              clamp(16px, 3.5vw, 20px)
+              clamp(70px, 18vw, 110px)
+              minmax(0, 1fr);
+            column-gap: 8px;
+          }
+          .wlrw-text { white-space: normal; }
+          .wlrw-input { width: clamp(80px, 32vw, 145px); }
+        }
+
+        @media (max-width: 440px) {
+          .wlrw-sentence { gap: 4px; }
+          .wlrw-pill { padding: 5px 14px; font-size: 14px; }
+        }
+      `}</style>
+
       <div
         className="div-forall"
-        style={{ display: "flex", flexDirection: "column", gap: "18px", maxWidth: "1100px", margin: "0 auto" }}
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: "18px",
+          maxWidth: "1100px",
+          margin: "0 auto",
+        }}
       >
+        {/* ── Header ── */}
         <h1
           className="WB-header-title-page8"
           style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
         >
-          <span className="WB-ex-A">A</span> Read and write ✓.
+          <span className="WB-ex-A">A</span>
+          Look, read, and write.
         </h1>
 
-        <div style={styles.wrapper}>
-          <div style={styles.table}>
-            {/* Header */}
-            <div style={styles.headerRow}>
-              <div style={styles.headerCell}></div>
-              <div style={{ ...styles.headerCell, borderLeft: `1.5px solid ${BORDER_COLOR}` }}>True</div>
-              <div style={{ ...styles.headerCell, borderLeft: `1.5px solid ${BORDER_COLOR}` }}>False</div>
-            </div>
-
-            {/* Rows */}
-            {EXERCISE_DATA.map((item, index) => (
-              <div
-                key={item.id}
-                style={{
-                  ...styles.bodyRow,
-                  borderBottom: index === EXERCISE_DATA.length - 1 ? "none" : `1.5px solid ${BORDER_COLOR}`,
-                  background:  "transparent",
-                  transition: "background 0.2s",
-                }}
-              >
-                {/* Sentence */}
-                <div style={styles.sentenceCell}>
-                  <span style={styles.number}>{item.id}</span>
-                  <span style={styles.sentenceText}>{item.text}</span>
-
-                  {/* ✗ badge */}
-                  {isWrong(item) && (
-                    <span
-                      style={{
-                        marginLeft:     "auto",
-                        flexShrink:     0,
-                        background:     "#ef4444",
-                        color:          "#fff",
-                        border : "1px solid #fff ",
-                        borderRadius:   "50%",
-                        width:          "clamp(18px,2vw,26px)",
-                        height:         "clamp(18px,2vw,26px)",
-                        fontSize:       "clamp(11px,1.2vw,15px)",
-                        fontWeight:     700,
-                        display:        "flex",
-                        alignItems:     "center",
-                        justifyContent: "center",
-                        boxShadow:      "0 1px 4px rgba(0,0,0,0.18)",
-                        flexShrink:     0,
-                      }}
-                    >
-                      X
-                    </span>
-                  )}
-                </div>
-
-                {/* True cell */}
-                <div
-                  onClick={() => handleSelect(item.id, "true")}
-                  style={{
-                    ...styles.optionCell,
-                    cursor: showAns ? "default" : "pointer",
-                  }}
-                >
-                  {renderMark(item, "true")}
-                </div>
-
-                {/* False cell */}
-                <div
-                  onClick={() => handleSelect(item.id, "false")}
-                  style={{
-                    ...styles.optionCell,
-                    cursor: showAns ? "default" : "pointer",
-                  }}
-                >
-                  {renderMark(item, "false")}
-                </div>
-              </div>
-            ))}
-          </div>
+        {/* ── Word Bank ── */}
+        <div className="wlrw-bank">
+          {WORD_BANK.map((word) => (
+            <div key={word} className="wlrw-pill">{word}</div>
+          ))}
         </div>
 
-        <div style={styles.buttonsWrap}>
+        {/* ── Items ── */}
+        <div className="wlrw-list">
+          {ITEMS.map((item) => {
+            const wrong  = isWrong(item);
+            const value  = answers[item.id] || "";
+            const uColor = getUnderlineColor(item);
+            const tColor = showAns ? INPUT_ANSWER_TEXT_COLOR : INPUT_TEXT_COLOR;
+
+            return (
+              <div key={item.id} className="wlrw-row">
+
+                {/* 1 ── Number */}
+                <span className="wlrw-num">{item.id}</span>
+
+                {/* 2 ── Image */}
+                <div className="wlrw-img-box">
+                  <img
+                    src={item.img}
+                    alt={`q${item.id}`}
+                    className="wlrw-img"
+                  />
+                </div>
+
+                {/* 3 ── Sentence + blank */}
+                <div className="wlrw-sentence">
+
+                  {item.before && (
+                    <span className="wlrw-text">{item.before}</span>
+                  )}
+
+                  {/* Input + badge */}
+                  <div className="wlrw-input-wrap">
+                    <input
+                      type="text"
+                      className="wlrw-input"
+                      value={value}
+                      disabled={isLocked}
+                      onChange={(e) => handleChange(item.id, e.target.value)}
+                      style={{
+                        borderBottomColor: uColor,
+                        color: tColor,
+                        cursor: isLocked ? "default" : "text",
+                      }}
+                      spellCheck={false}
+                      autoComplete="off"
+                    />
+
+                    {/* ✕ only when wrong after Check */}
+                    {wrong && <div className="wlrw-badge">✕</div>}
+                  </div>
+
+                  {item.after && (
+                    <span className="wlrw-text">{item.after}</span>
+                  )}
+
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* ── Buttons ── */}
+        <div className="wlrw-buttons">
           <Button
+            checkAnswers={handleCheck}
             handleShowAnswer={handleShowAnswer}
-            handleStartAgain={handleStartAgain}
-            checkAnswers={checkAnswers}
+            handleStartAgain={handleReset}
           />
         </div>
       </div>
     </div>
   );
-};
-
-export default WB_TrueFalse_Table;
+}

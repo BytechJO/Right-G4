@@ -1,420 +1,382 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useLayoutEffect } from "react";
 import Button from "../Button";
 import ValidationAlert from "../../Popup/ValidationAlert";
 
-import img1a from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U1 Folder/Page 7/SVG/Asset 2.svg";
-import img1b from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U1 Folder/Page 7/SVG/Asset 3.svg";
-import img2a from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U1 Folder/Page 7/SVG/Asset 4.svg";
-import img2b from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U1 Folder/Page 7/SVG/Asset 5.svg";
-import img3a from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U1 Folder/Page 7/SVG/Asset 6.svg";
-import img3b from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U1 Folder/Page 7/SVG/Asset 7.svg";
-import img4a from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U1 Folder/Page 7/SVG/Asset 8.svg";
-import img4b from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U1 Folder/Page 7/SVG/Asset 9.svg";
+// ─────────────────────────────────────────────
+//  🖼️  IMAGES — غيّر المسارات حسب مشروعك
+//  char = صورة الشخصية  |  scene = صورة النشاط
+// ─────────────────────────────────────────────
+import jakeChar    from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U1 Folder/Page 7/SVG/Asset 5.svg";
+import jakeScene   from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U1 Folder/Page 7/SVG/Asset 6.svg";
+import rosieChar   from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U1 Folder/Page 7/SVG/Asset 11.svg";
+import rosieScene  from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U1 Folder/Page 7/SVG/Asset 12.svg";
+import natalieChar  from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U1 Folder/Page 7/SVG/Asset 7.svg";
+import natalieScene from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U1 Folder/Page 7/SVG/Asset 8.svg";
+import hanselChar  from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U1 Folder/Page 7/SVG/Asset 13.svg";
+import hanselScene from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U1 Folder/Page 7/SVG/Asset 14.svg";
+import kevinChar   from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U1 Folder/Page 7/SVG/Asset 9.svg";
+import kevinScene  from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U1 Folder/Page 7/SVG/Asset 10.svg";
+import lillyChar   from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U1 Folder/Page 7/SVG/Asset 15.svg";
+import lillyScene  from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U1 Folder/Page 7/SVG/Asset 16.svg";
 
-const ITEMS = [
-  {
-    id: 1,
-    type: "answer",
-    question: "Which is bigger, the deer or the elephant?",
-    leftImg: img1a,
-    rightImg: img1b,
-    firstOptions: ["The elephant", "The deer"],
-    middle: "is bigger than",
-    lastOptions: ["the deer.", "the elephant."],
-    correctFirst: "The elephant",
-    correctLast: "the deer.",
-  },
-  {
-    id: 2,
-    type: "answer",
-    question: "Who is taller, the girl or the man?",
-    leftImg: img2a,
-    rightImg: img2b,
-    firstOptions: ["The man", "The girl"],
-    middle: "is taller than",
-    lastOptions: ["the girl.", "the man."],
-    correctFirst: "The man",
-    correctLast: "the girl.",
-  },
-  {
-    id: 3,
-    type: "question",
-    leftImg: img3a,
-    rightImg: img3b,
-    firstOptions: ["Which", "Who"],
-    middle: "is faster,",
-    lastOptions: ["the bike or the car?", "the car or the bike?"],
-    correctFirst: "Which",
-    correctLast: "the bike or the car?",
-    fixedAnswer: "The car is faster than the bike.",
-  },
-  {
-    id: 4,
-    type: "answer",
-    question: "Who is younger, John or Sarah?",
-    leftImg: img4a,
-    rightImg: img4b,
-    firstOptions: ["Sarah", "John"],
-    middle: "is younger than",
-    lastOptions: ["John.", "Sarah."],
-    correctFirst: "Sarah",
-    correctLast: "John.",
-  },
+// ─────────────────────────────────────────────
+//  🎨  COLORS — كلها قابلة للتعديل
+// ─────────────────────────────────────────────
+const TABLE_BORDER_COLOR  = "#2096a6";   // بوردر الجدول
+const DOT_DEFAULT_COLOR   = "#2096a6";   // لون النقطة العادية
+const DOT_SELECTED_COLOR  = "#2096a6";   // لون النقطة المحددة
+const LINE_COLOR          = "#2096a6";   // لون خط الوصل
+const WRONG_LINE_COLOR    = "#ef4444";   // لون خط الوصل الغلط
+const SENTENCE_COLOR      = "#2b2b2b";   // لون نص الجمل
+const NUMBER_COLOR        = "#2b2b2b";   // لون الأرقام
+const WRONG_BADGE_BG      = "#ef4444";   // خلفية badge الخطأ
+const WRONG_BADGE_TEXT    = "#ffffff";   // نص badge الخطأ
+
+// ─────────────────────────────────────────────
+//  📝  EXERCISE DATA
+// ─────────────────────────────────────────────
+// الجدول فوق — 3 rows × 2 cols
+const TABLE_ROWS = [
+  [
+    { name: "Jake",    char: jakeChar,    scene: jakeScene    },
+    { name: "Rosie",   char: rosieChar,   scene: rosieScene   },
+  ],
+  [
+    { name: "Natalie", char: natalieChar,  scene: natalieScene },
+    { name: "Hansel",  char: hanselChar,  scene: hanselScene  },
+  ],
+  [
+    { name: "Kevin",   char: kevinChar,   scene: kevinScene   },
+    { name: "Lilly",   char: lillyChar,   scene: lillyScene   },
+  ],
 ];
 
-export default function WB_Unit3_Page7_QJ() {
-  const [answers, setAnswers] = useState({});
-  const [checked, setChecked] = useState(false);
-  const [showAns, setShowAns] = useState(false);
+// اليسار — الشخصيات
+const LEFT_ITEMS = [
+  { id: 1, label: "Natalie will" },
+  { id: 2, label: "Hansel will"  },
+  { id: 3, label: "Lilly will"   },
+  { id: 4, label: "Jake will"    },
+  { id: 5, label: "Kevin will"   },
+  { id: 6, label: "Rosie will"   },
+];
 
-  const handleChange = (id, field, value) => {
-    if (showAns) return;
-    setAnswers((prev) => ({
-      ...prev,
-      [id]: { ...prev[id], [field]: value },
-    }));
-    setChecked(false);
+// اليمين — الأنشطة (مرتبة بشكل مختلف عن اليسار)
+const RIGHT_ITEMS = [
+  { id: 1, label: "go to the playground." },
+  { id: 2, label: "watch a movie."        },
+  { id: 3, label: "shop at the mall."     },
+  { id: 4, label: "go to the lake."       },
+  { id: 5, label: "ride a horse."         },
+  { id: 6, label: "eat at a restaurant."  },
+];
+
+// الإجابات الصحيحة: leftId → rightId
+const CORRECT_MATCHES = {
+  1: 4,   // Natalie will → go to the lake
+  2: 6,   // Hansel will  → watch a movie
+  3: 3,   // Lilly will   → shop at the mall
+  4: 5,   // Jake will    → ride a horse
+  5: 1,   // Kevin will   → go to the playground
+  6: 2,   // Rosie will   → eat at a restaurant
+};
+
+// ─────────────────────────────────────────────
+//  COMPONENT
+// ─────────────────────────────────────────────
+export default function WB_LookReadMatch_QJ() {
+  const [selectedLeft, setSelectedLeft] = useState(null);
+  const [matches,      setMatches]      = useState({});
+  const [showResults,  setShowResults]  = useState(false);
+  const [showAns,      setShowAns]      = useState(false);
+  const [lines,        setLines]        = useState([]);
+
+  const containerRef = useRef(null);
+  const dotRefs      = useRef({});
+
+  const isLocked = showResults || showAns;
+
+  // ── SVG lines ─────────────────────────────
+  useLayoutEffect(() => {
+    const update = () => {
+      if (!containerRef.current) return;
+      const cr = containerRef.current.getBoundingClientRect();
+      const newLines = Object.entries(matches).map(([lid, rid]) => {
+        const lEl = dotRefs.current[`left-${lid}`];
+        const rEl = dotRefs.current[`right-${rid}`];
+        if (!lEl || !rEl) return null;
+        const lr = lEl.getBoundingClientRect();
+        const rr = rEl.getBoundingClientRect();
+        return {
+          id:     `${lid}-${rid}`,
+          leftId: Number(lid),
+          rightId: Number(rid),
+          x1: lr.left + lr.width / 2 - cr.left,
+          y1: lr.top  + lr.height / 2 - cr.top,
+          x2: rr.left + rr.width / 2 - cr.left,
+          y2: rr.top  + rr.height / 2 - cr.top,
+        };
+      }).filter(Boolean);
+      setLines(newLines);
+    };
+    const raf = () => requestAnimationFrame(update);
+    raf();
+    window.addEventListener("resize", raf);
+    return () => window.removeEventListener("resize", raf);
+  }, [matches]);
+
+  // ── handlers ──────────────────────────────
+  const handleLeftClick = (id) => {
+    if (isLocked) return;
+    setSelectedLeft(id);
+  };
+
+  const handleRightClick = (rid) => {
+    if (isLocked || selectedLeft === null) return;
+    const updated = { ...matches };
+    // أزل أي وصل قديم لنفس اليمين
+    Object.keys(updated).forEach((k) => { if (updated[k] === rid) delete updated[k]; });
+    updated[selectedLeft] = rid;
+    setMatches(updated);
+    setSelectedLeft(null);
   };
 
   const handleCheck = () => {
-    if (showAns) return;
-    const allAnswered = ITEMS.every(
-      (item) => answers[item.id]?.first && answers[item.id]?.last
-    );
-    if (!allAnswered) {
-      ValidationAlert.info("Please complete all answers first.");
+    if (isLocked) return;
+    if (Object.keys(matches).length < LEFT_ITEMS.length) {
+      ValidationAlert.info("Please connect all items first.");
       return;
     }
     let score = 0;
-    ITEMS.forEach((item) => {
-      const firstCorrect = answers[item.id]?.first === item.correctFirst;
-      const lastCorrect = answers[item.id]?.last === item.correctLast;
-      if (firstCorrect && lastCorrect) score += 1;
+    LEFT_ITEMS.forEach((l) => {
+      if (matches[l.id] === CORRECT_MATCHES[l.id]) score++;
     });
-    setChecked(true);
-    if (score === ITEMS.length) {
-      ValidationAlert.success(`Score: ${score} / ${ITEMS.length}`);
-    } else if (score > 0) {
-      ValidationAlert.warning(`Score: ${score} / ${ITEMS.length}`);
-    } else {
-      ValidationAlert.error(`Score: ${score} / ${ITEMS.length}`);
-    }
+    setShowResults(true);
+    if (score === LEFT_ITEMS.length)   ValidationAlert.success(`Score: ${score} / ${LEFT_ITEMS.length}`);
+    else if (score > 0)                ValidationAlert.warning(`Score: ${score} / ${LEFT_ITEMS.length}`);
+    else                               ValidationAlert.error(`Score: ${score} / ${LEFT_ITEMS.length}`);
   };
 
   const handleShowAnswer = () => {
-    const filled = {};
-    ITEMS.forEach((item) => {
-      filled[item.id] = { first: item.correctFirst, last: item.correctLast };
-    });
-    setAnswers(filled);
-    setChecked(true);
+    setMatches({ ...CORRECT_MATCHES });
+    setShowResults(false);
     setShowAns(true);
+    setSelectedLeft(null);
   };
 
   const handleReset = () => {
-    setAnswers({});
-    setChecked(false);
+    setMatches({});
+    setSelectedLeft(null);
+    setShowResults(false);
     setShowAns(false);
+    setLines([]);
   };
 
-  const getValue = (itemId, field) => answers[itemId]?.[field] || "";
-
-  const isWrong = (item) => {
-    if (!checked || showAns) return false;
-    return (
-      answers[item.id]?.first !== item.correctFirst ||
-      answers[item.id]?.last !== item.correctLast
-    );
+  // ── helpers ───────────────────────────────
+  const isWrongLine = (leftId) => {
+    if (!showResults || showAns) return false;
+    return matches[leftId] !== CORRECT_MATCHES[leftId];
   };
 
-  const renderSelect = (item, field, options, className = "") => (
-    <div className={`wb-j-select-wrap ${className}`}>
-      <select
-        value={getValue(item.id, field)}
-        disabled={showAns}
-        onChange={(e) => handleChange(item.id, field, e.target.value)}
-        className={`wb-j-select ${
-          getValue(item.id, field) ? "wb-j-select--filled" : ""
-        }`}
-      >
-        <option value="" disabled hidden>
-          Select
-        </option>
-        {options.map((option) => (
-          <option key={option} value={option}>
-            {option}
-          </option>
-        ))}
-      </select>
-      {!showAns && <span className="wb-j-arrow">▼</span>}
-    </div>
-  );
+  const isDotConnectedLeft  = (id) => !!matches[id];
+  const isDotConnectedRight = (id) => Object.values(matches).includes(id);
+  const isSelectedLeft      = (id) => selectedLeft === id;
 
+  const dotColor = (connected, selected) =>
+    selected ? DOT_SELECTED_COLOR : connected ? DOT_SELECTED_COLOR : "#c0c0c0";
+
+  // ── render ────────────────────────────────
   return (
     <div className="main-container-component">
       <style>{`
-        .wb-j-wrapper {
+        /* ── Table ── */
+        .lrm-table {
           width: 100%;
-          max-width: 1100px;
-          margin: 0 auto;
-          padding: 8px 0 24px;
-          box-sizing: border-box;
-          display: flex;
-          flex-direction: column;
-          gap: 28px;
-        }
-
-        .wb-j-row {
-          display: grid;
-          grid-template-columns: 36px minmax(0, 1fr) clamp(220px, 24vw, 320px);
-          gap: 18px;
-          align-items: start;
-          width: 100%;
-        }
-
-        .wb-j-num {
-          font-size: 22px;
-          font-weight: 700;
-          line-height: 1;
-          color: #222;
-          padding-top: 8px;
-        }
-
-        .wb-j-text-col {
-          min-width: 0;
-          display: flex;
-          flex-direction: column;
-          gap: 12px;
-        }
-
-        .wb-j-question {
-          font-size: 22px;
-          line-height: 1.35;
-          color: #111;
-          font-weight: 500;
-        }
-
-        .wb-j-line-wrap {
-          position: relative;
-          width: 100%;
-        }
-
-        .wb-j-line {
-          width: 100%;
-          min-height: 58px;
-          border-bottom: 3px solid #2f2f2f;
-          display: flex;
-          align-items: center;
-          gap: clamp(6px, 1vw, 14px);
-          flex-wrap: nowrap;
-          padding-bottom: 6px;
-          box-sizing: border-box;
-          min-width: 0;
-        }
-
-        .wb-j-middle {
-          flex: 0 1 auto;
-          min-width: 0;
-          font-size: 22px;
-          line-height: 1.2;
-          color: #111;
-          font-weight: 500;
-          white-space: nowrap;
-        }
-
-        .wb-j-answer {
-          font-size: 22px;
-          line-height: 1.35;
-          color: #111;
-          font-weight: 500;
-        }
-
-        .wb-j-wrong {
-          position: absolute;
-          top: -7px;
-          right: -7px;
-          width: 22px;
-          height: 22px;
-          border-radius: 999px;
-          background: #ef4444;
-          color: #fff;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-size: 12px;
-          font-weight: 700;
-          border: 2px solid #fff;
-          box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-          box-sizing: border-box;
-        }
-
-        .wb-j-images {
-          width: 100%;
-          min-height: clamp(140px, 18vw, 220px);
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          gap: clamp(10px, 2vw, 24px);
-          padding-top: 4px;
-          box-sizing: border-box;
-        }
-
-        .wb-j-img-box {
-          flex: 1 1 0;
-          min-width: 0;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-        }
-
-        .wb-j-img {
-          display: block;
-          width: 100%;
-          height: auto;
-          max-height: clamp(120px, 17vw, 210px);
-          object-fit: contain;
-        }
-
-        .wb-j-buttons {
-          display: flex;
-          justify-content: center;
-          margin-top: 4px;
-        }
-
-        .wb-j-select-wrap {
-          position: relative;
-          display: inline-flex;
-          align-items: center;
-          flex: 1 1 0;
-          min-width: 0;
-          max-width: 100%;
-        }
-
-        .wb-j-select-wrap--small {
-          flex: 0 0 clamp(90px, 12vw, 120px);
-        }
-
-        .wb-j-select-wrap--medium {
-          flex: 0 1 clamp(120px, 18vw, 190px);
-        }
-
-        .wb-j-select-wrap--large {
-          flex: 0 1 clamp(150px, 24vw, 260px);
-        }
-
-        .wb-j-select {
-          width: 100%;
-          min-width: 0;
-          height: clamp(38px, 4vw, 46px);
-          border: 2px solid #c9c9c9;
-          border-radius: 10px;
-          background: #fff;
-          padding: 0 34px 0 12px;
-          font-size: 22px;
-          font-weight: 500;
-          color: #222;
-          outline: none;
-          appearance: none;
-          -webkit-appearance: none;
-          -moz-appearance: none;
-          box-sizing: border-box;
-          cursor: pointer;
-          text-align: center;
-          text-align-last: center;
-          white-space: nowrap;
+          border: 2px solid ${TABLE_BORDER_COLOR};
+          border-radius: 12px;
           overflow: hidden;
-          text-overflow: ellipsis;
+          box-sizing: border-box;
+        }
+        .lrm-table-row {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          border-bottom: 2px solid ${TABLE_BORDER_COLOR};
+        }
+        .lrm-table-row:last-child { border-bottom: none; }
+
+        .lrm-table-cell {
+          display: flex;
+          align-items: center;
+          gap: clamp(8px, 1.2vw, 16px);
+          padding: clamp(6px, 1vw, 12px) clamp(8px, 1.4vw, 16px);
+          box-sizing: border-box;
+        }
+        .lrm-table-cell:first-child {
+          border-right: 2px solid ${TABLE_BORDER_COLOR};
         }
 
-        .wb-j-select--filled {
-          color: #222;
+        .lrm-char-img {
+          width: clamp(36px, 5.5vw, 60px);
+          height: clamp(36px, 5.5vw, 60px);
+          object-fit: contain;
+          flex-shrink: 0;
+        }
+        .lrm-char-name {
+          font-size: clamp(13px, 1.6vw, 19px);
+          font-weight: 700;
+          color: #2b2b2b;
+          white-space: nowrap;
+        }
+        .lrm-scene-img {
+          width: clamp(80px, 13vw, 160px);
+          height: clamp(55px, 9vw, 110px);
+          object-fit: cover;
+          border-radius: 8px;
+          flex-shrink: 0;
+          margin-left: auto;
         }
 
-        .wb-j-select:disabled {
-          opacity: 1;
-          cursor: default;
+        /* ── Matching area ── */
+        .lrm-match {
+          position: relative;
+          display: grid;
+          grid-template-columns: minmax(0,1fr) clamp(20px,2.5vw,28px) clamp(20px,2.5vw,28px) minmax(0,1fr);
+          gap: 0 clamp(30px,5vw,80px);
+          width: 100%;
         }
 
-        .wb-j-arrow {
+        /* Left column */
+        .lrm-left-col {
+          display: flex;
+          flex-direction: column;
+        }
+
+        /* Right column */
+        .lrm-right-col {
+          display: flex;
+          flex-direction: column;
+        }
+
+        /* ── Left row: num + label + dot ── */
+        .lrm-left-item {
+          display: flex;
+          align-items: center;
+          min-height: clamp(38px, 5vw, 52px);
+          cursor: pointer;
+          user-select: none;
+          border-radius: 8px;
+          padding: 4px 4px 4px 0;
+          position: relative;
+        }
+        .lrm-left-item--selected {
+          background: rgba(32,150,166,0.08);
+          outline: 2px solid #2096a6;
+        }
+        .lrm-left-item .lrm-num   { flex-shrink: 0; margin-right: clamp(6px,1vw,10px); }
+        /* label يأخذ كل المساحة → النقطة تضطر تروح آخر اليمين */
+        .lrm-left-item .lrm-label { flex: 1 1 auto; }
+        /* النقطة في آخر الـ flex */
+        .lrm-left-item .lrm-dot   { flex-shrink: 0; margin-left: clamp(6px,1vw,10px); }
+
+        /* ── Right row: dot + label ── */
+        .lrm-right-item {
+          display: flex;
+          align-items: center;
+          min-height: clamp(38px, 5vw, 52px);
+          cursor: pointer;
+          user-select: none;
+          border-radius: 8px;
+          padding: 4px 0 4px 4px;
+        }
+        .lrm-right-item--connected {
+          background: rgba(32,150,166,0.06);
+        }
+        .lrm-right-item .lrm-label { flex: 1 1 auto; }
+
+        .lrm-num {
+          font-size: clamp(14px, 1.7vw, 20px);
+          font-weight: 700;
+          color: ${NUMBER_COLOR};
+          min-width: clamp(14px, 1.8vw, 22px);
+        }
+
+        .lrm-label {
+          font-size: clamp(14px, 1.7vw, 20px);
+          font-weight: 400;
+          color: ${SENTENCE_COLOR};
+          line-height: 1.4;
+        }
+
+        /* ── Base dot ── */
+        .lrm-dot {
+          width: clamp(11px, 1.4vw, 15px);
+          height: clamp(11px, 1.4vw, 15px);
+          border-radius: 50%;
+          transition: all 0.2s;
+          flex-shrink: 0;
+        }
+        .lrm-dot--selected {
+          box-shadow: 0 0 0 4px rgba(32,150,166,0.2);
+        }
+        /* ── Left dot — يمكن تتحكم فيه بشكل مستقل ── */
+        .lrm-dot--left {margin-left : -400%
+                }
+        /* ── Right dot — يمكن تتحكم فيه بشكل مستقل ── */
+        .lrm-dot--right {
+        margin-left : 400%}
+
+        /* ── Dot column — عمود مستقل للنقاط ── */
+        .lrm-dot-col {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: flex-start;
+          z-index: 2;
+        }
+        /* كل نقطة بنفس ارتفاع الجملة */
+        .lrm-dot-row {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          min-height: clamp(38px, 5vw, 52px);
+          width: 100%;
+          cursor: pointer;
+        }
+
+        /* ── Wrong badge — على الجملة مش النقطة ── */
+        .lrm-badge {
           position: absolute;
-          right: 12px;
           top: 50%;
           transform: translateY(-50%);
-          font-size: 12px;
-          color: #666;
+          right: clamp(18px,2.5vw,28px); /* يكون فوق النقطة تقريباً */
+          width: clamp(16px, 1.8vw, 20px);
+          height: clamp(16px, 1.8vw, 20px);
+          border-radius: 50%;
+          background: ${WRONG_BADGE_BG};
+          color: ${WRONG_BADGE_TEXT};
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: clamp(9px, 1vw, 11px);
+          font-weight: 700;
+          border: 2px solid #fff;
+          box-shadow: 0 2px 6px rgba(0,0,0,0.2);
           pointer-events: none;
+          z-index: 3;
         }
 
-        @media (max-width: 1100px) {
-          .wb-j-row {
-            grid-template-columns: 32px minmax(0, 1fr) minmax(180px, 260px);
-            gap: 16px;
-          }
-          .wb-j-line { gap: 8px; }
+        /* buttons */
+        .lrm-buttons {
+          display: flex;
+          justify-content: center;
+          margin-top: clamp(8px, 1.6vw, 18px);
         }
 
-        @media (max-width: 980px) {
-          .wb-j-row {
-            grid-template-columns: 32px 1fr;
-          }
-          .wb-j-images {
-            grid-column: 2 / 3;
-            width: min(100%, 420px);
-            min-height: auto;
-            margin-top: 4px;
-          }
-        }
-
-        @media (max-width: 768px) {
-          .wb-j-wrapper { gap: 24px; }
-          .wb-j-text-col { gap: 10px; }
-          .wb-j-line {
-            flex-wrap: wrap;
-            align-items: center;
-            min-height: auto;
-            padding-bottom: 8px;
-          }
-          .wb-j-middle { white-space: normal; }
-          .wb-j-select-wrap--small,
-          .wb-j-select-wrap--medium,
-          .wb-j-select-wrap--large { flex: 1 1 180px; }
-          .wb-j-images {
-            width: min(100%, 360px);
-            gap: 14px;
-          }
-          .wb-j-img { max-height: 150px; }
-
-          /* ✅ تصغير الخط على الشاشات المتوسطة */
-          .wb-j-num,
-          .wb-j-question,
-          .wb-j-middle,
-          .wb-j-answer,
-          .wb-j-select { font-size: 18px; }
-        }
-
-        @media (max-width: 560px) {
-          .wb-j-row {
-            grid-template-columns: 28px 1fr;
-            gap: 12px;
-          }
-          .wb-j-line { gap: 6px; }
-          .wb-j-arrow {
-            right: 10px;
-            font-size: 11px;
-          }
-          .wb-j-images { width: min(100%, 280px); }
-          .wb-j-img { max-height: 120px; }
-
-          /* ✅ تصغير الخط على الشاشات الصغيرة */
-          .wb-j-num,
-          .wb-j-question,
-          .wb-j-middle,
-          .wb-j-answer,
-          .wb-j-select { font-size: 15px; }
-
-          .wb-j-select {
-            height: 40px;
-            padding: 0 30px 0 10px;
+        /* hide lines on small screens */
+        @media (max-width: 580px) {
+          .lrm-svg { display: none; }
+          .lrm-match {
+            grid-template-columns: minmax(0,1fr) 24px 24px minmax(0,1fr);
           }
         }
       `}</style>
@@ -424,69 +386,140 @@ export default function WB_Unit3_Page7_QJ() {
         style={{
           display: "flex",
           flexDirection: "column",
-          gap: "18px",
+          gap: "clamp(14px, 2vw, 24px)",
           maxWidth: "1100px",
           margin: "0 auto",
         }}
       >
+        {/* ── Header ── */}
         <h1
           className="WB-header-title-page8"
-          style={{
-            margin: 0,
-            display: "flex",
-            alignItems: "center",
-            gap: "12px",
-            flexWrap: "wrap",
-          }}
+          style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
         >
           <span className="WB-ex-A">J</span>
-          Read and look. Write the questions or answers.
+          Look, read, and match.
         </h1>
 
-        {ITEMS.map((item) => (
-          <div key={item.id} className="wb-j-row">
-            <div className="wb-j-num">{item.id}</div>
-
-            <div className="wb-j-text-col">
-              {item.type === "answer" ? (
-                <>
-                  <div className="wb-j-question">{item.question}</div>
-                  <div className="wb-j-line-wrap">
-                    <div className="wb-j-line">
-                      {renderSelect(item, "first", item.firstOptions, "wb-j-select-wrap--medium")}
-                      <span className="wb-j-middle">{item.middle}</span>
-                      {renderSelect(item, "last", item.lastOptions, "wb-j-select-wrap--medium")}
-                    </div>
-                    {isWrong(item) && <div className="wb-j-wrong">✕</div>}
-                  </div>
-                </>
-              ) : (
-                <>
-                  <div className="wb-j-line-wrap">
-                    <div className="wb-j-line">
-                      {renderSelect(item, "first", item.firstOptions, "wb-j-select-wrap--small")}
-                      <span className="wb-j-middle">{item.middle}</span>
-                      {renderSelect(item, "last", item.lastOptions, "wb-j-select-wrap--large")}
-                    </div>
-                    {isWrong(item) && <div className="wb-j-wrong">✕</div>}
-                  </div>
-                  <div className="wb-j-answer">{item.fixedAnswer}</div>
-                </>
-              )}
+        {/* ── Table ── */}
+        <div className="lrm-table">
+          {TABLE_ROWS.map((row, ri) => (
+            <div key={ri} className="lrm-table-row">
+              {row.map((cell) => (
+                <div key={cell.name} className="lrm-table-cell">
+                  <img src={cell.char}  alt={cell.name} className="lrm-char-img" />
+                  <span className="lrm-char-name">{cell.name}</span>
+                  <img src={cell.scene} alt={`${cell.name}-scene`} className="lrm-scene-img" />
+                </div>
+              ))}
             </div>
+          ))}
+        </div>
 
-            <div className="wb-j-images">
-              <div className="wb-j-img-box">
-                <img src={item.leftImg} alt={`left-${item.id}`} className="wb-j-img" />
-              </div>
-              <div className="wb-j-img-box">
-                <img src={item.rightImg} alt={`right-${item.id}`} className="wb-j-img" />
-              </div>
-            </div>
+        {/* ── Matching ── */}
+        <div ref={containerRef} className="lrm-match">
+
+          {/* SVG lines */}
+          <svg
+            className="lrm-svg"
+            style={{
+              position: "absolute", inset: 0,
+              width: "100%", height: "100%",
+              pointerEvents: "none", overflow: "visible", zIndex: 1,
+            }}
+          >
+            {lines.map((line) => {
+              const mx = (line.x1 + line.x2) / 2;
+              const my = (line.y1 + line.y2) / 2 - Math.abs(line.y2 - line.y1) * 0.3;
+              const d  = `M ${line.x1} ${line.y1} Q ${mx} ${my} ${line.x2} ${line.y2}`;
+              return (
+                <path
+                  key={line.id}
+                  d={d}
+                  stroke={isWrongLine(line.leftId) ? WRONG_LINE_COLOR : LINE_COLOR}
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  fill="none"
+                />
+              );
+            })}
+          </svg>
+
+          {/* col 1: نص يسار */}
+          <div className="lrm-left-col">
+            {LEFT_ITEMS.map((item) => {
+              const wrong    = isWrongLine(item.id);
+              const selected = isSelectedLeft(item.id);
+              return (
+                <div
+                  key={item.id}
+                  className={`lrm-left-item ${selected ? "lrm-left-item--selected" : ""}`}
+                  onClick={() => handleLeftClick(item.id)}
+                  style={{ cursor: isLocked ? "default" : "pointer" }}
+                >
+                  <span className="lrm-num">{item.id}</span>
+                  <span className="lrm-label">{item.label}</span>
+                  {wrong && <div className="lrm-badge">✕</div>}
+                </div>
+              );
+            })}
           </div>
-        ))}
 
-        <div className="wb-j-buttons">
+          {/* col 2: نقطة يسار — مستقلة تماماً */}
+          <div className="lrm-dot-col">
+            {LEFT_ITEMS.map((item) => {
+              const selected  = isSelectedLeft(item.id);
+              const connected = isDotConnectedLeft(item.id);
+              return (
+                <div key={item.id} className="lrm-dot-row">
+                  <div
+                    ref={(el) => (dotRefs.current[`left-${item.id}`] = el)}
+                    className={`lrm-dot lrm-dot--left ${selected ? "lrm-dot--selected" : ""}`}
+                    style={{ backgroundColor: dotColor(connected, selected) }}
+                    onClick={() => handleLeftClick(item.id)}
+                  />
+                </div>
+              );
+            })}
+          </div>
+
+          {/* col 3: نقطة يمين — مستقلة تماماً */}
+          <div className="lrm-dot-col">
+            {RIGHT_ITEMS.map((item) => {
+              const connected = isDotConnectedRight(item.id);
+              return (
+                <div key={item.id} className="lrm-dot-row">
+                  <div
+                    ref={(el) => (dotRefs.current[`right-${item.id}`] = el)}
+                    className="lrm-dot lrm-dot--right"
+                    style={{ backgroundColor: dotColor(connected, false) }}
+                    onClick={() => handleRightClick(item.id)}
+                  />
+                </div>
+              );
+            })}
+          </div>
+
+          {/* col 4: نص يمين */}
+          <div className="lrm-right-col">
+            {RIGHT_ITEMS.map((item) => {
+              const connected = isDotConnectedRight(item.id);
+              return (
+                <div
+                  key={item.id}
+                  className={`lrm-right-item ${connected ? "lrm-right-item--connected" : ""}`}
+                  onClick={() => handleRightClick(item.id)}
+                  style={{ cursor: isLocked || selectedLeft === null ? "default" : "pointer" }}
+                >
+                  <span className="lrm-label">{item.label}</span>
+                </div>
+              );
+            })}
+          </div>
+
+        </div>
+
+        {/* ── Buttons ── */}
+        <div className="lrm-buttons">
           <Button
             checkAnswers={handleCheck}
             handleShowAnswer={handleShowAnswer}
