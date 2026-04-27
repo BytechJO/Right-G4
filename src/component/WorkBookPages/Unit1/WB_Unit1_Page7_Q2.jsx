@@ -2,56 +2,22 @@ import React, { useState, useRef, useLayoutEffect } from "react";
 import Button from "../Button";
 import ValidationAlert from "../../Popup/ValidationAlert";
 
-// ─────────────────────────────────────────────
-//  🖼️  IMAGES — غيّر المسارات حسب مشروعك
-//  char = صورة الشخصية  |  scene = صورة النشاط
-// ─────────────────────────────────────────────
-import jakeChar    from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U1 Folder/Page 7/SVG/Asset 5.svg";
-import jakeScene   from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U1 Folder/Page 7/SVG/Asset 6.svg";
-import rosieChar   from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U1 Folder/Page 7/SVG/Asset 11.svg";
-import rosieScene  from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U1 Folder/Page 7/SVG/Asset 12.svg";
-import natalieChar  from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U1 Folder/Page 7/SVG/Asset 7.svg";
-import natalieScene from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U1 Folder/Page 7/SVG/Asset 8.svg";
-import hanselChar  from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U1 Folder/Page 7/SVG/Asset 13.svg";
-import hanselScene from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U1 Folder/Page 7/SVG/Asset 14.svg";
-import kevinChar   from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U1 Folder/Page 7/SVG/Asset 9.svg";
-import kevinScene  from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U1 Folder/Page 7/SVG/Asset 10.svg";
-import lillyChar   from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U1 Folder/Page 7/SVG/Asset 15.svg";
-import lillyScene  from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U1 Folder/Page 7/SVG/Asset 16.svg";
+// ─── صورة الجدول الكاملة — غيّر المسار حسب مشروعك ───
+import tableImage from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U1 Folder/Page 7/Asset 9.svg";
 
 // ─────────────────────────────────────────────
-//  🎨  COLORS — كلها قابلة للتعديل
+//  🎨  COLORS
 // ─────────────────────────────────────────────
-const TABLE_BORDER_COLOR  = "#2096a6";   // بوردر الجدول
-const DOT_DEFAULT_COLOR   = "#2096a6";   // لون النقطة العادية
-const DOT_SELECTED_COLOR  = "#2096a6";   // لون النقطة المحددة
-const LINE_COLOR          = "#2096a6";   // لون خط الوصل
-const WRONG_LINE_COLOR    = "#ef4444";   // لون خط الوصل الغلط
-const SENTENCE_COLOR      = "#2b2b2b";   // لون نص الجمل
-const NUMBER_COLOR        = "#2b2b2b";   // لون الأرقام
-const WRONG_BADGE_BG      = "#ef4444";   // خلفية badge الخطأ
-const WRONG_BADGE_TEXT    = "#ffffff";   // نص badge الخطأ
+const LINE_COLOR       = "#2096a6";
+const WRONG_LINE_COLOR = "#ef4444";
+const SENTENCE_COLOR   = "#2b2b2b";
+const NUMBER_COLOR     = "#2b2b2b";
+const WRONG_BADGE_BG   = "#ef4444";
+const WRONG_BADGE_TEXT = "#ffffff";
 
 // ─────────────────────────────────────────────
 //  📝  EXERCISE DATA
 // ─────────────────────────────────────────────
-// الجدول فوق — 3 rows × 2 cols
-const TABLE_ROWS = [
-  [
-    { name: "Jake",    char: jakeChar,    scene: jakeScene    },
-    { name: "Rosie",   char: rosieChar,   scene: rosieScene   },
-  ],
-  [
-    { name: "Natalie", char: natalieChar,  scene: natalieScene },
-    { name: "Hansel",  char: hanselChar,  scene: hanselScene  },
-  ],
-  [
-    { name: "Kevin",   char: kevinChar,   scene: kevinScene   },
-    { name: "Lilly",   char: lillyChar,   scene: lillyScene   },
-  ],
-];
-
-// اليسار — الشخصيات
 const LEFT_ITEMS = [
   { id: 1, label: "Natalie will" },
   { id: 2, label: "Hansel will"  },
@@ -61,7 +27,6 @@ const LEFT_ITEMS = [
   { id: 6, label: "Rosie will"   },
 ];
 
-// اليمين — الأنشطة (مرتبة بشكل مختلف عن اليسار)
 const RIGHT_ITEMS = [
   { id: 1, label: "go to the playground." },
   { id: 2, label: "watch a movie."        },
@@ -71,14 +36,13 @@ const RIGHT_ITEMS = [
   { id: 6, label: "eat at a restaurant."  },
 ];
 
-// الإجابات الصحيحة: leftId → rightId
 const CORRECT_MATCHES = {
-  1: 4,   // Natalie will → go to the lake
-  2: 6,   // Hansel will  → watch a movie
-  3: 3,   // Lilly will   → shop at the mall
-  4: 5,   // Jake will    → ride a horse
-  5: 1,   // Kevin will   → go to the playground
-  6: 2,   // Rosie will   → eat at a restaurant
+  1: 4,
+  2: 6,
+  3: 3,
+  4: 5,
+  5: 1,
+  6: 2,
 };
 
 // ─────────────────────────────────────────────
@@ -94,9 +58,8 @@ export default function WB_LookReadMatch_QJ() {
   const containerRef = useRef(null);
   const dotRefs      = useRef({});
 
-  const isLocked =  showAns;
+  const isLocked = showAns;
 
-  // ── SVG lines ─────────────────────────────
   useLayoutEffect(() => {
     const update = () => {
       if (!containerRef.current) return;
@@ -108,7 +71,7 @@ export default function WB_LookReadMatch_QJ() {
         const lr = lEl.getBoundingClientRect();
         const rr = rEl.getBoundingClientRect();
         return {
-          id:     `${lid}-${rid}`,
+          id: `${lid}-${rid}`,
           leftId: Number(lid),
           rightId: Number(rid),
           x1: lr.left + lr.width / 2 - cr.left,
@@ -125,7 +88,6 @@ export default function WB_LookReadMatch_QJ() {
     return () => window.removeEventListener("resize", raf);
   }, [matches]);
 
-  // ── handlers ──────────────────────────────
   const handleLeftClick = (id) => {
     if (isLocked) return;
     setSelectedLeft(id);
@@ -134,7 +96,6 @@ export default function WB_LookReadMatch_QJ() {
   const handleRightClick = (rid) => {
     if (isLocked || selectedLeft === null) return;
     const updated = { ...matches };
-    // أزل أي وصل قديم لنفس اليمين
     Object.keys(updated).forEach((k) => { if (updated[k] === rid) delete updated[k]; });
     updated[selectedLeft] = rid;
     setMatches(updated);
@@ -172,7 +133,6 @@ export default function WB_LookReadMatch_QJ() {
     setLines([]);
   };
 
-  // ── helpers ───────────────────────────────
   const isWrongLine = (leftId) => {
     if (!showResults || showAns) return false;
     return matches[leftId] !== CORRECT_MATCHES[leftId];
@@ -183,85 +143,49 @@ export default function WB_LookReadMatch_QJ() {
   const isSelectedLeft      = (id) => selectedLeft === id;
 
   const dotColor = (connected, selected) =>
-    selected ? DOT_SELECTED_COLOR : connected ? DOT_SELECTED_COLOR : "#c0c0c0";
+    selected ? "#2096a6" : connected ? "#2096a6" : "#c0c0c0";
 
-  // ── render ────────────────────────────────
   return (
     <div className="main-container-component">
       <style>{`
-        /* ── Table ── */
-        .lrm-table {
+        /* ── صورة الجدول: إزالة الـ whitespace الزائد ── */
+        .lrm-table-img-wrapper {
           width: 100%;
-          border: 2px solid ${TABLE_BORDER_COLOR};
-          border-radius: 12px;
           overflow: hidden;
-          box-sizing: border-box;
-        }
-        .lrm-table-row {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          border-bottom: 2px solid ${TABLE_BORDER_COLOR};
-        }
-        .lrm-table-row:last-child { border-bottom: none; }
-
-        .lrm-table-cell {
-          display: flex;
-          align-items: center;
-          gap: clamp(8px, 1.2vw, 16px);
-          padding: clamp(6px, 1vw, 12px) clamp(8px, 1.4vw, 16px);
-          box-sizing: border-box;
-        }
-        .lrm-table-cell:first-child {
-          border-right: 2px solid ${TABLE_BORDER_COLOR};
+          /* يقلص المساحة الفارغة من فوق وتحت الـ SVG */
+          margin-top: -2%;
+          margin-bottom: -2%;
+          line-height: 0;
         }
 
-        .lrm-char-img {
-          width: clamp(36px, 5.5vw, 60px);
-          height: clamp(36px, 5.5vw, 60px);
-          object-fit: contain;
-          flex-shrink: 0;
-        }
-        .lrm-char-name {
-          font-size: clamp(13px, 1.6vw, 19px);
-          font-weight: 700;
-          color: #2b2b2b;
-          white-space: nowrap;
-        }
-        .lrm-scene-img {
-          width: clamp(80px, 13vw, 160px);
-          height: clamp(55px, 9vw, 110px);
-          object-fit: cover;
-          border-radius: 8px;
-          flex-shrink: 0;
-          margin-left: auto;
+        .lrm-table-img {
+          width: 100%;
+          display: block;
+          /* هذا يقصّ الـ whitespace من فوق وتحت في حال كانت SVG فيها padding */
+          object-position: center center;
+          /* حدد ارتفاع أقصى لتقليص الفراغ، عدّل القيمة حسب صورتك */
+          max-height: clamp(450px, 28vw, 450px);
         }
 
-        /* ── Matching area ── */
+        /* ── Matching layout ── */
         .lrm-match {
           position: relative;
           display: grid;
           grid-template-columns: minmax(0,1fr) clamp(20px,2.5vw,28px) clamp(20px,2.5vw,28px) minmax(0,1fr);
-          gap: 0 clamp(30px,5vw,80px);
-          width: 100%;
+gap: 0 clamp(80px,12vw,180px);          width: 100%;
         }
 
-        /* Left column */
-        .lrm-left-col {
+        .lrm-left-col, .lrm-right-col {
           display: flex;
           flex-direction: column;
         }
 
-        /* Right column */
-        .lrm-right-col {
-          display: flex;
-          flex-direction: column;
-        }
-
-        /* ── Left row: num + label + dot ── */
+        /* ── زيادة المسافة بين الـ rows ── */
         .lrm-left-item {
           display: flex;
           align-items: center;
-          min-height: clamp(38px, 5vw, 52px);
+          /* ← زيادة min-height لمسافة أكبر بين النقاط */
+          min-height: clamp(52px, 7vw, 76px);
           cursor: pointer;
           user-select: none;
           border-radius: 8px;
@@ -273,16 +197,13 @@ export default function WB_LookReadMatch_QJ() {
           outline: 2px solid #2096a6;
         }
         .lrm-left-item .lrm-num   { flex-shrink: 0; margin-right: clamp(6px,1vw,10px); }
-        /* label يأخذ كل المساحة → النقطة تضطر تروح آخر اليمين */
         .lrm-left-item .lrm-label { flex: 1 1 auto; }
-        /* النقطة في آخر الـ flex */
-        .lrm-left-item .lrm-dot   { flex-shrink: 0; margin-left: clamp(6px,1vw,10px); }
 
-        /* ── Right row: dot + label ── */
         .lrm-right-item {
           display: flex;
           align-items: center;
-          min-height: clamp(38px, 5vw, 52px);
+          /* ← نفس min-height محاذاةً مع اليسار */
+          min-height: clamp(52px, 7vw, 76px);
           cursor: pointer;
           user-select: none;
           border-radius: 8px;
@@ -307,7 +228,6 @@ export default function WB_LookReadMatch_QJ() {
           line-height: 1.4;
         }
 
-        /* ── Base dot ── */
         .lrm-dot {
           width: clamp(11px, 1.4vw, 15px);
           height: clamp(11px, 1.4vw, 15px);
@@ -318,14 +238,7 @@ export default function WB_LookReadMatch_QJ() {
         .lrm-dot--selected {
           box-shadow: 0 0 0 4px rgba(32,150,166,0.2);
         }
-        /* ── Left dot — يمكن تتحكم فيه بشكل مستقل ── */
-        .lrm-dot--left {margin-left : -400%
-                }
-        /* ── Right dot — يمكن تتحكم فيه بشكل مستقل ── */
-        .lrm-dot--right {
-        margin-left : 400%}
 
-        /* ── Dot column — عمود مستقل للنقاط ── */
         .lrm-dot-col {
           display: flex;
           flex-direction: column;
@@ -333,22 +246,21 @@ export default function WB_LookReadMatch_QJ() {
           justify-content: flex-start;
           z-index: 2;
         }
-        /* كل نقطة بنفس ارتفاع الجملة */
+        /* ← dot row يتطابق مع min-height الـ items */
         .lrm-dot-row {
           display: flex;
           align-items: center;
           justify-content: center;
-          min-height: clamp(38px, 5vw, 52px);
+          min-height: clamp(52px, 7vw, 76px);
           width: 100%;
           cursor: pointer;
         }
 
-        /* ── Wrong badge — على الجملة مش النقطة ── */
         .lrm-badge {
           position: absolute;
           top: 50%;
           transform: translateY(-50%);
-          right: clamp(18px,2.5vw,28px); /* يكون فوق النقطة تقريباً */
+          right: clamp(18px,2.5vw,28px);
           width: clamp(16px, 1.8vw, 20px);
           height: clamp(16px, 1.8vw, 20px);
           border-radius: 50%;
@@ -365,14 +277,12 @@ export default function WB_LookReadMatch_QJ() {
           z-index: 3;
         }
 
-        /* buttons */
         .lrm-buttons {
           display: flex;
           justify-content: center;
           margin-top: clamp(8px, 1.6vw, 18px);
         }
 
-        /* hide lines on small screens */
         @media (max-width: 580px) {
           .lrm-svg { display: none; }
           .lrm-match {
@@ -400,19 +310,9 @@ export default function WB_LookReadMatch_QJ() {
           Look, read, and match.
         </h1>
 
-        {/* ── Table ── */}
-        <div className="lrm-table">
-          {TABLE_ROWS.map((row, ri) => (
-            <div key={ri} className="lrm-table-row">
-              {row.map((cell) => (
-                <div key={cell.name} className="lrm-table-cell">
-                  <img src={cell.char}  alt={cell.name} className="lrm-char-img" />
-                  <span className="lrm-char-name">{cell.name}</span>
-                  <img src={cell.scene} alt={`${cell.name}-scene`} className="lrm-scene-img" />
-                </div>
-              ))}
-            </div>
-          ))}
+        {/* ── صورة الجدول — مغلّفة بـ wrapper لقص الـ whitespace ── */}
+        <div className="lrm-table-img-wrapper">
+          <img src={tableImage} alt="table" className="lrm-table-img" />
         </div>
 
         {/* ── Matching ── */}
@@ -464,7 +364,7 @@ export default function WB_LookReadMatch_QJ() {
             })}
           </div>
 
-          {/* col 2: نقطة يسار — مستقلة تماماً */}
+          {/* col 2: نقطة يسار */}
           <div className="lrm-dot-col">
             {LEFT_ITEMS.map((item) => {
               const selected  = isSelectedLeft(item.id);
@@ -473,7 +373,7 @@ export default function WB_LookReadMatch_QJ() {
                 <div key={item.id} className="lrm-dot-row">
                   <div
                     ref={(el) => (dotRefs.current[`left-${item.id}`] = el)}
-                    className={`lrm-dot lrm-dot--left ${selected ? "lrm-dot--selected" : ""}`}
+                    className={`lrm-dot ${selected ? "lrm-dot--selected" : ""}`}
                     style={{ backgroundColor: dotColor(connected, selected) }}
                     onClick={() => handleLeftClick(item.id)}
                   />
@@ -482,7 +382,7 @@ export default function WB_LookReadMatch_QJ() {
             })}
           </div>
 
-          {/* col 3: نقطة يمين — مستقلة تماماً */}
+          {/* col 3: نقطة يمين */}
           <div className="lrm-dot-col">
             {RIGHT_ITEMS.map((item) => {
               const connected = isDotConnectedRight(item.id);
@@ -490,7 +390,7 @@ export default function WB_LookReadMatch_QJ() {
                 <div key={item.id} className="lrm-dot-row">
                   <div
                     ref={(el) => (dotRefs.current[`right-${item.id}`] = el)}
-                    className="lrm-dot lrm-dot--right"
+                    className="lrm-dot"
                     style={{ backgroundColor: dotColor(connected, false) }}
                     onClick={() => handleRightClick(item.id)}
                   />

@@ -62,7 +62,7 @@ const ITEMS = [
       {
         id: "2a",
         segments: [
-          { type: "blank", key: "2a-1", correct: "He will go to the" },
+          { type: "blank", key: "2a-1", correct: "He will go to" },
           { type: "text",  value: "the park."                     },
         ],
       },

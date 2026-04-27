@@ -43,7 +43,7 @@ button {
   flex-direction: column;
   width: 60%;
   justify-content: flex-start;
-            gap: 30px ;
+            gap: 30px !important ;
 
   
 }

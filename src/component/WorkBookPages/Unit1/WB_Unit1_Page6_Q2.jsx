@@ -127,33 +127,33 @@ export default function WB_LookReadCircleTrueFalse_QH() {
     <div className="main-container-component">
       <style>{`
         /* ── Characters Scene ── */
-        .ltf-scene {
-          width: 100%;
-          max-width: clamp(400px, 72vw, 800px);
-          margin: 0 auto;
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          grid-template-rows: auto auto;
-          row-gap: 0;
-          column-gap: clamp(20px, 4vw, 60px);
-        }
+   .ltf-scene {
+  width: 100%;
+  max-width: clamp(500px, 90vw, 1100px);
+  margin: 0 auto;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-evenly;
+  align-items: flex-end;
+  gap: clamp(10px, 2vw, 30px);
+}
 
-        /* كل شخصية: صورة + اسم */
-        .ltf-char {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          gap: clamp(2px, 0.4vw, 6px);
-        }
+/* كل شخصية: صورة + اسم */
+.ltf-char {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(4px, 0.6vw, 8px);
+}
 
         /* Sarah: top-left — تتحرك شوي لليسار */
-        .ltf-char--sarah  { justify-self: start;  padding-left: clamp(10px, 3vw, 40px); }
+        .ltf-char--sarah  { width : clamp(160px, 0.6vw, 160px)  }
         /* John: top-right — تتحرك شوي لليمين */
-        .ltf-char--john   { justify-self: end;    padding-right: clamp(10px, 3vw, 40px); }
+        .ltf-char--john   { width : clamp(160px, 0.6vw, 160px)}
         /* Stella: bottom-left — في المنتصف بين sarah وjohn */
-        .ltf-char--stella { justify-self: center; margin-top: clamp(15px, -3vw, -40px); }
+        .ltf-char--stella { width : clamp(160px, 0.6vw, 160px)}
         /* Hansel: bottom-right */
-        .ltf-char--hansel { justify-self: center; margin-top: clamp(-10px, -2vw, -20px); }
+        .ltf-char--hansel { width : clamp(140px, 0.6vw, 140px) }
 
         .ltf-char-img {
           width: clamp(130px, 18vw, 220px);
@@ -196,13 +196,12 @@ export default function WB_LookReadCircleTrueFalse_QH() {
           font-size: clamp(15px, 1.9vw, 22px);
           font-weight: 700;
           color: ${NUMBER_COLOR};
-          line-height: 1;
+          line-height: 1.5;
         }
 
         /* Sentence — no bold */
         .ltf-sentence {
-          font-size: clamp(15px, 1.9vw, 22px);
-          font-weight: 400;
+          font-size: clamp(20px, 1.9vw, 20px);
           color: ${SENTENCE_TEXT_COLOR};
           line-height: 1.5;
         }
@@ -217,12 +216,11 @@ export default function WB_LookReadCircleTrueFalse_QH() {
 
         /* true / false text */
         .ltf-option {
-          font-size: clamp(15px, 1.9vw, 22px);
-          font-weight: 400;
-          line-height: 1;
+          font-size: clamp(20px, 1.9vw, 20px);
+          line-height: 1.5;
           padding: clamp(3px, 0.5vw, 6px) clamp(8px, 1.2vw, 14px);
           border-radius: 999px;
-          border: 2.5px solid transparent;
+          border: 2px solid transparent;
           user-select: none;
           white-space: nowrap;
           transition: border-color 0.15s, color 0.15s;
@@ -277,8 +275,8 @@ export default function WB_LookReadCircleTrueFalse_QH() {
               clamp(48px, 13vw, 70px);
             gap: 6px;
           }
-          .ltf-sentence { font-size: 14px; }
-          .ltf-option   { font-size: 14px; padding: 3px 8px; }
+          .ltf-sentence { font-size: 20px; }
+          .ltf-option   { font-size: 20px; padding: 3px 8px; }
         }
       `}</style>
 

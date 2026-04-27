@@ -2,470 +2,238 @@ import React, { useState } from "react";
 import Button from "../Button";
 import ValidationAlert from "../../Popup/ValidationAlert";
 
-import imgDesk from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U5 Folder/Page 29/SVG/Asset 1.svg";
-import imgBed from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U5 Folder/Page 29/SVG/Asset 3.svg";
-import imgShelf from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U5 Folder/Page 29/SVG/Asset 4.svg";
-import imgToyBox from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U5 Folder/Page 29/SVG/Asset 2.svg";
-import imgChair from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U5 Folder/Page 29/SVG/Asset 5.svg";
+// ─────────────────────────────────────────────
+//  🖼️  IMAGES — 6 صور للقطة مع الصندوق
+// ─────────────────────────────────────────────
+import img1 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U5 Folder/Page 29/1.svg"; // cat on box
+import img2 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U5 Folder/Page 29/1.svg"; ; // cat behind box
+import img3 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U5 Folder/Page 29/1.svg"; ; // cat between boxes
+import img4 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U5 Folder/Page 29/1.svg";  // cat under box
+import img5 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U5 Folder/Page 29/1.svg"; ; // cat in box
+import img6 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U5 Folder/Page 29/1.svg"; ; // cat in front of box
 
-const WORD_BANK = ["in", "on", "next to", "between", "under"];
+// ─────────────────────────────────────────────
+//  🎨  COLORS
+// ─────────────────────────────────────────────
+const INPUT_BORDER_DEFAULT    = "#2096a6";
+const INPUT_BORDER_WRONG      = "#ef4444";
+const INPUT_TEXT_COLOR        = "#2b2b2b";
+const INPUT_ANSWER_COLOR      = "#c81e1e";
+const NUMBER_COLOR            = "#2b2b2b";
+const WORD_BANK_BORDER        = "#2096a6";
+const WORD_BANK_LABEL_COLOR   = "#2b2b2b";
+const WORD_BANK_TEXT_COLOR    = "#2b2b2b";
+const WRONG_BADGE_BG          = "#ef4444";
+const WRONG_BADGE_TEXT        = "#ffffff";
 
-const SCENE_ITEMS = [
-  { id: 1, img: imgDesk, className: "wb-e-scene-desk", alt: "desk" },
-  { id: 2, img: imgBed, className: "wb-e-scene-bed", alt: "bed" },
-  { id: 3, img: imgShelf, className: "wb-e-scene-shelf", alt: "shelf" },
-  { id: 4, img: imgToyBox, className: "wb-e-scene-toybox", alt: "toy box" },
-  { id: 5, img: imgChair, className: "wb-e-scene-chair", alt: "chair" },
+// ─────────────────────────────────────────────
+//  📝  EXERCISE DATA
+// ─────────────────────────────────────────────
+const WORD_BANK = [
+  { label: "a", word: "under"      },
+  { label: "b", word: "behind"     },
+  { label: "c", word: "in"         },
+  { label: "d", word: "on"         },
+  { label: "e", word: "between"    },
+  { label: "f", word: "in front of"},
 ];
 
 const ITEMS = [
-  {
-    id: 1,
-    fixed: true,
-    question: "Where is the pen?",
-    answer: "It is on the desk.",
-  },
-  {
-    id: 2,
-    fixed: false,
-    question: "Where is the doll?",
-    options: [
-      "It is under the bed.",
-      "It is on the bed.",
-      "It is next to the chair.",
-      "It is in the toy box.",
-    ],
-    correct: "It is under the bed.",
-  },
-  {
-    id: 3,
-    fixed: false,
-    question: "Where is the teddy?",
-    options: [
-      "It is between the books.",
-      "It is under the desk.",
-      "It is next to the ball.",
-      "It is in the toy box.",
-    ],
-    correct: "It is between the books.",
-  },
-  {
-    id: 4,
-    fixed: false,
-    question: "Where is the car?",
-    options: [
-      "It is in the toy box.",
-      "It is under the chair.",
-      "It is on the shelf.",
-      "It is next to the bed.",
-    ],
-    correct: "It is in the toy box.",
-  },
-  {
-    id: 5,
-    fixed: false,
-    question: "Where is the ball?",
-    options: [
-      "It is next to the chair.",
-      "It is under the desk.",
-      "It is between the books.",
-      "It is on the shelf.",
-    ],
-    correct: "It is next to the chair.",
-  },
+  { id: 1, src: img1, correct: ["d", "D"], answer: "d" }, // on
+  { id: 2, src: img2, correct: ["b", "B"], answer: "b" }, // behind
+  { id: 3, src: img3, correct: ["e", "E"], answer: "e" }, // between
+  { id: 4, src: img4, correct: ["a", "A"], answer: "a" }, // under
+  { id: 5, src: img5, correct: ["c", "C"], answer: "c" }, // in
+  { id: 6, src: img6, correct: ["f", "F"], answer: "f" }, // in front of
 ];
 
-export default function WB_Unit5_Page28_QE() {
-  const [answers, setAnswers] = useState({});
-  const [checked, setChecked] = useState(false);
-  const [showAns, setShowAns] = useState(false);
+// ─────────────────────────────────────────────
+//  🔧  NORMALIZE
+// ─────────────────────────────────────────────
+const normalize = (str) => str.toLowerCase().trim();
+
+const isCorrect = (userVal, correctArr) =>
+  correctArr.some((c) => normalize(userVal) === normalize(c));
+
+// ─────────────────────────────────────────────
+//  COMPONENT
+// ─────────────────────────────────────────────
+export default function WB_LookReadWrite_QE() {
+  const [answers,     setAnswers]     = useState({});
+  const [showResults, setShowResults] = useState(false);
+  const [showAns,     setShowAns]     = useState(false);
 
   const handleChange = (id, value) => {
     if (showAns) return;
+    const item = ITEMS.find((i) => i.id === id);
+    if (showResults && item && isCorrect(answers[id] || "", item.correct)) return;
+    // فقط حرف واحد
+    if (value.length > 1) return;
     setAnswers((prev) => ({ ...prev, [id]: value }));
-    setChecked(false);
   };
 
   const handleCheck = () => {
     if (showAns) return;
-
-    const nonFixedItems = ITEMS.filter((item) => !item.fixed);
-
-    const allAnswered = nonFixedItems.every((item) => answers[item.id]);
-
-    if (!allAnswered) {
-      ValidationAlert.info("Please complete all answers first.");
-      return;
-    }
-
+    const allAnswered = ITEMS.every((item) => answers[item.id]?.trim());
+    if (!allAnswered) { ValidationAlert.info("Please complete all answers first."); return; }
     let score = 0;
-    const total = nonFixedItems.length;
-
-    nonFixedItems.forEach((item) => {
-      if (answers[item.id] === item.correct) {
-        score++;
-      }
-    });
-
-    setChecked(true);
-
-    if (score === total) {
-      ValidationAlert.success(`Score: ${score} / ${total}`);
-    } else if (score > 0) {
-      ValidationAlert.warning(`Score: ${score} / ${total}`);
-    } else {
-      ValidationAlert.error(`Score: ${score} / ${total}`);
-    }
+    ITEMS.forEach((item) => { if (isCorrect(answers[item.id] || "", item.correct)) score++; });
+    setShowResults(true);
+    if (score === ITEMS.length)   ValidationAlert.success(`Score: ${score} / ${ITEMS.length}`);
+    else if (score > 0)           ValidationAlert.warning(`Score: ${score} / ${ITEMS.length}`);
+    else                          ValidationAlert.error(`Score: ${score} / ${ITEMS.length}`);
   };
 
   const handleShowAnswer = () => {
     const filled = {};
-    ITEMS.forEach((item) => {
-      if (!item.fixed) {
-        filled[item.id] = item.correct;
-      }
-    });
+    ITEMS.forEach((item) => { filled[item.id] = item.answer; });
     setAnswers(filled);
-    setChecked(true);
+    setShowResults(false);
     setShowAns(true);
   };
 
   const handleReset = () => {
     setAnswers({});
-    setChecked(false);
+    setShowResults(false);
     setShowAns(false);
   };
 
   const isWrong = (item) => {
-    if (!checked || showAns || item.fixed) return false;
-    return answers[item.id] !== item.correct;
+    if (!showResults || showAns) return false;
+    return !isCorrect(answers[item.id] || "", item.correct);
   };
 
-  const getValue = (id) => answers[id] || "";
-
-  const renderSelect = (item) => {
-    return (
-      <div className="wb-e-select-wrap">
-        <select
-          value={getValue(item.id)}
-          disabled={showAns}
-          onChange={(e) => handleChange(item.id, e.target.value)}
-          className={`wb-e-select ${getValue(item.id) ? "wb-e-select--filled" : ""}`}
-        >
-          <option value="" disabled hidden>
-            Select
-          </option>
-          {item.options.map((option) => (
-            <option key={option} value={option}>
-              {option}
-            </option>
-          ))}
-        </select>
-        {!showAns && <span className="wb-e-arrow">▼</span>}
-      </div>
-    );
+  const isDisabled = (item) => {
+    if (showAns) return true;
+    if (showResults && isCorrect(answers[item.id] || "", item.correct)) return true;
+    return false;
   };
 
   return (
     <div className="main-container-component">
       <style>{`
-        .wb-e-scene-stage img,
-        .wb-e-scene-item img {
-          width: 100% !important;
-          height: auto !important;
-          max-height: none !important;
-          object-fit: contain;
+        /* ── Word bank ── */
+        .lrwe-bank {
+          display: flex;
+          flex-wrap: wrap;
+          gap: clamp(6px, 1vw, 12px);
+          align-items: center;
+        }
+
+        .lrwe-pill {
+          display: flex;
+          align-items: center;
+          gap: clamp(4px, 0.6vw, 8px);
+          border: 2px solid ${WORD_BANK_BORDER};
+          border-radius: 15px;
+          padding: clamp(4px, 0.6vw, 8px) clamp(10px, 1.4vw, 18px);
+font-size: clamp(15px, 1.9vw, 18px);
+          user-select: none;
+          white-space: nowrap;
+          background: #fff;
+        }
+
+        .lrwe-pill-label {
+          font-weight: 700;
+          color: ${WORD_BANK_LABEL_COLOR};
+        }
+        .lrwe-pill-word {
+          font-weight: 400;
+          color: ${WORD_BANK_TEXT_COLOR};
+        }
+
+        /* ── 3×2 image grid ── */
+        .lrwe-grid {
+          display: grid;
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+          gap: clamp(12px, 2vw, 24px);
+          width: 100%;
+        }
+
+        /* ── Single card ── */
+        .lrwe-card {
+          display: flex;
+          flex-direction: column;
+          align-items: flex-start;
+          gap: clamp(6px, 1vw, 10px);
+          min-width: 0;
+        }
+
+        /* Number */
+        .lrwe-num {
+                  position: relative;
+
+          font-size: clamp(14px, 1.7vw, 20px);
+          font-weight: 700;
+          color: ${NUMBER_COLOR};
+          top :15%
+        }
+
+        /* Image */
+        .lrwe-img {
+          width: 100%;
+          height: clamp(100px, 13vw, 150px);
           display: block;
         }
 
-        .wb-e-scene-wrap {
-          width: 100%;
-          display: flex;
-          justify-content: center;
-        }
-
-        .wb-e-scene-stage {
-          width: min(100%, 980px);
-          aspect-ratio: 980 / 360;
+        /* Input box — square letter input */
+        .lrwe-input-wrap {
           position: relative;
-          overflow: visible;
-          flex-shrink: 0;
+          align-self: flex-end;
         }
 
-        .wb-e-scene-item {
+        .lrwe-input {
+          width: clamp(32px, 4vw, 50px);
+          height: clamp(32px, 4vw, 50px);
+          border: 2px solid ${INPUT_BORDER_DEFAULT};
+          border-radius: 8px;
+          background: #fff;
+          text-align: center;
+font-size: clamp(15px, 1.9vw, 18px);
+          color: ${INPUT_TEXT_COLOR};
+          outline: none;
+          font-family: inherit;
+          transition: border-color 0.2s;
+          cursor: text;
+          padding: 0;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          box-sizing: border-box;
+        }
+        .lrwe-input:disabled        { opacity: 1; cursor: default; }
+        .lrwe-input--wrong          { border-color: ${INPUT_BORDER_WRONG}; }
+        .lrwe-input--answer         { color: ${INPUT_ANSWER_COLOR}; }
+
+        /* ✕ badge */
+        .lrwe-badge {
           position: absolute;
-          transform-origin: top left;
-        }
-
-        .wb-e-scene-desk {
-          width: 16.8%;
-          left: 2.2%;
-          top: 7%;
-        }
-
-        .wb-e-scene-bed {
-          width: 33.5%;
-          left: 30.8%;
-          top: 3%;
+          top: -8px; right: -8px;
+          width: clamp(16px, 1.8vw, 20px);
+          height: clamp(16px, 1.8vw, 20px);
+          border-radius: 50%;
+          background: ${WRONG_BADGE_BG};
+          color: ${WRONG_BADGE_TEXT};
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: clamp(8px, 0.9vw, 11px);
+          font-weight: 700;
+          border: 2px solid #fff;
+          box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+          pointer-events: none;
           z-index: 2;
         }
 
-        .wb-e-scene-shelf {
-          width: 25.2%;
-          right: 3%;
-          top: 0.5%;
-        }
-
-        .wb-e-scene-toybox {
-          width: 16.8%;
-          left: 17.4%;
-          top: 46.2%;
-          z-index: 1;
-        }
-
-        .wb-e-scene-chair {
-          width: 10.8%;
-          right: 11.3%;
-          top: 36.6%;
-        }
-
-        .wb-e-bank-wrap {
-          width: 100%;
+        /* Buttons */
+        .lrwe-buttons {
           display: flex;
           justify-content: center;
+          margin-top: clamp(8px, 1.6vw, 18px);
         }
 
-        .wb-e-bank {
-          width: 100%;
-          max-width: 560px;
-          min-height: 52px;
-          border: 3px solid #f39b42;
-          border-radius: 18px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: clamp(14px, 2vw, 34px);
-          padding: 10px 18px;
-          box-sizing: border-box;
-          flex-wrap: wrap;
-          background: #fff;
-        }
-
-        .wb-e-bank-word {
-          font-size: clamp(13px, 1.4vw, 18px);
-          line-height: 1.1;
-          color: #222;
-          font-weight: 500;
-        }
-
-        .wb-e-list {
-          width: 100%;
-          max-width: 1100px;
-          margin: 0 auto;
-          display: flex;
-          flex-direction: column;
-          gap: 12px;
-        }
-
-        .wb-e-row {
-          display: grid;
-          grid-template-columns: 34px minmax(0, 1fr);
-          gap: 14px;
-          align-items: start;
-          width: 100%;
-        }
-
-        .wb-e-num {
-          font-size: clamp(14px, 1.4vw, 20px);
-          font-weight: 700;
-          line-height: 1;
-          color: #222;
-          padding-top: 8px;
-        }
-
-        .wb-e-line-wrap {
-          position: relative;
-          width: 100%;
-        }
-
-        .wb-e-line {
-          width: 100%;
-          min-height: 40px;
-          border-bottom: 3px solid #2f2f2f;
-          display: flex;
-          align-items: center;
-          gap: 10px;
-          padding-bottom: 4px;
-          box-sizing: border-box;
-          min-width: 0;
-          flex-wrap: nowrap;
-        }
-
-        .wb-e-question {
-          font-size: clamp(13px, 1.4vw, 18px);
-          line-height: 1.3;
-          color: #111;
-          font-weight: 500;
-          white-space: nowrap;
-          flex: 0 1 auto;
-        }
-
-        .wb-e-answer-fixed {
-          font-size: clamp(13px, 1.4vw, 18px);
-          line-height: 1.3;
-          color: #111;
-          font-weight: 500;
-        }
-
-        .wb-e-answer-show {
-          font-size: clamp(13px, 1.4vw, 18px);
-          line-height: 1.3;
-          color: #d62828;
-          font-weight: 500;
-          word-break: break-word;
-        }
-
-        .wb-e-wrong {
-          position: absolute;
-          top: -7px;
-          right: -7px;
-          width: 22px;
-          height: 22px;
-          border-radius: 999px;
-          background: #ef4444;
-          color: #fff;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-size: 12px;
-          font-weight: 700;
-          border: 2px solid #fff;
-          box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-          box-sizing: border-box;
-        }
-
-        .wb-e-select-wrap {
-          position: relative;
-          display: inline-flex;
-          align-items: center;
-          flex: 1 1 auto;
-          min-width: 180px;
-          max-width: 380px;
-        }
-
-        .wb-e-select {
-          width: 100%;
-          min-width: 0;
-          height: clamp(30px, 3vw, 38px);
-          border: 2px solid #c9c9c9;
-          border-radius: 10px;
-          background: #fff;
-          padding: 0 34px 0 12px;
-          font-size: clamp(12px, 1.3vw, 17px);
-          font-weight: 500;
-          color: #222;
-          outline: none;
-          appearance: none;
-          -webkit-appearance: none;
-          -moz-appearance: none;
-          box-sizing: border-box;
-          cursor: pointer;
-          text-align: center;
-          text-align-last: center;
-          white-space: nowrap;
-          overflow: hidden;
-          text-overflow: ellipsis;
-        }
-
-        .wb-e-select--filled {
-          color: #111;
-        }
-
-        .wb-e-select:disabled {
-          opacity: 1;
-          cursor: default;
-        }
-
-        .wb-e-arrow {
-          position: absolute;
-          right: 12px;
-          top: 50%;
-          transform: translateY(-50%);
-          font-size: 12px;
-          color: #666;
-          pointer-events: none;
-        }
-
-        .wb-e-buttons {
-          display: flex;
-          justify-content: center;
-          margin-top: 4px;
-        }
-
-        @media (max-width: 768px) {
-          .wb-e-row {
-            grid-template-columns: 28px 1fr;
-            gap: 10px;
-          }
-
-          .wb-e-line {
-            min-height: auto;
-            gap: 6px;
-            padding-bottom: 8px;
-          }
-
-          .wb-e-question {
-            white-space: normal;
-          }
-
-          .wb-e-select-wrap {
-            flex: 1 1 180px;
-          }
-
-          .wb-e-bank {
-            gap: 12px 18px;
-            border-width: 2px;
-            border-radius: 16px;
-            min-height: 48px;
-            padding: 8px 14px;
-          }
-        }
-
-        @media (max-width: 560px) {
-          .wb-e-select {
-            height: 36px;
-            padding: 0 28px 0 10px;
-            font-size: 13px;
-          }
-
-          .wb-e-line {
-            flex-wrap: wrap;
-            min-height: auto;
-            gap: 6px;
-            padding-bottom: 8px;
-          }
-
-          .wb-e-question {
-            white-space: normal;
-          }
-
-          .wb-e-select-wrap {
-            flex: 1 1 180px;
-            max-width: 100%;
-          }
-
-          .wb-e-arrow {
-            right: 10px;
-            font-size: 11px;
-          }
-
-          .wb-e-bank-word {
-            font-size: 13px;
-          }
-
-          .wb-e-wrong {
-            right: -4px;
-          }
+        @media (max-width: 500px) {
+          .lrwe-grid { grid-template-columns: repeat(2, 1fr); }
         }
       `}</style>
 
@@ -474,71 +242,76 @@ export default function WB_Unit5_Page28_QE() {
         style={{
           display: "flex",
           flexDirection: "column",
-          gap: "28px",
+          gap: "clamp(14px, 2vw, 22px)",
           maxWidth: "1100px",
           margin: "0 auto",
         }}
       >
+        {/* ── Header ── */}
         <h1
           className="WB-header-title-page8"
-          style={{
-            margin: 0,
-            display: "flex",
-            alignItems: "center",
-            gap: "12px",
-            flexWrap: "wrap",
-            fontSize: "clamp(16px, 1.8vw, 24px)",
-          }}
+          style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
         >
           <span className="WB-ex-A">E</span>
-          Look, read, and answer.
+          Look, read, and write.
         </h1>
 
-        <div className="wb-e-scene-wrap">
-          <div className="wb-e-scene-stage">
-            {SCENE_ITEMS.map((item) => (
-              <div key={item.id} className={`wb-e-scene-item ${item.className}`}>
-                <img src={item.img} alt={item.alt} />
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="wb-e-bank-wrap">
-          <div className="wb-e-bank">
-            {WORD_BANK.map((word) => (
-              <span key={word} className="wb-e-bank-word">
-                {word}
-              </span>
-            ))}
-          </div>
-        </div>
-
-        <div className="wb-e-list">
-          {ITEMS.map((item) => (
-            <div key={item.id} className="wb-e-row">
-              <div className="wb-e-num">{item.id}</div>
-
-              <div className="wb-e-line-wrap">
-                <div className="wb-e-line">
-                  <span className="wb-e-question">{item.question}</span>
-
-                  {item.fixed ? (
-                    <span className="wb-e-answer-fixed">{item.answer}</span>
-                  ) : showAns ? (
-                    <span className="wb-e-answer-show">{item.correct}</span>
-                  ) : (
-                    renderSelect(item)
-                  )}
-                </div>
-
-                {isWrong(item) && <div className="wb-e-wrong">✕</div>}
-              </div>
+        {/* ── Word bank ── */}
+      <div style={{ display : "flex" , justifyContent : "center"}}>
+        <div className="lrwe-bank">
+          {WORD_BANK.map((w) => (
+            <div key={w.label} className="lrwe-pill">
+              <span className="lrwe-pill-label">{w.label}</span>
+              <span className="lrwe-pill-word">{w.word}</span>
             </div>
           ))}
         </div>
+</div>
+        {/* ── Images grid ── */}
+        <div className="lrwe-grid">
+          {ITEMS.map((item) => {
+            const wrong    = isWrong(item);
+            const value    = answers[item.id] || "";
+            const tColor   = showAns ? INPUT_ANSWER_COLOR : INPUT_TEXT_COLOR;
+            const bColor   = wrong ? INPUT_BORDER_WRONG : INPUT_BORDER_DEFAULT;
+            const disabled = isDisabled(item);
 
-        <div className="wb-e-buttons">
+            return (
+              <div key={item.id} className="lrwe-card">
+
+                {/* Number */}
+                <span className="lrwe-num">{item.id}</span>
+
+                {/* Image */}
+                <img src={item.src} alt={`scene-${item.id}`} className="lrwe-img" />
+
+                {/* Letter input */}
+                <div className="lrwe-input-wrap">
+                  <input
+                    type="text"
+                    maxLength={1}
+                    className={[
+                      "lrwe-input",
+                      wrong   ? "lrwe-input--wrong"  : "",
+                      showAns ? "lrwe-input--answer" : "",
+                    ].filter(Boolean).join(" ")}
+                    value={value}
+                    disabled={disabled}
+                    onChange={(e) => handleChange(item.id, e.target.value)}
+                    style={{ borderColor: bColor, color: tColor }}
+                    spellCheck={false}
+                    autoComplete="off"
+                  />
+                  {wrong && <div className="lrwe-badge">✕</div>}
+                </div>
+
+              </div>
+            );
+          })}
+        </div>
+
+        {/* ── Buttons ── */}
+        <div className="lrwe-buttons">
           <Button
             checkAnswers={handleCheck}
             handleShowAnswer={handleShowAnswer}

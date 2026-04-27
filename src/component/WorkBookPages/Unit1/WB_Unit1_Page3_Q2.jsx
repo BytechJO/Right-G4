@@ -183,7 +183,7 @@ export default function WB_ReadChooseWrite_QB() {
         }
 
         .rcw-speaker {
-font-size: clamp(15px, 1.9vw, 22px);
+font-size: clamp(20px, 1.9vw, 20px);
           font-weight: 700;
           color: ${SPEAKER_COLOR};
           white-space: nowrap;
@@ -191,7 +191,7 @@ font-size: clamp(15px, 1.9vw, 22px);
         }
 
         .rcw-text {
-font-size: clamp(15px, 1.9vw, 22px);
+font-size: clamp(20px, 1.9vw, 20px);
           color: ${SENTENCE_TEXT_COLOR};
           white-space: nowrap;
         }
@@ -208,7 +208,7 @@ font-size: clamp(15px, 1.9vw, 22px);
           border: none;
           border-bottom: 2px solid ${INPUT_UNDERLINE_DEFAULT};
           outline: none;
-font-size: clamp(15px, 1.9vw, 22px);
+font-size: clamp(20px, 1.9vw, 20px);
           text-align: center;
           color: ${INPUT_TEXT_COLOR};
           padding: 0 6px 2px;

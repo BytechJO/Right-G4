@@ -2,281 +2,161 @@ import React, { useState } from "react";
 import Button from "../Button";
 import ValidationAlert from "../../Popup/ValidationAlert";
 
-import topImg1 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U5 Folder/Page 28/C1.svg";
-import topImg2 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U5 Folder/Page 28/C2.svg";
-import topImg3 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U5 Folder/Page 28/C3.svg";
-import topImg4 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U5 Folder/Page 28/C4.svg";
-import topImg5 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U5 Folder/Page 28/C5.svg";
+// ─────────────────────────────────────────────
+//  🖼️  IMAGES
+// ─────────────────────────────────────────────
+import img1 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U5 Folder/Page 28/Asset 24.svg"; // doctor scene 1
+import img2 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U5 Folder/Page 28/1_1.svg"; // doctor scene 2
 
-import iconBoy1 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U5 Folder/Page 28/C6.svg";
-import iconBoy2 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U5 Folder/Page 28/C7.svg";
-import iconGirl1 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U5 Folder/Page 28/C8.svg";
-import iconGirl2 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U5 Folder/Page 28/C9.svg";
-import iconSofa from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U5 Folder/Page 28/C10.svg";
-import iconFridge from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U5 Folder/Page 28/C11.svg";
+// ─────────────────────────────────────────────
+//  🎨  COLORS
+// ─────────────────────────────────────────────
+const INPUT_UNDERLINE_DEFAULT = "#3f3f3f";
+const INPUT_UNDERLINE_WRONG   = "#ef4444";
+const INPUT_TEXT_COLOR        = "#2b2b2b";
+const INPUT_ANSWER_COLOR      = "#c81e1e";
+const NUMBER_COLOR            = "#2b2b2b";
+const SENTENCE_COLOR          = "#2b2b2b";
+const IMG_BORDER_COLOR        = "#2096a6";
+const WRONG_BADGE_BG          = "#ef4444";
+const WRONG_BADGE_TEXT        = "#ffffff";
 
+// ─────────────────────────────────────────────
+//  📝  EXERCISE DATA
+//  كل item: صورة + سطرين (كل سطر: before + input + after)
+// ─────────────────────────────────────────────
 const ITEMS = [
   {
-    id: 1,
-    question: "Is he in the bedroom?",
-    icon: iconBoy1,
+    id:  1,
+    src: img1,
     lines: [
       {
-        key: "line1",
-        type: "select",
-        options: ["Yes, he is.", "No, he isn't."],
-        correct: "No, he isn't.",
+        key:     "1-1",
+        before:  "What's",
+        after:   "?",
+        correct: ["the matter", "the matter?"],
+        answer:  "the matter?",
       },
       {
-        key: "line2",
-        type: "select",
-        options: [
-          "He's in the bathroom.",
-          "He's in the kitchen.",
-          "He's in the bedroom.",
-          "He's in the living room.",
-        ],
-        correct: "He's in the bathroom.",
+        key:     "1-2",
+        before:  "My",
+        after:   "hurts too.",
+        correct: ["stomach"],
+        answer:  "stomach",
       },
     ],
   },
   {
-    id: 2,
-    question: "Is he in the living room?",
-    icon: iconBoy2,
+    id:  2,
+    src: img2,
     lines: [
       {
-        key: "line1",
-        type: "select",
-        options: ["Yes, he is.", "No, he isn't."],
-        correct: "Yes, he is.",
+        key:     "2-1",
+        before:  "",
+        after:   "hurts?",
+        correct: ["What else"],
+        answer:  "What else",
       },
       {
-        key: "line2",
-        type: "empty",
-      },
-    ],
-  },
-  {
-    id: 3,
-    question: "Is she in the bedroom?",
-    icon: iconGirl1,
-    lines: [
-      {
-        key: "line1",
-        type: "select",
-        options: ["Yes, she is.", "No, she isn't."],
-        correct: "Yes, she is.",
-      },
-      {
-        key: "line2",
-        type: "empty",
-      },
-    ],
-  },
-  {
-    id: 4,
-    question: "Is she in the dining room?",
-    icon: iconGirl2,
-    lines: [
-      {
-        key: "line1",
-        type: "select",
-        options: ["Yes, she is.", "No, she isn't."],
-        correct: "No, she isn't.",
-      },
-      {
-        key: "line2",
-        type: "select",
-        options: [
-          "She's in the kitchen.",
-          "She's in the bedroom.",
-          "She's in the bathroom.",
-          "She's in the living room.",
-        ],
-        correct: "She's in the kitchen.",
-      },
-    ],
-  },
-  {
-    id: 5,
-    question: "Where's the sofa?",
-    icon: iconSofa,
-    lines: [
-      {
-        key: "line1",
-        type: "select",
-        options: [
-          "It's in the living room.",
-          "It's in the kitchen.",
-          "It's in the bathroom.",
-          "It's in the bedroom.",
-        ],
-        correct: "It's in the living room.",
-      },
-      {
-        key: "line2",
-        type: "empty",
-      },
-    ],
-  },
-  {
-    id: 6,
-    question: "Where's the fridge?",
-    icon: iconFridge,
-    lines: [
-      {
-        key: "line1",
-        type: "select",
-        options: [
-          "It's in the kitchen.",
-          "It's in the bathroom.",
-          "It's in the living room.",
-          "It's in the bedroom.",
-        ],
-        correct: "It's in the kitchen.",
-      },
-      {
-        key: "line2",
-        type: "empty",
+        key:     "2-2",
+        before:  "",
+        after:   "hurts too.",
+        correct: ["My head", "my head"],
+        answer:  "My head",
       },
     ],
   },
 ];
 
-const TOP_IMAGES = [topImg1, topImg2, topImg3, topImg4, topImg5];
+const ALL_INPUTS = ITEMS.flatMap((item) => item.lines);
 
-export default function WB_Unit5_Page28_QC() {
-  const [answers, setAnswers] = useState({});
-  const [checked, setChecked] = useState(false);
-  const [showAns, setShowAns] = useState(false);
+// ─────────────────────────────────────────────
+//  🔧  NORMALIZE
+// ─────────────────────────────────────────────
+const normalize = (str) =>
+  str.toLowerCase().replace(/[^a-z0-9\s]/g, "").replace(/\s+/g, " ").trim();
 
-  const handleChange = (itemId, lineKey, value) => {
+const isCorrect = (userVal, correctArr) =>
+  correctArr.some((c) => normalize(userVal) === normalize(c));
+
+// ─────────────────────────────────────────────
+//  COMPONENT
+// ─────────────────────────────────────────────
+export default function WB_LookReadWrite_QC() {
+  const [answers,     setAnswers]     = useState({});
+  const [showResults, setShowResults] = useState(false);
+  const [showAns,     setShowAns]     = useState(false);
+
+  const isLocked =  showAns;
+
+  const handleChange = (key, value) => {
     if (showAns) return;
-
-    setAnswers((prev) => ({
-      ...prev,
-      [itemId]: {
-        ...prev[itemId],
-        [lineKey]: value,
-      },
-    }));
-
-    setChecked(false);
+    const line = ALL_INPUTS.find((l) => l.key === key);
+    if (showResults && line && isCorrect(answers[key] || "", line.correct)) return;
+    setAnswers((prev) => ({ ...prev, [key]: value }));
   };
 
-  const getValue = (itemId, lineKey) => answers[itemId]?.[lineKey] || "";
-
-  const isLineWrong = (item, line) => {
-    if (!checked || showAns || line.type !== "select") return false;
-    return getValue(item.id, line.key) !== line.correct;
-  };
-
-  const isItemWrong = (item) => {
-    if (!checked || showAns) return false;
-
-    return item.lines.some((line) => {
-      if (line.type !== "select") return false;
-      return getValue(item.id, line.key) !== line.correct;
-    });
-  };
-
-  const checkAnswers = () => {
+  const handleCheck = () => {
     if (showAns) return;
-
-    const requiredLines = ITEMS.flatMap((item) =>
-      item.lines.filter((line) => line.type === "select").map((line) => ({
-        itemId: item.id,
-        lineKey: line.key,
-      }))
-    );
-
-    const allAnswered = requiredLines.every(
-      ({ itemId, lineKey }) => getValue(itemId, lineKey).trim() !== ""
-    );
-
-    if (!allAnswered) {
-      ValidationAlert.info("Please complete all answers first.");
-      return;
-    }
-
+    const allAnswered = ALL_INPUTS.every((l) => answers[l.key]?.trim());
+    if (!allAnswered) { ValidationAlert.info("Please complete all answers first."); return; }
     let score = 0;
-
-    ITEMS.forEach((item) => {
-      const allCorrect = item.lines.every((line) => {
-        if (line.type !== "select") return true;
-        return getValue(item.id, line.key) === line.correct;
-      });
-
-      if (allCorrect) score += 1;
-    });
-
-    setChecked(true);
-
-    if (score === ITEMS.length) {
-      ValidationAlert.success(`Score: ${score} / ${ITEMS.length}`);
-    } else if (score > 0) {
-      ValidationAlert.warning(`Score: ${score} / ${ITEMS.length}`);
-    } else {
-      ValidationAlert.error(`Score: ${score} / ${ITEMS.length}`);
-    }
+    ALL_INPUTS.forEach((l) => { if (isCorrect(answers[l.key] || "", l.correct)) score++; });
+    setShowResults(true);
+    if (score === ALL_INPUTS.length)   ValidationAlert.success(`Score: ${score} / ${ALL_INPUTS.length}`);
+    else if (score > 0)                ValidationAlert.warning(`Score: ${score} / ${ALL_INPUTS.length}`);
+    else                               ValidationAlert.error(`Score: ${score} / ${ALL_INPUTS.length}`);
   };
 
   const handleShowAnswer = () => {
     const filled = {};
-
-    ITEMS.forEach((item) => {
-      filled[item.id] = {};
-      item.lines.forEach((line) => {
-        if (line.type === "select") {
-          filled[item.id][line.key] = line.correct;
-        }
-      });
-    });
-
+    ALL_INPUTS.forEach((l) => { filled[l.key] = l.answer; });
     setAnswers(filled);
-    setChecked(true);
+    setShowResults(false);
     setShowAns(true);
   };
 
   const handleReset = () => {
     setAnswers({});
-    setChecked(false);
+    setShowResults(false);
     setShowAns(false);
   };
 
-  const renderLine = (item, line) => {
-    if (line.type === "empty") {
-      return <div className="wb-c-line wb-c-line--empty" />;
-    }
+  const isWrong = (line) => {
+    if (!showResults || showAns) return false;
+    return !isCorrect(answers[line.key] || "", line.correct);
+  };
+
+  const isLineDisabled = (line) => {
+    if (showAns) return true;
+    if (showResults && isCorrect(answers[line.key] || "", line.correct)) return true;
+    return false;
+  };
+
+  // ── render one input line ─────────────────
+  const renderLine = (line) => {
+    const wrong  = isWrong(line);
+    const value  = answers[line.key] || "";
+    const tColor = showAns ? INPUT_ANSWER_COLOR : INPUT_TEXT_COLOR;
+    const uColor = wrong ? INPUT_UNDERLINE_WRONG : INPUT_UNDERLINE_DEFAULT;
 
     return (
-      <div className="wb-c-line-wrap">
-        <div className="wb-c-line">
-          <div className="wb-c-select-wrap">
-            <select
-              value={getValue(item.id, line.key)}
-              disabled={showAns}
-              onChange={(e) => handleChange(item.id, line.key, e.target.value)}
-              className={`wb-c-select ${
-                getValue(item.id, line.key) ? "wb-c-select--filled" : ""
-              }`}
-            >
-              <option value="" disabled hidden>
-                Select
-              </option>
-              {line.options.map((option) => (
-                <option key={option} value={option}>
-                  {option}
-                </option>
-              ))}
-            </select>
-
-            {!showAns && <span className="wb-c-arrow">▼</span>}
-          </div>
+      <div key={line.key} className="lrwc-line">
+        {line.before && <span className="lrwc-text">{line.before}</span>}
+        <div className="lrwc-input-wrap">
+          <input
+            type="text"
+            className="lrwc-input"
+            value={value}
+            disabled={isLineDisabled(line)}
+            onChange={(e) => handleChange(line.key, e.target.value)}
+            style={{ borderBottomColor: uColor, color: tColor }}
+            spellCheck={false}
+            autoComplete="off"
+          />
+          {wrong && <div className="lrwc-badge">✕</div>}
         </div>
-
-        {isLineWrong(item, line) && <div className="wb-c-wrong">✕</div>}
+        {line.after && <span className="lrwc-text">{line.after}</span>}
       </div>
     );
   };
@@ -284,235 +164,119 @@ export default function WB_Unit5_Page28_QC() {
   return (
     <div className="main-container-component">
       <style>{`
-        .wb-c-wrapper {
+        /* ── 2-column grid ── */
+        .lrwc-grid {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: clamp(16px, 2.8vw, 36px);
           width: 100%;
-          max-width: 1100px;
-          margin: 0 auto;
+        }
+
+        /* ── Single card ── */
+        .lrwc-card {
           display: flex;
           flex-direction: column;
-          gap: 24px;
-          box-sizing: border-box;
+          gap: clamp(10px, 1.4vw, 16px);
+          min-width: 0;
         }
 
-        .wb-c-top-images {
-          display: grid;
-          grid-template-columns: repeat(5, minmax(0, 1fr));
-          gap: clamp(6px, 1vw, 12px);
-          width: 100%;
-          max-width: 820px;
-          margin: 0 auto;
-        }
-
-        .wb-c-top-card {
-          background: #f2f2f2;
-          border: 2px solid #f39b42;
-          border-radius: 12px;
-          overflow: hidden;
-          aspect-ratio: 1.12 / 1;
+        /* Number + image row */
+        .lrwc-img-row {
           display: flex;
-          align-items: center;
-          justify-content: center;
+          align-items: flex-start;
+          gap: clamp(6px, 0.8vw, 10px);
         }
 
-        .wb-c-top-img {
+        .lrwc-num {
+          font-size: clamp(15px, 1.8vw, 22px);
+          font-weight: 700;
+          color: ${NUMBER_COLOR};
+          flex-shrink: 0;
+          line-height: 1.5;
+        }
+
+        .lrwc-img-wrap {
+          flex: 1;
+          overflow: hidden;
+        }
+        .lrwc-img {
           width: 100%;
-          height: 100%;
-          object-fit: cover;
+          height: clamp(120px, 16vw, 200px);
           display: block;
         }
 
-        .wb-c-grid {
-          display: grid;
-          grid-template-columns: repeat(2, minmax(0, 1fr));
-          gap: clamp(22px, 4vw, 40px) clamp(30px, 5vw, 70px);
-          width: 100%;
-          align-items: start;
-        }
-
-        .wb-c-item {
+        /* Lines */
+        .lrwc-lines {
           display: flex;
           flex-direction: column;
-          gap: 10px;
-          min-width: 0;
+          gap: clamp(8px, 1.2vw, 14px);
         }
 
-        .wb-c-question-row {
+        .lrwc-line {
           display: flex;
-          align-items: center;
-          gap: clamp(8px, 1vw, 14px);
-          min-width: 0;
-          flex-wrap: wrap;
+          align-items: flex-end;
+          gap: clamp(4px, 0.6vw, 8px);
+          flex-wrap: nowrap;
         }
 
-        .wb-c-num {
-          font-size: clamp(11px, 0.9vw, 15px);
-          font-weight: 700;
-          color: #222;
-          line-height: 1;
+        .lrwc-text {
+font-size: clamp(15px, 1.9vw, 18px);
+          color: ${SENTENCE_COLOR};
+          white-space: nowrap;
           flex-shrink: 0;
+          line-height: 1.5;
         }
 
-        .wb-c-icon {
-          width: clamp(28px, 3vw, 42px);
-          height: clamp(28px, 3vw, 42px);
-          object-fit: contain;
-          flex-shrink: 0;
-        }
-
-        .wb-c-question {
-          font-size: clamp(13px, 1.4vw, 18px);
-          line-height: 1.35;
-          color: #111;
-          font-weight: 500;
-          min-width: 0;
-        }
-
-        .wb-c-answer-block {
-          display: flex;
-          flex-direction: column;
-          gap: 8px;
-          padding-left: clamp(42px, 5vw, 58px);
-        }
-
-        .wb-c-line-wrap {
+        /* Input wrap */
+        .lrwc-input-wrap {
           position: relative;
-          width: 100%;
+          flex: 1;
+          min-width: clamp(60px, 8vw, 130px);
         }
 
-        .wb-c-line {
+        .lrwc-input {
           width: 100%;
-          min-height: clamp(32px, 3.5vw, 42px);
-          border-bottom: 2.5px solid #3a3a3a;
-          display: flex;
-          align-items: center;
-          padding-bottom: 3px;
-          box-sizing: border-box;
-        }
-
-        .wb-c-line--empty {
-          width: 100%;
-          min-height: clamp(32px, 3.5vw, 42px);
-          border-bottom: 2.5px solid #3a3a3a;
-        }
-
-        .wb-c-select-wrap {
-          position: relative;
-          width: 100%;
-          max-width: 100%;
-        }
-
-        .wb-c-select {
-          width: 100%;
-          height: clamp(28px, 3vw, 36px);
-          border: none;
           background: transparent;
-          padding: 0 30px 0 0;
-          font-size: clamp(12px, 1.3vw, 17px);
-          line-height: 1.2;
-          color: #000000ff;
-          font-weight: 500;
+          border: none;
+          border-bottom: 2px solid ${INPUT_UNDERLINE_DEFAULT};
           outline: none;
-          appearance: none;
-          -webkit-appearance: none;
-          -moz-appearance: none;
+font-size: clamp(15px, 1.9vw, 18px);
+          color: ${INPUT_TEXT_COLOR};
+          line-height: 1.5;
           box-sizing: border-box;
-          text-align: center;
-          text-align-last: center;
-          cursor: pointer;
+          transition: border-color 0.2s;
         }
+        .lrwc-input:disabled { opacity: 1; cursor: default; }
 
-        .wb-c-select:disabled {
-          cursor: default;
-        }
-
-        .wb-c-select option {
-          color: #222;
-          background: #fff;
-        }
-
-        .wb-c-arrow {
+        /* ✕ badge */
+        .lrwc-badge {
           position: absolute;
-          right: 0;
-          top: 50%;
-          transform: translateY(-50%);
-          font-size: 11px;
-          color: #666;
-          pointer-events: none;
-        }
-
-        .wb-c-wrong {
-          position: absolute;
-          top: -8px;
-          right: -8px;
-          width: 22px;
-          height: 22px;
-          border-radius: 999px;
-          background: #ef4444;
-          color: #fff;
+          top: -8px; right: 0;
+          width: clamp(17px, 1.9vw, 22px);
+          height: clamp(17px, 1.9vw, 22px);
+          border-radius: 50%;
+          background: ${WRONG_BADGE_BG};
+          color: ${WRONG_BADGE_TEXT};
           display: flex;
           align-items: center;
           justify-content: center;
-          font-size: 12px;
+          font-size: clamp(9px, 1vw, 12px);
           font-weight: 700;
           border: 2px solid #fff;
-          box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-          box-sizing: border-box;
+          box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+          pointer-events: none;
+          z-index: 2;
         }
 
-        .wb-c-buttons {
+        /* Buttons */
+        .lrwc-buttons {
           display: flex;
           justify-content: center;
-          margin-top: 6px;
-        }
-
-        @media (max-width: 980px) {
-          .wb-c-top-images {
-            max-width: 680px;
-          }
-
-          .wb-c-grid {
-            gap: 24px 28px;
-          }
-        }
-
-        @media (max-width: 768px) {
-          .wb-c-top-images {
-            grid-template-columns: repeat(3, minmax(0, 1fr));
-            max-width: 520px;
-          }
-
-          .wb-c-grid {
-            grid-template-columns: 1fr;
-          }
-
-          .wb-c-answer-block {
-            padding-left: 0;
-          }
+          margin-top: clamp(8px, 1.6vw, 18px);
         }
 
         @media (max-width: 560px) {
-          .wb-c-top-images {
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            max-width: 340px;
-          }
-
-          .wb-c-question-row {
-            align-items: flex-start;
-          }
-
-          .wb-c-question {
-            font-size: 13px;
-          }
-
-          .wb-c-select {
-            font-size: 13px;
-          }
-
-          .wb-c-wrong {
-            width: 20px;
-            height: 20px;
-            font-size: 11px;
-          }
+          .lrwc-grid { grid-template-columns: 1fr; }
         }
       `}</style>
 
@@ -521,57 +285,46 @@ export default function WB_Unit5_Page28_QC() {
         style={{
           display: "flex",
           flexDirection: "column",
-          gap: "28px",
+          gap: "clamp(14px, 2vw, 22px)",
           maxWidth: "1100px",
           margin: "0 auto",
         }}
       >
+        {/* ── Header ── */}
         <h1
           className="WB-header-title-page8"
-          style={{
-            margin: 0,
-            display: "flex",
-            alignItems: "center",
-            gap: "12px",
-            flexWrap: "wrap",
-            fontSize: "clamp(16px, 1.8vw, 24px)",
-          }}
+          style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
         >
           <span className="WB-ex-A">C</span>
           Look, read, and write.
         </h1>
 
-        <div className="wb-c-top-images">
-          {TOP_IMAGES.map((img, index) => (
-            <div key={index} className="wb-c-top-card">
-              <img src={img} alt={`room-${index + 1}`} className="wb-c-top-img" />
-            </div>
-          ))}
-        </div>
-
-        <div className="wb-c-grid">
+        {/* ── Grid ── */}
+        <div className="lrwc-grid">
           {ITEMS.map((item) => (
-            <div key={item.id} className="wb-c-item">
-              <div className="wb-c-question-row">
-                <div className="wb-c-num">{item.id}</div>
-                <img src={item.icon} alt={`icon-${item.id}`} className="wb-c-icon" />
-                <div className="wb-c-question">{item.question}</div>
+            <div key={item.id} className="lrwc-card">
+
+              {/* Number + Image */}
+              <div className="lrwc-img-row">
+                <span className="lrwc-num">{item.id}</span>
+                <div className="lrwc-img-wrap">
+                  <img src={item.src} alt={`scene-${item.id}`} className="lrwc-img" />
+                </div>
               </div>
 
-              <div className="wb-c-answer-block">
-                {item.lines.map((line) => (
-                  <React.Fragment key={line.key}>
-                    {renderLine(item, line)}
-                  </React.Fragment>
-                ))}
+              {/* Lines */}
+              <div className="lrwc-lines">
+                {item.lines.map(renderLine)}
               </div>
+
             </div>
           ))}
         </div>
 
-        <div className="wb-c-buttons">
+        {/* ── Buttons ── */}
+        <div className="lrwc-buttons">
           <Button
-            checkAnswers={checkAnswers}
+            checkAnswers={handleCheck}
             handleShowAnswer={handleShowAnswer}
             handleStartAgain={handleReset}
           />

@@ -5,12 +5,12 @@ import ValidationAlert from "../../Popup/ValidationAlert";
 // ─────────────────────────────────────────────
 //  🖼️  IMAGES — غيّر المسارات حسب مشروعك
 // ─────────────────────────────────────────────
-import img1 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U1 Folder/Page 8/SVG/Asset 1.svg"; // boy delivering milk
-import img2 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U1 Folder/Page 8/SVG/Asset 2.svg"; // girl feeding chickens
-import img3 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U1 Folder/Page 8/SVG/Asset 3.svg"; // boys running in race
-import img4 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U1 Folder/Page 8/SVG/Asset 4.svg"; // girl riding horse
-import img5 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U1 Folder/Page 8/SVG/Asset 5.svg"; // girl eating bread
-import img6 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U1 Folder/Page 8/SVG/Asset 6.svg"; // boys flying kite
+import img1 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U1 Folder/Page 8/Asset 31.svg"; // boy delivering milk
+import img2 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U1 Folder/Page 8/Asset 30.svg"; // girl feeding chickens
+import img3 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U1 Folder/Page 8/Asset 18.svg"; // boys running in race
+import img4 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U1 Folder/Page 8/Asset 19.svg"; // girl riding horse
+import img5 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U1 Folder/Page 8/Asset 15.svg"; // girl eating bread
+import img6 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U1 Folder/Page 8/Asset 29.svg"; // boys flying kite
 
 // ─────────────────────────────────────────────
 //  🎨  COLORS — كلها قابلة للتعديل
@@ -219,38 +219,33 @@ export default function WB_ReadLookNumber_QL() {
         .rln-img-grid {
           display: grid;
           grid-template-columns: repeat(3, minmax(0, 1fr));
-          gap: clamp(12px, 2vw, 24px);
-          width: 100%;
+gap: 10px 30px     ;
+     width: 100%;
         }
 
         /* ── Single card — square ── */
         .rln-card {
           position: relative;
-          border: 2px solid ${IMG_BORDER_COLOR};
-          border-radius: 10px;
           overflow: hidden;
           display: block;
           background: #fff;
-          width: 70%;
+          width: 100%;
           aspect-ratio: 1 / 1;
         }
 
         /* Image fills card completely */
         .rln-img {
           position: absolute;
-          inset: 0;
           width: 100%;
           height: 100%;
-          object-fit: cover;
           display: block;
-          border-radius: 0;
         }
 
         /* ── Number input box — top-right inside image ── */
         .rln-num-box-wrap {
           position: absolute;
-          top: 8px;
-          right: 8px;
+          top: 30px;
+          right: 5px;
           z-index: 3;
         }
 
@@ -311,21 +306,6 @@ export default function WB_ReadLookNumber_QL() {
         }
 
         /* ── ✓ / ✗ icon — bottom-right corner ── */
-        .rln-icon {
-          position: absolute;
-          bottom: 6px;
-          right: 6px;
-          width: clamp(24px, 2.8vw, 34px);
-          height: clamp(24px, 2.8vw, 34px);
-          background: ${ICON_BG_COLOR};
-          border: 1.5px solid ${ICON_BORDER_COLOR};
-          border-radius: 6px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          z-index: 2;
-        }
-        .rln-icon-svg { width: 60%; height: 60%; }
 
         /* Buttons */
         .rln-buttons {

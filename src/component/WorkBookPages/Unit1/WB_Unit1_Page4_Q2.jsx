@@ -207,9 +207,9 @@ font-size: clamp(15px, 1.9vw, 22px);          color: ${SENTENCE_TEXT_COLOR};
 
         /* Single box */
         .wdc-box {
-          width: clamp(38px, 5vw, 56px);
-          height: clamp(38px, 5vw, 56px);
-          border: 2.5px solid ${BOX_BORDER_COLOR};
+          width: clamp(40px, 5vw, 40px);
+          height: clamp(40px, 5vw, 40px);
+          border: 2px solid ${BOX_BORDER_COLOR};
           border-radius: clamp(6px, 0.8vw, 10px);
           background: ${BOX_BG_EMPTY};
           display: flex;

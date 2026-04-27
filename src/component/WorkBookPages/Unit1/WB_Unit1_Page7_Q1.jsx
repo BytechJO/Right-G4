@@ -7,82 +7,51 @@ import img1b from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U1 F
 import img2a from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U1 Folder/Page 7/SVG/3_1.svg";
 import img2b from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U1 Folder/Page 7/SVG/4_3.svg";
 
-// ─────────────────────────────────────────────
-//  🎨  COLORS
-// ─────────────────────────────────────────────
 const CHECK_ICON_COLOR        = "#555555";
 const CROSS_ICON_COLOR        = "#555555";
-
 const INPUT_UNDERLINE_DEFAULT = "#3f3f3f";
 const INPUT_UNDERLINE_WRONG   = "#ef4444";
-
 const INPUT_TEXT_COLOR        = "#000000";
 const INPUT_ANSWER_TEXT_COLOR = "#c81e1e";
-
 const WRONG_BADGE_BG          = "#ef4444";
 const WRONG_BADGE_TEXT_COLOR  = "#ffffff";
-
 const NUMBER_COLOR            = "#2b2b2b";
 
 // ─────────────────────────────────────────────
-//  📝  EXERCISE DATA
-//  prefix : نص ثابت يظهر قبل الـ input (للسطر 1 و 2 فقط)
-//  correct: مصفوفة من الإجابات الصحيحة المقبولة
-//           أول عنصر يُعرض عند Show Answer
+//  📐  IMAGE SIZES - تحكم بحجم كل صورة هنا
 // ─────────────────────────────────────────────
+const IMAGE_SIZES = {
+  "1-1": { width: "100%", height: "160px" },
+  "1-2": { width: "100%", height: "160px" },
+  "2-1": { width: "100%", height: "160px" },
+  "2-2": { width: "100%", height: "160px" },
+};
+
 const ITEMS = [
   {
     id: 1,
     images: [
-      {
-        src: img1a, mark: "check", lineKey: "1-1", prefix: "She will",
-        correct: ["wash the dishes.", "wash the dishes"],
-      },
-      {
-        src: img1b, mark: "cross", lineKey: "1-2", prefix: "She won't",
-        correct: ["go to the store.", "go to the store"],
-      },
+      { src: img1a, mark: "check", lineKey: "1-1", prefix: "She will",  correct: ["wash the dishes.", "wash the dishes"] },
+      { src: img1b, mark: "cross", lineKey: "1-2", prefix: "She won't", correct: ["go to the store.", "go to the store"] },
     ],
   },
   {
     id: 2,
     images: [
-      {
-        src: img2a, mark: "cross", lineKey: "2-1", prefix: null,
-        correct: ["She won't build a snowman.", "she will not bulid a snowman" , "she wont bulid a snowman"],
-      },
-      {
-        src: img2b, mark: "check", lineKey: "2-2", prefix: null,
-        correct: ["She will draw a picture.", "She will draw a picture"],
-      },
+      { src: img2a, mark: "cross", lineKey: "2-1", prefix: null, correct: ["She won't build a snowman.", "she will not bulid a snowman", "she wont bulid a snowman"] },
+      { src: img2b, mark: "check", lineKey: "2-2", prefix: null, correct: ["She will draw a picture.", "She will draw a picture"] },
     ],
   },
 ];
 
-// أرقام تسلسلية عالمية لكل صورة: 1, 2, 3, 4
-const NUMBERED_ITEMS = (() => {
-  let c = 0;
-  return ITEMS.map((item) => ({
-    ...item,
-    images: item.images.map((img) => ({ ...img, num: ++c })),
-  }));
-})();
+const ALL_LINES = ITEMS.flatMap((item) => item.images);
 
-const ALL_LINES = NUMBERED_ITEMS.flatMap((item) => item.images);
-
-// ─────────────────────────────────────────────
-//  🔧  NORMALIZE
-// ─────────────────────────────────────────────
 const normalize = (str) =>
   str.toLowerCase().replace(/[^a-z0-9\s']/g, "").replace(/\s+/g, " ").trim();
 
-// يتحقق من الإجابة مقابل كل عنصر في المصفوفة
 const isCorrectAnswer = (userVal, correctArr) =>
   correctArr.some((c) => normalize(userVal) === normalize(c));
 
-// ─────────────────────────────────────────────
-//  COMPONENT
-// ─────────────────────────────────────────────
 export default function WB_LookWrite_QI() {
   const [answers,     setAnswers]     = useState({});
   const [showResults, setShowResults] = useState(false);
@@ -116,7 +85,6 @@ export default function WB_LookWrite_QI() {
 
   const handleShowAnswer = () => {
     const filled = {};
-    // يعرض أول إجابة في المصفوفة عند Show Answer
     ALL_LINES.forEach((l) => { filled[l.lineKey] = l.correct[0]; });
     setAnswers(filled);
     setShowResults(false);
@@ -134,7 +102,6 @@ export default function WB_LookWrite_QI() {
     return !isCorrectAnswer(answers[img.lineKey] || "", img.correct);
   };
 
-  // ── render ✓ / ✗ icon ─────────────────────
   const renderIcon = (type) => (
     <div className="lwi-icon">
       {type === "check" ? (
@@ -152,16 +119,25 @@ export default function WB_LookWrite_QI() {
     </div>
   );
 
-  // ── render image only ───────────────────────
-  const renderImageSlot = (img) => (
-    <div key={img.lineKey} className="lwi-img-slot">
-      <div className="lwi-img-wrap">
-        <img src={img.src} alt={`img-${img.lineKey}`} className="lwi-img" />
+  const renderImageSlot = (img, index, itemId) => {
+    const size = IMAGE_SIZES[img.lineKey] || { width: "100%", height: "160px" };
+    return (
+      <div key={img.lineKey} className="lwi-img-slot">
+        <div className="lwi-img-outer">
+          {index === 0 && (
+            <span className="lwi-group-num">{itemId}</span>
+          )}
+          <div
+            className="lwi-img-wrap"
+            style={{ width: size.width, height: size.height }}
+          >
+            <img src={img.src} alt={`img-${img.lineKey}`} className="lwi-img" />
+          </div>
+        </div>
       </div>
-    </div>
-  );
+    );
+  };
 
-  // ── render one numbered input line ───────────
   const renderInputLine = (img) => {
     const wrong  = isWrong(img);
     const value  = answers[img.lineKey] || "";
@@ -172,9 +148,6 @@ export default function WB_LookWrite_QI() {
 
     return (
       <div key={img.lineKey} className="lwi-line-wrap">
-        <span className="lwi-line-num">{img.num}</span>
-
-        {/* Prefix ثابت للسطر 1 و 2 فقط */}
         {img.prefix && (
           <span
             className="lwi-prefix"
@@ -183,7 +156,6 @@ export default function WB_LookWrite_QI() {
             {img.prefix}
           </span>
         )}
-
         <input
           type="text"
           className="lwi-input"
@@ -220,18 +192,11 @@ export default function WB_LookWrite_QI() {
           min-width: 0;
         }
 
-        .lwi-num-row { display: flex; align-items: center; }
-        .lwi-num {
-          font-size: clamp(17px, 2vw, 24px);
-          font-weight: 700;
-          color: ${NUMBER_COLOR};
-          line-height: 1;
-        }
-
         .lwi-img-pair {
           display: grid;
           grid-template-columns: 1fr 1fr;
           width: 100%;
+          gap: 8px;
         }
 
         .lwi-img-slot {
@@ -240,17 +205,34 @@ export default function WB_LookWrite_QI() {
           min-width: 0;
         }
 
+        .lwi-img-outer {
+          display: flex;
+          flex-direction: row;
+          align-items: center;
+          gap: 6px;
+          width: 100%;
+        }
+
+        .lwi-group-num {
+                
+          font-size: clamp(17px, 2vw, 24px);
+          font-weight: 700;
+          color: ${NUMBER_COLOR};
+          line-height: 1;
+          flex-shrink: 0;
+        }
+
         .lwi-img-wrap {
           position: relative;
-          width: 100%;
           overflow: hidden;
+          /* width و height بتجو من IMAGE_SIZES */
         }
 
         .lwi-img {
           width: 100%;
           height: 100%;
-          object-fit: cover;
           display: block;
+          object-fit: contain;
         }
 
         .lwi-icon {
@@ -276,17 +258,6 @@ export default function WB_LookWrite_QI() {
           gap: 6px;
         }
 
-        .lwi-line-num {
-          font-size: clamp(13px, 1.6vw, 19px);
-          font-weight: 700;
-          color: ${NUMBER_COLOR};
-          line-height: 1;
-          padding-bottom: 6px;
-          white-space: nowrap;
-          flex-shrink: 0;
-        }
-
-        /* Prefix ثابت (She will / She won't) */
         .lwi-prefix {
           font-size: clamp(15px, 1.9vw, 22px);
           font-weight: 600;
@@ -368,21 +339,14 @@ export default function WB_LookWrite_QI() {
         </h1>
 
         <div className="lwi-grid">
-          {NUMBERED_ITEMS.map((item) => (
+          {ITEMS.map((item) => (
             <div key={item.id} className="lwi-card">
-
-              <div className="lwi-num-row">
-                <span className="lwi-num">{item.id}</span>
-              </div>
-
               <div className="lwi-img-pair">
-                {item.images.map(renderImageSlot)}
+                {item.images.map((img, index) => renderImageSlot(img, index, item.id))}
               </div>
-
               <div className="lwi-inputs-stack">
                 {item.images.map(renderInputLine)}
               </div>
-
             </div>
           ))}
         </div>

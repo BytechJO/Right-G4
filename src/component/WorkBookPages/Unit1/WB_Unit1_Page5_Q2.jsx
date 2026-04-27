@@ -152,8 +152,8 @@ export default function WB_ReadNumberMatch_QF() {
         }
 
         .rnm-box {
-          width: clamp(36px, 4.5vw, 52px);
-          height: clamp(36px, 4.5vw, 52px);
+          width: clamp(40px, 4.5vw, 40px);
+          height: clamp(40px, 4.5vw, 40px);
           border: 2px solid ${BOX_BORDER_COLOR};
           border-radius: clamp(6px, 0.8vw, 9px);
           background: ${BOX_BG_COLOR};

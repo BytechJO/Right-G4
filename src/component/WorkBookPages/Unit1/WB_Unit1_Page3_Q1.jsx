@@ -139,7 +139,7 @@ export default function WB_Unit1_Page3_Q1() {
           border-radius: 15px;
           background: ${WORD_BANK_BG_COLOR};
           color: ${WORD_BANK_TEXT_COLOR};
-          font-size: clamp(22px, 1.8vw, 25px);
+          font-size: clamp(20px, 1.8vw, 20px);
           user-select: none;
           white-space: nowrap;
         }
@@ -195,7 +195,7 @@ export default function WB_Unit1_Page3_Q1() {
 
         /* Sentence text */
         .wlrw-text {
-          font-size: clamp(15px, 1.9vw, 22px);
+          font-size: clamp(20px, 1.9vw, 20px);
           color: ${SENTENCE_TEXT_COLOR};
           white-space: nowrap;
         }
@@ -214,7 +214,7 @@ export default function WB_Unit1_Page3_Q1() {
 
           border-bottom: 2px solid ${INPUT_UNDERLINE_DEFAULT};
           outline: none;
-          font-size: clamp(15px, 1.9vw, 22px);
+          font-size: clamp(20px, 1.9vw, 20px);
           color: ${INPUT_TEXT_COLOR};
           width: clamp(100px, 14vw, 195px);
           text-align: center;

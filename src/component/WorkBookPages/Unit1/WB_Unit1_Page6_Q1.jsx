@@ -3,7 +3,7 @@ import Button from "../Button";
 import ValidationAlert from "../../Popup/ValidationAlert";
 
 // ─────────────────────────────────────────────
-//  🖼️  IMAGES — غيّر المسارات حسب مشروعك
+//  🖼️  IMAGES
 // ─────────────────────────────────────────────
 import img1 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U1 Folder/Page 6/SVG/Asset 1.svg";
 import img2 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U1 Folder/Page 6/SVG/Asset 2.svg";
@@ -11,23 +11,22 @@ import img3 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U1 Fo
 import img4 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U1 Folder/Page 6/SVG/Asset 4.svg";
 
 // ─────────────────────────────────────────────
-//  🎨  COLORS — كلها قابلة للتعديل
+//  🎨  COLORS
 // ─────────────────────────────────────────────
-const WORD_BANK_BORDER_COLOR  = "#2096a6";   // بوردر الـ word bank box
-const WORD_BANK_BG_COLOR      = "#ffffff";   // خلفية الـ word bank box
-const WORD_BANK_TEXT_COLOR    = "#2b2b2b";   // نص الـ word bank
-const WORD_BANK_DIVIDER_COLOR = "#3a3a3a";   // لون الـ | بين الكلمات
+const WORD_BANK_BORDER_COLOR  = "#2096a6";
+const WORD_BANK_BG_COLOR      = "#ffffff";
+const WORD_BANK_TEXT_COLOR    = "#2b2b2b";
+const WORD_BANK_DIVIDER_COLOR = "#3a3a3a";
 
-const INPUT_UNDERLINE_DEFAULT = "#3f3f3f";   // خط الـ input الفارغ / صح
-const INPUT_UNDERLINE_WRONG   = "#ef4444";   // خط الـ input عند الخطأ
+const INPUT_UNDERLINE_DEFAULT = "#3f3f3f";
+const INPUT_UNDERLINE_WRONG   = "#ef4444";
+const INPUT_TEXT_COLOR        = "#2b2b2b";
+const INPUT_ANSWER_TEXT_COLOR = "#c81e1e";
 
-const INPUT_TEXT_COLOR        = "#2b2b2b";   // لون نص المستخدم
-const INPUT_ANSWER_TEXT_COLOR = "#c81e1e";   // لون الإجابة عند Show Answer
+const WRONG_BADGE_BG          = "#ef4444";
+const WRONG_BADGE_TEXT_COLOR  = "#ffffff";
 
-const WRONG_BADGE_BG          = "#ef4444";   // خلفية badge الخطأ
-const WRONG_BADGE_TEXT_COLOR  = "#ffffff";   // نص badge الخطأ
-
-const NUMBER_COLOR            = "#2b2b2b";   // لون الأرقام
+const NUMBER_COLOR            = "#2b2b2b";
 
 const IMG_BORDER_RADIUS       = "10px";
 const IMG_HEIGHT              = "clamp(140px, 20vw, 220px)";
@@ -55,10 +54,9 @@ const ITEMS = [
 const normalize = (str) =>
   str.toLowerCase().replace(/[^a-z0-9\s']/g, "").replace(/\s+/g, " ").trim();
 
-// correctAnswers array لكل سؤال — يقبل بوجود نقطة أو بدونها
 const getCorrectAnswers = (correct) => [
   correct,
-  correct.replace(/\.$/, ""),   // بدون نقطة
+  correct.replace(/\.$/, ""),
 ];
 
 // ─────────────────────────────────────────────
@@ -69,9 +67,8 @@ export default function WB_LookReadWriteSentences_QG() {
   const [showResults, setShowResults] = useState(false);
   const [showAns,     setShowAns]     = useState(false);
 
-  const isLocked =  showAns;
+  const isLocked = showAns;
 
-  // ── handlers ──────────────────────────────
   const handleChange = (id, value) => {
     if (isLocked) return;
     setAnswers((prev) => ({ ...prev, [id]: value }));
@@ -91,7 +88,7 @@ export default function WB_LookReadWriteSentences_QG() {
       const accepted = getCorrectAnswers(item.correct);
       if (accepted.some((ans) => normalize(answers[item.id] || "") === normalize(ans))) score++;
     });
-    setShowResults(true); // 🔒
+    setShowResults(true);
     if (score === ITEMS.length)   ValidationAlert.success(`Score: ${score} / ${ITEMS.length}`);
     else if (score > 0)           ValidationAlert.warning(`Score: ${score} / ${ITEMS.length}`);
     else                          ValidationAlert.error(`Score: ${score} / ${ITEMS.length}`);
@@ -102,16 +99,15 @@ export default function WB_LookReadWriteSentences_QG() {
     ITEMS.forEach((item) => { filled[item.id] = item.correct; });
     setAnswers(filled);
     setShowResults(false);
-    setShowAns(true); // 🔒
+    setShowAns(true);
   };
 
   const handleReset = () => {
     setAnswers({});
     setShowResults(false);
-    setShowAns(false); // 🔓
+    setShowAns(false);
   };
 
-  // ── helpers ───────────────────────────────
   const isWrong = (item) => {
     if (!showResults || showAns) return false;
     const accepted = getCorrectAnswers(item.correct);
@@ -123,7 +119,6 @@ export default function WB_LookReadWriteSentences_QG() {
     return isWrong(item) ? INPUT_UNDERLINE_WRONG : INPUT_UNDERLINE_DEFAULT;
   };
 
-  // ── render ────────────────────────────────
   return (
     <div className="main-container-component">
       <style>{`
@@ -143,15 +138,15 @@ export default function WB_LookReadWriteSentences_QG() {
         }
 
         .lws-word {
-font-size: clamp(15px, 1.9vw, 22px);       
+          font-size: clamp(15px, 1.9vw, 22px);
           color: ${WORD_BANK_TEXT_COLOR};
           white-space: nowrap;
         }
 
         .lws-divider {
           color: ${WORD_BANK_DIVIDER_COLOR};
-font-size: clamp(15px, 1.9vw, 22px);          u
-ser-select: none;
+          font-size: clamp(15px, 1.9vw, 22px);
+          user-select: none;
         }
 
         /* ── 2-column grid ── */
@@ -162,7 +157,7 @@ ser-select: none;
           width: 100%;
         }
 
-        /* ── Single card: num + img + input ── */
+        /* ── Single card ── */
         .lws-card {
           display: flex;
           flex-direction: column;
@@ -170,36 +165,38 @@ ser-select: none;
           min-width: 0;
         }
 
-        /* Number row */
-        .lws-num-row {
+        /* Number LEFT of image — flex row */
+        .lws-img-row {
           display: flex;
-          align-items: center;
-          gap: 6px;
+          align-items: flex-start;
+          gap: clamp(6px, 0.8vw, 10px);
         }
 
         .lws-num {
-font-size: clamp(15px, 1.9vw, 22px);          font-weight: 700;
+          font-size: clamp(15px, 1.9vw, 22px);
+          font-weight: 700;
           color: ${NUMBER_COLOR};
           line-height: 1;
+          flex-shrink: 0;
+          padding-top: 2px;
         }
 
-        /* Image */
+        /* Image — takes remaining width */
         .lws-img-box {
-          width: 100%;
+          flex: 1;
           height: ${IMG_HEIGHT};
           border-radius: ${IMG_BORDER_RADIUS};
-          border:2px solid #2096a6;
+          border: 2px solid #2096a6;
           overflow: hidden;
         }
         .lws-img {
           width: 100%;
           height: 100%;
-          
           object-fit: cover;
           display: block;
         }
 
-        /* Input row — full width underline */
+        /* Input wrap */
         .lws-input-wrap {
           position: relative;
           width: 100%;
@@ -211,14 +208,15 @@ font-size: clamp(15px, 1.9vw, 22px);          font-weight: 700;
           border: none;
           border-bottom: 2px solid ${INPUT_UNDERLINE_DEFAULT};
           outline: none;
-font-size: clamp(15px, 1.9vw, 22px);         
+          font-size: clamp(15px, 1.9vw, 22px);
           color: ${INPUT_TEXT_COLOR};
-                       line-height: 1.5;
+          line-height: 1.5;
           box-sizing: border-box;
+          font-family: inherit;
+          padding: 4px 6px 5px;
+          transition: border-color 0.2s;
         }
-        .lws-input:disabled {
-          cursor: default;
-        }
+        .lws-input:disabled { cursor: default; opacity: 1; }
 
         /* ✕ wrong badge */
         .lws-badge {
@@ -248,11 +246,9 @@ font-size: clamp(15px, 1.9vw, 22px);
           margin-top: clamp(8px, 1.6vw, 18px);
         }
 
-        /* ── Responsive ── */
+        /* Responsive */
         @media (max-width: 560px) {
-          .lws-grid {
-            grid-template-columns: 1fr;
-          }
+          .lws-grid { grid-template-columns: 1fr; }
         }
       `}</style>
 
@@ -298,14 +294,12 @@ font-size: clamp(15px, 1.9vw, 22px);
             return (
               <div key={item.id} className="lws-card">
 
-                {/* Number */}
-                <div className="lws-num-row">
+                {/* Number LEFT + Image RIGHT */}
+                <div className="lws-img-row">
                   <span className="lws-num">{item.id}</span>
-                </div>
-
-                {/* Image */}
-                <div className="lws-img-box">
-                  <img src={item.img} alt={`q${item.id}`} className="lws-img" />
+                  <div className="lws-img-box">
+                    <img src={item.img} alt={`q${item.id}`} className="lws-img" />
+                  </div>
                 </div>
 
                 {/* Input */}

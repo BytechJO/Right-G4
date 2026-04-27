@@ -2,295 +2,294 @@ import React, { useState } from "react";
 import Button from "../Button";
 import ValidationAlert from "../../Popup/ValidationAlert";
 
-// غيّري المسارات حسب ملفاتك
-import q1a from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U5 Folder/Page 29/E1.svg"
-import q1b from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U5 Folder/Page 29/E2.svg"
+// ─────────────────────────────────────────────
+//  🖼️  IMAGES
+// ─────────────────────────────────────────────
+import img1 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U5 Folder/Page 29/SVG/Asset 24.svg";  // boy running into woods
+import img2 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U5 Folder/Page 29/SVG/Asset 25.svg";  // people going up hill
+import img3 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U5 Folder/Page 29/SVG/Asset 26.svg";  // girl through tunnel
+import img4 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U5 Folder/Page 29/SVG/Asset 27.svg"; // boy under bridge
 
-import q2a from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U5 Folder/Page 29/F2.svg"
-import q2b from"../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U5 Folder/Page 29/F3.svg"
+// ─────────────────────────────────────────────
+//  🎨  COLORS
+// ─────────────────────────────────────────────
+const INPUT_UNDERLINE_DEFAULT = "#3f3f3f";
+const INPUT_UNDERLINE_WRONG   = "#ef4444";
+const INPUT_TEXT_COLOR        = "#2b2b2b";
+const INPUT_ANSWER_COLOR      = "#c81e1e";
+const NUMBER_COLOR            = "#2b2b2b";
+const SENTENCE_COLOR          = "#2b2b2b";
+const HINT_COLOR              = "#2b2b2b";
+const IMG_BORDER_COLOR        = "#2096a6";
+const WRONG_BADGE_BG          = "#ef4444";
+const WRONG_BADGE_TEXT        = "#ffffff";
 
-import q3a from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U5 Folder/Page 29/E3.svg"
-import q3b from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U5 Folder/Page 29/E4.svg";
-
-import q4a from"../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U5 Folder/Page 29/F4.svg"
-import q4b from"../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U5 Folder/Page 29/F5.svg"
-
-import q5a from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U5 Folder/Page 29/E5.svg"
-import q5b from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U5 Folder/Page 29/F1.svg"
-
-import q6a from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U5 Folder/Page 29/F6.svg"
-import q6b from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U5 Folder/Page 29/F7.svg"
-
-const YELLOW_COLOR = "#f39b42";
-const RED_COLOR = "#ef4444";
-const TEXT_COLOR = "#222";
-const BORDER_COLOR = "#d4d4d4";
-
-const QUESTIONS = [
+// ─────────────────────────────────────────────
+//  📝  EXERCISE DATA
+//  كل item: صورة + سطران
+//  سطر 1: subject + input1
+//  سطر 2: input2 + hint (woods / hill / tunnel / bridge)
+// ─────────────────────────────────────────────
+const ITEMS = [
   {
-    id: 1,
-    text: "The cat is under the bed.",
-    options: [
-      { id: "a", img: q1a },
-      { id: "b", img: q1b },
-    ],
-    correct: "a",
+    id:      1,
+    src:     img1,
+    subject: "He went",
+    hint:    "(woods)",
+    line1:   { key: "1-1", correct: ["into"],    answer: "into"    },
+    line2:   { key: "1-2", correct: ["the"],     answer: "the"     },
   },
   {
-    id: 2,
-    text: "The duck is in front of the bathtub.",
-    options: [
-      { id: "a", img: q2a },
-      { id: "b", img: q2b },
-    ],
-    correct: "a",
+    id:      2,
+    src:     img2,
+    subject: "They went",
+    hint:    "(hill)",
+    line1:   { key: "2-1", correct: ["up"],      answer: "up"      },
+    line2:   { key: "2-2", correct: ["the"],     answer: "the"     },
   },
   {
-    id: 3,
-    text: "The chair is behind the table.",
-    options: [
-      { id: "a", img: q3a },
-      { id: "b", img: q3b },
-    ],
-    correct: "a",
+    id:      3,
+    src:     img3,
+    subject: "She went",
+    hint:    "(tunnel)",
+    line1:   { key: "3-1", correct: ["through"], answer: "through" },
+    line2:   { key: "3-2", correct: ["the"],     answer: "the"     },
   },
   {
-    id: 4,
-    text: "The book is on the table.",
-    options: [
-      { id: "a", img: q4a },
-      { id: "b", img: q4b },
-    ],
-    correct: "b",
-  },
-  {
-    id: 5,
-    text: "The cup is between the dishes.",
-    options: [
-      { id: "a", img: q5a },
-      { id: "b", img: q5b },
-    ],
-    correct: "a",
-  },
-  {
-    id: 6,
-    text: "The table is next to the sofa.",
-    options: [
-      { id: "a", img: q6a },
-      { id: "b", img: q6b },
-    ],
-    correct: "b",
+    id:      4,
+    src:     img4,
+    subject: "He went",
+    hint:    "(bridge)",
+    line1:   { key: "4-1", correct: ["under"],   answer: "under"   },
+    line2:   { key: "4-2", correct: ["the"],     answer: "the"     },
   },
 ];
 
-const initialAnswers = {
-  1: null,
-  2: null,
-  3: null,
-  4: null,
-  5: null,
-  6: null,
-};
+const ALL_INPUTS = ITEMS.flatMap((item) => [item.line1, item.line2]);
 
-const styles = {
-  grid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
-    gap: "clamp(20px, 4vw, 42px)",
-    width: "100%",
-  },
+// ─────────────────────────────────────────────
+//  🔧  NORMALIZE
+// ─────────────────────────────────────────────
+const normalize = (str) =>
+  str.toLowerCase().replace(/[^a-z0-9\s]/g, "").replace(/\s+/g, " ").trim();
 
-  item: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "clamp(10px, 1.5vw, 16px)",
-    minWidth: 0,
-  },
+const isCorrect = (userVal, correctArr) =>
+  correctArr.some((c) => normalize(userVal) === normalize(c));
 
-  topRow: {
-    display: "flex",
-    alignItems: "flex-start",
-    gap: "clamp(8px, 1vw, 14px)",
-    minWidth: 0,
-  },
+// ─────────────────────────────────────────────
+//  COMPONENT
+// ─────────────────────────────────────────────
+export default function WB_LookReadWritePrep_QF() {
+  const [answers,     setAnswers]     = useState({});
+  const [showResults, setShowResults] = useState(false);
+  const [showAns,     setShowAns]     = useState(false);
 
-  number: {
-    fontSize: "clamp(20px, 2vw, 30px)",
-    fontWeight: "700",
-    color: TEXT_COLOR,
-    lineHeight: 1,
-    flexShrink: 0,
-    paddingTop: "clamp(2px, 0.4vw, 6px)",
-  },
-
-  optionsWrap: {
-    display: "grid",
-    gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
-    gap: "clamp(10px, 1.5vw, 18px)",
-    width: "100%",
-    minWidth: 0,
-  },
-
-  imageButton: {
-    position: "relative",
-    width: "100%",
-    border: "3px solid transparent",
-    borderRadius: "999px",
-    background: "transparent",
-    padding: "clamp(12px, 2vw, 21px)",
-    cursor: "pointer",
-    transition: "all 0.2s ease",
-    boxSizing: "border-box",
-  },
-
-  imageBox: {
-    width: "100%",
-    aspectRatio: "1.3 / 1",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    background: "#fff",
-    borderRadius: "16px",
-    boxSizing: "border-box",
-  },
-
-  image: {
-    width: "100%",
-    height: "100%",
-    objectFit: "contain",
-    display: "block",
-  },
-
-  sentence: {
-    fontSize: "clamp(18px, 2vw, 26px)",
-    lineHeight: 1.35,
-    color: TEXT_COLOR,
-    fontWeight: "500",
-    paddingLeft: "clamp(28px, 3vw, 38px)",
-  },
-
-  buttonsWrap: {
-    display: "flex",
-    justifyContent: "center",
-    marginTop: "clamp(4px, 1vw, 10px)",
-    width: "100%",
-  },
-};
-
-export default function WB_Unit5_Page29_QF() {
-  const [answers, setAnswers] = useState(initialAnswers);
-  const [checked, setChecked] = useState(false);
-  const [showAns, setShowAns] = useState(false);
-  const [wrongAnswers, setWrongAnswers] = useState({});
-
-  const handleSelect = (questionId, optionId) => {
+  const handleChange = (key, value) => {
     if (showAns) return;
-
-    setAnswers((prev) => ({
-      ...prev,
-      [questionId]: optionId,
-    }));
-
-    setChecked(false);
-    setWrongAnswers({});
+    const inp = ALL_INPUTS.find((i) => i.key === key);
+    if (showResults && inp && isCorrect(answers[key] || "", inp.correct)) return;
+    setAnswers((prev) => ({ ...prev, [key]: value }));
   };
 
-  const checkAnswers = () => {
+  const handleCheck = () => {
     if (showAns) return;
-
-    const allAnswered = Object.values(answers).every((value) => value !== null);
-
-    if (!allAnswered) {
-      ValidationAlert.info("Please answer all questions first.");
-      return;
-    }
-
+    const allAnswered = ALL_INPUTS.every((inp) => answers[inp.key]?.trim());
+    if (!allAnswered) { ValidationAlert.info("Please complete all answers first."); return; }
     let score = 0;
-    const newWrongAnswers = {};
-
-    QUESTIONS.forEach((item) => {
-      const isCorrect = answers[item.id] === item.correct;
-
-      if (isCorrect) {
-        score++;
-        newWrongAnswers[item.id] = false;
-      } else {
-        newWrongAnswers[item.id] = true;
-      }
-    });
-
-    setWrongAnswers(newWrongAnswers);
-    setChecked(true);
-
-    if (score === QUESTIONS.length) {
-      ValidationAlert.success(`Score: ${score} / ${QUESTIONS.length}`);
-    } else if (score > 0) {
-      ValidationAlert.warning(`Score: ${score} / ${QUESTIONS.length}`);
-    } else {
-      ValidationAlert.error(`Score: ${score} / ${QUESTIONS.length}`);
-    }
+    ALL_INPUTS.forEach((inp) => { if (isCorrect(answers[inp.key] || "", inp.correct)) score++; });
+    setShowResults(true);
+    if (score === ALL_INPUTS.length)   ValidationAlert.success(`Score: ${score} / ${ALL_INPUTS.length}`);
+    else if (score > 0)                ValidationAlert.warning(`Score: ${score} / ${ALL_INPUTS.length}`);
+    else                               ValidationAlert.error(`Score: ${score} / ${ALL_INPUTS.length}`);
   };
 
   const handleShowAnswer = () => {
-    const filledAnswers = {};
-
-    QUESTIONS.forEach((item) => {
-      filledAnswers[item.id] = item.correct;
-    });
-
-    setAnswers(filledAnswers);
-    setChecked(true);
+    const filled = {};
+    ALL_INPUTS.forEach((inp) => { filled[inp.key] = inp.answer; });
+    setAnswers(filled);
+    setShowResults(false);
     setShowAns(true);
-    setWrongAnswers({});
   };
 
-  const handleStartAgain = () => {
-    setAnswers(initialAnswers);
-    setChecked(false);
+  const handleReset = () => {
+    setAnswers({});
+    setShowResults(false);
     setShowAns(false);
-    setWrongAnswers({});
   };
 
-  const getCircleStyle = (question, optionId) => {
-    const isSelected = answers[question.id] === optionId;
-    const isWrongSelected =
-      checked &&
-      wrongAnswers[question.id] &&
-      answers[question.id] === optionId;
+  const isWrong = (inp) => {
+    if (!showResults || showAns) return false;
+    return !isCorrect(answers[inp.key] || "", inp.correct);
+  };
 
-    const isCorrectShown = showAns && question.correct === optionId;
+  const isDisabled = (inp) => {
+    if (showAns) return true;
+    if (showResults && isCorrect(answers[inp.key] || "", inp.correct)) return true;
+    return false;
+  };
 
-    if (isWrongSelected) {
-      return {
-        border: `4px solid ${RED_COLOR}`,
-      };
-    }
+  const renderInput = (inp) => {
+    const wrong    = isWrong(inp);
+    const value    = answers[inp.key] || "";
+    const tColor   = showAns ? INPUT_ANSWER_COLOR : INPUT_TEXT_COLOR;
+    const uColor   = wrong ? INPUT_UNDERLINE_WRONG : INPUT_UNDERLINE_DEFAULT;
+    const disabled = isDisabled(inp);
 
-    if (isSelected || isCorrectShown) {
-      return {
-        border: `4px solid ${YELLOW_COLOR}`,
-      };
-    }
-
-    return {
-      border: "4px solid transparent",
-      background: "transparent",
-    };
+    return (
+      <div className="lrwp-input-wrap">
+        <input
+          type="text"
+          className={[
+            "lrwp-input",
+            wrong   ? "lrwp-input--wrong"  : "",
+            showAns ? "lrwp-input--answer" : "",
+          ].filter(Boolean).join(" ")}
+          value={value}
+          disabled={disabled}
+          onChange={(e) => handleChange(inp.key, e.target.value)}
+          style={{ borderBottomColor: uColor, color: tColor }}
+          spellCheck={false}
+          autoComplete="off"
+        />
+        {wrong && <div className="lrwp-badge">✕</div>}
+      </div>
+    );
   };
 
   return (
     <div className="main-container-component">
       <style>{`
-        @media (max-width: 900px) {
-          .wb-f-grid {
-            grid-template-columns: 1fr !important;
-          }
+        /* ── List ── */
+        .lrwp-list {
+          display: flex;
+          flex-direction: column;
+          gap: clamp(14px, 2.2vw, 28px);
+          width: 100%;
         }
 
-        @media (max-width: 560px) {
-          .wb-f-options {
-            gap: 8px !important;
-          }
+        /* ── Single row: num | img | right ── */
+        .lrwp-row {
+          display: grid;
+          grid-template-columns:
+            clamp(16px, 1.8vw, 24px)
+            clamp(140px, 18vw, 220px)
+            1fr;
+          gap: clamp(10px, 1.6vw, 24px);
+          align-items: center;
+        }
+
+        /* Number */
+        .lrwp-num {
+          font-size: clamp(15px, 1.8vw, 22px);
+          font-weight: 700;
+          color: ${NUMBER_COLOR};
+          line-height: 1;
+          align-self: center;
+        }
+
+        /* Image */
+        .lrwp-img-wrap {
+          overflow: hidden;
+          width: 100%;
+        }
+        .lrwp-img {
+          width: 100%;
+          height: clamp(90px, 12vw, 160px);
+          display: block;
+        }
+
+        /* Right side */
+        .lrwp-right {
+          display: flex;
+          flex-direction: column;
+          gap: clamp(8px, 1.2vw, 16px);
+          min-width: 0;
+        }
+
+        /* Line row */
+        .lrwp-line {
+          display: flex;
+          align-items: flex-end;
+          gap: clamp(4px, 0.6vw, 8px);
+          flex-wrap: nowrap;
+        }
+
+        .lrwp-text {
+          font-size: clamp(14px, 1.7vw, 20px);
+          font-weight: 400;
+          color: ${SENTENCE_COLOR};
+          white-space: nowrap;
+          padding-bottom: 5px;
+          flex-shrink: 0;
+          line-height: 1;
+        }
+
+        .lrwp-hint {
+          font-size: clamp(14px, 1.7vw, 20px);
+          font-weight: 400;
+          color: ${HINT_COLOR};
+          white-space: nowrap;
+          padding-bottom: 5px;
+          flex-shrink: 0;
+          line-height: 1;
+        }
+
+        /* Input wrap */
+        .lrwp-input-wrap {
+          position: relative;
+          flex: 1;
+          min-width: clamp(60px, 8vw, 120px);
+        }
+
+        .lrwp-input {
+          width: 100%;
+          background: transparent;
+          border: none;
+          border-bottom: 2px solid ${INPUT_UNDERLINE_DEFAULT};
+          outline: none;
+          font-size: clamp(14px, 1.7vw, 20px);
+          font-weight: 400;
+          color: ${INPUT_TEXT_COLOR};
+          padding: 4px 4px 5px;
+          line-height: 1;
+          box-sizing: border-box;
+          font-family: inherit;
+          transition: border-color 0.2s;
+        }
+        .lrwp-input:disabled        { opacity: 1; cursor: default; }
+        .lrwp-input--wrong          { border-bottom-color: ${INPUT_UNDERLINE_WRONG}; }
+        .lrwp-input--answer         { color: ${INPUT_ANSWER_COLOR}; }
+
+        /* ✕ badge */
+        .lrwp-badge {
+          position: absolute;
+          top: -8px; right: 0;
+          width: clamp(17px, 1.9vw, 22px);
+          height: clamp(17px, 1.9vw, 22px);
+          border-radius: 50%;
+          background: ${WRONG_BADGE_BG};
+          color: ${WRONG_BADGE_TEXT};
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: clamp(9px, 1vw, 12px);
+          font-weight: 700;
+          border: 2px solid #fff;
+          box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+          pointer-events: none;
+          z-index: 2;
+        }
+
+        /* Buttons */
+        .lrwp-buttons {
+          display: flex;
+          justify-content: center;
+          margin-top: clamp(8px, 1.6vw, 18px);
+        }
+
+        @media (max-width: 500px) {
+          .lrwp-row { grid-template-columns: clamp(16px,4vw,20px) 1fr; }
+          .lrwp-img-wrap { display: none; }
         }
       `}</style>
 
@@ -299,100 +298,59 @@ export default function WB_Unit5_Page29_QF() {
         style={{
           display: "flex",
           flexDirection: "column",
-          gap: "28px",
+          gap: "clamp(14px, 2vw, 22px)",
           maxWidth: "1100px",
           margin: "0 auto",
-
         }}
       >
+        {/* ── Header ── */}
         <h1
           className="WB-header-title-page8"
-          style={{
-            margin: 0,
-            display: "flex",
-            alignItems: "center",
-            gap: "12px",
-            flexWrap: "wrap",
-          }}
+          style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
         >
           <span className="WB-ex-A">F</span>
-          Read, look, and circle.
+          Look, read, and write the correct preposition.
         </h1>
 
-        <div className="wb-f-grid" style={styles.grid}>
-          {QUESTIONS.map((question) => (
-            <div key={question.id} style={styles.item}>
-              <div style={styles.topRow}>
-                <div style={styles.number}>{question.id}</div>
+        {/* ── Items ── */}
+        <div className="lrwp-list">
+          {ITEMS.map((item) => (
+            <div key={item.id} className="lrwp-row">
 
-                <div
-                  className="wb-f-options"
-                  style={styles.optionsWrap}
-                >
-                  {question.options.map((option) => {
-                    const isWrongSelected =
-                      checked &&
-                      wrongAnswers[question.id] &&
-                      answers[question.id] === option.id;
+              {/* Number */}
+              <span className="lrwp-num">{item.id}</span>
 
-                    return (
-                      <button
-                        key={option.id}
-                        onClick={() => handleSelect(question.id, option.id)}
-                        style={{
-                          ...styles.imageButton,
-                          ...getCircleStyle(question, option.id),
-                          cursor: showAns ? "default" : "pointer",
-                        }}
-                      >
-                        <div style={styles.imageBox}>
-                          <img
-                            src={option.img}
-                            alt={`q${question.id}-${option.id}`}
-                            style={styles.image}
-                          />
-                        </div>
-
-                        {isWrongSelected && (
-                          <span
-                            style={{
-                              position: "absolute",
-                              top: "2px",
-                              right: "2px",
-                              width: "clamp(20px, 2vw, 24px)",
-                              height: "clamp(20px, 2vw, 24px)",
-                              borderRadius: "50%",
-                              background: RED_COLOR,
-                              color: "#fff",
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "center",
-                              fontSize: "clamp(10px, 1vw, 12px)",
-                              fontWeight: "700",
-                              border: "2px solid #fff",
-                              boxShadow: "0 2px 6px rgba(0,0,0,0.18)",
-                              boxSizing: "border-box",
-                            }}
-                          >
-                            ✕
-                          </span>
-                        )}
-                      </button>
-                    );
-                  })}
-                </div>
+              {/* Image */}
+              <div className="lrwp-img-wrap">
+                <img src={item.src} alt={`scene-${item.id}`} className="lrwp-img" />
               </div>
 
-              <div style={styles.sentence}>{question.text}</div>
+              {/* Right: two lines */}
+              <div className="lrwp-right">
+
+                {/* Line 1: subject + input1 */}
+                <div className="lrwp-line">
+                  <span className="lrwp-text">{item.subject}</span>
+                  {renderInput(item.line1)}
+                </div>
+
+                {/* Line 2: input2 + hint */}
+                <div className="lrwp-line">
+                  {renderInput(item.line2)}
+                  <span className="lrwp-hint">{item.hint}</span>
+                </div>
+
+              </div>
             </div>
           ))}
         </div>
 
-        <div style={styles.buttonsWrap}>
+        {/* ── Buttons ── */}
+        <div className="lrwp-buttons">
           <Button
+            checkAnswers={handleCheck}
             handleShowAnswer={handleShowAnswer}
-            handleStartAgain={handleStartAgain}
-            checkAnswers={checkAnswers}
+            handleStartAgain={handleReset}
           />
         </div>
       </div>

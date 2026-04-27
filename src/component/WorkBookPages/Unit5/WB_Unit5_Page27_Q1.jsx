@@ -177,8 +177,7 @@ export default function WB_LookUnscrambleRewrite_QA() {
 
         /* Sentence with scrambled word underlined */
         .lur-sentence {
-          font-size: clamp(14px, 1.7vw, 20px);
-          font-weight: 400;
+font-size: clamp(15px, 1.9vw, 18px);
           color: ${SENTENCE_COLOR};
           line-height: 1.5;
           display: flex;
@@ -209,13 +208,13 @@ export default function WB_LookUnscrambleRewrite_QA() {
           border: none;
           border-bottom: 2px solid ${INPUT_UNDERLINE_DEFAULT};
           outline: none;
-          font-size: clamp(14px, 1.7vw, 20px);
-          font-weight: 400;
-          color: ${INPUT_TEXT_COLOR};
-          padding: 4px 6px 5px;
-          line-height: 1.5;
+font-size: clamp(15px, 1.9vw, 18px);
+
+color: ${INPUT_TEXT_COLOR};
+
+line-height: 1.5;
           box-sizing: border-box;
-          font-family: inherit;
+
           transition: border-color 0.2s;
         }
         .lur-input:disabled    { opacity: 1; cursor: default; }
