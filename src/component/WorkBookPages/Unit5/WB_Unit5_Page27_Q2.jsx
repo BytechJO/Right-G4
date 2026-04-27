@@ -1,560 +1,402 @@
-import React, { useRef, useState } from "react";
-import ValidationAlert from "../../Popup/ValidationAlert";
+import React, { useState } from "react";
 import Button from "../Button";
+import ValidationAlert from "../../Popup/ValidationAlert";
 
-import imgHouse from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U5 Folder/Page 27/B1.svg";
+// ─────────────────────────────────────────────
+//  🎨  COLORS — كلها قابلة للتعديل
+// ─────────────────────────────────────────────
+const CELL_BORDER_COLOR   = "#d0d0d0";   // بوردر خلايا الجدول
+const CELL_BG_DEFAULT     = "#ffffff";   // خلفية الخلية العادية
+const CELL_BG_SELECTING   = "#b2dfdb";   // خلفية الخلية أثناء التحديد
+const CELL_TEXT_SELECTING = "#004d40";   // لون نص الخلية أثناء التحديد
+const CELL_BG_WRONG       = "#ffcdd2";   // خلفية الخلية عند تحديد غلط
+const CELL_TEXT_WRONG     = "#b71c1c";   // لون نص الخلية عند تحديد غلط
+const CELL_TEXT_DEFAULT   = "#263238";   // لون نص الخلية العادية
+const CELL_TEXT_FOUND     = "#ffffff";   // لون نص الخلية المكتشفة
+const WORD_LIST_BORDER    = "#b2dfdb";   // بوردر قائمة الكلمات
+const WORD_TEXT_COLOR     = "#37474f";   // لون نص الكلمات في القائمة
 
-const DRAG_ITEMS = [
-  { id: "act1", value: "bedroom" },
-  { id: "act2", value: "basement" },
-  { id: "act3", value: "garage" },
-  { id: "act4", value: "kitchen" },
-  { id: "act5", value: "living room" },
-  { id: "act6", value: "dining room" },
-  { id: "act7", value: "office" },
-  { id: "act8", value: "bathroom" },
+// ألوان الكلمات المكتشفة — كل كلمة بلون مختلف
+const FOUND_COLORS = [
+  "#e53935","#e67e22","#43a047","#1e88e5","#8e24aa",
+  "#00897b","#d81b60","#f4511e","#039be5",
 ];
 
-const ITEMS = [
-  { id: 1, correct: "bedroom", fixed: true },
-  { id: 2, correct: "basement" },
-  { id: 3, correct: "garage" },
-  { id: 4, correct: "kitchen" },
-  { id: 5, correct: "living room" },
-  { id: 6, correct: "dining room" },
-  { id: 7, correct: "office" },
-  { id: 8, correct: "bathroom" },
+// ─────────────────────────────────────────────
+//  📝  EXERCISE DATA
+// ─────────────────────────────────────────────
+
+// الجدول 10×10 — مطابق للكتاب بالضبط
+const GRID = [
+  ["h","a","s","r","f","s","t","l","s","p"],
+  ["e","d","r","u","t","p","a","a","t","w"],
+  ["a","e","w","r","y","o","w","k","o","a"],
+  ["d","b","u","a","o","i","f","n","m","t"],
+  ["a","h","t","h","t","l","u","i","a","o"],
+  ["c","s","f","l","u","e","l","r","c","f"],
+  ["b","a","c","k","h","d","r","d","h","b"],
 ];
 
-export default function WB_Unit5_Page27_Q2() {
-  const [answers, setAnswers] = useState({
-    "a-1": { dragId: "act1", value: "bedroom" },
+// كل كلمة + مسار خلاياها [row, col] — مطابق للكتاب
+// التقاطعات: machines ∩ homework عند (3,0) | robot ∩ homework عند (3,1)
+const WORD_DEFS = [
+  { word: "water",     cells: [[2,2],[3,3],[4,4],[5,5],[6,6]] },
+  { word: "spoiled",     cells: [[0,5],[1,5],[2,5],[3,5],[4,5] , [5,5], [6,5]] },
+  { word: "head",  cells: [[0,0],[1,0],[2,0],[3,0]] },
+  { word: "hurts",  cells: [[4,1],[3,2],[2,3],[1,4],[0,5]] },
+    { word: "awful",   cells: [[1,6],[2,6],[3,6],[4,6] , [5,6]] }, // ← stomach مش awful، راجع
+  { word: "bed",     cells: [[1,1],[2,1],[3,1],] }, // ← محتاج تأكيد
+  { word: "stay",    cells: [[5,1],[4,2],[3,3],[2,4]] },
+  { word: "flu",     cells: [[5,2],[5,3],[5,4]] },
+  { word: "back",    cells: [[6,0],[6,1],[6,2],[6,3]] },
+  { word: "drink",   cells: [[2,7],[3,7],[4,7] , [5,7], [6,7]] }, // ← محتاج تأكيد
+  { word: "stomach", cells: [[0,8],[1,8],[2,8],[3,8],[4,8],[5,8],[6,8]] },
+
+
+];
+
+// ترتيب الكلمات في القائمة — كما في الكتاب
+const WORD_LIST = [
+  "water","spoiled","head","hurts",
+  "awful","bed","stay","flu","back", "drink" , "stomach"
+];
+
+// ─────────────────────────────────────────────
+//  🔧  HELPERS
+// ─────────────────────────────────────────────
+const cellKey = (r, c) => `${r}-${c}`;
+
+// يرجع خلايا الخط المستقيم بين نقطتين (أفقي، عمودي، قطري 45°)
+const getCellsBetween = (a, b) => {
+  if (!a || !b) return [];
+  const dr  = b[0] - a[0];
+  const dc  = b[1] - a[1];
+  const len = Math.max(Math.abs(dr), Math.abs(dc));
+  if (len === 0) return [a];
+  // يقبل فقط أفقي أو عمودي أو قطري 45°
+  if (Math.abs(dr) !== 0 && Math.abs(dc) !== 0 && Math.abs(dr) !== Math.abs(dc)) return [a];
+  const sr = dr === 0 ? 0 : dr / Math.abs(dr);
+  const sc = dc === 0 ? 0 : dc / Math.abs(dc);
+  const cells = [];
+  for (let i = 0; i <= len; i++) cells.push([a[0] + sr * i, a[1] + sc * i]);
+  return cells;
+};
+
+// يتحقق إذا التحديد يطابق كلمة — بأي اتجاه (set-based مش position-based)
+const checkSelection = (cells, foundNames) => {
+  if (cells.length === 0) return null;
+  const selectedSet = new Set(cells.map(([r, c]) => `${r}-${c}`));
+  for (const def of WORD_DEFS) {
+    if (foundNames.has(def.word)) continue;
+    if (cells.length !== def.cells.length) continue;
+    const defSet = new Set(def.cells.map(([r, c]) => `${r}-${c}`));
+    // يطابق إذا كانت نفس مجموعة الخلايا بغض النظر عن الاتجاه
+    const isMatch = [...selectedSet].every((k) => defSet.has(k));
+    if (isMatch) return def;
+  }
+  return null;
+};
+
+// ─────────────────────────────────────────────
+//  COMPONENT
+// ─────────────────────────────────────────────
+export default function WB_WordSearch_QK() {
+  const [selecting,   setSelecting]   = useState(false);
+  const [startCell,   setStartCell]   = useState(null);
+  const [hoveredCell, setHoveredCell] = useState(null);
+  const [foundWords,  setFoundWords]  = useState([]); // [{ word, cells, color }]
+  const [wrongFlash,  setWrongFlash]  = useState(false);
+const [answerShown, setAnswerShown] = useState(false);
+  const foundNames = new Set(foundWords.map((f) => f.word));
+
+  // خريطة: cellKey → [color1, color2, ...] — تدعم التقاطعات بين كلمتين
+  const foundCellMap = {};
+  foundWords.forEach(({ cells, color }) => {
+    cells.forEach(([r, c]) => {
+      const k = cellKey(r, c);
+      if (!foundCellMap[k]) foundCellMap[k] = [];
+      foundCellMap[k].push(color);
+    });
   });
-  const [draggedItem, setDraggedItem] = useState(null);
-  const [touchItem, setTouchItem] = useState(null);
-  const [touchPos, setTouchPos] = useState({ x: 0, y: 0 });
-  const [checked, setChecked] = useState(false);
-  const [showAns, setShowAns] = useState(false);
 
-  const dropRefs = useRef({});
+  const selectionCells = getCellsBetween(startCell, hoveredCell);
+  const selectionKeys  = new Set(selectionCells.map(([r, c]) => cellKey(r, c)));
 
-  const usedDragIds = Object.entries(answers)
-    .filter(([key, entry]) => key !== "a-1" && entry)
-    .map(([, entry]) => entry.dragId);
+  // ── handlers ──────────────────────────────
+  const handleMouseDown = (r, c) => {
+    setSelecting(true);
+    setStartCell([r, c]);
+    setHoveredCell([r, c]);
+  };
 
-  const applyDrop = (boxKey, item) => {
-    const targetItem = ITEMS.find((q) => `a-${q.id}` === boxKey);
-    if (!targetItem || targetItem.fixed || showAns) return;
+  const handleMouseEnter = (r, c) => {
+    if (selecting) setHoveredCell([r, c]);
+  };
 
-    const newAnswers = { ...answers };
-
-    Object.keys(newAnswers).forEach((key) => {
-      if (key !== "a-1" && newAnswers[key]?.dragId === item.id) {
-        delete newAnswers[key];
+  const handleMouseUp = () => {
+    if (!selecting) return;
+    setSelecting(false);
+    if (selectionCells.length > 1) {
+      const match = checkSelection(selectionCells, foundNames);
+      if (match) {
+        const color = FOUND_COLORS[foundWords.length % FOUND_COLORS.length];
+        setFoundWords((prev) => [...prev, { word: match.word, cells: match.cells, color }]);
+      } else {
+        setWrongFlash(true);
+        setTimeout(() => setWrongFlash(false), 400);
       }
-    });
-
-    newAnswers[boxKey] = {
-      dragId: item.id,
-      value: item.value,
-    };
-
-    setAnswers(newAnswers);
-    setChecked(false);
-  };
-
-  const handleDragStart = (item) => {
-    if (showAns || usedDragIds.includes(item.id)) return;
-    setDraggedItem(item);
-  };
-
-  const handleDrop = (boxKey) => {
-    if (showAns || !draggedItem) return;
-    applyDrop(boxKey, draggedItem);
-    setDraggedItem(null);
-  };
-
-  const handleTouchStart = (e, item) => {
-    if (showAns || usedDragIds.includes(item.id)) return;
-
-    const touch = e.touches[0];
-    setTouchItem(item);
-    setTouchPos({ x: touch.clientX, y: touch.clientY });
-  };
-
-  const handleTouchMove = (e) => {
-    if (!touchItem) return;
-    const touch = e.touches[0];
-    setTouchPos({ x: touch.clientX, y: touch.clientY });
-  };
-
-  const handleTouchEnd = () => {
-    if (!touchItem) return;
-
-    Object.entries(dropRefs.current).forEach(([key, ref]) => {
-      if (!ref) return;
-
-      const rect = ref.getBoundingClientRect();
-
-      if (
-        touchPos.x >= rect.left &&
-        touchPos.x <= rect.right &&
-        touchPos.y >= rect.top &&
-        touchPos.y <= rect.bottom
-      ) {
-        applyDrop(key, touchItem);
-      }
-    });
-
-    setTouchItem(null);
-  };
-
-  const handleRemoveAnswer = (boxKey) => {
-    const targetItem = ITEMS.find((q) => `a-${q.id}` === boxKey);
-    if (!targetItem || targetItem.fixed || showAns) return;
-
-    setAnswers((prev) => {
-      const updated = { ...prev };
-      delete updated[boxKey];
-      return updated;
-    });
-
-    setChecked(false);
-  };
-
-  const handleCheck = () => {
-    if (showAns) return;
-
-    const allAnswered = ITEMS.every((item) => answers[`a-${item.id}`]?.value);
-
-    if (!allAnswered) {
-      ValidationAlert.info("Please complete all answers first.");
-      return;
     }
-
-    let score = 0;
-    const total = ITEMS.length;
-
-    ITEMS.forEach((item) => {
-      if (answers[`a-${item.id}`]?.value === item.correct) {
-        score++;
-      }
-    });
-
-    setChecked(true);
-
-    if (score === total) {
-      ValidationAlert.success(`Score: ${score} / ${total}`);
-    } else if (score > 0) {
-      ValidationAlert.warning(`Score: ${score} / ${total}`);
-    } else {
-      ValidationAlert.error(`Score: ${score} / ${total}`);
-    }
-  };
-
-  const handleShowAnswer = () => {
-    const filled = {};
-
-    ITEMS.forEach((item) => {
-      const matched = DRAG_ITEMS.find((d) => d.value === item.correct);
-      filled[`a-${item.id}`] = {
-        dragId: matched?.id ?? `act-${item.id}`,
-        value: item.correct,
-      };
-    });
-
-    setAnswers(filled);
-    setChecked(true);
-    setShowAns(true);
+    setStartCell(null);
+    setHoveredCell(null);
   };
 
   const handleReset = () => {
-    setAnswers({
-      "a-1": { dragId: "act1", value: "bedroom" },
-    });
-    setDraggedItem(null);
-    setTouchItem(null);
-    setChecked(false);
-    setShowAns(false);
+      setAnswerShown(false); 
+    setFoundWords([]);
+    setStartCell(null);
+    setHoveredCell(null);
+    setSelecting(false);
+    setWrongFlash(false);
   };
 
-  const isWrong = (item) => {
-    if (!checked || showAns || item.fixed) return false;
-    return answers[`a-${item.id}`]?.value !== item.correct;
-  };
-
-  const renderDropBox = (item) => {
-    const boxKey = `a-${item.id}`;
-    const value = answers[boxKey]?.value || "";
-
-    return (
-      <div className="wb-house-line-wrap">
-        <div
-          ref={(el) => (dropRefs.current[boxKey] = el)}
-          onDragOver={(e) => e.preventDefault()}
-          onDrop={() => handleDrop(boxKey)}
-          onClick={() => handleRemoveAnswer(boxKey)}
-          className={`wb-house-line ${item.fixed ? "wb-house-line--fixed" : ""}`}
-          style={{
-            cursor:
-              item.fixed || showAns
-                ? "default"
-                : value
-                ? "pointer"
-                : "pointer",
-          }}
-        >
-          {value ? (
-            <span
-              className={`wb-house-answer ${
-                item.fixed ? "wb-house-answer--fixed" : ""
-              }`}
-            >
-              {value}
-            </span>
-          ) : (
-            <span className="wb-house-placeholder"></span>
-          )}
-        </div>
-
-        {isWrong(item) && <div className="wb-house-wrong">✕</div>}
-      </div>
+  const handleShowAnswer = () => {
+    setAnswerShown(true);   
+    setFoundWords(
+      WORD_DEFS.map((def, i) => ({
+        word:  def.word,
+        cells: def.cells,
+        color: FOUND_COLORS[i % FOUND_COLORS.length],
+      }))
     );
   };
 
+  const handleCheck = () => {
+      if (answerShown) return;   // ← أضف هذا السطر
+
+    if (foundNames.size < WORD_DEFS.length) {
+      ValidationAlert.info("Please find all words first.");
+    } else {
+      ValidationAlert.success(`Score: ${WORD_DEFS.length} / ${WORD_DEFS.length}`);
+    }
+  };
+
+  const allFound = foundNames.size === WORD_DEFS.length;
+
+  // ── render cell background ────────────────
+const getCellStyle = (key, isSelecting, isWrong) => {
+  if (isWrong)     return { background: CELL_BG_WRONG };
+  if (isSelecting) return { background: CELL_BG_SELECTING };
+  const colors = foundCellMap[key];
+  if (!colors || colors.length === 0) return { background: CELL_BG_DEFAULT };
+  if (colors.length === 1) return { background: colors[0] };
+
+  // ✅ أي عدد من الألوان — كل لون بيأخذ شريحة متساوية
+  const step = 100 / colors.length;
+  const stops = colors.flatMap((c, i) => [
+    `${c} ${(i * step).toFixed(1)}%`,
+    `${c} ${((i + 1) * step).toFixed(1)}%`,
+  ]);
+  return {
+    background: `linear-gradient(135deg, ${stops.join(", ")})`,
+  };
+};
+
+  // ── render ────────────────────────────────
   return (
-    <div className="main-container-component">
-    <style>{`
-  .wb-house-wrap {
-    width: 100%;
-    max-width: 1100px;
-    margin: 0 auto;
-    padding: 8px 0 24px;
-    box-sizing: border-box;
-    display: flex;
-    flex-direction: column;
-    gap: 22px;
-  }
+    <div
+      className="main-container-component"
+      onMouseUp={handleMouseUp}
+      onMouseLeave={() => { if (selecting) handleMouseUp(); }}
+    >
+      <style>{`
+        /* ── Body: قائمة + جدول ── */
+        .wsk-body {
+          display: flex;
+          gap: clamp(20px, 3vw, 48px);
+          align-items: flex-start;
+          flex-wrap: wrap;
+        }
 
-  .wb-house-title {
-    margin: 0;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    flex-wrap: wrap;
-  }
+        /* ── قائمة الكلمات ── */
+        .wsk-word-list {
+          border: 2px solid ${WORD_LIST_BORDER};
+          border-radius: 14px;
+          padding: clamp(12px, 1.6vw, 20px) clamp(16px, 2vw, 26px);
+          display: flex;
+          flex-direction: column;
+          gap: clamp(6px, 0.9vw, 10px);
+          min-width: clamp(110px, 15vw, 160px);
+          flex-shrink: 0;
+        }
 
-  .wb-house-chips {
-    width: 100%;
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 10px;
-  }
+        .wsk-word-item {
+          font-size: clamp(14px, 1.6vw, 18px);
+          font-weight: 700;
+          color: ${WORD_TEXT_COLOR};
+          line-height: 1.3;
+          transition: opacity 0.25s;
+          user-select: none;
+        }
 
-  .wb-house-chip {
-    min-height: 32px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    padding: 5px 12px;
-    border-radius: 15px;
-    font-size: clamp(11px, 0.9vw, 15px);
-    font-weight: 500;
-    user-select: none;
-    box-sizing: border-box;
-    transition: 0.2s ease;
-    touch-action: none;
-    word-break: break-word;
-    background: #ffd09b;
-    color: #111;
-    border: 1.5px solid #ee9a42;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.05);
-  }
+        .wsk-word-item--found {
+          text-decoration: line-through;
+          opacity: 0.38;
+        }
 
-  .wb-house-chip--used {
-    background: #ececec;
-    color: #b7b7b7;
-    border-color: #dadada;
-    box-shadow: none;
-    opacity: 0.95;
-    cursor: not-allowed;
-  }
+        /* ── الجدول ── */
+        .wsk-grid {
+          display: grid;
+          grid-template-columns: repeat(10, 1fr);
+          gap: 0;
+          cursor: crosshair;
+          user-select: none;
+          -webkit-user-select: none;
+          border: 2px solid ${CELL_BORDER_COLOR};
+          border-radius: 8px;
+          overflow: hidden;
+          flex-shrink: 0;
+        }
 
-  .wb-house-chip--active {
-    cursor: grab;
-  }
+        /* ── خلية واحدة ── */
+        .wsk-cell {
+          width:  clamp(30px, 3.8vw, 46px);
+          height: clamp(30px, 3.8vw, 46px);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: clamp(13px, 1.5vw, 18px);
+          font-weight: 700;
+          color: ${CELL_TEXT_DEFAULT};
+          border-right: 1px solid ${CELL_BORDER_COLOR};
+          border-bottom: 1px solid ${CELL_BORDER_COLOR};
+          background: ${CELL_BG_DEFAULT};
+          transition: background 0.1s, color 0.1s;
+          position: relative;
+        }
 
-  .wb-house-layout {
-    display: grid;
-    grid-template-columns: minmax(210px, 1fr) minmax(260px, 0.95fr) minmax(210px, 1fr);
-    gap: clamp(20px, 3vw, 42px);
-    align-items: center;
-    width: 100%;
-  }
+        /* آخر عمود — بدون بوردر يمين */
+        .wsk-cell:nth-child(10n) { border-right: none; }
+        /* آخر صف — بدون بوردر تحت */
+        .wsk-cell:nth-child(n+91) { border-bottom: none; }
 
-  .wb-house-col {
-    display: flex;
-    flex-direction: column;
-    gap: clamp(16px, 2vw, 26px);
-    min-width: 0;
-  }
+        /* أثناء التحديد */
+        .wsk-cell--selecting {
+          color: ${CELL_TEXT_SELECTING};
+        }
 
-  .wb-house-item {
-    display: grid;
-    grid-template-columns: 32px minmax(0, 1fr);
-    gap: 12px;
-    align-items: center;
-    width: 100%;
-  }
+        /* تحديد غلط */
+        .wsk-cell--wrong {
+          color: ${CELL_TEXT_WRONG} !important;
+        }
 
-  .wb-house-num {
-    font-size: clamp(14px, 1.2vw, 20px);
-    font-weight: 700;
-    line-height: 1;
-    color: #1f1f1f;
-  }
+        /* كلمة مكتشفة */
+        .wsk-cell--found {
+          color: ${CELL_TEXT_FOUND};
+        }
 
-  .wb-house-line-wrap {
-    position: relative;
-    width: 100%;
-  }
+        /* Buttons */
+        .wsk-buttons {
+          display: flex;
+          justify-content: center;
+          margin-top: clamp(8px, 1.6vw, 18px);
+        }
 
-  .wb-house-line {
-    width: 100%;
-    min-height: 36px;
-    border-bottom: 3px solid #2c2c2c;
-    display: flex;
-    align-items: center;
-    padding: 0 4px 4px;
-    box-sizing: border-box;
-    user-select: none;
-  }
+        /* تهنئة */
+        .wsk-congrats {
+          text-align: center;
+          font-size: clamp(15px, 1.8vw, 20px);
+          font-weight: 800;
+          color: #27ae60;
+          animation: wsk-pop 0.4s ease both;
+        }
+        @keyframes wsk-pop {
+          from { transform: scale(0.7); opacity: 0; }
+          to   { transform: scale(1);   opacity: 1; }
+        }
 
-  .wb-house-line--fixed {
-    cursor: default !important;
-  }
-
-  .wb-house-answer {
-    font-size: clamp(13px, 1.4vw, 20px);
-    line-height: 1.1;
-    color: #000000ff;
-    font-weight: 500;
-    word-break: break-word;
-  }
-
-  .wb-house-answer--fixed {
-    color: #1f1f1f;
-  }
-
-  .wb-house-placeholder {
-    display: block;
-    width: 100%;
-    min-height: 26px;
-  }
-
-  .wb-house-wrong {
-    position: absolute;
-    top: -8px;
-    right: -8px;
-    width: 22px;
-    height: 22px;
-    border-radius: 999px;
-    background: #ef4444;
-    color: #fff;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 12px;
-    font-weight: 700;
-    border: 2px solid #fff;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-    box-sizing: border-box;
-  }
-
-  .wb-house-image-wrap {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .wb-house-image {
-    display: block;
-    width: 100%;
-    max-width: clamp(340px, 42vw, 600px);
-    height: auto;
-    object-fit: contain;
-  }
-
-  .wb-house-buttons {
-    display: flex;
-    justify-content: center;
-    margin-top: 4px;
-  }
-
-  @media (max-width: 980px) {
-    .wb-house-layout {
-      grid-template-columns: 1fr;
-      gap: 22px;
-    }
-
-    .wb-house-image-wrap {
-      order: -1;
-    }
-
-    .wb-house-image {
-      max-width: min(100%, 480px);
-    }
-
-    .wb-house-col {
-      gap: 16px;
-    }
-  }
-
-  @media (max-width: 700px) {
-    .wb-house-item {
-      grid-template-columns: 26px minmax(0, 1fr);
-      gap: 10px;
-    }
-
-    .wb-house-line {
-      min-height: 36px;
-    }
-
-    .wb-house-chips {
-      justify-content: flex-start;
-    }
-  }
-
-  @media (max-width: 520px) {
-    .wb-house-wrap {
-      gap: 18px;
-    }
-
-    .wb-house-chip {
-      font-size: 11px;
-      padding: 5px 10px;
-    }
-
-    .wb-house-wrong {
-      right: -4px;
-    }
-  }
-`}</style>
+        @media (max-width: 600px) {
+          .wsk-body { flex-direction: column; }
+        }
+      `}</style>
 
       <div
         className="div-forall"
         style={{
           display: "flex",
           flexDirection: "column",
-          gap: "28px",
+          gap: "clamp(14px, 2vw, 24px)",
           maxWidth: "1100px",
           margin: "0 auto",
         }}
       >
+        {/* ── Header ── */}
         <h1
           className="WB-header-title-page8"
-          style={{
-            margin: 0,
-            display: "flex",
-            alignItems: "center",
-            gap: "12px",
-            flexWrap: "wrap",
-          }}
+          style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
         >
           <span className="WB-ex-A">B</span>
-          Label the rooms in Tom’s house.
+          Find and circle the words.
         </h1>
 
-        <div className="wb-house-chips">
-          {DRAG_ITEMS.map((item) => {
-            const isUsed =
-              item.id === "act1"
-                ? true
-                : usedDragIds.includes(item.id);
+        {/* ── Body ── */}
+        <div className="wsk-body">
 
-            return (
-              <div
-                key={item.id}
-                draggable={!isUsed && !showAns}
-                onDragStart={() => handleDragStart(item)}
-                onTouchStart={(e) => handleTouchStart(e, item)}
-                onTouchMove={handleTouchMove}
-                onTouchEnd={handleTouchEnd}
-                className={`wb-house-chip ${
-                  isUsed || showAns
-                    ? "wb-house-chip--used"
-                    : "wb-house-chip--active"
-                }`}
+          {/* قائمة الكلمات */}
+          <div className="wsk-word-list">
+            {WORD_LIST.map((w) => (
+              <span
+                key={w}
+                className={`wsk-word-item ${foundNames.has(w) ? "wsk-word-item--found" : ""}`}
               >
-                {item.value}
-              </div>
-            );
-          })}
-        </div>
-
-        <div className="wb-house-layout">
-          <div className="wb-house-col">
-            {ITEMS.filter((item) => [1, 3, 5, 7].includes(item.id)).map((item) => (
-              <div key={item.id} className="wb-house-item">
-                <div className="wb-house-num">{item.id}</div>
-                {renderDropBox(item)}
-              </div>
+                {w}
+              </span>
             ))}
           </div>
 
-          <div className="wb-house-image-wrap">
-            <img
-              src={imgHouse}
-              alt="house scene"
-              className="wb-house-image"
-            />
+          {/* الجدول */}
+          <div className="wsk-grid">
+            {GRID.map((row, r) =>
+              row.map((letter, c) => {
+                const key         = cellKey(r, c);
+                const foundColors = foundCellMap[key];
+                const isFound     = foundColors && foundColors.length > 0;
+                const isSel       = selectionKeys.has(key) && !isFound;
+                const isWrong     = isSel && wrongFlash;
+                const isSelecting = isSel && !wrongFlash;
+
+                return (
+                  <div
+                    key={key}
+                    className={[
+                      "wsk-cell",
+                      isFound     ? "wsk-cell--found"     : "",
+                      isSelecting ? "wsk-cell--selecting" : "",
+                      isWrong     ? "wsk-cell--wrong"     : "",
+                    ].filter(Boolean).join(" ")}
+                    style={getCellStyle(key, isSelecting, isWrong)}
+                    onMouseDown={() => handleMouseDown(r, c)}
+                    onMouseEnter={() => handleMouseEnter(r, c)}
+                  >
+                    {letter}
+                  </div>
+                );
+              })
+            )}
           </div>
 
-          <div className="wb-house-col">
-            {ITEMS.filter((item) => [2, 4, 6, 8].includes(item.id)).map((item) => (
-              <div key={item.id} className="wb-house-item">
-                <div className="wb-house-num">{item.id}</div>
-                {renderDropBox(item)}
-              </div>
-            ))}
-          </div>
         </div>
 
-        <div className="wb-house-buttons">
+        {/* ── Buttons ── */}
+        <div className="wsk-buttons">
           <Button
+            checkAnswers={handleCheck}
             handleShowAnswer={handleShowAnswer}
             handleStartAgain={handleReset}
-            checkAnswers={handleCheck}
           />
         </div>
-      </div>
 
-      {touchItem && (
-        <div
-          style={{
-            position: "fixed",
-            left: touchPos.x - 60,
-            top: touchPos.y - 20,
-            background: "#fff",
-            padding: "8px 12px",
-            borderRadius: "10px",
-            boxShadow: "0 4px 10px rgba(0,0,0,0.2)",
-            pointerEvents: "none",
-            zIndex: 9999,
-            fontSize: "17px",
-            fontWeight: 600,
-            color: "#d72626",
-            maxWidth: "180px",
-            textAlign: "center",
-            border: "1px solid #f5c28a",
-          }}
-        >
-          {touchItem.value}
-        </div>
-      )}
+
+      </div>
     </div>
   );
 }

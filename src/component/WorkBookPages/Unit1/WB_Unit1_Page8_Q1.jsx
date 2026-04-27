@@ -181,18 +181,23 @@ const [answerShown, setAnswerShown] = useState(false);
   const allFound = foundNames.size === WORD_DEFS.length;
 
   // ── render cell background ────────────────
-  // خلية متقاطعة بين كلمتين → gradient قطري
-  const getCellStyle = (key, isSelecting, isWrong) => {
-    if (isWrong)      return { background: CELL_BG_WRONG };
-    if (isSelecting)  return { background: CELL_BG_SELECTING };
-    const colors = foundCellMap[key];
-    if (!colors || colors.length === 0) return { background: CELL_BG_DEFAULT };
-    if (colors.length === 1) return { background: colors[0] };
-    // خليتان متقاطعتان — split diagonal
-    return {
-      background: `linear-gradient(135deg, ${colors[0]} 50%, ${colors[1]} 50%)`,
-    };
+const getCellStyle = (key, isSelecting, isWrong) => {
+  if (isWrong)     return { background: CELL_BG_WRONG };
+  if (isSelecting) return { background: CELL_BG_SELECTING };
+  const colors = foundCellMap[key];
+  if (!colors || colors.length === 0) return { background: CELL_BG_DEFAULT };
+  if (colors.length === 1) return { background: colors[0] };
+
+  // ✅ أي عدد من الألوان — كل لون بيأخذ شريحة متساوية
+  const step = 100 / colors.length;
+  const stops = colors.flatMap((c, i) => [
+    `${c} ${(i * step).toFixed(1)}%`,
+    `${c} ${((i + 1) * step).toFixed(1)}%`,
+  ]);
+  return {
+    background: `linear-gradient(135deg, ${stops.join(", ")})`,
   };
+};
 
   // ── render ────────────────────────────────
   return (

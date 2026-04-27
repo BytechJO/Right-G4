@@ -1,357 +1,342 @@
-import { useState } from "react";
-
-import ValidationAlert from "../../Popup/ValidationAlert";
+import React, { useState } from "react";
 import Button from "../Button";
-import img1 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U5 Folder/Page 27/A1.svg";
-import img2 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U5 Folder/Page 27/A2.svg";
-import img3 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U5 Folder/Page 27/A3.svg";
-import img4 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U5 Folder/Page 27/A4.svg";
-import img5 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U5 Folder/Page 27/A5.svg";
-import img6 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U5 Folder/Page 27/A6.svg";
+import ValidationAlert from "../../Popup/ValidationAlert";
 
-const YELLOW_COLOR = "#f39b42";
-const RED_COLOR = "#ef4444";
-const TEXT_COLOR = "#222";
-const BORDER_COLOR = "#d4d4d4";
+// ─────────────────────────────────────────────
+//  🖼️  IMAGES
+// ─────────────────────────────────────────────
+import img1 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U5 Folder/Page 27/1.svg"; // boy holding stomach
+import img2 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U5 Folder/Page 27/Asset 21.svg"; // stone
+import img3 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U5 Folder/Page 27/Asset 22.svg"; // boy in bed
+import img4 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U5 Folder/Page 27/Asset 23.svg"; // family at beach
 
-const DATA = [
+// ─────────────────────────────────────────────
+//  🎨  COLORS
+// ─────────────────────────────────────────────
+const INPUT_UNDERLINE_DEFAULT = "#3f3f3f";
+const INPUT_UNDERLINE_WRONG   = "#ef4444";
+const INPUT_TEXT_COLOR        = "#2b2b2b";
+const INPUT_ANSWER_COLOR      = "#c81e1e";
+const NUMBER_COLOR            = "#2b2b2b";
+const SENTENCE_COLOR          = "#2b2b2b";
+const SCRAMBLED_COLOR         = "#2b2b2b";
+const IMG_BORDER_COLOR        = "#2096a6";
+const WRONG_BADGE_BG          = "#ef4444";
+const WRONG_BADGE_TEXT        = "#ffffff";
+
+// ─────────────────────────────────────────────
+//  📝  EXERCISE DATA
+//  sentence: الجملة مع الكلمة المشوشة مسطرة
+//  scrambled: الكلمة المشوشة (تظهر بخط تحتها)
+//  correct: الكلمة الصحيحة
+//  answer: الكلمة المعروضة عند Show Answer
+// ─────────────────────────────────────────────
+const ITEMS = [
   {
-    id: 1,
-    img: img1,
-    options: ["bathroom", "garage", "bedroom"],
-    correct: "bedroom",
+    id:         1,
+    src:        img1,
+    before:     "My",
+    scrambled:  "motshca",
+    after:      "hurts really bad.",
+    correct:    ["stomach"],
+    answer:     "stomach",
   },
   {
-    id: 2,
-    img: img2,
-    options: ["dining room", "basement", "hall"],
-    correct: "dining room",
+    id:         2,
+    src:        img2,
+    before:     "Are there ants near the",
+    scrambled:  "nesot",
+    after:      "?",
+    correct:    ["stone"],
+    answer:     "stone",
   },
   {
-    id: 3,
-    img: img3,
-    options: ["kitchen", "living room", "dining room"],
-    correct: "kitchen",
+    id:         3,
+    src:        img3,
+    before:     "He was still in",
+    scrambled:  "dbe",
+    after:      "at nine o'clock.",
+    correct:    ["bed"],
+    answer:     "bed",
   },
   {
-    id: 4,
-    img: img4,
-    options: ["living room", "office", "basement"],
-    correct: "office",
-  },
-  {
-    id: 5,
-    img: img5,
-    options: ["basement", "garage", "kitchen"],
-    correct: "basement",
-  },
-  {
-    id: 6,
-    img: img6,
-    options: ["hall", "bathroom", "stairs"],
-    correct: "bathroom",
+    id:         4,
+    src:        img4,
+    before:     "We always go",
+    scrambled:  "minsmgwi",
+    after:      "at the beach.",
+    correct:    ["swimming"],
+    answer:     "swimming",
   },
 ];
 
-const initialSelections = {
-  1: null,
-  2: null,
-  3: null,
-  4: null,
-  5: null,
-  6: null,
-};
+// ─────────────────────────────────────────────
+//  🔧  NORMALIZE
+// ─────────────────────────────────────────────
+const normalize = (str) =>
+  str.toLowerCase().replace(/[^a-z0-9\s]/g, "").replace(/\s+/g, " ").trim();
 
-const styles = {
-  grid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
-    gap: "clamp(18px, 4vw, 42px)",
-    width: "100%",
-  },
+const isCorrect = (userVal, correctArr) =>
+  correctArr.some((c) => normalize(userVal) === normalize(c));
 
-  card: {
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    gap: "clamp(10px, 2vw, 18px)",
-    minWidth: 0,
-  },
+// ─────────────────────────────────────────────
+//  COMPONENT
+// ─────────────────────────────────────────────
+export default function WB_LookUnscrambleRewrite_QA() {
+  const [answers,     setAnswers]     = useState({});
+  const [showResults, setShowResults] = useState(false);
+  const [showAns,     setShowAns]     = useState(false);
 
-  topRow: {
-    display: "flex",
-    alignItems: "flex-start",
-    justifyContent: "center",
-    gap: "clamp(10px, 1.8vw, 18px)",
-    width: "100%",
-    flexWrap: "nowrap",
-  },
+  const isLocked = showResults || showAns;
 
-  number: {
-    fontSize: "clamp(18px, 2.2vw, 28px)",
-    fontWeight: "700",
-    color: TEXT_COLOR,
-    lineHeight: 1,
-    paddingTop: "clamp(4px, 0.7vw, 8px)",
-    flexShrink: 0,
-  },
-
-  imageWrap: {
-    width: "clamp(78px, 14vw, 140px)",
-    height: "clamp(78px, 14vw, 140px)",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    flexShrink: 0,
-  },
-
-  image: {
-    width: "100%",
-    height: "100%",
-    objectFit: "contain",
-    display: "block",
-  },
-
-  optionsWrap: {
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    gap: "clamp(8px, 1.2vw, 12px)",
-    minWidth: 0,
-    flex: 1,
-    paddingTop: "clamp(2px, 0.5vw, 6px)",
-  },
-
-  optionButton: {
-    position: "relative",
-    border: "none",
-    background: "transparent",
-    padding: "0 clamp(12px, 2vw, 20px)",
-    minHeight: "clamp(26px, 3vw, 36px)",
-    fontSize: "clamp(16px, 2vw, 22px)",
-    fontWeight: "500",
-    color: TEXT_COLOR,
-    cursor: "pointer",
-    borderRadius: "999px",
-    lineHeight: 1.2,
-    transition: "all 0.2s ease",
-    whiteSpace: "nowrap",
-  },
-
-  buttonsWrap: {
-    display: "flex",
-    justifyContent: "center",
-    marginTop: "clamp(8px, 2vw, 16px)",
-    width: "100%",
-  },
-};
-
-const WB_Unit7_Page27_Q1 = () => {
-  const [userSelections, setUserSelections] = useState(initialSelections);
-  const [showAnswers, setShowAnswers] = useState(false);
-  const [wrongAnswers, setWrongAnswers] = useState({});
-  const [checkedAnswers, setCheckedAnswers] = useState(false);
-
-  const handleSelect = (id, option) => {
-    if (showAnswers) return;
-
-    setUserSelections((prev) => ({
-      ...prev,
-      [id]: option,
-    }));
-
-    setCheckedAnswers(false);
-    setWrongAnswers({});
+  const handleChange = (id, value) => {
+    if (isLocked) return;
+    setAnswers((prev) => ({ ...prev, [id]: value }));
   };
 
-  const checkAnswers = () => {
-    if (showAnswers) return;
-    const allAnswered = Object.values(userSelections).every((val) => val !== null);
-
-    if (!allAnswered) {
-      ValidationAlert.info("Please answer all questions!");
-      return;
-    }
-
-    let currentScore = 0;
-    const totalQuestions = DATA.length;
-    const newWrong = {};
-
-    DATA.forEach((item) => {
-      const userAnswer = userSelections[item.id];
-
-      if (userAnswer === item.correct) {
-        currentScore++;
-        newWrong[item.id] = false;
-      } else {
-        newWrong[item.id] = true;
-      }
-    });
-
-    setWrongAnswers(newWrong);
-    setCheckedAnswers(true);
-
-    if (currentScore === totalQuestions) {
-      ValidationAlert.success(`Score: ${currentScore} / ${totalQuestions}`);
-    } else if (currentScore > 0) {
-      ValidationAlert.warning(`Score: ${currentScore} / ${totalQuestions}`);
-    } else {
-      ValidationAlert.error(`Score: ${currentScore} / ${totalQuestions}`);
-    }
+  const handleCheck = () => {
+    if (isLocked) return;
+    const allAnswered = ITEMS.every((item) => answers[item.id]?.trim());
+    if (!allAnswered) { ValidationAlert.info("Please complete all answers first."); return; }
+    let score = 0;
+    ITEMS.forEach((item) => { if (isCorrect(answers[item.id] || "", item.correct)) score++; });
+    setShowResults(true);
+    if (score === ITEMS.length)   ValidationAlert.success(`Score: ${score} / ${ITEMS.length}`);
+    else if (score > 0)           ValidationAlert.warning(`Score: ${score} / ${ITEMS.length}`);
+    else                          ValidationAlert.error(`Score: ${score} / ${ITEMS.length}`);
   };
 
   const handleShowAnswer = () => {
-    const answers = {};
-    DATA.forEach((item) => {
-      answers[item.id] = item.correct;
-    });
-
-    setUserSelections(answers);
-    setShowAnswers(true);
-    setCheckedAnswers(false);
-    setWrongAnswers({});
+    const filled = {};
+    ITEMS.forEach((item) => { filled[item.id] = item.answer; });
+    setAnswers(filled);
+    setShowResults(false);
+    setShowAns(true);
   };
 
-  const handleStartAgain = () => {
-    setUserSelections(initialSelections);
-    setShowAnswers(false);
-    setWrongAnswers({});
-    setCheckedAnswers(false);
+  const handleReset = () => {
+    setAnswers({});
+    setShowResults(false);
+    setShowAns(false);
   };
 
-  const getOptionStyle = (item, option) => {
-    const isSelected = userSelections[item.id] === option;
-    const isCorrect = option === item.correct;
-    const isWrongSelected =
-      checkedAnswers && wrongAnswers[item.id] && isSelected;
-
-    if (showAnswers && isCorrect) {
-      return {
-        ...styles.optionButton,
-        border: `3px solid ${YELLOW_COLOR}`,
-      };
-    }
-
-    if (isWrongSelected) {
-      return {
-        ...styles.optionButton,
-        border: `3px solid ${RED_COLOR}`,
-      };
-    }
-
-    if (isSelected) {
-      return {
-        ...styles.optionButton,
-        border: `3px solid ${YELLOW_COLOR}`,
-      };
-    }
-
-    return {
-      ...styles.optionButton,
-      border: "3px solid transparent",
-      background: "transparent",
-    };
+  const isWrong = (item) => {
+    if (!showResults || showAns) return false;
+    return !isCorrect(answers[item.id] || "", item.correct);
   };
 
   return (
     <div className="main-container-component">
+      <style>{`
+        /* ── List ── */
+        .lur-list {
+          display: flex;
+          flex-direction: column;
+          gap: clamp(16px, 2.4vw, 30px);
+          width: 100%;
+        }
+
+        /* ── Single row: num | img | right ── */
+        .lur-row {
+          display: grid;
+          grid-template-columns:
+            clamp(16px, 1.8vw, 24px)
+            clamp(120px, 16vw, 200px)
+            1fr;
+          gap: clamp(10px, 1.6vw, 24px);
+          align-items: center;
+        }
+
+        /* Number */
+        .lur-num {
+          font-size: clamp(15px, 1.8vw, 22px);
+          font-weight: 700;
+          color: ${NUMBER_COLOR};
+          line-height: 1.5;
+          align-self: center;
+        }
+
+        /* Image */
+        .lur-img-wrap {
+          overflow: hidden;
+          width: 100%;
+        }
+        .lur-img {
+          width: 100%;
+          height: clamp(80px, 11vw, 140px);
+          display: block;
+        }
+
+        /* Right side */
+        .lur-right {
+          display: flex;
+          flex-direction: column;
+          gap: clamp(8px, 1.2vw, 14px);
+          min-width: 0;
+        }
+
+        /* Sentence with scrambled word underlined */
+        .lur-sentence {
+          font-size: clamp(14px, 1.7vw, 20px);
+          font-weight: 400;
+          color: ${SENTENCE_COLOR};
+          line-height: 1.5;
+          display: flex;
+          flex-wrap: wrap;
+          gap: 4px;
+          align-items: baseline;
+        }
+
+        .lur-word {
+          white-space: nowrap;
+        }
+
+        /* Scrambled word — underlined */
+        .lur-scrambled {
+          text-decoration: underline;
+          color: ${SCRAMBLED_COLOR};
+          white-space: nowrap;
+        }
+
+        /* Input wrap */
+        .lur-input-wrap {
+          position: relative;
+        }
+
+        .lur-input {
+          width: 100%;
+          background: transparent;
+          border: none;
+          border-bottom: 2px solid ${INPUT_UNDERLINE_DEFAULT};
+          outline: none;
+          font-size: clamp(14px, 1.7vw, 20px);
+          font-weight: 400;
+          color: ${INPUT_TEXT_COLOR};
+          padding: 4px 6px 5px;
+          line-height: 1.5;
+          box-sizing: border-box;
+          font-family: inherit;
+          transition: border-color 0.2s;
+        }
+        .lur-input:disabled    { opacity: 1; cursor: default; }
+        .lur-input--wrong      { border-bottom-color: ${INPUT_UNDERLINE_WRONG}; }
+        .lur-input--answer     { color: ${INPUT_ANSWER_COLOR}; }
+
+        /* ✕ badge */
+        .lur-badge {
+          position: absolute;
+          top: -8px; right: 0;
+          width: clamp(17px, 1.9vw, 22px);
+          height: clamp(17px, 1.9vw, 22px);
+          border-radius: 50%;
+          background: ${WRONG_BADGE_BG};
+          color: ${WRONG_BADGE_TEXT};
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: clamp(9px, 1vw, 12px);
+          font-weight: 700;
+          border: 2px solid #fff;
+          box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+          pointer-events: none;
+          z-index: 2;
+        }
+
+        /* Buttons */
+        .lur-buttons {
+          display: flex;
+          justify-content: center;
+          margin-top: clamp(8px, 1.6vw, 18px);
+        }
+
+        @media (max-width: 500px) {
+          .lur-row { grid-template-columns: clamp(16px,4vw,22px) 1fr; }
+          .lur-img-wrap { display: none; }
+        }
+      `}</style>
 
       <div
         className="div-forall"
-            style={{
+        style={{
           display: "flex",
           flexDirection: "column",
-          gap: "28px",
+          gap: "clamp(14px, 2vw, 22px)",
           maxWidth: "1100px",
           margin: "0 auto",
         }}
-
       >
+        {/* ── Header ── */}
         <h1
           className="WB-header-title-page8"
-          style={{
-            margin: 0,
-            display: "flex",
-            alignItems: "center",
-            gap: "12px",
-            flexWrap: "wrap",
-          }}
+          style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
         >
           <span className="WB-ex-A">A</span>
-          Look, read, and circle.
+          Look, unscramble, and rewrite each sentence.
         </h1>
 
-        <div className="wb-u7-q1-grid" style={styles.grid}>
-          {DATA.map((item) => (
-            <div key={item.id} style={styles.card}>
-              <div className="wb-u7-q1-row" style={styles.topRow}>
-                <div style={styles.number}>{item.id}</div>
+        {/* ── Items ── */}
+        <div className="lur-list">
+          {ITEMS.map((item) => {
+            const wrong  = isWrong(item);
+            const value  = answers[item.id] || "";
+            const tColor = showAns ? INPUT_ANSWER_COLOR : INPUT_TEXT_COLOR;
+            const uColor = wrong ? INPUT_UNDERLINE_WRONG : INPUT_UNDERLINE_DEFAULT;
 
-                <div style={styles.imageWrap}>
-                  <img src={item.img} alt={`option-${item.id}`} style={styles.image} />
+            return (
+              <div key={item.id} className="lur-row">
+
+                {/* Number */}
+                <span className="lur-num">{item.id}</span>
+
+                {/* Image */}
+                <div className="lur-img-wrap">
+                  <img src={item.src} alt={`scene-${item.id}`} className="lur-img" />
                 </div>
 
-                <div style={styles.optionsWrap}>
-                  {item.options.map((option) => {
-                    const isWrongSelected =
-                      checkedAnswers &&
-                      wrongAnswers[item.id] &&
-                      userSelections[item.id] === option;
+                {/* Right: sentence + input */}
+                <div className="lur-right">
 
-                    return (
-                      <button
-                        key={option}
-                        onClick={() => handleSelect(item.id, option)}
-                        style={{
-                          ...getOptionStyle(item, option),
-                          cursor: showAnswers ? "default" : "pointer",
-                        }}
-                      >
-                        {option}
+                  {/* Sentence with underlined scrambled word */}
+                  <div className="lur-sentence">
+                    {item.before && <span className="lur-word">{item.before}</span>}
+                    <span className="lur-scrambled">{item.scrambled}</span>
+                    {item.after && <span className="lur-word">{item.after}</span>}
+                  </div>
 
-                        {isWrongSelected && (
-                          <span
-                            style={{
-                              position: "absolute",
-                              top: "-8px",
-                              right: "-8px",
-                              width: "clamp(18px, 2vw, 22px)",
-                              height: "clamp(18px, 2vw, 22px)",
-                              borderRadius: "50%",
-                              background: RED_COLOR,
-                              color: "#fff",
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "center",
-                              fontSize: "clamp(10px, 1vw, 12px)",
-                              fontWeight: "700",
-                              border: "2px solid #fff",
-                              boxShadow: "0 2px 6px rgba(0,0,0,0.18)",
-                              boxSizing: "border-box",
-                            }}
-                          >
-                            ✕
-                          </span>
-                        )}
-                      </button>
-                    );
-                  })}
+                  {/* Answer input — write the correct word */}
+                  <div className="lur-input-wrap">
+                    <input
+                      type="text"
+                      className={[
+                        "lur-input",
+                        wrong   ? "lur-input--wrong"  : "",
+                        showAns ? "lur-input--answer" : "",
+                      ].filter(Boolean).join(" ")}
+                      value={value}
+                      disabled={isLocked}
+                      onChange={(e) => handleChange(item.id, e.target.value)}
+                      style={{ borderBottomColor: uColor, color: tColor }}
+                      spellCheck={false}
+                      autoComplete="off"
+                    />
+                    {wrong && <div className="lur-badge">✕</div>}
+                  </div>
+
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
-        <div style={styles.buttonsWrap}>
+        {/* ── Buttons ── */}
+        <div className="lur-buttons">
           <Button
+            checkAnswers={handleCheck}
             handleShowAnswer={handleShowAnswer}
-            handleStartAgain={handleStartAgain}
-            checkAnswers={checkAnswers}
+            handleStartAgain={handleReset}
           />
         </div>
       </div>
     </div>
   );
-};
-
-export default WB_Unit7_Page27_Q1;
+}

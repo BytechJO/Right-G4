@@ -137,7 +137,7 @@ export default function WB_Unit1_Page4_Q1() {
       <style>{`
         /* ── Paragraph — full width ── */
         .www-paragraph {
-font-size: clamp(15px, 1.9vw, 18px);
+font-size: clamp(15px, 1.9vw, 16px);
           line-height: 1.5;
           color: ${PARAGRAPH_TEXT_COLOR};
           background: ${PARAGRAPH_BG_COLOR};
