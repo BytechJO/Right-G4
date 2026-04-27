@@ -1,466 +1,388 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import Button from "../Button";
 import ValidationAlert from "../../Popup/ValidationAlert";
 
-import img1 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U4 Folder/Page 23//Ex E 1.svg";
-import img2 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U4 Folder/Page 23//Ex E 2.svg";
-import img3 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U4 Folder/Page 23//Ex E 3.svg";
-import img4 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U4 Folder/Page 23//Ex E 4.svg";
+// ─────────────────────────────────────────────
+//  🖼️  IMAGES — 9 صور
+// ─────────────────────────────────────────────
+import img1 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U4 Folder/Page 23/Asset 1.svg"; // airplane bike car
+import img2 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U4 Folder/Page 23/Asset 2.svg"; // clown C D
+import img3 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U4 Folder/Page 23/Asset 3.svg"; // clown E F G
+import img4 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U4 Folder/Page 23/Asset 4.svg"; // bike airplane
+import img5 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U4 Folder/Page 23/Asset 5.svg"; // feathers backpack
+import img6 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U4 Folder/Page 23/Asset 6.svg"; // elephant horse mouse
+import img7 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U4 Folder/Page 23/Asset 7.svg"; // skateboard bike
+import img8 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U4 Folder/Page 23/Asset 8.svg"; // truck motorcycle skateboard
+import img9 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U4 Folder/Page 23/Asset 9.svg"; // John dad
 
-const MONTHS = [
-  "January",
-  "February",
-  "March",
-  "April",
-  "May",
-  "June",
-  "July",
-  "August",
-  "September",
-  "October",
-  "November",
-  "December",
-];
+// ─────────────────────────────────────────────
+//  🎨  COLORS
+// ─────────────────────────────────────────────
+const INPUT_UNDERLINE_DEFAULT = "#3f3f3f";
+const INPUT_UNDERLINE_WRONG   = "#ef4444";
+const INPUT_TEXT_COLOR        = "#2b2b2b";
+const INPUT_ANSWER_COLOR      = "#c81e1e";
+const NUMBER_COLOR            = "#2b2b2b";
+const SENTENCE_COLOR          = "#2b2b2b";
+const HINT_COLOR              = "#2b2b2b";
+const IMG_BORDER_COLOR        = "#2096a6";
+const WRONG_BADGE_BG          = "#ef4444";
+const WRONG_BADGE_TEXT        = "#ffffff";
 
+// ─────────────────────────────────────────────
+//  📝  EXERCISE DATA
+//  كل جملة: prefix + input + suffix + (hint)
+// ─────────────────────────────────────────────
 const ITEMS = [
   {
-    id: 1,
-    img: img1,
-    correct: "February",
-    fixed: true,
+    id:      1,
+    prefix:  "The airplane is the",
+    suffix:  "(fast).",
+    correct: ["fastest", "the fastest"],
+    answer:  "fastest",
   },
   {
-    id: 2,
-    img: img2,
-    correct: "July",
-    fixed: false,
+    id:      2,
+    prefix:  "Clown C is",
+    suffix:  "(tall) than clown D.",
+    correct: ["taller"],
+    answer:  "taller",
   },
   {
-    id: 3,
-    img: img3,
-    correct: "October",
-    fixed: false,
+    id:      3,
+    prefix:  "Clown E is the",
+    suffix:  "(short) clown of all.",
+    correct: ["shortest"],
+    answer:  "shortest",
   },
   {
-    id: 4,
-    img: img4,
-    correct: "May",
-    fixed: false,
+    id:      4,
+    prefix:  "A bike is",
+    suffix:  "(slow) than an airplane.",
+    correct: ["slower"],
+    answer:  "slower",
+  },
+  {
+    id:      5,
+    prefix:  "Feathers are",
+    suffix:  "(light) than a backpack.",
+    correct: ["lighter"],
+    answer:  "lighter",
+  },
+  {
+    id:      6,
+    prefix:  "The mouse is the",
+    suffix:  "(small) animal.",
+    correct: ["smallest"],
+    answer:  "smallest",
+  },
+  {
+    id:      7,
+    prefix:  "The skateboard is",
+    suffix:  "(slow) than the bike.",
+    correct: ["slower"],
+    answer:  "slower",
+  },
+  {
+    id:      8,
+    prefix:  "The motorcycle is the",
+    suffix:  "(fast) of all three.",
+    correct: ["fastest"],
+    answer:  "fastest",
+  },
+  {
+    id:      9,
+    prefix:  "John is",
+    suffix:  "(young) than his dad.",
+    correct: ["younger"],
+    answer:  "younger",
   },
 ];
 
-const styles = {
-  pageWrap: {
-    width: "100%",
-  },
+const IMAGES = [
+  { num: 1, src: img1 },
+  { num: 2, src: img2 },
+  { num: 3, src: img3 },
+  { num: 4, src: img4 },
+  { num: 5, src: img5 },
+  { num: 6, src: img6 },
+  { num: 7, src: img7 },
+  { num: 8, src: img8 },
+  { num: 9, src: img9 },
+];
 
-  grid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
-    gap: "clamp(26px, 5vw, 48px) clamp(24px, 6vw, 80px)",
-    alignItems: "start",
-    justifyItems: "center",
-    width: "100%",
-  },
+// ─────────────────────────────────────────────
+//  🔧  NORMALIZE
+// ─────────────────────────────────────────────
+const normalize = (str) =>
+  str.toLowerCase().replace(/[^a-z0-9\s]/g, "").replace(/\s+/g, " ").trim();
 
-  card: {
-    width: "100%",
-    maxWidth: "clamp(280px, 44vw, 420px)",
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "flex-start",
-    gap: "clamp(12px, 2vw, 18px)",
-    minWidth: 0,
-  },
+const isCorrect = (userVal, correctArr) =>
+  correctArr.some((c) => normalize(userVal) === normalize(c));
 
-  questionRow: {
-    display: "flex",
-    alignItems: "baseline",
-    gap: "clamp(8px, 1.6vw, 16px)",
-    flexWrap: "wrap",
-    width: "100%",
-  },
+// ─────────────────────────────────────────────
+//  COMPONENT
+// ─────────────────────────────────────────────
+export default function WB_ReadLookWrite_QE() {
+  const [answers,     setAnswers]     = useState({});
+  const [showResults, setShowResults] = useState(false);
+  const [showAns,     setShowAns]     = useState(false);
 
-  qNumber: {
-    fontSize: "clamp(20px, 2.4vw, 28px)",
-    fontWeight: "700",
-    color: "#222",
-    lineHeight: 1,
-    flexShrink: 0,
-  },
-
-  qText: {
-    fontSize: "clamp(20px, 2.8vw, 30px)",
-    color: "#222",
-    lineHeight: 1.2,
-    fontWeight: "400",
-    wordBreak: "break-word",
-  },
-
-  imageWrap: {
-    width: "100%",
-    display: "flex",
-    justifyContent: "center",
-  },
-
-  image: {
-    width: "clamp(150px, 28vw, 220px)",
-    height: "clamp(150px, 28vw, 220px)",
-    objectFit: "contain",
-    display: "block",
-    maxWidth: "100%",
-  },
-
-  answerWrap: {
-    width: "100%",
-    display: "flex",
-    justifyContent: "center",
-    marginTop: "2px",
-  },
-
-  answerFieldOuter: {
-    position: "relative",
-    width: "100%",
-    maxWidth: "340px",
-    minHeight: "clamp(48px, 7vw, 60px)",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-
-  answerLine: {
-    position: "absolute",
-    left: 0,
-    right: 0,
-    bottom: "8px",
-    borderBottom: "3px solid #333",
-  },
-
-  answerInner: {
-    position: "relative",
-    zIndex: 1,
-    display: "inline-flex",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: "4px",
-    flexWrap: "wrap",
-    width: "100%",
-    textAlign: "center",
-  },
-
-  textStyle: {
-    fontSize: "clamp(20px, 3vw, 34px)",
-    color: "#222",
-    fontWeight: "400",
-    lineHeight: 1.1,
-    display: "flex",
-    alignItems: "center",
-    margin: 0,
-    padding: 0,
-  },
-
-  selectWrap: {
-    position: "relative",
-    display: "inline-flex",
-    alignItems: "center",
-    justifyContent: "center",
-    minWidth: "clamp(140px, 22vw, 190px)",
-    width: "fit-content",
-    maxWidth: "100%",
-    height: "clamp(34px, 6vw, 40px)",
-  },
-
-  select: {
-    width: "100%",
-    minWidth: "clamp(140px, 22vw, 190px)",
-    maxWidth: "100%",
-    height: "clamp(34px, 6vw, 40px)",
-    border: "none",
-    outline: "none",
-    background: "transparent",
-    appearance: "none",
-    WebkitAppearance: "none",
-    MozAppearance: "none",
-    textAlign: "center",
-    textAlignLast: "center",
-    fontSize: "clamp(20px, 3vw, 34px)",
-    lineHeight: 1.1,
-    color: "#222",
-    fontWeight: "400",
-    cursor: "pointer",
-    padding: "0 28px 0 8px",
-  },
-
-  selectArrow: {
-    position: "absolute",
-    right: "8px",
-    top: "50%",
-    transform: "translateY(-50%)",
-    fontSize: "14px",
-    color: "#666",
-    pointerEvents: "none",
-    lineHeight: 1,
-  },
-
-  wrongBadge: {
-    position: "absolute",
-    top: "-2px",
-    right: "-10px",
-    width: "22px",
-    height: "22px",
-    borderRadius: "50%",
-    background: "#ef4444",
-    color: "#fff",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    fontSize: "12px",
-    fontWeight: "700",
-    zIndex: 3,
-  },
-
-  buttonsWrap: {
-    display: "flex",
-    justifyContent: "center",
-    marginTop: "6px",
-  },
-};
-
-export default function WB_Months_Page230_QE() {
-  const [answers, setAnswers] = useState({});
-  const [checked, setChecked] = useState(false);
-  const [showAns, setShowAns] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
-
-  useEffect(() => {
-    const updateScreen = () => {
-      setIsMobile(window.innerWidth <= 768);
-    };
-
-    updateScreen();
-    window.addEventListener("resize", updateScreen);
-
-    return () => window.removeEventListener("resize", updateScreen);
-  }, []);
+  const isLocked = showResults || showAns;
 
   const handleChange = (id, value) => {
-    if (showAns) return;
-
-    setAnswers((prev) => ({
-      ...prev,
-      [id]: value,
-    }));
+    if (isLocked) return;
+    setAnswers((prev) => ({ ...prev, [id]: value }));
   };
 
   const handleCheck = () => {
-    if (showAns) return;
-
-    const allAnswered = ITEMS.filter((item) => !item.fixed).every(
-      (item) => answers[item.id]
-    );
-
-    if (!allAnswered) {
-      ValidationAlert.info("Please complete all answers first.");
-      return;
-    }
-
+    if (isLocked) return;
+    const allAnswered = ITEMS.every((item) => answers[item.id]?.trim());
+    if (!allAnswered) { ValidationAlert.info("Please complete all answers first."); return; }
     let score = 0;
-    const total = ITEMS.length;
-
-    ITEMS.forEach((item) => {
-      const userAnswer = item.fixed ? item.correct : answers[item.id];
-      if (userAnswer === item.correct) {
-        score++;
-      }
-    });
-
-    setChecked(true);
-
-    if (score === total) {
-      ValidationAlert.success(`Score: ${score} / ${total}`);
-    } else if (score > 0) {
-      ValidationAlert.warning(`Score: ${score} / ${total}`);
-    } else {
-      ValidationAlert.error(`Score: ${score} / ${total}`);
-    }
+    ITEMS.forEach((item) => { if (isCorrect(answers[item.id] || "", item.correct)) score++; });
+    setShowResults(true);
+    if (score === ITEMS.length)   ValidationAlert.success(`Score: ${score} / ${ITEMS.length}`);
+    else if (score > 0)           ValidationAlert.warning(`Score: ${score} / ${ITEMS.length}`);
+    else                          ValidationAlert.error(`Score: ${score} / ${ITEMS.length}`);
   };
 
   const handleShowAnswer = () => {
     const filled = {};
-
-    ITEMS.forEach((item) => {
-      if (!item.fixed) {
-        filled[item.id] = item.correct;
-      }
-    });
-
+    ITEMS.forEach((item) => { filled[item.id] = item.answer; });
     setAnswers(filled);
-    setChecked(true);
+    setShowResults(false);
     setShowAns(true);
   };
 
   const handleReset = () => {
     setAnswers({});
-    setChecked(false);
+    setShowResults(false);
     setShowAns(false);
   };
 
   const isWrong = (item) => {
-    if (!checked || item.fixed) return false;
-    return answers[item.id] !== item.correct;
-  };
-
-  const renderAnswerField = (item) => {
-    if (item.fixed) {
-      return (
-        <div style={styles.answerFieldOuter}>
-          <div style={styles.answerLine} />
-
-          <div
-            style={{
-              ...styles.answerInner,
-              background: "transparent",
-            }}
-          >
-            <span
-              style={{
-                ...styles.textStyle,
-                color: "#222",
-              }}
-            >
-              It’s
-            </span>
-
-            <span
-              style={{
-                ...styles.textStyle,
-                color: "#222",
-                padding: "0 4px",
-              }}
-            >
-              {item.correct}
-            </span>
-
-            <span
-              style={{
-                ...styles.textStyle,
-                color: "#222",
-              }}
-            >
-              .
-            </span>
-          </div>
-        </div>
-      );
-    }
-
-    return (
-      <div style={styles.answerFieldOuter}>
-        <div style={styles.answerLine} />
-
-        <div style={styles.answerInner}>
-          <span
-            style={{
-              ...styles.textStyle,
-              color: showAns || answers[item.id] ? "#000000" : "#222",
-            }}
-          >
-            It’s
-          </span>
-
-          <div style={styles.selectWrap}>
-            <select
-              value={answers[item.id] || ""}
-              disabled={showAns}
-              onChange={(e) => handleChange(item.id, e.target.value)}
-              style={{
-                ...styles.select,
-                color: showAns || answers[item.id] ? "#000000" : "#222",
-                cursor: showAns ? "default" : "pointer",
-              }}
-            >
-              <option value="" disabled>
-                —
-              </option>
-              {MONTHS.map((month) => (
-                <option key={month} value={month}>
-                  {month}
-                </option>
-              ))}
-            </select>
-
-            {!showAns && <span style={styles.selectArrow}>▼</span>}
-          </div>
-
-          <span
-            style={{
-              ...styles.textStyle,
-              color: showAns || answers[item.id] ? "#000000" : "#222",
-            }}
-          >
-            .
-          </span>
-        </div>
-
-        {isWrong(item) && <div style={styles.wrongBadge}>✕</div>}
-      </div>
-    );
+    if (!showResults || showAns) return false;
+    return !isCorrect(answers[item.id] || "", item.correct);
   };
 
   return (
     <div className="main-container-component">
+      <style>{`
+        /* ── Sentences list ── */
+        .rlw-list {
+          display: flex;
+          flex-direction: column;
+          gap: clamp(8px, 1.2vw, 16px);
+          width: 100%;
+        }
+
+        /* ── Single sentence row ── */
+        .rlw-row {
+          display: flex;
+          align-items: flex-end;
+          gap: clamp(4px, 0.6vw, 8px);
+          flex-wrap: nowrap;
+          min-width: 0;
+        }
+
+        .rlw-num {
+          font-size: clamp(13px, 1.5vw, 18px);
+          font-weight: 700;
+          color: ${NUMBER_COLOR};
+          flex-shrink: 0;
+          line-height: 1.5;
+          min-width: clamp(12px, 1.4vw, 18px);
+        }
+
+        .rlw-text {
+font-size: clamp(15px, 1.9vw, 22px);
+=          color: ${SENTENCE_COLOR};
+          white-space: nowrap;
+=          flex-shrink: 0;
+          line-height: 1.5;
+        }
+
+        /* Hint — (fast) etc */
+        .rlw-hint {
+font-size: clamp(15px, 1.9vw, 22px);
+          color: ${HINT_COLOR};
+          white-space: nowrap;
+          flex-shrink: 0;
+          line-height: 1.5;
+        }
+
+        /* Input wrap */
+        .rlw-input-wrap {
+          position: relative;
+          flex: 0 1 clamp(80px, 10vw, 140px);
+          min-width: clamp(60px, 8vw, 110px);
+        }
+
+        .rlw-input {
+          width: 100%;
+          background: transparent;
+          border: none;
+          border-bottom: 2px solid ${INPUT_UNDERLINE_DEFAULT};
+          outline: none;
+font-size: clamp(15px, 1.9vw, 22px);
+          color: ${INPUT_TEXT_COLOR};
+          line-height: 1;
+          box-sizing: border-box;
+          transition: border-color 0.2s;
+        }
+        .rlw-input:disabled    { opacity: 1; cursor: default; }
+        .rlw-input--wrong      { border-bottom-color: ${INPUT_UNDERLINE_WRONG}; }
+        .rlw-input--answer     { color: ${INPUT_ANSWER_COLOR}; }
+
+        /* ✕ badge */
+        .rlw-badge {
+          position: absolute;
+          top: -8px; right: 0;
+          width: clamp(15px, 1.7vw, 20px);
+          height: clamp(15px, 1.7vw, 20px);
+          border-radius: 50%;
+          background: ${WRONG_BADGE_BG};
+          color: ${WRONG_BADGE_TEXT};
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: clamp(8px, 0.9vw, 11px);
+          font-weight: 700;
+          border: 2px solid #fff;
+          box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+          pointer-events: none;
+          z-index: 2;
+        }
+
+        /* ── Images grid 3×3 ── */
+        .rlw-img-grid {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: clamp(8px, 1.2vw, 16px);
+          width: 100%;
+        }
+
+        .rlw-img-cell {
+          display: flex;
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 4px;
+        }
+
+        .rlw-img-num {
+          font-size: clamp(12px, 1.3vw, 16px);
+          font-weight: 700;
+          color: ${NUMBER_COLOR};
+          line-height:1;
+        }
+
+        .rlw-img-wrap {
+          overflow: hidden;
+          width: 100%;
+          background: #fff;
+        }
+
+        .rlw-img {
+          width: 100%;
+          height: clamp(80px, 11vw, 140px);
+          object-fit: contain;
+          display: block;
+          box-sizing: border-box;
+        }
+
+        /* Buttons */
+        .rlw-buttons {
+          display: flex;
+          justify-content: center;
+          margin-top: clamp(8px, 1.6vw, 18px);
+        }
+
+        @media (max-width: 560px) {
+          .rlw-row    { flex-wrap: wrap; }
+          .rlw-text   { white-space: normal; }
+          .rlw-img-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+      `}</style>
+
       <div
         className="div-forall"
         style={{
           display: "flex",
           flexDirection: "column",
-          gap: "28px",
+          gap: "clamp(14px, 2vw, 22px)",
           maxWidth: "1100px",
           margin: "0 auto",
         }}
       >
+        {/* ── Header ── */}
         <h1
           className="WB-header-title-page8"
-          style={{
-            margin: 0,
-          }}
+          style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
         >
           <span className="WB-ex-A">E</span>
           Read, look, and write.
         </h1>
 
-        <div style={styles.pageWrap}>
-          <div
-            style={{
-              ...styles.grid,
-              gridTemplateColumns: isMobile
-                ? "1fr"
-                : "repeat(2, minmax(0, 1fr))",
-            }}
-          >
-            {ITEMS.map((item) => (
-              <div key={item.id} style={styles.card}>
-                <div style={styles.questionRow}>
-                  <span style={styles.qNumber}>{item.id}</span>
+        {/* ── Sentences ── */}
+        <div className="rlw-list">
+          {ITEMS.map((item) => {
+            const wrong  = isWrong(item);
+            const value  = answers[item.id] || "";
+            const tColor = showAns ? INPUT_ANSWER_COLOR : INPUT_TEXT_COLOR;
+            const uColor = wrong ? INPUT_UNDERLINE_WRONG : INPUT_UNDERLINE_DEFAULT;
 
-                  <span style={styles.qText}>What month is it?</span>
-                </div>
+            // Split suffix into hint part "(fast)" and rest
+            const hintMatch = item.suffix.match(/^(\(.*?\))\s*(.*)$/);
+            const hintPart  = hintMatch ? hintMatch[1] : "";
+            const restPart  = hintMatch ? hintMatch[2] : item.suffix;
 
-                <div style={styles.imageWrap}>
-                  <img
-                    src={item.img}
-                    alt={`month-${item.id}`}
-                    style={styles.image}
+            return (
+              <div key={item.id} className="rlw-row">
+
+                <span className="rlw-num">{item.id}</span>
+                <span className="rlw-text">{item.prefix}</span>
+
+                <div className="rlw-input-wrap">
+                  <input
+                    type="text"
+                    className={[
+                      "rlw-input",
+                      wrong   ? "rlw-input--wrong"  : "",
+                      showAns ? "rlw-input--answer" : "",
+                    ].filter(Boolean).join(" ")}
+                    value={value}
+                    disabled={isLocked}
+                    onChange={(e) => handleChange(item.id, e.target.value)}
+                    style={{ borderBottomColor: uColor, color: tColor }}
+                    spellCheck={false}
+                    autoComplete="off"
                   />
+                  {wrong && <div className="rlw-badge">✕</div>}
                 </div>
 
-                <div style={styles.answerWrap}>{renderAnswerField(item)}</div>
+                {hintPart && <span className="rlw-hint">{hintPart}</span>}
+                {restPart && <span className="rlw-text">{restPart}</span>}
+
               </div>
-            ))}
-          </div>
+            );
+          })}
         </div>
 
-        <div style={styles.buttonsWrap}>
+        {/* ── Images 3×3 grid ── */}
+        <div className="rlw-img-grid">
+          {IMAGES.map((img) => (
+            <div key={img.num} className="rlw-img-cell">
+              <span className="rlw-img-num">{img.num}</span>
+              <div className="rlw-img-wrap">
+                <img src={img.src} alt={`scene-${img.num}`} className="rlw-img" />
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* ── Buttons ── */}
+        <div className="rlw-buttons">
           <Button
             checkAnswers={handleCheck}
             handleShowAnswer={handleShowAnswer}

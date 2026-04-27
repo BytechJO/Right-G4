@@ -1,312 +1,301 @@
-import React, { useMemo, useState } from "react";
+import React, { useState } from "react";
 import Button from "../Button";
 import ValidationAlert from "../../Popup/ValidationAlert";
 
-const MONTHS = [
-  { id: 1,  name: "March",     correct: 3  },
-  { id: 2,  name: "April",     correct: 4  },
-  { id: 3,  name: "August",    correct: 8  },
-  { id: 4,  name: "November",  correct: 11 },
-  { id: 5,  name: "January",   correct: 1  },
-  { id: 6,  name: "June",      correct: 6  },
-  { id: 7,  name: "July",      correct: 7  },
-  { id: 8,  name: "December",  correct: 12 },
-  { id: 9,  name: "February",  correct: 2  },
-  { id: 10, name: "May",       correct: 5  },
-  { id: 11, name: "September", correct: 9  },
-  { id: 12, name: "October",   correct: 10 },
+// ─────────────────────────────────────────────
+//  🎨  COLORS
+// ─────────────────────────────────────────────
+const TABLE_BORDER_COLOR      = "#2096a6";
+const HEADER_BG               = "#ffffff";
+const HEADER_TEXT_COLOR       = "#2b2b2b";
+const CELL_TEXT_COLOR         = "#2b2b2b";
+const INPUT_UNDERLINE_DEFAULT = "#3f3f3f";
+const INPUT_UNDERLINE_WRONG   = "#ef4444";
+const INPUT_TEXT_COLOR        = "#2b2b2b";
+const INPUT_ANSWER_COLOR      = "#c81e1e";
+const WRONG_BADGE_BG          = "#ef4444";
+const WRONG_BADGE_TEXT        = "#ffffff";
+
+// ─────────────────────────────────────────────
+//  📝  EXERCISE DATA
+// ─────────────────────────────────────────────
+const TABLE_ROWS = [
+  [
+    { type: "text",  value: "big" },
+    { type: "input", key: "1-comp", correct: ["bigger"],   answer: "bigger"   },
+    { type: "text",  value: "biggest" },
+  ],
+  [
+    { type: "input", key: "2-adj",  correct: ["small"],    answer: "small"    },
+    { type: "text",  value: "smaller" },
+    { type: "input", key: "2-sup",  correct: ["smallest"], answer: "smallest" },
+  ],
+  [
+    { type: "text",  value: "light" },
+    { type: "text",  value: "lighter" },
+    { type: "input", key: "3-sup",  correct: ["lightest"], answer: "lightest" },
+  ],
 ];
 
-const NUMBER_OPTIONS = Array.from({ length: 12 }, (_, i) => i + 1);
+const ALL_INPUTS = TABLE_ROWS.flatMap((row) =>
+  row.filter((cell) => cell.type === "input")
+);
 
-function MonthItem({ item, value, onChange, showAns, wrong }) {
-  const currentValue = showAns ? item.correct : value ?? "";
+// ─────────────────────────────────────────────
+//  🔧  NORMALIZE
+// ─────────────────────────────────────────────
+const normalize = (str) =>
+  str.toLowerCase().replace(/[^a-z0-9\s]/g, "").replace(/\s+/g, " ").trim();
 
-  return (
-    <div className="month-item">
-      <div className={`select-box ${wrong ? "select-box--wrong" : ""}`}>
-        <select
-          aria-label={`Select the order number for ${item.name}`}
-          value={currentValue}
-          disabled={showAns}
-          onChange={(e) => onChange(item.id, Number(e.target.value))}
-          className="month-select"
-        >
-          <option value="" disabled>-</option>
-          {NUMBER_OPTIONS.map((num) => (
-            <option key={num} value={num}>{num}</option>
-          ))}
-        </select>
-        {!showAns && <span className="select-arrow">▼</span>}
-      </div>
+const isCorrect = (userVal, correctArr) =>
+  correctArr.some((c) => normalize(userVal) === normalize(c));
 
-      <span className="month-name">{item.name}</span>
+// ─────────────────────────────────────────────
+//  COMPONENT
+// ─────────────────────────────────────────────
+export default function WB_ReadWriteTable_QH() {
+  const [answers,     setAnswers]     = useState({});
+  const [showResults, setShowResults] = useState(false);
+  const [showAns,     setShowAns]     = useState(false);
 
-      {wrong && !showAns && <span className="wrong-badge">✕</span>}
-    </div>
-  );
-}
+  const isLocked = showResults || showAns;
 
-export default function WB_UnitX_Page25_QI() {
-  const [answers, setAnswers] = useState({});
-  const [checked, setChecked] = useState(false);
-  const [showAns, setShowAns] = useState(false);
-
-  const allAnswered = useMemo(
-    () => MONTHS.every((item) => answers[item.id]),
-    [answers]
-  );
-
-  const score = useMemo(() => {
-    return MONTHS.reduce((total, item) => {
-      return total + (answers[item.id] === item.correct ? 1 : 0);
-    }, 0);
-  }, [answers]);
-
-  const handleChange = (id, value) => {
-    if (showAns) return;
-    setAnswers((prev) => ({ ...prev, [id]: value }));
+  const handleChange = (key, value) => {
+    if (isLocked) return;
+    setAnswers((prev) => ({ ...prev, [key]: value }));
   };
 
   const handleCheck = () => {
-    if (showAns) return;
-    if (!allAnswered) {
-      ValidationAlert.info("Please complete all answers first.");
-      return;
-    }
-    setChecked(true);
-    if (score === MONTHS.length)   ValidationAlert.success(`Score: ${score} / ${MONTHS.length}`);
-    else if (score > 0)            ValidationAlert.warning(`Score: ${score} / ${MONTHS.length}`);
-    else                           ValidationAlert.error(`Score: ${score} / ${MONTHS.length}`);
+    if (isLocked) return;
+    const allAnswered = ALL_INPUTS.every((inp) => answers[inp.key]?.trim());
+    if (!allAnswered) { ValidationAlert.info("Please complete all answers first."); return; }
+    let score = 0;
+    ALL_INPUTS.forEach((inp) => { if (isCorrect(answers[inp.key] || "", inp.correct)) score++; });
+    setShowResults(true);
+    if (score === ALL_INPUTS.length)   ValidationAlert.success(`Score: ${score} / ${ALL_INPUTS.length}`);
+    else if (score > 0)                ValidationAlert.warning(`Score: ${score} / ${ALL_INPUTS.length}`);
+    else                               ValidationAlert.error(`Score: ${score} / ${ALL_INPUTS.length}`);
   };
 
   const handleShowAnswer = () => {
-    const filledAnswers = MONTHS.reduce((acc, item) => {
-      acc[item.id] = item.correct;
-      return acc;
-    }, {});
-    setAnswers(filledAnswers);
-    setChecked(true);
+    const filled = {};
+    ALL_INPUTS.forEach((inp) => { filled[inp.key] = inp.answer; });
+    setAnswers(filled);
+    setShowResults(false);
     setShowAns(true);
   };
 
-  const handleStartAgain = () => {
+  const handleReset = () => {
     setAnswers({});
-    setChecked(false);
+    setShowResults(false);
     setShowAns(false);
   };
 
-  const isWrong = (item) => {
-    if (!checked || showAns) return false;
-    return answers[item.id] !== item.correct;
+  const isWrong = (key, correctArr) => {
+    if (!showResults || showAns) return false;
+    return !isCorrect(answers[key] || "", correctArr);
+  };
+
+  // ── render cell content (no <td> wrapper) ──
+  const renderCellContent = (cell, isLast) => {
+    const borderBottom = isLast ? "none" : `1.5px solid ${TABLE_BORDER_COLOR}`;
+
+    if (cell.type === "text") {
+      return (
+        <div
+          key={cell.value}
+          className="rwt-cell-item"
+          style={{ borderBottom }}
+        >
+          <span className="rwt-cell-text">{cell.value}</span>
+        </div>
+      );
+    }
+
+    const wrong  = isWrong(cell.key, cell.correct);
+    const value  = answers[cell.key] || "";
+    const tColor = showAns ? INPUT_ANSWER_COLOR : INPUT_TEXT_COLOR;
+    const uColor = wrong ? INPUT_UNDERLINE_WRONG : INPUT_UNDERLINE_DEFAULT;
+
+    return (
+      <div
+        key={cell.key}
+        className="rwt-cell-item"
+        style={{ borderBottom }}
+      >
+        <div className="rwt-input-wrap">
+          <input
+            type="text"
+            className={[
+              "rwt-input",
+              wrong   ? "rwt-input--wrong"  : "",
+              showAns ? "rwt-input--answer" : "",
+            ].filter(Boolean).join(" ")}
+            value={value}
+            disabled={isLocked}
+            onChange={(e) => handleChange(cell.key, e.target.value)}
+            style={{ borderBottomColor: uColor, color: tColor }}
+            spellCheck={false}
+            autoComplete="off"
+          />
+          {wrong && <div className="rwt-badge">✕</div>}
+        </div>
+      </div>
+    );
   };
 
   return (
-    <>
+    <div className="main-container-component">
       <style>{`
-        .months-card {
+        /* ── Table ── */
+        .rwt-table {
           width: 100%;
-          background: linear-gradient(180deg, #fcfcfc 0%, #f5f5f5 100%);
-          border: 2px solid #f39b42;
-          border-radius: 24px;
-          padding: 28px;
-          box-sizing: border-box;
-          box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+          border-collapse: collapse;
+          border: 2px solid ${TABLE_BORDER_COLOR};
+          border-radius: 5px;
         }
 
-        .months-grid {
-          display: grid;
-          grid-template-columns: repeat(4, minmax(0, 1fr));
-          gap: 24px 28px;
-          align-items: start;
-        }
-
-        .month-item {
-          position: relative;
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          min-width: 0;
-          min-height: 64px;
-        }
-
-        .select-box {
-          position: relative;
-          /* ✅ FIX: تصغير حجم الـ select box */
-          width: 58px;
-          min-width: 58px;
-          height: 52px;
-          border: 2px solid #f39b42;
-          border-radius: 14px;
-          background: #ffffff;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          overflow: hidden;
-          box-sizing: border-box;
-          flex-shrink: 0;
-          transition: all 0.2s ease;
-        }
-
-        .select-box:focus-within {
-          border-color: #f39b42;
-          box-shadow: 0 0 0 4px rgba(243,155,66,0.15);
-        }
-
-        .select-box--wrong {
-          border-color: #ef4444;
-          background: #fff7f7;
-        }
-
-        .month-select {
-          width: 100%;
-          height: 100%;
-          border: none;
-          outline: none;
-          background: transparent;
-          appearance: none;
-          -webkit-appearance: none;
-          -moz-appearance: none;
-          cursor: pointer;
+        /* Header row */
+        .rwt-th {
+          background: ${HEADER_BG};
+          border-right: 1.5px solid ${TABLE_BORDER_COLOR};
+          border-bottom: 2px solid ${TABLE_BORDER_COLOR};
+          padding: clamp(10px, 1.4vw, 18px) clamp(12px, 1.8vw, 24px);
+font-size: clamp(15px, 1.9vw, 22px);
+          color: ${HEADER_TEXT_COLOR};
           text-align: center;
-          text-align-last: center;
-          /* ✅ FIX: تصغير font size الـ select */
-          font-size: 20px;
-          font-weight: 700;
-          color: #000;
-          padding: 0 16px 0 8px;
+                    border-radius: 5px;
+
+        }
+        .rwt-th:last-child { border-right: none !important;
+         }
+
+        /* Single tall data cell per column */
+        .rwt-tall-cell {
+          vertical-align: top;
+          padding: 0;
+          width: 33.33%;
         }
 
-        .month-select:disabled {
-          cursor: default;
-          opacity: 1;
-        }
-
-        .select-arrow {
-          position: absolute;
-          right: 6px;
-          top: 50%;
-          transform: translateY(-50%);
-          font-size: 10px;
-          color: #666;
-          pointer-events: none;
-        }
-
-        /* ✅ FIX: تصغير font size اسم الشهر ليتناسب مع العرض */
-        .month-name {
-          font-size: 18px;
-          font-weight: 600;
-          color: #222;
-          line-height: 1.2;
-          word-break: keep-all;
-          white-space: nowrap;
-          overflow: hidden;
-          text-overflow: ellipsis;
-          min-width: 0;
-        }
-
-        .wrong-badge {
-          position: absolute;
-          top: 50%;
-          right: -8px;
-          transform: translateY(-50%);
-          width: 24px;
-          height: 24px;
-          border-radius: 999px;
+        /* Each sub-row inside tall cell */
+        .rwt-cell-item {
+        
           display: flex;
           align-items: center;
           justify-content: center;
-          background: #ef4444;
-          color: #fff;
-          font-size: 12px;
+          min-height: clamp(65px, 9vw, 110px);
+          padding: clamp(8px, 1.2vw, 16px) clamp(14px, 2vw, 26px);
+          border-bottom :  1.5px solid rgba(0, 226, 94, 0) !important ;
+
+        }
+
+        .rwt-cell-text {
+font-size: clamp(15px, 1.9vw, 22px);
+          color: ${CELL_TEXT_COLOR};
+        }
+
+        /* Input wrap */
+        .rwt-input-wrap {
+          position: relative;
+          display: flex;
+          justify-content: center;
+          width: 100%;
+        }
+
+        .rwt-input {
+          width: clamp(80px, 12vw, 160px);
+          background: transparent;
+          border: none;
+          border-bottom: 2px solid ${INPUT_UNDERLINE_DEFAULT};
+          outline: none;
+font-size: clamp(15px, 1.9vw, 22px);
+          color: ${INPUT_TEXT_COLOR};
+          text-align: center;
+          box-sizing: border-box;
+          transition: border-color 0.2s;
+        }
+        .rwt-input:disabled    { opacity: 1; cursor: default; }
+        .rwt-input--wrong      { border-bottom-color: ${INPUT_UNDERLINE_WRONG}; }
+        .rwt-input--answer     { color: ${INPUT_ANSWER_COLOR}; }
+
+        /* ✕ badge */
+        .rwt-badge {
+          position: absolute;
+          top: -8px; right: 0;
+          width: clamp(17px, 1.9vw, 22px);
+          height: clamp(17px, 1.9vw, 22px);
+          border-radius: 50%;
+          background: ${WRONG_BADGE_BG};
+          color: ${WRONG_BADGE_TEXT};
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: clamp(9px, 1vw, 12px);
           font-weight: 700;
           border: 2px solid #fff;
-          box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+          box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+          pointer-events: none;
           z-index: 2;
         }
 
-        .months-actions {
+        /* Buttons */
+        .rwt-buttons {
           display: flex;
           justify-content: center;
-          margin-top: 4px;
-        }
-
-        @media (max-width: 1100px) {
-          .months-grid {
-            grid-template-columns: repeat(3, minmax(0, 1fr));
-          }
-        }
-
-        @media (max-width: 780px) {
-          .months-card {
-            padding: 20px 16px;
-            border-radius: 20px;
-          }
-          .months-grid {
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 18px 16px;
-          }
-          .month-item {
-            gap: 10px;
-            min-height: 56px;
-          }
-          .select-box {
-            width: 52px;
-            min-width: 52px;
-            height: 46px;
-            border-radius: 12px;
-          }
-          .month-select { font-size: 18px; }
-          .month-name   { font-size: 16px; }
-          .wrong-badge  { right: -6px; width: 22px; height: 22px; }
-        }
-
-        @media (max-width: 520px) {
-          .months-grid { grid-template-columns: 1fr; }
-          .months-card { padding: 18px 14px; }
-          .month-item  { min-height: 54px; }
-          .month-name  { font-size: 18px; white-space: normal; }
-          .select-box  { width: 52px; min-width: 52px; height: 46px; }
-          .month-select{ font-size: 18px; }
+          margin-top: clamp(8px, 1.6vw, 18px);
         }
       `}</style>
 
-      <div className="main-container-component">
-        <div
-          className="div-forall"
-          style={{ display:"flex", flexDirection:"column", gap:"28px", maxWidth:"1100px", margin:"0 auto" }}
+      <div
+        className="div-forall"
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: "clamp(14px, 2vw, 22px)",
+          maxWidth: "1100px",
+          margin: "0 auto",
+        }}
+      >
+        {/* ── Header ── */}
+        <h1
+          className="WB-header-title-page8"
+          style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
         >
-          <h1
-            className="WB-header-title-page8"
-            style={{ margin:0, display:"flex", alignItems:"center", gap:"12px" }}
-          >
-            <span className="WB-ex-A">I</span> Number the months in order.
-          </h1>
+          <span className="WB-ex-A">H</span>
+          Read and write.
+        </h1>
 
-          <div className="months-card">
-            <div className="months-grid">
-              {MONTHS.map((item) => (
-                <MonthItem
-                  key={item.id}
-                  item={item}
-                  value={answers[item.id]}
-                  onChange={handleChange}
-                  showAns={showAns}
-                  wrong={isWrong(item)}
-                />
+        {/* ── Table ── */}
+        <table className="rwt-table">
+          <thead>
+            <tr>
+              <th className="rwt-th">Adjective</th>
+              <th className="rwt-th">Comparative (2)</th>
+              <th className="rwt-th">Superlative (3 or more)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              {[0, 1, 2].map((colIdx) => (
+                <td key={colIdx} className="rwt-tall-cell">
+                  {TABLE_ROWS.map((row, rowIdx) =>
+                    renderCellContent(row[colIdx], rowIdx === TABLE_ROWS.length - 1)
+                  )}
+                </td>
               ))}
-            </div>
-          </div>
+            </tr>
+          </tbody>
+        </table>
 
-          <div className="months-actions">
-            <Button
-              handleShowAnswer={handleShowAnswer}
-              handleStartAgain={handleStartAgain}
-              checkAnswers={handleCheck}
-            />
-          </div>
+        {/* ── Buttons ── */}
+        <div className="rwt-buttons">
+          <Button
+            checkAnswers={handleCheck}
+            handleShowAnswer={handleShowAnswer}
+            handleStartAgain={handleReset}
+          />
         </div>
       </div>
-    </>
+    </div>
   );
 }

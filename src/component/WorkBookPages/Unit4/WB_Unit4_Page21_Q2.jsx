@@ -1,674 +1,317 @@
-import { useState, useRef, useLayoutEffect } from "react";
-import ValidationAlert from "../../Popup/ValidationAlert";
+import React, { useState } from "react";
 import Button from "../Button";
+import ValidationAlert from "../../Popup/ValidationAlert";
 
-import topImg1 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U4 Folder/Page 21/Ex A 5.svg";
-import topImg2 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U4 Folder/Page 21/Ex A 6.svg";
-import topImg3 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U4 Folder/Page 21/Ex A 7.svg";
-import topImg4 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U4 Folder/Page 21/Ex A 8.svg";
+// ─────────────────────────────────────────────
+//  🖼️  IMAGE
+// ─────────────────────────────────────────────
+import rollerCoasterImg from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U4 Folder/Page 21/SVG/Asset 2.svg";
 
-import bottomImg1 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U4 Folder/Page 21/Ex B 1.svg";
-import bottomImg2 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U4 Folder/Page 21/Ex B 2.svg";
-import bottomImg3 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U4 Folder/Page 21/Ex B 3.svg";
-import bottomImg4 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U4 Folder/Page 21/Ex B 4.svg";
+// ─────────────────────────────────────────────
+//  🎨  COLORS
+// ─────────────────────────────────────────────
+const INPUT_UNDERLINE_DEFAULT = "#3f3f3f";
+const INPUT_UNDERLINE_WRONG   = "#ef4444";
+const INPUT_TEXT_COLOR        = "#2b2b2b";
+const INPUT_ANSWER_COLOR      = "#c81e1e";
+const NUMBER_COLOR            = "#2b2b2b";
+const SENTENCE_COLOR          = "#2b2b2b";
+const WORD_BANK_BORDER        = "#2096a6";
+const WORD_BANK_TEXT          = "#2b2b2b";
+const WRONG_BADGE_BG          = "#ef4444";
+const WRONG_BADGE_TEXT        = "#ffffff";
 
-const ACTIVE_COLOR = "#f39b42";
-const LINE_COLOR = "#f39b42";
-const INACTIVE_COLOR = "#a3a3a3";
-const WRONG_COLOR = "#ef4444";
+// ─────────────────────────────────────────────
+//  📝  EXERCISE DATA
+// ─────────────────────────────────────────────
+const WORD_BANK = [
+  "I forgot.",
+  "Hey! What are you doing?",
+  "It sure does!",
+];
 
-const EXERCISE_DATA = {
-  top: [
-    { id: 1, img: topImg1 }, // flower
-    { id: 2, img: topImg2 }, // leaf
-    { id: 3, img: topImg3 }, // umbrella
-    { id: 4, img: topImg4 }, // snowman
-  ],
-  middle: [
-    { id: 1, text: "summer" },
-    { id: 2, text: "winter" },
-    { id: 3, text: "spring" },
-    { id: 4, text: "autumn" },
-  ],
-  bottom: [
-    { id: 1, img: bottomImg1 }, // spring scene
-    { id: 2, img: bottomImg2 }, // summer scene
-    { id: 3, img: bottomImg3 }, // winter scene
-    { id: 4, img: bottomImg4 }, // autumn scene
-  ],
-
-  // top image -> season
-  correctTopMatches: {
-    1: 3, // flower -> spring
-    2: 4, // leaf -> autumn
-    3: 1, // umbrella -> summer
-    4: 2, // snowman -> winter
+const ITEMS = [
+  {
+    id:      1,
+    sentence: "Wow, that roller coaster goes fast.",
+    correct:  ["It sure does!", "It sure does"],
+    answer:   "It sure does!",
   },
-
-  // season -> bottom image
-  correctBottomMatches: {
-    1: 2, // summer -> summer picture
-    2: 3, // winter -> winter picture
-    3: 1, // spring -> spring picture
-    4: 4, // autumn -> autumn picture
+  {
+    id:      2,
+    sentence: "Why didn't you clean your room?",
+    correct:  ["I forgot.", "I forgot"],
+    answer:   "I forgot.",
   },
-};
+  {
+    id:      3,
+    sentence: "Hi, Tom and Harley.",
+    correct:  ["Hey! What are you doing?", "Hey What are you doing" ],
+    answer:   "Hey! What are you doing?",
+  },
+];
 
-const WB_UnitX_Page21_QB = () => {
-  const [selectedTop, setSelectedTop] = useState(null);
-  const [selectedMiddle, setSelectedMiddle] = useState(null);
+// ─────────────────────────────────────────────
+//  🔧  NORMALIZE
+// ─────────────────────────────────────────────
+const normalize = (str) =>
+  str.toLowerCase().replace(/[^a-z0-9\s]/g, "").replace(/\s+/g, " ").trim();
 
-  const [topMatches, setTopMatches] = useState({});
-  const [bottomMatches, setBottomMatches] = useState({});
+const isCorrect = (userVal, correctArr) =>
+  correctArr.some((c) => normalize(userVal) === normalize(c));
 
+// ─────────────────────────────────────────────
+//  COMPONENT
+// ─────────────────────────────────────────────
+export default function WB_ReadWrite_QB() {
+  const [answers,     setAnswers]     = useState({});
   const [showResults, setShowResults] = useState(false);
-  const [showAns, setShowAns] = useState(false);
+  const [showAns,     setShowAns]     = useState(false);
 
-  const [topLines, setTopLines] = useState([]);
-  const [bottomLines, setBottomLines] = useState([]);
+  const isLocked = showResults || showAns;
 
-  const containerRef = useRef(null);
-  const elementRefs = useRef({});
-
-  useLayoutEffect(() => {
-    const updateLines = () => {
-      if (!containerRef.current) return;
-
-      const containerRect = containerRef.current.getBoundingClientRect();
-
-      const newTopLines = Object.entries(topMatches)
-        .map(([topId, middleId]) => {
-          const topEl = elementRefs.current[`top-dot-${topId}`];
-          const middleEl = elementRefs.current[`middle-top-dot-${middleId}`];
-
-          if (!topEl || !middleEl) return null;
-
-          const topRect = topEl.getBoundingClientRect();
-          const middleRect = middleEl.getBoundingClientRect();
-
-          return {
-            id: `top-${topId}-${middleId}`,
-            x1: topRect.left + topRect.width / 2 - containerRect.left,
-            y1: topRect.top + topRect.height / 2 - containerRect.top,
-            x2: middleRect.left + middleRect.width / 2 - containerRect.left,
-            y2: middleRect.top + middleRect.height / 2 - containerRect.top,
-          };
-        })
-        .filter(Boolean);
-
-      const newBottomLines = Object.entries(bottomMatches)
-        .map(([middleId, bottomId]) => {
-          const middleEl = elementRefs.current[`middle-bottom-dot-${middleId}`];
-          const bottomEl = elementRefs.current[`bottom-dot-${bottomId}`];
-
-          if (!middleEl || !bottomEl) return null;
-
-          const middleRect = middleEl.getBoundingClientRect();
-          const bottomRect = bottomEl.getBoundingClientRect();
-
-          return {
-            id: `bottom-${middleId}-${bottomId}`,
-            x1: middleRect.left + middleRect.width / 2 - containerRect.left,
-            y1: middleRect.top + middleRect.height / 2 - containerRect.top,
-            x2: bottomRect.left + bottomRect.width / 2 - containerRect.left,
-            y2: bottomRect.top + bottomRect.height / 2 - containerRect.top,
-          };
-        })
-        .filter(Boolean);
-
-      setTopLines(newTopLines);
-      setBottomLines(newBottomLines);
-    };
-
-    updateLines();
-    window.addEventListener("resize", updateLines);
-    return () => window.removeEventListener("resize", updateLines);
-  }, [topMatches, bottomMatches]);
-
-  const handleTopClick = (id) => {
-    if (showAns) return;
-    setSelectedTop(id);
-    setSelectedMiddle(null);
-    setShowResults(false);
+  const handleChange = (id, value) => {
+    if (isLocked) return;
+    setAnswers((prev) => ({ ...prev, [id]: value }));
   };
 
-  const handleMiddleTopClick = (middleId) => {
-    if (showAns || selectedTop === null) return;
-
-    const newMatches = { ...topMatches };
-
-    Object.keys(newMatches).forEach((key) => {
-      if (newMatches[key] === middleId) {
-        delete newMatches[key];
-      }
-    });
-
-    newMatches[selectedTop] = middleId;
-
-    setTopMatches(newMatches);
-    setSelectedTop(null);
-    setShowResults(false);
-  };
-
-  const handleMiddleBottomClick = (middleId) => {
-    if (showAns) return;
-    setSelectedMiddle(middleId);
-    setSelectedTop(null);
-    setShowResults(false);
-  };
-
-  const handleBottomClick = (bottomId) => {
-    if (showAns || selectedMiddle === null) return;
-
-    const newMatches = { ...bottomMatches };
-
-    Object.keys(newMatches).forEach((key) => {
-      if (newMatches[key] === bottomId) {
-        delete newMatches[key];
-      }
-    });
-
-    newMatches[selectedMiddle] = bottomId;
-
-    setBottomMatches(newMatches);
-    setSelectedMiddle(null);
-    setShowResults(false);
-  };
-
-  const checkAnswers = () => {
-    if (showAns) return;
-
-    const allTopConnected = EXERCISE_DATA.top.every((item) => topMatches[item.id]);
-    const allBottomConnected = EXERCISE_DATA.middle.every(
-      (item) => bottomMatches[item.id]
-    );
-
-    if (!allTopConnected || !allBottomConnected) {
-      ValidationAlert.info("Please connect all items first.");
-      return;
-    }
-
-    setShowResults(true);
-
+  const handleCheck = () => {
+    if (isLocked) return;
+    const allAnswered = ITEMS.every((item) => answers[item.id]?.trim());
+    if (!allAnswered) { ValidationAlert.info("Please complete all answers first."); return; }
     let score = 0;
-    const total =
-      EXERCISE_DATA.top.length + EXERCISE_DATA.middle.length;
-
-    Object.keys(EXERCISE_DATA.correctTopMatches).forEach((topId) => {
-      if (topMatches[topId] === EXERCISE_DATA.correctTopMatches[topId]) {
-        score++;
-      }
-    });
-
-    Object.keys(EXERCISE_DATA.correctBottomMatches).forEach((middleId) => {
-      if (bottomMatches[middleId] === EXERCISE_DATA.correctBottomMatches[middleId]) {
-        score++;
-      }
-    });
-
-    if (score === total) {
-      ValidationAlert.success(`Score: ${score} / ${total}`);
-    } else if (score > 0) {
-      ValidationAlert.warning(`Score: ${score} / ${total}`);
-    } else {
-      ValidationAlert.error(`Score: ${score} / ${total}`);
-    }
+    ITEMS.forEach((item) => { if (isCorrect(answers[item.id] || "", item.correct)) score++; });
+    setShowResults(true);
+    if (score === ITEMS.length)   ValidationAlert.success(`Score: ${score} / ${ITEMS.length}`);
+    else if (score > 0)           ValidationAlert.warning(`Score: ${score} / ${ITEMS.length}`);
+    else                          ValidationAlert.error(`Score: ${score} / ${ITEMS.length}`);
   };
 
   const handleShowAnswer = () => {
-    setTopMatches(EXERCISE_DATA.correctTopMatches);
-    setBottomMatches(EXERCISE_DATA.correctBottomMatches);
-    setShowResults(true);
+    const filled = {};
+    ITEMS.forEach((item) => { filled[item.id] = item.answer; });
+    setAnswers(filled);
+    setShowResults(false);
     setShowAns(true);
-    setSelectedTop(null);
-    setSelectedMiddle(null);
   };
 
-  const handleStartAgain = () => {
-    setTopMatches({});
-    setBottomMatches({});
-    setSelectedTop(null);
-    setSelectedMiddle(null);
+  const handleReset = () => {
+    setAnswers({});
     setShowResults(false);
     setShowAns(false);
-    setTopLines([]);
-    setBottomLines([]);
   };
 
-  const getTopDotColor = (topId) => {
-    if (selectedTop === topId) return ACTIVE_COLOR;
-    if (topMatches[topId]) return ACTIVE_COLOR;
-    return INACTIVE_COLOR;
-  };
-
-  const getMiddleTopDotColor = (middleId) => {
-    const isConnected = Object.values(topMatches).includes(middleId);
-    const isSelected = selectedTop !== null && topMatches[selectedTop] === middleId;
-
-    if (isSelected) return ACTIVE_COLOR;
-    if (isConnected) return ACTIVE_COLOR;
-    return INACTIVE_COLOR;
-  };
-
-  const getMiddleBottomDotColor = (middleId) => {
-    const isConnected = !!bottomMatches[middleId];
-    if (selectedMiddle === middleId) return ACTIVE_COLOR;
-    if (isConnected) return ACTIVE_COLOR;
-    return INACTIVE_COLOR;
-  };
-
-  const getBottomDotColor = (bottomId) => {
-    const isConnected = Object.values(bottomMatches).includes(bottomId);
-    const isSelected =
-      selectedMiddle !== null && bottomMatches[selectedMiddle] === bottomId;
-
-    if (isSelected) return ACTIVE_COLOR;
-    if (isConnected) return ACTIVE_COLOR;
-    return INACTIVE_COLOR;
-  };
-
-  const isWrongTopMatch = (topId) => {
-    if (!showResults || !topMatches[topId]) return false;
-    return topMatches[topId] !== EXERCISE_DATA.correctTopMatches[topId];
-  };
-
-  const isWrongBottomMatch = (middleId) => {
-    if (!showResults || !bottomMatches[middleId]) return false;
-    return bottomMatches[middleId] !== EXERCISE_DATA.correctBottomMatches[middleId];
+  const isWrong = (item) => {
+    if (!showResults || showAns) return false;
+    return !isCorrect(answers[item.id] || "", item.correct);
   };
 
   return (
-   <div className="main-container-component">
+    <div className="main-container-component">
+      <style>{`
+        /* ── Word bank ── */
+        .rw-bank {
+          display: flex;
+          gap: clamp(8px, 1.2vw, 16px);
+          flex-wrap: wrap;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .rw-bank-word {
+          border: 2px solid ${WORD_BANK_BORDER};
+          border-radius: 15px;
+          padding: clamp(6px, 0.8vw, 10px) clamp(14px, 1.8vw, 22px);
+font-size: clamp(15px, 1.9vw, 22px);
+          color: ${WORD_BANK_TEXT};
+          background: #fff;
+          user-select: none;
+          white-space: nowrap;
+        }
+
+        /* ── Items list ── */
+        .rw-list {
+          display: flex;
+          flex-direction: column;
+          gap: clamp(10px, 1.6vw, 20px);
+          width: 100%;
+        }
+
+        /* ── Single row: num | sentence | input ── */
+        .rw-row {
+          display: flex;
+          align-items: flex-end;
+          gap: clamp(6px, 0.8vw, 10px);
+          flex-wrap: nowrap;
+          min-width: 0;
+        }
+
+        .rw-num {
+          font-size: clamp(15px, 1.8vw, 22px);
+          font-weight: 700;
+          color: ${NUMBER_COLOR};
+          flex-shrink: 0;
+          padding-bottom: 5px;
+          line-height: 1.5;
+        }
+
+        .rw-sentence {
+font-size: clamp(15px, 1.9vw, 22px);
+          color: ${SENTENCE_COLOR};
+          white-space: nowrap;
+          padding-bottom: 5px;
+          flex-shrink: 0;
+          line-height: 1.5;
+        }
+
+        /* Input wrap */
+        .rw-input-wrap {
+          position: relative;
+          flex: 1;
+          min-width: clamp(120px, 16vw, 240px);
+        }
+
+        .rw-input {
+          width: 100%;
+          background: transparent;
+          border: none;
+          border-bottom: 2px solid ${INPUT_UNDERLINE_DEFAULT};
+          outline: none;
+font-size: clamp(15px, 1.9vw, 22px);
+color: ${INPUT_TEXT_COLOR};
+line-height: 1.5;
+          box-sizing: border-box;
+          font-family: inherit
+          transition: border-color 0.2s;
+        }
+        .rw-input:disabled    { opacity: 1; cursor: default; }
+        .rw-input--wrong      { border-bottom-color: ${INPUT_UNDERLINE_WRONG}; }
+        .rw-input--answer     { color: ${INPUT_ANSWER_COLOR}; }
+
+        /* ✕ badge */
+        .rw-badge {
+          position: absolute;
+          top: -8px; right: 0;
+          width: clamp(17px, 1.9vw, 22px);
+          height: clamp(17px, 1.9vw, 22px);
+          border-radius: 50%;
+          background: ${WRONG_BADGE_BG};
+          color: ${WRONG_BADGE_TEXT};
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: clamp(9px, 1vw, 12px);
+          font-weight: 700;
+          border: 2px solid #fff;
+          box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+          pointer-events: none;
+          z-index: 2;
+        }
+
+        /* Image */
+        .rw-img-wrap {
+          display: flex;
+          justify-content: center;
+          margin-top: clamp(8px, 1.2vw, 16px);
+        }
+        .rw-img {
+          width: clamp(260px, 50vw, 520px);
+          height: auto;
+          display: block;
+          border-radius: 10px;
+          border: 2px solid #2096a6;
+        }
+
+        /* Buttons */
+        .rw-buttons {
+          display: flex;
+          justify-content: center;
+          margin-top: clamp(8px, 1.6vw, 18px);
+        }
+
+        @media (max-width: 560px) {
+          .rw-row { flex-wrap: wrap; }
+          .rw-sentence { white-space: normal; }
+        }
+      `}</style>
+
       <div
         className="div-forall"
-            style={{
+        style={{
           display: "flex",
           flexDirection: "column",
-          gap: "28px",
+          gap: "clamp(14px, 2vw, 22px)",
           maxWidth: "1100px",
           margin: "0 auto",
         }}
       >
-        <h1 className="WB-header-title-page8" style={{ margin: 0 }}>
-          <span className="WB-ex-A">B</span> Look, read, and match.
+        {/* ── Header ── */}
+        <h1
+          className="WB-header-title-page8"
+          style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
+        >
+          <span className="WB-ex-A">B</span>
+          Read and write.
         </h1>
 
-        <div
-          ref={containerRef}
-          style={{
-            position: "relative",
-            width: "100%",
-            minHeight: "560px",
-            display: "flex",
-            flexDirection: "column",
-            gap: "22px",
-          }}
-        >
-          <svg
-            style={{
-              position: "absolute",
-              inset: 0,
-              width: "100%",
-              height: "100%",
-              pointerEvents: "none",
-              overflow: "visible",
-              zIndex: 1,
-            }}
-          >
-            {topLines.map((line) => (
-              <line
-                key={line.id}
-                x1={line.x1}
-                y1={line.y1}
-                x2={line.x2}
-                y2={line.y2}
-                stroke={LINE_COLOR}
-                strokeWidth="4"
-                strokeLinecap="round"
-              />
-            ))}
-
-            {bottomLines.map((line) => (
-              <line
-                key={line.id}
-                x1={line.x1}
-                y1={line.y1}
-                x2={line.x2}
-                y2={line.y2}
-                stroke={LINE_COLOR}
-                strokeWidth="4"
-                strokeLinecap="round"
-              />
-            ))}
-          </svg>
-
-          {/* Top row */}
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(4, 1fr)",
-              gap: "26px",
-              alignItems: "start",
-              zIndex: 2,
-            }}
-          >
-            {EXERCISE_DATA.top.map((item) => {
-              const wrong = isWrongTopMatch(item.id);
-
-              return (
-                <div
-                  key={item.id}
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    gap: "10px",
-                    position: "relative",
-                  }}
-                >
-                  <div
-                    style={{
-                      display: "flex",
-                      width: "100%",
-                      justifyContent: "flex-start",
-                      paddingLeft: "6px",
-                      fontSize: "22px",
-                      fontWeight: "700",
-                      color: "#111",
-                    }}
-                  >
-                    {item.id}
-                  </div>
-
-                  <div
-                    onClick={() => handleTopClick(item.id)}
-                    style={{
-                      width: "110px",
-                      height: "110px",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      cursor: showAns ? "default" : "pointer",
-                      border:
-                        selectedTop === item.id
-                          ? `3px solid ${ACTIVE_COLOR}`
-                          : topMatches[item.id]
-                          ? `2px solid #f5d0a8`
-                          : "2px solid transparent",
-                      borderRadius: "14px",
-                      background:
-                        selectedTop === item.id
-                          ? "rgba(243,155,66,0.08)"
-                          : "transparent",
-                      transition: "0.2s ease",
-                    }}
-                  >
-                    <img
-                      src={item.img}
-                      alt={`top-${item.id}`}
-                      style={{
-                        maxWidth: "100%",
-                        maxHeight: "100%",
-                        objectFit: "contain",
-                        display: "block",
-                      }}
-                    />
-                  </div>
-
-                  <div
-                    ref={(el) => (elementRefs.current[`top-dot-${item.id}`] = el)}
-                    onClick={() => handleTopClick(item.id)}
-                    style={{
-                      width: "16px",
-                      height: "16px",
-                      borderRadius: "50%",
-                      backgroundColor: getTopDotColor(item.id),
-                      cursor: showAns ? "default" : "pointer",
-                    }}
-                  />
-
-                  {wrong && (
-                    <div
-                      style={{
-                        position: "absolute",
-                        right: "14px",
-                        top: "36px",
-                        width: "22px",
-                        height: "22px",
-                        borderRadius: "50%",
-                        backgroundColor: WRONG_COLOR,
-                        color: "#fff",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        fontSize: "12px",
-                        fontWeight: "700",
-                        border: "2px solid #fff",
-                        boxShadow: "0 2px 6px rgba(0,0,0,0.18)",
-                      }}
-                    >
-                      ✕
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-
-          {/* Middle row */}
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(4, 1fr)",
-              gap: "26px",
-              alignItems: "center",
-              zIndex: 2,
-              marginTop: "8px",
-            }}
-          >
-            {EXERCISE_DATA.middle.map((item) => {
-              const wrong = isWrongBottomMatch(item.id);
-              const topSelectedMatch =
-                selectedTop !== null && topMatches[selectedTop] === item.id;
-
-              return (
-                <div
-                  key={item.id}
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    gap: "8px",
-                    position: "relative",
-                  }}
-                >
-                  <div
-                    ref={(el) =>
-                      (elementRefs.current[`middle-top-dot-${item.id}`] = el)
-                    }
-                    onClick={() => handleMiddleTopClick(item.id)}
-                    style={{
-                      width: "16px",
-                      height: "16px",
-                      borderRadius: "50%",
-                      backgroundColor: getMiddleTopDotColor(item.id),
-                      cursor:
-                        showAns || selectedTop === null ? "default" : "pointer",
-                    }}
-                  />
-
-                  <div
-                    onClick={() => {
-                      if (selectedTop !== null) {
-                        handleMiddleTopClick(item.id);
-                      } else {
-                        handleMiddleBottomClick(item.id);
-                      }
-                    }}
-                    style={{
-                      minWidth: "130px",
-                      minHeight: "56px",
-                      padding: "0 18px",
-                      borderRadius: "16px",
-                      border:
-                        selectedMiddle === item.id || topSelectedMatch
-                          ? `3px solid ${ACTIVE_COLOR}`
-                          : bottomMatches[item.id] || Object.values(topMatches).includes(item.id)
-                          ? "2px solid #f39b42"
-                          : "2px solid #f39b42",
-                      background:
-                        selectedMiddle === item.id || topSelectedMatch
-                          ? "rgba(243,155,66,0.08)"
-                          : "#fff",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      fontSize: "24px",
-                      color: "#222",
-                      lineHeight: "1",
-                      cursor: showAns ? "default" : "pointer",
-                      boxSizing: "border-box",
-                    }}
-                  >
-                    {item.text}
-                  </div>
-
-                  <div
-                    ref={(el) =>
-                      (elementRefs.current[`middle-bottom-dot-${item.id}`] = el)
-                    }
-                    onClick={() => handleMiddleBottomClick(item.id)}
-                    style={{
-                      width: "16px",
-                      height: "16px",
-                      borderRadius: "50%",
-                      backgroundColor: getMiddleBottomDotColor(item.id),
-                      cursor: showAns ? "default" : "pointer",
-                    }}
-                  />
-
-                  {wrong && (
-                    <div
-                      style={{
-                        position: "absolute",
-                        right: "6px",
-                        bottom: "26px",
-                        width: "22px",
-                        height: "22px",
-                        borderRadius: "50%",
-                        backgroundColor: WRONG_COLOR,
-                        color: "#fff",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        fontSize: "12px",
-                        fontWeight: "700",
-                        border: "2px solid #fff",
-                        boxShadow: "0 2px 6px rgba(0,0,0,0.18)",
-                      }}
-                    >
-                      ✕
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-
-          {/* Bottom row */}
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(4, 1fr)",
-              gap: "26px",
-              alignItems: "start",
-              zIndex: 2,
-              marginTop: "4px",
-            }}
-          >
-            {EXERCISE_DATA.bottom.map((item) => {
-              const isSelected =
-                selectedMiddle !== null && bottomMatches[selectedMiddle] === item.id;
-              const isConnected = Object.values(bottomMatches).includes(item.id);
-
-              return (
-                <div
-                  key={item.id}
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    gap: "8px",
-                  }}
-                >
-                  <div
-                    ref={(el) => (elementRefs.current[`bottom-dot-${item.id}`] = el)}
-                    onClick={() => handleBottomClick(item.id)}
-                    style={{
-                      width: "16px",
-                      height: "16px",
-                      borderRadius: "50%",
-                      backgroundColor: getBottomDotColor(item.id),
-                      cursor:
-                        showAns || selectedMiddle === null ? "default" : "pointer",
-                    }}
-                  />
-
-                  <div
-                    onClick={() => handleBottomClick(item.id)}
-                    style={{
-                      width: "180px",
-                      height: "130px",
-                      borderRadius: "16px",
-                      overflow: "hidden",
-                      border: isSelected
-                        ? `3px solid ${ACTIVE_COLOR}`
-                        : isConnected
-                        ? "2px solid #f39b42"
-                        : "2px solid #f39b42",
-                      background:
-                        isSelected ? "rgba(243,155,66,0.08)" : "#fff",
-                      cursor:
-                        showAns || selectedMiddle === null ? "default" : "pointer",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      boxSizing: "border-box",
-                    }}
-                  >
-                    <img
-                      src={item.img}
-                      alt={`bottom-${item.id}`}
-                      style={{
-                        width: "100%",
-                        height: "100%",
-                        objectFit: "cover",
-                        display: "block",
-                      }}
-                    />
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+        {/* ── Word bank ── */}
+        <div className="rw-bank">
+          {WORD_BANK.map((w) => (
+            <div key={w} className="rw-bank-word">{w}</div>
+          ))}
         </div>
 
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            marginTop: "4px",
-          }}
-        >
+        {/* ── Items ── */}
+        <div className="rw-list">
+          {ITEMS.map((item) => {
+            const wrong  = isWrong(item);
+            const value  = answers[item.id] || "";
+            const tColor = showAns ? INPUT_ANSWER_COLOR : INPUT_TEXT_COLOR;
+            const uColor = wrong ? INPUT_UNDERLINE_WRONG : INPUT_UNDERLINE_DEFAULT;
+
+            return (
+              <div key={item.id} className="rw-row">
+
+                <span className="rw-num">{item.id}</span>
+                <span className="rw-sentence">{item.sentence}</span>
+
+                <div className="rw-input-wrap">
+                  <input
+                    type="text"
+                    className={[
+                      "rw-input",
+                      wrong   ? "rw-input--wrong"  : "",
+                      showAns ? "rw-input--answer" : "",
+                    ].filter(Boolean).join(" ")}
+                    value={value}
+                    disabled={isLocked}
+                    onChange={(e) => handleChange(item.id, e.target.value)}
+                    style={{ borderBottomColor: uColor, color: tColor }}
+                    spellCheck={false}
+                    autoComplete="off"
+                  />
+                  {wrong && <div className="rw-badge">✕</div>}
+                </div>
+
+              </div>
+            );
+          })}
+        </div>
+
+        {/* ── Image ── */}
+        <div className="rw-img-wrap">
+          <img src={rollerCoasterImg} alt="roller coaster" className="rw-img" />
+        </div>
+
+        {/* ── Buttons ── */}
+        <div className="rw-buttons">
           <Button
+            checkAnswers={handleCheck}
             handleShowAnswer={handleShowAnswer}
-            handleStartAgain={handleStartAgain}
-            checkAnswers={checkAnswers}
+            handleStartAgain={handleReset}
           />
         </div>
       </div>
     </div>
   );
-};
-
-export default WB_UnitX_Page21_QB;
+}

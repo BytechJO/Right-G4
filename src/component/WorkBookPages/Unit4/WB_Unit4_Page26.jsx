@@ -17,7 +17,7 @@ const WB_Unit4_Page26 = ({ openPopup }) => {
           width="22"
           height="22"
           viewBox="0 0 90 90"
-          onClick={() => openPopup("exercise", { startIndex: 49 })}
+          onClick={() => openPopup("exercise", { startIndex: 43 })}
           // className="click-icon-page8-1 hover:scale-110 transition"
           style={{ overflow: "visible" }}
         >
@@ -40,7 +40,7 @@ const WB_Unit4_Page26 = ({ openPopup }) => {
           width="22"
           height="22"
           viewBox="0 0 90 90"
-          onClick={() => openPopup("exercise", { startIndex: 50 })}
+          onClick={() => openPopup("exercise", { startIndex: 44 })}
           // className="click-icon-page8-1 hover:scale-110 transition"
           style={{ overflow: "visible" }}
         >
@@ -54,49 +54,7 @@ const WB_Unit4_Page26 = ({ openPopup }) => {
           />
         </svg>
       </div>
-     <div
-        className="q12-4 hover:scale-110 transition"
-        style={{ overflow: "visible" }}
-      >
-        <svg
-          width="22"
-          height="22"
-          viewBox="0 0 90 90"
-          onClick={() => openPopup("exercise", { startIndex: 51 })}
-          // className="click-icon-page8-1 hover:scale-110 transition"
-          style={{ overflow: "visible" }}
-        >
-          <image className="svg-img"
-            href={arrowBtn}
-            x="0"
-            y="0"
-            width="100%"
-            height="100%"
-            preserveAspectRatio="xMidYMid meet"
-          />
-        </svg>
-      </div> <div
-        className="q13-4 hover:scale-110 transition"
-        style={{ overflow: "visible" }}
-      >
-        <svg
-          width="22"
-          height="22"
-          viewBox="0 0 90 90"
-          onClick={() => openPopup("exercise", { startIndex: 52 })}
-          // className="click-icon-page8-1 hover:scale-110 transition"
-          style={{ overflow: "visible" }}
-        >
-          <image className="svg-img"
-            href={arrowBtn}
-            x="0"
-            y="0"
-            width="100%"
-            height="100%"
-            preserveAspectRatio="xMidYMid meet"
-          />
-        </svg>
-      </div>
+   
     </div>
   );
 };

@@ -2,354 +2,363 @@ import React, { useState } from "react";
 import Button from "../Button";
 import ValidationAlert from "../../Popup/ValidationAlert";
 
-import img1 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U4 Folder/Page 21/Ex A 1.svg";
-import img2 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U4 Folder/Page 21/Ex A 2.svg";
-import img3 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U4 Folder/Page 21/Ex A 3.svg";
-import img4 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U4 Folder/Page 21/Ex A 4.svg";
-import { object } from "framer-motion/client";
+// ─────────────────────────────────────────────
+//  🎨  COLORS
+// ─────────────────────────────────────────────
+const INPUT_UNDERLINE_DEFAULT = "#3f3f3f";
+const INPUT_UNDERLINE_WRONG   = "#ef4444";
+const INPUT_TEXT_COLOR        = "#2b2b2b";
+const INPUT_ANSWER_COLOR      = "#c81e1e";
+const NUMBER_COLOR            = "#2b2b2b";
+const SENTENCE_COLOR          = "#2b2b2b";
+const UNDERLINE_WORD_COLOR    = "#2b2b2b";
+const WORD_BANK_BORDER        = "#2096a6";
+const WORD_BANK_TEXT          = "#2b2b2b";
+const WRONG_BADGE_BG          = "#ef4444";
+const WRONG_BADGE_TEXT        = "#ffffff";
 
-const WORDS = ["hot", "cold", "rainy", "windy"];
+// ─────────────────────────────────────────────
+//  📝  EXERCISE DATA
+// ─────────────────────────────────────────────
 
-const ITEMS = [
-  { id: 1, img: img1, correct: "cold" },
-  { id: 2, img: img2, correct: "rainy" },
-  { id: 3, img: img3, correct: "hot" },
-  { id: 4, img: img4, correct: "windy" },
+// كلمات البنك — cousin مشطوبة (مثال)
+const WORD_BANK = [
+  { word: "picnic",   strikethrough: false },
+  { word: "glad",     strikethrough: false },
+  { word: "cousin",   strikethrough: false  }, // المثال
+  { word: "shorter",  strikethrough: false },
+  { word: "youngest", strikethrough: false },
+  { word: "leave",    strikethrough: false },
 ];
 
-const styles = {
-  page: {
-    width: "100%",
-    padding: "12px 20px 28px",
-    boxSizing: "border-box",
+// الجمل — كل جملة فيها:
+// sentence: النص الأصلي
+// underlinedWord: الكلمة المسطرة بالجملة
+// correct: مصفوفة إجابات مقبولة
+// answer: الإجابة الرسمية
+const ITEMS = [
+  {
+    id:      1,
+    sentence:      "He's my aunt's son. He's my",
+    underlinedWord: "shorter",
+    sentenceEnd:   ".",
+    correct: [
+      "He's my aunt's son. He's my cousin.",
+      "Hes my aunts son Hes my cousin",
+    ],
+    answer: "He's my aunt's son. He's my cousin.",
   },
-
-  container: {
-    maxWidth: "980px",
-    margin: "0 auto",
-    display: "flex",
-    flexDirection: "column",
-    gap: "26px",
+  {
+    id:      2,
+    sentence:      "The time was very late, so I wanted to",
+    underlinedWord: "picnic",
+    sentenceEnd:   ".",
+    correct: [
+      "The time was very late, so I wanted to leave.",
+      "The time was very late so I wanted to leave",
+    ],
+    answer: "The time was very late, so I wanted to leave.",
   },
-
-  title: {
-    margin: 0,
-    display: "flex",
-    alignItems: "center",
-    gap: "12px",
-    flexWrap: "wrap",
+  {
+    id:      3,
+    sentence:      "Hansel is",
+    underlinedWord: "taller",
+    sentenceEnd:   "than Tom.",
+    correct: [
+      "Hansel is shorter than Tom.",
+      "Hansel is shorter than Tom",
+    ],
+    answer: "Hansel is shorter than Tom.",
   },
-
-  wordBankWrap: {
-    display: "flex",
-    justifyContent: "center",
+  {
+    id:      4,
+    sentence:      "We made sandwiches for the",
+    underlinedWord: "baby",
+    sentenceEnd:   ".",
+    correct: [
+      "We made sandwiches for the picnic.",
+      "We made sandwiches for the picnic",
+    ],
+    answer: "We made sandwiches for the picnic.",
   },
-
-  wordBank: {
-    minWidth: "min(100%, 520px)",
-    maxWidth: "620px",
-    border: "2px solid #f39b42",
-    borderRadius: "18px",
-    padding: "14px 22px",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    gap: "34px",
-    background: "#fff",
-    flexWrap: "wrap",
-    boxSizing: "border-box",
+  {
+    id:      5,
+    sentence:      "I was",
+    underlinedWord: "angry",
+    sentenceEnd:   "when I caught my first fish.",
+    correct: [
+      "I was glad when I caught my first fish.",
+      "I was glad when I caught my first fish",
+    ],
+    answer: "I was glad when I caught my first fish.",
   },
-
-  word: {
-    fontSize: "22px",
-    color: "#222",
-    lineHeight: 1.1,
-    fontWeight: 500,
+  {
+    id:      6,
+    sentence:      "When I went fishing with my grandpa and my dad, I was the",
+    underlinedWord: "oldest",
+    sentenceEnd:   ".",
+    correct: [
+      "When I went fishing with my grandpa and my dad, I was the youngest.",
+      "When I went fishing with my grandpa and my dad I was the youngest",
+    ],
+    answer: "When I went fishing with my grandpa and my dad, I was the youngest.",
   },
+];
 
-grid: {
-  display: "grid",
-  gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
-  gap: "34px 42px",
-  alignItems: "start",
-},
+// ─────────────────────────────────────────────
+//  🔧  NORMALIZE
+// ─────────────────────────────────────────────
+const normalize = (str) =>
+  str.toLowerCase().replace(/[^a-z0-9\s]/g, "").replace(/\s+/g, " ").trim();
 
-  card: {
-    width: "100%",
-    display: "flex",
-    flexDirection: "column",
-    gap: "12px",
-  },
+const isCorrect = (userVal, correctArr) =>
+  correctArr.some((c) => normalize(userVal) === normalize(c));
 
-  mediaWrap: {
-    position: "relative",
-    width: "100%",
-  },
+// ─────────────────────────────────────────────
+//  COMPONENT
+// ─────────────────────────────────────────────
+export default function WB_ReadChangeRewrite_QA() {
+  const [answers,     setAnswers]     = useState({});
+  const [showResults, setShowResults] = useState(false);
+  const [showAns,     setShowAns]     = useState(false);
 
-  numberBadge: {
-    position: "absolute",
-    top: "-12px",
-    left: "-10px",
-    minWidth: "34px",
-    height: "34px",
-    borderRadius: "999px",
-    background: "#fff",
-    border: "2px solid #f39b42",
-    boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    fontSize: "22px",
-    fontWeight: 700,
-    color: "#222",
-    zIndex: 2,
-  },
-
-  imageBox: {
-    width: "100%",
-    height: "170px",
-    border: "2px solid #f39b42",
-    objectfit:"contain",
-    borderRadius: "18px",
-    overflow: "hidden",
-    background: "#fff",
-  },
-
-  image: {
-    width: "100%",
-    height: "100%",
-    objectFit: "cover",
-    display: "block",
-  },
-
-  answerWrap: {
-    position: "relative",
-    width: "100%",
-    paddingTop: "6px",
-  },
-
-  answerLine: {
-    width: "100%",
-    borderBottom: "3px solid #4a4a4a",
-    paddingBottom: "8px",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    minHeight: "68px",
-    boxSizing: "border-box",
-  },
-
-  selectBox: {
-    position: "relative",
-    width: "190px",
-    height: "48px",
-    borderRadius: "12px",
-    background: "#fff",
-    border: "1.5px solid #d4d4d4",
-    boxShadow: "0 1px 3px rgba(0,0,0,0.06)",
-    display: "flex",
-    alignItems: "center",
-  },
-
-  select: {
-    width: "100%",
-    height: "100%",
-    border: "none",
-    outline: "none",
-    background: "transparent",
-    appearance: "none",
-    WebkitAppearance: "none",
-    MozAppearance: "none",
-    padding: "0 40px 0 14px",
-    textAlign: "center",
-    textAlignLast: "center",
-    fontSize: "27px",
-    fontWeight: 600,
-    cursor: "pointer",
-    borderRadius: "12px",
-  },
-
-  arrow: {
-    position: "absolute",
-    right: "14px",
-    top: "50%",
-    transform: "translateY(-50%)",
-    fontSize: "14px",
-    color: "#666",
-    pointerEvents: "none",
-  },
-
-  wrongBadge: {
-    position: "absolute",
-    top: "-4px",
-    right: "-8px",
-    width: "24px",
-    height: "24px",
-    borderRadius: "999px",
-    background: "#ef4444",
-    color: "#fff",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    fontSize: "13px",
-    fontWeight: 700,
-    boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
-  },
-
-  buttonsWrap: {
-    display: "flex",
-    justifyContent: "center",
-    marginTop: "4px",
-  },
-};
-
-export default function WB_Weather_Page228_QA() {
-  const [answers, setAnswers] = useState({});
-  const [checked, setChecked] = useState(false);
-  const [showAns, setShowAns] = useState(false);
+  const isLocked = showResults || showAns;
 
   const handleChange = (id, value) => {
-    if (showAns) return;
-
-    setAnswers((prev) => ({
-      ...prev,
-      [id]: value,
-    }));
+    if (isLocked) return;
+    setAnswers((prev) => ({ ...prev, [id]: value }));
   };
 
   const handleCheck = () => {
-    if (showAns) return;
-
-    const allAnswered = ITEMS.every((item) => answers[item.id]);
-
-    if (!allAnswered) {
-      ValidationAlert.info("Please complete all answers first.");
-      return;
-    }
-
+    if (isLocked) return;
+    const allAnswered = ITEMS.every((item) => answers[item.id]?.trim());
+    if (!allAnswered) { ValidationAlert.info("Please complete all answers first."); return; }
     let score = 0;
-
-    ITEMS.forEach((item) => {
-      if (answers[item.id] === item.correct) {
-        score += 1;
-      }
-    });
-
-    setChecked(true);
-
-    if (score === ITEMS.length) {
-      ValidationAlert.success(`Score: ${score} / ${ITEMS.length}`);
-    } else if (score > 0) {
-      ValidationAlert.warning(`Score: ${score} / ${ITEMS.length}`);
-    } else {
-      ValidationAlert.error(`Score: ${score} / ${ITEMS.length}`);
-    }
+    ITEMS.forEach((item) => { if (isCorrect(answers[item.id] || "", item.correct)) score++; });
+    setShowResults(true);
+    if (score === ITEMS.length)   ValidationAlert.success(`Score: ${score} / ${ITEMS.length}`);
+    else if (score > 0)           ValidationAlert.warning(`Score: ${score} / ${ITEMS.length}`);
+    else                          ValidationAlert.error(`Score: ${score} / ${ITEMS.length}`);
   };
 
   const handleShowAnswer = () => {
     const filled = {};
-
-    ITEMS.forEach((item) => {
-      filled[item.id] = item.correct;
-    });
-
+    ITEMS.forEach((item) => { filled[item.id] = item.answer; });
     setAnswers(filled);
-    setChecked(true);
+    setShowResults(false);
     setShowAns(true);
   };
 
   const handleReset = () => {
     setAnswers({});
-    setChecked(false);
+    setShowResults(false);
     setShowAns(false);
   };
 
   const isWrong = (item) => {
-    if (!checked || showAns) return false;
-    return answers[item.id] !== item.correct;
-  };
-
-  const getSelectColor = (item) => {
-    if (answers[item.id]) return "#000000ff";
-    return "#222";
+    if (!showResults || showAns) return false;
+    return !isCorrect(answers[item.id] || "", item.correct);
   };
 
   return (
     <div className="main-container-component">
+      <style>{`
+        /* ── Word bank ── */
+        .rcr-bank {
+          display: flex;
+          gap: clamp(8px, 1.2vw, 16px);
+          flex-wrap: wrap;
+          align-items: center;
+        }
+
+        .rcr-bank-word {
+          border: 2px solid ${WORD_BANK_BORDER};
+          border-radius: 15px;
+          padding: clamp(5px, 0.7vw, 9px) clamp(12px, 1.6vw, 20px);
+font-size: clamp(15px, 1.9vw, 22px);
+          color: ${WORD_BANK_TEXT};
+          background: #fff;
+          user-select: none;
+        }
+
+        /* مشطوبة — cousin مثال */
+        .rcr-bank-word--strike {
+          text-decoration: line-through;
+          color: #9e9e9e;
+          border-color: #9e9e9e;
+        }
+
+        /* ── Items list ── */
+        .rcr-list {
+          display: flex;
+          flex-direction: column;
+          gap: clamp(14px, 2.2vw, 28px);
+          width: 100%;
+        }
+
+        /* ── Single item ── */
+        .rcr-item {
+          display: flex;
+          flex-direction: column;
+          gap: clamp(6px, 1vw, 12px);
+        }
+
+        /* Original sentence row */
+        .rcr-orig-row {
+          display: flex;
+          align-items: baseline;
+          gap: clamp(6px, 0.8vw, 10px);
+          flex-wrap: wrap;
+        }
+
+        .rcr-num {
+          font-size: clamp(15px, 1.8vw, 22px);
+          font-weight: 700;
+          color: ${NUMBER_COLOR};
+          flex-shrink: 0;
+          line-height: 1;
+        }
+
+        .rcr-sentence-text {
+font-size: clamp(15px, 1.9vw, 22px);
+          color: ${SENTENCE_COLOR};
+          line-height: 1.5;
+        }
+
+        /* Underlined word in original sentence */
+        .rcr-underlined {
+          text-decoration: underline;
+          color: ${UNDERLINE_WORD_COLOR};
+        }
+
+        /* Answer input wrap */
+        .rcr-input-wrap {
+          position: relative;
+          padding-left: clamp(20px, 2.4vw, 30px); /* indent لمحاذاة الجملة */
+        }
+
+        .rcr-input {
+          width: 100%;
+          background: transparent;
+          border: none;
+          border-bottom: 2px solid ${INPUT_UNDERLINE_DEFAULT};
+          outline: none;
+font-size: clamp(15px, 1.9vw, 22px);
+          color: ${INPUT_TEXT_COLOR};
+          line-height: 1.5;
+          box-sizing: border-box;
+          transition: border-color 0.2s;
+        }
+        .rcr-input:disabled    { opacity: 1; cursor: default; }
+        .rcr-input--wrong      { border-bottom-color: ${INPUT_UNDERLINE_WRONG}; }
+        .rcr-input--answer     { color: ${INPUT_ANSWER_COLOR}; }
+
+        /* ✕ badge */
+        .rcr-badge {
+          position: absolute;
+          top: -8px; right: 0;
+          width: clamp(17px, 1.9vw, 22px);
+          height: clamp(17px, 1.9vw, 22px);
+          border-radius: 50%;
+          background: ${WRONG_BADGE_BG};
+          color: ${WRONG_BADGE_TEXT};
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: clamp(9px, 1vw, 12px);
+          font-weight: 700;
+          border: 2px solid #fff;
+          box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+          pointer-events: none;
+          z-index: 2;
+        }
+
+        /* Buttons */
+        .rcr-buttons {
+          display: flex;
+          justify-content: center;
+          margin-top: clamp(8px, 1.6vw, 18px);
+        }
+      `}</style>
+
       <div
         className="div-forall"
-            style={{
+        style={{
           display: "flex",
           flexDirection: "column",
-          gap: "28px",
+          gap: "clamp(14px, 2vw, 22px)",
           maxWidth: "1100px",
           margin: "0 auto",
         }}
       >
-        <h1 className="WB-header-title-page8" style={styles.title}>
+        {/* ── Header ── */}
+        <h1
+          className="WB-header-title-page8"
+          style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
+        >
           <span className="WB-ex-A">A</span>
-          Look, read, and write.
+          Read, change, and rewrite.
         </h1>
 
-        <div style={styles.wordBankWrap}>
-          <div style={styles.wordBank}>
-            {WORDS.map((word) => (
-              <span key={word} style={styles.word}>
-                {word}
-              </span>
-            ))}
-          </div>
-        </div>
-
-        <div style={styles.grid}>
-          {ITEMS.map((item) => (
-            <div key={item.id} style={styles.card}>
-              <div style={styles.mediaWrap}>
-                <div style={styles.numberBadge}>{item.id}</div>
-
-                <div style={styles.imageBox}>
-                  <img
-                    src={item.img}
-                    alt={`weather-${item.id}`}
-                    style={styles.image}
-                  />
-                </div>
-              </div>
-
-              <div style={styles.answerWrap}>
-                <div style={styles.answerLine}>
-                  <div style={styles.selectBox}>
-                    <select
-                      value={answers[item.id] || ""}
-                      disabled={showAns}
-                      onChange={(e) => handleChange(item.id, e.target.value)}
-                      style={{
-                        ...styles.select,
-                        color: getSelectColor(item),
-                        cursor: showAns ? "default" : "pointer",
-                      }}
-                    >
-                      <option value="" disabled hidden>
-                        —
-                      </option>
-                      {WORDS.map((word) => (
-                        <option key={word} value={word}>
-                          {word}
-                        </option>
-                      ))}
-                    </select>
-
-                    {!showAns && <span style={styles.arrow}>▼</span>}
-                  </div>
-                </div>
-
-                {isWrong(item) && <div style={styles.wrongBadge}>✕</div>}
-              </div>
+        {/* ── Word bank ── */}
+        <div className="rcr-bank">
+          {WORD_BANK.map((w) => (
+            <div
+              key={w.word}
+              className={`rcr-bank-word ${w.strikethrough ? "rcr-bank-word--strike" : ""}`}
+            >
+              {w.word}
             </div>
           ))}
         </div>
 
-        <div style={styles.buttonsWrap}>
+        {/* ── Items ── */}
+        <div className="rcr-list">
+          {ITEMS.map((item) => {
+            const wrong  = isWrong(item);
+            const value  = answers[item.id] || "";
+            const tColor = showAns ? INPUT_ANSWER_COLOR : INPUT_TEXT_COLOR;
+            const uColor = wrong ? INPUT_UNDERLINE_WRONG : INPUT_UNDERLINE_DEFAULT;
+
+            return (
+              <div key={item.id} className="rcr-item">
+
+                {/* Original sentence */}
+                <div className="rcr-orig-row">
+                  <span className="rcr-num">{item.id}</span>
+                  <span className="rcr-sentence-text">
+                    {item.sentence}{" "}
+                    <span className="rcr-underlined">{item.underlinedWord}</span>
+                    {item.sentenceEnd && <span>{" "}{item.sentenceEnd}</span>}
+                  </span>
+                </div>
+
+                {/* Rewrite input */}
+                <div className="rcr-input-wrap">
+                  <input
+                    type="text"
+                    className={[
+                      "rcr-input",
+                      wrong   ? "rcr-input--wrong"  : "",
+                      showAns ? "rcr-input--answer" : "",
+                    ].filter(Boolean).join(" ")}
+                    value={value}
+                    disabled={isLocked}
+                    onChange={(e) => handleChange(item.id, e.target.value)}
+                    style={{ borderBottomColor: uColor, color: tColor }}
+                    spellCheck={false}
+                    autoComplete="off"
+                  />
+                  {wrong && <div className="rcr-badge">✕</div>}
+                </div>
+
+              </div>
+            );
+          })}
+        </div>
+
+        {/* ── Buttons ── */}
+        <div className="rcr-buttons">
           <Button
             checkAnswers={handleCheck}
             handleShowAnswer={handleShowAnswer}
