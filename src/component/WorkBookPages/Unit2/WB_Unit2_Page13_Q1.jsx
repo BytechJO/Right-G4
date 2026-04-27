@@ -147,7 +147,7 @@ export default function WB_LookReadWrite_1() {
   const [showResults, setShowResults] = useState(false);
   const [showAns,     setShowAns]     = useState(false);
 
-  const isLocked = showResults || showAns;
+  const isLocked =showAns;
 
   // ── handlers ──────────────────────────────
   const handleChange = (key, value) => {

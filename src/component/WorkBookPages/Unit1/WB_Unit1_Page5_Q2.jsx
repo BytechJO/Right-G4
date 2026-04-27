@@ -55,7 +55,7 @@ export default function WB_ReadNumberMatch_QF() {
   const [showAns,     setShowAns]     = useState(false);
 
   // 🔒 بعد check أو show answer
-  const isLocked = showResults || showAns;
+  const isLocked =  showAns;
 
   // ── handlers ──────────────────────────────
   const handleChange = (id, value) => {

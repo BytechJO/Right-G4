@@ -40,7 +40,7 @@ export default function WB_ReadExerciseC_WriteCheckX_QD() {
   const [showAns,     setShowAns]     = useState(false);
 
   // 🔒 بعد check أو show answer
-  const isLocked = showResults || showAns;
+  const isLocked =  showAns;
 
   // ── handlers ──────────────────────────────
   // الطالب يختار check أو cross مباشرة

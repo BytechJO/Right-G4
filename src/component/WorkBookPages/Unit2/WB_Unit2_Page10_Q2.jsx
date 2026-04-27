@@ -60,6 +60,7 @@ const ROWS = [
     correctSentences: [
       "Dr. Stevens is going to see the patient.",
       "Dr. Stevens is going to see the patient",
+      "Dr Stevens is going to see the patient",
     ],
     answerSentence: "Dr. Stevens is going to see the patient.",
   },
@@ -82,7 +83,7 @@ export default function WB_ReadAndWrite_D() {
   const [showResults, setShowResults] = useState(false);
   const [showAns,     setShowAns]     = useState(false);
 
-  const isLocked = showResults || showAns;
+  const isLocked =  showAns;
 
   // ── handlers ──────────────────────────────
   const handleChange = (id, value) => {

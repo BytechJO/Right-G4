@@ -100,7 +100,7 @@ export default function WB_LookReadComplete_QE() {
   const [showResults, setShowResults] = useState(false);
   const [showAns,     setShowAns]     = useState(false);
 
-  const isLocked = showResults || showAns;
+  const isLocked = showAns;
 
   // ── handlers ──────────────────────────────
   const handleChange = (key, value) => {

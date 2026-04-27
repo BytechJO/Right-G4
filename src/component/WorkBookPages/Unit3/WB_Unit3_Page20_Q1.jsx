@@ -61,7 +61,7 @@ export default function WB_ReadWriteSentences_QL() {
   const [showResults, setShowResults] = useState(false);
   const [showAns,     setShowAns]     = useState(false);
 
-  const isLocked = showResults || showAns;
+  const isLocked =  showAns;
 
   const handleChange = (id, value) => {
     if (isLocked) return;

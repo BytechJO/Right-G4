@@ -73,7 +73,7 @@ export default function WB_Unscramble_H() {
   const [showResults, setShowResults] = useState(false);
   const [showAns,     setShowAns]     = useState(false);
 
-  const isLocked = showResults || showAns;
+  const isLocked =  showAns;
 
   // ── handlers ──────────────────────────────
   const handleChange = (id, value) => {

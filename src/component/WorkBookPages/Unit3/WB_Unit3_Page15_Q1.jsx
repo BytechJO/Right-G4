@@ -92,7 +92,7 @@ export default function WB_ReadLookCircleWrite_A() {
   const [showResults, setShowResults] = useState(false);
   const [showAns,     setShowAns]     = useState(false);
 
-  const isLocked = showResults || showAns;
+  const isLocked =  showAns;
 
   // ── handlers ──────────────────────────────
   const handleSelect = (id, option) => {

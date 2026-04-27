@@ -132,7 +132,7 @@ export default function WB_Crossword_QA() {
   const [showResults,  setShowResults]  = useState(false);
   const [showAns,      setShowAns]      = useState(false);
 
-  const isLocked = showResults || showAns;
+  const isLocked =  showAns;
 
   const activeWord      = WORDS.find((w) => w.id === activeWordId) || null;
   const activeWordCells = activeWord ? new Set(getWordCells(activeWord)) : new Set();

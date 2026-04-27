@@ -40,7 +40,7 @@ export default function WB_LookReadWriteCheckX_C() {
   const [showResults, setShowResults] = useState(false);
   const [showAns,     setShowAns]     = useState(false);
 
-  const isLocked = showResults || showAns;
+  const isLocked =  showAns;
 
   // ── handlers ──────────────────────────────
   const handleSelect = (id, value) => {

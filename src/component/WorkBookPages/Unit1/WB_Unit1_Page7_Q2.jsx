@@ -94,7 +94,7 @@ export default function WB_LookReadMatch_QJ() {
   const containerRef = useRef(null);
   const dotRefs      = useRef({});
 
-  const isLocked = showResults || showAns;
+  const isLocked =  showAns;
 
   // ── SVG lines ─────────────────────────────
   useLayoutEffect(() => {

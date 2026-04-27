@@ -67,7 +67,7 @@ export default function WB_PutWord_QB() {
   const [showResults, setShowResults] = useState(false);
   const [showAns,     setShowAns]     = useState(false);
 
-  const isLocked = showResults || showAns;
+  const isLocked =  showAns;
 
   // ── handlers ──────────────────────────────
   const handleWordChange = (rowId, value) => {

@@ -53,7 +53,7 @@ export default function WB_ReadChooseWrite_QB() {
   const [showResults, setShowResults] = useState(false);
   const [showAns,     setShowAns]     = useState(false);
 
-  const isLocked = showResults || showAns;
+  const isLocked =  showAns;
 
   const handleChange = (key, value) => {
     if (isLocked) return;

@@ -63,7 +63,7 @@ export default function WB_Unit1_Page3_Q1() {
   const [showAns,     setShowAns]     = useState(false);
 
   // 🔒 بعد check أو show answer الـ inputs تنلوك
-  const isLocked = showResults || showAns;
+  const isLocked =  showAns;
 
   // ── handlers ──────────────────────────────
   const handleChange = (id, value) => {

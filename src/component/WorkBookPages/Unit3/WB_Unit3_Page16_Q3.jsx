@@ -52,7 +52,7 @@ export default function WB_ReadLookMatch_D() {
   const containerRef = useRef(null);
   const dotRefs      = useRef({});
 
-  const isLocked = showResults || showAns;
+  const isLocked = showAns;
 
   // ── SVG lines ─────────────────────────────
   useLayoutEffect(() => {
