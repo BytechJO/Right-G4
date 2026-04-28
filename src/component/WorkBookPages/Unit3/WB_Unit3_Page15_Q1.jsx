@@ -6,7 +6,7 @@ import img1 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U3 Fo
 import img2 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U3 Folder/Page 15/SVG/Asset 8.svg";
 import img3 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U3 Folder/Page 15/SVG/Asset 9.svg";
 import img4 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U3 Folder/Page 15/SVG/Asset 10.svg";
-import img5 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U3 Folder/Page 15/SVG/Asset 11.svg";
+import img5 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U3 Folder/Page 15/SVG/Asset 34.svg";
 import img6 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U3 Folder/Page 15/SVG/Asset 12.svg";
 
 // ─────────────────────────────────────────────

@@ -3,7 +3,7 @@ import Button from "../Button";
 import ValidationAlert from "../../Popup/ValidationAlert";
 
 import img1 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U3 Folder/Page 16/SVG/Asset 19.svg";
-import img2 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U3 Folder/Page 16/SVG/Asset 20.svg";
+import img2 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U3 Folder/Page 16/SVG/Asset 39.svg";
 import img3 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U3 Folder/Page 16/SVG/Asset 21.svg";
 import img4 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U3 Folder/Page 16/SVG/Asset 22.svg";
 // ─────────────────────────────────────────────

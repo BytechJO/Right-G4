@@ -256,10 +256,11 @@ export default function WB_ReadDraw_QI() {
 
         /* ── Table ── */
         .rad-table {
-          width: 100%;
-          border-collapse: collapse;
-          border: 2px solid ${TABLE_BORDER_COLOR};
-          border-radius: 15px;
+ 
+              width: 100%;
+    border-collapse: inherit;
+    border: 2px solid #2096a6;
+    border-radius: 8px;
         }
         .rad-th {
           border-right: 1.5px solid ${TABLE_BORDER_COLOR};

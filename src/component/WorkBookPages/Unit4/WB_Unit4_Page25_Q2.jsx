@@ -149,10 +149,10 @@ export default function WB_ReadWriteTable_QH() {
       <style>{`
         /* ── Table ── */
         .rwt-table {
-          width: 100%;
-          border-collapse: collapse;
-          border: 2px solid ${TABLE_BORDER_COLOR};
-          border-radius: 5px;
+           width: 100%;
+    border-collapse: inherit;
+    border: 2px solid #2096a6;
+    border-radius: 8px;
         }
 
         /* Header row */
