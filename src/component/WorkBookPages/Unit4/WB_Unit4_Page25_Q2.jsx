@@ -161,7 +161,7 @@ export default function WB_ReadWriteTable_QH() {
           border-right: 1.5px solid ${TABLE_BORDER_COLOR};
           border-bottom: 2px solid ${TABLE_BORDER_COLOR};
           padding: clamp(10px, 1.4vw, 18px) clamp(12px, 1.8vw, 24px);
-font-size: clamp(15px, 1.9vw, 22px);
+font-size: clamp(15px, 1.9vw, 20px);
           color: ${HEADER_TEXT_COLOR};
           text-align: center;
                     border-radius: 5px;
@@ -190,7 +190,7 @@ font-size: clamp(15px, 1.9vw, 22px);
         }
 
         .rwt-cell-text {
-font-size: clamp(15px, 1.9vw, 22px);
+font-size: clamp(15px, 1.9vw, 20px);
           color: ${CELL_TEXT_COLOR};
         }
 
@@ -208,7 +208,7 @@ font-size: clamp(15px, 1.9vw, 22px);
           border: none;
           border-bottom: 2px solid ${INPUT_UNDERLINE_DEFAULT};
           outline: none;
-font-size: clamp(15px, 1.9vw, 22px);
+font-size: clamp(15px, 1.9vw, 20px);
           color: ${INPUT_TEXT_COLOR};
           text-align: center;
           box-sizing: border-box;

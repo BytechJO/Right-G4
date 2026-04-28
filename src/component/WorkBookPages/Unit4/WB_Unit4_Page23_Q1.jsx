@@ -196,7 +196,7 @@ export default function WB_ReadLookWrite_QE() {
         }
 
         .rlw-text {
-font-size: clamp(15px, 1.9vw, 22px);
+font-size: clamp(15px, 1.9vw, 20px);
 =          color: ${SENTENCE_COLOR};
           white-space: nowrap;
 =          flex-shrink: 0;
@@ -205,7 +205,7 @@ font-size: clamp(15px, 1.9vw, 22px);
 
         /* Hint — (fast) etc */
         .rlw-hint {
-font-size: clamp(15px, 1.9vw, 22px);
+font-size: clamp(15px, 1.9vw, 20px);
           color: ${HINT_COLOR};
           white-space: nowrap;
           flex-shrink: 0;
@@ -225,7 +225,7 @@ font-size: clamp(15px, 1.9vw, 22px);
           border: none;
           border-bottom: 2px solid ${INPUT_UNDERLINE_DEFAULT};
           outline: none;
-font-size: clamp(15px, 1.9vw, 22px);
+font-size: clamp(15px, 1.9vw, 20px);
           color: ${INPUT_TEXT_COLOR};
           line-height: 1;
           box-sizing: border-box;

@@ -175,7 +175,7 @@ export default function WB_ReadChangeRewrite_QA() {
           border: 2px solid ${WORD_BANK_BORDER};
           border-radius: 15px;
           padding: clamp(5px, 0.7vw, 9px) clamp(12px, 1.6vw, 20px);
-font-size: clamp(15px, 1.9vw, 22px);
+font-size: clamp(15px, 1.9vw, 20px);
           color: ${WORD_BANK_TEXT};
           background: #fff;
           user-select: none;
@@ -220,7 +220,7 @@ font-size: clamp(15px, 1.9vw, 22px);
         }
 
         .rcr-sentence-text {
-font-size: clamp(15px, 1.9vw, 22px);
+font-size: clamp(15px, 1.9vw, 20px);
           color: ${SENTENCE_COLOR};
           line-height: 1.5;
         }
@@ -243,7 +243,7 @@ font-size: clamp(15px, 1.9vw, 22px);
           border: none;
           border-bottom: 2px solid ${INPUT_UNDERLINE_DEFAULT};
           outline: none;
-font-size: clamp(15px, 1.9vw, 22px);
+font-size: clamp(15px, 1.9vw, 20px);
           color: ${INPUT_TEXT_COLOR};
           line-height: 1.5;
           box-sizing: border-box;

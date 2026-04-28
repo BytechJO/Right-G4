@@ -148,7 +148,7 @@ export default function WB_SolveWrite_QD() {
 }
 
 .sw-box-word {
-  font-size: clamp(15px, 1.9vw, 22px);
+font-size: clamp(15px, 1.9vw, 20px);
   color: ${BOX_TEXT_COLOR};
   line-height: 1.5;
   white-space: nowrap;
@@ -182,7 +182,7 @@ export default function WB_SolveWrite_QD() {
         }
 
         .sw-clue {
-font-size: clamp(15px, 1.9vw, 22px);
+font-size: clamp(15px, 1.9vw, 20px);
           color: ${CLUE_TEXT_COLOR};
           white-space: nowrap;
           flex-shrink: 0;
@@ -202,7 +202,7 @@ font-size: clamp(15px, 1.9vw, 22px);
           border: none;
           border-bottom: 2px solid ${INPUT_UNDERLINE_DEFAULT};
           outline: none;
-font-size: clamp(15px, 1.9vw, 22px);
+font-size: clamp(15px, 1.9vw, 20px);
           color: ${INPUT_TEXT_COLOR};
           line-height: 1.5;
           box-sizing: border-box;

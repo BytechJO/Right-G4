@@ -266,8 +266,7 @@ export default function WB_ReadDraw_QI() {
           border-right: 1.5px solid ${TABLE_BORDER_COLOR};
           border-bottom: 1.5px solid ${TABLE_BORDER_COLOR};
           padding: clamp(8px, 1.2vw, 16px);
-          font-size: clamp(14px, 1.7vw, 20px);
-          font-weight: 700;
+font-size: clamp(15px, 1.9vw, 20px);
           color: ${HEADER_TEXT_COLOR};
           text-align: center;
           background: #fff;
@@ -302,7 +301,7 @@ export default function WB_ReadDraw_QI() {
           flex-wrap: nowrap;
         }
         .rad-question-text {
-          font-size: clamp(14px, 1.7vw, 20px);
+font-size: clamp(15px, 1.9vw, 20px);
           color: ${TEXT_COLOR};
           white-space: nowrap;
           padding-bottom: 5px;
@@ -315,7 +314,7 @@ export default function WB_ReadDraw_QI() {
           border: none;
           border-bottom: 2px solid ${INPUT_UNDERLINE_DEFAULT};
           outline: none;
-          font-size: clamp(14px, 1.7vw, 20px);
+font-size: clamp(15px, 1.9vw, 20px);
           color: ${INPUT_TEXT_COLOR};
           padding: 4px 6px 5px;
           line-height: 1.5;

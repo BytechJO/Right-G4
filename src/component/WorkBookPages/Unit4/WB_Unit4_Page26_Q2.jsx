@@ -64,7 +64,6 @@ export default function WB_ReadWrite_QJ() {
 
         .rw2-question {
           font-size: clamp(14px, 1.7vw, 20px);
-          font-weight: 400;
           color: ${QUESTION_TEXT_COLOR};
           line-height: 1.5;
         }
@@ -76,8 +75,7 @@ export default function WB_ReadWrite_QJ() {
           border: none;
           border-bottom: 2px solid ${INPUT_UNDERLINE_DEFAULT};
           outline: none;
-          font-size: clamp(14px, 1.7vw, 20px);
-          font-weight: 400;
+font-size: clamp(15px, 1.9vw, 20px);
           color: ${INPUT_TEXT_COLOR};
           padding: 4px 6px 5px;
           line-height: 1.5;

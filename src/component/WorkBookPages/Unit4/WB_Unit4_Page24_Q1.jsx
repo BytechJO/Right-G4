@@ -66,7 +66,7 @@ export default function WB_LookWriteSentences_QF() {
           border: 2px solid ${PAIR_BORDER_COLOR};
           border-radius: 15px;
           padding: clamp(4px, 0.5vw, 7px) clamp(10px, 1.2vw, 16px);
-font-size: clamp(15px, 1.9vw, 22px);
+font-size: clamp(15px, 1.9vw, 20px);
 
           color: ${PAIR_TEXT_COLOR};
           white-space: nowrap;
@@ -103,7 +103,7 @@ font-size: clamp(15px, 1.9vw, 22px);
           border: none;
           border-bottom: 2px solid ${INPUT_UNDERLINE_DEFAULT};
           outline: none;
-font-size: clamp(15px, 1.9vw, 22px);
+font-size: clamp(15px, 1.9vw, 20px);
 
 color: ${INPUT_TEXT_COLOR};
 

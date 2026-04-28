@@ -122,7 +122,7 @@ export default function WB_ReadWrite_QB() {
           border: 2px solid ${WORD_BANK_BORDER};
           border-radius: 15px;
           padding: clamp(6px, 0.8vw, 10px) clamp(14px, 1.8vw, 22px);
-font-size: clamp(15px, 1.9vw, 22px);
+font-size: clamp(15px, 1.9vw, 20px);
           color: ${WORD_BANK_TEXT};
           background: #fff;
           user-select: none;
@@ -156,7 +156,7 @@ font-size: clamp(15px, 1.9vw, 22px);
         }
 
         .rw-sentence {
-font-size: clamp(15px, 1.9vw, 22px);
+font-size: clamp(15px, 1.9vw, 20px);
           color: ${SENTENCE_COLOR};
           white-space: nowrap;
           padding-bottom: 5px;
@@ -177,11 +177,10 @@ font-size: clamp(15px, 1.9vw, 22px);
           border: none;
           border-bottom: 2px solid ${INPUT_UNDERLINE_DEFAULT};
           outline: none;
-font-size: clamp(15px, 1.9vw, 22px);
+font-size: clamp(15px, 1.9vw, 20px);
 color: ${INPUT_TEXT_COLOR};
 line-height: 1.5;
           box-sizing: border-box;
-          font-family: inherit
           transition: border-color 0.2s;
         }
         .rw-input:disabled    { opacity: 1; cursor: default; }

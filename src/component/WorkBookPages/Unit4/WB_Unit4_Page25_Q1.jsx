@@ -192,7 +192,7 @@ export default function WB_ReadWriteSay_QG() {
         }
 
         .rws-sentence {
-font-size: clamp(15px, 1.9vw, 22px);
+font-size: clamp(15px, 1.9vw, 20px);
           color: ${SENTENCE_COLOR};
           line-height: 1.5;
         }
@@ -206,7 +206,7 @@ font-size: clamp(15px, 1.9vw, 22px);
         }
 
         .rws-label {
-font-size: clamp(15px, 1.9vw, 22px);
+font-size: clamp(15px, 1.9vw, 20px);
           color: ${LABEL_COLOR};
           flex-shrink: 0;
           min-width: clamp(14px, 1.6vw, 20px);
@@ -214,7 +214,7 @@ font-size: clamp(15px, 1.9vw, 22px);
 
         .rws-word {
 
-font-size: clamp(15px, 1.9vw, 22px);
+font-size: clamp(15px, 1.9vw, 20px);
 
 color: ${WORD_COLOR};
           flex: 1;
@@ -235,7 +235,7 @@ color: ${WORD_COLOR};
         }
 
         .rws-sub-label {
-font-size: clamp(15px, 1.9vw, 22px);
+font-size: clamp(15px, 1.9vw, 20px);
 
 color: ${LABEL_COLOR};
           flex-shrink: 0;
@@ -257,7 +257,7 @@ color: ${LABEL_COLOR};
           border: none;
           border-bottom: 2px solid ${INPUT_UNDERLINE_DEFAULT};
           outline: none;
-font-size: clamp(15px, 1.9vw, 22px);
+font-size: clamp(15px, 1.9vw, 20px);
           color: ${INPUT_TEXT_COLOR};
           line-height: 1.5;
           box-sizing: border-box;

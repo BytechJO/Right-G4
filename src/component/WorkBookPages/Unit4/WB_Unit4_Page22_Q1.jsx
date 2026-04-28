@@ -123,7 +123,7 @@ export default function WB_ReadWrite_QC() {
         }
 
         .rwc-box-phrase {
-font-size: clamp(15px, 1.9vw, 22px);
+font-size: clamp(15px, 1.9vw, 20px);
           color: ${BOX_TEXT_COLOR};
           line-height: 1.5;
         }
@@ -166,7 +166,7 @@ font-size: clamp(15px, 1.9vw, 22px);
           border: none;
           border-bottom: 2px solid ${INPUT_UNDERLINE_DEFAULT};
           outline: none;
-font-size: clamp(15px, 1.9vw, 22px);
+font-size: clamp(15px, 1.9vw, 20px);
           color: ${INPUT_TEXT_COLOR};
           line-height: 1;
           transition: border-color 0.2s;
