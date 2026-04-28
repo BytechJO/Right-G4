@@ -233,7 +233,7 @@ font-size: clamp(15px, 1.9vw, 22px);
         >
           <span className="WB-ex-A">D</span>
           Read and write sentences. Use{" "}
-          <span style={{ color: "#f89631", fontStyle: "italic", fontWeight: 400 }}>going to</span>.
+          <span style={{ color: "#f89631", fontStyle: "italic", fontWeight: 300 }}>going to</span>.
         </h1>
 
         {/* ── Rows ── */}

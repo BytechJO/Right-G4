@@ -190,7 +190,6 @@ export default function WB_LookReadWriteCheckX_C() {
         .lrwx-img-wrap {
           width: 100%;
           border-radius: 10px;
-          overflow: hidden;
         }
         .lrwx-img {
           width: 100%;
@@ -206,10 +205,10 @@ export default function WB_LookReadWriteCheckX_C() {
           flex-wrap: nowrap;
         }
         .lrwx-sentence {
-          font-size: clamp(13px, 1.6vw, 19px);
+          font-size: clamp(16px, 1.6vw, 19px);
           color: #2b2b2b;
-          flex: 1;
-          line-height: 1.4;
+          flex: 2;
+          line-height: 1.5;
         }
 
         /* Two boxes side by side */

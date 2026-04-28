@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import Button from "../Button";
 import ValidationAlert from "../../Popup/ValidationAlert";
-import img1 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U2 Folder/Page 11/SVG/1.png";
-import img2 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U2 Folder/Page 11/SVG/2.png";
-import img3 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U2 Folder/Page 11/SVG/3.png";
+import img1 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U2 Folder/Page 11/z/1.svg";
+import img2 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U2 Folder/Page 11/z/2.svg";
+import img3 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U2 Folder/Page 11/z/3.svg"
 // ─────────────────────────────────────────────
 //  🎨  COLORS
 // ─────────────────────────────────────────────
@@ -149,12 +149,11 @@ export default function WB_ReadLookWrite_E() {
           width: clamp(160px, 22vw, 260px);
           border-radius: 12px;
           overflow: hidden;
-          border: 2px solid #2096a6;
-          background: #f5f5f5;
+      background: #f5f5f5;
         }
         .rlw-img-wrap img {
-          width: 100%;
-          height: 100%;
+          width: 110%;
+          height: 110%;
           object-fit: cover;
           display: block;
         }

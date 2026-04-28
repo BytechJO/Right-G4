@@ -259,7 +259,6 @@ img {
   font-family: "Gill Sans MT", "Gill Sans", Calibri, "Trebuchet MS", sans-serif;
   color: #2096a6;
   font-weight: 700;
-  display: flex;
   align-items: center;
   gap: 5px;
   white-space: nowrap;
@@ -273,6 +272,8 @@ img {
   padding: 0px 10px;
   border-radius: 6px;
   font-weight: bold;
+    white-space: nowrap;
+
 }
 .exercise-container {
   display: flex;

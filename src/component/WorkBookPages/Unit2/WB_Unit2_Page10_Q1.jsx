@@ -21,20 +21,32 @@ const WRONG_BADGE_TEXT        = "#ffffff";
 const WORD_BANK = ["kangaroos", "summer", "picture", "believe", "I know", "How about you?", "week", "visit"];
 
 // ─────────────────────────────────────────────
+//  ✅  ANSWERS
+// ─────────────────────────────────────────────
+const ANSWERS = {
+  1: "picture",
+  2: "visit",
+  3: "week",
+  4: "believe",
+  5: "kangaroos",
+  6: "I know",
+  7: "How about you?",
+  8: "summer",
+};
+
+// ─────────────────────────────────────────────
 //  📝  DIALOGUE DATA
-//  Each blank is represented as { id, answer, width }
-//  Text parts are plain strings
 // ─────────────────────────────────────────────
 const DIALOGUE = [
   {
     speaker: "Harley",
     parts: [
       "Stella, look at this ",
-      { id: 1, answer: "picture", width: 90 },
+      { id: 1, answer: ANSWERS[1], width: 90 },
       " of me at the airport. I got to ",
-      { id: 2, answer: "visit", width: 80 },
+      { id: 2, answer: ANSWERS[2], width: 80 },
       " Australia last ",
-      { id: 3, answer: "week", width: 80 },
+      { id: 3, answer: ANSWERS[3], width: 80 },
       "! We just got back.",
     ],
   },
@@ -46,7 +58,7 @@ const DIALOGUE = [
     speaker: "Harley",
     parts: [
       "We wanted to see the country and the animals, so we went to many places. I can't ",
-      { id: 4, answer: "believe", width: 90 },
+      { id: 4, answer: ANSWERS[4], width: 90 },
       " how many animals we saw!",
     ],
   },
@@ -58,14 +70,14 @@ const DIALOGUE = [
     speaker: "Harley",
     parts: [
       "No, because they don't have tigers there. But we saw some ",
-      { id: 5, answer: "kangaroos", width: 110 },
+      { id: 5, answer: ANSWERS[5], width: 110 },
       ". They can hop very fast!",
     ],
   },
   {
     speaker: "Stella",
     parts: [
-      { id: 6, answer: "I know", width: 90 },
+      { id: 6, answer: ANSWERS[6], width: 90 },
       ". I have seen them on nature programs.",
     ],
   },
@@ -73,7 +85,7 @@ const DIALOGUE = [
     speaker: "Harley",
     parts: [
       "Let me show you more pictures. I think Australia is so beautiful! ",
-      { id: 7, answer: "How about you?", width: 140 },
+      { id: 7, answer: ANSWERS[7], width: 140 },
       " Would you like to visit Australia?",
     ],
   },
@@ -81,7 +93,7 @@ const DIALOGUE = [
     speaker: "Stella",
     parts: [
       "Yes. I hope my family can go there next ",
-      { id: 8, answer: "summer", width: 90 },
+      { id: 8, answer: ANSWERS[8], width: 90 },
       "!",
     ],
   },
@@ -91,7 +103,7 @@ const DIALOGUE = [
 //  🔧  NORMALIZE
 // ─────────────────────────────────────────────
 const normalize = (str) =>
-  str.toLowerCase().replace(/[^a-z0-9\s?]/g, "").replace(/\s+/g, " ").trim();
+  str.toLowerCase().replace(/[^a-z0-9\s]/g, "").replace(/\s+/g, " ").trim();
 
 const isCorrect = (userVal, answer) =>
   normalize(userVal) === normalize(answer);
@@ -109,7 +121,7 @@ export default function WB_ReadAndWrite_C() {
   const [showResults, setShowResults] = useState(false);
   const [showAns,     setShowAns]     = useState(false);
 
-  const isLocked =  showAns;
+  const isLocked = showAns;
 
   // ── handlers ──────────────────────────────
   const handleChange = (id, value) => {
@@ -203,9 +215,8 @@ export default function WB_ReadAndWrite_C() {
           border: 2px solid ${WORD_BANK_BORDER};
           border-radius: 15px;
           padding: clamp(5px, 0.7vw, 9px) clamp(12px, 1.6vw, 20px);
-font-size: clamp(15px, 1.9vw, 22px);
-
-color: ${WORD_BANK_TEXT};
+          font-size: clamp(15px, 1.9vw, 22px);
+          color: ${WORD_BANK_TEXT};
           background: #fff;
           user-select: none;
         }

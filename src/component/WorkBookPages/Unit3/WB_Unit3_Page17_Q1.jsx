@@ -17,7 +17,7 @@ const WRONG_BADGE_TEXT        = "#ffffff";
 // ─────────────────────────────────────────────
 //  📝  EXERCISE DATA
 // ─────────────────────────────────────────────
-const PASSAGE = `Stacy and her sister had many things in their bedroom. Stacy had a scooter while her sister had a tricycle. The tricycle was red and had three wheels. Stacy won a large stuffed rabbit. It is on her window sill. Her sister had lots of small dolls on her bed. They had a large bookcase filled with books that they liked to read. Stacy's sister had some of the pictures that she drew up on the walls in their bedroom. Stacy had her backpack at the foot of her bed.`;
+const PASSAGE = "Stacy and her sister had many things in their bedroom. Stacy had a scooter while her sister had a tricycle. The tricycle was red and had three wheels. Stacy won a large stuffed rabbit. It is on her window sill. Her sister had lots of small dolls on her bed. They had a large bookcase filled with books that they liked to read. Stacy's sister had some of the pictures that she drew up on the walls in their bedroom. Stacy had her backpack at the foot of her bed.";
 
 const ROWS = [
   {
@@ -128,7 +128,7 @@ export default function WB_ReadAndWrite_E() {
         }
         .raw-passage {
           flex: 1 1 280px;
-font-size: clamp(15px, 1.9vw, 22px);
+font-size: clamp(18px, 1.9vw, 18px);
           color: #2b2b2b;
           line-height: 1.5;
           text-indent: clamp(16px, 2vw, 28px);
@@ -171,7 +171,7 @@ j        }
           flex-shrink: 0;
         }
         .raw-question {
-font-size: clamp(15px, 1.9vw, 22px);
+font-size: clamp(20px, 1.9vw, 20px);
           color: #2b2b2b;
           line-height: 1.5;
         }
@@ -184,7 +184,7 @@ font-size: clamp(15px, 1.9vw, 22px);
           padding-left: clamp(22px, 3vw, 36px);
         }
         .raw-prefix {
-font-size: clamp(15px, 1.9vw, 22px);
+font-size: clamp(20px, 1.9vw, 20px);
           color: #2b2b2b;
           white-space: nowrap;
           flex-shrink: 0;
@@ -201,7 +201,7 @@ font-size: clamp(15px, 1.9vw, 22px);
           border: none;
           border-bottom: 2px solid ${INPUT_UNDERLINE_DEFAULT};
           outline: none;
-font-size: clamp(15px, 1.9vw, 22px);
+font-size: clamp(20px, 1.9vw, 20px);
           font-family: inherit;
           color: ${INPUT_TEXT_COLOR};
           line-height: 1.5;

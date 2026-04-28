@@ -1,13 +1,8 @@
 import React, { useState, useRef, useLayoutEffect } from "react";
 import Button from "../Button";
 import ValidationAlert from "../../Popup/ValidationAlert";
-
-// ─── صورة الجدول الكاملة — غيّر المسار حسب مشروعك ───
 import tableImage from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U1 Folder/Page 7/Asset 9.svg";
 
-// ─────────────────────────────────────────────
-//  🎨  COLORS
-// ─────────────────────────────────────────────
 const LINE_COLOR       = "#2096a6";
 const WRONG_LINE_COLOR = "#ef4444";
 const SENTENCE_COLOR   = "#2b2b2b";
@@ -15,9 +10,6 @@ const NUMBER_COLOR     = "#2b2b2b";
 const WRONG_BADGE_BG   = "#ef4444";
 const WRONG_BADGE_TEXT = "#ffffff";
 
-// ─────────────────────────────────────────────
-//  📝  EXERCISE DATA
-// ─────────────────────────────────────────────
 const LEFT_ITEMS = [
   { id: 1, label: "Natalie will" },
   { id: 2, label: "Hansel will"  },
@@ -45,9 +37,6 @@ const CORRECT_MATCHES = {
   6: 2,
 };
 
-// ─────────────────────────────────────────────
-//  COMPONENT
-// ─────────────────────────────────────────────
 export default function WB_LookReadMatch_QJ() {
   const [selectedLeft, setSelectedLeft] = useState(null);
   const [matches,      setMatches]      = useState({});
@@ -148,77 +137,79 @@ export default function WB_LookReadMatch_QJ() {
   return (
     <div className="main-container-component">
       <style>{`
-        /* ── صورة الجدول: إزالة الـ whitespace الزائد ── */
         .lrm-table-img-wrapper {
           width: 100%;
           overflow: hidden;
-          /* يقلص المساحة الفارغة من فوق وتحت الـ SVG */
           margin-top: -2%;
           margin-bottom: -2%;
           line-height: 0;
         }
-
         .lrm-table-img {
           width: 100%;
           display: block;
-          /* هذا يقصّ الـ whitespace من فوق وتحت في حال كانت SVG فيها padding */
           object-position: center center;
-          /* حدد ارتفاع أقصى لتقليص الفراغ، عدّل القيمة حسب صورتك */
           max-height: clamp(450px, 28vw, 450px);
         }
 
-        /* ── Matching layout ── */
         .lrm-match {
           position: relative;
-          display: grid;
-          grid-template-columns: minmax(0,1fr) clamp(20px,2.5vw,28px) clamp(20px,2.5vw,28px) minmax(0,1fr);
-gap: 0 clamp(80px,12vw,180px);          width: 100%;
+          display: flex;
+          flex-direction: row;
+          width: 100%;
         }
 
-        .lrm-left-col, .lrm-right-col {
+        /* ── اليسار: يأخذ بقدر محتواه فقط ── */
+        .lrm-left-col {
           display: flex;
           flex-direction: column;
         }
 
-        /* ── زيادة المسافة بين الـ rows ── */
+        /* ── اليمين: يُدفع لأقصى اليمين ── */
+        .lrm-right-col {
+          display: flex;
+          flex-direction: column;
+          margin-left: auto;
+          min-width: 45%;
+        }
+
         .lrm-left-item {
           display: flex;
           align-items: center;
-          /* ← زيادة min-height لمسافة أكبر بين النقاط */
           min-height: clamp(52px, 7vw, 76px);
           cursor: pointer;
           user-select: none;
           border-radius: 8px;
-          padding: 4px 4px 4px 0;
+          padding: 4px 0;
           position: relative;
+          gap: clamp(6px, 1vw, 10px);
+          justify-content: space-between;
         }
         .lrm-left-item--selected {
           background: rgba(32,150,166,0.08);
           outline: 2px solid #2096a6;
+          border-radius: 8px;
         }
-        .lrm-left-item .lrm-num   { flex-shrink: 0; margin-right: clamp(6px,1vw,10px); }
-        .lrm-left-item .lrm-label { flex: 1 1 auto; }
 
         .lrm-right-item {
           display: flex;
           align-items: center;
-          /* ← نفس min-height محاذاةً مع اليسار */
           min-height: clamp(52px, 7vw, 76px);
           cursor: pointer;
           user-select: none;
           border-radius: 8px;
-          padding: 4px 0 4px 4px;
+          padding: 4px 0;
+          gap: clamp(6px, 1vw, 10px);
         }
         .lrm-right-item--connected {
           background: rgba(32,150,166,0.06);
         }
-        .lrm-right-item .lrm-label { flex: 1 1 auto; }
 
         .lrm-num {
           font-size: clamp(14px, 1.7vw, 20px);
           font-weight: 700;
           color: ${NUMBER_COLOR};
           min-width: clamp(14px, 1.8vw, 22px);
+          flex-shrink: 0;
         }
 
         .lrm-label {
@@ -239,28 +230,11 @@ gap: 0 clamp(80px,12vw,180px);          width: 100%;
           box-shadow: 0 0 0 4px rgba(32,150,166,0.2);
         }
 
-        .lrm-dot-col {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: flex-start;
-          z-index: 2;
-        }
-        /* ← dot row يتطابق مع min-height الـ items */
-        .lrm-dot-row {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          min-height: clamp(52px, 7vw, 76px);
-          width: 100%;
-          cursor: pointer;
-        }
-
         .lrm-badge {
           position: absolute;
           top: 50%;
           transform: translateY(-50%);
-          right: clamp(18px,2.5vw,28px);
+          right: clamp(18px, 2.5vw, 28px);
           width: clamp(16px, 1.8vw, 20px);
           height: clamp(16px, 1.8vw, 20px);
           border-radius: 50%;
@@ -281,13 +255,6 @@ gap: 0 clamp(80px,12vw,180px);          width: 100%;
           display: flex;
           justify-content: center;
           margin-top: clamp(8px, 1.6vw, 18px);
-        }
-
-        @media (max-width: 580px) {
-          .lrm-svg { display: none; }
-          .lrm-match {
-            grid-template-columns: minmax(0,1fr) 24px 24px minmax(0,1fr);
-          }
         }
       `}</style>
 
@@ -310,7 +277,7 @@ gap: 0 clamp(80px,12vw,180px);          width: 100%;
           Look, read, and match.
         </h1>
 
-        {/* ── صورة الجدول — مغلّفة بـ wrapper لقص الـ whitespace ── */}
+        {/* ── صورة الجدول ── */}
         <div className="lrm-table-img-wrapper">
           <img src={tableImage} alt="table" className="lrm-table-img" />
         </div>
@@ -320,7 +287,6 @@ gap: 0 clamp(80px,12vw,180px);          width: 100%;
 
           {/* SVG lines */}
           <svg
-            className="lrm-svg"
             style={{
               position: "absolute", inset: 0,
               width: "100%", height: "100%",
@@ -344,11 +310,12 @@ gap: 0 clamp(80px,12vw,180px);          width: 100%;
             })}
           </svg>
 
-          {/* col 1: نص يسار */}
+          {/* col 1: Left */}
           <div className="lrm-left-col">
             {LEFT_ITEMS.map((item) => {
-              const wrong    = isWrongLine(item.id);
-              const selected = isSelectedLeft(item.id);
+              const wrong     = isWrongLine(item.id);
+              const selected  = isSelectedLeft(item.id);
+              const connected = isDotConnectedLeft(item.id);
               return (
                 <div
                   key={item.id}
@@ -356,50 +323,22 @@ gap: 0 clamp(80px,12vw,180px);          width: 100%;
                   onClick={() => handleLeftClick(item.id)}
                   style={{ cursor: isLocked ? "default" : "pointer" }}
                 >
-                  <span className="lrm-num">{item.id}</span>
-                  <span className="lrm-label">{item.label}</span>
+                  <div style={{ display: "flex", alignItems: "center", gap: "clamp(6px,1vw,10px)" }}>
+                    <span className="lrm-num">{item.id}</span>
+                    <span className="lrm-label">{item.label}</span>
+                  </div>
                   {wrong && <div className="lrm-badge">✕</div>}
-                </div>
-              );
-            })}
-          </div>
-
-          {/* col 2: نقطة يسار */}
-          <div className="lrm-dot-col">
-            {LEFT_ITEMS.map((item) => {
-              const selected  = isSelectedLeft(item.id);
-              const connected = isDotConnectedLeft(item.id);
-              return (
-                <div key={item.id} className="lrm-dot-row">
                   <div
                     ref={(el) => (dotRefs.current[`left-${item.id}`] = el)}
                     className={`lrm-dot ${selected ? "lrm-dot--selected" : ""}`}
                     style={{ backgroundColor: dotColor(connected, selected) }}
-                    onClick={() => handleLeftClick(item.id)}
                   />
                 </div>
               );
             })}
           </div>
 
-          {/* col 3: نقطة يمين */}
-          <div className="lrm-dot-col">
-            {RIGHT_ITEMS.map((item) => {
-              const connected = isDotConnectedRight(item.id);
-              return (
-                <div key={item.id} className="lrm-dot-row">
-                  <div
-                    ref={(el) => (dotRefs.current[`right-${item.id}`] = el)}
-                    className="lrm-dot"
-                    style={{ backgroundColor: dotColor(connected, false) }}
-                    onClick={() => handleRightClick(item.id)}
-                  />
-                </div>
-              );
-            })}
-          </div>
-
-          {/* col 4: نص يمين */}
+          {/* col 2: Right — مدفوع لأقصى اليمين */}
           <div className="lrm-right-col">
             {RIGHT_ITEMS.map((item) => {
               const connected = isDotConnectedRight(item.id);
@@ -410,6 +349,11 @@ gap: 0 clamp(80px,12vw,180px);          width: 100%;
                   onClick={() => handleRightClick(item.id)}
                   style={{ cursor: isLocked || selectedLeft === null ? "default" : "pointer" }}
                 >
+                  <div
+                    ref={(el) => (dotRefs.current[`right-${item.id}`] = el)}
+                    className="lrm-dot"
+                    style={{ backgroundColor: dotColor(connected, false) }}
+                  />
                   <span className="lrm-label">{item.label}</span>
                 </div>
               );

@@ -32,12 +32,12 @@ const WRONG_BADGE_TEXT        = "#ffffff";
 //  يمكنك تغيير: height, marginTop, marginBottom, objectPosition ...
 // ─────────────────────────────────────────────
 const IMAGE_STYLES = {
-  1: { height: "200px", marginTop: "0px",  marginBottom: "0px"  },
-  2: { height: "200px", marginTop: "0px",  marginBottom: "0px"  },
-  3: { height: "200px", marginTop: "0px",  marginBottom: "0px"  },
-  4: { height: "200px", marginTop: "0px",  marginBottom: "0px"  },
-  5: { height: "200px", marginTop: "0px",  marginBottom: "0px"  },
-  6: { height: "200px", marginTop: "0px",  marginBottom: "0px"  },
+  1: { height: "150px", marginTop: "0px",  marginBottom: "0px"  },
+  2: { height: "150px", marginTop: "0px",  marginBottom: "0px"  },
+  3: { height: "150px", marginTop: "0px",  marginBottom: "0px"  },
+  4: { height: "150px", marginTop: "0px",  marginBottom: "0px"  },
+  5: { height: "150px", marginTop: "0px",  marginBottom: "0px"  },
+  6: { height: "150px", marginTop: "0px",  marginBottom: "0px"  },
 };
 
 const ROWS = [
@@ -248,19 +248,21 @@ export default function WB_LookReadWrite_1() {
         .lrw-card {
           display: flex;
           flex-direction: column;
-          gap: clamp(8px, 1.2vw, 14px);
+          gap: clamp(20px, 1.2vw, 20px);
         }
 
         /* number */
         .lrw-num {
+                  position: relative;
           font-size: clamp(14px, 1.6vw, 19px);
           font-weight: 700;
           color: #2b2b2b;
+          bottom : -20%
         }
 
         /* image */
         .lrw-img {
-          width: 100%;
+          width: 50%;
           border-radius: 10px;
           display: block;
         }

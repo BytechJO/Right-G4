@@ -28,7 +28,7 @@ const POEM_1 = [
   {
     parts: [
       "I'm going to go to the ",
-      { id: 1, answer: "mall", width: 120 },
+      { id: 1, answer: "mall", width: 300 },
       ",",
     ],
   },
@@ -36,7 +36,7 @@ const POEM_1 = [
   {
     parts: [
       "She's going to be staying here for a ",
-      { id: 2, answer: "week", width: 100 },
+      { id: 2, answer: "week", width: 300 },
       ".",
     ],
   },
@@ -44,7 +44,7 @@ const POEM_1 = [
   {
     parts: [
       'You ask me, "Are you excited?" I say, "I ',
-      { id: 3, answer: "sure", width: 90 },
+      { id: 3, answer: "sure", width: 300 },
       ' am."',
     ],
   },
@@ -52,7 +52,7 @@ const POEM_1 = [
   {
     parts: [
       "We'll have a great time, ",
-      { id: 4, answer: "I know", width: 110 },
+      { id: 4, answer: "I know", width: 300 },
       ".",
     ],
   },
@@ -63,7 +63,7 @@ const POEM_2 = [
   {
     parts: [
       "Australia has its ",
-      { id: 5, answer: "kangaroos", width: 120 },
+      { id: 5, answer: "kangaroos", width: 300 },
       ",",
     ],
   },
@@ -73,7 +73,7 @@ const POEM_2 = [
   {
     parts: [
       "There are so many places in the world to ",
-      { id: 6, answer: "visit", width: 90 },
+      { id: 6, answer: "visit", width: 300 },
       ".",
     ],
   },
@@ -187,14 +187,14 @@ export default function WB_ReadAndWrite_J() {
           display: flex;
           gap: clamp(10px, 1.6vw, 18px);
           flex-wrap: wrap;
-          justify-content: center;
+          justify-content: space-between;
           margin-bottom: clamp(10px, 1.6vw, 18px);
         }
         .rw-bank-word {
           border: 2px solid ${WORD_BANK_BORDER};
           border-radius: 8px;
           padding: clamp(5px, 0.7vw, 9px) clamp(12px, 1.6vw, 20px);
-          font-size: clamp(15px, 1.9vw, 22px);
+          font-size: clamp(18px, 1.9vw, 18px);
           color: ${WORD_BANK_TEXT};
           background: #fff;
           user-select: none;
@@ -209,7 +209,7 @@ export default function WB_ReadAndWrite_J() {
 
         /* ── Line ── */
         .rw-line {
-font-size: clamp(15px, 1.9vw, 22px);
+font-size: clamp(18px, 1.9vw, 18px);
           color: #2b2b2b;
           line-height:1.5;
           display: flex;
@@ -228,7 +228,7 @@ font-size: clamp(15px, 1.9vw, 22px);
           border-bottom: 2px solid ${INPUT_UNDERLINE_DEFAULT};
           background: transparent;
           outline: none;
-font-size: clamp(15px, 1.9vw, 22px);
+font-size: clamp(18px, 1.9vw, 18px);
           color: ${INPUT_TEXT_COLOR};
           text-align: center;
           line-height: 1.6;

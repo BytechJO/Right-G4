@@ -170,7 +170,7 @@ export default function WB_ReadLookMatch_D() {
         }
         .rlm-left--selected {
           background: rgba(32,150,166,0.08);
-          outline: 2px solid #2096a6;
+         border : 2px solid #2096a6;
           border-radius: 8px;
         }
         .rlm-num {

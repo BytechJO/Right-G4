@@ -262,7 +262,7 @@ font-size: clamp(10px, 1.9vw, 17px);
         {/* ── Header ── */}
         <h1
           className="WB-header-title-page8"
-          style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
+          style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px",  }}
         >
           <span className="WB-ex-A">B</span>
           Put each word in the correct place. Then write a sentence using{" "}

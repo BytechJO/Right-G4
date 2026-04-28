@@ -217,6 +217,7 @@ const getCellStyle = (key, isSelecting, isWrong) => {
 
         /* ── قائمة الكلمات ── */
         .wsk-word-list {
+        margin-top: 45px ; 
           border: 2px solid ${WORD_LIST_BORDER};
           border-radius: 14px;
           padding: clamp(12px, 1.6vw, 20px) clamp(16px, 2vw, 26px);
