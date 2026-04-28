@@ -5,10 +5,10 @@ import ValidationAlert from "../../Popup/ValidationAlert";
 // ─────────────────────────────────────────────
 //  🖼️  IMAGES
 // ─────────────────────────────────────────────
-import img1 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U1 Folder/Page 6/SVG/Asset 1.svg";
-import img2 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U1 Folder/Page 6/SVG/Asset 2.svg";
-import img3 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U1 Folder/Page 6/SVG/Asset 3.svg";
-import img4 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U1 Folder/Page 6/SVG/Asset 4.svg";
+import img1 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U1 Folder/Page 6/SVG/Asset 21.svg";
+import img2 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U1 Folder/Page 6/SVG/Asset 24.svg";
+import img3 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U1 Folder/Page 6/SVG/Asset 27.svg";
+import img4 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U1 Folder/Page 6/SVG/Asset 26.svg";
 
 // ─────────────────────────────────────────────
 //  🎨  COLORS
@@ -185,14 +185,11 @@ export default function WB_LookReadWriteSentences_QG() {
         .lws-img-box {
           flex: 1;
           height: ${IMG_HEIGHT};
-          border-radius: ${IMG_BORDER_RADIUS};
-          border: 2px solid #2096a6;
-          overflow: hidden;
+=          overflow: hidden;
         }
         .lws-img {
           width: 100%;
           height: 100%;
-          object-fit: cover;
           display: block;
         }
 

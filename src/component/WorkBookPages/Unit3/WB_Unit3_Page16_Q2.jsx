@@ -102,12 +102,12 @@ export default function WB_LookReadWriteCheckX_C() {
     return (
       <div key={item.id} className="lrwx-card">
 
-        {/* Number */}
-        <span className="lrwx-num">{item.id}</span>
-
-        {/* Image */}
-        <div className="lrwx-img-wrap">
-          <img src={item.imageSrc} alt={`item ${item.id}`} className="lrwx-img" />
+        {/* Image row: number + image side by side */}
+        <div className="lrwx-img-row">
+          <span className="lrwx-num">{item.id}</span>
+          <div className="lrwx-img-wrap">
+            <img src={item.imageSrc} alt={`item ${item.id}`} className="lrwx-img" />
+          </div>
         </div>
 
         {/* Sentence + two boxes */}
@@ -179,22 +179,31 @@ export default function WB_LookReadWriteCheckX_C() {
           gap: clamp(6px, 0.9vw, 12px);
         }
 
+        /* Image row: number beside image */
+        .lrwx-img-row {
+          display: flex;
+          align-items: flex-start;
+          gap: clamp(4px, 0.6vw, 8px);
+        }
+
         /* Number */
         .lrwx-num {
           font-size: clamp(15px, 1.9vw, 22px);
           font-weight: 700;
           color: #2b2b2b;
+          flex-shrink: 0;
+          padding-top: 2px;
         }
 
         /* Image */
         .lrwx-img-wrap {
-          width: 100%;
+          flex: 1;
           border-radius: 10px;
         }
         .lrwx-img {
           width: 100%;
           height: clamp(130px, 16vw, 200px);
-د          display: block;
+          display: block;
         }
 
         /* Bottom row */
@@ -204,20 +213,21 @@ export default function WB_LookReadWriteCheckX_C() {
           gap: clamp(6px, 1vw, 14px);
           flex-wrap: nowrap;
         }
-        .lrwx-sentence {
-          font-size: clamp(16px, 1.6vw, 19px);
-          color: #2b2b2b;
-          flex: 2;
-          line-height: 1.5;
-        }
-
+.lrwx-sentence {
+    position: relative;
+    font-size: clamp(16px, 1.6vw, 19px);
+    color: #2b2b2b;
+    flex: 2;
+    line-height: 1.5;
+    left: 7px;
+}
         /* Two boxes side by side */
-        .lrwx-boxes {
-          display: flex;
-          gap: clamp(6px, 0.8vw, 10px);
-          flex-shrink: 0;
-        }
-
+   .lrwx-boxes {
+    position: relative;
+    display: flex;
+    gap: clamp(6px, 0.8vw, 10px);
+    flex-shrink: 0;
+}
         /* Box wrap for badge */
         .lrwx-box-wrap {
           position: relative;
@@ -225,8 +235,8 @@ export default function WB_LookReadWriteCheckX_C() {
 
         /* Box base */
         .lrwx-box {
-          width: clamp(34px, 4vw, 48px);
-          height: clamp(34px, 4vw, 48px);
+          width: clamp(40px, 4vw, 40px);
+          height: clamp(40px, 4vw, 40px);
           border-radius: 8px;
           border: 2px solid ${BORDER_COLOR};
           background: #fff;

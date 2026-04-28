@@ -188,6 +188,8 @@ export default function WB_LookReadWriteChart_QI() {
           max-height: clamp(220px, 30vw, 380px);
           object-fit: contain;
           display: block;
+              height: auto;
+
         }
 
         /* ── Sentences list ── */

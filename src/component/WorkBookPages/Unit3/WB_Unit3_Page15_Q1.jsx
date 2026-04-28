@@ -256,7 +256,7 @@ export default function WB_ReadLookCircleWrite_A() {
         .rlcw-sentence-line {
           display: flex;
           align-items: baseline;
-          flex-wrap: wrap;
+          flex-wrap: no-wrap;
           gap: 4px;
           line-height: 1.5;
         }
@@ -271,7 +271,7 @@ export default function WB_ReadLookCircleWrite_A() {
         }
 
         .rlcw-sentence-text {
-          font-size: clamp(20px, 1.9vw, 25px);
+          font-size: clamp(20px, 1.9vw, 15px);
           color: #2b2b2b;
           white-space: pre;
         }
@@ -290,7 +290,7 @@ export default function WB_ReadLookCircleWrite_A() {
           font-size: clamp(15px, 1.9vw, 22px);
           color: #2b2b2b;
           text-align: center;
-          min-width: 110px;
+              width: 100px;
           transition: border-color 0.2s;
         }
         .rlcw-blank:disabled   { opacity: 1; cursor: default; }
@@ -330,9 +330,11 @@ export default function WB_ReadLookCircleWrite_A() {
 
         /* ── Options ── */
         .rlcw-options {
-          display: flex;
-          flex-direction: column;
-          gap: clamp(4px, 0.6vw, 8px);
+       display: flex;
+    flex-direction: row;
+    gap: clamp(4px, 0.6vw, 8px);
+    justify-content: center;
+}
         }
         .rlcw-option-wrap {
           display: flex;
@@ -341,14 +343,14 @@ export default function WB_ReadLookCircleWrite_A() {
           position: relative;
         }
         .rlcw-opt-letter {
-          font-size: clamp(15px, 1.9vw, 22px);
+          font-size: clamp(15px, 1.9vw, 15px);
           font-weight: 700;
           color: #2b2b2b;
           flex-shrink: 0;
           min-width: 16px;
         }
         .rlcw-opt-text {
-          font-size: clamp(15px, 1.9vw, 22px);
+          font-size: clamp(15px, 1.9vw, 15px);
           color: #2b2b2b;
           padding: clamp(2px, 0.3vw, 4px) clamp(8px, 1vw, 14px);
           border-radius: 999px;
