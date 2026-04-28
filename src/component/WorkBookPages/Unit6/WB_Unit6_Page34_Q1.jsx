@@ -1,393 +1,340 @@
-import React, { useMemo, useRef, useState } from "react";
+import React, { useState } from "react";
 import Button from "../Button";
 import ValidationAlert from "../../Popup/ValidationAlert";
 
-import img1 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U6 Folder/Page 34/C.1.svg";
-import img2 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U6 Folder/Page 34/C.2.svg";
-import img3 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U6 Folder/Page 34/C.3.svg";
-import img4 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U6 Folder/Page 34/C.4.svg";
-import img5 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U6 Folder/Page 34/C.5.svg";
-import img6 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U6 Folder/Page 34/C.6.svg";
+// ─────────────────────────────────────────────
+//  🎨  COLORS
+// ─────────────────────────────────────────────
+const INPUT_UNDERLINE_DEFAULT = "#3f3f3f";
+const INPUT_UNDERLINE_WRONG   = "#ef4444";
+const INPUT_TEXT_COLOR        = "#2b2b2b";
+const INPUT_ANSWER_COLOR      = "#c81e1e";
+const NUMBER_COLOR            = "#2b2b2b";
+const CODE_NUM_COLOR          = "#2b2b2b";
+const WORD_NUM_COLOR          = "#2b2b2b";
+const CODE_TABLE_BG           = "#f8f8f8";
+const CODE_TABLE_BORDER       = "#e0e0e0";
+const WRONG_BADGE_BG          = "#ef4444";
+const WRONG_BADGE_TEXT        = "#ffffff";
 
-const BORDER_COLOR = "#f39b42";
-const WRONG_COLOR  = "#ef4444";
-const DRAG_BG      = "#f29a1f";
-const TEXT_COLOR   = "#111";
+// ─────────────────────────────────────────────
+//  📝  CIPHER CODE
+// ─────────────────────────────────────────────
+const CODE = {
+  26:"a", 25:"b", 24:"c", 23:"d", 22:"e", 21:"f", 20:"g", 19:"h",
+  18:"i", 17:"j", 16:"k", 15:"l", 14:"m", 13:"n", 12:"o", 11:"p",
+  10:"q",  9:"r",  8:"s",  7:"t",  6:"u",  5:"v",  4:"w",  3:"x",
+   2:"y",  1:"z",
+};
 
-const SENTENCES = [
-  { id: 1, text: "A small cat and a big dog are running down the hill." },
-  { id: 2, text: "They're running across the street."                    },
-  { id: 3, text: "The cat can go through the fence. The dog can't."     },
-  { id: 4, text: "The dog can't jump over the fence."                   },
-  { id: 5, text: "The cat is climbing up a tree."                       },
-  { id: 6, text: "The cat is happy. The dog is sad."                    },
+// Code table rows for display
+const CODE_ROWS = [
+  [{n:26,l:"a"},{n:25,l:"b"},{n:24,l:"c"},{n:23,l:"d"},{n:22,l:"e"},{n:21,l:"f"},{n:20,l:"g"},{n:19,l:"h"}],
+  [{n:18,l:"i"},{n:17,l:"j"},{n:16,l:"k"},{n:15,l:"l"},{n:14,l:"m"},{n:13,l:"n"},{n:12,l:"o"},{n:11,l:"p"}],
+  [{n:10,l:"q"},{n:9,l:"r"},{n:8,l:"s"},{n:7,l:"t"},{n:6,l:"u"},{n:5,l:"v"},{n:4,l:"w"},{n:3,l:"x"}],
+  [{n:2,l:"y"},{n:1,l:"z"}],
 ];
 
-const IMAGE_CARDS = [
-  { id: 1, img: img1, correctNumber: 3 },
-  { id: 2, img: img2, correctNumber: 5 },
-  { id: 3, img: img3, correctNumber: 2 },
-  { id: 4, img: img4, correctNumber: 6 },
-  { id: 5, img: img5, correctNumber: 1 },
-  { id: 6, img: img6, correctNumber: 4 },
+// ─────────────────────────────────────────────
+//  📝  EXERCISE DATA
+//  codes: أرقام الكلمة
+//  كل حرف = input واحد
+// ─────────────────────────────────────────────
+const ITEMS = [
+  { id: 1, codes: [7, 22, 8, 7],               word: "test"      },
+  { id: 2, codes: [11, 26, 24, 16],            word: "pack"      },
+  { id: 3, codes: [8, 24, 18, 22, 13, 24, 22], word: "science"   },
+  { id: 4, codes: [4, 22, 26, 9],              word: "wear"      },
+  { id: 5, codes: [15, 26, 7, 22],             word: "late"      },
+  { id: 6, codes: [7, 9, 26, 18, 13, 22, 9, 8], word: "trainers" },
 ];
 
-const DRAG_NUMBERS = [1, 2, 3, 4, 5, 6];
+// Build all input keys
+const ALL_INPUTS = ITEMS.flatMap((item) =>
+  item.codes.map((code, i) => ({
+    key:     `${item.id}-${i}`,
+    correct: [CODE[code]],
+    answer:  CODE[code],
+  }))
+);
 
-export default function SB_ReadLookNumber_PageC() {
-  const [imageAnswers,  setImageAnswers]  = useState({});
-  const [draggedNumber, setDraggedNumber] = useState(null);
-  const [touchItem,     setTouchItem]     = useState(null);
-  const [touchPos,      setTouchPos]      = useState({ x: 0, y: 0 });
-  const [checked,       setChecked]       = useState(false);
-  const [showAns,       setShowAns]       = useState(false);
+// ─────────────────────────────────────────────
+//  🔧  NORMALIZE
+// ─────────────────────────────────────────────
+const isCorrect = (userVal, correctArr) =>
+  correctArr.some((c) => userVal.trim().toLowerCase() === c.toLowerCase());
 
-  const dropRefs    = useRef({});
-  const boxRefs     = useRef({});
-  const usedNumbers = useMemo(() => Object.values(imageAnswers), [imageAnswers]);
+// ─────────────────────────────────────────────
+//  COMPONENT
+// ─────────────────────────────────────────────
+export default function WB_UseCodeWrite_QC() {
+  const [answers,     setAnswers]     = useState({});
+  const [showResults, setShowResults] = useState(false);
+  const [showAns,     setShowAns]     = useState(false);
 
-  const applyDrop = (cardId, num) => {
-    const updated = { ...imageAnswers };
-    Object.keys(updated).forEach((k) => { if (updated[k] === num) delete updated[k]; });
-    updated[cardId] = num;
-    setImageAnswers(updated);
-    setDraggedNumber(null);
-    setChecked(false);
-  };
-
-  const handleDragStart = (num) => {
-    if (showAns || usedNumbers.includes(num)) return;
-    setDraggedNumber(num);
-  };
-
-  const handleDrop = (cardId) => {
-    if (showAns || draggedNumber === null) return;
-    applyDrop(cardId, draggedNumber);
-  };
-
-  const handleTouchStart = (e, num) => {
-    if (showAns || usedNumbers.includes(num)) return;
-    const t = e.touches[0];
-    setTouchItem(num);
-    setDraggedNumber(num);
-    setTouchPos({ x: t.clientX, y: t.clientY });
-  };
-
-  const handleTouchMove = (e) => {
-    if (touchItem === null) return;
-    const t = e.touches[0];
-    setTouchPos({ x: t.clientX, y: t.clientY });
-  };
-
-  const handleTouchEnd = () => {
-    if (touchItem === null) return;
-    // تحقق من drop على الـ card كاملة أو على الـ box
-    const allRefs = { ...dropRefs.current };
-    Object.entries(allRefs).forEach(([key, ref]) => {
-      if (!ref) return;
-      const r = ref.getBoundingClientRect();
-      if (
-        touchPos.x >= r.left && touchPos.x <= r.right &&
-        touchPos.y >= r.top  && touchPos.y <= r.bottom
-      ) applyDrop(Number(key), touchItem);
-    });
-    setTouchItem(null);
-    setDraggedNumber(null);
-  };
-
-  const handleRemoveNumber = (cardId) => {
+  const handleChange = (key, value) => {
     if (showAns) return;
-    setImageAnswers((prev) => {
-      const updated = { ...prev };
-      delete updated[cardId];
-      return updated;
-    });
-    setChecked(false);
+    const inp = ALL_INPUTS.find((i) => i.key === key);
+    if (showResults && inp && isCorrect(answers[key] || "", inp.correct)) return;
+    if (value.length > 1) return;
+    setAnswers((prev) => ({ ...prev, [key]: value }));
   };
 
   const handleCheck = () => {
     if (showAns) return;
-    const allAnswered = IMAGE_CARDS.every((c) => imageAnswers[c.id]);
-    if (!allAnswered) {
-      ValidationAlert.info("Please complete all answers first.");
-      return;
-    }
+    const allAnswered = ALL_INPUTS.every((inp) => answers[inp.key]?.trim());
+    if (!allAnswered) { ValidationAlert.info("Please complete all answers first."); return; }
     let score = 0;
-    IMAGE_CARDS.forEach((c) => { if (imageAnswers[c.id] === c.correctNumber) score++; });
-    setChecked(true);
-    const total = IMAGE_CARDS.length;
-    if (score === total)  ValidationAlert.success(`Score: ${score} / ${total}`);
-    else if (score > 0)   ValidationAlert.warning(`Score: ${score} / ${total}`);
-    else                  ValidationAlert.error(`Score: ${score} / ${total}`);
+    ALL_INPUTS.forEach((inp) => { if (isCorrect(answers[inp.key] || "", inp.correct)) score++; });
+    setShowResults(true);
+    if (score === ALL_INPUTS.length)   ValidationAlert.success(`Score: ${score} / ${ALL_INPUTS.length}`);
+    else if (score > 0)                ValidationAlert.warning(`Score: ${score} / ${ALL_INPUTS.length}`);
+    else                               ValidationAlert.error(`Score: ${score} / ${ALL_INPUTS.length}`);
   };
 
   const handleShowAnswer = () => {
-    const correct = {};
-    IMAGE_CARDS.forEach((c) => { correct[c.id] = c.correctNumber; });
-    setImageAnswers(correct);
-    setChecked(true);
+    const filled = {};
+    ALL_INPUTS.forEach((inp) => { filled[inp.key] = inp.answer; });
+    setAnswers(filled);
+    setShowResults(false);
     setShowAns(true);
-    setDraggedNumber(null);
-    setTouchItem(null);
   };
 
   const handleReset = () => {
-    setImageAnswers({});
-    setDraggedNumber(null);
-    setTouchItem(null);
-    setChecked(false);
+    setAnswers({});
+    setShowResults(false);
     setShowAns(false);
   };
 
-  const isCardWrong = (cardId) => {
-    if (!checked || showAns) return false;
-    const card = IMAGE_CARDS.find((c) => c.id === cardId);
-    return imageAnswers[cardId] !== card.correctNumber;
+  const isWrong = (inp) => {
+    if (!showResults || showAns) return false;
+    return !isCorrect(answers[inp.key] || "", inp.correct);
+  };
+
+  const isDisabled = (inp) => {
+    if (showAns) return true;
+    if (showResults && isCorrect(answers[inp.key] || "", inp.correct)) return true;
+    return false;
   };
 
   return (
     <div className="main-container-component">
+      <style>{`
+        /* ── Words grid 3 columns ── */
+        .ucw-grid {
+          display: grid;
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+          gap: clamp(16px, 2.4vw, 30px) clamp(20px, 3vw, 40px);
+          width: 100%;
+        }
+
+        /* ── Single word card ── */
+        .ucw-card {
+          display: flex;
+          flex-direction: row;
+          align-items: flex-start;
+          gap: 10px;
+        }
+
+        .ucw-item-num {
+      font-size: clamp(13px, 1.5vw, 18px);
+    font-weight: 700;
+    color: #2b2b2b;
+    line-height: 1.5;
+    align-self: center;
+    margin-left : 10px l
+        }
+
+        /* Letters row */
+        .ucw-letters {
+          display: flex;
+          align-items: flex-end;
+          gap: 2px;
+        }
+
+        /* Code numbers row */
+        .ucw-codes {
+          display: flex;
+          align-items: center;
+          gap: 2px;
+        }
+
+        /* Single letter cell */
+        .ucw-cell {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 2px;
+        }
+
+        /* Input wrap */
+        .ucw-input-wrap {
+          position: relative;
+        }
+
+        .ucw-input {
+          width: clamp(20px, 2.6vw, 32px);
+          background: transparent;
+          border: none;
+          border-bottom: 2px solid ${INPUT_UNDERLINE_DEFAULT};
+          outline: none;
+          font-size: clamp(15px, 1.9vw, 24px);
+          font-weight: 400;
+          color: ${INPUT_TEXT_COLOR};
+          text-align: center;
+          padding: 2px 0 3px;
+          box-sizing: border-box;
+          font-family: inherit;
+          transition: border-color 0.2s;
+          line-height: 1;
+        }
+        .ucw-input:disabled        { opacity: 1; cursor: default; }
+        .ucw-input--wrong          { border-bottom-color: ${INPUT_UNDERLINE_WRONG}; }
+        .ucw-input--answer         { color: ${INPUT_ANSWER_COLOR}; }
+
+        /* ✕ badge */
+        .ucw-badge {
+          position: absolute;
+          top: -7px; right: -5px;
+          width: clamp(13px, 1.5vw, 17px);
+          height: clamp(13px, 1.5vw, 17px);
+          border-radius: 50%;
+          background: ${WRONG_BADGE_BG};
+          color: ${WRONG_BADGE_TEXT};
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: clamp(7px, 0.8vw, 9px);
+          font-weight: 700;
+          border: 2px solid #fff;
+          box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+          pointer-events: none;
+          z-index: 2;
+        }
+
+        /* Code number below letter */
+        .ucw-code-num {
+          font-size: clamp(11px, 1.3vw, 16px);
+          font-weight: 400;
+          color: ${CODE_NUM_COLOR};
+          line-height: 1;
+          width: clamp(20px, 2.6vw, 32px);
+          text-align: center;
+        }
+
+        /* ── Code table ── */
+        .ucw-code-table {
+    width: 100%;
+    position: relative;
+    left: 5%;    
+    margin-top : 5%;    }
+
+    
+.ucw-code-row {
+display: grid;
+    flex: wrap;
+    grid-template-columns: repeat(8, minmax(0, 1fr));
+    margin-bottom: clamp(6px, 0.8vw, 10px);
+    justify-content: space-around;
+
+      }
+        .ucw-code-row:last-child { margin-bottom: 0; }
+
+        .ucw-code-entry {
+          font-size: clamp(13px, 1.5vw, 18px);
+          font-weight: 400;
+          color: ${WORD_NUM_COLOR};
+          white-space: nowrap;
+        }
+
+        /* Buttons */
+        .ucw-buttons {
+          display: flex;
+          justify-content: center;
+          margin-top: clamp(8px, 1.6vw, 18px);
+        }
+
+        @media (max-width: 560px) {
+          .ucw-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+      `}</style>
+
       <div
         className="div-forall"
         style={{
-          display:       "flex",
+          display: "flex",
           flexDirection: "column",
-          gap:           "18px",
-          maxWidth:      "1100px",
-          margin:        "0 auto",
+          gap: "clamp(14px, 2vw, 22px)",
+          maxWidth: "1100px",
+          margin: "0 auto",
         }}
       >
-        {/* Title */}
+        {/* ── Header ── */}
         <h1
           className="WB-header-title-page8"
-          style={{
-            margin:     0,
-            display:    "flex",
-            alignItems: "center",
-            gap:        "12px",
-            flexWrap:   "wrap",
-          }}
+          style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
         >
           <span className="WB-ex-A">C</span>
-          Read, look, and number the pictures. Point and say.
+          Use the code to write the vocabulary words.
         </h1>
 
-        {/* Sentences */}
-        <div
-          style={{
-            display:       "flex",
-            flexDirection: "column",
-            gap:           "clamp(6px,0.9vw,12px)",
-            width:         "100%",
-          }}
-        >
-          {SENTENCES.map((s) => (
-            <div
-              key={s.id}
-              style={{
-                display:    "flex",
-                alignItems: "baseline",
-                gap:        "clamp(8px,1vw,14px)",
-              }}
-            >
-              <span
-                style={{
-                  fontSize:   "clamp(16px,1.9vw,26px)",
-                  fontWeight: 700,
-                  color:      TEXT_COLOR,
-                  lineHeight: 1,
-                  flexShrink: 0,
-                  minWidth:   "clamp(16px,1.9vw,26px)",
-                }}
-              >
-                {s.id}
-              </span>
-              <span
-                style={{
-                  fontSize:   "clamp(14px,1.7vw,22px)",
-                  fontWeight: 500,
-                  color:      TEXT_COLOR,
-                  lineHeight: 1.35,
-                  wordBreak:  "break-word",
-                }}
-              >
-                {s.text}
-              </span>
+        {/* ── Words grid ── */}
+        <div className="ucw-grid">
+          {ITEMS.map((item) => (
+            <div key={item.id} className="ucw-card">
+              <span className="ucw-item-num">{item.id}</span>
+              <div className="ucw-letters">
+                {item.codes.map((code, i) => {
+                  const key     = `${item.id}-${i}`;
+                  const inp     = ALL_INPUTS.find((x) => x.key === key);
+                  const wrong   = isWrong(inp);
+                  const value   = answers[key] || "";
+                  const tColor  = showAns ? INPUT_ANSWER_COLOR : INPUT_TEXT_COLOR;
+                  const uColor  = wrong ? INPUT_UNDERLINE_WRONG : INPUT_UNDERLINE_DEFAULT;
+                  const disabled = isDisabled(inp);
+
+                  return (
+                    <div key={key} className="ucw-cell">
+                      <div className="ucw-input-wrap">
+                        <input
+                          type="text"
+                          maxLength={1}
+                          className={[
+                            "ucw-input",
+                            wrong   ? "ucw-input--wrong"  : "",
+                            showAns ? "ucw-input--answer" : "",
+                          ].filter(Boolean).join(" ")}
+                          value={value}
+                          disabled={disabled}
+                          onChange={(e) => handleChange(key, e.target.value)}
+                          style={{ borderBottomColor: uColor, color: tColor }}
+                          spellCheck={false}
+                          autoComplete="off"
+                        />
+                        {wrong && <div className="ucw-badge">✕</div>}
+                      </div>
+                      <span className="ucw-code-num">{code}</span>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           ))}
         </div>
 
-        {/* Image cards 3×2 */}
-        <div
-          style={{
-            display:             "grid",
-            gridTemplateColumns: "repeat(3, minmax(0,1fr))",
-            gap:                 "clamp(10px,1.5vw,20px)",
-            width:               "100%",
-          }}
-        >
-          {IMAGE_CARDS.map((card) => {
-            const wrong = isCardWrong(card.id);
-            const num   = imageAnswers[card.id];
-
-            return (
-              <div
-                key={card.id}
-                ref={(el) => (dropRefs.current[card.id] = el)}
-                onDragOver={(e) => e.preventDefault()}
-                onDrop={() => handleDrop(card.id)}
-                style={{
-                  position:     "relative",
-                  width:        "100%",
-                  aspectRatio:  "1.5 / 1",
-                  borderRadius: "clamp(10px,1.2vw,16px)",
-                  overflow:     "visible",
-                  border:       `2px solid ${wrong ? WRONG_COLOR : BORDER_COLOR}`,
-                  background:   "#f7f7f7",
-                  boxSizing:    "border-box",
-                  transition:   "border-color 0.2s",
-                }}
-              >
-                {/* image — inner clip */}
-                <div
-                  style={{
-                    position:     "absolute",
-                    inset:        0,
-                    borderRadius: "clamp(10px,1.2vw,16px)",
-                    overflow:     "hidden",
-                  }}
-                >
-                  <img
-                    src={card.img}
-                    alt={`card-${card.id}`}
-                    style={{
-                      width:         "100%",
-                      height:        "100%",
-                      objectFit:     "cover",
-                      display:       "block",
-                      userSelect:    "none",
-                      pointerEvents: "none",
-                    }}
-                  />
-                </div>
-
-                {/* ── White box — دايماً موجود top right ── */}
-                <div
-                  ref={(el) => (boxRefs.current[card.id] = el)}
-                  onClick={() => handleRemoveNumber(card.id)}
-                  onDragOver={(e) => e.preventDefault()}
-                  onDrop={() => handleDrop(card.id)}
-                  style={{
-                    position:        "absolute",
-                    top:             "clamp(4px,0.8vw,10px)",
-                    right:           "clamp(4px,0.8vw,10px)",
-                    width:           "clamp(28px,3.8vw,48px)",
-                    height:          "clamp(28px,3.8vw,48px)",
-                    borderRadius:    "clamp(6px,0.8vw,10px)",
-                    border:          `2px solid ${wrong ? WRONG_COLOR : "#bbb"}`,
-                    backgroundColor: "#fff",
-                    display:         "flex",
-                    alignItems:      "center",
-                    justifyContent:  "center",
-                    fontSize:        "clamp(14px,2.2vw,30px)",
-                    fontWeight:      700,
-                    color:           wrong ? WRONG_COLOR : "#111",
-                    boxShadow:       "0 2px 6px rgba(0,0,0,0.15)",
-                    zIndex:          4,
-                    cursor:          num && !showAns ? "pointer" : "default",
-                    transition:      "border-color 0.2s, color 0.2s",
-                    boxSizing:       "border-box",
-                  }}
-                >
-                  {num || ""}
-                </div>
-
-                {/* wrong badge — خارج الـ overflow */}
-                {wrong && (
-                  <div
-                    style={{
-                      position:        "absolute",
-                      top:             "-8px",
-                      right:           "-8px",
-                      width:           "clamp(16px,1.8vw,22px)",
-                      height:          "clamp(16px,1.8vw,22px)",
-                      borderRadius:    "50%",
-                      backgroundColor: WRONG_COLOR,
-                      color:           "#fff",
-                      display:         "flex",
-                      alignItems:      "center",
-                      justifyContent:  "center",
-                      fontSize:        "clamp(9px,0.9vw,12px)",
-                      fontWeight:      700,
-                      boxShadow:       "0 1px 4px rgba(0,0,0,0.25)",
-                      zIndex:          5,
-                      pointerEvents:   "none",
-                    }}
-                  >
-                    ✕
-                  </div>
-                )}
-              </div>
-            );
-          })}
+        {/* ── Code table ── */}
+        <div className="ucw-code-table">
+          {CODE_ROWS.map((row, ri) => (
+            <div key={ri} className="ucw-code-row">
+              {row.map(({ n, l }) => (
+                <span key={n} className="ucw-code-entry">{n} = {l}</span>
+              ))}
+            </div>
+          ))}
         </div>
 
-        {/* Drag numbers */}
-        <div
-          style={{
-            display:        "flex",
-            justifyContent: "center",
-            flexWrap:       "wrap",
-            gap:            "clamp(10px,1.4vw,16px)",
-          }}
-        >
-          {DRAG_NUMBERS.map((num) => {
-            const disabled = usedNumbers.includes(num);
-            const selected = draggedNumber === num || touchItem === num;
-            return (
-              <div
-                key={num}
-                draggable={!disabled && !showAns}
-                onDragStart={() => handleDragStart(num)}
-                onTouchStart={(e) => handleTouchStart(e, num)}
-                onTouchMove={handleTouchMove}
-                onTouchEnd={handleTouchEnd}
-                style={{
-                  width:        "clamp(40px,5vw,56px)",
-                  height:       "clamp(40px,5vw,56px)",
-                  borderRadius: "50%",
-                  background:   disabled || showAns ? "#cfcfd4" : DRAG_BG,
-                  color:        "#fff",
-                  display:      "flex",
-                  alignItems:   "center",
-                  justifyContent: "center",
-                  fontSize:     "clamp(18px,2.4vw,30px)",
-                  fontWeight:   700,
-                  cursor:       disabled || showAns ? "not-allowed" : "grab",
-                  userSelect:   "none",
-                  opacity:      disabled ? 0.55 : 1,
-                  touchAction:  "none",
-                  transition:   "0.2s ease",
-                  transform:    selected ? "scale(1.08)" : "scale(1)",
-                  boxShadow:    selected
-                    ? "0 0 0 3px rgba(242,154,31,0.35)"
-                    : "0 3px 10px rgba(0,0,0,0.12)",
-                }}
-              >
-                {num}
-              </div>
-            );
-          })}
-        </div>
-
-        {/* Buttons */}
-        <div
-          style={{
-            display:        "flex",
-            justifyContent: "center",
-            marginTop:      "clamp(6px,1vw,12px)",
-          }}
-        >
+        {/* ── Buttons ── */}
+        <div className="ucw-buttons">
           <Button
             checkAnswers={handleCheck}
             handleShowAnswer={handleShowAnswer}
@@ -395,32 +342,6 @@ export default function SB_ReadLookNumber_PageC() {
           />
         </div>
       </div>
-
-      {/* Touch ghost */}
-      {touchItem !== null && (
-        <div
-          style={{
-            position:       "fixed",
-            left:           touchPos.x - 28,
-            top:            touchPos.y - 28,
-            width:          "clamp(40px,5vw,56px)",
-            height:         "clamp(40px,5vw,56px)",
-            borderRadius:   "50%",
-            background:     DRAG_BG,
-            color:          "#fff",
-            display:        "flex",
-            alignItems:     "center",
-            justifyContent: "center",
-            fontSize:       "clamp(18px,2.4vw,30px)",
-            fontWeight:     700,
-            pointerEvents:  "none",
-            zIndex:         9999,
-            boxShadow:      "0 4px 10px rgba(0,0,0,0.2)",
-          }}
-        >
-          {touchItem}
-        </div>
-      )}
     </div>
   );
 }

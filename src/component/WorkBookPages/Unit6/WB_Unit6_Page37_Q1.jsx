@@ -1,452 +1,418 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import Button from "../Button";
 import ValidationAlert from "../../Popup/ValidationAlert";
 
-import img1 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U6 Folder/Page 37/I.1.svg";
-import img2 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U6 Folder/Page 37/I.2.svg";
-import img3 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U6 Folder/Page 37/I.3.svg";
-import img4 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U6 Folder/Page 37/I.4.svg";
+// ─────────────────────────────────────────────
+//  🖼️  IMAGES
+// ─────────────────────────────────────────────
+import imgHelen  from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U6 Folder/Page 37/SVG/Asset 27.svg";
+import imgSarah  from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U6 Folder/Page 37/SVG/Asset 28.svg";
+import imgStella from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U6 Folder/Page 37/SVG/Asset 29.svg";
+import imgHarley from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U6 Folder/Page 37/SVG/Asset 30.svg";
+import imgTom    from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U6 Folder/Page 37/SVG/Asset 31.svg";
+import imgJack   from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U6 Folder/Page 37/SVG/Asset 40.svg";
 
-const BORDER_COLOR = "#f39b42";
-const ACTIVE_COLOR = "#f39b42";
-const SOFT_COLOR   = "#ffca94";
-const WRONG_COLOR  = "#ef4444";
-const RED_COLOR    = "#000000ff";
-const LINE_COLOR   = "#333";
+// ─────────────────────────────────────────────
+//  🎨  COLORS
+// ─────────────────────────────────────────────
+const DOT_DEFAULT_COLOR    = "#2096a6";
+const DOT_SELECTED_COLOR   = "#2096a6";
+const LINE_DEFAULT_COLOR   = "#2096a6";
+const LINE_WRONG_COLOR     = "#2096a6";
+const LINE_CORRECT_COLOR   = "#2096a6";
+const SENTENCE_COLOR       = "#2b2b2b";
+const ANSWER_COLOR         = "#2b2b2b";
+const NUMBER_COLOR         = "#2b2b2b";
+const WRONG_BADGE_BG       = "#ef4444";
+const WRONG_BADGE_TEXT     = "#ffffff";
 
-const ITEMS = [
-  {
-    id:      1,
-    img:     img1,
-    example: true,
-    question: "What month is it ?",
-    answer:   "It's July.",
-  },
-  {
-    id:      2,
-    img:     img2,
-    example: false,
-    question: "What month is it ?",
-    answer:   "It's April.",
-  },
-  {
-    id:      3,
-    img:     img3,
-    example: false,
-    question: "What month is it ?",
-    answer:   "It's September.",
-  },
-  {
-    id:      4,
-    img:     img4,
-    example: false,
-    question: "What month is it ?",
-    answer:   "It's November.",
-  },
+// ─────────────────────────────────────────────
+//  📝  EXERCISE DATA
+// ─────────────────────────────────────────────
+const LEFT_ITEMS = [
+  { id: 1, text: "Helen should"    },
+  { id: 2, text: "Sarah should"    },
+  { id: 3, text: "Stella should"   },
+  { id: 4, text: "Harley should"   },
+  { id: 5, text: "Tom shouldn't"   },
+  { id: 6, text: "Jack shouldn't"  },
 ];
 
-const DRAG_ITEMS = ITEMS.filter((i) => !i.example).map((i) => ({
-  id:    `ans-${i.id}`,
-  value: i.answer,
-}));
+const RIGHT_ITEMS = [
+  { id: "a", text: "kick rocks."        },
+  { id: "b", text: "get on the bus."    },
+  { id: "c", text: "be late."           },
+  { id: "d", text: "pick up her toys."  },
+  { id: "e", text: "help her mom."      },
+  { id: "f", text: "go to sleep early." },
+];
 
-export default function SB_ReadLookWrite_PageI() {
-  const [answers,     setAnswers]     = useState({});
-  const [draggedItem, setDraggedItem] = useState(null);
-  const [touchItem,   setTouchItem]   = useState(null);
-  const [touchPos,    setTouchPos]    = useState({ x: 0, y: 0 });
-  const [showResults, setShowResults] = useState(false);
-  const [showAns,     setShowAns]     = useState(false);
+// الإجابات الصحيحة: left id → right id
+const CORRECT_ANSWERS = {
+  1: "b", 
+  2: "d",
+  3: "e", 
+  4: "f", 
+  5: "c", 
+  6: "a", 
+};
+// الصور مع أسمائها
+const IMAGES = [
+  { name: "Helen",  src: imgHelen  },
+  { name: "Sarah",  src: imgSarah  },
+  { name: "Stella", src: imgStella },
+  { name: "Harley", src: imgHarley },
+  { name: "Tom",    src: imgTom    },
+  { name: "Jack",   src: imgJack   },
+];
 
-  const dropRefs = useRef({});
-  const usedIds  = Object.values(answers).filter(Boolean).map((e) => e.dragId);
+// ─────────────────────────────────────────────
+//  COMPONENT
+// ─────────────────────────────────────────────
+export default function WB_ReadLookMatch_QI() {
+  const [matches,     setMatches]     = useState({}); // { leftId: rightId }
+  const [selectedLeft, setSelectedLeft] = useState(null);
+  const [showResults,  setShowResults]  = useState(false);
+  const [showAns,      setShowAns]      = useState(false);
 
-  const applyDrop = (boxKey, item) => {
-    const upd = { ...answers };
-    Object.keys(upd).forEach((k) => { if (upd[k]?.dragId === item.id) delete upd[k]; });
-    upd[boxKey] = { dragId: item.id, value: item.value };
-    setAnswers(upd);
-    setShowResults(false);
-  };
+  const leftRefs  = useRef({});
+  const rightRefs = useRef({});
+  const svgRef    = useRef(null);
+  const containerRef = useRef(null);
 
-  const handleDragStart = (item) => {
-    if (showAns || usedIds.includes(item.id)) return;
-    setDraggedItem(item);
-  };
+  const [lines, setLines] = useState([]);
 
-  const handleDrop = (boxKey) => {
-    if (showAns || !draggedItem) return;
-    applyDrop(boxKey, draggedItem);
-    setDraggedItem(null);
-  };
+  // إعادة رسم الخطوط عند تغيير matches
+  useEffect(() => {
+    recalcLines();
+  }, [matches, showResults, showAns]);
 
-  const handleTouchStart = (e, item) => {
-    if (showAns || usedIds.includes(item.id)) return;
-    const t = e.touches[0];
-    setTouchItem(item);
-    setTouchPos({ x: t.clientX, y: t.clientY });
-  };
+  useEffect(() => {
+    window.addEventListener("resize", recalcLines);
+    return () => window.removeEventListener("resize", recalcLines);
+  }, [matches, showResults, showAns]);
 
-  const handleTouchMove = (e) => {
-    if (!touchItem) return;
-    const t = e.touches[0];
-    setTouchPos({ x: t.clientX, y: t.clientY });
-  };
+  const recalcLines = () => {
+    if (!svgRef.current || !containerRef.current) return;
+    const container = containerRef.current.getBoundingClientRect();
+    const newLines = [];
 
-  const handleTouchEnd = () => {
-    if (!touchItem) return;
-    Object.entries(dropRefs.current).forEach(([key, ref]) => {
-      if (!ref) return;
-      const r = ref.getBoundingClientRect();
-      if (
-        touchPos.x >= r.left && touchPos.x <= r.right &&
-        touchPos.y >= r.top  && touchPos.y <= r.bottom
-      ) applyDrop(key, touchItem);
+    Object.entries(matches).forEach(([leftId, rightId]) => {
+      const leftEl  = leftRefs.current[leftId];
+      const rightEl = rightRefs.current[rightId];
+      if (!leftEl || !rightEl) return;
+
+      const lRect = leftEl.getBoundingClientRect();
+      const rRect = rightEl.getBoundingClientRect();
+
+      const x1 = lRect.right  - container.left;
+      const y1 = lRect.top + lRect.height / 2 - container.top;
+      const x2 = rRect.left   - container.left;
+      const y2 = rRect.top + rRect.height / 2 - container.top;
+
+      newLines.push({ x1, y1, x2, y2, color: LINE_DEFAULT_COLOR });
     });
-    setTouchItem(null);
+
+    setLines(newLines);
   };
 
-  const handleRemove = (boxKey) => {
+  const handleLeftClick = (id) => {
     if (showAns) return;
-    setAnswers((prev) => { const u = { ...prev }; delete u[boxKey]; return u; });
-    setShowResults(false);
+    if (showResults && CORRECT_ANSWERS[id] === matches[id]) return;
+    setSelectedLeft(id === selectedLeft ? null : id);
+  };
+
+  const handleRightClick = (id) => {
+    if (showAns) return;
+    if (!selectedLeft) return;
+    if (showResults && CORRECT_ANSWERS[selectedLeft] === matches[selectedLeft]) return;
+
+    setMatches((prev) => {
+      const updated = { ...prev };
+      // إزالة أي ربط سابق لنفس اليمين
+      Object.keys(updated).forEach((k) => { if (updated[k] === id) delete updated[k]; });
+      updated[selectedLeft] = id;
+      return updated;
+    });
+    setSelectedLeft(null);
   };
 
   const handleCheck = () => {
     if (showAns) return;
-    const editables = ITEMS.filter((i) => !i.example);
-    const allAnswered = editables.every((i) => answers[`a-${i.id}`]?.value);
-    if (!allAnswered) {
-      ValidationAlert.info("Please complete all answers first.");
+    if (Object.keys(matches).length < LEFT_ITEMS.length) {
+      ValidationAlert.info("Please match all items first.");
       return;
     }
     let score = 0;
-    editables.forEach((i) => {
-      if (answers[`a-${i.id}`]?.value === i.answer) score++;
-    });
+    LEFT_ITEMS.forEach((l) => { if (CORRECT_ANSWERS[l.id] === matches[l.id]) score++; });
     setShowResults(true);
-    const total = editables.length;
-    if (score === total)  ValidationAlert.success(`Score: ${score} / ${total}`);
-    else if (score > 0)   ValidationAlert.warning(`Score: ${score} / ${total}`);
-    else                  ValidationAlert.error(`Score: ${score} / ${total}`);
+    if (score === LEFT_ITEMS.length) ValidationAlert.success(`Score: ${score} / ${LEFT_ITEMS.length}`);
+    else if (score > 0)              ValidationAlert.warning(`Score: ${score} / ${LEFT_ITEMS.length}`);
+    else                             ValidationAlert.error(`Score: ${score} / ${LEFT_ITEMS.length}`);
   };
 
   const handleShowAnswer = () => {
-    const filled = {};
-    ITEMS.filter((i) => !i.example).forEach((i) => {
-      const d = DRAG_ITEMS.find((d) => d.value === i.answer);
-      filled[`a-${i.id}`] = { dragId: d?.id ?? `ans-${i.id}`, value: i.answer };
-    });
-    setAnswers(filled);
-    setShowResults(true);
+    setMatches({ ...CORRECT_ANSWERS });
+    setShowResults(false);
     setShowAns(true);
+    setSelectedLeft(null);
   };
 
-  const handleStartAgain = () => {
-    setAnswers({});
-    setDraggedItem(null);
-    setTouchItem(null);
+  const handleReset = () => {
+    setMatches({});
     setShowResults(false);
     setShowAns(false);
+    setSelectedLeft(null);
+    setLines([]);
   };
 
-  const isWrong = (item) =>
-    showResults && !showAns && answers[`a-${item.id}`]?.value !== item.answer;
-
-  // ── render one item card ──
-  const renderItem = (item) => {
-    const boxKey = `a-${item.id}`;
-    const value  = answers[boxKey]?.value || "";
-    const wrong  = isWrong(item);
-
-    return (
-      <div
-        key={item.id}
-        style={{
-          display:       "flex",
-          flexDirection: "column",
-          gap:           "clamp(8px,1.2vw,14px)",
-          minWidth:      0,
-        }}
-      >
-        {/* number + calendar image row */}
-        <div
-          style={{
-            display:    "flex",
-            alignItems: "center",
-            gap:        "clamp(8px,1vw,14px)",
-          }}
-        >
-          <span
-            style={{
-              fontSize:   "clamp(18px,2vw,30px)",
-              fontWeight: 700,
-              color:      "#111",
-              lineHeight: 1,
-              flexShrink: 0,
-              minWidth:   "clamp(16px,2vw,28px)",
-            }}
-          >
-            {item.id}
-          </span>
-
-          <div
-            style={{
-              width:        "clamp(70px,10vw,120px)",
-              aspectRatio:  "0.85 / 1",
-              flexShrink:   0,
-              overflow:     "hidden",
-              borderRadius: "clamp(6px,0.8vw,10px)",
-              background:   "#f7f7f7",
-            }}
-          >
-            <img
-              src={item.img}
-              alt={`calendar-${item.id}`}
-              style={{
-                width:         "100%",
-                height:        "100%",
-                objectFit:     "contain",
-                display:       "block",
-                userSelect:    "none",
-                pointerEvents: "none",
-              }}
-            />
-          </div>
-        </div>
-
-        {/* question line */}
-        {item.example ? (
-          <div
-            style={{
-              fontSize:      "clamp(14px,1.8vw,22px)",
-              fontWeight:    600,
-              color:         RED_COLOR,
-              borderBottom:  `2px solid ${LINE_COLOR}`,
-              paddingBottom: "3px",
-              lineHeight:    1.3,
-            }}
-          >
-            {item.question}
-          </div>
-        ) : (
-          <div
-            style={{
-              fontSize:      "clamp(14px,1.8vw,22px)",
-              fontWeight:    600,
-              color:         RED_COLOR,
-              borderBottom:  `2px solid ${LINE_COLOR}`,
-              paddingBottom: "3px",
-              lineHeight:    1.3,
-            }}
-          >
-            {item.question}
-          </div>
-        )}
-
-        {/* answer line */}
-        {item.example ? (
-          <div
-            style={{
-              fontSize:      "clamp(14px,1.8vw,22px)",
-              fontWeight:    600,
-              color:         RED_COLOR,
-              borderBottom:  `2px solid ${LINE_COLOR}`,
-              paddingBottom: "3px",
-              lineHeight:    1.3,
-            }}
-          >
-            {item.answer}
-          </div>
-        ) : (
-          /* drop zone */
-          <div
-            ref={(el) => (dropRefs.current[boxKey] = el)}
-            onDragOver={(e) => e.preventDefault()}
-            onDrop={() => handleDrop(boxKey)}
-            onClick={() => handleRemove(boxKey)}
-            style={{
-              position:      "relative",
-              minHeight:     "clamp(28px,3.5vw,42px)",
-              borderBottom:  `2px solid ${wrong ? WRONG_COLOR : LINE_COLOR}`,
-              display:       "flex",
-              alignItems:    "flex-end",
-              paddingBottom: "3px",
-              boxSizing:     "border-box",
-              cursor:        value && !showAns ? "pointer" : "default",
-            }}
-          >
-            {value && (
-              <span
-                style={{
-                  fontSize:   "clamp(14px,1.8vw,22px)",
-                  fontWeight: 600,
-                  color:      wrong ? WRONG_COLOR : RED_COLOR,
-                  lineHeight: 1.3,
-                  wordBreak:  "break-word",
-                }}
-              >
-                {value}
-              </span>
-            )}
-
-            {wrong && (
-              <div
-                style={{
-                  position:        "absolute",
-                  top:             "-8px",
-                  right:           "-8px",
-                  width:           "clamp(16px,1.8vw,22px)",
-                  height:          "clamp(16px,1.8vw,22px)",
-                  borderRadius:    "50%",
-                  backgroundColor: WRONG_COLOR,
-                  color:           "#fff",
-                  display:         "flex",
-                  alignItems:      "center",
-                  justifyContent:  "center",
-                  fontSize:        "clamp(9px,0.9vw,12px)",
-                  fontWeight:      700,
-                  boxShadow:       "0 1px 4px rgba(0,0,0,0.2)",
-                  zIndex:          3,
-                  pointerEvents:   "none",
-                }}
-              >
-                ✕
-              </div>
-            )}
-          </div>
-        )}
-      </div>
-    );
+  const getDotColor = (side, id) => {
+    if (side === "left") {
+      if (selectedLeft === id) return DOT_SELECTED_COLOR;
+      if (matches[id]) return showAns ? LINE_CORRECT_COLOR : (showResults ? (CORRECT_ANSWERS[id] === matches[id] ? LINE_CORRECT_COLOR : LINE_WRONG_COLOR) : DOT_DEFAULT_COLOR);
+    }
+    return DOT_DEFAULT_COLOR;
   };
 
   return (
     <div className="main-container-component">
+      <style>{`
+        /* ── Matching area ── */
+        .rlm2-container {
+          position: relative;
+          width: 100%;
+        }
+
+        .rlm2-rows {
+          display: grid;
+          grid-template-columns: 1fr auto 1fr;
+          align-items: center;
+          row-gap: clamp(10px, 1.6vw, 18px);
+          width: 100%;
+        }
+
+        /* Left sentence */
+        .rlm2-left {
+          display: flex;
+          align-items: center;
+          gap: clamp(6px, 0.8vw, 10px);
+          cursor: pointer;
+          user-select: none;
+        }
+
+        .rlm2-num {
+          font-size: clamp(14px, 1.7vw, 20px);
+          font-weight: 700;
+          color: ${NUMBER_COLOR};
+          min-width: clamp(16px, 1.8vw, 22px);
+          flex-shrink: 0;
+        }
+
+        .rlm2-text {
+          font-size: clamp(14px, 1.7vw, 20px);
+          font-weight: 400;
+          color: ${SENTENCE_COLOR};
+          line-height: 1.4;
+        }
+
+        .rlm2-dot {
+          width: clamp(9px, 1.1vw, 13px);
+          height: clamp(9px, 1.1vw, 13px);
+          border-radius: 50%;
+          flex-shrink: 0;
+          transition: background 0.15s, transform 0.15s;
+          cursor: pointer;
+        }
+        .rlm2-dot:hover { transform: scale(1.3); }
+
+        /* Spacer for SVG */
+        .rlm2-spacer {
+          width: clamp(60px, 8vw, 120px);
+        }
+
+        /* Right answer */
+        .rlm2-right {
+          display: flex;
+          align-items: center;
+          gap: clamp(6px, 0.8vw, 10px);
+          cursor: pointer;
+          user-select: none;
+          justify-content: flex-start;
+        }
+
+        /* SVG overlay */
+        .rlm2-svg {
+          position: absolute;
+          top: 0; left: 0;
+          width: 100%;
+          height: 100%;
+          pointer-events: none;
+          overflow: visible;
+        }
+
+        /* Images grid */
+        .rlm2-images {
+          display: grid;
+          grid-template-columns: repeat(2, 1fr);
+          gap: clamp(10px, 1.6vw, 20px);
+          margin-top: clamp(16px, 2.4vw, 28px);
+        }
+
+        .rlm2-img-card {
+          display: flex;
+          align-items: center;
+          gap: clamp(6px, 0.8vw, 12px);
+        }
+
+        .rlm2-img {
+          width: clamp(100px, 14vw, 180px);
+          height: clamp(75px, 10vw, 130px);
+          display: block;
+          object-fit: cover;
+          border-radius: 8px;
+          border: 2px solid #2096a6;
+        }
+
+        .rlm2-img-name {
+          font-size: clamp(13px, 1.5vw, 18px);
+          font-weight: 400;
+          color: ${SENTENCE_COLOR};
+        }
+
+
+        /* ✕ badge on dot */
+        .rlm2-badge {
+          position: absolute;
+          top: -8px; right: -8px;
+          width: clamp(16px, 1.8vw, 20px);
+          height: clamp(16px, 1.8vw, 20px);
+          border-radius: 50%;
+          background: #ef4444;
+          color: #ffffff;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: clamp(8px, 0.9vw, 11px);
+          font-weight: 700;
+          border: 2px solid #fff;
+          box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+          pointer-events: none;
+          z-index: 2;
+        }
+
+        /* Buttons */
+        .rlm2-buttons {
+          display: flex;
+          justify-content: center;
+          margin-top: clamp(8px, 1.6vw, 18px);
+        }
+
+        @media (max-width: 520px) {
+          .rlm2-spacer { width: 40px; }
+          .rlm2-images { grid-template-columns: 1fr; }
+        }
+      `}</style>
+
       <div
         className="div-forall"
         style={{
-          display:       "flex",
+          display: "flex",
           flexDirection: "column",
-          gap:           "18px",
-          maxWidth:      "1100px",
-          margin:        "0 auto",
+          gap: "clamp(14px, 2vw, 22px)",
+          maxWidth: "1100px",
+          margin: "0 auto",
         }}
       >
-        {/* Title */}
+        {/* ── Header ── */}
         <h1
           className="WB-header-title-page8"
-          style={{
-            margin:     0,
-            display:    "flex",
-            alignItems: "center",
-            gap:        "12px",
-            flexWrap:   "wrap",
-          }}
+          style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
         >
-          <span className="WB-ex-A">I</span> Read, look, and write.
+          <span className="WB-ex-A">I</span>
+          Read, look, and match.
         </h1>
 
-        {/* Word bank */}
-        <div
-          style={{
-            width:          "100%",
-            border:         `2px solid ${BORDER_COLOR}`,
-            borderRadius:   "clamp(12px,1.4vw,18px)",
-            padding:        "clamp(10px,1.2vw,16px)",
-            boxSizing:      "border-box",
-            display:        "flex",
-            flexWrap:       "wrap",
-            gap:            "clamp(8px,1vw,12px)",
-            justifyContent: "center",
-            background:     "#fff",
-          }}
-        >
-          {DRAG_ITEMS.map((item) => {
-            const isUsed = usedIds.includes(item.id);
-            return (
-              <div
-                key={item.id}
-                draggable={!isUsed && !showAns}
-                onDragStart={() => handleDragStart(item)}
-                onTouchStart={(e) => handleTouchStart(e, item)}
-                onTouchMove={handleTouchMove}
-                onTouchEnd={handleTouchEnd}
-                style={{
-                  padding:         "clamp(7px,0.9vw,12px) clamp(12px,1.4vw,18px)",
-                  borderRadius:    "14px",
-                  border:          `1.5px solid ${isUsed ? "#d9d9d9" : ACTIVE_COLOR}`,
-                  backgroundColor: isUsed ? "#eeeeee" : SOFT_COLOR,
-                  color:           isUsed ? "#999" : "#222",
-                  cursor:          isUsed || showAns ? "not-allowed" : "grab",
-                  opacity:         isUsed ? 0.6 : 1,
-                  userSelect:      "none",
-                  fontSize:        "clamp(13px,1.5vw,19px)",
-                  fontWeight:      600,
-                  boxShadow:       isUsed ? "none" : "0 2px 8px rgba(0,0,0,0.06)",
-                  transition:      "0.2s ease",
-                  touchAction:     "none",
-                  textAlign:       "center",
-                  lineHeight:      1.3,
-                }}
-              >
-                {item.value}
-              </div>
-            );
-          })}
+        {/* ── Matching rows ── */}
+        <div className="rlm2-container" ref={containerRef}>
+          <svg ref={svgRef} className="rlm2-svg">
+            {lines.map((line, i) => (
+              <line
+                key={i}
+                x1={line.x1} y1={line.y1}
+                x2={line.x2} y2={line.y2}
+                stroke={line.color}
+                strokeWidth="2"
+                strokeDasharray="5,4"
+              />
+            ))}
+          </svg>
+
+          <div className="rlm2-rows">
+            {LEFT_ITEMS.map((left, idx) => {
+              const right = RIGHT_ITEMS[idx];
+              const dotColorL = getDotColor("left", left.id);
+              const dotColorR = DOT_DEFAULT_COLOR;
+              const isSelected = selectedLeft === left.id;
+              const isWrongMatch = showResults && !showAns && matches[left.id] && CORRECT_ANSWERS[left.id] !== matches[left.id];
+
+              return (
+                <React.Fragment key={left.id}>
+
+                  {/* Left */}
+                  <div
+                    className={`rlm2-left${isSelected ? " rlm2-left--selected" : ""}`}
+                    onClick={() => handleLeftClick(left.id)}
+                  >
+                    <span className="rlm2-num">{left.id}</span>
+                    <span className="rlm2-text">{left.text}</span>
+                    <div style={{ position: "relative", flexShrink: 0 }}>
+                      <div
+                        ref={(el) => (leftRefs.current[left.id] = el)}
+                        className="rlm2-dot"
+                        style={{ background: dotColorL }}
+                      />
+                      {isWrongMatch && <div className="rlm2-badge">✕</div>}
+                    </div>
+                  </div>
+
+                  {/* Spacer */}
+                  <div className="rlm2-spacer" />
+
+                  {/* Right */}
+                  <div className="rlm2-right" onClick={() => handleRightClick(right.id)}>
+                    <div
+                      ref={(el) => (rightRefs.current[right.id] = el)}
+                      className="rlm2-dot"
+                      style={{ background: dotColorR }}
+                    />
+                    <span className="rlm2-text">{right.text}</span>
+                  </div>
+
+                </React.Fragment>
+              );
+            })}
+          </div>
         </div>
 
-        {/* 2×2 grid */}
-        <div
-          style={{
-            display:             "grid",
-            gridTemplateColumns: "repeat(2, minmax(0,1fr))",
-            gap:                 "clamp(20px,3vw,36px) clamp(24px,4vw,48px)",
-            width:               "100%",
-          }}
-        >
-          {ITEMS.map((item) => renderItem(item))}
+        {/* ── Images ── */}
+        <div className="rlm2-images">
+          {IMAGES.map((img) => (
+            <div key={img.name} className="rlm2-img-card">
+              <img src={img.src} alt={img.name} className="rlm2-img" />
+              <span className="rlm2-img-name">{img.name}</span>
+            </div>
+          ))}
         </div>
 
-        {/* Buttons */}
-        <div
-          style={{
-            display:        "flex",
-            justifyContent: "center",
-            marginTop:      "clamp(6px,1vw,12px)",
-          }}
-        >
+        {/* ── Buttons ── */}
+        <div className="rlm2-buttons">
           <Button
             checkAnswers={handleCheck}
             handleShowAnswer={handleShowAnswer}
-            handleStartAgain={handleStartAgain}
+            handleStartAgain={handleReset}
           />
         </div>
       </div>
-
-      {/* Touch ghost */}
-      {touchItem && (
-        <div
-          style={{
-            position:       "fixed",
-            left:           touchPos.x - 80,
-            top:            touchPos.y - 20,
-            background:     "#fff",
-            padding:        "8px 14px",
-            borderRadius:   "10px",
-            boxShadow:      "0 4px 10px rgba(0,0,0,0.2)",
-            pointerEvents:  "none",
-            zIndex:         9999,
-            fontSize:       "clamp(13px,1.5vw,18px)",
-            fontWeight:     600,
-            color:          "#222",
-            maxWidth:       "220px",
-            textAlign:      "center",
-            lineHeight:     1.3,
-          }}
-        >
-          {touchItem.value}
-        </div>
-      )}
     </div>
   );
 }

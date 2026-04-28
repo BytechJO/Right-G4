@@ -2,359 +2,265 @@ import React, { useState } from "react";
 import Button from "../Button";
 import ValidationAlert from "../../Popup/ValidationAlert";
 
-// ── House image (one full image)
-import houseImg from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U5 Folder/Page 30/H1.svg";
+// ─────────────────────────────────────────────
+//  🎨  COLORS
+// ─────────────────────────────────────────────
+const INPUT_BORDER_DEFAULT = "#2096a6";
+const INPUT_BORDER_WRONG   = "#ef4444";
+const INPUT_TEXT_COLOR     = "#2b2b2b";
+const INPUT_ANSWER_COLOR   = "#c81e1e";
+const LABEL_COLOR          = "#2b2b2b";
+const SENTENCE_COLOR       = "#2b2b2b";
+const PARAGRAPH_COLOR      = "#2b2b2b";
+const WRONG_BADGE_BG       = "#ef4444";
+const WRONG_BADGE_TEXT     = "#ffffff";
 
-// ── Character images
-import girlImg from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U5 Folder/Page 30/H2.svg";
-import boyImg  from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U5 Folder/Page 30/H3.svg";
+// ─────────────────────────────────────────────
+//  📝  EXERCISE DATA
+// ─────────────────────────────────────────────
+const PARAGRAPH = `Joey had a brown rabbit called Bow. Joey and Bow did everything together. He took Bow to museums. Bow liked to sit and watch movies with Joey. Bow would even sit on a seat just like Joey. Joey and Bow would run under bridges and walk carefully through dark tunnels while Joey carried a flashlight. Bow liked to watch as Joey flew a kite above their heads. Bow and Joey would sometimes sleep under trees when they got tired of playing together. At night, Joey would read Bow a story from a book. Then they would fall asleep together.`;
 
-// ── Bottom item images
-import armchairImg  from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U5 Folder/Page 30/H4.svg";
-import chairImg     from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U5 Folder/Page 30/H5.svg";
-import bathtubImg   from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U5 Folder/Page 30/H6.svg";
-import fridgeImg    from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U5 Folder/Page 30/H7.svg";
-import telephoneImg from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U5 Folder/Page 30/H8.svg";
-
-const BORDER_COLOR = "#f39b42";
-const WRONG_COLOR  = "#ef4444";
-const RED_COLOR    = "#000000ff";
-
-const LABELS = [
-  { id: 1, correct: "bedroom",     style: { top: "12%", left: "30%" } },
-  { id: 2, correct: "living room", style: { top: "12%", left: "72%" } },
-  { id: 3, correct: "bathroom",    style: { top: "58%", left: "30%" } },
-  { id: 4, correct: "kitchen",     style: { top: "58%", left: "72%" } },
+const ITEMS = [
+  { id: "a", sentence: "Joey and Bow would sleep under trees.",    correct: ["7"], answer: "7" },
+  { id: "b", sentence: "Bow liked watching Joey fly a kite.",      correct: ["5"], answer: "5" },
+  { id: "c", sentence: "Joey took Bow to museums.",                correct: ["1"], answer: "1" },
+  { id: "d", sentence: "They walked carefully through dark tunnels.", correct: ["4"], answer: "4" },
+  { id: "e", sentence: "They would watch movies.",                 correct: ["2"], answer: "2" },
+  { id: "f", sentence: "Joey and Bow would run under bridges.",    correct: ["3"], answer: "3" },
+  { id: "g", sentence: "Joey would read a story from a book.",     correct: ["6"], answer: "6" },
 ];
 
-const OPTIONS = ["bedroom", "living room", "bathroom", "kitchen"];
+// ─────────────────────────────────────────────
+//  🔧  NORMALIZE
+// ─────────────────────────────────────────────
+const isCorrect = (userVal, correctArr) =>
+  correctArr.some((c) => userVal.trim() === c.trim());
 
-const BOTTOM_ITEMS = [
-  { id: 1, img: armchairImg,  alt: "armchair"  },
-  { id: 2, img: chairImg,     alt: "chair"     },
-  { id: 3, img: bathtubImg,   alt: "bathtub"   },
-  { id: 4, img: fridgeImg,    alt: "fridge"    },
-  { id: 5, img: telephoneImg, alt: "telephone" },
-];
-
-export default function WB_Unit5_Page30_Q2() {
-  const [selected, setSelected] = useState({ 1: "", 2: "", 3: "", 4: "" });
+// ─────────────────────────────────────────────
+//  COMPONENT
+// ─────────────────────────────────────────────
+export default function WB_ReadNumber_QH() {
+  const [answers,     setAnswers]     = useState({});
   const [showResults, setShowResults] = useState(false);
-  const [showAns, setShowAns]         = useState(false);
+  const [showAns,     setShowAns]     = useState(false);
 
   const handleChange = (id, value) => {
     if (showAns) return;
-    setSelected((prev) => ({ ...prev, [id]: value }));
-    setShowResults(false);
+    const item = ITEMS.find((i) => i.id === id);
+    if (showResults && item && isCorrect(answers[id] || "", item.correct)) return;
+    // رقم واحد فقط 1-9
+    if (value !== "" && !/^[1-9]$/.test(value)) return;
+    setAnswers((prev) => ({ ...prev, [id]: value }));
   };
 
   const handleCheck = () => {
     if (showAns) return;
-    const allAnswered = LABELS.every((l) => selected[l.id]);
-    if (!allAnswered) {
-      ValidationAlert.info("Please answer all questions first.");
-      return;
-    }
+    const allAnswered = ITEMS.every((item) => answers[item.id]?.trim());
+    if (!allAnswered) { ValidationAlert.info("Please complete all answers first."); return; }
     let score = 0;
-    LABELS.forEach((l) => { if (selected[l.id] === l.correct) score++; });
+    ITEMS.forEach((item) => { if (isCorrect(answers[item.id] || "", item.correct)) score++; });
     setShowResults(true);
-    if (score === LABELS.length)      ValidationAlert.success(`Score: ${score} / ${LABELS.length}`);
-    else if (score > 0)               ValidationAlert.warning(`Score: ${score} / ${LABELS.length}`);
-    else                              ValidationAlert.error(`Score: ${score} / ${LABELS.length}`);
+    if (score === ITEMS.length)   ValidationAlert.success(`Score: ${score} / ${ITEMS.length}`);
+    else if (score > 0)           ValidationAlert.warning(`Score: ${score} / ${ITEMS.length}`);
+    else                          ValidationAlert.error(`Score: ${score} / ${ITEMS.length}`);
   };
 
   const handleShowAnswer = () => {
     const filled = {};
-    LABELS.forEach((l) => { filled[l.id] = l.correct; });
-    setSelected(filled);
-    setShowResults(true);
+    ITEMS.forEach((item) => { filled[item.id] = item.answer; });
+    setAnswers(filled);
+    setShowResults(false);
     setShowAns(true);
   };
 
-  const handleStartAgain = () => {
-    setSelected({ 1: "", 2: "", 3: "", 4: "" });
+  const handleReset = () => {
+    setAnswers({});
     setShowResults(false);
     setShowAns(false);
   };
 
-  const isWrong = (label) =>
-    showResults && selected[label.id] !== label.correct;
+  const isWrong = (item) => {
+    if (!showResults || showAns) return false;
+    return !isCorrect(answers[item.id] || "", item.correct);
+  };
+
+  const isDisabled = (item) => {
+    if (showAns) return true;
+    if (showResults && isCorrect(answers[item.id] || "", item.correct)) return true;
+    return false;
+  };
 
   return (
     <div className="main-container-component">
+      <style>{`
+        /* ── Paragraph ── */
+        .ran-para {
+          font-size: clamp(13px, 1.5vw, 18px);
+          color: ${PARAGRAPH_COLOR};
+          line-height: 1.7;
+          text-indent: clamp(16px, 2vw, 26px);
+          margin: 0;
+        }
+
+        /* ── Items list ── */
+        .ran-list {
+          display: flex;
+          flex-direction: column;
+          gap: clamp(10px, 1.4vw, 16px);
+          width: 100%;
+        }
+
+        /* ── Single row: input | label | sentence ── */
+        .ran-row {
+          display: flex;
+          align-items: center;
+          gap: clamp(8px, 1.2vw, 16px);
+          min-width: 0;
+        }
+
+        /* Number input — square box */
+        .ran-input-wrap {
+          position: relative;
+          flex-shrink: 0;
+        }
+
+        .ran-input {
+          width: clamp(40px, 4vw, 40px);
+          height: clamp(40px, 4vw, 40px);
+          border: 2px solid ${INPUT_BORDER_DEFAULT};
+          border-radius: 8px;
+          background: #fff;
+          text-align: center;
+          font-size: clamp(14px, 1.8vw, 22px);
+          font-weight: 700;
+          color: ${INPUT_TEXT_COLOR};
+          outline: none;
+          font-family: inherit;
+          transition: border-color 0.2s;
+          padding: 0;
+          box-sizing: border-box;
+          cursor: text;
+        }
+        .ran-input:disabled        { opacity: 1; cursor: default; }
+        .ran-input--wrong          { border-color: ${INPUT_BORDER_WRONG}; }
+        .ran-input--answer         { color: ${INPUT_ANSWER_COLOR}; }
+
+        /* ✕ badge */
+        .ran-badge {
+          position: absolute;
+          top: -8px; right: -8px;
+          width: clamp(16px, 1.8vw, 20px);
+          height: clamp(16px, 1.8vw, 20px);
+          border-radius: 50%;
+          background: ${WRONG_BADGE_BG};
+          color: ${WRONG_BADGE_TEXT};
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: clamp(8px, 0.9vw, 11px);
+          font-weight: 700;
+          border: 2px solid #fff;
+          box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+          pointer-events: none;
+          z-index: 2;
+        }
+
+        /* Label — a b c d... */
+        .ran-label {
+          font-size: clamp(14px, 1.7vw, 20px);
+          font-weight: 700;
+          color: ${LABEL_COLOR};
+          flex-shrink: 0;
+          min-width: clamp(14px, 1.6vw, 20px);
+        }
+
+        /* Sentence */
+        .ran-sentence {
+          font-size: clamp(14px, 1.7vw, 20px);
+          font-weight: 400;
+          color: ${SENTENCE_COLOR};
+          line-height: 1.5;
+        }
+
+        /* Buttons */
+        .ran-buttons {
+          display: flex;
+          justify-content: center;
+          margin-top: clamp(8px, 1.6vw, 18px);
+        }
+      `}</style>
+
       <div
         className="div-forall"
         style={{
           display: "flex",
           flexDirection: "column",
-          gap: "18px",
+          gap: "clamp(14px, 2vw, 22px)",
           maxWidth: "1100px",
           margin: "0 auto",
         }}
       >
-        {/* ── Title ── */}
+        {/* ── Header ── */}
         <h1
           className="WB-header-title-page8"
-          style={{
-            margin: 0,
-            display: "flex",
-            alignItems: "center",
-            gap: "12px",
-            flexWrap: "wrap",
-          }}
+          style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
         >
-          <span className="WB-ex-A">H</span> Label the rooms and ask a friend.
+          <span className="WB-ex-A">H</span>
+          Read and number in the correct order.
         </h1>
 
-        {/* ── House image + overlaid dropdowns ── */}
-        <div
-          style={{
-            position: "relative",
-            width: "100%",
-            border: `2px solid ${BORDER_COLOR}`,
-            borderRadius: "clamp(12px, 1.4vw, 18px)",
-            overflow: "hidden",
-            background: "#f7f7f7",
-          }}
-        >
-          <img
-            src={houseImg}
-            alt="house rooms"
-            style={{ width: "100%", height: "auto", display: "block" }}
-          />
+        {/* ── Paragraph ── */}
+        <p className="ran-para">{PARAGRAPH}</p>
 
-          {LABELS.map((label) => {
-            const wrong = isWrong(label);
+        {/* ── Items ── */}
+        <div className="ran-list">
+          {ITEMS.map((item) => {
+            const wrong    = isWrong(item);
+            const value    = answers[item.id] || "";
+            const tColor   = showAns ? INPUT_ANSWER_COLOR : INPUT_TEXT_COLOR;
+            const bColor   = wrong ? INPUT_BORDER_WRONG : INPUT_BORDER_DEFAULT;
+            const disabled = isDisabled(item);
+
             return (
-              <div
-                key={label.id}
-                style={{
-                  position: "absolute",
-                  ...label.style,
-                  transform: "translateX(-50%)",
-                  zIndex: 2,
-                }}
-              >
-                <div style={{ position: "relative", display: "inline-block" }}>
-                  <select
-                    disabled={showAns}
-                    value={selected[label.id]}
-                    onChange={(e) => handleChange(label.id, e.target.value)}
-                    style={{
-                      background: "#fff",
-                      border: `2px solid ${wrong ? WRONG_COLOR : BORDER_COLOR}`,
-                      borderRadius: "999px",
-                      padding: "clamp(3px,0.5vw,6px) clamp(10px,1.5vw,20px)",
-                      fontSize: "clamp(12px,1.5vw,18px)",
-                      fontWeight: 700,
-                      color: RED_COLOR,
-                      cursor: showAns ? "default" : "pointer",
-                      outline: "none",
-                      appearance: "auto",
-                      boxShadow: "0 2px 8px rgba(0,0,0,0.10)",
-                      minWidth: "clamp(100px,14vw,180px)",
-                    }}
-                  >
-                    <option value="" disabled hidden></option>
-                    {OPTIONS.map((opt) => (
-                      <option key={opt} value={opt}>{opt}</option>
-                    ))}
-                  </select>
+              <div key={item.id} className="ran-row">
 
-                  {wrong && (
-                    <div
-                      style={{
-                        position: "absolute",
-                        top: "-6px",
-                        right: "-6px",
-                        width: "clamp(16px,1.8vw,22px)",
-                        height: "clamp(16px,1.8vw,22px)",
-                        borderRadius: "50%",
-                        backgroundColor: WRONG_COLOR,
-                        color: "#fff",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        fontSize: "clamp(9px,0.9vw,12px)",
-                        fontWeight: 700,
-                        boxShadow: "0 1px 4px rgba(0,0,0,0.2)",
-                        zIndex: 3,
-                      }}
-                    >
-                      ✕
-                    </div>
-                  )}
+                {/* Number input */}
+                <div className="ran-input-wrap">
+                  <input
+                    type="text"
+                    maxLength={1}
+                    className={[
+                      "ran-input",
+                      wrong   ? "ran-input--wrong"  : "",
+                      showAns ? "ran-input--answer" : "",
+                    ].filter(Boolean).join(" ")}
+                    value={value}
+                    disabled={disabled}
+                    onChange={(e) => handleChange(item.id, e.target.value)}
+                    style={{ borderColor: bColor, color: tColor }}
+                    spellCheck={false}
+                    autoComplete="off"
+                  />
+                  {wrong && <div className="ran-badge">✕</div>}
                 </div>
+
+                {/* Label */}
+                <span className="ran-label">{item.id}</span>
+
+                {/* Sentence */}
+                <span className="ran-sentence">{item.sentence}</span>
+
               </div>
             );
           })}
         </div>
 
-        {/* ── Dialogue section: girl LEFT | boy RIGHT ── */}
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            gap: "clamp(10px,2vw,24px)",
-            flexWrap: "wrap",
-          }}
-        >
-          {/* ── Girl + her bubbles ── */}
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "clamp(8px,1vw,14px)",
-              flex: 1,
-              minWidth: 0,
-            }}
-          >
-            {/* Bubbles LEFT of girl */}
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                gap: "clamp(6px,0.8vw,10px)",
-                alignItems: "flex-end",
-              }}
-            >
-              {[
-                "Where's the telephone?",
-                "Is there a bathtub in the kitchen?",
-              ].map((text, i) => (
-                <div
-                  key={i}
-                  style={{
-                    background: "#fff",
-                    border: "2px solid #ccc",
-                    borderRadius: "clamp(10px,1.2vw,16px)",
-                    padding:
-                      "clamp(5px,0.7vw,9px) clamp(10px,1.3vw,16px)",
-                    fontSize: "clamp(12px,1.4vw,17px)",
-                    fontWeight: 500,
-                    color: "#222",
-                    maxWidth: "clamp(160px,24vw,280px)",
-                    lineHeight: 1.3,
-                    boxShadow: "0 1px 4px rgba(0,0,0,0.07)",
-                  }}
-                >
-                  {text}
-                </div>
-              ))}
-            </div>
-
-            {/* Girl image */}
-            <img
-              src={girlImg}
-              alt="girl"
-              style={{
-                height: "clamp(70px,11vw,130px)",
-                width: "auto",
-                objectFit: "contain",
-                flexShrink: 0,
-              }}
-            />
-          </div>
-
-          {/* ── Boy + his bubbles ── */}
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "clamp(8px,1vw,14px)",
-              flex: 1,
-              minWidth: 0,
-              justifyContent: "flex-end",
-            }}
-          >
-            {/* Boy image */}
-            <img
-              src={boyImg}
-              alt="boy"
-              style={{
-                height: "clamp(70px,11vw,130px)",
-                width: "auto",
-                objectFit: "contain",
-                flexShrink: 0,
-              }}
-            />
-
-            {/* Bubbles RIGHT of boy */}
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                gap: "clamp(6px,0.8vw,10px)",
-                alignItems: "flex-start",
-              }}
-            >
-              {["It's in the living room.", "No, there isn't."].map(
-                (text, i) => (
-                  <div
-                    key={i}
-                    style={{
-                      background: "#fff",
-                      border: "2px solid #ccc",
-                      borderRadius: "clamp(10px,1.2vw,16px)",
-                      padding:
-                        "clamp(5px,0.7vw,9px) clamp(10px,1.3vw,16px)",
-                      fontSize: "clamp(12px,1.4vw,17px)",
-                      fontWeight: 500,
-                      color: "#222",
-                      maxWidth: "clamp(160px,24vw,280px)",
-                      lineHeight: 1.3,
-                      boxShadow: "0 1px 4px rgba(0,0,0,0.07)",
-                    }}
-                  >
-                    {text}
-                  </div>
-                )
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* ── Bottom item images ── */}
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "flex-end",
-            gap: "clamp(14px,2.5vw,36px)",
-            flexWrap: "wrap",
-            padding: "clamp(6px,1vw,12px) 0",
-          }}
-        >
-          {BOTTOM_ITEMS.map((item) => (
-            <img
-              key={item.id}
-              src={item.img}
-              alt={item.alt}
-              style={{
-                height: "clamp(55px,9vw,105px)",
-                width: "auto",
-                objectFit: "contain",
-                display: "block",
-                userSelect: "none",
-                pointerEvents: "none",
-              }}
-            />
-          ))}
-        </div>
-
         {/* ── Buttons ── */}
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            marginTop: "clamp(6px,1vw,12px)",
-          }}
-        >
+        <div className="ran-buttons">
           <Button
             checkAnswers={handleCheck}
             handleShowAnswer={handleShowAnswer}
-            handleStartAgain={handleStartAgain}
+            handleStartAgain={handleReset}
           />
         </div>
       </div>

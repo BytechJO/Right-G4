@@ -245,6 +245,8 @@ const getCellStyle = (key, isSelecting, isWrong) => {
 
         /* ── الجدول ── */
         .wsk-grid {
+            top: 45px;
+    position: relative;
           display: grid;
           grid-template-columns: repeat(10, 1fr);
           gap: 0;

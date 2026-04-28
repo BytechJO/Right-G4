@@ -1,469 +1,375 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useLayoutEffect } from "react";
 import Button from "../Button";
 import ValidationAlert from "../../Popup/ValidationAlert";
 
-// ── استبدلي المسارات بمساراتك الفعلية
-import img1 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U6 Folder/Page 34/D.1.svg";
-import img2 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U6 Folder/Page 34/D.2.svg";
-import img3 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U6 Folder/Page 34/D.3.svg";
-import img4 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U6 Folder/Page 34/D.4.svg";
-import img5 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U6 Folder/Page 34/D.5.svg";
-import img6 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U6 Folder/Page 34/D.6.svg";
-const BORDER_COLOR = "#f39b42";
-const WRONG_COLOR  = "#ef4444";
-const ANSWER_COLOR = "#d62828";
-const LINE_COLOR   = "#2f2f2f";
+// ─────────────────────────────────────────────
+//  🖼️  IMAGE — school bus scene
+// ─────────────────────────────────────────────
+import sceneImg from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U6 Folder/Page 34/Asset 19.svg";
 
-// الـ word bank — كل الكلمات مع بعض
-const DRAG_ITEMS = [
-  { id: "d1", value: "first"               },
-  { id: "d2", value: "second"              },
-  { id: "d3", value: "fifth"               },
-  { id: "d4", value: "is running"          },
-  { id: "d5", value: "is eating an ice cream" },
-  { id: "d6", value: "is singing"          },
+// ─────────────────────────────────────────────
+//  🎨  COLORS
+// ─────────────────────────────────────────────
+const LINE_COLOR       = "#2096a6";
+const WRONG_LINE_COLOR = "#ef4444";
+const SENTENCE_COLOR   = "#2b2b2b";
+const NUMBER_COLOR     = "#2b2b2b";
+const WRONG_BADGE_BG   = "#ef4444";
+const WRONG_BADGE_TEXT = "#ffffff";
+
+// ─────────────────────────────────────────────
+//  📝  EXERCISE DATA
+// ─────────────────────────────────────────────
+const LEFT_ITEMS = [
+  { id: 1, label: "All set for school?"  },
+  { id: 2, label: "I'm almost ready."   },
+  { id: 3, label: "Okay, dear."         },
+  { id: 4, label: "What about these?"   },
 ];
 
-// الأسئلة الستة
-const ITEMS = [
-  {
-    id: 1,
-    img: img3,
-    sentence: { before: "The third boy", after: "." },
-    correct: "is running",
-    type: "verb",
-  },
-  {
-    id: 2,
-    img: img1,
-    sentence: { before: "The", after: "boy is riding a bike." },
-    correct: "first",
-    type: "ordinal",
-  },
-  {
-    id: 3,
-    img: img6,
-    sentence: { before: "The sixth boy", after: "." },
-    correct: "is eating an ice cream",
-    type: "verb",
-  },
-  {
-    id: 4,
-    img: img5,
-    sentence: { before: "The", after: "boy is kicking the ball." },
-    correct: "fifth",
-    type: "ordinal",
-  },
-  {
-    id: 5,
-    img: img4,
-    sentence: { before: "The fourth boy", after: "." },
-    correct: "is singing",
-    type: "verb",
-  },
-  {
-    id: 6,
-    img: img2,
-    sentence: { before: "The", after: "boy is skateboarding." },
-    correct: "second",
-    type: "ordinal",
-  },
+const RIGHT_ITEMS = [
+  { id: 1, label: "You're almost finished, but you have other things to do before you can leave." },
+  { id: 2, label: "What do you think about these items?" },
+  { id: 3, label: "Yes, that's fine."                   },
+  { id: 4, label: "You're asking if the person is ready to go to school." },
 ];
 
-export default function WB_LookReadWrite_PageD() {
-  const [answers,     setAnswers]     = useState({});
-  const [touchItem,   setTouchItem]   = useState(null);
-  const [touchPos,    setTouchPos]    = useState({ x: 0, y: 0 });
-  const [draggedItem, setDraggedItem] = useState(null);
-  const [showResults, setShowResults] = useState(false);
-  const [showAns,     setShowAns]     = useState(false);
+// left id → right id
+const CORRECT_MATCHES = {
+  1: 4,
+  2: 1,
+  3: 3,
+  4: 2,
+};
 
-  const dropRefs = useRef({});
+// ─────────────────────────────────────────────
+//  COMPONENT
+// ─────────────────────────────────────────────
+export default function WB_ReadMatch_QD() {
+  const [selectedLeft, setSelectedLeft] = useState(null);
+  const [matches,      setMatches]      = useState({});
+  const [showResults,  setShowResults]  = useState(false);
+  const [showAns,      setShowAns]      = useState(false);
+  const [lines,        setLines]        = useState([]);
 
-  const usedIds = Object.values(answers)
-    .filter(Boolean)
-    .map((e) => e.dragId);
+  const containerRef = useRef(null);
+  const dotRefs      = useRef({});
 
-  const applyDrop = (boxKey, item) => {
-    const upd = { ...answers };
-    // إذا الكلمة مستخدمة بمكان ثاني، امسحها منه
-    Object.keys(upd).forEach((k) => {
-      if (upd[k]?.dragId === item.id) delete upd[k];
-    });
-    upd[boxKey] = { dragId: item.id, value: item.value };
-    setAnswers(upd);
-    setShowResults(false);
+  const isLocked = showAns;
+
+  // ── Recalculate SVG lines ─────────────────
+  useLayoutEffect(() => {
+    const update = () => {
+      if (!containerRef.current) return;
+      const cr = containerRef.current.getBoundingClientRect();
+      const newLines = Object.entries(matches).map(([lid, rid]) => {
+        const lEl = dotRefs.current[`left-${lid}`];
+        const rEl = dotRefs.current[`right-${rid}`];
+        if (!lEl || !rEl) return null;
+        const lr = lEl.getBoundingClientRect();
+        const rr = rEl.getBoundingClientRect();
+        return {
+          id:      `${lid}-${rid}`,
+          leftId:  Number(lid),
+          rightId: Number(rid),
+          x1: lr.left + lr.width / 2 - cr.left,
+          y1: lr.top  + lr.height / 2 - cr.top,
+          x2: rr.left + rr.width / 2 - cr.left,
+          y2: rr.top  + rr.height / 2 - cr.top,
+        };
+      }).filter(Boolean);
+      setLines(newLines);
+    };
+    const raf = () => requestAnimationFrame(update);
+    raf();
+    window.addEventListener("resize", raf);
+    return () => window.removeEventListener("resize", raf);
+  }, [matches]);
+
+  // ── Handlers ─────────────────────────────
+  const handleLeftClick = (id) => {
+    if (isLocked) return;
+    setSelectedLeft(id);
   };
 
-  // ── Mouse drag
-  const handleDragStart = (item) => {
-    if (showAns || usedIds.includes(item.id)) return;
-    setDraggedItem(item);
-  };
-  const handleDrop = (boxKey) => {
-    if (showAns || !draggedItem) return;
-    applyDrop(boxKey, draggedItem);
-    setDraggedItem(null);
-  };
-
-  // ── Touch drag
-  const handleTouchStart = (e, item) => {
-    if (showAns || usedIds.includes(item.id)) return;
-    const t = e.touches[0];
-    setTouchItem(item);
-    setTouchPos({ x: t.clientX, y: t.clientY });
-  };
-  const handleTouchMove = (e) => {
-    if (!touchItem) return;
-    const t = e.touches[0];
-    setTouchPos({ x: t.clientX, y: t.clientY });
-  };
-  const handleTouchEnd = () => {
-    if (!touchItem) return;
-    Object.entries(dropRefs.current).forEach(([key, ref]) => {
-      if (!ref) return;
-      const r = ref.getBoundingClientRect();
-      if (
-        touchPos.x >= r.left && touchPos.x <= r.right &&
-        touchPos.y >= r.top  && touchPos.y <= r.bottom
-      ) applyDrop(key, touchItem);
-    });
-    setTouchItem(null);
+  const handleRightClick = (rid) => {
+    if (isLocked || selectedLeft === null) return;
+    const updated = { ...matches };
+    // remove old match to this right item
+    Object.keys(updated).forEach((k) => { if (updated[k] === rid) delete updated[k]; });
+    updated[selectedLeft] = rid;
+    setMatches(updated);
+    setSelectedLeft(null);
   };
 
-  const handleRemove = (boxKey) => {
-    if (showAns) return;
-    setAnswers((prev) => {
-      const u = { ...prev };
-      delete u[boxKey];
-      return u;
-    });
-    setShowResults(false);
-  };
-
-  // ── Check
   const handleCheck = () => {
-    if (showAns) return;
-    const allAnswered = ITEMS.every((i) => answers[`a-${i.id}`]?.value);
-    if (!allAnswered) {
-      ValidationAlert.info("Please complete all answers first.");
+    if (isLocked) return;
+    if (Object.keys(matches).length < LEFT_ITEMS.length) {
+      ValidationAlert.info("Please connect all items first.");
       return;
     }
     let score = 0;
-    ITEMS.forEach((i) => {
-      if (answers[`a-${i.id}`]?.value === i.correct) score++;
-    });
+    LEFT_ITEMS.forEach((l) => { if (matches[l.id] === CORRECT_MATCHES[l.id]) score++; });
     setShowResults(true);
-    const total = ITEMS.length;
-    if (score === total)  ValidationAlert.success(`Score: ${score} / ${total}`);
-    else if (score > 0)   ValidationAlert.warning(`Score: ${score} / ${total}`);
-    else                  ValidationAlert.error(`Score: ${score} / ${total}`);
+    if (score === LEFT_ITEMS.length)   ValidationAlert.success(`Score: ${score} / ${LEFT_ITEMS.length}`);
+    else if (score > 0)                ValidationAlert.warning(`Score: ${score} / ${LEFT_ITEMS.length}`);
+    else                               ValidationAlert.error(`Score: ${score} / ${LEFT_ITEMS.length}`);
   };
 
   const handleShowAnswer = () => {
-    const filled = {};
-    ITEMS.forEach((i) => {
-      const d = DRAG_ITEMS.find((d) => d.value === i.correct);
-      filled[`a-${i.id}`] = { dragId: d?.id ?? `auto-${i.id}`, value: i.correct };
-    });
-    setAnswers(filled);
-    setShowResults(true);
+    setMatches({ ...CORRECT_MATCHES });
+    setShowResults(false);
     setShowAns(true);
+    setSelectedLeft(null);
   };
 
-  const handleStartAgain = () => {
-    setAnswers({});
-    setDraggedItem(null);
-    setTouchItem(null);
+  const handleReset = () => {
+    setMatches({});
+    setSelectedLeft(null);
     setShowResults(false);
     setShowAns(false);
+    setLines([]);
   };
 
-  const isWrong = (item) =>
-    showResults && !showAns && answers[`a-${item.id}`]?.value !== item.correct;
+  // ── Helpers ───────────────────────────────
+  const isWrongLine         = (leftId) => showResults && !showAns && matches[leftId] !== CORRECT_MATCHES[leftId];
+  const isDotConnectedLeft  = (id)     => !!matches[id];
+  const isDotConnectedRight = (id)     => Object.values(matches).includes(id);
+  const isSelectedLeft      = (id)     => selectedLeft === id;
+
+  const dotColor = (connected, selected) =>
+    selected ? "#2096a6" : connected ? "#2096a6" : "#c0c0c0";
 
   return (
     <div className="main-container-component">
+      <style>{`
+        /* ── Matching container ── */
+        .rdm-match {
+      position: relative;
+    display: flex;
+    flex-direction: row;
+    /* width: 100%; */
+    gap: 110px;
+        }
+
+        /* Left col */
+        .rdm-left-col {
+          display: flex;
+          flex-direction: column;
+          min-width: 38%;
+        }
+
+        /* Right col */
+        .rdm-right-col {
+          display: flex;
+          flex-direction: column;
+          margin-left: auto;
+          min-width: 52%;
+        }
+
+        /* Left item */
+        .rdm-left-item {
+  display: flex;
+    align-items: center;
+    min-height: clamp(48px, 6.5vw, 72px);
+    cursor: pointer;
+    user-select: none;
+    border-radius: 8px;
+    padding: 4px 0;
+    position: relative;
+    gap: clamp(6px, 1vw, 10px);
+              justify-content: start;
+
+        }
+        .rdm-left-item--selected {
+          background: rgba(32,150,166,0.08);
+          outline: 2px solid #2096a6;
+          border-radius: 8px;
+        }
+
+        /* Right item */
+        .rdm-right-item {
+          display: flex;
+          align-items: center;
+          min-height: clamp(48px, 6.5vw, 72px);
+          cursor: pointer;
+          user-select: none;
+          border-radius: 8px;
+          padding: 4px 0;
+          gap: clamp(6px, 1vw, 10px);
+        }
+        .rdm-right-item--connected { background: rgba(32,150,166,0.06); }
+
+        .rdm-num {
+          font-size: clamp(14px, 1.7vw, 20px);
+          font-weight: 700;
+          color: ${NUMBER_COLOR};
+          min-width: clamp(14px, 1.8vw, 22px);
+          flex-shrink: 0;
+        }
+
+        .rdm-label {
+          font-size: clamp(14px, 1.7vw, 18px);
+          color: ${SENTENCE_COLOR};
+          line-height: 1.4;
+        }
+
+        .rdm-dot {
+          width: clamp(11px, 1.4vw, 15px);
+          height: clamp(11px, 1.4vw, 15px);
+          border-radius: 50%;
+          transition: all 0.2s;
+          flex-shrink: 0;
+        }
+        .rdm-dot--selected { box-shadow: 0 0 0 4px rgba(32,150,166,0.2); }
+
+        /* ✕ badge */
+        .rdm-badge {
+          position: absolute;
+          top: 50%;
+          transform: translateY(-50%);
+          right: clamp(18px, 2.5vw, 28px);
+          width: clamp(16px, 1.8vw, 20px);
+          height: clamp(16px, 1.8vw, 20px);
+          border-radius: 50%;
+          background: ${WRONG_BADGE_BG};
+          color: ${WRONG_BADGE_TEXT};
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: clamp(9px, 1vw, 11px);
+          font-weight: 700;
+          border: 2px solid #fff;
+          box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+          pointer-events: none;
+          z-index: 3;
+        }
+
+        /* Scene image */
+        .rdm-scene {
+          width: 100%;
+          height: auto;
+          display: block;
+        }
+
+        .rdm-buttons {
+          display: flex;
+          justify-content: center;
+          margin-top: clamp(8px, 1.6vw, 18px);
+        }
+      `}</style>
+
       <div
         className="div-forall"
         style={{
-          display:       "flex",
+          display: "flex",
           flexDirection: "column",
-          gap:           "clamp(18px,2.5vw,28px)",
-          maxWidth:      "1100px",
-          margin:        "0 auto",
+          gap: "clamp(14px, 2vw, 22px)",
+          maxWidth: "1100px",
+          margin: "0 auto",
         }}
       >
-        {/* Title */}
+        {/* ── Header ── */}
         <h1
           className="WB-header-title-page8"
           style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
         >
-          <span className="WB-ex-A">D</span> Look, read, and write.
+          <span className="WB-ex-A">D</span>
+          Read and match each expression to its definition.
         </h1>
 
-        {/* ── صور الأولاد الستة ── */}
-        <div
-          style={{
-            display:             "grid",
-            gridTemplateColumns: "repeat(6, minmax(0,1fr))",
-            gap:                 "clamp(6px,1vw,12px)",
-            width:               "100%",
-          }}
-        >
-          {ITEMS.map((item) => (
-            <div
-              key={item.id}
-              style={{
-                display:        "flex",
-                flexDirection:  "column",
-                alignItems:     "center",
-                gap:            "4px",
-              }}
-            >
-              {/* رقم الصورة */}
-              <span
-                style={{
-                  fontSize:   "clamp(11px,1.2vw,16px)",
-                  fontWeight: 700,
-                  color:      "#555",
-                }}
-              >
-                {item.id}
-              </span>
+        {/* ── Matching area ── */}
+        <div ref={containerRef} className="rdm-match">
 
-              <div
-                style={{
-                  width:        "100%",
-                  aspectRatio:  "0.75 / 1",
-                  borderRadius: "clamp(8px,1vw,14px)",
-                  overflow:     "hidden",
-                  display:      "flex",
-                  alignItems:   "center",
-                  justifyContent: "center",
-                }}
-              >
-                <img
-                  src={item.img}
-                  alt={`boy-${item.id}`}
-                  style={{ width: "90%", height: "90%", objectFit: "contain" }}
+          {/* SVG lines */}
+          <svg
+            style={{
+              position: "absolute", inset: 0,
+              width: "100%", height: "100%",
+              pointerEvents: "none", overflow: "visible", zIndex: 1,
+            }}
+          >
+            {lines.map((line) => {
+              const mx = (line.x1 + line.x2) / 2;
+              const my = (line.y1 + line.y2) / 2 - Math.abs(line.y2 - line.y1) * 0.3;
+              const d  = `M ${line.x1} ${line.y1} Q ${mx} ${my} ${line.x2} ${line.y2}`;
+              return (
+                <path
+                  key={line.id}
+                  d={d}
+                  stroke={isWrongLine(line.leftId) ? WRONG_LINE_COLOR : LINE_COLOR}
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  fill="none"
                 />
-              </div>
-            </div>
-          ))}
-        </div>
+              );
+            })}
+          </svg>
 
-        {/* ── Word Bank ── */}
-        <div
-          style={{
-            width:          "100%",
-            border:         `2px solid ${BORDER_COLOR}`,
-            borderRadius:   "clamp(12px,1.4vw,18px)",
-            padding:        "clamp(10px,1.2vw,16px)",
-            boxSizing:      "border-box",
-            display:        "flex",
-            flexWrap:       "wrap",
-            gap:            "clamp(8px,1vw,12px)",
-            justifyContent: "center",
-            background:     "#fff",
-          }}
-        >
-          {DRAG_ITEMS.map((item) => {
-            const isUsed = usedIds.includes(item.id);
-            return (
-              <div
-                key={item.id}
-                draggable={!isUsed && !showAns}
-                onDragStart={() => handleDragStart(item)}
-                onTouchStart={(e) => handleTouchStart(e, item)}
-                onTouchMove={handleTouchMove}
-                onTouchEnd={handleTouchEnd}
-                style={{
-                  padding:         "clamp(6px,0.8vw,10px) clamp(12px,1.4vw,18px)",
-                  borderRadius:    "14px",
-                  border:          `1.5px solid ${isUsed ? "#d9d9d9" : BORDER_COLOR}`,
-                  backgroundColor: isUsed ? "#eeeeee" : "#ffca94",
-                  color:           isUsed ? "#999" : "#222",
-                  cursor:          isUsed || showAns ? "not-allowed" : "grab",
-                  opacity:         isUsed ? 0.6 : 1,
-                  userSelect:      "none",
-                  fontSize:        "clamp(13px,1.4vw,18px)",
-                  fontWeight:      500,
-                  boxShadow:       isUsed ? "none" : "0 2px 8px rgba(0,0,0,0.06)",
-                  transition:      "0.2s ease",
-                  touchAction:     "none",
-                  textAlign:       "center",
-                  lineHeight:      1.3,
-                }}
-              >
-                {item.value}
-              </div>
-            );
-          })}
-        </div>
-
-        {/* ── الأسئلة: شبكة 2 عمود ── */}
-        <div
-          style={{
-            display:             "grid",
-            gridTemplateColumns: "repeat(2, minmax(0,1fr))",
-            gap:                 "clamp(14px,2vw,24px) clamp(20px,3vw,40px)",
-            width:               "100%",
-          }}
-        >
-          {ITEMS.map((item) => {
-            const boxKey = `a-${item.id}`;
-            const value  = answers[boxKey]?.value || "";
-            const wrong  = isWrong(item);
-
-            return (
-              <div
-                key={item.id}
-                style={{
-                  display:    "flex",
-                  alignItems: "flex-end",
-                  gap:        "6px",
-                  flexWrap:   "wrap",
-                  minWidth:   0,
-                }}
-              >
-                {/* رقم السؤال */}
-                <span
-                  style={{
-                    fontSize:   "clamp(18px,2vw,26px)",
-                    fontWeight: 700,
-                    color:      "#111",
-                    lineHeight: 1,
-                    flexShrink: 0,
-                    paddingBottom: "6px",
-                  }}
-                >
-                  {item.id}
-                </span>
-
-                {/* النص قبل الـ drop zone */}
-                <span
-                  style={{
-                    fontSize:   "clamp(14px,1.6vw,20px)",
-                    fontWeight: 500,
-                    color:      "#111",
-                    lineHeight: 1,
-                    flexShrink: 0,
-                    paddingBottom: "6px",
-                  }}
-                >
-                  {item.sentence.before}
-                </span>
-
-                {/* Drop zone */}
+          {/* Left col */}
+          <div className="rdm-left-col">
+            {LEFT_ITEMS.map((item) => {
+              const wrong     = isWrongLine(item.id);
+              const selected  = isSelectedLeft(item.id);
+              const connected = isDotConnectedLeft(item.id);
+              return (
                 <div
-                  ref={(el) => (dropRefs.current[boxKey] = el)}
-                  onDragOver={(e) => e.preventDefault()}
-                  onDrop={() => handleDrop(boxKey)}
-                  onClick={() => handleRemove(boxKey)}
-                  style={{
-                    position:      "relative",
-                    minWidth:      "clamp(80px,10vw,140px)",
-                    minHeight:     "clamp(28px,3.5vw,40px)",
-                    borderBottom:  `2.5px solid ${wrong ? WRONG_COLOR : LINE_COLOR}`,
-                    display:       "flex",
-                    alignItems:    "flex-end",
-                    justifyContent:"center",
-                    paddingBottom: "4px",
-                    cursor:        value && !showAns ? "pointer" : "default",
-                    flexShrink:    0,
-                  }}
+                  key={item.id}
+                  className={`rdm-left-item ${selected ? "rdm-left-item--selected" : ""}`}
+                  onClick={() => handleLeftClick(item.id)}
+                  style={{ cursor: isLocked ? "default" : "pointer" }}
                 >
-                  {value && (
-                    <span
-                      style={{
-                        fontSize:   "clamp(14px,1.6vw,20px)",
-                        fontWeight: 600,
-                        color:      wrong ? WRONG_COLOR : ANSWER_COLOR,
-                        lineHeight: 1,
-                        whiteSpace: "nowrap",
-                      }}
-                    >
-                      {value}
-                    </span>
-                  )}
-
-                  {wrong && (
-                    <div
-                      style={{
-                        position:        "absolute",
-                        top:             "-8px",
-                        right:           "-8px",
-                        width:           "clamp(16px,1.8vw,22px)",
-                        height:          "clamp(16px,1.8vw,22px)",
-                        borderRadius:    "50%",
-                        backgroundColor: WRONG_COLOR,
-                        color:           "#fff",
-                        display:         "flex",
-                        alignItems:      "center",
-                        justifyContent:  "center",
-                        fontSize:        "clamp(9px,0.9vw,12px)",
-                        fontWeight:      700,
-                        boxShadow:       "0 1px 4px rgba(0,0,0,0.2)",
-                      }}
-                    >
-                      ✕
-                    </div>
-                  )}
+                  <div style={{ display: "flex", alignItems: "center", gap: "clamp(6px,1vw,10px)" }}>
+                    <span className="rdm-num">{item.id}</span>
+                    <span className="rdm-label">{item.label}</span>
+                  </div>
+                  {wrong && <div className="rdm-badge">✕</div>}
+                  <div
+                    ref={(el) => (dotRefs.current[`left-${item.id}`] = el)}
+                    className={`rdm-dot ${selected ? "rdm-dot--selected" : ""}`}
+                    style={{ backgroundColor: dotColor(connected, selected) }}
+                  />
                 </div>
+              );
+            })}
+          </div>
 
-                {/* النص بعد الـ drop zone */}
-                <span
-                  style={{
-                    fontSize:      "clamp(14px,1.6vw,20px)",
-                    fontWeight:    500,
-                    color:         "#111",
-                    lineHeight:    1,
-                    flexShrink:    0,
-                    paddingBottom: "6px",
-                  }}
+          {/* Right col */}
+          <div className="rdm-right-col">
+            {RIGHT_ITEMS.map((item) => {
+              const connected = isDotConnectedRight(item.id);
+              return (
+                <div
+                  key={item.id}
+                  className={`rdm-right-item ${connected ? "rdm-right-item--connected" : ""}`}
+                  onClick={() => handleRightClick(item.id)}
+                  style={{ cursor: isLocked || selectedLeft === null ? "default" : "pointer" }}
                 >
-                  {item.sentence.after}
-                </span>
-              </div>
-            );
-          })}
+                  <div
+                    ref={(el) => (dotRefs.current[`right-${item.id}`] = el)}
+                    className="rdm-dot"
+                    style={{ backgroundColor: dotColor(connected, false) }}
+                  />
+                  <span className="rdm-label">{item.label}</span>
+                </div>
+              );
+            })}
+          </div>
+
         </div>
 
-        {/* Buttons */}
-        <div style={{ display: "flex", justifyContent: "center", marginTop: "clamp(6px,1vw,12px)" }}>
+        {/* ── Scene image ── */}
+        <img src={sceneImg} alt="school scene" className="rdm-scene" />
+
+        {/* ── Buttons ── */}
+        <div className="rdm-buttons">
           <Button
             checkAnswers={handleCheck}
             handleShowAnswer={handleShowAnswer}
-            handleStartAgain={handleStartAgain}
+            handleStartAgain={handleReset}
           />
         </div>
       </div>
-
-      {/* Touch ghost */}
-      {touchItem && (
-        <div
-          style={{
-            position:      "fixed",
-            left:          touchPos.x - 80,
-            top:           touchPos.y - 20,
-            background:    "#fff",
-            padding:       "8px 14px",
-            borderRadius:  "10px",
-            boxShadow:     "0 4px 10px rgba(0,0,0,0.2)",
-            pointerEvents: "none",
-            zIndex:        9999,
-            fontSize:      "clamp(13px,1.5vw,18px)",
-            fontWeight:    600,
-            color:         "#222",
-            maxWidth:      "220px",
-            textAlign:     "center",
-            lineHeight:    1.3,
-          }}
-        >
-          {touchItem.value}
-        </div>
-      )}
     </div>
   );
 }

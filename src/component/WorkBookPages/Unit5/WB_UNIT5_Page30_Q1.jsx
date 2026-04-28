@@ -5,8 +5,8 @@ import ValidationAlert from "../../Popup/ValidationAlert";
 // ─────────────────────────────────────────────
 //  🖼️  IMAGES
 // ─────────────────────────────────────────────
-import img1 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U5 Folder/Page 30/SVG/Asset 1.svg"; // closet with dress inside
-import img2 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U5 Folder/Page 30/SVG/Asset 2.svg"; // kite flying over heads
+import img1 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U5 Folder/Page 30/SVG/Asset 28.svg"; // closet with dress inside
+import img2 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U5 Folder/Page 30/SVG/Asset 29.svg"; // kite flying over heads
 
 // ─────────────────────────────────────────────
 //  🎨  COLORS
@@ -43,7 +43,7 @@ const ITEMS = [
     src:         img2,
     parts:       ["The kite is flying", "under", "their heads."],
     wrongWord:   "under",
-    correct:     ["The kite is flying over their heads.", "The kite is flying over their heads"],
+    correct:     ["The kite is flying over their heads.", "The kite is flying over their heads over"],
     answer:      "The kite is flying over their heads.",
   },
 
@@ -133,15 +133,12 @@ export default function WB_LookReadCircleMistake_QG() {
 
         /* Image */
         .lrcm-img-wrap {
-          border: 2px solid ${IMG_BORDER_COLOR};
-          border-radius: 10px;
           overflow: hidden;
           width: 100%;
         }
         .lrcm-img {
           width: 100%;
           height: clamp(100px, 13vw, 170px);
-          object-fit: cover;
           display: block;
         }
 
@@ -178,15 +175,10 @@ export default function WB_LookReadCircleMistake_QG() {
 
         /* Wrong word — circled */
         .lrcm-wrong-word {
-          font-size: clamp(14px, 1.7vw, 20px);
-          font-weight: 600;
-          color: ${SENTENCE_COLOR};
-          background: ${WRONG_WORD_BG};
-          border: 2px solid ${WRONG_WORD_BORDER};
-          border-radius: 999px;
-          padding: 1px clamp(6px, 0.8vw, 10px);
-          line-height: 1.5;
-          white-space: nowrap;
+      font-size: clamp(14px, 1.7vw, 20px);
+    font-weight: 400;
+    color: #2b2b2b;
+    line-height: 1.5;
         }
 
         /* Input wrap */

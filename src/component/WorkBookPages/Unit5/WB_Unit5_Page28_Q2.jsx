@@ -5,10 +5,10 @@ import ValidationAlert from "../../Popup/ValidationAlert";
 // ─────────────────────────────────────────────
 //  🖼️  IMAGES
 // ─────────────────────────────────────────────
-import img1 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U5 Folder/Page 28/Asset 21.svg"; // living room - lamp
-import img2 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U5 Folder/Page 28/Asset 27.svg"; // bathroom - telephone
-import img3 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U5 Folder/Page 28/Asset 22.svg";// playground - swing
-import img4 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U5 Folder/Page 28/Asset 23.svg"; // bedroom - rabbit
+import img1 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U5 Folder/Page 28/svg/Asset 28.svg"; // living room - lamp
+import img2 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U5 Folder/Page 28/svg/Asset 27.svg"; // bathroom - telephone
+import img3 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U5 Folder/Page 28/svg/Asset 32.svg";// playground - swing
+import img4 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U5 Folder/Page 28/svg/Asset 33.svg"; // bedroom - rabbit
 
 // ─────────────────────────────────────────────
 //  🎨  COLORS

@@ -6,11 +6,11 @@ import ValidationAlert from "../../Popup/ValidationAlert";
 //  🖼️  IMAGES — 6 صور للقطة مع الصندوق
 // ─────────────────────────────────────────────
 import img1 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U5 Folder/Page 29/1.svg"; // cat on box
-import img2 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U5 Folder/Page 29/1.svg"; ; // cat behind box
-import img3 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U5 Folder/Page 29/1.svg"; ; // cat between boxes
-import img4 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U5 Folder/Page 29/1.svg";  // cat under box
-import img5 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U5 Folder/Page 29/1.svg"; ; // cat in box
-import img6 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U5 Folder/Page 29/1.svg"; ; // cat in front of box
+import img2 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U5 Folder/Page 29/2.svg"; ; // cat behind box
+import img3 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U5 Folder/Page 29/3.svg"; ; // cat between boxes
+import img4 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U5 Folder/Page 29/4.svg";  // cat under box
+import img5 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U5 Folder/Page 29/Asset 20.svg"; ; // cat in box
+import img6 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U5 Folder/Page 29/Asset 21.svg"; ; // cat in front of box
 
 // ─────────────────────────────────────────────
 //  🎨  COLORS
@@ -114,10 +114,10 @@ export default function WB_LookReadWrite_QE() {
       <style>{`
         /* ── Word bank ── */
         .lrwe-bank {
-          display: flex;
-          flex-wrap: wrap;
-          gap: clamp(6px, 1vw, 12px);
-          align-items: center;
+            display: flex;
+    flex-wrap: nowrap;
+    gap: clamp(6px, 1vw, 12px);
+    justify-content: space-between;
         }
 
         .lrwe-pill {
@@ -257,7 +257,6 @@ font-size: clamp(15px, 1.9vw, 18px);
         </h1>
 
         {/* ── Word bank ── */}
-      <div style={{ display : "flex" , justifyContent : "center"}}>
         <div className="lrwe-bank">
           {WORD_BANK.map((w) => (
             <div key={w.label} className="lrwe-pill">
@@ -266,7 +265,6 @@ font-size: clamp(15px, 1.9vw, 18px);
             </div>
           ))}
         </div>
-</div>
         {/* ── Images grid ── */}
         <div className="lrwe-grid">
           {ITEMS.map((item) => {

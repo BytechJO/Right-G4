@@ -66,7 +66,6 @@ import WB_Unit5_Page31_Q1 from "./Unit5/WB_Unit5_Page31_Q1";
 import WB_Unit5_Page31_Q2 from "./Unit5/WB_Unit5_Page31_Q2";  // ✅ اسم المتغير صار Page31_Q2
 import WB_Unit5_Page32_Q1 from "./Unit5/WB_Unit5_Page32_Q1";  // ✅ اسم المتغير صار Page32_Q1
 import WB_Unit5_Page32_Q2 from "./Unit5/WB_Unit5_Page32_Q2";  // ✅ اسم المتغير صار Page32_Q2
-import WB_Unit5_Page32_Q3 from "./Unit5/WB_Unit5_Page32_Q3";  // ✅ اسم المتغير صار Page32_Q3
 
 // Unit6
 import WB_Unit6_Page33_Q1 from "./Unit6/WB_Unit6_Page33_Q1";
@@ -78,10 +77,8 @@ import WB_Unit6_Page35_Q2 from "./Unit6/WB_Unit6_Page35_Q2";
 import WB_Unit6_Page36_Q1 from "./Unit6/WB_Unit6_Page36_Q1";
 import WB_Unit6_Page36_Q2 from "./Unit6/WB_Unit6_Page36_Q2";
 import WB_Unit6_Page37_Q1 from "./Unit6/WB_Unit6_Page37_Q1";
-import WB_Unit6_Page37_Q2 from "./Unit6/WB_Unit6_Page37_Q2";
 import WB_Unit6_Page38_Q1 from "./Unit6/WB_Unit6_Page38_Q1";
-import WB_Unit6_Page38_Q2 from "./Unit6/WB_Unit6_Page38_Q2";
-import WB_Unit6_Page38_Q3 from "./Unit6/WB_Unit6_Page38_Q3";
+
 
 // Unit7
 import WB_Unit7_Page39_Q1 from "./Unit7/WB_Unit7_Page39_Q1";
@@ -213,8 +210,7 @@ export const workBookData = [
   { component: WB_Unit5_Page31_Q1, unit: 5 },
   { component: WB_Unit5_Page31_Q2, unit: 5 },
   { component: WB_Unit5_Page32_Q1, unit: 5 },
-  { component: WB_Unit5_Page32_Q2, unit: 5 },
-  { component: WB_Unit5_Page32_Q3, unit: 5, lastOfUnit: true },
+  { component: WB_Unit5_Page32_Q2, unit: 5, lastOfUnit: true  },
 
   // UNIT 6
   { component: WB_Unit6_Page33_Q1, unit: 6 },
@@ -226,10 +222,8 @@ export const workBookData = [
   { component: WB_Unit6_Page36_Q1, unit: 6 },
   { component: WB_Unit6_Page36_Q2, unit: 6 },
   { component: WB_Unit6_Page37_Q1, unit: 6 },
-  { component: WB_Unit6_Page37_Q2, unit: 6 },
-  { component: WB_Unit6_Page38_Q1, unit: 6 },
-  { component: WB_Unit6_Page38_Q2, unit: 6 },
-  { component: WB_Unit6_Page38_Q3, unit: 6, lastOfUnit: true },
+  { component: WB_Unit6_Page38_Q1, unit: 6 , lastOfUnit: true },
+ 
 
   // UNIT 7
   { component: WB_Unit7_Page39_Q1, unit: 7 },

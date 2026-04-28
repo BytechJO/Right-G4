@@ -1,430 +1,327 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useState } from "react";
 import Button from "../Button";
 import ValidationAlert from "../../Popup/ValidationAlert";
 
-const INSTRUCTIONS = [
-  "1. Draw a face in the first square and an umbrella in the fifth square.",
-  "2. Color the second square green and the eighth square red.",
-  "3. Write your name in the third square and your friend's name in the tenth square.",
-  "4. Draw the sun in the ninth square and the moon in the fourth square.",
-  "5. Draw a triangle in the seventh square and a star in the twelfth square.",
-  "6. Write your birthday in the sixth square and your friend's birthday in the eleventh square.",
+// ─────────────────────────────────────────────
+//  🖼️  IMAGES
+// ─────────────────────────────────────────────
+import img1 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U6 Folder/Page 36/SVG/Asset 34.svg";
+import img2 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U6 Folder/Page 36/SVG/Asset 35.svg";
+import img4 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U6 Folder/Page 36/SVG/Asset 36.svg";
+import img3 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U6 Folder/Page 36/SVG/Asset 37.svg";
+
+// ─────────────────────────────────────────────
+//  🎨  COLORS
+// ─────────────────────────────────────────────
+const BORDER_COLOR   = "#2096a6";
+const CHECK_BG       = "#ef4444";
+const CROSS_BG       = "#ef4444";
+const WRONG_BADGE_BG   = "#ef4444";
+const WRONG_BADGE_TEXT = "#ffffff";
+
+// ─────────────────────────────────────────────
+//  📝  EXERCISE DATA
+// ─────────────────────────────────────────────
+const CONTEXT = "I have a test tomorrow. What should I do?";
+
+const ITEMS = [
+  { id: 1, imageSrc: img1, sentence: "You should go swimming.",                          correct: "✗" },
+  { id: 2, imageSrc: img2, sentence: "You should ask questions if you don't understand.", correct: "✓" },
+  { id: 3, imageSrc: img3, sentence: "You should study hard.",                           correct: "✓" },
+  { id: 4, imageSrc: img4, sentence: "You should play a computer game.",                 correct: "✗" },
 ];
 
-const COLORS = [
-  "#111827",
-  "#ef4444",
-  "#22c55e",
-  "#3b82f6",
-  "#eab308",
-  "#a855f7",
-  "#ec4899",
-  "#ffffff",
-];
+// ─────────────────────────────────────────────
+//  COMPONENT
+// ─────────────────────────────────────────────
+export default function WB_ReadWriteCheckX_QG() {
+  const [selected,    setSelected]    = useState({});
+  const [showResults, setShowResults] = useState(false);
+  const [showAns,     setShowAns]     = useState(false);
 
-const SIZES = [2, 4, 8, 12];
+  const isLocked = showAns;
 
-const BOX_SIZE = 110;
-
-const BOX_LAYOUT = [
-  { num: 4, row: 1, col: 1 },
-  { num: 5, row: 1, col: 2 },
-  { num: 6, row: 1, col: 3 },
-  { num: 7, row: 1, col: 4 },
-  { num: 8, row: 1, col: 5 },
-  { num: 9, row: 1, col: 6 },
-
-  { num: 3, row: 2, col: 1 },
-  { num: 10, row: 2, col: 6 },
-
-  { num: 2, row: 3, col: 1 },
-  { num: 11, row: 3, col: 6 },
-
-  { num: 1, row: 4, col: 1 },
-  { num: 12, row: 4, col: 6 },
-];
-
-export default function WB_Unit6_Page36_QG() {
-  const [tool, setTool] = useState("pencil"); // pencil | eraser | fill | text
-  const [color, setColor] = useState("#ef4444");
-  const [size, setSize] = useState(4);
-  const [selectedBox, setSelectedBox] = useState(1);
-  const [textValue, setTextValue] = useState("");
-  const [isDrawing, setIsDrawing] = useState(false);
-
-  const canvasRefs = useRef({});
-  const ctxRefs = useRef({});
-  const lastPos = useRef({});
-
-  useEffect(() => {
-    BOX_LAYOUT.forEach(({ num }) => {
-      const canvas = canvasRefs.current[num];
-      if (!canvas) return;
-
-      const ctx = canvas.getContext("2d");
-      ctx.lineCap = "round";
-      ctx.lineJoin = "round";
-      ctxRefs.current[num] = ctx;
-
-      clearCanvas(num);
-    });
-  }, []);
-
-  const clearCanvas = (num) => {
-    const canvas = canvasRefs.current[num];
-    const ctx = ctxRefs.current[num];
-    if (!canvas || !ctx) return;
-
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = "#ffffff";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-  };
-
-  const clearAllCanvases = () => {
-    BOX_LAYOUT.forEach(({ num }) => clearCanvas(num));
-  };
-
-  const getPos = (e, canvas) => {
-    const rect = canvas.getBoundingClientRect();
-    const scaleX = canvas.width / rect.width;
-    const scaleY = canvas.height / rect.height;
-
-    if (e.touches) {
-      return {
-        x: (e.touches[0].clientX - rect.left) * scaleX,
-        y: (e.touches[0].clientY - rect.top) * scaleY,
-      };
-    }
-
-    return {
-      x: (e.clientX - rect.left) * scaleX,
-      y: (e.clientY - rect.top) * scaleY,
-    };
-  };
-
-  const startDrawing = (e, num) => {
-    e.preventDefault();
-    setSelectedBox(num);
-
-    const canvas = canvasRefs.current[num];
-    const ctx = ctxRefs.current[num];
-    if (!canvas || !ctx) return;
-
-    if (tool === "fill") {
-      ctx.fillStyle = color;
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-      return;
-    }
-
-    if (tool === "text") {
-      if (!textValue.trim()) {
-        ValidationAlert.info("Please type text first.");
-        return;
-      }
-
-      const pos = getPos(e, canvas);
-      ctx.fillStyle = color;
-      ctx.font = "16px Arial";
-      ctx.textBaseline = "top";
-      ctx.fillText(textValue, pos.x, pos.y);
-      return;
-    }
-
-    const pos = getPos(e, canvas);
-    lastPos.current[num] = pos;
-    setIsDrawing(true);
-
-    ctx.beginPath();
-    ctx.arc(pos.x, pos.y, (tool === "eraser" ? size * 2 : size) / 2, 0, Math.PI * 2);
-    ctx.fillStyle = tool === "eraser" ? "#ffffff" : color;
-    ctx.fill();
-  };
-
-  const draw = (e, num) => {
-    e.preventDefault();
-    if (!isDrawing || selectedBox !== num) return;
-
-    const canvas = canvasRefs.current[num];
-    const ctx = ctxRefs.current[num];
-    if (!canvas || !ctx) return;
-
-    if (tool !== "pencil" && tool !== "eraser") return;
-
-    const pos = getPos(e, canvas);
-    const prev = lastPos.current[num];
-    if (!prev) return;
-
-    ctx.beginPath();
-    ctx.moveTo(prev.x, prev.y);
-    ctx.lineTo(pos.x, pos.y);
-    ctx.strokeStyle = tool === "eraser" ? "#ffffff" : color;
-    ctx.lineWidth = tool === "eraser" ? size * 3 : size;
-    ctx.stroke();
-
-    lastPos.current[num] = pos;
-  };
-
-  const stopDrawing = (e, num) => {
-    e?.preventDefault();
-    setIsDrawing(false);
-    lastPos.current[num] = null;
+  // ── handlers ──────────────────────────────
+  const handleSelect = (id, value) => {
+    if (isLocked) return;
+    setSelected((prev) => ({ ...prev, [id]: value }));
   };
 
   const handleCheck = () => {
-    ValidationAlert.success("Done! Please review the drawings and writing.");
+    if (isLocked) return;
+    const allAnswered = ITEMS.every((item) => selected[item.id]);
+    if (!allAnswered) {
+      ValidationAlert.info("Please answer all items first.");
+      return;
+    }
+    let score = 0;
+    ITEMS.forEach((item) => {
+      if (selected[item.id] === item.correct) score++;
+    });
+    const total = ITEMS.length;
+    setShowResults(true);
+    if (score === total)  ValidationAlert.success(`Score: ${score} / ${total}`);
+    else if (score > 0)   ValidationAlert.warning(`Score: ${score} / ${total}`);
+    else                  ValidationAlert.error(`Score: ${score} / ${total}`);
   };
 
-  const getCursor = () => {
-    if (tool === "eraser") return "cell";
-    if (tool === "text") return "text";
-    return "crosshair";
+  const handleShowAnswer = () => {
+    const ans = {};
+    ITEMS.forEach((item) => { ans[item.id] = item.correct; });
+    setSelected(ans);
+    setShowResults(false);
+    setShowAns(true);
   };
 
-  const renderBox = (num) => (
-    <div
-      key={num}
-      onClick={() => setSelectedBox(num)}
-      style={{
-        position: "relative",
-        width: `${BOX_SIZE}px`,
-        height: `${BOX_SIZE}px`,
-        border: selectedBox === num ? "3px solid #f59e0b" : "2px solid #f59e0b",
-        borderRadius: "10px",
-        backgroundColor: "#fff",
-        overflow: "hidden",
-        boxSizing: "border-box",
-        boxShadow: selectedBox === num ? "0 0 0 3px rgba(245, 158, 11, 0.15)" : "none",
-      }}
-    >
-      <div
-        style={{
-          position: "absolute",
-          top: "4px",
-          left: "4px",
-          width: "18px",
-          height: "18px",
-          borderRadius: "50%",
-          border: "1px solid #111",
-          backgroundColor: "#fff",
-          fontSize: "11px",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          zIndex: 2,
-        }}
-      >
-        {num}
+  const handleReset = () => {
+    setSelected({});
+    setShowResults(false);
+    setShowAns(false);
+  };
+
+  // ── helpers ───────────────────────────────
+  const isWrong = (item) => {
+    if (!showResults || showAns) return false;
+    return selected[item.id] !== item.correct;
+  };
+
+  // ── render one sentence row ───────────────
+  const renderRow = (item) => {
+    const wrong      = isWrong(item);
+    const selCheck   = selected[item.id] === "✓";
+    const selCross   = selected[item.id] === "✗";
+    const ansCheck   = showAns && item.correct === "✓";
+    const ansCross   = showAns && item.correct === "✗";
+
+    const checkActive = selCheck || ansCheck;
+    const crossActive = selCross || ansCross;
+    const checkWrong  = wrong && selCheck;
+    const crossWrong  = wrong && selCross;
+
+    return (
+      <div key={item.id} className="lrwx-row">
+
+        {/* Two boxes */}
+        <div className="lrwx-boxes">
+
+          {/* ✓ box */}
+          <div className="lrwx-box-wrap">
+            <div
+              className={[
+                "lrwx-box",
+                checkActive ? "lrwx-box--check-active" : "lrwx-box--idle",
+                checkWrong  ? "lrwx-box--wrong"        : "",
+              ].filter(Boolean).join(" ")}
+              onClick={() => handleSelect(item.id, "✓")}
+              style={{ cursor: isLocked ? "default" : "pointer" }}
+            >
+              {checkActive && <span className="lrwx-symbol">✓</span>}
+            </div>
+            {checkWrong && <div className="lrwx-badge">✕</div>}
+          </div>
+
+          {/* ✗ box */}
+          <div className="lrwx-box-wrap">
+            <div
+              className={[
+                "lrwx-box",
+                crossActive ? "lrwx-box--cross-active" : "lrwx-box--idle",
+                crossWrong  ? "lrwx-box--wrong"        : "",
+              ].filter(Boolean).join(" ")}
+              onClick={() => handleSelect(item.id, "✗")}
+              style={{ cursor: isLocked ? "default" : "pointer" }}
+            >
+              {crossActive && <span className="lrwx-symbol">✗</span>}
+            </div>
+            {crossWrong && <div className="lrwx-badge">✕</div>}
+          </div>
+
+        </div>
+
+        {/* Number + Sentence */}
+        <span className="lrwx-num">{item.id}</span>
+        <span className="lrwx-sentence">{item.sentence}</span>
+
       </div>
+    );
+  };
 
-      <canvas
-        ref={(el) => {
-          if (el) canvasRefs.current[num] = el;
-        }}
-        width={BOX_SIZE}
-        height={BOX_SIZE}
-        style={{
-          width: "100%",
-          height: "100%",
-          display: "block",
-          cursor: getCursor(),
-          touchAction: "none",
-        }}
-        onMouseDown={(e) => startDrawing(e, num)}
-        onMouseMove={(e) => draw(e, num)}
-        onMouseUp={(e) => stopDrawing(e, num)}
-        onMouseLeave={(e) => stopDrawing(e, num)}
-        onTouchStart={(e) => startDrawing(e, num)}
-        onTouchMove={(e) => draw(e, num)}
-        onTouchEnd={(e) => stopDrawing(e, num)}
-      />
-    </div>
-  );
-
+  // ── render ────────────────────────────────
   return (
     <div className="main-container-component">
-      <div className="div-forall" style={{ gap: "16px" , marginBottom:"70px" }}>
-        <h1 className="WB-header-title-page8">
+      <style>{`
+
+        /* ── Sentence rows list ── */
+        .lrwx-list {
+          display: flex;
+          flex-direction: column;
+          gap: clamp(10px, 1.4vw, 18px);
+        }
+
+        /* ── Single sentence row ── */
+        .lrwx-row {
+          display: flex;
+          align-items: center;
+          gap: clamp(8px, 1.2vw, 16px);
+        }
+
+        /* Two boxes side by side */
+        .lrwx-boxes {
+          display: flex;
+          gap: clamp(6px, 0.8vw, 10px);
+          flex-shrink: 0;
+        }
+
+        /* Box wrap for badge */
+        .lrwx-box-wrap {
+          position: relative;
+        }
+
+        /* Box base */
+        .lrwx-box {
+          width: clamp(40px, 3.8vw, 40px);
+          height: clamp(40px, 3.8vw, 40px);
+          border-radius: 8px;
+          border: 2px solid ${BORDER_COLOR};
+          background: #fff;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: background 0.15s, border-color 0.15s;
+          user-select: none;
+        }
+
+        .lrwx-box--idle          { background: #fff; }
+        .lrwx-box--check-active  { background: ${CHECK_BG}; border-color: ${CHECK_BG}; }
+        .lrwx-box--cross-active  { background: ${CROSS_BG}; border-color: ${CROSS_BG}; }
+        .lrwx-box--wrong         { border-color: ${WRONG_BADGE_BG} !important; }
+
+        /* Symbol inside box */
+        .lrwx-symbol {
+          font-size: clamp(16px, 2vw, 24px);
+          font-weight: 700;
+          color: #fff;
+          line-height: 1;
+        }
+
+        /* ✕ wrong badge */
+        .lrwx-badge {
+          position: absolute;
+          top: -8px; right: -8px;
+          width: clamp(15px, 1.7vw, 20px);
+          height: clamp(15px, 1.7vw, 20px);
+          border-radius: 50%;
+          background: ${WRONG_BADGE_BG};
+          color: ${WRONG_BADGE_TEXT};
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: clamp(8px, 0.9vw, 11px);
+          font-weight: 700;
+          border: 2px solid #fff;
+          box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+          pointer-events: none;
+          z-index: 2;
+        }
+
+        /* Number */
+        .lrwx-num {
+          font-size: clamp(15px, 1.9vw, 22px);
+          font-weight: 700;
+          color: #2b2b2b;
+          flex-shrink: 0;
+        }
+
+        /* Sentence */
+        .lrwx-sentence {
+          font-size: clamp(14px, 1.7vw, 20px);
+          color: #2b2b2b;
+          line-height: 1.5;
+          flex: 1;
+        }
+
+        /* Context question */
+        .lrwx-context {
+          font-size: clamp(14px, 1.7vw, 20px);
+          color: #2b2b2b;
+          margin: 0;
+          line-height: 1.5;
+        }
+
+        /* ── Images row (4 columns) ── */
+        .lrwx-imgs {
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          gap: clamp(8px, 1.2vw, 16px);
+        }
+        @media (max-width: 600px) {
+          .lrwx-imgs { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        .lrwx-img-wrap {
+          overflow: hidden;
+        }
+        .lrwx-img {
+        height : auto ; 
+          width: 100%;
+          aspect-ratio: 4 / 3;
+          display: block;
+        }
+
+        /* Buttons */
+        .lrwx-buttons {
+          display: flex;
+          justify-content: center;
+          margin-top: clamp(8px, 1.6vw, 18px);
+        }
+      `}</style>
+
+      <div
+        className="div-forall"
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: "clamp(14px, 2vw, 22px)",
+          maxWidth: "1100px",
+          margin: "0 auto",
+        }}
+      >
+        {/* ── Header ── */}
+        <h1
+          className="WB-header-title-page8"
+          style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
+        >
           <span className="WB-ex-A">G</span>
-          Read and complete.
+          Read and write{" "}
+          <span style={{ color: "#ef4444", fontWeight: 700 }}>✓</span>
+          {" "}and{" "}
+          <span style={{ color: "#ef4444", fontWeight: 700 }}>✗</span>.
         </h1>
 
-        {/* Toolbar */}
-        <div
-          style={{
-            display: "flex",
-            flexWrap: "wrap",
-            alignItems: "center",
-            gap: "12px",
-            padding: "12px 16px",
-            border: "1px solid #e5e7eb",
-            borderRadius: "16px",
-            background: "#f9fafb",
-            
-          }}
-        >
-          <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
-            {[
-              { id: "pencil", label: "✏️ Draw" },
-              { id: "eraser", label: "🧽 Erase" },
-              { id: "fill", label: "🪣 Fill" },
-            ].map((item) => (
-              <button
-                key={item.id}
-                onClick={() => setTool(item.id)}
-                style={{
-                  padding: "8px 12px",
-                  borderRadius: "10px",
-                  border: tool === item.id ? "2px solid #3b82f6" : "2px solid #d1d5db",
-                  background: tool === item.id ? "#eff6ff" : "#fff",
-                  color: tool === item.id ? "#1d4ed8" : "#374151",
-                  fontWeight: "600",
-                  cursor: "pointer",
-                }}
-              >
-                {item.label}
-              </button>
-            ))}
-          </div>
+        {/* ── Context question ── */}
+        <p className="lrwx-context">{CONTEXT}</p>
 
-          <div style={{ width: "1px", height: "28px", background: "#d1d5db" }} />
-
-          <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
-            {COLORS.map((c) => (
-              <button
-                key={c}
-                onClick={() => setColor(c)}
-                style={{
-                  width: "28px",
-                  height: "28px",
-                  borderRadius: "50%",
-                  border: color === c ? "3px solid #111827" : "2px solid #d1d5db",
-                  background: c,
-                  cursor: "pointer",
-                }}
-              />
-            ))}
-          </div>
-
-          <div style={{ width: "1px", height: "28px", background: "#d1d5db" }} />
-
-          <div style={{ display: "flex", gap: "8px" }}>
-            {SIZES.map((s) => (
-              <button
-                key={s}
-                onClick={() => setSize(s)}
-                style={{
-                  width: "32px",
-                  height: "32px",
-                  borderRadius: "50%",
-                  border: size === s ? "2px solid #3b82f6" : "2px solid #d1d5db",
-                  background: "#fff",
-                  cursor: "pointer",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <span
-                  style={{
-                    width: `${Math.min(s * 2, 16)}px`,
-                    height: `${Math.min(s * 2, 16)}px`,
-                    borderRadius: "50%",
-                    background: "#111827",
-                    display: "block",
-                  }}
-                />
-              </button>
-            ))}
-          </div>
-
-       
-
-          <button
-            onClick={() => clearCanvas(selectedBox)}
-            style={{
-              padding: "8px 12px",
-              borderRadius: "10px",
-              border: "2px solid #fca5a5",
-              background: "#fef2f2",
-              color: "#dc2626",
-              fontWeight: "600",
-              cursor: "pointer",
-            }}
-          >
-            Clear Selected
-          </button>
-
-          <button
-            onClick={clearAllCanvases}
-            style={{
-              padding: "8px 12px",
-              borderRadius: "10px",
-              border: "2px solid #fecaca",
-              background: "#fff",
-              color: "#b91c1c",
-              fontWeight: "600",
-              cursor: "pointer",
-            }}
-          >
-            Clear All
-          </button>
+        {/* ── Sentence rows ── */}
+        <div className="lrwx-list">
+          {ITEMS.map((item) => renderRow(item))}
         </div>
 
-        {/* Main layout */}
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: `${BOX_SIZE}px ${BOX_SIZE}px ${BOX_SIZE}px ${BOX_SIZE}px ${BOX_SIZE}px ${BOX_SIZE}px`,
-            gridTemplateRows: `${BOX_SIZE}px ${BOX_SIZE}px ${BOX_SIZE}px ${BOX_SIZE}px`,
-            gap: "0",
-            justifyContent: "center",
-            alignItems: "center",
-            maxWidth: "900px",
-            margin: "0 auto",
-            position: "relative",
-          }}
-        >
-          {BOX_LAYOUT.map((box) => (
-            <div
-              key={box.num}
-              style={{
-                gridColumn: box.col,
-                gridRow: box.row,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              {renderBox(box.num)}
+        {/* ── Images ── */}
+        <div className="lrwx-imgs">
+          {ITEMS.map((item) => (
+            <div key={item.id} className="lrwx-img-wrap">
+              <img src={item.imageSrc} alt={`scene-${item.id}`} className="lrwx-img" />
             </div>
           ))}
-
-          <div
-            style={{
-              gridColumn: "2 / 6",
-              gridRow: "2 / 5",
-              padding: "12px 20px",
-              display: "flex",
-              flexDirection: "column",
-              justifyContent: "center",
-              gap: "10px",
-              fontSize: "18px",
-              lineHeight: "1.45",
-              color: "#222",
-              marginTop:"50px"
-            }}
-          >
-            {INSTRUCTIONS.map((item, index) => (
-              <div key={index} style={{ display: "flex", gap: "10px", alignItems: "flex-start" }}>
-                <span style={{ fontWeight: "700" }}>{index + 1}</span>
-                <p style={{ margin: 0 }}>{item}</p>
-              </div>
-            ))}
-          </div>
         </div>
 
-        <div style={{ display: "flex", justifyContent: "center", marginTop: "12px" }}>
-          <Button checkAnswers={handleCheck} handleStartAgain={clearAllCanvases} />
+        {/* ── Buttons ── */}
+        <div className="lrwx-buttons">
+          <Button
+            checkAnswers={handleCheck}
+            handleShowAnswer={handleShowAnswer}
+            handleStartAgain={handleReset}
+          />
         </div>
       </div>
     </div>

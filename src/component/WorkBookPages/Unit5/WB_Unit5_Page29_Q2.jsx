@@ -5,10 +5,10 @@ import ValidationAlert from "../../Popup/ValidationAlert";
 // ─────────────────────────────────────────────
 //  🖼️  IMAGES
 // ─────────────────────────────────────────────
-import img1 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U5 Folder/Page 29/SVG/Asset 24.svg";  // boy running into woods
-import img2 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U5 Folder/Page 29/SVG/Asset 25.svg";  // people going up hill
-import img3 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U5 Folder/Page 29/SVG/Asset 26.svg";  // girl through tunnel
-import img4 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U5 Folder/Page 29/SVG/Asset 27.svg"; // boy under bridge
+import img1 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U5 Folder/Page 29/SVG/Asset 22.svg";  // boy running into woods
+import img2 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U5 Folder/Page 29/SVG/Asset 23.svg";  // people going up hill
+import img3 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U5 Folder/Page 29/SVG/Asset 24.svg";  // girl through tunnel
+import img4 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U5 Folder/Page 29/SVG/Asset 25.svg"; // boy under bridge
 
 // ─────────────────────────────────────────────
 //  🎨  COLORS
@@ -79,7 +79,7 @@ const isCorrect = (userVal, correctArr) =>
 // ─────────────────────────────────────────────
 //  COMPONENT
 // ─────────────────────────────────────────────
-export default function WB_LookReadWritePrep_QF() {
+export default function WB_Unit5_Page28_Q2() {
   const [answers,     setAnswers]     = useState({});
   const [showResults, setShowResults] = useState(false);
   const [showAns,     setShowAns]     = useState(false);

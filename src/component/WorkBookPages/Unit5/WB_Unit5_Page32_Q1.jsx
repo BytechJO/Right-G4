@@ -2,298 +2,274 @@ import React, { useState } from "react";
 import Button from "../Button";
 import ValidationAlert from "../../Popup/ValidationAlert";
 
-import img1 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U5 Folder/Page 32/A.1.svg";
-import img2 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U5 Folder/Page 32/A.2.svg";
-import img3 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U5 Folder/Page 32/A.3.svg";
-import img4 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U5 Folder/Page 32/A.4.svg";
-import img5 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U5 Folder/Page 32/A.5.svg";
-import img6 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U5 Folder/Page 32/A.6.svg";
+// ─────────────────────────────────────────────
+//  🎨  COLORS
+// ─────────────────────────────────────────────
+const INPUT_UNDERLINE_DEFAULT = "#3f3f3f";
+const INPUT_UNDERLINE_WRONG   = "#ef4444";
+const INPUT_TEXT_COLOR        = "#2b2b2b";
+const INPUT_ANSWER_COLOR      = "#c81e1e";
+const NUMBER_COLOR            = "#2b2b2b";
+const SCRAMBLED_COLOR         = "#2b2b2b";
+const WRONG_BADGE_BG          = "#ef4444";
+const WRONG_BADGE_TEXT        = "#ffffff";
 
-const BORDER_COLOR = "#f39b42";
-const WRONG_COLOR  = "#ef4444";
-const RIGHT_COLOR  = "#22c55e";
-
+// ─────────────────────────────────────────────
+//  📝  EXERCISE DATA
+// ─────────────────────────────────────────────
 const ITEMS = [
-  { id: 1, img: img1, correct: true  },
-  { id: 2, img: img2, correct: false },
-  { id: 3, img: img3, correct: true  },
-  { id: 4, img: img4, correct: false },
-  { id: 5, img: img5, correct: false },
-  { id: 6, img: img6, correct: true  },
+  {
+    id:       1,
+    scrambled: "the under My is bed ball.",
+    correct:  ["My ball is under the bed.", "My ball is under the bed"],
+    answer:   "My ball is under the bed.",
+  },
+  {
+    id:       2,
+    scrambled: "in the bird tree is The.",
+    correct:  ["The bird is in the tree.", "The bird is in the tree"],
+    answer:   "The bird is in the tree.",
+  },
+  {
+    id:       3,
+    scrambled: "pony is The barn the near.",
+    correct:  ["The pony is near the barn.", "The pony is near the barn"],
+    answer:   "The pony is near the barn.",
+  },
+  {
+    id:       4,
+    scrambled: "swimming the He in lake is.",
+    correct:  ["He is swimming in the lake.", "He is swimming in the lake"],
+    answer:   "He is swimming in the lake.",
+  },
+  {
+    id:       5,
+    scrambled: "climbed the up The mountain man.",
+    correct:  ["The man climbed up the mountain.", "The man climbed up the mountain"],
+    answer:   "The man climbed up the mountain.",
+  },
 ];
 
-export default function WB_YSound_PageA() {
-  const [answers,     setAnswers]     = useState({});   // id → true | false
+// ─────────────────────────────────────────────
+//  🔧  NORMALIZE
+// ─────────────────────────────────────────────
+const normalize = (str) =>
+  str.toLowerCase().replace(/[^a-z0-9\s]/g, "").replace(/\s+/g, " ").trim();
+
+const isCorrect = (userVal, correctArr) =>
+  correctArr.some((c) => normalize(userVal) === normalize(c));
+
+// ─────────────────────────────────────────────
+//  COMPONENT
+// ─────────────────────────────────────────────
+export default function WB_UnscrambleWrite_QK() {
+  const [answers,     setAnswers]     = useState({});
   const [showResults, setShowResults] = useState(false);
   const [showAns,     setShowAns]     = useState(false);
 
-  /* ── select ✓ or ✕ for a card ── */
-  const handleSelect = (id, value) => {
+  const handleChange = (id, value) => {
     if (showAns) return;
-    setAnswers((prev) =>
-      prev[id] === value
-        ? (() => { const upd = { ...prev }; delete upd[id]; return upd; })()  // deselect
-        : { ...prev, [id]: value }
-    );
-    setShowResults(false);
+    const item = ITEMS.find((i) => i.id === id);
+    if (showResults && item && isCorrect(answers[id] || "", item.correct)) return;
+    setAnswers((prev) => ({ ...prev, [id]: value }));
   };
 
   const handleCheck = () => {
     if (showAns) return;
-    const allAnswered = ITEMS.every((i) => answers[i.id] !== undefined);
-    if (!allAnswered) {
-      ValidationAlert.info("Please answer all questions first.");
-      return;
-    }
+    const allAnswered = ITEMS.every((item) => answers[item.id]?.trim());
+    if (!allAnswered) { ValidationAlert.info("Please complete all answers first."); return; }
     let score = 0;
-    ITEMS.forEach((i) => { if (answers[i.id] === i.correct) score++; });
+    ITEMS.forEach((item) => { if (isCorrect(answers[item.id] || "", item.correct)) score++; });
     setShowResults(true);
-    const total = ITEMS.length;
-    if (score === total)  ValidationAlert.success(`Score: ${score} / ${total}`);
-    else if (score > 0)   ValidationAlert.warning(`Score: ${score} / ${total}`);
-    else                  ValidationAlert.error(`Score: ${score} / ${total}`);
+    if (score === ITEMS.length)   ValidationAlert.success(`Score: ${score} / ${ITEMS.length}`);
+    else if (score > 0)           ValidationAlert.warning(`Score: ${score} / ${ITEMS.length}`);
+    else                          ValidationAlert.error(`Score: ${score} / ${ITEMS.length}`);
   };
 
   const handleShowAnswer = () => {
     const filled = {};
-    ITEMS.forEach((i) => { filled[i.id] = i.correct; });
+    ITEMS.forEach((item) => { filled[item.id] = item.answer; });
     setAnswers(filled);
-    setShowResults(true);
+    setShowResults(false);
     setShowAns(true);
   };
 
-  const handleStartAgain = () => {
+  const handleReset = () => {
     setAnswers({});
     setShowResults(false);
     setShowAns(false);
   };
 
-  /* ── helpers ── */
-  const isWrong = (item) =>
-    showResults && !showAns && answers[item.id] !== item.correct;
+  const isWrong = (item) => {
+    if (!showResults || showAns) return false;
+    return !isCorrect(answers[item.id] || "", item.correct);
+  };
 
-  const getCardBorderColor = (item) =>
-    isWrong(item) ? WRONG_COLOR : BORDER_COLOR;
-
-  /* colour of a box given which symbol it holds */
-  const getBoxStyle = (item, boxValue) => {
-    const selected   = answers[item.id] === boxValue;
-    const isCorrect  = item.correct === boxValue;
-
-    let bg      = "transparent";
-    let border  = `2px solid ${BORDER_COLOR}`;
-    let color   = boxValue ? RIGHT_COLOR : WRONG_COLOR;
-
-    if (selected) {
-      if (!showResults) {
-        // before check — highlight with symbol colour tint
-        bg = boxValue ? "rgba(34,197,94,0.12)" : "rgba(239,68,68,0.12)";
-        border = `2px solid ${boxValue ? RIGHT_COLOR : WRONG_COLOR}`;
-      } else {
-        // after check — green if correct answer selected, red if wrong
-        const correct = answers[item.id] === item.correct;
-        bg     = correct ? "rgba(34,197,94,0.15)" : "rgba(239,68,68,0.15)";
-        border = `2px solid ${correct ? RIGHT_COLOR : WRONG_COLOR}`;
-        color  = correct ? RIGHT_COLOR : WRONG_COLOR;
-      }
-    }
-
-    return { bg, border, color };
+  const isDisabled = (item) => {
+    if (showAns) return true;
+    if (showResults && isCorrect(answers[item.id] || "", item.correct)) return true;
+    return false;
   };
 
   return (
     <div className="main-container-component">
+      <style>{`
+        /* ── List ── */
+        .usw-list {
+          display: flex;
+          flex-direction: column;
+          gap: clamp(16px, 2.4vw, 30px);
+          width: 100%;
+        }
+
+        /* ── Single item ── */
+        .usw-item {
+          display: flex;
+          flex-direction: column;
+          gap: clamp(8px, 1.2vw, 14px);
+        }
+
+        /* Scrambled sentence row */
+        .usw-scrambled-row {
+          display: flex;
+          align-items: baseline;
+          gap: clamp(8px, 1vw, 14px);
+          flex-wrap: wrap;
+        }
+
+        .usw-num {
+          font-size: clamp(15px, 1.8vw, 22px);
+          font-weight: 700;
+          color: ${NUMBER_COLOR};
+          flex-shrink: 0;
+          line-height: 1.5;
+        }
+
+        .usw-scrambled {
+          font-size: clamp(14px, 1.7vw, 20px);
+          color: ${SCRAMBLED_COLOR};
+          line-height: 1.5;
+        }
+
+        /* Answer input */
+        .usw-input-wrap {
+          position: relative;
+          padding-left: clamp(22px, 2.6vw, 34px);
+        }
+
+        .usw-input {
+          width: 100%;
+          background: transparent;
+          border: none;
+          border-bottom: 2px solid ${INPUT_UNDERLINE_DEFAULT};
+          outline: none;
+          font-size: clamp(14px, 1.7vw, 20px);
+          font-weight: 400;
+          color: ${INPUT_TEXT_COLOR};
+          line-height: 1.5;
+          box-sizing: border-box;
+          font-family: inherit;
+          transition: border-color 0.2s;
+        }
+        .usw-input:disabled        { opacity: 1; cursor: default; }
+        .usw-input--wrong          { border-bottom-color: ${INPUT_UNDERLINE_WRONG}; }
+        .usw-input--answer         { color: ${INPUT_ANSWER_COLOR}; }
+
+        /* ✕ badge */
+        .usw-badge {
+          position: absolute;
+          top: -8px; right: 0;
+          width: clamp(17px, 1.9vw, 22px);
+          height: clamp(17px, 1.9vw, 22px);
+          border-radius: 50%;
+          background: ${WRONG_BADGE_BG};
+          color: ${WRONG_BADGE_TEXT};
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: clamp(9px, 1vw, 12px);
+          font-weight: 700;
+          border: 2px solid #fff;
+          box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+          pointer-events: none;
+          z-index: 2;
+        }
+
+        /* Buttons */
+        .usw-buttons {
+          display: flex;
+          justify-content: center;
+          margin-top: clamp(8px, 1.6vw, 18px);
+        }
+      `}</style>
+
       <div
         className="div-forall"
         style={{
-          display:       "flex",
+          display: "flex",
           flexDirection: "column",
-          gap:           "18px",
-          maxWidth:      "1100px",
-          margin:        "0 auto",
+          gap: "clamp(14px, 2vw, 22px)",
+          maxWidth: "1100px",
+          margin: "0 auto",
         }}
       >
-        {/* ── Title ── */}
+        {/* ── Header ── */}
         <h1
           className="WB-header-title-page8"
-          style={{
-            margin:     0,
-            display:    "flex",
-            alignItems: "center",
-            gap:        "12px",
-            flexWrap:   "wrap",
-          }}
+          style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
         >
-          <span className="WB-ex-A">A</span>
-          Does it have a <strong style={{ fontWeight: 900 }}>-y sound</strong>? Write ✓ or ✕.
+          <span className="WB-ex-A">K</span>
+          Unscramble and write.
         </h1>
 
-        {/* ── Cards grid ── */}
-        <div
-          style={{
-            display:             "grid",
-            gridTemplateColumns: "repeat(6, minmax(0,1fr))",
-            gap:                 "clamp(8px,1.2vw,16px)",
-            width:               "100%",
-          }}
-        >
+        {/* ── Items ── */}
+        <div className="usw-list">
           {ITEMS.map((item) => {
-            const wrong = isWrong(item);
-            const borderColor = getCardBorderColor(item);
+            const wrong    = isWrong(item);
+            const value    = answers[item.id] || "";
+            const tColor   = showAns ? INPUT_ANSWER_COLOR : INPUT_TEXT_COLOR;
+            const uColor   = wrong ? INPUT_UNDERLINE_WRONG : INPUT_UNDERLINE_DEFAULT;
+            const disabled = isDisabled(item);
 
             return (
-              <div
-                key={item.id}
-                style={{
-                  position:     "relative",
-                  width:        "100%",
-                  display:      "flex",
-                  flexDirection:"column",
-                  gap:          "clamp(4px,0.6vw,8px)",
-                  userSelect:   "none",
-                }}
-              >
-                {/* ── Image card ── */}
-                <div
-                  style={{
-                    position:     "relative",
-                    width:        "100%",
-                    aspectRatio:  "1 / 1",
-                    border:       `2px solid ${borderColor}`,
-                    borderRadius: "clamp(10px,1.2vw,16px)",
-                    background:   "#fff",
-                    overflow:     "hidden",
-                    boxSizing:    "border-box",
-                    boxShadow:    wrong
-                      ? `0 0 0 2px ${WRONG_COLOR}40`
-                      : "0 2px 8px rgba(0,0,0,0.07)",
-                    transition:   "border-color 0.2s, box-shadow 0.2s",
-                  }}
-                >
-                  {/* Number badge */}
-                  <div
-                    style={{
-                      position:       "absolute",
-                      top:            "clamp(4px,0.7vw,8px)",
-                      left:           "clamp(4px,0.7vw,8px)",
-                      width:          "clamp(20px,2.8vw,36px)",
-                      height:         "clamp(20px,2.8vw,36px)",
-                      borderRadius:   "clamp(5px,0.6vw,8px)",
-                      border:         `2px solid ${BORDER_COLOR}`,
-                      background:     "#fff",
-                      display:        "flex",
-                      alignItems:     "center",
-                      justifyContent: "center",
-                      fontSize:       "clamp(11px,1.5vw,20px)",
-                      fontWeight:     700,
-                      color:          "#111",
-                      zIndex:         2,
-                      boxSizing:      "border-box",
-                    }}
-                  >
-                    {item.id}
-                  </div>
+              <div key={item.id} className="usw-item">
 
-                  {/* Image */}
-                  <img
-                    src={item.img}
-                    alt={`item-${item.id}`}
-                    style={{
-                      width:         "100%",
-                      height:        "100%",
-                      objectFit:     "contain",
-                      display:       "block",
-                      padding:       "clamp(10px,1.6vw,20px)",
-                      boxSizing:     "border-box",
-                      pointerEvents: "none",
-                    }}
+                {/* Scrambled sentence */}
+                <div className="usw-scrambled-row">
+                  <span className="usw-num">{item.id}</span>
+                  <span className="usw-scrambled">{item.scrambled}</span>
+                </div>
+
+                {/* Answer input */}
+                <div className="usw-input-wrap">
+                  <input
+                    type="text"
+                    className={[
+                      "usw-input",
+                      wrong   ? "usw-input--wrong"  : "",
+                      showAns ? "usw-input--answer" : "",
+                    ].filter(Boolean).join(" ")}
+                    value={value}
+                    disabled={disabled}
+                    onChange={(e) => handleChange(item.id, e.target.value)}
+                    style={{ borderBottomColor: uColor, color: tColor }}
+                    spellCheck={false}
+                    autoComplete="off"
                   />
-
-                  {/* Wrong badge */}
-                  {wrong && (
-                    <div
-                      style={{
-                        position:        "absolute",
-                        top:             "-8px",
-                        right:           "-8px",
-                        width:           "clamp(16px,1.8vw,22px)",
-                        height:          "clamp(16px,1.8vw,22px)",
-                        borderRadius:    "50%",
-                        backgroundColor: WRONG_COLOR,
-                        color:           "#fff",
-                        display:         "flex",
-                        alignItems:      "center",
-                        justifyContent:  "center",
-                        fontSize:        "clamp(9px,0.9vw,12px)",
-                        fontWeight:      700,
-                        boxShadow:       "0 1px 4px rgba(0,0,0,0.25)",
-                        zIndex:          5,
-                        pointerEvents:   "none",
-                      }}
-                    >
-                      ✕
-                    </div>
-                  )}
+                  {wrong && <div className="usw-badge">✕</div>}
                 </div>
 
-                {/* ── Two answer boxes: ✓ | ✕ ── */}
-                <div
-                  style={{
-                    display:       "flex",
-                    gap:           "clamp(4px,0.5vw,6px)",
-                    width:         "100%",
-                  }}
-                >
-                  {[true, false].map((boxValue) => {
-                    const { bg, border, color } = getBoxStyle(item, boxValue);
-                    const symbol = boxValue ? "✓" : "✕";
-
-                    return (
-                      <button
-                        key={String(boxValue)}
-                        onClick={() => handleSelect(item.id, boxValue)}
-                        disabled={showAns}
-                        style={{
-                          flex:           1,
-                          height:         "clamp(28px,4vw,48px)",
-                          border,
-                          borderRadius:   "clamp(6px,0.8vw,10px)",
-                          background:     bg,
-                          display:        "flex",
-                          alignItems:     "center",
-                          justifyContent: "center",
-                          fontSize:       "clamp(14px,2.2vw,30px)",
-                          fontWeight:     900,
-                          color,
-                          cursor:         showAns ? "default" : "pointer",
-                          transition:     "background 0.15s, border 0.15s",
-                          outline:        "none",
-                          padding:        0,
-                          lineHeight:     1,
-                        }}
-                      >
-                        {symbol}
-                      </button>
-                    );
-                  })}
-                </div>
               </div>
             );
           })}
         </div>
 
         {/* ── Buttons ── */}
-        <div
-          style={{
-            display:        "flex",
-            justifyContent: "center",
-            marginTop:      "clamp(6px,1vw,12px)",
-          }}
-        >
+        <div className="usw-buttons">
           <Button
             checkAnswers={handleCheck}
             handleShowAnswer={handleShowAnswer}
-            handleStartAgain={handleStartAgain}
+            handleStartAgain={handleReset}
           />
         </div>
       </div>
