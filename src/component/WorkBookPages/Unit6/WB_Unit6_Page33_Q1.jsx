@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import Button from "../Button";
 import ValidationAlert from "../../Popup/ValidationAlert";
 
@@ -17,7 +17,6 @@ const WRONG_BADGE_TEXT        = "#ffffff";
 
 // ─────────────────────────────────────────────
 //  📝  EXERCISE DATA
-//  parts: array of { type: "letter" | "input", value?, key?, correct?, answer? }
 // ─────────────────────────────────────────────
 const ITEMS = [
   {
@@ -126,12 +125,21 @@ export default function WB_ReadWriteMissingLetters_QA() {
   const [showResults, setShowResults] = useState(false);
   const [showAns,     setShowAns]     = useState(false);
 
+  const inputRefs = useRef({});
+
   const handleChange = (key, value) => {
     if (showAns) return;
     const inp = ALL_INPUTS.find((i) => i.key === key);
     if (showResults && inp && isCorrect(answers[key] || "", inp.correct)) return;
-    if (value.length > 1) return; // حرف واحد فقط
+    if (value.length > 1) return;
     setAnswers((prev) => ({ ...prev, [key]: value }));
+
+    // انتقال تلقائي للتالي
+    if (value.length === 1) {
+      const currentIdx = ALL_INPUTS.findIndex((i) => i.key === key);
+      const next = ALL_INPUTS[currentIdx + 1];
+      if (next) inputRefs.current[next.key]?.focus();
+    }
   };
 
   const handleCheck = () => {
@@ -208,7 +216,7 @@ export default function WB_ReadWriteMissingLetters_QA() {
 
         /* Fixed letter */
         .rwml-letter {
-font-size: clamp(14px, 1.6vw, 20px);
+          font-size: clamp(14px, 1.6vw, 20px);
           color: ${LETTER_COLOR};
           line-height: 1.5;
           min-width: clamp(14px, 1.8vw, 22px);
@@ -226,7 +234,7 @@ font-size: clamp(14px, 1.6vw, 20px);
           border: none;
           border-bottom: 2px solid ${INPUT_BORDER_DEFAULT};
           outline: none;
-font-size: clamp(14px, 1.6vw, 20px);
+          font-size: clamp(14px, 1.6vw, 20px);
           color: ${INPUT_TEXT_COLOR};
           text-align: center;
           box-sizing: border-box;
@@ -259,13 +267,14 @@ font-size: clamp(14px, 1.6vw, 20px);
 
         /* Equals + definition */
         .rwml-eq {
-font-size: clamp(14px, 1.6vw, 20px);
+          font-size: clamp(14px, 1.6vw, 20px);
           color: ${LETTER_COLOR};
           flex-shrink: 0;
         }
 
         .rwml-def {
-font-size: clamp(14px, 1.6vw, 20px);          color: ${DEFINITION_COLOR};
+          font-size: clamp(14px, 1.6vw, 20px);
+          color: ${DEFINITION_COLOR};
           line-height: 1.5;
         }
 
@@ -312,7 +321,6 @@ font-size: clamp(14px, 1.6vw, 20px);          color: ${DEFINITION_COLOR};
                       <span key={i} className="rwml-letter">{part.value}</span>
                     );
                   }
-                  // input
                   const wrong    = isWrong(part);
                   const value    = answers[part.key] || "";
                   const tColor   = showAns ? INPUT_ANSWER_COLOR : INPUT_TEXT_COLOR;
@@ -322,6 +330,7 @@ font-size: clamp(14px, 1.6vw, 20px);          color: ${DEFINITION_COLOR};
                   return (
                     <div key={part.key} className="rwml-input-wrap">
                       <input
+                        ref={(el) => (inputRefs.current[part.key] = el)}
                         type="text"
                         maxLength={1}
                         className={[

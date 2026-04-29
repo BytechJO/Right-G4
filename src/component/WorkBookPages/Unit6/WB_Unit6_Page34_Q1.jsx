@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import Button from "../Button";
 import ValidationAlert from "../../Popup/ValidationAlert";
 
@@ -27,7 +27,6 @@ const CODE = {
    2:"y",  1:"z",
 };
 
-// Code table rows for display
 const CODE_ROWS = [
   [{n:26,l:"a"},{n:25,l:"b"},{n:24,l:"c"},{n:23,l:"d"},{n:22,l:"e"},{n:21,l:"f"},{n:20,l:"g"},{n:19,l:"h"}],
   [{n:18,l:"i"},{n:17,l:"j"},{n:16,l:"k"},{n:15,l:"l"},{n:14,l:"m"},{n:13,l:"n"},{n:12,l:"o"},{n:11,l:"p"}],
@@ -37,8 +36,6 @@ const CODE_ROWS = [
 
 // ─────────────────────────────────────────────
 //  📝  EXERCISE DATA
-//  codes: أرقام الكلمة
-//  كل حرف = input واحد
 // ─────────────────────────────────────────────
 const ITEMS = [
   { id: 1, codes: [7, 22, 8, 7],               word: "test"      },
@@ -49,7 +46,6 @@ const ITEMS = [
   { id: 6, codes: [7, 9, 26, 18, 13, 22, 9, 8], word: "trainers" },
 ];
 
-// Build all input keys
 const ALL_INPUTS = ITEMS.flatMap((item) =>
   item.codes.map((code, i) => ({
     key:     `${item.id}-${i}`,
@@ -72,12 +68,21 @@ export default function WB_UseCodeWrite_QC() {
   const [showResults, setShowResults] = useState(false);
   const [showAns,     setShowAns]     = useState(false);
 
+  const inputRefs = useRef({});
+
   const handleChange = (key, value) => {
     if (showAns) return;
     const inp = ALL_INPUTS.find((i) => i.key === key);
     if (showResults && inp && isCorrect(answers[key] || "", inp.correct)) return;
     if (value.length > 1) return;
     setAnswers((prev) => ({ ...prev, [key]: value }));
+
+    // انتقال تلقائي للتالي
+    if (value.length === 1) {
+      const currentIdx = ALL_INPUTS.findIndex((i) => i.key === key);
+      const next = ALL_INPUTS[currentIdx + 1];
+      if (next) inputRefs.current[next.key]?.focus();
+    }
   };
 
   const handleCheck = () => {
@@ -137,12 +142,12 @@ export default function WB_UseCodeWrite_QC() {
         }
 
         .ucw-item-num {
-      font-size: clamp(13px, 1.5vw, 18px);
-    font-weight: 700;
-    color: #2b2b2b;
-    line-height: 1.5;
-    align-self: center;
-    margin-left : 10px l
+          font-size: clamp(13px, 1.5vw, 18px);
+          font-weight: 700;
+          color: #2b2b2b;
+          line-height: 1.5;
+          align-self: center;
+          margin-left: 10px;
         }
 
         /* Letters row */
@@ -224,20 +229,19 @@ export default function WB_UseCodeWrite_QC() {
 
         /* ── Code table ── */
         .ucw-code-table {
-    width: 100%;
-    position: relative;
-    left: 5%;    
-    margin-top : 5%;    }
+          width: 100%;
+          position: relative;
+          left: 5%;
+          margin-top: 5%;
+        }
 
-    
-.ucw-code-row {
-display: grid;
-    flex: wrap;
-    grid-template-columns: repeat(8, minmax(0, 1fr));
-    margin-bottom: clamp(6px, 0.8vw, 10px);
-    justify-content: space-around;
-
-      }
+        .ucw-code-row {
+          display: grid;
+          flex: wrap;
+          grid-template-columns: repeat(8, minmax(0, 1fr));
+          margin-bottom: clamp(6px, 0.8vw, 10px);
+          justify-content: space-around;
+        }
         .ucw-code-row:last-child { margin-bottom: 0; }
 
         .ucw-code-entry {
@@ -297,6 +301,7 @@ display: grid;
                     <div key={key} className="ucw-cell">
                       <div className="ucw-input-wrap">
                         <input
+                          ref={(el) => (inputRefs.current[key] = el)}
                           type="text"
                           maxLength={1}
                           className={[

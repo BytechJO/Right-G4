@@ -183,8 +183,7 @@ export default function WB_LookWrite_QI() {
           grid-template-columns: repeat(2, minmax(0, 1fr));
           gap: clamp(16px, 2.8vw, 36px);
           width: 100%;
-              margin-top: 10%;
-
+    margin: 9% 0;
         }
 
         .lwi-card {
@@ -192,6 +191,7 @@ export default function WB_LookWrite_QI() {
           flex-direction: column;
           gap: clamp(10px, 1.4vw, 16px);
           min-width: 0;
+              gap: 30px;
         }
 
         .lwi-img-pair {
@@ -306,6 +306,7 @@ export default function WB_LookWrite_QI() {
           flex-direction: column;
           gap: clamp(8px, 1.2vw, 20px);
           width: 100%;
+          gap: 20px;
         }
 
         .lwi-buttons {

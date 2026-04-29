@@ -119,6 +119,8 @@ export default function WB_LookReadCircleMistake_QG() {
           flex-direction: column;
           gap: clamp(18px, 2.8vw, 34px);
           width: 100%;
+              margin: 4% 0;
+
         }
 
         /* ── Single row: img | num + right ── */

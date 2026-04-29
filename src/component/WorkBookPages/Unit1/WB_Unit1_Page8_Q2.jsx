@@ -220,6 +220,8 @@ export default function WB_ReadLookNumber_QL() {
           display: grid;
           grid-template-columns: repeat(3, minmax(0, 1fr));
      width: 100%;
+        margin-top: -20px;
+
         }
 
         /* ── Single card — square ── */
