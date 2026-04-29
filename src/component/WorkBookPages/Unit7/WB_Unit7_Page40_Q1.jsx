@@ -173,7 +173,7 @@ export default function WB_LookUnscrambleWrite_QC() {
           width: 100%;
           background: transparent;
           border: none;
-          border-bottom: 2px solid ${INPUT_UNDERLINE_DEFAULT};
+          border-bottom: 1px solid ${INPUT_UNDERLINE_DEFAULT};
           outline: none;
           font-size: clamp(14px, 1.7vw, 20px);
           color: ${INPUT_TEXT_COLOR};

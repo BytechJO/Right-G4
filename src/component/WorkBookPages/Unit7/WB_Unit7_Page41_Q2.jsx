@@ -82,6 +82,7 @@ export default function WB_CircleTrueFalse_QF() {
           flex-direction: column;
           gap: clamp(14px, 2.2vw, 26px);
           width: 100%;
+          margin-top : 10% ; 
         }
 
         /* ── Single row ── */

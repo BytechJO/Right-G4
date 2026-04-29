@@ -1,235 +1,315 @@
-import React, { useRef, useState, useEffect } from "react";
+import React, { useState } from "react";
 import Button from "../Button";
 import ValidationAlert from "../../Popup/ValidationAlert";
 
-import imgRoom from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U7 Folder/Page 42/SVG/1.svg"
-const INSTRUCTIONS = [
-  { num: 1, text: "I can see the flowers in the vase." },
-  { num: 2, text: "I can see the ball near the table." },
-  { num: 3, text: "I can see the book under the table." },
-  { num: 4, text: "I can see the cat on the sofa." },
-  { num: 5, text: "I can see the picture next to the window." },
+// ─────────────────────────────────────────────
+//  🖼️  IMAGES
+// ─────────────────────────────────────────────
+import img1 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U7 Folder/Page 42/SVG/Asset 1.svg";
+import img2 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U7 Folder/Page 42/SVG/Asset 2.svg";
+import img3 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U7 Folder/Page 42/SVG/Asset 3.svg";
+import img4 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U7 Folder/Page 42/SVG/Asset 4.svg";
+
+// ─────────────────────────────────────────────
+//  🎨  COLORS
+// ─────────────────────────────────────────────
+const INPUT_UNDERLINE_DEFAULT = "#3f3f3f";
+const INPUT_UNDERLINE_WRONG   = "#ef4444";
+const INPUT_TEXT_COLOR        = "#2b2b2b";
+const INPUT_ANSWER_COLOR      = "#c81e1e";
+const NUMBER_COLOR            = "#2b2b2b";
+const SENTENCE_COLOR          = "#2b2b2b";
+const WRONG_BADGE_BG          = "#ef4444";
+const WRONG_BADGE_TEXT        = "#ffffff";
+
+// ─────────────────────────────────────────────
+//  📝  EXERCISE DATA
+// ─────────────────────────────────────────────
+const ITEMS = [
+  {
+    id:      1,
+    src:     img1,
+    before:  "",
+    after:   "",
+    // السؤال الأول كامل — الطالب يكتب الجملة كاملة
+    correct: ["Were there any apples?", "were there any apples"],
+    answer:  "Were there any apples?",
+  },
+  {
+    id:      2,
+    src:     img2,
+    before:  "",
+    after:   "fruits?",
+    correct: ["Were there any", "were there any"],
+    answer:  "Were there any",
+  },
+  {
+    id:      3,
+    src:     img3,
+    before:  "",
+    after:   "cupcakes?",
+    correct: ["Were there any", "were there any"],
+    answer:  "Were there any",
+  },
+  {
+    id:      4,
+    src:     img4,
+    before:  "",
+    after:   "soup?",
+    correct: ["Was there any", "was there any"],
+    answer:  "Was there any",
+  },
 ];
 
-const COLORS = [
-  "#1e293b", "#ef4444", "#f97316", "#eab308",
-  "#22c55e", "#3b82f6", "#a855f7", "#ec4899",
-  "#ffffff", "#92400e",
-];
+// ─────────────────────────────────────────────
+//  🔧  NORMALIZE
+// ─────────────────────────────────────────────
+const normalize = (str) =>
+  str.toLowerCase().replace(/[^a-z0-9\s]/g, "").replace(/\s+/g, " ").trim();
 
-const SIZES = [2, 4, 8, 14];
+const isCorrect = (userVal, correctArr) =>
+  correctArr.some((c) => normalize(userVal) === normalize(c));
 
-export default function WB_Unit7_Page42_DrawColor() {
-  const canvasRef = useRef(null);
-  const [isDrawing, setIsDrawing] = useState(false);
-  const [tool, setTool] = useState("pencil"); // pencil | eraser | fill
-  const [color, setColor] = useState("#ef4444");
-  const [size, setSize] = useState(4);
-  const lastPos = useRef(null);
-  const imgRef = useRef(null);
+// ─────────────────────────────────────────────
+//  COMPONENT
+// ─────────────────────────────────────────────
+export default function WB_LookReadWrite_QG() {
+  const [answers,     setAnswers]     = useState({});
+  const [showResults, setShowResults] = useState(false);
+  const [showAns,     setShowAns]     = useState(false);
 
-  // تحميل الصورة على الـ canvas
-  const loadImage = () => {
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext("2d");
-    const img = new Image();
-    img.src = imgRoom;
-    img.onload = () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-      imgRef.current = img;
-    };
+  const handleChange = (id, value) => {
+    if (showAns) return;
+    const item = ITEMS.find((i) => i.id === id);
+    if (showResults && item && isCorrect(answers[id] || "", item.correct)) return;
+    setAnswers((prev) => ({ ...prev, [id]: value }));
   };
 
-  useEffect(() => { loadImage(); }, []);
-
-  const getPos = (e, canvas) => {
-    const rect = canvas.getBoundingClientRect();
-    const scaleX = canvas.width / rect.width;
-    const scaleY = canvas.height / rect.height;
-    if (e.touches) {
-      return {
-        x: (e.touches[0].clientX - rect.left) * scaleX,
-        y: (e.touches[0].clientY - rect.top) * scaleY,
-      };
-    }
-    return {
-      x: (e.clientX - rect.left) * scaleX,
-      y: (e.clientY - rect.top) * scaleY,
-    };
+  const handleCheck = () => {
+    if (showAns) return;
+    const allAnswered = ITEMS.every((item) => answers[item.id]?.trim());
+    if (!allAnswered) { ValidationAlert.info("Please complete all answers first."); return; }
+    let score = 0;
+    ITEMS.forEach((item) => { if (isCorrect(answers[item.id] || "", item.correct)) score++; });
+    setShowResults(true);
+    if (score === ITEMS.length)   ValidationAlert.success(`Score: ${score} / ${ITEMS.length}`);
+    else if (score > 0)           ValidationAlert.warning(`Score: ${score} / ${ITEMS.length}`);
+    else                          ValidationAlert.error(`Score: ${score} / ${ITEMS.length}`);
   };
 
-  const startDrawing = (e) => {
-    e.preventDefault();
-    const canvas = canvasRef.current;
-    const pos = getPos(e, canvas);
-    lastPos.current = pos;
-    setIsDrawing(true);
-
-    // نقطة واحدة عند الكليك
-    if (tool === "pencil" || tool === "eraser") {
-      const ctx = canvas.getContext("2d");
-      ctx.beginPath();
-      ctx.arc(pos.x, pos.y, (tool === "eraser" ? size * 3 : size) / 2, 0, Math.PI * 2);
-      ctx.fillStyle = tool === "eraser" ? "#ffffff" : color;
-      ctx.fill();
-    }
+  const handleShowAnswer = () => {
+    const filled = {};
+    ITEMS.forEach((item) => { filled[item.id] = item.answer; });
+    setAnswers(filled);
+    setShowResults(false);
+    setShowAns(true);
   };
 
-  const draw = (e) => {
-    e.preventDefault();
-    if (!isDrawing) return;
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext("2d");
-    const pos = getPos(e, canvas);
-
-    if (tool === "pencil" || tool === "eraser") {
-      ctx.beginPath();
-      ctx.moveTo(lastPos.current.x, lastPos.current.y);
-      ctx.lineTo(pos.x, pos.y);
-      ctx.strokeStyle = tool === "eraser" ? "#ffffff" : color;
-      ctx.lineWidth = tool === "eraser" ? size * 3 : size;
-      ctx.lineCap = "round";
-      ctx.lineJoin = "round";
-      ctx.stroke();
-    }
-
-    lastPos.current = pos;
+  const handleReset = () => {
+    setAnswers({});
+    setShowResults(false);
+    setShowAns(false);
   };
 
-  const stopDrawing = (e) => {
-    e?.preventDefault();
-    setIsDrawing(false);
-    lastPos.current = null;
+  const isWrong = (item) => {
+    if (!showResults || showAns) return false;
+    return !isCorrect(answers[item.id] || "", item.correct);
   };
 
-  const handleClear = () => { loadImage(); };
-  const handleCheck = () => { ValidationAlert.success("Great drawing and coloring! 🎨"); };
-
-  const getCursor = () => {
-    if (tool === "eraser") return "cell";
-    return "crosshair";
+  const isDisabled = (item) => {
+    if (showAns) return true;
+    if (showResults && isCorrect(answers[item.id] || "", item.correct)) return true;
+    return false;
   };
 
   return (
     <div className="main-container-component">
-      <div className="div-forall" style={{ gap: "15px" }}>
+      <style>{`
+        /* ── Items list ── */
+        .lrwg-list {
+          display: flex;
+          flex-direction: column;
+          gap: clamp(14px, 2.2vw, 26px);
+          width: 100%;
+    margin-top: 5%;
+        }
 
-        {/* العنوان */}
-        <h1 className="WB-header-title-page8">
-          <span className="WB-ex-A">G</span>Read, draw, and color.
+        /* ── Single row: num | img | before + input + after ── */
+        .lrwg-row {
+          display: flex;
+          align-items: center;
+          gap: clamp(8px, 1.2vw, 16px);
+        }
+
+        .lrwg-num {
+          font-size: clamp(15px, 1.8vw, 22px);
+          font-weight: 700;
+          color: ${NUMBER_COLOR};
+          flex-shrink: 0;
+          min-width: clamp(14px, 1.8vw, 22px);
+        }
+
+        .lrwg-img {
+              height: auto;
+    width: 10%;
+    display: block;
+    flex-shrink: 0;
+
+        }
+
+        /* Sentence part: before + input + after */
+        .lrwg-sentence {
+          display: flex;
+          align-items: flex-end;
+          gap: clamp(4px, 0.6vw, 8px);
+          flex: 1;
+          min-width: 0;
+        }
+
+        .lrwg-text {
+          font-size: clamp(14px, 1.7vw, 20px);
+          font-weight: 400;
+          color: ${SENTENCE_COLOR};
+          white-space: nowrap;
+          flex-shrink: 0;
+          padding-bottom: 5px;
+          line-height: 1;
+        }
+
+        /* Input wrap */
+        .lrwg-input-wrap {
+          position: relative;
+          flex: 1;
+          min-width: clamp(100px, 14vw, 200px);
+        }
+
+        .lrwg-input {
+          width: 100%;
+          background: transparent;
+          border: none;
+          border-bottom: 1px solid ${INPUT_UNDERLINE_DEFAULT};
+          outline: none;
+          font-size: clamp(14px, 1.7vw, 20px);
+          font-weight: 400;
+          color: ${INPUT_TEXT_COLOR};
+          padding: 4px 4px 5px;
+          line-height: 1;
+          box-sizing: border-box;
+          font-family: inherit;
+          transition: border-color 0.2s;
+        }
+        .lrwg-input:disabled   { opacity: 1; cursor: default; }
+        .lrwg-input--wrong     { border-bottom-color: ${INPUT_UNDERLINE_WRONG}; }
+        .lrwg-input--answer    { color: ${INPUT_ANSWER_COLOR}; }
+
+        /* ✕ badge */
+        .lrwg-badge {
+          position: absolute;
+          top: -8px; right: 0;
+          width: clamp(17px, 1.9vw, 22px);
+          height: clamp(17px, 1.9vw, 22px);
+          border-radius: 50%;
+          background: ${WRONG_BADGE_BG};
+          color: ${WRONG_BADGE_TEXT};
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: clamp(9px, 1vw, 12px);
+          font-weight: 700;
+          border: 2px solid #fff;
+          box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+          pointer-events: none;
+          z-index: 2;
+        }
+
+        /* Buttons */
+        .lrwg-buttons {
+          display: flex;
+          justify-content: center;
+          margin-top: clamp(8px, 1.6vw, 18px);
+        }
+
+        @media (max-width: 500px) {
+          .lrwg-sentence { flex-wrap: wrap; }
+          .lrwg-text { white-space: normal; }
+        }
+      `}</style>
+
+      <div
+        className="div-forall"
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: "clamp(14px, 2vw, 22px)",
+          maxWidth: "1100px",
+          margin: "0 auto",
+        }}
+      >
+        {/* ── Header ── */}
+        <h1
+          className="WB-header-title-page8"
+          style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
+        >
+          <span className="WB-ex-A">G</span>
+          Look, read, and write.
         </h1>
 
-        {/* التعليمات */}
-        <div className="flex flex-col gap-1.5 mb-1">
-          {INSTRUCTIONS.map((inst) => (
-            <p key={inst.num} className="text-gray-700 text-sm">
-              <span className="font-bold text-gray-500 mr-2">{inst.num}</span>
-              {inst.text}
-            </p>
-          ))}
+        {/* ── Items ── */}
+        <div className="lrwg-list">
+          {ITEMS.map((item) => {
+            const wrong    = isWrong(item);
+            const value    = answers[item.id] || "";
+            const tColor   = showAns ? INPUT_ANSWER_COLOR : INPUT_TEXT_COLOR;
+            const uColor   = wrong ? INPUT_UNDERLINE_WRONG : INPUT_UNDERLINE_DEFAULT;
+            const disabled = isDisabled(item);
+
+            return (
+              <div key={item.id} className="lrwg-row">
+
+                {/* Number */}
+                <span className="lrwg-num">{item.id}</span>
+
+                {/* Image */}
+                <img src={item.src} alt={`item-${item.id}`} className="lrwg-img" />
+
+                {/* Sentence */}
+                <div className="lrwg-sentence">
+                  {item.before && <span className="lrwg-text">{item.before}</span>}
+
+                  <div className="lrwg-input-wrap">
+                    <input
+                      type="text"
+                      className={[
+                        "lrwg-input",
+                        wrong   ? "lrwg-input--wrong"  : "",
+                        showAns ? "lrwg-input--answer" : "",
+                      ].filter(Boolean).join(" ")}
+                      value={value}
+                      disabled={disabled}
+                      onChange={(e) => handleChange(item.id, e.target.value)}
+                      style={{ borderBottomColor: uColor, color: tColor }}
+                      spellCheck={false}
+                      autoComplete="off"
+                    />
+                    {wrong && <div className="lrwg-badge">✕</div>}
+                  </div>
+
+                  {item.after && <span className="lrwg-text">{item.after}</span>}
+                </div>
+
+              </div>
+            );
+          })}
         </div>
 
-        {/* شريط الأدوات */}
-        <div className="flex flex-wrap items-center gap-3 bg-gray-50 border border-gray-200 rounded-2xl px-4 py-3">
-
-          {/* الأدوات */}
-          <div className="flex gap-2">
-            {[
-              { id: "pencil", label: "✏️ Draw" },
-              { id: "eraser", label: "🧹 Erase" },
-            ].map((t) => (
-              <button
-                key={t.id}
-                onClick={() => setTool(t.id)}
-                className={`px-3 py-1.5 rounded-xl text-sm font-medium border-2 transition-all
-                  ${tool === t.id
-                    ? "border-blue-500 bg-blue-50 text-blue-700"
-                    : "border-gray-200 bg-white text-gray-600 hover:border-gray-300"
-                  }`}
-              >
-                {t.label}
-              </button>
-            ))}
-          </div>
-
-          <div className="w-px h-6 bg-gray-200" />
-
-          {/* الألوان */}
-          <div className="flex gap-1.5 flex-wrap">
-            {COLORS.map((c) => (
-              <button
-                key={c}
-                onClick={() => { setColor(c); setTool("pencil"); }}
-                className={`w-7 h-7 rounded-full border-2 transition-all flex-shrink-0
-                  ${color === c && tool === "pencil"
-                    ? "border-gray-700 scale-110 shadow"
-                    : "border-gray-300 hover:scale-105"
-                  }`}
-                style={{ backgroundColor: c }}
-              />
-            ))}
-          </div>
-
-          <div className="w-px h-6 bg-gray-200" />
-
-          {/* حجم الفرشاة */}
-          <div className="flex items-center gap-2">
-            {SIZES.map((s) => (
-              <button
-                key={s}
-                onClick={() => setSize(s)}
-                className={`flex items-center justify-center rounded-full border-2 bg-white transition-all
-                  ${size === s ? "border-blue-500" : "border-gray-200 hover:border-gray-300"}`}
-                style={{ width: 30, height: 30 }}
-              >
-                <span
-                  className="rounded-full bg-gray-700"
-                  style={{ width: Math.min(s * 2.2, 22), height: Math.min(s * 2.2, 22) }}
-                />
-              </button>
-            ))}
-          </div>
-
-          <div className="w-px h-6 bg-gray-200" />
-
-          {/* مسح الكل */}
-          <button
-            onClick={handleClear}
-            className="px-3 py-1.5 rounded-xl text-sm font-medium border-2 border-red-200 bg-red-50 text-red-500 hover:border-red-400 transition-all"
-          >
-            🗑️ Clear all
-          </button>
-        </div>
-
-        {/* الـ Canvas */}
-        <div
-          className="relative w-full rounded-2xl overflow-hidden border-2 border-gray-200 bg-white shadow-sm"
-          style={{ cursor: getCursor() }}
-        >
-          <canvas
-            ref={canvasRef}
-            width={900}
-            height={620}
-            className="w-full h-auto touch-none block"
-            onMouseDown={startDrawing}
-            onMouseMove={draw}
-            onMouseUp={stopDrawing}
-            onMouseLeave={stopDrawing}
-            onTouchStart={startDrawing}
-            onTouchMove={draw}
-            onTouchEnd={stopDrawing}
-          />
-        </div>
-
-        {/* الأزرار */}
-        <div className="mt-6 flex justify-center">
+        {/* ── Buttons ── */}
+        <div className="lrwg-buttons">
           <Button
             checkAnswers={handleCheck}
-            handleStartAgain={handleClear}
+            handleShowAnswer={handleShowAnswer}
+            handleStartAgain={handleReset}
           />
         </div>
-
       </div>
     </div>
   );

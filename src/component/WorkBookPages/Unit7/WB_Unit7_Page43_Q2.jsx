@@ -2,248 +2,269 @@ import React, { useState } from "react";
 import Button from "../Button";
 import ValidationAlert from "../../Popup/ValidationAlert";
 
-import img1 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U7 Folder/Page 43/SVG/5.svg";
-import img2 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U7 Folder/Page 43/SVG/6.svg";
-import img3 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U7 Folder/Page 43/SVG/7.svg";
-import img4 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U7 Folder/Page 43/SVG/8.svg";
-import img5 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U7 Folder/Page 43/SVG/9.svg";
-import img6 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U7 Folder/Page 43/SVG/10.svg";
+// ─────────────────────────────────────────────
+//  🖼️  IMAGES
+// ─────────────────────────────────────────────
+import img1 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U7 Folder/Page 43/SVG/Asset 6.svg";
+import img2 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U7 Folder/Page 43/SVG/Asset 7.svg";
+import img3 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U7 Folder/Page 43/SVG/Asset 8.svg";
 
-const BORDER_COLOR = "#f39b42";
-const WRONG_COLOR  = "#ef4444";
+// ─────────────────────────────────────────────
+//  🎨  COLORS
+// ─────────────────────────────────────────────
+const INPUT_UNDERLINE_DEFAULT = "#3f3f3f";
+const INPUT_UNDERLINE_WRONG   = "#ef4444";
+const INPUT_TEXT_COLOR        = "#2b2b2b";
+const INPUT_ANSWER_COLOR      = "#c81e1e";
+const NUMBER_COLOR            = "#2b2b2b";
+const WRONG_BADGE_BG          = "#ef4444";
+const WRONG_BADGE_TEXT        = "#ffffff";
 
+// ─────────────────────────────────────────────
+//  📝  EXERCISE DATA
+// ─────────────────────────────────────────────
 const ITEMS = [
   {
-    id: 1, img: img1,
-    options: ["bus station", "music room", "computer lab"],
-    correct: "music room",
+    id:      1,
+    src:     img1,
+    correct: ["There was jello.", "There was jello", "there was jello."],
+    answer:  "There was jello.",
   },
   {
-    id: 2, img: img2,
-    options: ["street", "class", "cafeteria"],
-    correct: "cafeteria",
+    id:      2,
+    src:     img2,
+    correct: ["There were bananas.", "There were bananas", "there were bananas."],
+    answer:  "There were bananas.",
   },
   {
-    id: 3, img: img3,
-    options: ["bus station", "soccer field", "library"],
-    correct: "bus station",
-  },
-  {
-    id: 4, img: img4,
-    options: ["soccer field", "music room", "cafeteria"],
-    correct: "soccer field",
-  },
-  {
-    id: 5, img: img5,
-    options: ["computer lab", "class", "street"],
-    correct: "class",
-  },
-  {
-    id: 6, img: img6,
-    options: ["soccer field", "bus station", "computer lab"],
-    correct: "computer lab",
+    id:      3,
+    src:     img3,
+    correct: ["There was cake.", "There was cake", "there was cake."],
+    answer:  "There was cake.",
   },
 ];
 
-export default function WB_LookReadCircle_PageJ() {
+// ─────────────────────────────────────────────
+//  🔧  NORMALIZE
+// ─────────────────────────────────────────────
+const normalize = (str) =>
+  str.toLowerCase().replace(/[^a-z0-9'\s]/g, "").replace(/\s+/g, " ").trim();
+
+const isCorrect = (userVal, correctArr) =>
+  correctArr.some((c) => normalize(userVal) === normalize(c));
+
+// ─────────────────────────────────────────────
+//  COMPONENT
+// ─────────────────────────────────────────────
+export default function WB_LookReadWrite_QJ() {
   const [answers,     setAnswers]     = useState({});
   const [showResults, setShowResults] = useState(false);
   const [showAns,     setShowAns]     = useState(false);
 
-  const handleSelect = (id, value) => {
+  const handleChange = (id, value) => {
     if (showAns) return;
+    const item = ITEMS.find((i) => i.id === id);
+    if (showResults && item && isCorrect(answers[id] || "", item.correct)) return;
     setAnswers((prev) => ({ ...prev, [id]: value }));
-    setShowResults(false);
   };
 
   const handleCheck = () => {
     if (showAns) return;
-    const allAnswered = ITEMS.every((i) => answers[i.id]);
-    if (!allAnswered) {
-      ValidationAlert.info("Please answer all questions first.");
-      return;
-    }
+    const allAnswered = ITEMS.every((item) => answers[item.id]?.trim());
+    if (!allAnswered) { ValidationAlert.info("Please complete all answers first."); return; }
     let score = 0;
-    ITEMS.forEach((i) => { if (answers[i.id] === i.correct) score++; });
+    ITEMS.forEach((item) => { if (isCorrect(answers[item.id] || "", item.correct)) score++; });
     setShowResults(true);
-    const total = ITEMS.length;
-    if (score === total)  ValidationAlert.success(`Score: ${score} / ${total}`);
-    else if (score > 0)   ValidationAlert.warning(`Score: ${score} / ${total}`);
-    else                  ValidationAlert.error(`Score: ${score} / ${total}`);
+    if (score === ITEMS.length)   ValidationAlert.success(`Score: ${score} / ${ITEMS.length}`);
+    else if (score > 0)           ValidationAlert.warning(`Score: ${score} / ${ITEMS.length}`);
+    else                          ValidationAlert.error(`Score: ${score} / ${ITEMS.length}`);
   };
 
   const handleShowAnswer = () => {
     const filled = {};
-    ITEMS.forEach((i) => { filled[i.id] = i.correct; });
+    ITEMS.forEach((item) => { filled[item.id] = item.answer; });
     setAnswers(filled);
-    setShowResults(true);
+    setShowResults(false);
     setShowAns(true);
   };
 
-  const handleStartAgain = () => {
+  const handleReset = () => {
     setAnswers({});
     setShowResults(false);
     setShowAns(false);
   };
 
-  const getOptionStyle = (item, opt) => {
-    const isSelected = answers[item.id] === opt;
-    const isWrong    = showResults && !showAns && answers[item.id] === opt && opt !== item.correct;
-    const isCorrectShown = showAns && opt === item.correct;
+  const isWrong = (item) => {
+    if (!showResults || showAns) return false;
+    return !isCorrect(answers[item.id] || "", item.correct);
+  };
 
-    if (isWrong) {
-      return {
-        border:          `2.5px solid ${WRONG_COLOR}`,
-        color:           WRONG_COLOR,
-      };
-    }
-    if (isSelected || isCorrectShown) {
-      return {
-        border:          `2.5px solid ${BORDER_COLOR}`,
-        color:           "#111",
-      };
-    }
-    return {
-      border:          "2.5px solid transparent",
-      color:           "#444",
-    };
+  const isDisabled = (item) => {
+    if (showAns) return true;
+    if (showResults && isCorrect(answers[item.id] || "", item.correct)) return true;
+    return false;
   };
 
   return (
     <div className="main-container-component">
+      <style>{`
+        /* ── Items list ── */
+        .lrwj-list {
+          display: flex;
+          flex-direction: column;
+          gap: clamp(14px, 2.2vw, 26px);
+          width: 100%;
+        }
+
+        /* ── Single item ── */
+        .lrwj-item {
+          display: flex;
+          flex-direction: column;
+          gap: clamp(4px, 0.5vw, 6px);
+        }
+
+        /* Top row: num + img */
+        .lrwj-top {
+          display: flex;
+          align-items: flex-end;
+          gap: clamp(8px, 1.2vw, 14px);
+        }
+
+        .lrwj-num {
+          font-size: clamp(15px, 1.8vw, 22px);
+          font-weight: 700;
+          color: ${NUMBER_COLOR};
+          flex-shrink: 0;
+          min-width: clamp(14px, 1.8vw, 22px);
+          line-height: 1;
+          padding-bottom: 4px;
+        }
+
+        .lrwj-img {
+          height: auto;
+          width: 15%;
+          display: block;
+          flex-shrink: 0;
+        }
+
+        /* Input wrap — full width */
+        .lrwj-input-wrap {
+          position: relative;
+          width: 100%;
+        }
+
+        .lrwj-input {
+          width: 100%;
+          background: transparent;
+          border: none;
+          border-bottom: 1px solid ${INPUT_UNDERLINE_DEFAULT};
+          outline: none;
+          font-size: clamp(14px, 1.7vw, 20px);
+          font-weight: 400;
+          color: ${INPUT_TEXT_COLOR};
+          line-height: 1.5;
+          box-sizing: border-box;
+          transition: border-color 0.2s;
+        }
+        .lrwj-input:disabled   { opacity: 1; cursor: default; }
+        .lrwj-input--wrong     { border-bottom-color: ${INPUT_UNDERLINE_WRONG}; }
+        .lrwj-input--answer    { color: ${INPUT_ANSWER_COLOR}; }
+
+        /* ✕ badge */
+        .lrwj-badge {
+          position: absolute;
+          top: -8px; right: 0;
+          width: clamp(17px, 1.9vw, 22px);
+          height: clamp(17px, 1.9vw, 22px);
+          border-radius: 50%;
+          background: ${WRONG_BADGE_BG};
+          color: ${WRONG_BADGE_TEXT};
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: clamp(9px, 1vw, 12px);
+          font-weight: 700;
+          border: 2px solid #fff;
+          box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+          pointer-events: none;
+          z-index: 2;
+        }
+
+        /* Buttons */
+        .lrwj-buttons {
+          display: flex;
+          justify-content: center;
+          margin-top: clamp(8px, 1.6vw, 18px);
+        }
+      `}</style>
+
       <div
         className="div-forall"
         style={{
-          display:       "flex",
+          display: "flex",
           flexDirection: "column",
-          gap:           "clamp(18px,2.5vw,28px)",
-          maxWidth:      "1100px",
-          margin:        "0 auto",
+          gap: "clamp(14px, 2vw, 22px)",
+          maxWidth: "1100px",
+          margin: "0 auto",
         }}
       >
-        {/* Title */}
+        {/* ── Header ── */}
         <h1
           className="WB-header-title-page8"
           style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
         >
-          <span className="WB-ex-A">J</span> Look, read, and circle.
+          <span className="WB-ex-A">J</span>
+          Look, read, and write.
         </h1>
 
-        {/* ── Grid 3×2 ── */}
-        <div
-          style={{
-            display:             "grid",
-            gridTemplateColumns: "repeat(3, minmax(0,1fr))",
-            gap:                 "clamp(16px,2.5vw,32px)",
-            width:               "100%",
-          }}
-        >
-          {ITEMS.map((item) => (
-            <div
-              key={item.id}
-              style={{
-                display:       "flex",
-                flexDirection: "column",
-                alignItems:    "center",
-                gap:           "clamp(6px,0.8vw,10px)",
-              }}
-            >
-              {/* رقم */}
-              <span style={{ fontSize: "clamp(16px,1.8vw,24px)", fontWeight: 700, color: "#111", alignSelf: "flex-start" }}>
-                {item.id}
-              </span>
+        {/* ── Items ── */}
+        <div className="lrwj-list">
+          {ITEMS.map((item) => {
+            const wrong    = isWrong(item);
+            const value    = answers[item.id] || "";
+            const tColor   = showAns ? INPUT_ANSWER_COLOR : INPUT_TEXT_COLOR;
+            const uColor   = wrong ? INPUT_UNDERLINE_WRONG : INPUT_UNDERLINE_DEFAULT;
+            const disabled = isDisabled(item);
 
-              {/* الصورة */}
-              <div
-                style={{
-                  width:        "100%",
-                  aspectRatio:  "1.4 / 1",
-                  border:       `2px solid ${BORDER_COLOR}`,
-                  borderRadius: "clamp(10px,1.2vw,16px)",
-                  overflow:     "hidden",
-                  background:   "#f7f7f7",
-                }}
-              >
-                <img
-                  src={item.img}
-                  alt={`item-${item.id}`}
-                  style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
-                />
+            return (
+              <div key={item.id} className="lrwj-item">
+
+                {/* Number + Image */}
+                <div className="lrwj-top">
+                  <span className="lrwj-num">{item.id}</span>
+                  <img src={item.src} alt={`item-${item.id}`} className="lrwj-img" />
+                </div>
+
+                {/* Input full width */}
+                <div className="lrwj-input-wrap">
+                  <input
+                    type="text"
+                    className={[
+                      "lrwj-input",
+                      wrong   ? "lrwj-input--wrong"  : "",
+                      showAns ? "lrwj-input--answer" : "",
+                    ].filter(Boolean).join(" ")}
+                    value={value}
+                    disabled={disabled}
+                    onChange={(e) => handleChange(item.id, e.target.value)}
+                    style={{ borderBottomColor: uColor, color: tColor }}
+                    spellCheck={false}
+                    autoComplete="off"
+                  />
+                  {wrong && <div className="lrwj-badge">✕</div>}
+                </div>
+
               </div>
-
-              {/* الخيارات */}
-              <div
-                style={{
-                  display:       "flex",
-                  flexDirection: "column",
-                  alignItems:    "center",
-                  gap:           "clamp(4px,0.5vw,7px)",
-                  width:         "100%",
-                }}
-              >
-                {item.options.map((opt) => {
-                  const isSelected = answers[item.id] === opt;
-                  const isWrong    = showResults && !showAns && answers[item.id] === opt && opt !== item.correct;
-
-                  return (
-                    <div key={opt} style={{ position: "relative", width: "100%" }}>
-                      <button
-                        onClick={() => handleSelect(item.id, opt)}
-                        style={{
-                          width:        "100%",
-                          padding:      "clamp(4px,0.6vw,8px) clamp(10px,1.2vw,16px)",
-                          borderRadius: "999px",
-                          fontSize:     "clamp(13px,1.4vw,18px)",
-                          fontWeight:   isSelected ? 700 : 500,
-                          cursor:       showAns ? "default" : "pointer",
-                          transition:   "all 0.15s",
-                          userSelect:   "none",
-                          textAlign:    "center",
-                          boxSizing:    "border-box",
-                          background:   "transparent",
-                          ...getOptionStyle(item, opt),
-                        }}
-                      >
-                        {opt}
-                      </button>
-
-                      {/* Wrong badge */}
-                      {isWrong && (
-                        <div style={{
-                          position:        "absolute",
-                          top:             "-6px",
-                          right:           "-6px",
-                          width:           "clamp(16px,1.8vw,20px)",
-                          height:          "clamp(16px,1.8vw,20px)",
-                          borderRadius:    "50%",
-                          border:          "1px solid #fff",
-                          backgroundColor: WRONG_COLOR,
-                          color:           "#fff",
-                          display:         "flex",
-                          alignItems:      "center",
-                          justifyContent:  "center",
-                          fontSize:        "clamp(9px,0.9vw,11px)",
-                          fontWeight:      700,
-                          boxShadow:       "0 1px 4px rgba(0,0,0,0.2)",
-                          pointerEvents:   "none",
-                        }}>
-                          ✕
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
-        {/* Buttons */}
-        <div style={{ display: "flex", justifyContent: "center", marginTop: "clamp(6px,1vw,12px)" }}>
+        {/* ── Buttons ── */}
+        <div className="lrwj-buttons">
           <Button
             checkAnswers={handleCheck}
             handleShowAnswer={handleShowAnswer}
-            handleStartAgain={handleStartAgain}
+            handleStartAgain={handleReset}
           />
         </div>
       </div>
