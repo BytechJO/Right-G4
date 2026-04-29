@@ -258,7 +258,7 @@ export default function WB_Crossword_QA() {
           flex: 1 1 200px;
           display: flex;
           flex-direction: column;
-          gap: clamp(14px, 2vw, 22px);
+          gap:50px;
           min-width: 180px;
         }
         .cw-clue-dir {

@@ -161,15 +161,13 @@ export default function WB_LookReadWriteSentences_QG() {
         .lws-card {
           display: flex;
           flex-direction: column;
-          gap: clamp(8px, 1.2vw, 14px);
           min-width: 0;
         }
 
         /* Number LEFT of image — flex row */
         .lws-img-row {
           display: flex;
-          align-items: flex-start;
-          gap: clamp(6px, 0.8vw, 10px);
+       
         }
 
         .lws-num {
@@ -178,7 +176,8 @@ export default function WB_LookReadWriteSentences_QG() {
           color: ${NUMBER_COLOR};
           line-height: 1;
           flex-shrink: 0;
-          padding-top: 2px;
+              align-self: center;
+
         }
 
         /* Image — takes remaining width */
@@ -188,9 +187,10 @@ export default function WB_LookReadWriteSentences_QG() {
 =          overflow: hidden;
         }
         .lws-img {
-          width: 100%;
-          height: 100%;
-          display: block;
+      width: 60%;
+    height: 100%;
+    display: block;
+    justify-self: center;
         }
 
         /* Input wrap */

@@ -161,6 +161,7 @@ export default function WB_ReadExerciseC_WriteCheckX_QD() {
           flex-direction: column;
           gap: clamp(10px, 1.6vw, 18px);
           width: 100%;
+              margin: 5% 0;
         }
 
         /* ── Row: num | text | box ── */

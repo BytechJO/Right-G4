@@ -363,7 +363,7 @@ export default function WB_ReadLookMatch_D() {
         </div>
 
         {/* ── Buttons ── */}
-        <div className="rlm-buttons">
+        <div className="rlm-buttons" style={{zIndex : "1000"}}>
           <Button
             checkAnswers={handleCheck}
             handleShowAnswer={handleShowAnswer}

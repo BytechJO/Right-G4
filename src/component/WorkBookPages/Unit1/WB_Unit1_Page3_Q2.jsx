@@ -141,6 +141,7 @@ export default function WB_ReadChooseWrite_QB() {
           flex-direction: column;
           gap: clamp(28px, 4vw, 48px);
           width: 100%;
+              margin: 5% 0;
         }
 
         .rcw-item {

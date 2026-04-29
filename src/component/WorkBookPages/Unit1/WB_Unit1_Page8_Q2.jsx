@@ -176,7 +176,7 @@ export default function WB_ReadLookNumber_QL() {
         <img src={img.src} alt={`scene-${img.key}`} className="rln-img" />
 
         {/* ✓ / ✗ icon — bottom-right corner */}
-        {renderIcon(img.mark)}
+
 
       </div>
     );
@@ -219,7 +219,6 @@ export default function WB_ReadLookNumber_QL() {
         .rln-img-grid {
           display: grid;
           grid-template-columns: repeat(3, minmax(0, 1fr));
-gap: 10px 30px     ;
      width: 100%;
         }
 
@@ -230,13 +229,13 @@ gap: 10px 30px     ;
           display: block;
           background: #fff;
           width: 100%;
-          aspect-ratio: 1 / 1;
+            aspect-ratio: 4 / 3; 
         }
 
         /* Image fills card completely */
         .rln-img {
           position: absolute;
-          width: 100%;
+          width: 70%;
           height: 100%;
           display: block;
         }
@@ -244,16 +243,20 @@ gap: 10px 30px     ;
         /* ── Number input box — top-right inside image ── */
         .rln-num-box-wrap {
           position: absolute;
-    top: 9.8%;
-          right: 0.5px;
+    top: 12.7%;
+          right: 30.25%;
           z-index: 3;
         }
 
         .rln-num-box {
-         width: 50px;
-    height: 50px;
-          border: 2px solid ${INPUT_BORDER_DEFAULT};
-          border-radius: 8px;
+         width:35px;
+    height: 35px;
+          border-top: 1px solid ${INPUT_BORDER_DEFAULT};
+                    border-bottom: 2px solid ${INPUT_BORDER_DEFAULT};
+          border-left: 2px solid ${INPUT_BORDER_DEFAULT};
+          border-right: 1px solid ${INPUT_BORDER_DEFAULT};
+
+          border-radius:0px 10px 0px 4px;
           background: ${INPUT_BG_DEFAULT};
           text-align: center;
           font-size: clamp(14px, 1.8vw, 21px);

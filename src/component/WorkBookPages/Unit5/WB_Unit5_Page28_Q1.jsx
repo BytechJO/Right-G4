@@ -170,6 +170,7 @@ export default function WB_LookReadWrite_QC() {
           grid-template-columns: repeat(2, minmax(0, 1fr));
           gap: clamp(16px, 2.8vw, 36px);
           width: 100%;
+          margin-top : 10%
         }
 
         /* ── Single card ── */
@@ -207,9 +208,13 @@ export default function WB_LookReadWrite_QC() {
 
         /* Lines */
         .lrwc-lines {
-          display: flex;
-          flex-direction: column;
-          gap: clamp(8px, 1.2vw, 14px);
+        display: flex;
+    flex-direction: column;
+    gap: clamp(8px, 1.2vw, 14px);
+    width: 80%;
+    align-self: center;
+    margin-left: 5%;
+
         }
 
         .lrwc-line {
@@ -238,7 +243,7 @@ font-size: clamp(15px, 1.9vw, 18px);
           width: 100%;
           background: transparent;
           border: none;
-          border-bottom: 2px solid ${INPUT_UNDERLINE_DEFAULT};
+          border-bottom: 1px solid ${INPUT_UNDERLINE_DEFAULT};
           outline: none;
 font-size: clamp(15px, 1.9vw, 18px);
           color: ${INPUT_TEXT_COLOR};

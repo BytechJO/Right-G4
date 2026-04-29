@@ -138,8 +138,7 @@ export default function WB_ReadAndWrite_D() {
           display: flex;
           flex-direction: column;
           gap: clamp(14px, 2vw, 22px);
-          margin-top : 7%;
-        }
+    margin: 10% 0%;        }
 
         .rwd-row {
           display: flex;

@@ -176,6 +176,8 @@ export default function WB_LookReadCircleTrueFalse_QH() {
           flex-direction: column;
           gap: clamp(12px, 2vw, 22px);
           width: 100%;
+  
+    margin-top: 15px;
         }
 
         /* ── Single row: num | sentence | true | false ── */

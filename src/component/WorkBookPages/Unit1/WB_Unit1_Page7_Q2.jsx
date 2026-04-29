@@ -145,10 +145,9 @@ export default function WB_LookReadMatch_QJ() {
           line-height: 0;
         }
         .lrm-table-img {
-          width: 100%;
+          width: 82%;
           display: block;
-          object-position: center center;
-          max-height: clamp(450px, 28vw, 450px);
+         height: auto ;
         }
 
         .lrm-match {

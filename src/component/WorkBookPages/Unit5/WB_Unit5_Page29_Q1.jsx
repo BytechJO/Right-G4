@@ -183,8 +183,8 @@ font-size: clamp(15px, 1.9vw, 18px);
         }
 
         .lrwe-input {
-          width: clamp(32px, 4vw, 50px);
-          height: clamp(32px, 4vw, 50px);
+          width: clamp(40px, 4vw, 40px);
+          height: clamp(40px, 4vw, 40px);
           border: 2px solid ${INPUT_BORDER_DEFAULT};
           border-radius: 8px;
           background: #fff;

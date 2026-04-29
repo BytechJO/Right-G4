@@ -295,7 +295,7 @@ export default function WB_ReadLookCircleWrite_A() {
         }
         .rlcw-blank:disabled   { opacity: 1; cursor: default; }
         .rlcw-blank--wrong     { border-bottom-color: ${INPUT_UNDERLINE_WRONG}; }
-        .rlcw-blank--answer    { color: ${INPUT_ANSWER_COLOR}; font-weight: 700; }
+        .rlcw-blank--answer    { color: ${INPUT_ANSWER_COLOR};}
 
         /* ✕ badge on blank */
         .rlcw-badge {

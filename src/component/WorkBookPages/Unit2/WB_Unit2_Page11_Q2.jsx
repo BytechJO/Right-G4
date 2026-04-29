@@ -331,10 +331,9 @@ export default function WB_MissingLetters_F() {
         .ml-grid {
           display: grid;
           grid-template-columns: 1fr 1fr;
-          gap: clamp(12px, 1.8vw, 22px) clamp(20px, 3vw, 48px);
+          gap: clamp(12px, 1.8vw, 30px) clamp(60px, 3vw, 60px);
           align-items: center;
-          margin-top: 5%
-        }
+ margin: 5% 0%;         }
         @media (max-width: 600px) {
           .ml-grid { grid-template-columns: 1fr; }
         }
