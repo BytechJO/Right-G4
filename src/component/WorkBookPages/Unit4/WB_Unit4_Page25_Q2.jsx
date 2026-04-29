@@ -150,31 +150,34 @@ export default function WB_ReadWriteTable_QH() {
         /* ── Table ── */
         .rwt-table {
            width: 100%;
-    border-collapse: inherit;
     border: 2px solid #2096a6;
-    border-radius: 8px;
+        border-collapse: separate;
+    border-spacing: 0;
+    border-radius: 10px;
+    overflow: hidden;
         }
 
         /* Header row */
-        .rwt-th {
-          background: ${HEADER_BG};
-          border-right: 1.5px solid ${TABLE_BORDER_COLOR};
-          border-bottom: 2px solid ${TABLE_BORDER_COLOR};
-          padding: clamp(10px, 1.4vw, 18px) clamp(12px, 1.8vw, 24px);
-font-size: clamp(15px, 1.9vw, 20px);
-          color: ${HEADER_TEXT_COLOR};
-          text-align: center;
-                    border-radius: 5px;
+  .rwt-th {
+    background: #ffffff;
+    border: 1px solid #2096a6;
+    /* border-bottom: 2px solid #2096a6; */
+    padding: clamp(10px, 1.4vw, 18px) clamp(12px, 1.8vw, 24px);
+    font-size: clamp(15px, 1.9vw, 20px);
+    color: #2b2b2b;
+    text-align: center;
+        font-weight: 500;
 
-        }
+}
         .rwt-th:last-child { border-right: none !important;
          }
 
         /* Single tall data cell per column */
         .rwt-tall-cell {
-          vertical-align: top;
-          padding: 0;
-          width: 33.33%;
+       padding: 0;
+    /* width: 33.33%; */
+    border: 1px solid #2096a6;
+    overflow: hidden;
         }
 
         /* Each sub-row inside tall cell */
@@ -206,7 +209,7 @@ font-size: clamp(15px, 1.9vw, 20px);
           width: clamp(80px, 12vw, 160px);
           background: transparent;
           border: none;
-          border-bottom: 2px solid ${INPUT_UNDERLINE_DEFAULT};
+          border-bottom: 1px solid ${INPUT_UNDERLINE_DEFAULT};
           outline: none;
 font-size: clamp(15px, 1.9vw, 20px);
           color: ${INPUT_TEXT_COLOR};

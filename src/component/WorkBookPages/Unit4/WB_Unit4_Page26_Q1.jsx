@@ -257,24 +257,28 @@ export default function WB_ReadDraw_QI() {
         /* ── Table ── */
         .rad-table {
  
-              width: 100%;
-    border-collapse: inherit;
+         width: 100%;
     border: 2px solid #2096a6;
-    border-radius: 8px;
+        border-collapse: separate;
+    border-spacing: 0;
+    border-radius: 10px;
+    overflow: hidden;
         }
         .rad-th {
-          border-right: 1.5px solid ${TABLE_BORDER_COLOR};
-          border-bottom: 1.5px solid ${TABLE_BORDER_COLOR};
+          border-right: 2px solid ${TABLE_BORDER_COLOR};
+          border-bottom: 2px solid ${TABLE_BORDER_COLOR};
           padding: clamp(8px, 1.2vw, 16px);
 font-size: clamp(15px, 1.9vw, 20px);
           color: ${HEADER_TEXT_COLOR};
           text-align: center;
           background: #fff;
+                  font-weight: 500;
+
         }
         .rad-th:last-child { border-right: none; }
 
         .rad-td {
-          border-right: 1.5px solid ${TABLE_BORDER_COLOR};
+          border-right: 2px solid ${TABLE_BORDER_COLOR};
           padding: clamp(6px, 1vw, 10px);
           vertical-align: top;
           width: 33.33%;
@@ -287,8 +291,6 @@ font-size: clamp(15px, 1.9vw, 20px);
           aspect-ratio: 1 / 1;
           display: block;
           cursor: crosshair;
-          border: 1px solid #e0e0e0;
-          border-radius: 6px;
           touch-action: none;
         }
         .rad-canvas--eraser { cursor: cell; }
@@ -312,7 +314,7 @@ font-size: clamp(15px, 1.9vw, 20px);
           flex: 1;
           background: transparent;
           border: none;
-          border-bottom: 2px solid ${INPUT_UNDERLINE_DEFAULT};
+          border-bottom: 1px solid ${INPUT_UNDERLINE_DEFAULT};
           outline: none;
 font-size: clamp(15px, 1.9vw, 20px);
           color: ${INPUT_TEXT_COLOR};

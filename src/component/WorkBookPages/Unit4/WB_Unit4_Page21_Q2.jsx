@@ -151,7 +151,6 @@ font-size: clamp(15px, 1.9vw, 20px);
           font-weight: 700;
           color: ${NUMBER_COLOR};
           flex-shrink: 0;
-          padding-bottom: 5px;
           line-height: 1.5;
         }
 
@@ -159,7 +158,6 @@ font-size: clamp(15px, 1.9vw, 20px);
 font-size: clamp(15px, 1.9vw, 20px);
           color: ${SENTENCE_COLOR};
           white-space: nowrap;
-          padding-bottom: 5px;
           flex-shrink: 0;
           line-height: 1.5;
         }
@@ -175,11 +173,10 @@ font-size: clamp(15px, 1.9vw, 20px);
           width: 100%;
           background: transparent;
           border: none;
-          border-bottom: 2px solid ${INPUT_UNDERLINE_DEFAULT};
+          border-bottom: 1px solid ${INPUT_UNDERLINE_DEFAULT};
           outline: none;
 font-size: clamp(15px, 1.9vw, 20px);
 color: ${INPUT_TEXT_COLOR};
-line-height: 1.5;
           box-sizing: border-box;
           transition: border-color 0.2s;
         }

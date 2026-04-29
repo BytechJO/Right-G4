@@ -210,6 +210,8 @@ font-size: clamp(15px, 1.9vw, 20px);
           color: ${LABEL_COLOR};
           flex-shrink: 0;
           min-width: clamp(14px, 1.6vw, 20px);
+              font-weight: 700;
+
         }
 
         .rws-word {
@@ -242,6 +244,8 @@ color: ${LABEL_COLOR};
 
           line-height: 1.5;
           min-width: clamp(14px, 1.6vw, 20px);
+              font-weight: 700;
+
         }
 
         /* Input wrap */
@@ -255,7 +259,7 @@ color: ${LABEL_COLOR};
           width: 100%;
           background: transparent;
           border: none;
-          border-bottom: 2px solid ${INPUT_UNDERLINE_DEFAULT};
+          border-bottom: 1px solid ${INPUT_UNDERLINE_DEFAULT};
           outline: none;
 font-size: clamp(15px, 1.9vw, 20px);
           color: ${INPUT_TEXT_COLOR};

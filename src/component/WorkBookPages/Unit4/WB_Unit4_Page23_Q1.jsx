@@ -5,15 +5,15 @@ import ValidationAlert from "../../Popup/ValidationAlert";
 // ─────────────────────────────────────────────
 //  🖼️  IMAGES — 9 صور
 // ─────────────────────────────────────────────
-import img1 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U4 Folder/Page 23/Asset 1.svg"; // airplane bike car
-import img2 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U4 Folder/Page 23/Asset 2.svg"; // clown C D
-import img3 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U4 Folder/Page 23/Asset 3.svg"; // clown E F G
-import img4 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U4 Folder/Page 23/Asset 4.svg"; // bike airplane
-import img5 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U4 Folder/Page 23/Asset 5.svg"; // feathers backpack
-import img6 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U4 Folder/Page 23/Asset 6.svg"; // elephant horse mouse
-import img7 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U4 Folder/Page 23/Asset 7.svg"; // skateboard bike
-import img8 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U4 Folder/Page 23/Asset 8.svg"; // truck motorcycle skateboard
-import img9 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U4 Folder/Page 23/Asset 9.svg"; // John dad
+import img1 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U4 Folder/Page 23/Asset 1.svg";
+import img2 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U4 Folder/Page 23/Asset 2.svg";
+import img3 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U4 Folder/Page 23/Asset 3.svg";
+import img4 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U4 Folder/Page 23/Asset 4.svg";
+import img5 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U4 Folder/Page 23/Asset 5.svg";
+import img6 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U4 Folder/Page 23/Asset 6.svg";
+import img7 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U4 Folder/Page 23/Asset 7.svg";
+import img8 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U4 Folder/Page 23/Asset 8.svg";
+import img9 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U4 Folder/Page 23/Asset 9.svg";
 
 // ─────────────────────────────────────────────
 //  🎨  COLORS
@@ -25,13 +25,11 @@ const INPUT_ANSWER_COLOR      = "#c81e1e";
 const NUMBER_COLOR            = "#2b2b2b";
 const SENTENCE_COLOR          = "#2b2b2b";
 const HINT_COLOR              = "#2b2b2b";
-const IMG_BORDER_COLOR        = "#2096a6";
 const WRONG_BADGE_BG          = "#ef4444";
 const WRONG_BADGE_TEXT        = "#ffffff";
 
 // ─────────────────────────────────────────────
 //  📝  EXERCISE DATA
-//  كل جملة: prefix + input + suffix + (hint)
 // ─────────────────────────────────────────────
 const ITEMS = [
   {
@@ -128,7 +126,7 @@ export default function WB_ReadLookWrite_QE() {
   const [showResults, setShowResults] = useState(false);
   const [showAns,     setShowAns]     = useState(false);
 
-  const isLocked =  showAns;
+  const isLocked = showAns;
 
   const handleChange = (id, value) => {
     if (isLocked) return;
@@ -196,16 +194,15 @@ export default function WB_ReadLookWrite_QE() {
         }
 
         .rlw-text {
-font-size: clamp(15px, 1.9vw, 20px);
-=          color: ${SENTENCE_COLOR};
+          font-size: clamp(15px, 1.9vw, 20px);
+          color: ${SENTENCE_COLOR};
           white-space: nowrap;
-=          flex-shrink: 0;
+          flex-shrink: 0;
           line-height: 1.5;
         }
 
-        /* Hint — (fast) etc */
         .rlw-hint {
-font-size: clamp(15px, 1.9vw, 20px);
+          font-size: clamp(15px, 1.9vw, 20px);
           color: ${HINT_COLOR};
           white-space: nowrap;
           flex-shrink: 0;
@@ -223,11 +220,11 @@ font-size: clamp(15px, 1.9vw, 20px);
           width: 100%;
           background: transparent;
           border: none;
-          border-bottom: 2px solid ${INPUT_UNDERLINE_DEFAULT};
+          border-bottom: 1px solid ${INPUT_UNDERLINE_DEFAULT};
           outline: none;
-font-size: clamp(15px, 1.9vw, 20px);
+          font-size: clamp(15px, 1.9vw, 20px);
           color: ${INPUT_TEXT_COLOR};
-          line-height: 1;
+          line-height: 1.5;
           box-sizing: border-box;
           transition: border-color 0.2s;
         }
@@ -263,30 +260,32 @@ font-size: clamp(15px, 1.9vw, 20px);
           width: 100%;
         }
 
+        /* ✅ التعديل: الرقم جنب الصورة */
         .rlw-img-cell {
           display: flex;
-          flex-direction: column;
+          flex-direction: row;
           align-items: flex-start;
-          gap: 4px;
+          gap: clamp(4px, 0.5vw, 8px);
         }
 
         .rlw-img-num {
-          font-size: clamp(12px, 1.3vw, 16px);
+          font-size: clamp(12px, 1.3vw, 20px);
           font-weight: 700;
           color: ${NUMBER_COLOR};
-          line-height:1;
+          line-height: 1;
+          flex-shrink: 0;
+          padding-top: 2px;
         }
 
         .rlw-img-wrap {
           overflow: hidden;
-          width: 100%;
+          flex: 1;
           background: #fff;
         }
 
         .rlw-img {
-          width: 100%;
-          height: clamp(80px, 11vw, 140px);
-          object-fit: contain;
+          width: 90%;
+          height: auto;
           display: block;
           box-sizing: border-box;
         }
@@ -332,7 +331,6 @@ font-size: clamp(15px, 1.9vw, 20px);
             const tColor = showAns ? INPUT_ANSWER_COLOR : INPUT_TEXT_COLOR;
             const uColor = wrong ? INPUT_UNDERLINE_WRONG : INPUT_UNDERLINE_DEFAULT;
 
-            // Split suffix into hint part "(fast)" and rest
             const hintMatch = item.suffix.match(/^(\(.*?\))\s*(.*)$/);
             const hintPart  = hintMatch ? hintMatch[1] : "";
             const restPart  = hintMatch ? hintMatch[2] : item.suffix;
