@@ -244,16 +244,16 @@ gap: 10px 30px     ;
         /* ── Number input box — top-right inside image ── */
         .rln-num-box-wrap {
           position: absolute;
-          top: 30px;
-          right: 5px;
+    top: 9.8%;
+          right: 0.5px;
           z-index: 3;
         }
 
         .rln-num-box {
-          width:  clamp(28px, 3.2vw, 40px);
-          height: clamp(28px, 3.2vw, 40px);
+         width: 50px;
+    height: 50px;
           border: 2px solid ${INPUT_BORDER_DEFAULT};
-          border-radius: 6px;
+          border-radius: 8px;
           background: ${INPUT_BG_DEFAULT};
           text-align: center;
           font-size: clamp(14px, 1.8vw, 21px);

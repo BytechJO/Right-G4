@@ -259,15 +259,15 @@ export default function WB_ReadAndWrite_C() {
 
         .raw-blank {
           border: none;
-          border-bottom: 2px solid ${INPUT_UNDERLINE_DEFAULT};
+          border-bottom: 1px solid ${INPUT_UNDERLINE_DEFAULT};
           background: transparent;
           outline: none;
           font-size: clamp(14px, 1.6vw, 19px);
           font-family: inherit;
           color: ${INPUT_TEXT_COLOR};
           text-align: center;
-          padding: 0 4px 2px;
-          line-height: 1.6;
+
+          line-height: 1.5;
           transition: border-color 0.2s;
           min-width: 60px;
         }

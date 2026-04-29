@@ -202,15 +202,16 @@ font-size: clamp(15px, 1.9vw, 22px);
 =          color: ${HINT_TEXT_COLOR};
           text-align: center;
           white-space: nowrap;
-          align-self: center;
+              margin-top: 35%;
+
         }
 
         /* Lines — question + answer stacked */
         .lrqa-lines {
-          display: flex;
-          flex-direction: column;
-          gap: clamp(8px, 1.2vw, 16px);
-          min-width: 0;
+            display: flex;
+    flex-direction: column;
+    gap: 5vh;
+    min-width: 0;
         }
 
         /* Input wrap */
@@ -223,7 +224,7 @@ font-size: clamp(15px, 1.9vw, 22px);
           width: 100%;
           background: transparent;
           border: none;
-          border-bottom: 2px solid ${INPUT_UNDERLINE_DEFAULT};
+          border-bottom: 1px solid ${INPUT_UNDERLINE_DEFAULT};
           outline: none;
 font-size: clamp(15px, 1.9vw, 22px);
           color: ${INPUT_TEXT_COLOR};

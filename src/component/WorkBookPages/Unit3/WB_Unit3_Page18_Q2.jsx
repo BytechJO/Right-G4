@@ -184,11 +184,11 @@ export default function WB_LookReadWriteChart_QI() {
       <style>{`
         /* ── Chart image ── */
         .lrc-chart {
-          width: 100%;
-          max-height: clamp(220px, 30vw, 380px);
-          object-fit: contain;
-          display: block;
-              height: auto;
+        display: flex;
+    width: 80%;
+    height: auto;
+    align-self: center;
+}
 
         }
 
@@ -230,7 +230,7 @@ export default function WB_LookReadWriteChart_QI() {
         }
 
         .lrc-text {
-          font-size: clamp(15px, 1.8vw, 22px);
+          font-size: clamp(15px, 1.8vw, 20px);
           color: ${SENTENCE_TEXT_COLOR};
           white-space: nowrap;
           padding-bottom: 5px;
@@ -250,9 +250,9 @@ export default function WB_LookReadWriteChart_QI() {
           width: 100%;
           background: transparent;
           border: none;
-          border-bottom: 2px solid ${INPUT_UNDERLINE_DEFAULT};
+          border-bottom: 1px solid ${INPUT_UNDERLINE_DEFAULT};
           outline: none;
-          font-size: clamp(15px, 1.8vw, 22px);
+          font-size: clamp(15px, 1.8vw, 20px);
           color: ${INPUT_TEXT_COLOR};
           line-height: 1.5;
           box-sizing: border-box;

@@ -148,8 +148,7 @@ export default function WB_ReadLookWrite_E() {
           flex-shrink: 0;
           width: clamp(160px, 22vw, 260px);
           border-radius: 12px;
-          overflow: hidden;
-      background: #f5f5f5;
+          background: #f5f5f5;
         }
         .rlw-img-wrap img {
           width: 110%;
@@ -182,14 +181,15 @@ font-size: clamp(15px, 1.9vw, 22px);
           min-width: 220px;
           display: flex;
           flex-direction: column;
-          gap: clamp(10px, 1.4vw, 16px);
-        }
+    gap: 5vh;        }
 
         /* Number + question */
         .rlw-question-row {
-          display: flex;
-          align-items: flex-start;
-          gap: clamp(6px, 0.8vw, 10px);
+              display: flex;
+    align-items: flex-start;
+    gap: clamp(6px, 0.8vw, 10px);
+    white-space: nowrap;
+
         }
         .rlw-num {
           font-size: clamp(15px, 1.8vw, 21px);
@@ -211,7 +211,7 @@ font-size: clamp(15px, 1.9vw, 22px);
           width: 100%;
           background: transparent;
           border: none;
-          border-bottom: 2px solid ${INPUT_UNDERLINE_DEFAULT};
+          border-bottom: 1px solid ${INPUT_UNDERLINE_DEFAULT};
           outline: none;
 font-size: clamp(15px, 1.9vw, 22px);
           color: ${INPUT_TEXT_COLOR};

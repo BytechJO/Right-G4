@@ -1,221 +1,252 @@
-import React, { useRef, useState, useEffect } from "react";
+import React, { useState } from "react";
 import Button from "../Button";
 import ValidationAlert from "../../Popup/ValidationAlert";
 
-// ✅ استبدل هذا المسار بمسار صورة الشجرة عندك
-import imgTree from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U7 Folder/Page 41/SVG/2.svg";
+// ─────────────────────────────────────────────
+//  🎨  COLORS
+// ─────────────────────────────────────────────
+const CIRCLE_COLOR       = "#2096a6";
+const CIRCLE_WRONG_COLOR = "#ef4444";
+const TEXT_DEFAULT       = "#2b2b2b";
+const TEXT_CIRCLED       = "#2b2b2b";
+const TEXT_WRONG         = "#2b2b2b";
+const NUMBER_COLOR       = "#2b2b2b";
+const SENTENCE_COLOR     = "#2b2b2b";
 
-const INSTRUCTIONS = [
-  "Draw a nest in the tree.",
-  "Draw a box next to the tree.",
-  "Draw a cat between the flowers.",
+// ─────────────────────────────────────────────
+//  📝  EXERCISE DATA
+// ─────────────────────────────────────────────
+const ITEMS = [
+  { id: 1, sentence: "There were apples and peaches.",   correct: "true"  },
+  { id: 2, sentence: "There was toast with butter.",     correct: "true"  },
+  { id: 3, sentence: "There was chicken and potato soup.", correct: "false" },
+  { id: 4, sentence: "There was banana bread.",          correct: "true"  },
 ];
 
-// أدوات الرسم
-const TOOLS = [
-  { id: "pencil", label: "✏️ Pencil" },
-  { id: "eraser", label: "🧹 Eraser" },
-];
+// ─────────────────────────────────────────────
+//  COMPONENT
+// ─────────────────────────────────────────────
+export default function WB_CircleTrueFalse_QF() {
+  const [answers,     setAnswers]     = useState({});
+  const [showResults, setShowResults] = useState(false);
+  const [showAns,     setShowAns]     = useState(false);
 
-const COLORS = ["#1e293b", "#ef4444", "#f97316", "#eab308", "#22c55e", "#3b82f6", "#a855f7", "#ec4899"];
-const SIZES = [2, 4, 7, 12];
+  const isLocked =  showAns;
 
-export default function WB_Unit7_Page41_Draw() {
-  const canvasRef = useRef(null);
-  const [isDrawing, setIsDrawing] = useState(false);
-  const [tool, setTool] = useState("pencil");
-  const [color, setColor] = useState("#1e293b");
-  const [size, setSize] = useState(4);
-  const lastPos = useRef(null);
-
-  // ارسم الصورة على الـ canvas عند التحميل
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext("2d");
-    const img = new Image();
-    img.src = imgTree;
-    img.onload = () => {
-      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-    };
-  }, []);
-
-  const getPos = (e, canvas) => {
-    const rect = canvas.getBoundingClientRect();
-    const scaleX = canvas.width / rect.width;
-    const scaleY = canvas.height / rect.height;
-    if (e.touches) {
-      return {
-        x: (e.touches[0].clientX - rect.left) * scaleX,
-        y: (e.touches[0].clientY - rect.top) * scaleY,
-      };
-    }
-    return {
-      x: (e.clientX - rect.left) * scaleX,
-      y: (e.clientY - rect.top) * scaleY,
-    };
-  };
-
-  const startDrawing = (e) => {
-    e.preventDefault();
-    const canvas = canvasRef.current;
-    lastPos.current = getPos(e, canvas);
-    setIsDrawing(true);
-  };
-
-  const draw = (e) => {
-    e.preventDefault();
-    if (!isDrawing) return;
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext("2d");
-    const pos = getPos(e, canvas);
-
-    ctx.beginPath();
-    ctx.moveTo(lastPos.current.x, lastPos.current.y);
-    ctx.lineTo(pos.x, pos.y);
-    ctx.strokeStyle = tool === "eraser" ? "#ffffff" : color;
-    ctx.lineWidth = tool === "eraser" ? size * 4 : size;
-    ctx.lineCap = "round";
-    ctx.lineJoin = "round";
-    ctx.stroke();
-
-    lastPos.current = pos;
-  };
-
-  const stopDrawing = (e) => {
-    e?.preventDefault();
-    setIsDrawing(false);
-    lastPos.current = null;
-  };
-
-  const handleClear = () => {
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext("2d");
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    // أعد رسم الصورة
-    const img = new Image();
-    img.src = imgTree;
-    img.onload = () => ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+  const handleSelect = (id, value) => {
+    if (isLocked) return;
+    setAnswers((prev) => ({ ...prev, [id]: prev[id] === value ? null : value }));
   };
 
   const handleCheck = () => {
-    ValidationAlert.success("Great drawing! 🎨");
+    if (isLocked) return;
+    const allAnswered = ITEMS.every((item) => answers[item.id]);
+    if (!allAnswered) { ValidationAlert.info("Please answer all questions first."); return; }
+    let score = 0;
+    ITEMS.forEach((item) => { if (answers[item.id] === item.correct) score++; });
+    setShowResults(true);
+    if (score === ITEMS.length)   ValidationAlert.success(`Score: ${score} / ${ITEMS.length}`);
+    else if (score > 0)           ValidationAlert.warning(`Score: ${score} / ${ITEMS.length}`);
+    else                          ValidationAlert.error(`Score: ${score} / ${ITEMS.length}`);
+  };
+
+  const handleShowAnswer = () => {
+    const filled = {};
+    ITEMS.forEach((item) => { filled[item.id] = item.correct; });
+    setAnswers(filled);
+    setShowResults(false);
+    setShowAns(true);
+  };
+
+  const handleReset = () => {
+    setAnswers({});
+    setShowResults(false);
+    setShowAns(false);
+  };
+
+  // حالة الكلمة: none | selected | correct | wrong
+  const getWordState = (item, value) => {
+    const selected = answers[item.id] === value;
+    if (!selected) return "none";
+    if (showAns)   return "correct";
+    if (showResults) return item.correct === value ? "correct" : "wrong";
+    return "selected";
   };
 
   return (
     <div className="main-container-component">
-      <div className="div-forall" style={{ gap: "15px" }}>
+      <style>{`
+        /* ── Items list ── */
+        .ctf-list {
+          display: flex;
+          flex-direction: column;
+          gap: clamp(14px, 2.2vw, 26px);
+          width: 100%;
+        }
 
-        {/* العنوان */}
-        <h1 className="WB-header-title-page8">
-          <span className="WB-ex-A">G</span>Read and draw.
+        /* ── Single row ── */
+        .ctf-row {
+          display: flex;
+          align-items: center;
+          gap: clamp(8px, 1.2vw, 16px);
+        }
+
+        .ctf-num {
+          font-size: clamp(15px, 1.8vw, 22px);
+          font-weight: 700;
+          color: ${NUMBER_COLOR};
+          flex-shrink: 0;
+          min-width: clamp(16px, 2vw, 24px);
+        }
+
+        .ctf-sentence {
+          font-size: clamp(14px, 1.7vw, 20px);
+          font-weight: 400;
+          color: ${SENTENCE_COLOR};
+          line-height: 1.5;
+          flex: 1;
+        }
+
+        /* True / False buttons group */
+        .ctf-options {
+          display: flex;
+          gap: clamp(20px, 3vw, 40px);
+          flex-shrink: 0;
+        }
+
+        /* Each option word */
+        .ctf-option {
+          position: relative;
+          padding: clamp(2px, 0.3vw, 4px) clamp(8px, 1.2vw, 14px);
+          cursor: pointer;
+          user-select: none;
+          font-size: clamp(14px, 1.7vw, 20px);
+          font-weight: 400;
+          color: ${TEXT_DEFAULT};
+          line-height: 1.5;
+          transition: color 0.15s;
+        }
+        .ctf-option--locked { cursor: default; }
+
+        /* Oval circle */
+        .ctf-oval {
+          position: absolute;
+          inset: 0;
+          border-radius: 999px;
+          border: 2.5px solid transparent;
+          pointer-events: none;
+          transition: border-color 0.15s;
+        }
+
+        /* States */
+        .ctf-option--selected .ctf-oval  { border-color: ${CIRCLE_COLOR}; }
+        .ctf-option--selected            { color: ${TEXT_CIRCLED}; }
+
+        .ctf-option--correct .ctf-oval   { border-color: ${CIRCLE_COLOR}; }
+        .ctf-option--correct             { color: ${TEXT_CIRCLED}; }
+
+        .ctf-option--wrong .ctf-oval     { border-color: ${CIRCLE_WRONG_COLOR}; }
+        .ctf-option--wrong               { color: ${TEXT_WRONG}; }
+
+        /* ✕ badge */
+        .ctf-badge {
+          position: absolute;
+          top: -8px; right: -8px;
+          width: clamp(16px, 1.8vw, 20px);
+          height: clamp(16px, 1.8vw, 20px);
+          border-radius: 50%;
+          background: #ef4444;
+          color: #ffffff;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: clamp(8px, 0.9vw, 11px);
+          font-weight: 700;
+          border: 2px solid #fff;
+          box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+          pointer-events: none;
+          z-index: 2;
+        }
+
+        /* Buttons */
+        .ctf-buttons {
+          display: flex;
+          justify-content: center;
+          margin-top: clamp(8px, 1.6vw, 18px);
+        }
+
+        @media (max-width: 500px) {
+          .ctf-row { flex-wrap: wrap; }
+          .ctf-options { margin-left: clamp(18px, 2.4vw, 28px); }
+        }
+      `}</style>
+
+      <div
+        className="div-forall"
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: "clamp(14px, 2vw, 22px)",
+          maxWidth: "1100px",
+          margin: "0 auto",
+        }}
+      >
+        {/* ── Header ── */}
+        <h1
+          className="WB-header-title-page8"
+          style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
+        >
+          <span className="WB-ex-A">F</span>
+          Read Exercise E. Circle <span style={{color : "#f89631"}}>true</span>  or<span style={{color : "#f89631"}}> false.</span>
         </h1>
 
-        {/* التعليمات */}
-        <div className="flex flex-col gap-1 mb-2">
-          {INSTRUCTIONS.map((inst, i) => (
-            <p key={i} className="text-gray-700 text-sm font-medium">
-              • {inst}
-            </p>
+        {/* ── Items ── */}
+        <div className="ctf-list">
+          {ITEMS.map((item) => (
+            <div key={item.id} className="ctf-row">
+
+              {/* Number */}
+              <span className="ctf-num">{item.id}</span>
+
+              {/* Sentence */}
+              <span className="ctf-sentence">{item.sentence}</span>
+
+              {/* True / False */}
+              <div className="ctf-options">
+                {["true", "false"].map((val) => {
+                  const state = getWordState(item, val);
+                  return (
+                    <div
+                      key={val}
+                      className={[
+                        "ctf-option",
+                        isLocked ? "ctf-option--locked" : "",
+                        state === "selected" ? "ctf-option--selected" : "",
+                        state === "correct"  ? "ctf-option--correct"  : "",
+                        state === "wrong"    ? "ctf-option--wrong"    : "",
+                      ].filter(Boolean).join(" ")}
+                      onClick={() => handleSelect(item.id, val)}
+                    >
+                      <div className="ctf-oval" />
+                      {val}
+                      {state === "wrong" && <div className="ctf-badge">✕</div>}
+                    </div>
+                  );
+                })}
+              </div>
+
+            </div>
           ))}
         </div>
 
-        {/* شريط الأدوات */}
-        <div className="flex flex-wrap items-center gap-3 bg-gray-50 border border-gray-200 rounded-2xl p-3">
-
-          {/* أدوات */}
-          <div className="flex gap-2">
-            {TOOLS.map((t) => (
-              <button
-                key={t.id}
-                onClick={() => setTool(t.id)}
-                className={`px-3 py-1.5 rounded-xl text-sm font-medium border-2 transition-all
-                  ${tool === t.id
-                    ? "border-blue-500 bg-blue-50 text-blue-700"
-                    : "border-gray-200 bg-white text-gray-600 hover:border-gray-300"
-                  }`}
-              >
-                {t.label}
-              </button>
-            ))}
-          </div>
-
-          {/* فاصل */}
-          <div className="w-px h-6 bg-gray-200" />
-
-          {/* الألوان */}
-          <div className="flex gap-1.5 flex-wrap">
-            {COLORS.map((c) => (
-              <button
-                key={c}
-                onClick={() => { setColor(c); setTool("pencil"); }}
-                className={`w-6 h-6 rounded-full border-2 transition-all ${
-                  color === c && tool === "pencil" ? "border-gray-700 scale-110" : "border-transparent hover:scale-105"
-                }`}
-                style={{ backgroundColor: c }}
-              />
-            ))}
-          </div>
-
-          {/* فاصل */}
-          <div className="w-px h-6 bg-gray-200" />
-
-          {/* حجم الفرشاة */}
-          <div className="flex items-center gap-2">
-            {SIZES.map((s) => (
-              <button
-                key={s}
-                onClick={() => setSize(s)}
-                className={`flex items-center justify-center rounded-full border-2 transition-all bg-white
-                  ${size === s ? "border-blue-500" : "border-gray-200 hover:border-gray-300"}`}
-                style={{ width: 28, height: 28 }}
-              >
-                <span
-                  className="rounded-full bg-gray-700"
-                  style={{ width: Math.min(s * 2, 20), height: Math.min(s * 2, 20) }}
-                />
-              </button>
-            ))}
-          </div>
-
-          {/* فاصل */}
-          <div className="w-px h-6 bg-gray-200" />
-
-          {/* مسح الكل */}
-          <button
-            onClick={handleClear}
-            className="px-3 py-1.5 rounded-xl text-sm font-medium border-2 border-red-200 bg-red-50 text-red-500 hover:border-red-400 transition-all"
-          >
-            🗑️ Clear
-          </button>
-        </div>
-
-        {/* الـ Canvas */}
-        <div className="relative w-full rounded-2xl overflow-hidden border-2 border-gray-200 bg-white"
-          style={{ cursor: tool === "eraser" ? "cell" : "crosshair" }}
-        >
-          <canvas
-            ref={canvasRef}
-            width={800}
-            height={600}
-            className="w-full h-auto touch-none"
-            onMouseDown={startDrawing}
-            onMouseMove={draw}
-            onMouseUp={stopDrawing}
-            onMouseLeave={stopDrawing}
-            onTouchStart={startDrawing}
-            onTouchMove={draw}
-            onTouchEnd={stopDrawing}
-          />
-        </div>
-
-        {/* الأزرار */}
-        <div className="mt-6 flex justify-center">
+        {/* ── Buttons ── */}
+        <div className="ctf-buttons">
           <Button
             checkAnswers={handleCheck}
-            handleStartAgain={handleClear}
+            handleShowAnswer={handleShowAnswer}
+            handleStartAgain={handleReset}
           />
         </div>
-
       </div>
     </div>
   );

@@ -176,8 +176,7 @@ export default function WB_LookReadWriteCheckX_C() {
         .lrwx-card {
           display: flex;
           flex-direction: column;
-          gap: clamp(6px, 0.9vw, 12px);
-        }
+gap: 6%;        }
 
         /* Image row: number beside image */
         .lrwx-img-row {
@@ -215,11 +214,13 @@ export default function WB_LookReadWriteCheckX_C() {
         }
 .lrwx-sentence {
     position: relative;
-    font-size: clamp(16px, 1.6vw, 19px);
+    font-size: clamp(16px, 1.6vw, 16px);
     color: #2b2b2b;
     flex: 2;
     line-height: 1.5;
-    left: 7px;
+    left: 3vh;
+              flex-wrap: nowrap;
+
 }
         /* Two boxes side by side */
    .lrwx-boxes {

@@ -2,441 +2,350 @@ import React, { useState, useRef } from "react";
 import Button from "../Button";
 import ValidationAlert from "../../Popup/ValidationAlert";
 
-import houseImg from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U7 Folder/Page 39/SVG/1.svg";
+// ─────────────────────────────────────────────
+//  🖼️  IMAGES
+// ─────────────────────────────────────────────
+import imgA from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U7 Folder/Page 39/SVG/Asset 11.svg";
+import imgB from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U7 Folder/Page 39/SVG/Asset 12.svg";
+import imgC from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U7 Folder/Page 39/SVG/Asset 13.svg";
+import imgD from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U7 Folder/Page 39/SVG/Asset 14.svg";
+import imgE from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U7 Folder/Page 39/SVG/Asset 15.svg";
+import imgF from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U7 Folder/Page 39/SVG/Asset 16.svg";
+import imgG from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U7 Folder/Page 39/SVG/Asset 17.svg";
+import imgH from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U7 Folder/Page 39/SVG/Asset 18.svg";
 
-const BORDER_COLOR = "#f39b42";
-const ACTIVE_COLOR = "#f39b42";
-const SOFT_COLOR   = "#ffca94";
-const WRONG_COLOR  = "#ef4444";
-const RED_COLOR    = "#000000ff";
-const LINE_COLOR   = "#333";
+// ─────────────────────────────────────────────
+//  🎨  COLORS
+// ─────────────────────────────────────────────
+const BOX_BORDER_DEFAULT  = "#2096a6";
+const BOX_BORDER_WRONG    = "#ef4444";
+const BOX_TEXT_DEFAULT    = "#2b2b2b";
+const BOX_TEXT_ANSWER     = "#c81e1e";
+const IMG_LABEL_BG        = "#2096a6";
+const IMG_LABEL_TEXT      = "#ffffff";
+const WORD_COLOR          = "#2b2b2b";
+const NUMBER_COLOR        = "#2b2b2b";
+const WRONG_BADGE_BG      = "#ef4444";
+const WRONG_BADGE_TEXT    = "#ffffff";
 
-const ITEMS = [
-  {
-    id:      1,
-    example: true,
-    question: "Can you see Hansel?",
-    answer:   "Yes, I can see him by the tree.",
-  },
-  {
-    id:      2,
-    example: false,
-    question: "Can you see the cat?",
-    answer:   "Yes, I can see it in the kitchen.",
-  },
-  {
-    id:      3,
-    example: false,
-    question: "Can you see Dad?",
-    answer:   "Yes, I can see him near the bed in the bedroom.",
-  },
-  {
-    id:      4,
-    example: false,
-    question: "Can you see Mom?",
-    answer:   "Yes, I can see her in front of the washing machine in the basement.",
-  },
+// ─────────────────────────────────────────────
+//  📝  EXERCISE DATA
+// ─────────────────────────────────────────────
+// 8 صور بترتيب a-h
+const IMAGES = [
+  { label: "a", src: imgA },
+  { label: "b", src: imgB },
+  { label: "c", src: imgC },
+  { label: "d", src: imgD },
+  { label: "e", src: imgE },
+  { label: "f", src: imgF },
+  { label: "g", src: imgG },
+  { label: "h", src: imgH },
 ];
 
-const DRAG_ITEMS = ITEMS.filter((i) => !i.example).map((i) => ({
-  id:    `ans-${i.id}`,
-  value: i.answer,
-}));
+// 8 كلمات مع الإجابة الصحيحة (حرف الصورة)
+const WORDS = [
+  { id: 1, word: "alligator", correct: ["c", "C"], answer: "c" },
+  { id: 2, word: "dream",     correct: ["h", "H"], answer: "h" },
+  { id: 3, word: "song",      correct: ["e", "E"], answer: "e" },
+  { id: 4, word: "frogs",     correct: ["b", "B"], answer: "b" },
+  { id: 5, word: "chasing",   correct: ["f", "F"], answer: "f" },
+  { id: 6, word: "pond",      correct: ["a", "A"], answer: "a" },
+  { id: 7, word: "rock",      correct: ["d", "D"], answer: "d" },
+  { id: 8, word: "stumbled",  correct: ["g", "G"], answer: "g" },
+];
 
-export default function SB_LookAndAnswer_PageA() {
+// ─────────────────────────────────────────────
+//  🔧  HELPERS
+// ─────────────────────────────────────────────
+const isCorrect = (userVal, correctArr) =>
+  correctArr.some((c) => userVal.trim().toLowerCase() === c.toLowerCase());
+
+// ─────────────────────────────────────────────
+//  COMPONENT
+// ─────────────────────────────────────────────
+export default function WB_LookReadWrite_QA() {
   const [answers,     setAnswers]     = useState({});
-  const [draggedItem, setDraggedItem] = useState(null);
-  const [touchItem,   setTouchItem]   = useState(null);
-  const [touchPos,    setTouchPos]    = useState({ x: 0, y: 0 });
   const [showResults, setShowResults] = useState(false);
   const [showAns,     setShowAns]     = useState(false);
 
-  const dropRefs = useRef({});
-  const usedIds  = Object.values(answers).filter(Boolean).map((e) => e.dragId);
+  // ref لكل input بالترتيب
+  const inputRefs = useRef({});
 
-  const applyDrop = (boxKey, item) => {
-    const upd = { ...answers };
-    Object.keys(upd).forEach((k) => { if (upd[k]?.dragId === item.id) delete upd[k]; });
-    upd[boxKey] = { dragId: item.id, value: item.value };
-    setAnswers(upd);
-    setShowResults(false);
-  };
-
-  const handleDragStart = (item) => {
-    if (showAns || usedIds.includes(item.id)) return;
-    setDraggedItem(item);
-  };
-
-  const handleDrop = (boxKey) => {
-    if (showAns || !draggedItem) return;
-    applyDrop(boxKey, draggedItem);
-    setDraggedItem(null);
-  };
-
-  const handleTouchStart = (e, item) => {
-    if (showAns || usedIds.includes(item.id)) return;
-    const t = e.touches[0];
-    setTouchItem(item);
-    setTouchPos({ x: t.clientX, y: t.clientY });
-  };
-
-  const handleTouchMove = (e) => {
-    if (!touchItem) return;
-    const t = e.touches[0];
-    setTouchPos({ x: t.clientX, y: t.clientY });
-  };
-
-  const handleTouchEnd = () => {
-    if (!touchItem) return;
-    Object.entries(dropRefs.current).forEach(([key, ref]) => {
-      if (!ref) return;
-      const r = ref.getBoundingClientRect();
-      if (
-        touchPos.x >= r.left && touchPos.x <= r.right &&
-        touchPos.y >= r.top  && touchPos.y <= r.bottom
-      ) applyDrop(key, touchItem);
-    });
-    setTouchItem(null);
-  };
-
-  const handleRemove = (boxKey) => {
+  const handleChange = (id, value) => {
     if (showAns) return;
-    setAnswers((prev) => { const u = { ...prev }; delete u[boxKey]; return u; });
-    setShowResults(false);
+    const word = WORDS.find((w) => w.id === id);
+    if (showResults && word && isCorrect(answers[id] || "", word.correct)) return;
+    // حرف واحد بس
+    if (value.length > 1) return;
+    setAnswers((prev) => ({ ...prev, [id]: value }));
+
+    // انتقال تلقائي للتالي إذا كتب حرف
+    if (value.length === 1) {
+      const currentIdx = WORDS.findIndex((w) => w.id === id);
+      const nextWord   = WORDS[currentIdx + 1];
+      if (nextWord) {
+        const nextRef = inputRefs.current[nextWord.id];
+        if (nextRef) nextRef.focus();
+      }
+    }
   };
 
   const handleCheck = () => {
     if (showAns) return;
-    const editables = ITEMS.filter((i) => !i.example);
-    const allAnswered = editables.every((i) => answers[`a-${i.id}`]?.value);
-    if (!allAnswered) {
-      ValidationAlert.info("Please complete all answers first.");
-      return;
-    }
+    const allAnswered = WORDS.every((w) => answers[w.id]?.trim());
+    if (!allAnswered) { ValidationAlert.info("Please complete all answers first."); return; }
     let score = 0;
-    editables.forEach((i) => {
-      if (answers[`a-${i.id}`]?.value === i.answer) score++;
-    });
+    WORDS.forEach((w) => { if (isCorrect(answers[w.id] || "", w.correct)) score++; });
     setShowResults(true);
-    const total = editables.length;
-    if (score === total)  ValidationAlert.success(`Score: ${score} / ${total}`);
-    else if (score > 0)   ValidationAlert.warning(`Score: ${score} / ${total}`);
-    else                  ValidationAlert.error(`Score: ${score} / ${total}`);
+    if (score === WORDS.length)   ValidationAlert.success(`Score: ${score} / ${WORDS.length}`);
+    else if (score > 0)           ValidationAlert.warning(`Score: ${score} / ${WORDS.length}`);
+    else                          ValidationAlert.error(`Score: ${score} / ${WORDS.length}`);
   };
 
   const handleShowAnswer = () => {
     const filled = {};
-    ITEMS.filter((i) => !i.example).forEach((i) => {
-      const d = DRAG_ITEMS.find((d) => d.value === i.answer);
-      filled[`a-${i.id}`] = { dragId: d?.id ?? `ans-${i.id}`, value: i.answer };
-    });
+    WORDS.forEach((w) => { filled[w.id] = w.answer; });
     setAnswers(filled);
-    setShowResults(true);
+    setShowResults(false);
     setShowAns(true);
   };
 
-  const handleStartAgain = () => {
+  const handleReset = () => {
     setAnswers({});
-    setDraggedItem(null);
-    setTouchItem(null);
     setShowResults(false);
     setShowAns(false);
   };
 
-  const isWrong = (item) =>
-    showResults && !showAns && answers[`a-${item.id}`]?.value !== item.answer;
+  const isWrong = (w) => {
+    if (!showResults || showAns) return false;
+    return !isCorrect(answers[w.id] || "", w.correct);
+  };
 
-  const renderDropZone = (item) => {
-    const boxKey = `a-${item.id}`;
-    const value  = answers[boxKey]?.value || "";
-    const wrong  = isWrong(item);
-
-    return (
-      <div
-        ref={(el) => (dropRefs.current[boxKey] = el)}
-        onDragOver={(e) => e.preventDefault()}
-        onDrop={() => handleDrop(boxKey)}
-        onClick={() => handleRemove(boxKey)}
-        style={{
-          position:      "relative",
-          minHeight:     "clamp(28px,4vw,48px)",
-          borderBottom:  `2px solid ${wrong ? WRONG_COLOR : LINE_COLOR}`,
-          display:       "flex",
-          alignItems:    "flex-end",
-          paddingBottom: "3px",
-          boxSizing:     "border-box",
-          cursor:        value && !showAns ? "pointer" : "default",
-          width:         "100%",
-        }}
-      >
-        {value && (
-          <span
-            style={{
-              fontSize:   "clamp(13px,1.6vw,20px)",
-              fontWeight: 600,
-              color:      RED_COLOR,
-              lineHeight: 1.35,
-              wordBreak:  "break-word",
-            }}
-          >
-            {value}
-          </span>
-        )}
-
-        {/* wrong badge — يسار فقط */}
-        {wrong && (
-          <div
-            style={{
-              position:        "absolute",
-              top:             "-8px",
-              left:            "-8px",
-              width:           "clamp(16px,1.8vw,22px)",
-              height:          "clamp(16px,1.8vw,22px)",
-              borderRadius:    "50%",
-              border:"1px solid #fff",
-              backgroundColor: WRONG_COLOR,
-              color:           "#fff",
-              display:         "flex",
-              alignItems:      "center",
-              justifyContent:  "center",
-              fontSize:        "clamp(9px,0.9vw,12px)",
-              fontWeight:      700,
-              boxShadow:       "0 1px 4px rgba(0,0,0,0.2)",
-              zIndex:          3,
-              pointerEvents:   "none",
-            }}
-          >
-            ✕
-          </div>
-        )}
-      </div>
-    );
+  const isDisabled = (w) => {
+    if (showAns) return true;
+    if (showResults && isCorrect(answers[w.id] || "", w.correct)) return true;
+    return false;
   };
 
   return (
     <div className="main-container-component">
+      <style>{`
+        /* ── Images grid 4×2 ── */
+        .lrwa-img-grid {
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          gap: clamp(10px, 1.6vw, 20px);
+          width: 100%;
+        }
+
+        /* ── Single image card ── */
+        .lrwa-img-card {
+          position: relative;
+          overflow: visible;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+        }
+
+        .lrwa-img {
+          width: 100%;
+          height: auto;
+          display: block;
+          position: relative;
+
+        }
+  
+        /* Label badge — bottom center */
+        .lrwa-img-label {
+            position: absolute;
+
+          margin-top: 85%;
+          width: clamp(22px, 2.8vw, 32px);
+          height: clamp(22px, 2.8vw, 32px);
+          border-radius: 50%;
+          background: #ffffff;
+          border: 2px solid ${IMG_LABEL_BG};
+          color: #2b2b2b;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: clamp(12px, 1.4vw, 20px);
+          font-weight: bold;
+          user-select: none;
+          flex-shrink: 0;
+        }
+
+        /* ── Words grid 4×2 ── */
+        .lrwa-word-grid {
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          gap: clamp(10px, 1.6vw, 18px) clamp(12px, 2vw, 24px);
+          width: 100%;
+        }
+
+        /* ── Single word row: input + num + word ── */
+        .lrwa-word-row {
+          display: flex;
+          align-items: center;
+          gap: clamp(5px, 0.7vw, 10px);
+        }
+
+        /* Input wrap */
+        .lrwa-input-wrap {
+          position: relative;
+          flex-shrink: 0;
+        }
+
+        .lrwa-input {
+          width: clamp(40px, 3.4vw, 40px);
+          height: clamp(40px, 3.4vw, 40px);
+          border: 2px solid ${BOX_BORDER_DEFAULT};
+          border-radius: 6px;
+          background: #fff;
+          text-align: center;
+          font-size: clamp(14px, 1.7vw, 20px);
+          font-weight: 700;
+          color: ${BOX_TEXT_DEFAULT};
+          outline: none;
+          font-family: inherit;
+          transition: border-color 0.2s;
+          padding: 0;
+          box-sizing: border-box;
+          cursor: text;
+        }
+        .lrwa-input:disabled      { opacity: 1; cursor: default; }
+        .lrwa-input--wrong        { border-color: ${BOX_BORDER_WRONG}; }
+        .lrwa-input--answer       { color: ${BOX_TEXT_ANSWER}; }
+
+        /* ✕ badge */
+        .lrwa-badge {
+          position: absolute;
+          top: -8px; right: -8px;
+          width: clamp(16px, 1.8vw, 20px);
+          height: clamp(16px, 1.8vw, 20px);
+          border-radius: 50%;
+          background: ${WRONG_BADGE_BG};
+          color: ${WRONG_BADGE_TEXT};
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: clamp(8px, 0.9vw, 11px);
+          font-weight: 700;
+          border: 2px solid #fff;
+          box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+          pointer-events: none;
+          z-index: 2;
+        }
+
+        .lrwa-num {
+          font-size: clamp(14px, 1.7vw, 20px);
+          font-weight: 700;
+          color: ${NUMBER_COLOR};
+          flex-shrink: 0;
+        }
+
+        .lrwa-word {
+          font-size: clamp(14px, 1.7vw, 20px);
+          font-weight: 400;
+          color: ${WORD_COLOR};
+        }
+
+        /* Buttons */
+        .lrwa-buttons {
+          display: flex;
+          justify-content: center;
+          margin-top: clamp(8px, 1.6vw, 18px);
+        }
+
+        @media (max-width: 520px) {
+          .lrwa-img-grid  { grid-template-columns: repeat(2, 1fr); }
+          .lrwa-word-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+      `}</style>
+
       <div
         className="div-forall"
         style={{
-          display:       "flex",
+          display: "flex",
           flexDirection: "column",
-          gap:           "18px",
-          maxWidth:      "1100px",
-          margin:        "0 auto",
+          gap: "clamp(14px, 2vw, 22px)",
+          maxWidth: "1100px",
+          margin: "0 auto",
         }}
       >
-        {/* Title */}
+        {/* ── Header ── */}
         <h1
           className="WB-header-title-page8"
-          style={{
-            margin:     0,
-            display:    "flex",
-            alignItems: "center",
-            gap:        "12px",
-            flexWrap:   "wrap",
-          }}
+          style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
         >
-          <span className="WB-ex-A">A</span> Look and answer the questions.
+          <span className="WB-ex-A">A</span>
+          Look, read, and write.
         </h1>
 
-        {/* Word bank */}
-        <div
-          style={{
-            width:          "100%",
-            border:         `2px solid ${BORDER_COLOR}`,
-            borderRadius:   "clamp(12px,1.4vw,18px)",
-            padding:        "clamp(10px,1.2vw,16px)",
-            boxSizing:      "border-box",
-            display:        "flex",
-            flexWrap:       "wrap",
-            gap:            "clamp(8px,1vw,12px)",
-            justifyContent: "center",
-            background:     "#fff",
-          }}
-        >
-          {DRAG_ITEMS.map((item) => {
-            const isUsed = usedIds.includes(item.id);
+        {/* ── Images 4×2 ── */}
+        <div className="lrwa-img-grid">
+          {IMAGES.map((img) => (
+            <div key={img.label} className="lrwa-img-card">
+              <img src={img.src} alt={`img-${img.label}`} className="lrwa-img" />
+              <div className="lrwa-img-label">{img.label}</div>
+            </div>
+          ))}
+        </div>
+
+        {/* ── Words 4×2 ── */}
+        <div className="lrwa-word-grid">
+          {WORDS.map((w) => {
+            const wrong    = isWrong(w);
+            const value    = answers[w.id] || "";
+            const tColor   = showAns ? BOX_TEXT_ANSWER : BOX_TEXT_DEFAULT;
+            const bColor   = wrong ? BOX_BORDER_WRONG : BOX_BORDER_DEFAULT;
+            const disabled = isDisabled(w);
+
             return (
-              <div
-                key={item.id}
-                draggable={!isUsed && !showAns}
-                onDragStart={() => handleDragStart(item)}
-                onTouchStart={(e) => handleTouchStart(e, item)}
-                onTouchMove={handleTouchMove}
-                onTouchEnd={handleTouchEnd}
-                style={{
-                  padding:         "clamp(7px,0.9vw,12px) clamp(12px,1.4vw,18px)",
-                  borderRadius:    "14px",
-                  border:          `1.5px solid ${isUsed ? "#d9d9d9" : ACTIVE_COLOR}`,
-                  backgroundColor: isUsed ? "#eeeeee" : SOFT_COLOR,
-                  color:           isUsed ? "#999" : "#222",
-                  cursor:          isUsed || showAns ? "not-allowed" : "grab",
-                  opacity:         isUsed ? 0.6 : 1,
-                  userSelect:      "none",
-                  fontSize:        "clamp(12px,1.4vw,18px)",
-                  fontWeight:      600,
-                  boxShadow:       isUsed ? "none" : "0 2px 8px rgba(0,0,0,0.06)",
-                  transition:      "0.2s ease",
-                  touchAction:     "none",
-                  textAlign:       "center",
-                  lineHeight:      1.3,
-                  maxWidth:        "clamp(200px,40vw,400px)",
-                }}
-              >
-                {item.value}
+              <div key={w.id} className="lrwa-word-row">
+
+                {/* Input */}
+                <div className="lrwa-input-wrap">
+                  <input
+                    ref={(el) => (inputRefs.current[w.id] = el)}
+                    type="text"
+                    maxLength={1}
+                    className={[
+                      "lrwa-input",
+                      wrong   ? "lrwa-input--wrong"  : "",
+                      showAns ? "lrwa-input--answer" : "",
+                    ].filter(Boolean).join(" ")}
+                    value={value}
+                    disabled={disabled}
+                    onChange={(e) => handleChange(w.id, e.target.value)}
+                    style={{ borderColor: bColor, color: tColor }}
+                    spellCheck={false}
+                    autoComplete="off"
+                  />
+                  {wrong && <div className="lrwa-badge">✕</div>}
+                </div>
+
+                {/* Number */}
+                <span className="lrwa-num">{w.id}</span>
+
+                {/* Word */}
+                <span className="lrwa-word">{w.word}</span>
+
               </div>
             );
           })}
         </div>
 
-        {/* Main layout: house LEFT | Q&A RIGHT */}
-        <div
-          style={{
-            display:             "grid",
-            gridTemplateColumns: "minmax(0,1fr) minmax(0,1.1fr)",
-            gap:                 "clamp(16px,2.5vw,32px)",
-            alignItems:          "start",
-            width:               "100%",
-          }}
-        >
-          {/* House image */}
-          <div
-            style={{
-              width:        "100%",
-              borderRadius: "clamp(12px,1.4vw,18px)",
-              overflow:     "hidden",
-              background:   "#f7f7f7",
-              flexShrink:   0,
-            }}
-          >
-            <img
-              src={houseImg}
-              alt="house"
-              style={{
-                width:      "100%",
-                height:     "auto",
-                display:    "block",
-                userSelect: "none",
-              }}
-            />
-          </div>
-
-          {/* Q&A list */}
-          <div
-            style={{
-              display:       "flex",
-              flexDirection: "column",
-              gap:           "clamp(16px,2.5vw,30px)",
-              minWidth:      0,
-            }}
-          >
-            {ITEMS.map((item) => (
-              <div
-                key={item.id}
-                style={{
-                  display:       "flex",
-                  flexDirection: "column",
-                  gap:           "clamp(6px,0.8vw,10px)",
-                  minWidth:      0,
-                }}
-              >
-                {/* number + question */}
-                <div
-                  style={{
-                    display:    "flex",
-                    alignItems: "baseline",
-                    gap:        "clamp(6px,0.8vw,12px)",
-                  }}
-                >
-                  <span
-                    style={{
-                      fontSize:   "clamp(16px,1.9vw,26px)",
-                      fontWeight: 700,
-                      color:      "#111",
-                      lineHeight: 1,
-                      flexShrink: 0,
-                      minWidth:   "clamp(14px,1.8vw,24px)",
-                    }}
-                  >
-                    {item.id}
-                  </span>
-                  <span
-                    style={{
-                      fontSize:   "clamp(14px,1.7vw,22px)",
-                      fontWeight: 500,
-                      color:      "#111",
-                      lineHeight: 1.35,
-                      wordBreak:  "break-word",
-                    }}
-                  >
-                    {item.question}
-                  </span>
-                </div>
-
-                {/* answer line */}
-                {item.example ? (
-                  /* example — static red text على سطرين إذا احتاج */
-                  <div
-                    style={{
-                      fontSize:      "clamp(13px,1.6vw,20px)",
-                      fontWeight:    600,
-                      color:         RED_COLOR,
-                      borderBottom:  `2px solid ${LINE_COLOR}`,
-                      paddingBottom: "3px",
-                      lineHeight:    1.4,
-                      wordBreak:     "break-word",
-                    }}
-                  >
-                    {item.answer}
-                  </div>
-                ) : (
-                  renderDropZone(item)
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Buttons */}
-        <div
-          style={{
-            display:        "flex",
-            justifyContent: "center",
-            marginTop:      "clamp(6px,1vw,12px)",
-          }}
-        >
+        {/* ── Buttons ── */}
+        <div className="lrwa-buttons">
           <Button
             checkAnswers={handleCheck}
             handleShowAnswer={handleShowAnswer}
-            handleStartAgain={handleStartAgain}
+            handleStartAgain={handleReset}
           />
         </div>
       </div>
-
-      {/* Touch ghost */}
-      {touchItem && (
-        <div
-          style={{
-            position:       "fixed",
-            left:           touchPos.x - 100,
-            top:            touchPos.y - 20,
-            background:     "#fff",
-            padding:        "8px 14px",
-            borderRadius:   "10px",
-            boxShadow:      "0 4px 10px rgba(0,0,0,0.2)",
-            pointerEvents:  "none",
-            zIndex:         9999,
-            fontSize:       "clamp(12px,1.4vw,17px)",
-            fontWeight:     600,
-            color:          "#222",
-            maxWidth:       "280px",
-            textAlign:      "center",
-            lineHeight:     1.3,
-          }}
-        >
-          {touchItem.value}
-        </div>
-      )}
     </div>
   );
 }

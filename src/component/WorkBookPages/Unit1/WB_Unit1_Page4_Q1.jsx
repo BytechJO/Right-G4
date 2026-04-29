@@ -5,7 +5,7 @@ import ValidationAlert from "../../Popup/ValidationAlert";
 // ─────────────────────────────────────────────
 //  🖼️  IMAGE — غيّر المسار حسب مشروعك
 // ─────────────────────────────────────────────
-import chefImg from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U1 Folder/Page 4/SVG/1.svg";
+import chefImg from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U1 Folder/Page 4/SVG/Asset 8.svg";
 
 // ─────────────────────────────────────────────
 //  🎨  COLORS — كلها قابلة للتعديل
@@ -218,7 +218,7 @@ font-size: clamp(20px, 1.9vw, 20px);
         .www-input {
           background: transparent;
           border: none;
-          border-bottom: 2px solid ${INPUT_UNDERLINE_DEFAULT};
+          border-bottom: 1px solid ${INPUT_UNDERLINE_DEFAULT};
           outline: none;
 font-size: clamp(15px, 1.9vw, 22px);
           color: ${INPUT_TEXT_COLOR};

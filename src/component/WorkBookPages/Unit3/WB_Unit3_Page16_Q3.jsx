@@ -33,10 +33,10 @@ const RIGHT_ITEMS = [
 
 // leftId → rightId
 const CORRECT_MATCHES = {
-  1: 3,  // Did she have a cat?       → Yes, she did.
-  2: 1,  // Did he have a skateboard? → Yes, he did.
-  3: 4,  // Did she have a laptop?    → No, she didn't.
-  4: 2,  // Did he have a net?        → No, he didn't.
+  1: 3,
+  2: 1,
+  3: 4,
+  4: 2,
 };
 
 // ─────────────────────────────────────────────
@@ -142,35 +142,30 @@ export default function WB_ReadLookMatch_D() {
   return (
     <div className="main-container-component">
       <style>{`
-        /* ── Layout: 4 columns ── */
-        /* num+question | image+dot | gap(svg) | dot+answer */
         .rlm-match {
           position: relative;
           display: grid;
           grid-template-columns:
             minmax(0, 1fr)
             clamp(100px, 16vw, 200px)
-            clamp(60px, 8vw, 120px)
+            clamp(120px, 16vw, 220px)
             minmax(0, 1fr);
           align-items: stretch;
           width: 100%;
           row-gap: clamp(12px, 2vw, 24px);
         }
 
-        /* ── Left side: num + question ── */
         .rlm-left {
           display: flex;
           align-items: center;
-          gap: clamp(6px, 0.8vw, 10px);
-          padding-right: clamp(8px, 1.2vw, 16px);
+          gap: clamp(6px, 0.8vw, 6px);
           cursor: pointer;
           border-radius: 8px;
-          padding: 4px 8px 4px 0;
           user-select: none;
         }
         .rlm-left--selected {
           background: rgba(32,150,166,0.08);
-         border : 2px solid #2096a6;
+          border: 2px solid #2096a6;
           border-radius: 8px;
         }
         .rlm-num {
@@ -178,28 +173,30 @@ export default function WB_ReadLookMatch_D() {
           font-weight: 700;
           color: #2b2b2b;
           flex-shrink: 0;
+
         }
         .rlm-question {
-          font-size: clamp(14px, 1.7vw, 20px);
+          font-size: clamp(18px, 1.7vw, 18px);
           color: #2b2b2b;
-          line-height: 1.4;
+              white-space: nowrap;
         }
 
-        /* ── Image + dot ── */
         .rlm-img-dot {
           display: flex;
           align-items: center;
           gap: clamp(6px, 1vw, 12px);
           cursor: pointer;
+          margin-left : 10%;
         }
         .rlm-img {
           width: clamp(80px, 12vw, 160px);
           height: clamp(60px, 9vw, 120px);
           border-radius: 10px;
           flex-shrink: 0;
+                    margin-right : 5%;
+
         }
 
-        /* ── Dot ── */
         .rlm-dot {
           width: clamp(11px, 1.4vw, 15px);
           height: clamp(11px, 1.4vw, 15px);
@@ -212,7 +209,6 @@ export default function WB_ReadLookMatch_D() {
           box-shadow: 0 0 0 4px rgba(32,150,166,0.25);
         }
 
-        /* ── Right side: dot + answer ── */
         .rlm-right {
           display: flex;
           align-items: center;
@@ -223,12 +219,11 @@ export default function WB_ReadLookMatch_D() {
           user-select: none;
         }
         .rlm-answer {
-          font-size: clamp(14px, 1.7vw, 20px);
+          font-size: clamp(18px, 1.7vw, 18px);
           color: #2b2b2b;
           line-height: 1.4;
         }
 
-        /* ── Wrong badge ── */
         .rlm-badge {
           width: clamp(16px, 1.8vw, 20px);
           height: clamp(16px, 1.8vw, 20px);
@@ -246,7 +241,6 @@ export default function WB_ReadLookMatch_D() {
           margin-left: 4px;
         }
 
-        /* Buttons */
         .rlm-buttons {
           display: flex;
           justify-content: center;
@@ -298,11 +292,11 @@ export default function WB_ReadLookMatch_D() {
 
           {/* ── 4 rows ── */}
           {LEFT_ITEMS.map((lItem, idx) => {
-            const rItem    = RIGHT_ITEMS[idx];
-            const wrong    = isWrongLine(lItem.id);
-            const selLeft  = isSelectedLeft(lItem.id);
-            const connLeft = isDotConnLeft(lItem.id);
-            const connRight= isDotConnRight(rItem.id);
+            const rItem     = RIGHT_ITEMS[idx];
+            const wrong     = isWrongLine(lItem.id);
+            const selLeft   = isSelectedLeft(lItem.id);
+            const connLeft  = isDotConnLeft(lItem.id);
+            const connRight = isDotConnRight(rItem.id);
 
             return (
               <>

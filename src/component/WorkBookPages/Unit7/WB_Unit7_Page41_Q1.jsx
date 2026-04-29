@@ -1,293 +1,378 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useLayoutEffect } from "react";
 import Button from "../Button";
 import ValidationAlert from "../../Popup/ValidationAlert";
 
-import houseImg from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U7 Folder/Page 41/SVG/1.svg";
+import img1    from"../../../assets/imgs/pages/Activity Book/Right Int WB G4 U7 Folder/Page 40/SVG/Asset 5.svg";
+import img2     from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U7 Folder/Page 40/SVG/Asset 6.svg";
+import img3      from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U7 Folder/Page 40/SVG/Asset 7.svg";
+import img4 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U7 Folder/Page 40/SVG/Asset 8.svg";
+// ─────────────────────────────────────────────
+//  🎨  COLORS
+// ─────────────────────────────────────────────
+const LINE_COLOR       = "#2096a6";
+const WRONG_LINE_COLOR = "#2096a6";
+const WRONG_BADGE_BG   = "#ef4444";
+const WRONG_BADGE_TEXT = "#ffffff";
 
-const WRONG_COLOR = "#ef4444";
-const RED_COLOR   = "#000000ff";
-const LINE_COLOR  = "#333";
-const OPTIONS     = ["in", "on", "in front of"];
-
-const ITEMS = [
-  {
-    id:      1,
-    before:  "There's a cat",
-    after:   "the toy house.",
-    correct: "on",
-  },
-  {
-    id:      2,
-    before:  "There's a mouse",
-    after:   "the toy house.",
-    correct: "in",
-  },
-  {
-    id:      3,
-    before:  "There's cheese",
-    after:   "the toy house.",
-    correct: "in front of",
-  },
+// ─────────────────────────────────────────────
+//  📝  EXERCISE DATA
+// ─────────────────────────────────────────────
+const LEFT_ITEMS = [
+  { id: 1, text: "Were there any oranges?",    src: img1     },
+  { id: 2, text: "Were there any grapes?",     src: img2     },
+  { id: 3, text: "Was there any steak?",       src: img3     },
+  { id: 4, text: "Was there any orange juice?", src: img4 },
 ];
 
-export default function WB_ReadLookWrite_PageE() {
-  const [selected,    setSelected]    = useState({});
-  const [showResults, setShowResults] = useState(false);
-  const [showAns,     setShowAns]     = useState(false);
+const RIGHT_ITEMS = [
+  { id: "a", text: "Yes, there was."   },
+  { id: "b", text: "Yes, there were."  },
+  { id: "c", text: "No, there wasn't." },
+  { id: "d", text: "No, there weren't." },
+]
+// leftId → rightId
+const CORRECT_MATCHES = {
+  1: 3,  // Did she have a cat?       → Yes, she did.
+  2: 1,  // Did he have a skateboard? → Yes, he did.
+  3: 4,  // Did she have a laptop?    → No, she didn't.
+  4: 2,  // Did he have a net?        → No, he didn't.
+};
 
-  const handleChange = (id, value) => {
-    if (showAns) return;
-    setSelected((prev) => ({ ...prev, [id]: value }));
-    setShowResults(false);
+// ─────────────────────────────────────────────
+//  COMPONENT
+// ─────────────────────────────────────────────
+export default function WB_ReadLookMatch_D() {
+  const [selectedLeft, setSelectedLeft] = useState(null);
+  const [matches,      setMatches]      = useState({});
+  const [showResults,  setShowResults]  = useState(false);
+  const [showAns,      setShowAns]      = useState(false);
+  const [lines,        setLines]        = useState([]);
+
+  const containerRef = useRef(null);
+  const dotRefs      = useRef({});
+
+  const isLocked = showAns;
+
+  // ── SVG lines ─────────────────────────────
+  useLayoutEffect(() => {
+    const update = () => {
+      if (!containerRef.current) return;
+      const cr = containerRef.current.getBoundingClientRect();
+      const newLines = Object.entries(matches).map(([lid, rid]) => {
+        const lEl = dotRefs.current[`left-${lid}`];
+        const rEl = dotRefs.current[`right-${rid}`];
+        if (!lEl || !rEl) return null;
+        const lr = lEl.getBoundingClientRect();
+        const rr = rEl.getBoundingClientRect();
+        return {
+          id:      `${lid}-${rid}`,
+          leftId:  Number(lid),
+          rightId: Number(rid),
+          x1: lr.left + lr.width  / 2 - cr.left,
+          y1: lr.top  + lr.height / 2 - cr.top,
+          x2: rr.left + rr.width  / 2 - cr.left,
+          y2: rr.top  + rr.height / 2 - cr.top,
+        };
+      }).filter(Boolean);
+      setLines(newLines);
+    };
+    const raf = () => requestAnimationFrame(update);
+    raf();
+    window.addEventListener("resize", raf);
+    return () => window.removeEventListener("resize", raf);
+  }, [matches]);
+
+  // ── handlers ──────────────────────────────
+  const handleLeftClick = (id) => {
+    if (isLocked) return;
+    setSelectedLeft(id);
+  };
+
+  const handleRightClick = (rid) => {
+    if (isLocked || selectedLeft === null) return;
+    const updated = { ...matches };
+    Object.keys(updated).forEach((k) => { if (updated[k] === rid) delete updated[k]; });
+    updated[selectedLeft] = rid;
+    setMatches(updated);
+    setSelectedLeft(null);
   };
 
   const handleCheck = () => {
-    if (showAns) return;
-    const allAnswered = ITEMS.every((i) => selected[i.id]);
-    if (!allAnswered) {
-      ValidationAlert.info("Please answer all questions first.");
+    if (isLocked) return;
+    if (Object.keys(matches).length < LEFT_ITEMS.length) {
+      ValidationAlert.info("Please connect all items first.");
       return;
     }
     let score = 0;
-    ITEMS.forEach((i) => { if (selected[i.id] === i.correct) score++; });
+    LEFT_ITEMS.forEach((l) => {
+      if (matches[l.id] === CORRECT_MATCHES[l.id]) score++;
+    });
     setShowResults(true);
-    const total = ITEMS.length;
-    if (score === total)  ValidationAlert.success(`Score: ${score} / ${total}`);
-    else if (score > 0)   ValidationAlert.warning(`Score: ${score} / ${total}`);
-    else                  ValidationAlert.error(`Score: ${score} / ${total}`);
+    if (score === LEFT_ITEMS.length)  ValidationAlert.success(`Score: ${score} / ${LEFT_ITEMS.length}`);
+    else if (score > 0)               ValidationAlert.warning(`Score: ${score} / ${LEFT_ITEMS.length}`);
+    else                              ValidationAlert.error(`Score: ${score} / ${LEFT_ITEMS.length}`);
   };
 
   const handleShowAnswer = () => {
-    const filled = {};
-    ITEMS.forEach((i) => { filled[i.id] = i.correct; });
-    setSelected(filled);
-    setShowResults(true);
+    setMatches({ ...CORRECT_MATCHES });
+    setShowResults(false);
     setShowAns(true);
+    setSelectedLeft(null);
   };
 
-  const handleStartAgain = () => {
-    setSelected({});
+  const handleReset = () => {
+    setMatches({});
+    setSelectedLeft(null);
     setShowResults(false);
     setShowAns(false);
+    setLines([]);
   };
 
-  const isWrong = (item) =>
-    showResults && !showAns && selected[item.id] !== item.correct;
+  // ── helpers ───────────────────────────────
+  const isWrongLine     = (leftId) => showResults && !showAns && matches[leftId] !== CORRECT_MATCHES[leftId];
+  const isDotConnLeft   = (id)     => !!matches[id];
+  const isDotConnRight  = (id)     => Object.values(matches).includes(id);
+  const isSelectedLeft  = (id)     => selectedLeft === id;
 
+  const dotColor = (connected, selected) =>
+    selected || connected ? "#2096a6" : "#c0c0c0";
+
+  // ── render ────────────────────────────────
   return (
     <div className="main-container-component">
+      <style>{`
+        /* ── Layout: 4 columns ── */
+        /* num+question | image+dot | gap(svg) | dot+answer */
+        .rlm-match {
+          position: relative;
+          display: grid;
+          grid-template-columns:
+            minmax(0, 1fr)
+            clamp(100px, 16vw, 200px)
+            clamp(60px, 8vw, 120px)
+            minmax(0, 1fr);
+          align-items: stretch;
+          width: 100%;
+          row-gap: clamp(12px, 2vw, 24px);
+        }
+
+        /* ── Left side: num + question ── */
+        .rlm-left {
+          display: flex;
+          align-items: center;
+          gap: clamp(6px, 0.8vw, 10px);
+          padding-right: clamp(8px, 1.2vw, 16px);
+          cursor: pointer;
+          border-radius: 8px;
+          padding: 4px 8px 4px 0;
+          user-select: none;
+        }
+        .rlm-left--selected {
+          background: rgba(32,150,166,0.08);
+         border : 2px solid #2096a6;
+          border-radius: 8px;
+        }
+        .rlm-num {
+          font-size: clamp(15px, 1.9vw, 22px);
+          font-weight: 700;
+          color: #2b2b2b;
+          flex-shrink: 0;
+        }
+        .rlm-question {
+          font-size: clamp(14px, 1.7vw, 20px);
+          color: #2b2b2b;
+          line-height: 1.4;
+        }
+
+        /* ── Image + dot ── */
+        .rlm-img-dot {
+          display: flex;
+          align-items: center;
+          gap: clamp(6px, 1vw, 12px);
+          cursor: pointer;
+        }
+        .rlm-img {
+          width: clamp(80px, 12vw, 160px);
+          height: clamp(60px, 9vw, 120px);
+          border-radius: 10px;
+          flex-shrink: 0;
+        }
+
+        /* ── Dot ── */
+        .rlm-dot {
+          width: clamp(11px, 1.4vw, 15px);
+          height: clamp(11px, 1.4vw, 15px);
+          border-radius: 50%;
+          flex-shrink: 0;
+          transition: all 0.2s;
+          cursor: pointer;
+        }
+        .rlm-dot--selected {
+          box-shadow: 0 0 0 4px rgba(32,150,166,0.25);
+        }
+
+        /* ── Right side: dot + answer ── */
+        .rlm-right {
+          display: flex;
+          align-items: center;
+          gap: clamp(6px, 1vw, 12px);
+          cursor: pointer;
+          border-radius: 8px;
+          padding: 4px 0 4px 8px;
+          user-select: none;
+        }
+        .rlm-answer {
+          font-size: clamp(14px, 1.7vw, 20px);
+          color: #2b2b2b;
+          line-height: 1.4;
+        }
+
+        /* ── Wrong badge ── */
+        .rlm-badge {
+          width: clamp(16px, 1.8vw, 20px);
+          height: clamp(16px, 1.8vw, 20px);
+          border-radius: 50%;
+          background: ${WRONG_BADGE_BG};
+          color: ${WRONG_BADGE_TEXT};
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          font-size: clamp(9px, 1vw, 11px);
+          font-weight: 700;
+          border: 2px solid #fff;
+          box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+          flex-shrink: 0;
+          margin-left: 4px;
+        }
+
+        /* Buttons */
+        .rlm-buttons {
+          display: flex;
+          justify-content: center;
+          margin-top: clamp(8px, 1.6vw, 18px);
+        }
+      `}</style>
+
       <div
         className="div-forall"
         style={{
-          display:       "flex",
+          display: "flex",
           flexDirection: "column",
-          gap:           "18px",
-          maxWidth:      "1100px",
-          margin:        "0 auto",
+          gap: "clamp(14px, 2vw, 24px)",
+          maxWidth: "1100px",
+          margin: "0 auto",
         }}
       >
-        {/* Title */}
+        {/* ── Header ── */}
         <h1
           className="WB-header-title-page8"
-          style={{
-            margin:     0,
-            display:    "flex",
-            alignItems: "center",
-            gap:        "12px",
-            flexWrap:   "wrap",
-          }}
+          style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
         >
-          <span className="WB-ex-A">E</span>
-          Read, look, and write{" "}
-          <strong style={{ fontWeight: 900 }}>in</strong>,{" "}
-          <strong style={{ fontWeight: 900 }}>on</strong>, or{" "}
-          <strong style={{ fontWeight: 900 }}>in front of</strong>.
+          <span className="WB-ex-A">D</span>
+          Read, look, and match.
         </h1>
 
-        {/* Main layout: sentences LEFT | house image RIGHT */}
-        <div
-          style={{
-            display:             "grid",
-            gridTemplateColumns: "1fr auto",
-            gap:                 "clamp(20px,3vw,40px)",
-            alignItems:          "center",
-            width:               "100%",
-          }}
-        >
-          {/* Sentences */}
-          <div
+        {/* ── Matching area ── */}
+        <div ref={containerRef} className="rlm-match">
+
+          {/* SVG lines */}
+          <svg
             style={{
-              display:       "flex",
-              flexDirection: "column",
-              gap:           "clamp(20px,3vw,36px)",
-              minWidth:      0,
+              position: "absolute", inset: 0,
+              width: "100%", height: "100%",
+              pointerEvents: "none", overflow: "visible", zIndex: 1,
             }}
           >
-            {ITEMS.map((item) => {
-              const wrong = isWrong(item);
-              return (
+            {lines.map((line) => (
+              <line
+                key={line.id}
+                x1={line.x1} y1={line.y1}
+                x2={line.x2} y2={line.y2}
+                stroke={isWrongLine(line.leftId) ? WRONG_LINE_COLOR : LINE_COLOR}
+                strokeWidth="2.5"
+                strokeLinecap="round"
+              />
+            ))}
+          </svg>
+
+          {/* ── 4 rows ── */}
+          {LEFT_ITEMS.map((lItem, idx) => {
+            const rItem    = RIGHT_ITEMS[idx];
+            const wrong    = isWrongLine(lItem.id);
+            const selLeft  = isSelectedLeft(lItem.id);
+            const connLeft = isDotConnLeft(lItem.id);
+            const connRight= isDotConnRight(rItem.id);
+
+            return (
+              <>
+                {/* col 1: num + question */}
                 <div
-                  key={item.id}
-                  style={{
-                    display:    "flex",
-                    alignItems: "flex-start",
-                    gap:        "clamp(8px,1vw,14px)",
-                    minWidth:   0,
-                  }}
+                  key={`left-${lItem.id}`}
+                  className={`rlm-left ${selLeft ? "rlm-left--selected" : ""}`}
+                  onClick={() => handleLeftClick(lItem.id)}
+                  style={{ cursor: isLocked ? "default" : "pointer" }}
                 >
-                  {/* number */}
-                  <span
-                    style={{
-                      fontSize:   "clamp(16px,1.9vw,26px)",
-                      fontWeight: 700,
-                      color:      "#111",
-                      lineHeight: 1.4,
-                      flexShrink: 0,
-                      minWidth:   "clamp(14px,1.8vw,24px)",
-                    }}
-                  >
-                    {item.id}
-                  </span>
-
-                  {/* sentence block */}
-                  <div
-                    style={{
-                      display:   "flex",
-                      flexWrap:  "wrap",
-                      alignItems:"baseline",
-                      gap:       "clamp(4px,0.5vw,7px)",
-                      minWidth:  0,
-                      flex:      1,
-                    }}
-                  >
-                    {/* before */}
-                    <span
-                      style={{
-                        fontSize:   "clamp(14px,1.8vw,24px)",
-                        fontWeight: 500,
-                        color:      "#111",
-                        lineHeight: 1.4,
-                        whiteSpace: "nowrap",
-                      }}
-                    >
-                      {item.before}
-                    </span>
-
-                    {/* dropdown */}
-                    <div
-                      style={{
-                        position: "relative",
-                        display:  "inline-flex",
-                        alignItems: "flex-end",
-                      }}
-                    >
-                      <select
-                        disabled={showAns}
-                        value={selected[item.id] || ""}
-                        onChange={(e) => handleChange(item.id, e.target.value)}
-                        style={{
-                          minWidth:     "clamp(80px,14vw,180px)",
-                          borderTop:    "none",
-                          borderLeft:   "none",
-                          borderRight:  "none",
-                          borderBottom: `2.5px solid ${wrong ? WRONG_COLOR : LINE_COLOR}`,
-                          borderRadius: 0,
-                          outline:      "none",
-                          fontSize:     "clamp(14px,1.8vw,24px)",
-                          fontWeight:   700,
-                          color:        RED_COLOR,
-                          padding:      "0 clamp(4px,0.6vw,8px) 3px 2px",
-                          background:   "transparent",
-                          cursor:       showAns ? "default" : "pointer",
-                          appearance:   "auto",
-                          boxSizing:    "border-box",
-                        }}
-                      >
-                        <option value="" disabled hidden></option>
-                        {OPTIONS.map((opt) => (
-                          <option key={opt} value={opt}>{opt}</option>
-                        ))}
-                      </select>
-
-                      {/* wrong badge — يسار أعلى */}
-                      {wrong && (
-                        <div
-                          style={{
-                            position:        "absolute",
-                            top:             "-8px",
-                            left:            "-8px",
-                            width:           "clamp(16px,1.8vw,22px)",
-                            height:          "clamp(16px,1.8vw,22px)",
-                            borderRadius:    "50%",
-                            backgroundColor: WRONG_COLOR,
-                            border:          "1px solid #fff",
-                            color:           "#fff",
-                            display:         "flex",
-                            alignItems:      "center",
-                            justifyContent:  "center",
-                            fontSize:        "clamp(9px,0.9vw,12px)",
-                            fontWeight:      700,
-                            boxShadow:       "0 1px 4px rgba(0,0,0,0.2)",
-                            zIndex:          3,
-                            pointerEvents:   "none",
-                          }}
-                        >
-                          ✕
-                        </div>
-                      )}
-                    </div>
-
-                    {/* after */}
-                    <span
-                      style={{
-                        fontSize:   "clamp(14px,1.8vw,24px)",
-                        fontWeight: 500,
-                        color:      "#111",
-                        lineHeight: 1.4,
-                        whiteSpace: "nowrap",
-                      }}
-                    >
-                      {item.after}
-                    </span>
-                  </div>
+                  <span className="rlm-num">{lItem.id}</span>
+                  <span className="rlm-question">{lItem.question}</span>
+                  {wrong && <span className="rlm-badge">✕</span>}
                 </div>
-              );
-            })}
-          </div>
 
-          {/* House image */}
-          <div
-            style={{
-              width:        "clamp(180px,28vw,340px)",
-              flexShrink:   0,
-            }}
-          >
-            <img
-              src={houseImg}
-              alt="toy house"
-              style={{
-                width:         "100%",
-                height:        "auto",
-                display:       "block",
-                userSelect:    "none",
-                pointerEvents: "none",
-              }}
-            />
-          </div>
+                {/* col 2: image + left dot */}
+                <div
+                  key={`img-${lItem.id}`}
+                  className="rlm-img-dot"
+                  onClick={() => handleLeftClick(lItem.id)}
+                  style={{ cursor: isLocked ? "default" : "pointer" }}
+                >
+                  <img src={lItem.imageSrc} alt={`item ${lItem.id}`} className="rlm-img" />
+                  <div
+                    ref={(el) => (dotRefs.current[`left-${lItem.id}`] = el)}
+                    className={`rlm-dot ${selLeft ? "rlm-dot--selected" : ""}`}
+                    style={{ backgroundColor: dotColor(connLeft, selLeft) }}
+                  />
+                </div>
+
+                {/* col 3: right dot */}
+                <div
+                  key={`rdot-${rItem.id}`}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "flex-end",
+                    paddingRight: "4px",
+                    cursor: isLocked || selectedLeft === null ? "default" : "pointer",
+                    zIndex: 2,
+                  }}
+                  onClick={() => handleRightClick(rItem.id)}
+                >
+                  <div
+                    ref={(el) => (dotRefs.current[`right-${rItem.id}`] = el)}
+                    className="rlm-dot"
+                    style={{ backgroundColor: dotColor(connRight, false) }}
+                  />
+                </div>
+
+                {/* col 4: answer */}
+                <div
+                  key={`right-${rItem.id}`}
+                  className="rlm-right"
+                  onClick={() => handleRightClick(rItem.id)}
+                  style={{ cursor: isLocked || selectedLeft === null ? "default" : "pointer" }}
+                >
+                  <span className="rlm-answer">{rItem.label}</span>
+                </div>
+              </>
+            );
+          })}
+
         </div>
 
-        {/* Buttons */}
-        <div
-          style={{
-            display:        "flex",
-            justifyContent: "center",
-            marginTop:      "clamp(6px,1vw,12px)",
-          }}
-        >
+        {/* ── Buttons ── */}
+        <div className="rlm-buttons">
           <Button
             checkAnswers={handleCheck}
             handleShowAnswer={handleShowAnswer}
-            handleStartAgain={handleStartAgain}
+            handleStartAgain={handleReset}
           />
         </div>
       </div>

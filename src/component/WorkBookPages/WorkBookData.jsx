@@ -93,7 +93,6 @@ import WB_Unit7_Page43_Q1 from "./Unit7/WB_Unit7_Page43_Q1";
 import WB_Unit7_Page43_Q2 from "./Unit7/WB_Unit7_Page43_Q2";
 import WB_Unit7_Page44_Q1 from "./Unit7/WB_Unit7_Page44_Q1";
 import WB_Unit7_Page44_Q2 from "./Unit7/WB_Unit7_Page44_Q2";
-import WB_Unit7_Page44_Q3 from "./Unit7/WB_Unit7_Page44_Q3";
 
 // Unit8
 import WB_Unit8_Page45_Q1 from "./Unit8/WB_Unit8_Page45_Q1";
@@ -237,8 +236,7 @@ export const workBookData = [
   { component: WB_Unit7_Page43_Q1, unit: 7 },
   { component: WB_Unit7_Page43_Q2, unit: 7 },
   { component: WB_Unit7_Page44_Q1, unit: 7 },
-  { component: WB_Unit7_Page44_Q2, unit: 7 },
-  { component: WB_Unit7_Page44_Q3, unit: 7, lastOfUnit: true },
+  { component: WB_Unit7_Page44_Q2, unit: 7, lastOfUnit: true },
 
   // UNIT 8
   { component: WB_Unit8_Page45_Q1, unit: 8 },

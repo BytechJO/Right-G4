@@ -212,7 +212,7 @@ export default function WB_Unit1_Page3_Q1() {
         .wlrw-input {
               border: 0px solid rgba(255, 255, 255, 0);
 
-          border-bottom: 2px solid ${INPUT_UNDERLINE_DEFAULT};
+          border-bottom: 1px solid ${INPUT_UNDERLINE_DEFAULT};
           outline: none;
           font-size: clamp(20px, 1.9vw, 20px);
           color: ${INPUT_TEXT_COLOR};

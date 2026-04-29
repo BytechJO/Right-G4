@@ -183,6 +183,8 @@ export default function WB_LookWrite_QI() {
           grid-template-columns: repeat(2, minmax(0, 1fr));
           gap: clamp(16px, 2.8vw, 36px);
           width: 100%;
+              margin-top: 10%;
+
         }
 
         .lwi-card {
@@ -214,8 +216,7 @@ export default function WB_LookWrite_QI() {
         }
 
         .lwi-group-num {
-                
-          font-size: clamp(17px, 2vw, 24px);
+          font-size: clamp(17px, 2vw, 22px);
           font-weight: 700;
           color: ${NUMBER_COLOR};
           line-height: 1;
@@ -225,14 +226,12 @@ export default function WB_LookWrite_QI() {
         .lwi-img-wrap {
           position: relative;
           overflow: hidden;
-          /* width و height بتجو من IMAGE_SIZES */
         }
 
         .lwi-img {
           width: 100%;
           height: 100%;
           display: block;
-          object-fit: contain;
         }
 
         .lwi-icon {
@@ -252,17 +251,17 @@ export default function WB_LookWrite_QI() {
         .lwi-icon-svg { width: 60%; height: 60%; }
 
         .lwi-line-wrap {
-          position: relative;
-          display: flex;
-          align-items: flex-end;
-          gap: 6px;
+     display: flex;
+    position: relative;
+    align-items: flex-end;
+    gap: 6px;
+    width: 85%;
+    margin-left: 7%;
         }
 
         .lwi-prefix {
-          font-size: clamp(15px, 1.9vw, 22px);
-          font-weight: 600;
-          line-height: 1;
-          padding-bottom: 6px;
+          font-size: clamp(15px, 1.9vw, 20px);
+          line-height: 1.5;
           white-space: nowrap;
           flex-shrink: 0;
         }
@@ -271,14 +270,14 @@ export default function WB_LookWrite_QI() {
           flex: 1;
           background: transparent;
           border: none;
-          border-bottom: 2px solid ${INPUT_UNDERLINE_DEFAULT};
+          border-bottom: 1px solid ${INPUT_UNDERLINE_DEFAULT};
           outline: none;
-          font-size: clamp(15px, 1.9vw, 22px);
+          font-size: clamp(15px, 1.9vw, 20px);
           color: ${INPUT_TEXT_COLOR};
           line-height: 1.5;
           box-sizing: border-box;
           transition: border-color 0.2s;
-          min-width: 0;
+          width: 70px;
         }
         .lwi-input:disabled { opacity: 1; cursor: default; }
 
@@ -305,7 +304,7 @@ export default function WB_LookWrite_QI() {
         .lwi-inputs-stack {
           display: flex;
           flex-direction: column;
-          gap: clamp(8px, 1.2vw, 14px);
+          gap: clamp(8px, 1.2vw, 20px);
           width: 100%;
         }
 

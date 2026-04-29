@@ -138,6 +138,7 @@ export default function WB_ReadAndWrite_D() {
           display: flex;
           flex-direction: column;
           gap: clamp(14px, 2vw, 22px);
+          margin-top : 7%;
         }
 
         .rwd-row {
@@ -166,13 +167,11 @@ export default function WB_ReadAndWrite_D() {
           width: 100%;
           background: transparent;
           border: none;
-          border-bottom: 2px solid ${INPUT_UNDERLINE_DEFAULT};
+          border-bottom: 1px solid ${INPUT_UNDERLINE_DEFAULT};
           outline: none;
 font-size: clamp(15px, 1.9vw, 22px);
-          font-family: inherit;
           color: ${INPUT_TEXT_COLOR};
-          padding: 4px 6px 5px;
-          line-height: 1.6;
+n          line-height: 1.5;
           box-sizing: border-box;
           transition: border-color 0.2s;
         }

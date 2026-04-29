@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import Button from "../Button";
 import ValidationAlert from "../../Popup/ValidationAlert";
 
@@ -14,16 +14,10 @@ const WRONG_BADGE_TEXT        = "#ffffff";
 
 // ─────────────────────────────────────────────
 //  📝  EXERCISE DATA
-//
-//  Each item in `parts` is either:
-//    { type: "fixed",  text: "p" }   → shown as plain letter
-//    { type: "blank",  id: "2-1" }   → one-letter input box
-//  `answer` = the full correct word (used for checking & show answer)
 // ─────────────────────────────────────────────
 const ITEMS = [
   {
     id: 1,
-    // ye__ __e__d__ __  → yesterday
     parts: [
       { type: "fixed", text: "ye" },
       { type: "blank", id: "1-1" },
@@ -39,7 +33,6 @@ const ITEMS = [
   },
   {
     id: 2,
-    // w__ __ __er__ __ __  → wonderful
     parts: [
       { type: "fixed", text: "w" },
       { type: "blank", id: "2-1" },
@@ -55,7 +48,6 @@ const ITEMS = [
   },
   {
     id: 3,
-    // b__ __th__ __ __  → birthday
     parts: [
       { type: "fixed", text: "b" },
       { type: "blank", id: "3-1" },
@@ -70,7 +62,6 @@ const ITEMS = [
   },
   {
     id: 4,
-    // d__l__c__ __ __s  → delicious
     parts: [
       { type: "fixed", text: "d" },
       { type: "blank", id: "4-1" },
@@ -87,10 +78,14 @@ const ITEMS = [
   },
 ];
 
+// ── قائمة مرتبة بكل الـ blank IDs ──
+const ALL_BLANK_IDS = ITEMS.flatMap((item) =>
+  item.parts.filter((p) => p.type === "blank").map((p) => p.id)
+);
+
 // ─────────────────────────────────────────────
 //  🔧  HELPERS
 // ─────────────────────────────────────────────
-// Check all blanks of one item
 const isItemCorrect = (item, inputs) =>
   Object.entries(item.blanks).every(
     ([id, answer]) =>
@@ -105,14 +100,36 @@ export default function WB_MissingLetters_F() {
   const [showResults, setShowResults] = useState(false);
   const [showAns,     setShowAns]     = useState(false);
 
-  const isLocked =  showAns;
+  const inputRefs = useRef({});
+
+  const isLocked = showAns;
 
   // ── handlers ──────────────────────────────
   const handleChange = (id, value) => {
     if (isLocked) return;
-    // allow only 1 letter
     const val = value.slice(-1);
     setInputs((prev) => ({ ...prev, [id]: val }));
+
+    // انتقل للـ input التالي تلقائياً
+    if (val) {
+      const currentIndex = ALL_BLANK_IDS.indexOf(id);
+      const nextId = ALL_BLANK_IDS[currentIndex + 1];
+      if (nextId && inputRefs.current[nextId]) {
+        inputRefs.current[nextId].focus();
+      }
+    }
+  };
+
+  const handleKeyDown = (id, e) => {
+    if (isLocked) return;
+    // Backspace: إذا الخانة فاضية، ارجع للسابق
+    if (e.key === "Backspace" && !inputs[id]) {
+      const currentIndex = ALL_BLANK_IDS.indexOf(id);
+      const prevId = ALL_BLANK_IDS[currentIndex - 1];
+      if (prevId && inputRefs.current[prevId]) {
+        inputRefs.current[prevId].focus();
+      }
+    }
   };
 
   const handleCheck = () => {
@@ -160,32 +177,31 @@ export default function WB_MissingLetters_F() {
     const wrong = isItemWrong(item);
     return (
       <div key={item.id} className="ml-item">
-        {/* number */}
         <span className="ml-num">{item.id}</span>
 
-        {/* word display */}
         <span className="ml-word-wrap">
           {item.prefix && <span className="ml-fixed">{item.prefix}</span>}
           {item.parts.map((part, i) => {
             if (part.type === "fixed") {
               return <span key={i} className="ml-fixed">{part.text}</span>;
             }
-            // blank
-            const val    = inputs[part.id] || "";
-            const isAns  = showAns;
+            const val   = inputs[part.id] || "";
+            const isAns = showAns;
             return (
               <input
                 key={i}
+                ref={(el) => { inputRefs.current[part.id] = el; }}
                 type="text"
                 maxLength={1}
                 className={[
                   "ml-input",
-                  wrong  ? "ml-input--wrong"  : "",
-                  isAns  ? "ml-input--answer" : "",
+                  wrong ? "ml-input--wrong"  : "",
+                  isAns ? "ml-input--answer" : "",
                 ].filter(Boolean).join(" ")}
                 value={val}
                 disabled={isLocked}
                 onChange={(e) => handleChange(part.id, e.target.value)}
+                onKeyDown={(e) => handleKeyDown(part.id, e)}
                 spellCheck={false}
                 autoComplete="off"
               />
@@ -194,7 +210,6 @@ export default function WB_MissingLetters_F() {
           {item.suffix && <span className="ml-fixed">{item.suffix}</span>}
         </span>
 
-        {/* ✕ badge */}
         {wrong && <span className="ml-badge">✕</span>}
       </div>
     );
@@ -204,7 +219,6 @@ export default function WB_MissingLetters_F() {
   return (
     <div className="main-container-component">
       <style>{`
-        /* ── Grid ── */
         .ml-grid {
           display: grid;
           grid-template-columns: 1fr 1fr;
@@ -215,7 +229,6 @@ export default function WB_MissingLetters_F() {
           .ml-grid { grid-template-columns: 1fr; }
         }
 
-        /* ── Item ── */
         .ml-item {
           display: flex;
           align-items: center;
@@ -224,7 +237,7 @@ export default function WB_MissingLetters_F() {
         }
 
         .ml-num {
-          font-size: clamp(14px, 1.6vw, 19px);
+          font-size: clamp(25px, 1.6vw, 25px);
           font-weight: 700;
           color: #2b2b2b;
           min-width: 20px;
@@ -236,20 +249,16 @@ export default function WB_MissingLetters_F() {
           align-items: flex-end;
           flex-wrap: wrap;
           gap: 0;
-font-size: clamp(15px, 1.9vw, 22px);
-
-color: #2b2b2b;
-          line-height: 1.8;
+          font-size: clamp(25px, 1.9vw, 25px);
+          color: #2b2b2b;
         }
 
         .ml-fixed {
-font-size: clamp(15px, 1.9vw, 22px);
+          font-size: clamp(25px, 1.9vw, 25px);
           color: #2b2b2b;
-          line-height: 1.5;
           white-space: pre;
         }
 
-        /* Single-letter input */
         .ml-input {
           width: clamp(20px, 2.4vw, 30px);
           border: none;
@@ -257,9 +266,8 @@ font-size: clamp(15px, 1.9vw, 22px);
           background: transparent;
           outline: none;
           text-align: center;
-font-size: clamp(15px, 1.9vw, 22px);
+          font-size: clamp(25px, 1.9vw, 25px);
           color: #2b2b2b;
-          line-height: 1.5;
           transition: border-color 0.2s;
           box-sizing: border-box;
         }
@@ -267,7 +275,6 @@ font-size: clamp(15px, 1.9vw, 22px);
         .ml-input--wrong        { border-bottom-color: ${INPUT_UNDERLINE_WRONG}; }
         .ml-input--answer       { color: ${INPUT_ANSWER_COLOR}; }
 
-        /* ✕ badge */
         .ml-badge {
           width: clamp(16px, 1.8vw, 21px);
           height: clamp(16px, 1.8vw, 21px);
@@ -285,7 +292,6 @@ font-size: clamp(15px, 1.9vw, 22px);
           margin-left: 4px;
         }
 
-        /* Buttons */
         .ml-buttons {
           display: flex;
           justify-content: center;
@@ -303,7 +309,6 @@ font-size: clamp(15px, 1.9vw, 22px);
           margin: "0 auto",
         }}
       >
-        {/* ── Header ── */}
         <h1
           className="WB-header-title-page8"
           style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
@@ -312,8 +317,7 @@ font-size: clamp(15px, 1.9vw, 22px);
           Write the missing letters.
         </h1>
 
-        {/* ── Two-column grid — odd ids left, even ids right ── */}
-        <div className="ml-grid" style={{marginTop : "50px"}}>
+        <div className="ml-grid" style={{ marginTop: "20%" }}>
           {ITEMS.filter((_, i) => i % 2 === 0).map((item, rowIdx) => {
             const rightItem = ITEMS[rowIdx * 2 + 1];
             return (
@@ -325,7 +329,6 @@ font-size: clamp(15px, 1.9vw, 22px);
           })}
         </div>
 
-        {/* ── Buttons ── */}
         <div className="ml-buttons">
           <Button
             checkAnswers={handleCheck}

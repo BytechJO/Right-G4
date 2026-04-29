@@ -203,7 +203,7 @@ export default function WB_LookReadWriteSentences_QG() {
           width: 100%;
           background: transparent;
           border: none;
-          border-bottom: 2px solid ${INPUT_UNDERLINE_DEFAULT};
+          border-bottom: 1px solid ${INPUT_UNDERLINE_DEFAULT};
           outline: none;
           font-size: clamp(15px, 1.9vw, 22px);
           color: ${INPUT_TEXT_COLOR};

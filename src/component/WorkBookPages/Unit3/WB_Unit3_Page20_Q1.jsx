@@ -108,6 +108,8 @@ export default function WB_ReadWriteSentences_QL() {
           flex-direction: column;
           gap: clamp(12px, 1.8vw, 22px);
           width: 100%;
+              margin-top: 10%;
+
         }
 
         /* ── Single row: num | prompt | input ── */
@@ -148,7 +150,7 @@ export default function WB_ReadWriteSentences_QL() {
           width: 100%;
           background: transparent;
           border: none;
-          border-bottom: 2px solid ${INPUT_UNDERLINE_DEFAULT};
+          border-bottom: 1px solid ${INPUT_UNDERLINE_DEFAULT};
           outline: none;
           font-size: clamp(15px, 1.8vw, 22px);
           font-weight: 400;

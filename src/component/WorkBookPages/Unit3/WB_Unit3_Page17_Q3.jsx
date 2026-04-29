@@ -105,6 +105,7 @@ export default function WB_DescribePictures_QG() {
           grid-template-columns: repeat(2, minmax(0, 1fr));
           gap: clamp(16px, 3vw, 40px);
           width: 100%;
+          margin-top : 5%
         }
 
         /* ── Single card ── */
@@ -152,7 +153,7 @@ export default function WB_DescribePictures_QG() {
           width: 100%;
           background: transparent;
           border: none;
-          border-bottom: 2px solid ${INPUT_UNDERLINE_DEFAULT};
+          border-bottom: 1px solid ${INPUT_UNDERLINE_DEFAULT};
           outline: none;
           font-size: clamp(15px, 1.8vw, 22px);
           font-weight: 400;

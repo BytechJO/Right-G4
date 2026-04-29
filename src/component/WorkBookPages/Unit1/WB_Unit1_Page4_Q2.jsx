@@ -184,7 +184,7 @@ font-size: clamp(15px, 1.9vw, 22px);
 
         /* Sentence */
         .wdc-text {
-font-size: clamp(15px, 1.9vw, 22px);          color: ${SENTENCE_TEXT_COLOR};
+font-size: clamp(15px, 1.9vw, 20px);          color: ${SENTENCE_TEXT_COLOR};
           line-height: 1.4;
         }
 

@@ -284,7 +284,7 @@ export default function WB_ReadLookCircleWrite_A() {
         }
         .rlcw-blank {
           border: none;
-          border-bottom: 2px solid ${INPUT_UNDERLINE};
+          border-bottom: 1px solid ${INPUT_UNDERLINE};
           background: transparent;
           outline: none;
           font-size: clamp(15px, 1.9vw, 22px);
@@ -319,7 +319,7 @@ export default function WB_ReadLookCircleWrite_A() {
 
         /* ── Image ── */
         .rlcw-img-wrap {
-          width: 100%;
+          width: 60%;
           overflow: hidden;
         }
         .rlcw-img {
@@ -330,10 +330,9 @@ export default function WB_ReadLookCircleWrite_A() {
 
         /* ── Options ── */
         .rlcw-options {
-       display: flex;
+       display: grid;
     flex-direction: row;
     gap: clamp(4px, 0.6vw, 8px);
-    justify-content: center;
 }
         }
         .rlcw-option-wrap {
@@ -343,14 +342,14 @@ export default function WB_ReadLookCircleWrite_A() {
           position: relative;
         }
         .rlcw-opt-letter {
-          font-size: clamp(15px, 1.9vw, 15px);
+          font-size: clamp(18px, 1.9vw, 18px);
           font-weight: 700;
           color: #2b2b2b;
           flex-shrink: 0;
           min-width: 16px;
         }
         .rlcw-opt-text {
-          font-size: clamp(15px, 1.9vw, 15px);
+          font-size: clamp(18px, 1.9vw, 18px);
           color: #2b2b2b;
           padding: clamp(2px, 0.3vw, 4px) clamp(8px, 1vw, 14px);
           border-radius: 999px;
