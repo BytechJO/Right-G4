@@ -1,520 +1,262 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useState } from "react";
 import Button from "../Button";
 import ValidationAlert from "../../Popup/ValidationAlert";
 
-import img1 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U8 Folder/Page 48/SVG/8.svg";
-import img2 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U8 Folder/Page 48/SVG/9.svg";
-import img3 from"../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U8 Folder/Page 48/SVG/10.svg";
+// ─────────────────────────────────────────────
+//  🎨  COLORS
+// ─────────────────────────────────────────────
+const INPUT_UNDERLINE_DEFAULT = "#3f3f3f";
+const INPUT_UNDERLINE_WRONG   = "#ef4444";
+const INPUT_TEXT_COLOR        = "#2b2b2b";
+const INPUT_ANSWER_COLOR      = "#c81e1e";
+const NUMBER_COLOR            = "#2b2b2b";
+const POSITIVE_COLOR          = "#2b2b2b";
+const WRONG_BADGE_BG          = "#ef4444";
+const WRONG_BADGE_TEXT        = "#ffffff";
 
-const COLORS = [
-  "#111827",
-  "#ef4444",
-  "#f97316",
-  "#eab308",
-  "#22c55e",
-  "#3b82f6",
-  "#a855f7",
-  "#ec4899",
-  "#ffffff",
-];
-
-const SIZES = [2, 4, 8, 12];
-
+// ─────────────────────────────────────────────
+//  📝  EXERCISE DATA
+// ─────────────────────────────────────────────
 const ITEMS = [
   {
-    id: 1,
-    img: img1,
-    width: 320,
-    height: 250,
-    text: [
-      "My grandfather had a small, old house.",
-      "It had a red roof and two tall chimneys.",
-      "It had little windows and a big green door.",
-    ],
+    id:       1,
+    positive: "Louisa helped her mom.",
+    correct:  ["Louisa didn't help her mom.", "Louisa did not help her mom"],
+    answer:   "Louisa didn't help her mom.",
   },
   {
-    id: 2,
-    img: img2,
-    width: 320,
-    height: 250,
-    text: [
-      "Grandpa had a pretty garden, too.",
-      "There was a swing in the tree.",
-      "There were lots of pink and yellow flowers.",
-    ],
+    id:       2,
+    positive: "She watched a movie with her sister.",
+    correct:  ["She didn't watch a movie with her sister.", "She did not watch a movie with her sister"],
+    answer:   "She didn't watch a movie with her sister.",
   },
   {
-    id: 3,
-    img: img3,
-    width: 320,
-    height: 220,
-    text: [
-      "Grandpa had a car. It was very old, slow, and noisy,",
-      "but it was beautiful. It was red and black.",
-    ],
+    id:       3,
+    positive: "Louisa studied for a test on Monday.",
+    correct:  ["Louisa didn't study for a test on Monday.", "Louisa didn't study for a test on Monday" , "Louisa did not study for a test on Monday" ,],
+    answer:   "Louisa didn't study for a test on Monday.",
   },
 ];
 
-export default function WB_Unit8_Page48_QH() {
-  const [tool, setTool] = useState("pencil");
-  const [color, setColor] = useState("#ef4444");
-  const [size, setSize] = useState(4);
-  const [selectedCanvas, setSelectedCanvas] = useState(1);
-  const [textValue, setTextValue] = useState("");
-  const [isDrawing, setIsDrawing] = useState(false);
+// ─────────────────────────────────────────────
+//  🔧  NORMALIZE
+// ─────────────────────────────────────────────
+const normalize = (str) =>
+  str.toLowerCase().replace(/[^a-z0-9'\s]/g, "").replace(/\s+/g, " ").trim();
 
-  const canvasRefs = useRef({});
-  const ctxRefs = useRef({});
-  const imageRefs = useRef({});
-  const lastPos = useRef({});
+const isCorrect = (userVal, correctArr) =>
+  correctArr.some((c) => normalize(userVal) === normalize(c));
 
-  useEffect(() => {
-    ITEMS.forEach((item) => {
-      const canvas = canvasRefs.current[item.id];
-      if (!canvas) return;
+// ─────────────────────────────────────────────
+//  COMPONENT
+// ─────────────────────────────────────────────
+export default function WB_ReadWriteNegative_QH() {
+  const [answers,     setAnswers]     = useState({});
+  const [showResults, setShowResults] = useState(false);
+  const [showAns,     setShowAns]     = useState(false);
 
-      const ctx = canvas.getContext("2d");
-      ctx.lineCap = "round";
-      ctx.lineJoin = "round";
-      ctxRefs.current[item.id] = ctx;
-
-      loadImageToCanvas(item.id, item.img, item.width, item.height);
-    });
-  }, []);
-
-  const loadImageToCanvas = (id, src, width, height) => {
-    const canvas = canvasRefs.current[id];
-    const ctx = ctxRefs.current[id];
-    if (!canvas || !ctx) return;
-
-    const img = new Image();
-    img.src = src;
-    img.onload = () => {
-      ctx.clearRect(0, 0, width, height);
-      ctx.drawImage(img, 0, 0, width, height);
-      imageRefs.current[id] = img;
-    };
-  };
-
-  const clearCanvas = (id) => {
-    const item = ITEMS.find((x) => x.id === id);
-    if (!item) return;
-    loadImageToCanvas(id, item.img, item.width, item.height);
-  };
-
-  const clearAllCanvases = () => {
-    ITEMS.forEach((item) => {
-      loadImageToCanvas(item.id, item.img, item.width, item.height);
-    });
-  };
-
-  const getPos = (e, canvas) => {
-    const rect = canvas.getBoundingClientRect();
-    const scaleX = canvas.width / rect.width;
-    const scaleY = canvas.height / rect.height;
-
-    if (e.touches && e.touches.length > 0) {
-      return {
-        x: (e.touches[0].clientX - rect.left) * scaleX,
-        y: (e.touches[0].clientY - rect.top) * scaleY,
-      };
-    }
-
-    return {
-      x: (e.clientX - rect.left) * scaleX,
-      y: (e.clientY - rect.top) * scaleY,
-    };
-  };
-
-  const startDrawing = (e, id) => {
-    e.preventDefault();
-    setSelectedCanvas(id);
-
-    const canvas = canvasRefs.current[id];
-    const ctx = ctxRefs.current[id];
-    if (!canvas || !ctx) return;
-
-    if (tool === "fill") {
-      ctx.fillStyle = color;
-      ctx.globalAlpha = 0.35;
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-      ctx.globalAlpha = 1;
-      return;
-    }
-
-    if (tool === "text") {
-      if (!textValue.trim()) {
-        ValidationAlert.info("Please type text first.");
-        return;
-      }
-
-      const pos = getPos(e, canvas);
-      ctx.fillStyle = color;
-      ctx.font = "18px Arial";
-      ctx.textBaseline = "top";
-      ctx.fillText(textValue, pos.x, pos.y);
-      return;
-    }
-
-    const pos = getPos(e, canvas);
-    lastPos.current[id] = pos;
-    setIsDrawing(true);
-
-    ctx.beginPath();
-    ctx.arc(
-      pos.x,
-      pos.y,
-      (tool === "eraser" ? size * 2.5 : size) / 2,
-      0,
-      Math.PI * 2
-    );
-    ctx.fillStyle = tool === "eraser" ? "#ffffff" : color;
-    ctx.fill();
-  };
-
-  const draw = (e, id) => {
-    e.preventDefault();
-
-    if (!isDrawing || selectedCanvas !== id) return;
-
-    const canvas = canvasRefs.current[id];
-    const ctx = ctxRefs.current[id];
-    if (!canvas || !ctx) return;
-
-    if (tool !== "pencil" && tool !== "eraser") return;
-
-    const pos = getPos(e, canvas);
-    const prev = lastPos.current[id];
-    if (!prev) return;
-
-    ctx.beginPath();
-    ctx.moveTo(prev.x, prev.y);
-    ctx.lineTo(pos.x, pos.y);
-    ctx.strokeStyle = tool === "eraser" ? "#ffffff" : color;
-    ctx.lineWidth = tool === "eraser" ? size * 3 : size;
-    ctx.stroke();
-
-    lastPos.current[id] = pos;
-  };
-
-  const stopDrawing = (e, id) => {
-    e?.preventDefault?.();
-    setIsDrawing(false);
-    lastPos.current[id] = null;
+  const handleChange = (id, value) => {
+    if (showAns) return;
+    const item = ITEMS.find((i) => i.id === id);
+    if (showResults && item && isCorrect(answers[id] || "", item.correct)) return;
+    setAnswers((prev) => ({ ...prev, [id]: value }));
   };
 
   const handleCheck = () => {
-    ValidationAlert.success("Great! Check your drawing and coloring.");
+    if (showAns) return;
+    const allAnswered = ITEMS.every((item) => answers[item.id]?.trim());
+    if (!allAnswered) { ValidationAlert.info("Please complete all answers first."); return; }
+    let score = 0;
+    ITEMS.forEach((item) => { if (isCorrect(answers[item.id] || "", item.correct)) score++; });
+    setShowResults(true);
+    if (score === ITEMS.length)   ValidationAlert.success(`Score: ${score} / ${ITEMS.length}`);
+    else if (score > 0)           ValidationAlert.warning(`Score: ${score} / ${ITEMS.length}`);
+    else                          ValidationAlert.error(`Score: ${score} / ${ITEMS.length}`);
   };
 
-  const getCursor = () => {
-    if (tool === "eraser") return "cell";
-    if (tool === "text") return "text";
-    return "crosshair";
+  const handleShowAnswer = () => {
+    const filled = {};
+    ITEMS.forEach((item) => { filled[item.id] = item.answer; });
+    setAnswers(filled);
+    setShowResults(false);
+    setShowAns(true);
+  };
+
+  const handleReset = () => {
+    setAnswers({});
+    setShowResults(false);
+    setShowAns(false);
+  };
+
+  const isWrong = (item) => {
+    if (!showResults || showAns) return false;
+    return !isCorrect(answers[item.id] || "", item.correct);
+  };
+
+  const isDisabled = (item) => {
+    if (showAns) return true;
+    if (showResults && isCorrect(answers[item.id] || "", item.correct)) return true;
+    return false;
   };
 
   return (
-      <div className="main-container-component">
+    <div className="main-container-component">
+      <style>{`
+        /* ── Items list ── */
+        .rwnh-list {
+          display: flex;
+          flex-direction: column;
+          gap: clamp(16px, 2.4vw, 30px);
+          width: 100%;\
+              margin: 7% 0;
+        }
+
+        /* ── Single item ── */
+        .rwnh-item {
+          display: flex;
+          flex-direction: column;
+          gap: clamp(8px, 1.2vw, 14px);
+        }
+
+        /* Positive row: num + sentence */
+        .rwnh-positive-row {
+          display: flex;
+          align-items: center;
+          gap: clamp(6px, 0.8vw, 12px);
+        }
+
+        .rwnh-num {
+          font-size: clamp(15px, 1.8vw, 22px);
+          font-weight: 700;
+          color: ${NUMBER_COLOR};
+          flex-shrink: 0;
+          line-height: 1;
+        }
+
+        .rwnh-positive {
+          font-size: clamp(14px, 1.7vw, 20px);
+          font-weight: 400;
+          color: ${POSITIVE_COLOR};
+          line-height: 1.5;
+        }
+
+        /* Input wrap — full width */
+        .rwnh-input-wrap {
+          position: relative;
+          width: 100%;
+        }
+
+        .rwnh-input {
+          width: 100%;
+          background: transparent;
+          border: none;
+          border-bottom: 1px solid ${INPUT_UNDERLINE_DEFAULT};
+          outline: none;
+          font-size: clamp(14px, 1.7vw, 20px);
+=          color: ${INPUT_TEXT_COLOR};
+=          line-height: 1.5;
+          box-sizing: border-box;
+=          transition: border-color 0.2s;
+        }
+        .rwnh-input:disabled   { opacity: 1; cursor: default; }
+        .rwnh-input--wrong     { border-bottom-color: ${INPUT_UNDERLINE_WRONG}; }
+        .rwnh-input--answer    { color: ${INPUT_ANSWER_COLOR}; }
+
+        /* ✕ badge */
+        .rwnh-badge {
+          position: absolute;
+          top: -8px; right: 0;
+          width: clamp(17px, 1.9vw, 22px);
+          height: clamp(17px, 1.9vw, 22px);
+          border-radius: 50%;
+          background: ${WRONG_BADGE_BG};
+          color: ${WRONG_BADGE_TEXT};
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: clamp(9px, 1vw, 12px);
+          font-weight: 700;
+          border: 2px solid #fff;
+          box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+          pointer-events: none;
+          z-index: 2;
+        }
+
+        /* Buttons */
+        .rwnh-buttons {
+          display: flex;
+          justify-content: center;
+          margin-top: clamp(8px, 1.6vw, 18px);
+        }
+      `}</style>
+
       <div
         className="div-forall"
         style={{
-          display:       "flex",
+          display: "flex",
           flexDirection: "column",
-          gap:           "clamp(18px,2.5vw,28px)",
-          maxWidth:      "1100px",
-          margin:        "0 auto",
+          gap: "clamp(14px, 2vw, 22px)",
+          maxWidth: "1100px",
+          margin: "0 auto",
         }}
       >
-        <h1 className="WB-header-title-page8">
+        {/* ── Header ── */}
+        <h1
+          className="WB-header-title-page8"
+          style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
+        >
           <span className="WB-ex-A">H</span>
-          Read, draw, and color.
+          Read and write negative sentences.
         </h1>
 
-        {/* Toolbar */}
-        <div
-          style={{
-            display: "flex",
-            flexWrap: "wrap",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: "10px",
-            padding: "12px 14px",
-            border: "1px solid #e5e7eb",
-            borderRadius: "16px",
-            backgroundColor: "#f9fafb",
-            width: "100%",
-            boxSizing: "border-box",
-          }}
-        >
-          {[
-            { id: "pencil", label: "✏️ Draw" },
-            { id: "eraser", label: "🧽 Erase" },
-            { id: "fill", label: "🪣 Fill" },
-          ].map((item) => (
-            <button
-              key={item.id}
-              onClick={() => setTool(item.id)}
-              style={{
-                padding: "8px 12px",
-                borderRadius: "10px",
-                border:
-                  tool === item.id
-                    ? "2px solid #3b82f6"
-                    : "2px solid #d1d5db",
-                backgroundColor: tool === item.id ? "#eff6ff" : "#fff",
-                color: tool === item.id ? "#1d4ed8" : "#374151",
-                fontWeight: "600",
-                cursor: "pointer",
-              }}
-            >
-              {item.label}
-            </button>
-          ))}
+        {/* ── Items ── */}
+        <div className="rwnh-list">
+          {ITEMS.map((item) => {
+            const wrong    = isWrong(item);
+            const value    = answers[item.id] || "";
+            const tColor   = showAns ? INPUT_ANSWER_COLOR : INPUT_TEXT_COLOR;
+            const uColor   = wrong ? INPUT_UNDERLINE_WRONG : INPUT_UNDERLINE_DEFAULT;
+            const disabled = isDisabled(item);
 
-          <div
-            style={{
-              width: "1px",
-              height: "28px",
-              backgroundColor: "#d1d5db",
-            }}
-          />
+            return (
+              <div key={item.id} className="rwnh-item">
 
-          <div
-            style={{
-              display: "flex",
-              gap: "8px",
-              flexWrap: "wrap",
-              alignItems: "center",
-            }}
-          >
-            {COLORS.map((c) => (
-              <button
-                key={c}
-                onClick={() => setColor(c)}
-                style={{
-                  width: "28px",
-                  height: "28px",
-                  borderRadius: "50%",
-                  border:
-                    color === c ? "3px solid #111827" : "2px solid #d1d5db",
-                  backgroundColor: c,
-                  cursor: "pointer",
-                }}
-              />
-            ))}
-          </div>
-
-          <div
-            style={{
-              width: "1px",
-              height: "28px",
-              backgroundColor: "#d1d5db",
-            }}
-          />
-
-          <div
-            style={{
-              display: "flex",
-              gap: "8px",
-              alignItems: "center",
-              flexWrap: "wrap",
-            }}
-          >
-            {SIZES.map((s) => (
-              <button
-                key={s}
-                onClick={() => setSize(s)}
-                style={{
-                  width: "32px",
-                  height: "32px",
-                  borderRadius: "50%",
-                  border:
-                    size === s ? "2px solid #3b82f6" : "2px solid #d1d5db",
-                  backgroundColor: "#fff",
-                  cursor: "pointer",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <span
-                  style={{
-                    width: `${Math.min(s * 2, 16)}px`,
-                    height: `${Math.min(s * 2, 16)}px`,
-                    borderRadius: "50%",
-                    backgroundColor: "#111827",
-                    display: "block",
-                  }}
-                />
-              </button>
-            ))}
-          </div>
-
-
-
-          <button
-            onClick={() => clearCanvas(selectedCanvas)}
-            style={{
-              padding: "8px 12px",
-              borderRadius: "10px",
-              border: "2px solid #fca5a5",
-              backgroundColor: "#fef2f2",
-              color: "#dc2626",
-              fontWeight: "600",
-              cursor: "pointer",
-            }}
-          >
-            Clear Selected
-          </button>
-
-          <button
-            onClick={clearAllCanvases}
-            style={{
-              padding: "8px 12px",
-              borderRadius: "10px",
-              border: "2px solid #fecaca",
-              backgroundColor: "#fff",
-              color: "#b91c1c",
-              fontWeight: "600",
-              cursor: "pointer",
-            }}
-          >
-            Clear All
-          </button>
-        </div>
-
-        {/* Sections */}
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            gap: "24px",
-            width: "100%",
-          }}
-        >
-          {ITEMS.map((item) => (
-            <div
-              key={item.id}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                gap: "22px",
-                width: "100%",
-                flexWrap: "wrap",
-              }}
-            >
-              {/* image + canvas */}
-              <div
-                style={{
-                  position: "relative",
-                  width: `${item.width}px`,
-                  height: `${item.height}px`,
-                  flexShrink: 0,
-                  border:
-                    selectedCanvas === item.id
-                      ? "3px solid #f59e0b"
-                      : "2px solid #e5e7eb",
-                  borderRadius: "14px",
-                  overflow: "hidden",
-                  backgroundColor: "#fff",
-                  boxSizing: "border-box",
-                }}
-                onClick={() => setSelectedCanvas(item.id)}
-              >
-                <canvas
-                  ref={(el) => {
-                    if (el) canvasRefs.current[item.id] = el;
-                  }}
-                  width={item.width}
-                  height={item.height}
-                  style={{
-                    width: "100%",
-                    height: "100%",
-                    display: "block",
-                    cursor: getCursor(),
-                    touchAction: "none",
-                  }}
-                  onMouseDown={(e) => startDrawing(e, item.id)}
-                  onMouseMove={(e) => draw(e, item.id)}
-                  onMouseUp={(e) => stopDrawing(e, item.id)}
-                  onMouseLeave={(e) => stopDrawing(e, item.id)}
-                  onTouchStart={(e) => startDrawing(e, item.id)}
-                  onTouchMove={(e) => draw(e, item.id)}
-                  onTouchEnd={(e) => stopDrawing(e, item.id)}
-                />
-
-                <div
-                  style={{
-                    position: "absolute",
-                    top: "6px",
-                    left: "6px",
-                    width: "24px",
-                    height: "24px",
-                    borderRadius: "50%",
-                    backgroundColor: "#fff",
-                    border: "1px solid #111",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    fontSize: "13px",
-                    fontWeight: "700",
-                    zIndex: 2,
-                  }}
-                >
-                  {item.id}
+                {/* Positive sentence */}
+                <div className="rwnh-positive-row">
+                  <span className="rwnh-num">{item.id}</span>
+                  <span className="rwnh-positive">{item.positive}</span>
                 </div>
-              </div>
 
-              {/* text */}
-              <div
-                style={{
-                  flex: "1 1 420px",
-                  minWidth: "280px",
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: "6px",
-                  justifyContent: "center",
-                }}
-              >
-                {item.text.map((line, index) => (
-                  <p
-                    key={index}
-                    style={{
-                      margin: 0,
-                      fontSize: "19px",
-                      lineHeight: "1.45",
-                      color: "#222",
-                      fontWeight: index === 0 ? "600" : "500",
-                    }}
-                  >
-                    {index === 0 ? (
-                      <>
-                        <span style={{ fontWeight: "700", marginRight: "8px" }}>
-                          {item.id}
-                        </span>
-                        {line}
-                      </>
-                    ) : (
-                      line
-                    )}
-                  </p>
-                ))}
+                {/* Negative input */}
+                <div className="rwnh-input-wrap">
+                  <input
+                    type="text"
+                    className={[
+                      "rwnh-input",
+                      wrong   ? "rwnh-input--wrong"  : "",
+                      showAns ? "rwnh-input--answer" : "",
+                    ].filter(Boolean).join(" ")}
+                    value={value}
+                    disabled={disabled}
+                    onChange={(e) => handleChange(item.id, e.target.value)}
+                    style={{ borderBottomColor: uColor, color: tColor }}
+                    spellCheck={false}
+                    autoComplete="off"
+                  />
+                  {wrong && <div className="rwnh-badge">✕</div>}
+                </div>
+
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            marginTop: "8px",
-          }}
-        >
+        {/* ── Buttons ── */}
+        <div className="rwnh-buttons">
           <Button
             checkAnswers={handleCheck}
-            handleStartAgain={clearAllCanvases}
+            handleShowAnswer={handleShowAnswer}
+            handleStartAgain={handleReset}
           />
         </div>
       </div>

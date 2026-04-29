@@ -1,472 +1,270 @@
-import { useState, useRef, useLayoutEffect } from "react";
+import React, { useState } from "react";
 import Button from "../Button";
 import ValidationAlert from "../../Popup/ValidationAlert";
 
-import img1 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U8 Folder/Page 50/SVG/1.svg";
-import img2 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U8 Folder/Page 50/SVG/2.svg";
-import img3 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U8 Folder/Page 50/SVG/3.svg";
-import img4 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U8 Folder/Page 50/SVG/4.svg";
-import img5 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U8 Folder/Page 50/SVG/5.svg";
-import img6 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U8 Folder/Page 50/SVG/6.svg";
+// ─────────────────────────────────────────────
+//  🎨  COLORS
+// ─────────────────────────────────────────────
+const INPUT_UNDERLINE_DEFAULT = "#3f3f3f";
+const INPUT_UNDERLINE_WRONG   = "#ef4444";
+const INPUT_TEXT_COLOR        = "#2b2b2b";
+const INPUT_ANSWER_COLOR      = "#c81e1e";
+const NUMBER_COLOR            = "#2b2b2b";
+const CUE_COLOR               = "#2b2b2b";
+const WRONG_BADGE_BG          = "#ef4444";
+const WRONG_BADGE_TEXT        = "#ffffff";
 
-const DOT_COLOR    = "#9ca3af";
-const ACTIVE_COLOR = "#f39b42";
-const WRONG_COLOR  = "#ef4444";
-const LINE_COLOR   = "#f39b42";
-const CHUNK_COLOR  = "#ffca94";
-
-const WORDS = [
-  { id: 1, prefix: "",         suffix: "andmother", correctChunk: "gr", fullWord: "grandmother", correctImage: 2 },
-  { id: 2, prefix: "bus",      suffix: "",          correctChunk: "es", fullWord: "buses",        correctImage: 1 },
-  { id: 3, prefix: "",         suffix: "esent",     correctChunk: "pr", fullWord: "present",      correctImage: 6 },
-  { id: 4, prefix: "box",      suffix: "",          correctChunk: "es", fullWord: "boxes",        correctImage: 3 },
-  { id: 5, prefix: "",         suffix: "ize",       correctChunk: "pr", fullWord: "prize",        correctImage: 4 },
-  { id: 6, prefix: "sandwich", suffix: "",          correctChunk: "es", fullWord: "sandwiches",   correctImage: 5 },
+// ─────────────────────────────────────────────
+//  📝  EXERCISE DATA
+// ─────────────────────────────────────────────
+const ITEMS = [
+  {
+    id:      1,
+    cue:     "he / play / the violin",
+    correct: ["He played the violin.", "He played the violin"],
+    answer:  "He played the violin.",
+  },
+  {
+    id:      2,
+    cue:     "she / wash / the dishes",
+    correct: ["She washed the dishes.", "She washed the dishes"],
+    answer:  "She washed the dishes.",
+  },
+  {
+    id:      3,
+    cue:     "we / paint / a picture",
+    correct: ["We painted a picture.", "We painted a picture"],
+    answer:  "We painted a picture.",
+  },
+  {
+    id:      4,
+    cue:     "they / plant / flowers",
+    correct: ["They planted flowers.", "They planted flowers"],
+    answer:  "They planted flowers.",
+  },
 ];
 
-const IMAGES = [
-  { id: 1, img: img1, alt: "buses"       },
-  { id: 2, img: img2, alt: "grandmother" },
-  { id: 3, img: img3, alt: "boxes"       },
-  { id: 4, img: img4, alt: "prize"       },
-  { id: 5, img: img5, alt: "sandwiches"  },
-  { id: 6, img: img6, alt: "present"     },
-];
+// ─────────────────────────────────────────────
+//  🔧  NORMALIZE
+// ─────────────────────────────────────────────
+const normalize = (str) =>
+  str.toLowerCase().replace(/[^a-z0-9'\s]/g, "").replace(/\s+/g, " ").trim();
 
-const CHUNKS = [
-  { id: "es-1", value: "es" },
-  { id: "gr-1", value: "gr" },
-  { id: "pr-2", value: "pr" },
-  { id: "pr-1", value: "pr" },
-  { id: "es-2", value: "es" },
-  { id: "es-3", value: "es" },
-];
+const isCorrect = (userVal, correctArr) =>
+  correctArr.some((c) => normalize(userVal) === normalize(c));
 
-const ROW_HEIGHT = 72;
+// ─────────────────────────────────────────────
+//  COMPONENT
+// ─────────────────────────────────────────────
+export default function WB_ReadWritePastTense_QK() {
+  const [answers,     setAnswers]     = useState({});
+  const [showResults, setShowResults] = useState(false);
+  const [showAns,     setShowAns]     = useState(false);
 
-const WB_Unit8_Page48_QA = () => {
-  const [chunkAnswers, setChunkAnswers] = useState({});
-  const [usedChunkIds, setUsedChunkIds] = useState({});
-  const [draggedChunk, setDraggedChunk] = useState(null);
-
-  const [touchChunk, setTouchChunk] = useState(null);
-  const [touchPos,   setTouchPos]   = useState({ x: 0, y: 0 });
-
-  const [selectedLeft, setSelectedLeft] = useState(null);
-  const [matches,      setMatches]      = useState({});
-  const [showResults,  setShowResults]  = useState(false);
-  const [showAns,      setShowAns]      = useState(false);
-  const [lines,        setLines]        = useState([]);
-
-  const containerRef = useRef(null);
-  const elementRefs  = useRef({});
-  const dropZoneRefs = useRef({});
-
-  useLayoutEffect(() => {
-    const updateLines = () => {
-      if (!containerRef.current) return;
-      const cr = containerRef.current.getBoundingClientRect();
-      const newLines = Object.entries(matches)
-        .map(([leftId, rightId]) => {
-          const le = elementRefs.current[`left-${leftId}`];
-          const re = elementRefs.current[`right-${rightId}`];
-          if (!le || !re) return null;
-          const lr = le.getBoundingClientRect();
-          const rr = re.getBoundingClientRect();
-          return {
-            id: `${leftId}-${rightId}`,
-            x1: lr.right - cr.left,
-            y1: lr.top   + lr.height / 2 - cr.top,
-            x2: rr.left  - cr.left,
-            y2: rr.top   + rr.height / 2 - cr.top,
-          };
-        })
-        .filter(Boolean);
-      setLines(newLines);
-    };
-    updateLines();
-    window.addEventListener("resize", updateLines);
-    return () => window.removeEventListener("resize", updateLines);
-  }, [matches]);
-
-  // ── منطق مشترك drag و touch ──
-  const applyChunkDrop = (wordId, chunk) => {
-    const oldChunkId = chunkAnswers[wordId]?.chunkId;
-    setChunkAnswers((prev) => ({
-      ...prev,
-      [wordId]: { chunk: chunk.value, chunkId: chunk.id },
-    }));
-    setUsedChunkIds((prev) => {
-      const updated = { ...prev, [chunk.id]: true };
-      if (oldChunkId) delete updated[oldChunkId];
-      return updated;
-    });
-    setShowResults(false);
-  };
-
-  // ── Drag desktop ──
-  const handleDragStart = (chunk) => {
-    if (showAns || usedChunkIds[chunk.id]) return;
-    setDraggedChunk(chunk);
-  };
-  const handleDropChunk = (wordId) => {
-    if (showAns || !draggedChunk) return;
-    applyChunkDrop(wordId, draggedChunk);
-    setDraggedChunk(null);
-  };
-
-  // ── Touch mobile ──
-  const handleTouchStart = (e, chunk) => {
-    if (showAns || usedChunkIds[chunk.id]) return;
-    const t = e.touches[0];
-    setTouchChunk(chunk);
-    setTouchPos({ x: t.clientX, y: t.clientY });
-  };
-  const handleTouchMove = (e) => {
-    if (!touchChunk) return;
-    const t = e.touches[0];
-    setTouchPos({ x: t.clientX, y: t.clientY });
-  };
-  const handleTouchEnd = () => {
-    if (!touchChunk) return;
-    Object.entries(dropZoneRefs.current).forEach(([wordId, ref]) => {
-      if (!ref) return;
-      const r = ref.getBoundingClientRect();
-      if (
-        touchPos.x >= r.left && touchPos.x <= r.right &&
-        touchPos.y >= r.top  && touchPos.y <= r.bottom
-      ) {
-        applyChunkDrop(Number(wordId), touchChunk);
-      }
-    });
-    setTouchChunk(null);
-  };
-
-  // ── Matching ──
-  const handleLeftClick = (id) => {
+  const handleChange = (id, value) => {
     if (showAns) return;
-    setSelectedLeft(id);
-    setShowResults(false);
-  };
-  const handleRightClick = (rightId) => {
-    if (showAns || selectedLeft === null) return;
-    const newMatches = { ...matches };
-    Object.keys(newMatches).forEach((k) => { if (newMatches[k] === rightId) delete newMatches[k]; });
-    newMatches[selectedLeft] = rightId;
-    setMatches(newMatches);
-    setSelectedLeft(null);
-    setShowResults(false);
+    const item = ITEMS.find((i) => i.id === id);
+    if (showResults && item && isCorrect(answers[id] || "", item.correct)) return;
+    setAnswers((prev) => ({ ...prev, [id]: value }));
   };
 
-  // ── Check / Show / Reset ──
-  const getItemResult = (item) =>
-    chunkAnswers[item.id]?.chunk === item.correctChunk &&
-    matches[item.id] === item.correctImage;
-
-  const checkAnswers = () => {
+  const handleCheck = () => {
     if (showAns) return;
-    if (!WORDS.every((i) => chunkAnswers[i.id]?.chunk) || !WORDS.every((i) => matches[i.id])) {
-      ValidationAlert.info("Please complete all answers first.");
-      return;
-    }
+    const allAnswered = ITEMS.every((item) => answers[item.id]?.trim());
+    if (!allAnswered) { ValidationAlert.info("Please complete all answers first."); return; }
     let score = 0;
-    WORDS.forEach((i) => { if (getItemResult(i)) score++; });
+    ITEMS.forEach((item) => { if (isCorrect(answers[item.id] || "", item.correct)) score++; });
     setShowResults(true);
-    if (score === WORDS.length)  ValidationAlert.success(`Score: ${score} / ${WORDS.length}`);
-    else if (score > 0)          ValidationAlert.warning(`Score: ${score} / ${WORDS.length}`);
-    else                         ValidationAlert.error(`Score: ${score} / ${WORDS.length}`);
+    if (score === ITEMS.length)   ValidationAlert.success(`Score: ${score} / ${ITEMS.length}`);
+    else if (score > 0)           ValidationAlert.warning(`Score: ${score} / ${ITEMS.length}`);
+    else                          ValidationAlert.error(`Score: ${score} / ${ITEMS.length}`);
   };
 
   const handleShowAnswer = () => {
-    const correctChunks  = {};
-    const correctUsed    = {};
-    const correctMatches = {};
-    const usedIndexes    = new Set();
-    WORDS.forEach((item) => {
-      const idx = CHUNKS.findIndex((c, i) => c.value === item.correctChunk && !usedIndexes.has(i));
-      if (idx !== -1) {
-        correctChunks[item.id]      = { chunk: CHUNKS[idx].value, chunkId: CHUNKS[idx].id };
-        correctUsed[CHUNKS[idx].id] = true;
-        usedIndexes.add(idx);
-      }
-      correctMatches[item.id] = item.correctImage;
-    });
-    setChunkAnswers(correctChunks);
-    setUsedChunkIds(correctUsed);
-    setMatches(correctMatches);
+    const filled = {};
+    ITEMS.forEach((item) => { filled[item.id] = item.answer; });
+    setAnswers(filled);
+    setShowResults(false);
     setShowAns(true);
-    setShowResults(true);
-    setSelectedLeft(null);
   };
 
-  const handleStartAgain = () => {
-    setChunkAnswers({});
-    setUsedChunkIds({});
-    setDraggedChunk(null);
-    setTouchChunk(null);
-    setSelectedLeft(null);
-    setMatches({});
+  const handleReset = () => {
+    setAnswers({});
     setShowResults(false);
     setShowAns(false);
-    setLines([]);
   };
 
-  // ── Helpers ──
-  const isWrongItem = (item) => showResults && !showAns && !getItemResult(item);
-
-  const getDotColor = (side, id) => {
-    if (side === "left" && selectedLeft === id) return ACTIVE_COLOR;
-    const connected = side === "left" ? !!matches[id] : Object.values(matches).includes(id);
-    return connected ? ACTIVE_COLOR : DOT_COLOR;
+  const isWrong = (item) => {
+    if (!showResults || showAns) return false;
+    return !isCorrect(answers[item.id] || "", item.correct);
   };
 
-  const getLeftRowStyle = (itemId) => {
-    const isActive = selectedLeft === itemId;
-    return {
-      position:        "relative",
-      height:          `${ROW_HEIGHT}px`,
-      display:         "flex",
-      alignItems:      "center",
-      justifyContent:  "space-between",
-      gap:             "12px",
-      padding:         "0 10px 0 8px",
-      borderRadius:    "14px",
-      border:          isActive ? `2px solid ${ACTIVE_COLOR}` : "2px solid transparent",
-      backgroundColor: isActive ? "rgba(243,155,66,0.08)" : "transparent",
-      boxShadow:       isActive ? "0 0 0 3px rgba(243,155,66,0.12)" : "none",
-      transition:      "all 0.2s ease",
-    };
+  const isDisabled = (item) => {
+    if (showAns) return true;
+    if (showResults && isCorrect(answers[item.id] || "", item.correct)) return true;
+    return false;
   };
-
-  const dropZoneStyle = (item) => ({
-    minWidth:       "88px",
-    minHeight:      "34px",
-    borderBottom:   "2px solid #333",
-    display:        "flex",
-    alignItems:     "center",
-    justifyContent: "center",
-    color:          chunkAnswers[item.id]?.chunk
-      ? (isWrongItem(item) ? WRONG_COLOR : "#000000ff")
-      : "#9ca3af",
-    fontSize:   "22px",
-    lineHeight: "1",
-    padding:    "0 4px",
-    fontWeight: 700,
-  });
 
   return (
     <div className="main-container-component">
-      <div className="div-forall" style={{ display: "flex", flexDirection: "column", gap: "18px" }}>
+      <style>{`
+        /* ── Items list ── */
+        .rwpt-list {
+          display: flex;
+          flex-direction: column;
+          gap: clamp(14px, 2.2vw, 26px);
+          width: 100%;
+              margin: 10% 0;
+        }
 
-        <h1 className="WB-header-title-page8">
-          <span className="WB-ex-A">A</span>
-          Look, write, and match.
+        /* ── Single row: num + cue + input ── */
+        .rwpt-row {
+          display: flex;
+          align-items: flex-end;
+          gap: clamp(6px, 0.8vw, 12px);
+          min-width: 0;
+        }
+
+        .rwpt-num {
+          font-size: clamp(14px, 1.7vw, 20px);
+          font-weight: 700;
+          color: ${NUMBER_COLOR};
+          flex-shrink: 0;
+          padding-bottom: 4px;
+          line-height: 1;
+        }
+
+        .rwpt-cue {
+          font-size: clamp(13px, 1.6vw, 19px);
+          font-weight: 400;
+          color: ${CUE_COLOR};
+          flex-shrink: 0;
+          white-space: nowrap;
+          line-height: 1.5;
+        }
+
+        /* Input wrap */
+        .rwpt-input-wrap {
+          position: relative;
+          flex: 1;
+          min-width: clamp(120px, 16vw, 240px);
+        }
+
+        .rwpt-input {
+          width: 100%;
+          background: transparent;
+          border: none;
+          border-bottom: 1px solid ${INPUT_UNDERLINE_DEFAULT};
+          outline: none;
+          font-size: clamp(13px, 1.6vw, 19px);
+          color: ${INPUT_TEXT_COLOR};
+          line-height: 1.5;
+          box-sizing: border-box;
+          transition: border-color 0.2s;
+        }
+        .rwpt-input:disabled   { opacity: 1; cursor: default; }
+        .rwpt-input--wrong     { border-bottom-color: ${INPUT_UNDERLINE_WRONG}; }
+        .rwpt-input--answer    { color: ${INPUT_ANSWER_COLOR}; }
+
+        /* ✕ badge */
+        .rwpt-badge {
+          position: absolute;
+          top: -8px; right: 0;
+          width: clamp(17px, 1.9vw, 22px);
+          height: clamp(17px, 1.9vw, 22px);
+          border-radius: 50%;
+          background: ${WRONG_BADGE_BG};
+          color: ${WRONG_BADGE_TEXT};
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: clamp(9px, 1vw, 12px);
+          font-weight: 700;
+          border: 2px solid #fff;
+          box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+          pointer-events: none;
+          z-index: 2;
+        }
+
+        /* Buttons */
+        .rwpt-buttons {
+          display: flex;
+          justify-content: center;
+          margin-top: clamp(8px, 1.6vw, 18px);
+        }
+
+        @media (max-width: 500px) {
+          .rwpt-row { flex-wrap: wrap; }
+          .rwpt-cue { white-space: normal; }
+        }
+      `}</style>
+
+      <div
+        className="div-forall"
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: "clamp(14px, 2vw, 22px)",
+          maxWidth: "1100px",
+          margin: "0 auto",
+        }}
+      >
+        {/* ── Header ── */}
+        <h1
+          className="WB-header-title-page8"
+          style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
+        >
+          <span className="WB-ex-A">K</span>
+          Read and write sentences in the past tense.
         </h1>
 
-        {/* ── Chunk bank ── */}
-        <div style={{ display: "flex", justifyContent: "center", gap: "10px", flexWrap: "wrap" }}>
-          {CHUNKS.map((chunk) => {
-            const disabled = !!usedChunkIds[chunk.id];
+        {/* ── Items ── */}
+        <div className="rwpt-list">
+          {ITEMS.map((item) => {
+            const wrong    = isWrong(item);
+            const value    = answers[item.id] || "";
+            const tColor   = showAns ? INPUT_ANSWER_COLOR : INPUT_TEXT_COLOR;
+            const uColor   = wrong ? INPUT_UNDERLINE_WRONG : INPUT_UNDERLINE_DEFAULT;
+            const disabled = isDisabled(item);
+
             return (
-              <div
-                key={chunk.id}
-                draggable={!disabled && !showAns}
-                onDragStart={() => handleDragStart(chunk)}
-                onTouchStart={(e) => handleTouchStart(e, chunk)}
-                onTouchMove={handleTouchMove}
-                onTouchEnd={handleTouchEnd}
-                style={{
-                  padding:         "8px 14px",
-                  borderRadius:    "10px",
-                  backgroundColor: disabled ? "#d1d5db" : CHUNK_COLOR,
-                  color:           disabled ? "#fff" : "#222",
-                  fontSize:        "18px",
-                  fontWeight:      "700",
-                  border:          `1px solid ${disabled ? "#d1d5db" : ACTIVE_COLOR}`,
-                  cursor:          disabled ? "not-allowed" : "grab",
-                  opacity:         disabled ? 0.5 : 1,
-                  userSelect:      "none",
-                  touchAction:     "none",
-                  boxShadow:       "0 2px 6px rgba(0,0,0,0.12)",
-                  minWidth:        "52px",
-                  textAlign:       "center",
-                  transition:      "opacity 0.2s",
-                }}
-              >
-                {chunk.value}
+              <div key={item.id} className="rwpt-row">
+
+                <span className="rwpt-num">{item.id}</span>
+                <span className="rwpt-cue">{item.cue}</span>
+
+                <div className="rwpt-input-wrap">
+                  <input
+                    type="text"
+                    className={[
+                      "rwpt-input",
+                      wrong   ? "rwpt-input--wrong"  : "",
+                      showAns ? "rwpt-input--answer" : "",
+                    ].filter(Boolean).join(" ")}
+                    value={value}
+                    disabled={disabled}
+                    onChange={(e) => handleChange(item.id, e.target.value)}
+                    style={{ borderBottomColor: uColor, color: tColor }}
+                    spellCheck={false}
+                    autoComplete="off"
+                  />
+                  {wrong && <div className="rwpt-badge">✕</div>}
+                </div>
+
               </div>
             );
           })}
         </div>
 
-        {/* ── Matching area ── */}
-        <div
-          ref={containerRef}
-          style={{
-            position:       "relative",
-            display:        "flex",
-            justifyContent: "center",
-            alignItems:     "flex-start",
-            gap:            "90px",
-            padding:        "10px 20px",
-            minHeight:      "560px",
-          }}
-        >
-          {/* Left side */}
-          <div style={{ display: "flex", flexDirection: "column", gap: "0", width: "390px" }}>
-            {WORDS.map((item) => (
-              <div key={item.id} style={getLeftRowStyle(item.id)}>
-                <div style={{ display: "flex", alignItems: "center", gap: "12px", flex: 1, minHeight: "38px" }}>
-                  <span style={{ fontSize: "18px", fontWeight: "700", color: "#222", minWidth: "18px" }}>
-                    {item.id}
-                  </span>
-
-                  {item.prefix ? (
-                    <>
-                      <span style={{ fontSize: "22px", color: "#222", lineHeight: "1" }}>{item.prefix}</span>
-                      <div
-                        ref={(el) => (dropZoneRefs.current[item.id] = el)}
-                        onDragOver={(e) => e.preventDefault()}
-                        onDrop={() => handleDropChunk(item.id)}
-                        style={dropZoneStyle(item)}
-                      >
-                        {chunkAnswers[item.id]?.chunk || ""}
-                      </div>
-                    </>
-                  ) : (
-                    <>
-                      <div
-                        ref={(el) => (dropZoneRefs.current[item.id] = el)}
-                        onDragOver={(e) => e.preventDefault()}
-                        onDrop={() => handleDropChunk(item.id)}
-                        style={dropZoneStyle(item)}
-                      >
-                        {chunkAnswers[item.id]?.chunk || ""}
-                      </div>
-                      <span style={{ fontSize: "22px", color: "#222", lineHeight: "1" }}>{item.suffix}</span>
-                    </>
-                  )}
-                </div>
-
-                {/* Left dot */}
-                <div
-                  ref={(el) => (elementRefs.current[`left-${item.id}`] = el)}
-                  onClick={() => handleLeftClick(item.id)}
-                  style={{
-                    width:           "20px",
-                    height:          "20px",
-                    borderRadius:    "50%",
-                    backgroundColor: getDotColor("left", item.id),
-                    cursor:          showAns ? "default" : "pointer",
-                    flexShrink:      0,
-                    transition:      "all 0.2s ease",
-                    boxShadow:       selectedLeft === item.id ? "0 0 0 4px rgba(243,155,66,0.25)" : "none",
-                  }}
-                />
-
-                {isWrongItem(item) && (
-                  <div style={{
-                    position:        "absolute",
-                    right:           "-34px",
-                    top:             "50%",
-                    transform:       "translateY(-50%)",
-                    width:           "22px",
-                    height:          "22px",
-                    borderRadius:    "50%",
-                    backgroundColor: WRONG_COLOR,
-                    color:           "#fff",
-                    display:         "flex",
-                    alignItems:      "center",
-                    justifyContent:  "center",
-                    fontSize:        "12px",
-                    fontWeight:      "700",
-                    boxShadow:       "0 2px 6px rgba(0,0,0,0.2)",
-                  }}>✕</div>
-                )}
-              </div>
-            ))}
-          </div>
-
-          {/* Right side */}
-          <div style={{ display: "flex", flexDirection: "column", gap: "0", width: "250px" }}>
-            {IMAGES.map((item) => (
-              <div key={item.id} style={{ height: `${ROW_HEIGHT}px`, display: "flex", alignItems: "center", gap: "14px" }}>
-                <div
-                  ref={(el) => (elementRefs.current[`right-${item.id}`] = el)}
-                  onClick={() => handleRightClick(item.id)}
-                  style={{
-                    width:           "20px",
-                    height:          "20px",
-                    borderRadius:    "50%",
-                    backgroundColor: getDotColor("right", item.id),
-                    cursor:          showAns || selectedLeft === null ? "default" : "pointer",
-                    flexShrink:      0,
-                    transition:      "all 0.2s ease",
-                  }}
-                />
-                <div style={{ width: "120px", height: "56px", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  <img
-                    src={item.img}
-                    alt={item.alt}
-                    style={{ maxWidth: "110px", maxHeight: "52px", objectFit: "contain", display: "block" }}
-                  />
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* SVG lines */}
-          <svg style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", pointerEvents: "none" }}>
-            {lines.map((line) => (
-              <line
-                key={line.id}
-                x1={line.x1} y1={line.y1}
-                x2={line.x2} y2={line.y2}
-                stroke={LINE_COLOR}
-                strokeWidth="3"
-                strokeLinecap="round"
-              />
-            ))}
-          </svg>
-        </div>
-
-        {/* Buttons */}
-        <div style={{ display: "flex", justifyContent: "center", marginTop: "8px" }}>
+        {/* ── Buttons ── */}
+        <div className="rwpt-buttons">
           <Button
+            checkAnswers={handleCheck}
             handleShowAnswer={handleShowAnswer}
-            handleStartAgain={handleStartAgain}
-            checkAnswers={checkAnswers}
+            handleStartAgain={handleReset}
           />
         </div>
       </div>
-
-      {/* ── Ghost chunk للتاتش ── */}
-      {touchChunk && (
-        <div style={{
-          position:        "fixed",
-          left:            touchPos.x - 26,
-          top:             touchPos.y - 26,
-          backgroundColor: CHUNK_COLOR,
-          color:           "#222",
-          width:           "52px",
-          height:          "52px",
-          borderRadius:    "10px",
-          border:          `1px solid ${ACTIVE_COLOR}`,
-          display:         "flex",
-          alignItems:      "center",
-          justifyContent:  "center",
-          fontSize:        "18px",
-          fontWeight:      "700",
-          pointerEvents:   "none",
-          zIndex:          9999,
-          boxShadow:       "0 4px 12px rgba(0,0,0,0.25)",
-          userSelect:      "none",
-        }}>
-          {touchChunk.value}
-        </div>
-      )}
     </div>
   );
-};
-
-export default WB_Unit8_Page48_QA;
+}

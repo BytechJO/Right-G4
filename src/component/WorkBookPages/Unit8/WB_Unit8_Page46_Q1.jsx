@@ -2,326 +2,304 @@ import React, { useState } from "react";
 import Button from "../Button";
 import ValidationAlert from "../../Popup/ValidationAlert";
 
-import roomImg from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U8 Folder/Page 46/SVG/1.svg";
+// ─────────────────────────────────────────────
+//  🖼️  IMAGES
+// ─────────────────────────────────────────────
+import img1a from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U8 Folder/Page 46/SVG/Asset 19.svg";
+import img1b from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U8 Folder/Page 46/SVG/Asset 25.svg";
+import img2a from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U8 Folder/Page 46/SVG/Asset 21.svg";
+import img2b from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U8 Folder/Page 46/SVG/Asset 22.svg";
+import img3a from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U8 Folder/Page 46/SVG/Asset 26.svg";
+import img3b from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U8 Folder/Page 46/SVG/Asset 24.svg";
 
-const BORDER_COLOR = "#f39b42";
-const WRONG_COLOR  = "#ef4444";
-const CHECK_COLOR  = "#ef4444";
+// ─────────────────────────────────────────────
+//  🎨  COLORS
+// ─────────────────────────────────────────────
+const CHECK_COLOR      = "#e53935";
+const WRONG_BADGE_BG   = "#ef4444";
+const WRONG_BADGE_TEXT = "#ffffff";
+const SENTENCE_COLOR   = "#2b2b2b";
+const NUMBER_COLOR     = "#2b2b2b";
 
+// ─────────────────────────────────────────────
+//  📝  EXERCISE DATA
+// ─────────────────────────────────────────────
 const ITEMS = [
-  { id: 1, text: "Did Grandma have a radio?", correct: "yes" },
-  { id: 2, text: "Did she have a TV?",        correct: "no"  },
-  { id: 3, text: "Did she have a cat?",       correct: "no"  },
-  { id: 4, text: "Did she have a bird?",      correct: "no"  },
-  { id: 5, text: "Did she have a lamp?",      correct: "yes" },
-  { id: 6, text: "Did she have a phone?",     correct: "no"  },
-  { id: 7, text: "Did she have a rug?",       correct: "yes" },
-  { id: 8, text: "Did she have a mirror?",    correct: "no"  },
+  {
+    id:          1,
+    sentence:    "I looked at the books in the library.",
+    imgA:        img1a,
+    imgB:        img1b,
+    correctSide: "a",
+  },
+  {
+    id:          2,
+    sentence:    "We went to the science museum.",
+    imgA:        img2a,
+    imgB:        img2b,
+    correctSide: "a",
+  },
+  {
+    id:          3,
+    sentence:    "They played volleyball.",
+    imgA:        img3a,
+    imgB:        img3b,
+    correctSide: "b",
+  },
 ];
 
-export default function WB_YesNo_PageC() {
-  const [answers,     setAnswers]     = useState({});
+// ─────────────────────────────────────────────
+//  COMPONENT
+// ─────────────────────────────────────────────
+export default function WB_ReadChoosePicture_QC() {
+  const [selected,    setSelected]    = useState({});
   const [showResults, setShowResults] = useState(false);
   const [showAns,     setShowAns]     = useState(false);
 
-  const handleSelect = (id, value) => {
-    if (showAns) return;
-    setAnswers((prev) => ({
+  const isLocked = showResults || showAns;
+
+  const handleSelect = (itemId, side) => {
+    if (isLocked) return;
+    setSelected((prev) => ({
       ...prev,
-      [id]: prev[id] === value ? undefined : value,
+      [itemId]: prev[itemId] === side ? null : side,
     }));
-    setShowResults(false);
   };
 
   const handleCheck = () => {
-    if (showAns) return;
-    const allAnswered = ITEMS.every((i) => answers[i.id]);
-    if (!allAnswered) {
-      ValidationAlert.info("Please answer all questions first.");
-      return;
-    }
+    if (isLocked) return;
+    const allAnswered = ITEMS.every((item) => selected[item.id]);
+    if (!allAnswered) { ValidationAlert.info("Please choose a picture for each sentence."); return; }
     let score = 0;
-    ITEMS.forEach((i) => { if (answers[i.id] === i.correct) score++; });
+    ITEMS.forEach((item) => { if (selected[item.id] === item.correctSide) score++; });
     setShowResults(true);
-    const total = ITEMS.length;
-    if (score === total)  ValidationAlert.success(`Score: ${score} / ${total}`);
-    else if (score > 0)   ValidationAlert.warning(`Score: ${score} / ${total}`);
-    else                  ValidationAlert.error(`Score: ${score} / ${total}`);
+    if (score === ITEMS.length) ValidationAlert.success(`Score: ${score} / ${ITEMS.length}`);
+    else if (score > 0)         ValidationAlert.warning(`Score: ${score} / ${ITEMS.length}`);
+    else                        ValidationAlert.error(`Score: ${score} / ${ITEMS.length}`);
   };
 
   const handleShowAnswer = () => {
     const filled = {};
-    ITEMS.forEach((i) => { filled[i.id] = i.correct; });
-    setAnswers(filled);
-    setShowResults(true);
+    ITEMS.forEach((item) => { filled[item.id] = item.correctSide; });
+    setSelected(filled);
+    setShowResults(false);
     setShowAns(true);
   };
 
-  const handleStartAgain = () => {
-    setAnswers({});
+  const handleReset = () => {
+    setSelected({});
     setShowResults(false);
     setShowAns(false);
   };
 
-  const isWrong = (item) =>
-    showResults && !showAns && answers[item.id] !== item.correct;
-
-  const renderCheckbox = (item, value) => {
-    const selected  = answers[item.id] === value;
-    const wrong     = isWrong(item) && selected;
-
-    return (
-      <div
-        onClick={() => handleSelect(item.id, value)}
-        style={{
-          position:        "relative",
-          width:           "clamp(28px,3.5vw,44px)",
-          height:          "clamp(28px,3.5vw,44px)",
-          border:          `2px solid ${BORDER_COLOR}`,
-          borderRadius:    "clamp(5px,0.6vw,8px)",
-          background:      "#fff",
-          display:         "flex",
-          alignItems:      "center",
-          justifyContent:  "center",
-          cursor:          showAns ? "default" : "pointer",
-          boxSizing:       "border-box",
-          flexShrink:      0,
-          transition:      "border-color 0.2s",
-        }}
-      >
-        {selected && (
-          <span
-            style={{
-              fontSize:   "clamp(18px,2.8vw,36px)",
-              fontWeight: 900,
-              color:      wrong ? WRONG_COLOR : CHECK_COLOR,
-              lineHeight: 1,
-              userSelect: "none",
-            }}
-          >
-            ✓
-          </span>
-        )}
-
-        {/* wrong badge — يسار أعلى */}
-        {wrong && (
-          <div
-            style={{
-              position:        "absolute",
-              top:             "-7px",
-              left:            "-7px",
-              width:           "clamp(14px,1.6vw,20px)",
-              height:          "clamp(14px,1.6vw,20px)",
-              borderRadius:    "50%",
-              backgroundColor: WRONG_COLOR,
-              border:          "1px solid #fff",
-              color:           "#fff",
-              display:         "flex",
-              alignItems:      "center",
-              justifyContent:  "center",
-              fontSize:        "clamp(8px,0.8vw,11px)",
-              fontWeight:      700,
-              boxShadow:       "0 1px 4px rgba(0,0,0,0.25)",
-              zIndex:          5,
-              pointerEvents:   "none",
-            }}
-          >
-            ✕
-          </div>
-        )}
-      </div>
-    );
+  const getBoxState = (item, side) => {
+    const isSelected = selected[item.id] === side;
+    if (!isSelected) return "none";
+    if (showAns)     return "correct";
+    if (showResults) return item.correctSide === side ? "correct" : "wrong";
+    return "selected";
   };
 
   return (
     <div className="main-container-component">
+      <style>{`
+        .rcp-list {
+          display: flex;
+          flex-direction: column;
+          gap: clamp(16px, 2.4vw, 30px);
+          width: 100%;
+        }
+
+        .rcp-row {
+          display: grid;
+          grid-template-columns: auto clamp(110px, 16vw, 200px) 1fr clamp(110px, 16vw, 200px);
+          gap: clamp(10px, 1.6vw, 20px);
+          align-items: center;
+        }
+
+        .rcp-num {
+          font-size: clamp(14px, 1.7vw, 20px);
+          font-weight: 700;
+          color: ${NUMBER_COLOR};
+          flex-shrink: 0;
+          align-self: flex-start;
+          padding-top: 4px;
+        }
+
+        .rcp-img-wrap {
+          position: relative;
+          cursor: pointer;
+          user-select: none;
+          overflow: hidden;
+        }
+        .rcp-img-wrap--locked { cursor: default; }
+
+        .rcp-img {
+          width: 100%;
+          height: 100%;
+          display: block;
+        }
+
+        .rcp-checkbox {
+          position: absolute;
+          top: 0;
+          right: 0;
+          width: 40px;
+          height: 40px;
+          border-top: 2px solid #2096a6;
+          border-bottom: 2px solid #2096a6;
+          border-left: 2px solid #2096a6;
+          border-right: 2px solid #2096a6;
+          border-radius: 0px 10px 0px 4px;
+          background: #ffffff;
+          text-align: center;
+          font-size: clamp(14px, 1.8vw, 21px);
+          font-weight: 700;
+          color: #2b2b2b;
+          outline: none;
+          cursor: text;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 0;
+          line-height: 1;
+          font-family: inherit;
+          transition: border-color 0.2s;
+        }
+
+        .rcp-checkbox--selected { color: ${CHECK_COLOR}; }
+        .rcp-checkbox--correct  { ; color: ${CHECK_COLOR}; }
+        .rcp-checkbox--wrong    {  color: ${WRONG_BADGE_BG}; }
+
+        /* ✕ badge — top right of checkbox */
+        .rcp-wrong-badge {
+          position: absolute;
+          top: 25px;
+          right: 25px;
+          width: clamp(16px, 1.8vw, 20px);
+          height: clamp(16px, 1.8vw, 20px);
+          border-radius: 50%;
+          background: ${WRONG_BADGE_BG};
+          color: ${WRONG_BADGE_TEXT};
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: clamp(8px, 0.9vw, 11px);
+          font-weight: 700;
+          border: 2px solid #fff;
+          box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+          pointer-events: none;
+          z-index: 1000;
+        }
+
+        .rcp-sentence {
+          font-size: clamp(13px, 1.6vw, 19px);
+          font-weight: 400;
+          color: ${SENTENCE_COLOR};
+          line-height: 1.5;
+          text-align: center;
+        }
+
+        .rcp-buttons {
+          display: flex;
+          justify-content: center;
+          margin-top: clamp(8px, 1.6vw, 18px);
+        }
+
+        @media (max-width: 540px) {
+          .rcp-row {
+            grid-template-columns: auto 1fr 1fr;
+            grid-template-rows: auto auto;
+          }
+          .rcp-sentence { grid-column: 1 / -1; }
+        }
+      `}</style>
+
       <div
         className="div-forall"
         style={{
-          display:       "flex",
+          display: "flex",
           flexDirection: "column",
-          gap:           "18px",
-          maxWidth:      "1100px",
-          margin:        "0 auto",
+          gap: "clamp(14px, 2vw, 22px)",
+          maxWidth: "1100px",
+          margin: "0 auto",
         }}
       >
-        {/* Title */}
+        {/* ── Header ── */}
         <h1
           className="WB-header-title-page8"
-          style={{
-            margin:     0,
-            display:    "flex",
-            alignItems: "center",
-            gap:        "12px",
-            flexWrap:   "wrap",
-          }}
+          style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
         >
           <span className="WB-ex-A">C</span>
-          Look and write ✓ for{" "}
-          <strong style={{ fontWeight: 900 }}>Yes</strong> or{" "}
-          <strong style={{ fontWeight: 900 }}>No</strong>.
+          Read and choose ✓ the correct picture.
         </h1>
 
-        {/* Main layout: image LEFT | table RIGHT */}
-        <div
-          style={{
-            display:             "grid",
-            gridTemplateColumns: "minmax(0,1fr) minmax(0,1.2fr)",
-            gap:                 "clamp(16px,2.5vw,32px)",
-            alignItems:          "start",
-            width:               "100%",
-          }}
-        >
-          {/* Room image */}
-          <div
-            style={{
-              width:        "100%",
-              borderRadius: "clamp(10px,1.2vw,16px)",
-              overflow:     "hidden",
-              border:       `2px solid ${BORDER_COLOR}`,
-              background:   "#f7f7f7",
-              flexShrink:   0,
-            }}
-          >
-            <img
-              src={roomImg}
-              alt="grandma room"
-              style={{
-                width:      "100%",
-                height:     "auto",
-                display:    "block",
-                userSelect: "none",
-              }}
-            />
-          </div>
+        {/* ── Items ── */}
+        <div className="rcp-list">
+          {ITEMS.map((item) => {
+            const stateA = getBoxState(item, "a");
+            const stateB = getBoxState(item, "b");
 
-          {/* Questions table */}
-          <div style={{ minWidth: 0 }}>
-            {/* Header */}
-            <div
-              style={{
-                display:             "grid",
-                gridTemplateColumns: "1fr clamp(50px,8vw,100px) clamp(50px,8vw,100px)",
-                gap:                 "clamp(6px,1vw,12px)",
-                marginBottom:        "clamp(8px,1vw,12px)",
-                paddingRight:        "clamp(4px,0.5vw,8px)",
-              }}
-            >
-              <div />
-              <div
-                style={{
-                  textAlign:  "center",
-                  fontSize:   "clamp(16px,2vw,26px)",
-                  fontWeight: 700,
-                  color:      "#111",
-                }}
-              >
-                Yes
-              </div>
-              <div
-                style={{
-                  textAlign:  "center",
-                  fontSize:   "clamp(16px,2vw,26px)",
-                  fontWeight: 700,
-                  color:      "#111",
-                }}
-              >
-                No
-              </div>
-            </div>
+            const getCheckmark = (state) => {
+              if (state === "none")  return null;
+              if (state === "wrong") return "✕";
+              return "✓";
+            };
 
-            {/* Rows */}
-            <div
-              style={{
-                display:       "flex",
-                flexDirection: "column",
-                gap:           "clamp(10px,1.5vw,18px)",
-              }}
-            >
-              {ITEMS.map((item) => (
+            return (
+              <div key={item.id} className="rcp-row">
+
+                {/* Number */}
+                <span className="rcp-num">{item.id}</span>
+
+                {/* Image A */}
                 <div
-                  key={item.id}
-                  style={{
-                    display:             "grid",
-                    gridTemplateColumns: "1fr clamp(50px,8vw,100px) clamp(50px,8vw,100px)",
-                    gap:                 "clamp(6px,1vw,12px)",
-                    alignItems:          "center",
-                  }}
+                  className={`rcp-img-wrap${isLocked ? " rcp-img-wrap--locked" : ""}`}
+                  onClick={() => handleSelect(item.id, "a")}
                 >
-                  {/* sentence */}
-                  <div
-                    style={{
-                      display:    "flex",
-                      alignItems: "center",
-                      gap:        "clamp(6px,0.8vw,12px)",
-                      minWidth:   0,
-                    }}
-                  >
-                    <span
-                      style={{
-                        fontSize:   "clamp(15px,1.8vw,24px)",
-                        fontWeight: 700,
-                        color:      "#111",
-                        lineHeight: 1,
-                        flexShrink: 0,
-                        minWidth:   "clamp(12px,1.6vw,22px)",
-                      }}
-                    >
-                      {item.id}
-                    </span>
-                    <span
-                      style={{
-                        fontSize:   "clamp(13px,1.6vw,21px)",
-                        fontWeight: 500,
-                        color:      "#111",
-                        lineHeight: 1.35,
-                        wordBreak:  "break-word",
-                        transition: "color 0.2s",
-                      }}
-                    >
-                      {item.text}
-                    </span>
-                  </div>
-
-                  {/* Yes checkbox */}
-                  <div
-                    style={{
-                      display:        "flex",
-                      justifyContent: "center",
-                      alignItems:     "center",
-                    }}
-                  >
-                    {renderCheckbox(item, "yes")}
-                  </div>
-
-                  {/* No checkbox */}
-                  <div
-                    style={{
-                      display:        "flex",
-                      justifyContent: "center",
-                      alignItems:     "center",
-                    }}
-                  >
-                    {renderCheckbox(item, "no")}
+                  <img src={item.imgA} alt={`${item.id}a`} className="rcp-img" />
+                  <div className={[
+                    "rcp-checkbox",
+                    stateA === "selected" ? "rcp-checkbox--selected" : "",
+                    stateA === "correct"  ? "rcp-checkbox--correct"  : "",
+                    stateA === "wrong"    ? "rcp-checkbox--wrong"    : "",
+                  ].filter(Boolean).join(" ")}>
+                    {getCheckmark(stateA)}
+                    {stateA === "wrong" && <div className="rcp-wrong-badge">✕</div>}
                   </div>
                 </div>
-              ))}
-            </div>
-          </div>
+
+                {/* Sentence */}
+                <span className="rcp-sentence">{item.sentence}</span>
+
+                {/* Image B */}
+                <div
+                  className={`rcp-img-wrap${isLocked ? " rcp-img-wrap--locked" : ""}`}
+                  onClick={() => handleSelect(item.id, "b")}
+                >
+                  <img src={item.imgB} alt={`${item.id}b`} className="rcp-img" />
+                  <div className={[
+                    "rcp-checkbox",
+                    stateB === "selected" ? "rcp-checkbox--selected" : "",
+                    stateB === "correct"  ? "rcp-checkbox--correct"  : "",
+                    stateB === "wrong"    ? "rcp-checkbox--wrong"    : "",
+                  ].filter(Boolean).join(" ")}>
+                    {getCheckmark(stateB)}
+                    {stateB === "wrong" && <div className="rcp-wrong-badge">✕</div>}
+                  </div>
+                </div>
+
+              </div>
+            );
+          })}
         </div>
 
-        {/* Buttons */}
-        <div
-          style={{
-            display:        "flex",
-            justifyContent: "center",
-            marginTop:      "clamp(6px,1vw,12px)",
-          }}
-        >
+        {/* ── Buttons ── */}
+        <div className="rcp-buttons">
           <Button
             checkAnswers={handleCheck}
             handleShowAnswer={handleShowAnswer}
-            handleStartAgain={handleStartAgain}
+            handleStartAgain={handleReset}
           />
         </div>
       </div>

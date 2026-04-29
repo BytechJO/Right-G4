@@ -1,475 +1,339 @@
-import React, { useState, useRef } from "react";
+import React, { useState } from "react";
 import Button from "../Button";
 import ValidationAlert from "../../Popup/ValidationAlert";
 
-import img1  from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U8 Folder/Page 46/SVG/2.svg";
-import img2  from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U8 Folder/Page 46/SVG/3.svg";
-import img3  from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U8 Folder/Page 46/SVG/4.svg";
-import img4  from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U8 Folder/Page 46/SVG/5.svg";
-import img5  from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U8 Folder/Page 46/SVG/6.svg";
-import img6  from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U8 Folder/Page 46/SVG/7.svg";
-import img7  from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U8 Folder/Page 46/SVG/8.svg";
-import img8  from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U8 Folder/Page 46/SVG/9.svg";
-import img9  from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U8 Folder/Page 46/SVG/10.svg";
-import img10 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U8 Folder/Page 46/SVG/11.svg";
-import img11 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U8 Folder/Page 46/SVG/12.svg";
-import img12 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U8 Folder/Page 46/SVG/13.svg";
-import img13 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U8 Folder/Page 46/SVG/14.svg";
-import img14 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U8 Folder/Page 46/SVG/15.svg";
-import img15 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U8 Folder/Page 46/SVG/16.svg";
+// ─────────────────────────────────────────────
+//  🎨  COLORS
+// ─────────────────────────────────────────────
+const INPUT_UNDERLINE_DEFAULT = "#3f3f3f";
+const INPUT_UNDERLINE_WRONG   = "#ef4444";
+const INPUT_TEXT_COLOR        = "#2b2b2b";
+const INPUT_ANSWER_COLOR      = "#c81e1e";
+const SPEAKER_COLOR           = "#2b2b2b";
+const TEXT_COLOR              = "#2b2b2b";
+const WORD_BANK_BORDER        = "#2096a6";
+const WRONG_BADGE_BG          = "#ef4444";
+const WRONG_BADGE_TEXT        = "#ffffff";
 
-const BORDER_COLOR = "#f39b42";
-const WRONG_COLOR  = "#ef4444";
-const ANSWER_COLOR = "#000000ff";
-const LINE_COLOR   = "#2f2f2f";
+// ─────────────────────────────────────────────
+//  📝  EXERCISE DATA
+// ─────────────────────────────────────────────
+const WORD_BANK = ["I sure do", "when you grow up", "I know what you mean", "was awesome"];
 
-const LEFT_GROUP = [
-  { id: 1, person: img1,  yesImg: img2,  noImg: img3  },
-  { id: 2, person: img4,  yesImg: img5,  noImg: img6  },
-  { id: 3, person: img7,  yesImg: img8,  noImg: img9  },
+// كل line فيها: speaker (اختياري) + parts
+// كل part إما { type: "text", value } أو { type: "input", key, correct, answer }
+const LINES = [
+  {
+    speaker: "Steve",
+    parts: [
+      { type: "text",  value: "What do you want to do for work" },
+      { type: "input", key: "1", correct: ["when you grow up"], answer: "when you grow up" },
+      { type: "text",  value: "?" },
+    ],
+  },
+  {
+    speaker: "Rick",
+    parts: [
+      { type: "text", value: "I'd like to be a doctor. What about you?" },
+    ],
+  },
+  {
+    speaker: "Steve",
+    parts: [
+      { type: "text", value: "I'd like to be a scientist. Do you remember Career Day? So many parents came in and talked about their jobs. That day" },
+      { type: "input", key: "2", correct: ["was awesome"], answer: "was awesome" },
+      { type: "text",  value: ". Do you like science?" },
+    ],
+  },
+  {
+    speaker: "Rick",
+    parts: [
+      { type: "input", key: "3", correct: ["I sure do"], answer: "I sure do" },
+      { type: "text",  value: ". I always look forward to science class at school." },
+    ],
+  },
+  {
+    speaker: "Steve",
+    parts: [
+      { type: "input", key: "4", correct: ["I know what you mean"], answer: "I know what you mean" },
+      { type: "text",  value: ". It's one of my favorites, too." },
+    ],
+  },
 ];
 
-const RIGHT_GROUP = [
-  { id: 4, person: img10, yesImg: img11, noImg: img12 },
-  { id: 5, person: img13, yesImg: img14, noImg: img15 },
-];
-
-const SENTENCES = [
-  { id: 1, first: "She had a doll,",    second: "she didn't have a computer." },
-  { id: 2, first: "He had a kite,",     second: "he didn't have a car."       },
-  { id: 3, first: "He had a ball,",     second: "he didn't have a train."     },
-  { id: 4, first: "They had a radio,",  second: "they didn't have a TV."      },
-  { id: 5, first: "She had a book,",    second: "she didn't have a robot."    },
-];
-
-const DRAG_ITEMS = [
-  { id: "d1a", value: "She had a doll,"              },
-  { id: "d1b", value: "she didn't have a computer."  },
-  { id: "d2a", value: "He had a kite,"               },
-  { id: "d2b", value: "he didn't have a car."        },
-  { id: "d3a", value: "He had a ball,"               },
-  { id: "d3b", value: "he didn't have a train."      },
-  { id: "d4a", value: "They had a radio,"            },
-  { id: "d4b", value: "they didn't have a TV."       },
-  { id: "d5a", value: "She had a book,"              },
-  { id: "d5b", value: "she didn't have a robot."     },
-];
-
-// ── جدول الصور
-const GroupTable = ({ rows }) => (
-  <div style={{
-    display:             "grid",
-    gridTemplateColumns: "clamp(60px,7vw,80px) clamp(80px,10vw,110px) clamp(80px,10vw,110px)",
-    gridTemplateRows:    `clamp(28px,3.5vw,38px) repeat(${rows.length}, clamp(72px,10vw,96px))`,
-    borderRadius:        "14px",
-    overflow:            "visible",
-  }}>
-    {/* Header */}
-    <div style={{ background: "transparent" }} />
-    {["✓", "✕"].map((sym) => (
-      <div key={sym} style={{
-        border:         `2px solid ${BORDER_COLOR}`,
-        borderBottom:   "none",
-        borderLeft:     sym === "✕" ? "none" : undefined,
-        borderTopLeftRadius:  sym === "✓" ? "14px" : 0,
-        borderTopRightRadius: sym === "✕" ? "14px" : 0,
-        display:        "flex",
-        alignItems:     "center",
-        justifyContent: "center",
-        fontSize:       "clamp(18px,2.5vw,28px)",
-        color:          "#7c7c7c",
-        fontWeight:     700,
-        background:     "#f9f9f9",
-      }}>{sym}</div>
-    ))}
-
-    {/* Rows */}
-    {rows.map((row, index) => (
-      <React.Fragment key={row.id}>
-        {/* صورة الشخص */}
-        <div style={{
-          position:             "relative",
-          border:               `2px solid #f39b42`,
-          borderTop:            index === 0 ? `2px solid #f39b42` : "none",
-          borderRight:          "none",
-          borderTopLeftRadius:  index === 0 ? "14px" : 0,
-          borderBottomLeftRadius: index === rows.length - 1 ? "14px" : 0,
-          display:              "flex",
-          alignItems:           "center",
-          justifyContent:       "center",
-          background:           "#fff",
-          overflow:             "hidden",
-        }}>
-          <div style={{
-            position:   "absolute",
-            top:        "5px",
-            left:       "5px",
-            width:      "clamp(18px,2.2vw,24px)",
-            height:     "clamp(18px,2.2vw,24px)",
-            borderRadius: "50%",
-            border:     "1.5px solid #f39b42",
-            background: "#fff",
-            display:    "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            fontSize:   "clamp(11px,1.3vw,14px)",
-            color:      "#555",
-            fontWeight: 700,
-            zIndex:     2,
-          }}>{row.id}</div>
-          <img src={row.person} alt={`person-${row.id}`}
-            style={{ width: "80%", height: "80%", objectFit: "contain" }} />
-        </div>
-
-        {/* صورة ✓ */}
-        <div style={{
-          border:    `2px solid #f39b42`,
-          borderTop: index === 0 ? `2px solid #f39b42` : "none",
-          borderRight: "none",
-          display:   "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          background: "#fff",
-          overflow:  "hidden",
-        }}>
-          <img src={row.yesImg} alt={`yes-${row.id}`}
-            style={{ width: "85%", height: "75%", objectFit: "contain" }} />
-        </div>
-
-        {/* صورة ✕ */}
-        <div style={{
-          border:    `2px solid #f39b42`,
-          borderTop: index === 0 ? `2px solid #f39b42` : "none",
-          borderBottomRightRadius: index === rows.length - 1 ? "14px" : 0,
-          display:   "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          background: "#fff",
-          overflow:  "hidden",
-        }}>
-          <img src={row.noImg} alt={`no-${row.id}`}
-            style={{ width: "85%", height: "75%", objectFit: "contain" }} />
-        </div>
-      </React.Fragment>
-    ))}
-  </div>
+const ALL_INPUTS = LINES.flatMap((line) =>
+  line.parts.filter((p) => p.type === "input")
 );
 
-export default function WB_Unit8_Page46_QD() {
+// ─────────────────────────────────────────────
+//  🔧  NORMALIZE
+// ─────────────────────────────────────────────
+const normalize = (str) =>
+  str.toLowerCase().replace(/[^a-z0-9\s]/g, "").replace(/\s+/g, " ").trim();
+
+const isCorrect = (userVal, correctArr) =>
+  correctArr.some((c) => normalize(userVal) === normalize(c));
+
+// ─────────────────────────────────────────────
+//  COMPONENT
+// ─────────────────────────────────────────────
+export default function WB_ReadWrite_QD() {
   const [answers,     setAnswers]     = useState({});
-  const [draggedItem, setDraggedItem] = useState(null);
-  const [touchItem,   setTouchItem]   = useState(null);
-  const [touchPos,    setTouchPos]    = useState({ x: 0, y: 0 });
   const [showResults, setShowResults] = useState(false);
   const [showAns,     setShowAns]     = useState(false);
 
-  const dropRefs = useRef({});
-
-  const usedIds = Object.values(answers).filter(Boolean).map((e) => e.dragId);
-
-  const applyDrop = (boxKey, item) => {
-    const upd = { ...answers };
-    Object.keys(upd).forEach((k) => { if (upd[k]?.dragId === item.id) delete upd[k]; });
-    upd[boxKey] = { dragId: item.id, value: item.value };
-    setAnswers(upd);
-    setShowResults(false);
-  };
-
-  const handleDragStart = (item) => {
-    if (showAns || usedIds.includes(item.id)) return;
-    setDraggedItem(item);
-  };
-  const handleDrop = (boxKey) => {
-    if (showAns || !draggedItem) return;
-    applyDrop(boxKey, draggedItem);
-    setDraggedItem(null);
-  };
-
-  const handleTouchStart = (e, item) => {
-    if (showAns || usedIds.includes(item.id)) return;
-    const t = e.touches[0];
-    setTouchItem(item);
-    setTouchPos({ x: t.clientX, y: t.clientY });
-  };
-  const handleTouchMove = (e) => {
-    if (!touchItem) return;
-    const t = e.touches[0];
-    setTouchPos({ x: t.clientX, y: t.clientY });
-  };
-  const handleTouchEnd = () => {
-    if (!touchItem) return;
-    Object.entries(dropRefs.current).forEach(([key, ref]) => {
-      if (!ref) return;
-      const r = ref.getBoundingClientRect();
-      if (
-        touchPos.x >= r.left && touchPos.x <= r.right &&
-        touchPos.y >= r.top  && touchPos.y <= r.bottom
-      ) applyDrop(key, touchItem);
-    });
-    setTouchItem(null);
-  };
-
-  const handleRemove = (boxKey) => {
+  const handleChange = (key, value) => {
     if (showAns) return;
-    setAnswers((prev) => { const u = { ...prev }; delete u[boxKey]; return u; });
-    setShowResults(false);
-  };
-
-  const isItemWrong = (item) => {
-    if (!showResults || showAns) return false;
-    return (
-      answers[`${item.id}-first`]?.value  !== item.first ||
-      answers[`${item.id}-second`]?.value !== item.second
-    );
+    const inp = ALL_INPUTS.find((i) => i.key === key);
+    if (showResults && inp && isCorrect(answers[key] || "", inp.correct)) return;
+    setAnswers((prev) => ({ ...prev, [key]: value }));
   };
 
   const handleCheck = () => {
     if (showAns) return;
-    const allAnswered = SENTENCES.every(
-      (i) => answers[`${i.id}-first`]?.value && answers[`${i.id}-second`]?.value
-    );
-    if (!allAnswered) {
-      ValidationAlert.info("Please complete all sentences first.");
-      return;
-    }
+    const allAnswered = ALL_INPUTS.every((inp) => answers[inp.key]?.trim());
+    if (!allAnswered) { ValidationAlert.info("Please complete all answers first."); return; }
     let score = 0;
-    SENTENCES.forEach((i) => {
-      if (
-        answers[`${i.id}-first`]?.value  === i.first &&
-        answers[`${i.id}-second`]?.value === i.second
-      ) score++;
-    });
+    ALL_INPUTS.forEach((inp) => { if (isCorrect(answers[inp.key] || "", inp.correct)) score++; });
     setShowResults(true);
-    const total = SENTENCES.length;
-    if (score === total)  ValidationAlert.success(`Score: ${score} / ${total}`);
-    else if (score > 0)   ValidationAlert.warning(`Score: ${score} / ${total}`);
-    else                  ValidationAlert.error(`Score: ${score} / ${total}`);
+    if (score === ALL_INPUTS.length)   ValidationAlert.success(`Score: ${score} / ${ALL_INPUTS.length}`);
+    else if (score > 0)                ValidationAlert.warning(`Score: ${score} / ${ALL_INPUTS.length}`);
+    else                               ValidationAlert.error(`Score: ${score} / ${ALL_INPUTS.length}`);
   };
 
   const handleShowAnswer = () => {
     const filled = {};
-    SENTENCES.forEach((i) => {
-      const d1 = DRAG_ITEMS.find((d) => d.value === i.first);
-      const d2 = DRAG_ITEMS.find((d) => d.value === i.second);
-      filled[`${i.id}-first`]  = { dragId: d1?.id, value: i.first  };
-      filled[`${i.id}-second`] = { dragId: d2?.id, value: i.second };
-    });
+    ALL_INPUTS.forEach((inp) => { filled[inp.key] = inp.answer; });
     setAnswers(filled);
-    setShowResults(true);
+    setShowResults(false);
     setShowAns(true);
   };
 
-  const handleStartAgain = () => {
+  const handleReset = () => {
     setAnswers({});
-    setDraggedItem(null);
-    setTouchItem(null);
     setShowResults(false);
     setShowAns(false);
   };
 
-  const renderDropZone = (boxKey) => {
-    const value = answers[boxKey]?.value || "";
-    return (
-      <div
-        ref={(el) => (dropRefs.current[boxKey] = el)}
-        onDragOver={(e) => e.preventDefault()}
-        onDrop={() => handleDrop(boxKey)}
-        onClick={() => handleRemove(boxKey)}
-        style={{
-          minWidth:      "clamp(120px,18vw,240px)",
-          minHeight:     "clamp(26px,3vw,36px)",
-          borderBottom:  `2.5px solid ${LINE_COLOR}`,
-          display:       "flex",
-          alignItems:    "flex-end",
-          paddingBottom: "3px",
-          cursor:        value && !showAns ? "pointer" : "default",
-          flexShrink:    0,
-        }}
-      >
-        {value && (
-          <span style={{
-            fontSize:   "clamp(13px,1.4vw,18px)",
-            fontWeight: 600,
-            color:      ANSWER_COLOR,
-            lineHeight: 1,
-            wordBreak:  "break-word",
-          }}>
-            {value}
-          </span>
-        )}
-      </div>
-    );
+  const isWrong = (inp) => {
+    if (!showResults || showAns) return false;
+    return !isCorrect(answers[inp.key] || "", inp.correct);
+  };
+
+  const isDisabled = (inp) => {
+    if (showAns) return true;
+    if (showResults && isCorrect(answers[inp.key] || "", inp.correct)) return true;
+    return false;
   };
 
   return (
     <div className="main-container-component">
+      <style>{`
+        /* ── Word bank ── */
+        .rwd-bank {
+          border: 2px solid ${WORD_BANK_BORDER};
+          border-radius: 12px;
+          padding: clamp(8px, 1.2vw, 14px) clamp(14px, 2vw, 24px);
+          display: flex;
+          flex-wrap: wrap;
+          gap: clamp(10px, 1.6vw, 20px);
+          justify-content: center;
+          width: 100%;
+          box-sizing: border-box;
+        }
+
+        .rwd-bank-word {
+          font-size: clamp(14px, 1.7vw, 20px);
+          font-weight: 400;
+          color: ${TEXT_COLOR};
+          white-space: nowrap;
+        }
+
+        /* ── Dialogue list ── */
+        .rwd-list {
+          display: flex;
+          flex-direction: column;
+          gap: clamp(10px, 1.6vw, 18px);
+          width: 100%;
+        }
+
+        /* ── Single line ── */
+        .rwd-line {
+          display: flex;
+          align-items: flex-start;
+          gap: clamp(4px, 0.6vw, 8px);
+          flex-wrap: wrap;
+          min-width: 0;
+        }
+
+        .rwd-speaker {
+          font-size: clamp(14px, 1.7vw, 20px);
+          font-weight: 700;
+          color: ${SPEAKER_COLOR};
+          flex-shrink: 0;
+          white-space: nowrap;
+        }
+
+        .rwd-colon {
+          font-size: clamp(14px, 1.7vw, 20px);
+          font-weight: 700;
+          color: ${SPEAKER_COLOR};
+          flex-shrink: 0;
+        }
+
+        /* Parts container */
+        .rwd-parts {
+          display: flex;
+          align-items: flex-end;
+          flex-wrap: wrap;
+          gap: clamp(3px, 0.4vw, 6px);
+          flex: 1;
+          min-width: 0;
+        }
+
+        .rwd-text {
+          font-size: clamp(14px, 1.7vw, 20px);
+          font-weight: 400;
+          color: ${TEXT_COLOR};
+          line-height: 1.5;
+          padding-bottom: 3px;
+        }
+
+        /* Input wrap */
+        .rwd-input-wrap {
+          position: relative;
+          flex: 0 1 clamp(100px, 14vw, 220px);
+          min-width: clamp(90px, 12vw, 180px);
+        }
+
+        .rwd-input {
+          width: 100%;
+          background: transparent;
+          border: none;
+          border-bottom: 1px solid ${INPUT_UNDERLINE_DEFAULT};
+          outline: none;
+          font-size: clamp(14px, 1.7vw, 20px);
+          font-weight: 400;
+          color: ${INPUT_TEXT_COLOR};
+          line-height: 1.5;
+          box-sizing: border-box;
+          transition: border-color 0.2s;
+          text-align: center;
+        }
+        .rwd-input:disabled   { opacity: 1; cursor: default; }
+        .rwd-input--wrong     { border-bottom-color: ${INPUT_UNDERLINE_WRONG}; }
+        .rwd-input--answer    { color: ${INPUT_ANSWER_COLOR}; }
+
+        /* ✕ badge */
+        .rwd-badge {
+          position: absolute;
+          top: -8px; right: 0;
+          width: clamp(17px, 1.9vw, 22px);
+          height: clamp(17px, 1.9vw, 22px);
+          border-radius: 50%;
+          background: ${WRONG_BADGE_BG};
+          color: ${WRONG_BADGE_TEXT};
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: clamp(9px, 1vw, 12px);
+          font-weight: 700;
+          border: 2px solid #fff;
+          box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+          pointer-events: none;
+          z-index: 2;
+        }
+
+        /* Buttons */
+        .rwd-buttons {
+          display: flex;
+          justify-content: center;
+          margin-top: clamp(8px, 1.6vw, 18px);
+        }
+      `}</style>
+
       <div
         className="div-forall"
         style={{
-          display:       "flex",
+          display: "flex",
           flexDirection: "column",
-          gap:           "clamp(18px,2.5vw,28px)",
-          maxWidth:      "1100px",
-          margin:        "0 auto",
+          gap: "clamp(14px, 2vw, 22px)",
+          maxWidth: "1100px",
+          margin: "0 auto",
         }}
       >
-        {/* Title */}
+        {/* ── Header ── */}
         <h1
           className="WB-header-title-page8"
           style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
         >
-          <span className="WB-ex-A">D</span> Find and write sentences.
+          <span className="WB-ex-A">D</span>
+          Read and write.
         </h1>
 
-        {/* ── الجداول ── */}
-        <div style={{
-          display:        "flex",
-          justifyContent: "center",
-          alignItems:     "flex-start",
-          gap:            "clamp(16px,3vw,40px)",
-          flexWrap:       "wrap",
-        }}>
-          <GroupTable rows={LEFT_GROUP}  />
-          <GroupTable rows={RIGHT_GROUP} />
+        {/* ── Word bank ── */}
+        <div className="rwd-bank">
+          {WORD_BANK.map((w) => (
+            <span key={w} className="rwd-bank-word">{w}</span>
+          ))}
         </div>
 
-        {/* ── Word Bank ── */}
-        <div style={{
-          width:          "100%",
-          border:         `2px solid ${BORDER_COLOR}`,
-          borderRadius:   "clamp(12px,1.4vw,18px)",
-          padding:        "clamp(10px,1.2vw,16px)",
-          boxSizing:      "border-box",
-          display:        "flex",
-          flexWrap:       "wrap",
-          gap:            "clamp(6px,0.8vw,10px)",
-          justifyContent: "center",
-          background:     "#fff",
-        }}>
-          {DRAG_ITEMS.map((item) => {
-            const isUsed = usedIds.includes(item.id);
-            return (
-              <div
-                key={item.id}
-                draggable={!isUsed && !showAns}
-                onDragStart={() => handleDragStart(item)}
-                onTouchStart={(e) => handleTouchStart(e, item)}
-                onTouchMove={handleTouchMove}
-                onTouchEnd={handleTouchEnd}
-                style={{
-                  padding:         "clamp(6px,0.8vw,10px) clamp(10px,1.2vw,14px)",
-                  borderRadius:    "14px",
-                  border:          `1.5px solid ${isUsed ? "#d9d9d9" : BORDER_COLOR}`,
-                  backgroundColor: isUsed ? "#eeeeee" : "#ffca94",
-                  color:           isUsed ? "#aaa" : "#222",
-                  cursor:          isUsed || showAns ? "not-allowed" : "grab",
-                  opacity:         isUsed ? 0.55 : 1,
-                  userSelect:      "none",
-                  fontSize:        "clamp(12px,1.3vw,17px)",
-                  fontWeight:      500,
-                  boxShadow:       isUsed ? "none" : "0 2px 6px rgba(0,0,0,0.07)",
-                  transition:      "0.2s ease",
-                  touchAction:     "none",
-                  textAlign:       "center",
-                  lineHeight:      1.3,
-                }}
-              >
-                {item.value}
+        {/* ── Dialogue ── */}
+        <div className="rwd-list">
+          {LINES.map((line, li) => (
+            <div key={li} className="rwd-line">
+              {line.speaker && (
+                <>
+                  <span className="rwd-speaker">{line.speaker}</span>
+                  <span className="rwd-colon">:</span>
+                </>
+              )}
+              <div className="rwd-parts">
+                {line.parts.map((part, pi) => {
+                  if (part.type === "text") {
+                    return <span key={pi} className="rwd-text">{part.value}</span>;
+                  }
+                  // input
+                  const wrong    = isWrong(part);
+                  const value    = answers[part.key] || "";
+                  const tColor   = showAns ? INPUT_ANSWER_COLOR : INPUT_TEXT_COLOR;
+                  const uColor   = wrong ? INPUT_UNDERLINE_WRONG : INPUT_UNDERLINE_DEFAULT;
+                  const disabled = isDisabled(part);
+
+                  return (
+                    <div key={part.key} className="rwd-input-wrap">
+                      <input
+                        type="text"
+                        className={[
+                          "rwd-input",
+                          wrong   ? "rwd-input--wrong"  : "",
+                          showAns ? "rwd-input--answer" : "",
+                        ].filter(Boolean).join(" ")}
+                        value={value}
+                        disabled={disabled}
+                        onChange={(e) => handleChange(part.key, e.target.value)}
+                        style={{ borderBottomColor: uColor, color: tColor }}
+                        spellCheck={false}
+                        autoComplete="off"
+                      />
+                      {wrong && <div className="rwd-badge">✕</div>}
+                    </div>
+                  );
+                })}
               </div>
-            );
-          })}
+            </div>
+          ))}
         </div>
 
-        {/* ── الجمل ── */}
-        <div style={{ display: "flex", flexDirection: "column", gap: "clamp(12px,1.8vw,20px)", width: "100%" }}>
-          {SENTENCES.map((item) => {
-            const wrong = isItemWrong(item);
-            return (
-              <div
-                key={item.id}
-                style={{
-                  position:   "relative",
-                  display:    "flex",
-                  alignItems: "flex-end",
-                  gap:        "clamp(6px,0.8vw,10px)",
-                  flexWrap:   "wrap",
-                }}
-              >
-                {/* رقم */}
-                <span style={{ fontSize: "clamp(16px,1.8vw,24px)", fontWeight: 700, color: "#111", flexShrink: 0, paddingBottom: "4px" }}>
-                  {item.id}
-                </span>
-
-                {/* first drop zone */}
-                {renderDropZone(`${item.id}-first`)}
-
-                {/* but */}
-                <span style={{ fontSize: "clamp(13px,1.4vw,18px)", fontWeight: 600, color: "#111", paddingBottom: "4px", flexShrink: 0 }}>
-                  but
-                </span>
-
-                {/* second drop zone */}
-                {renderDropZone(`${item.id}-second`)}
-
-                {/* Wrong badge */}
-                {wrong && (
-                  <div style={{
-                    position:        "absolute",
-                    top:             "-8px",
-                    right:           "-8px",
-                    width:           "18px",
-                    height:          "18px",
-                    borderRadius:    "50%",
-                    border:          "1px solid #fff",
-                    backgroundColor: WRONG_COLOR,
-                    color:           "#fff",
-                    display:         "flex",
-                    alignItems:      "center",
-                    justifyContent:  "center",
-                    fontSize:        "10px",
-                    fontWeight:      700,
-                    boxShadow:       "0 1px 4px rgba(0,0,0,0.2)",
-                    pointerEvents:   "none",
-                  }}>✕</div>
-                )}
-              </div>
-            );
-          })}
-        </div>
-
-        {/* Buttons */}
-        <div style={{ display: "flex", justifyContent: "center", marginTop: "clamp(6px,1vw,12px)" }}>
+        {/* ── Buttons ── */}
+        <div className="rwd-buttons">
           <Button
             checkAnswers={handleCheck}
             handleShowAnswer={handleShowAnswer}
-            handleStartAgain={handleStartAgain}
+            handleStartAgain={handleReset}
           />
         </div>
       </div>
-
-      {/* Touch ghost */}
-      {touchItem && (
-        <div style={{
-          position:      "fixed",
-          left:          touchPos.x - 70,
-          top:           touchPos.y - 20,
-          background:    "#ffca94",
-          padding:       "8px 12px",
-          borderRadius:  "10px",
-          border:        `1.5px solid ${BORDER_COLOR}`,
-          boxShadow:     "0 4px 10px rgba(0,0,0,0.2)",
-          pointerEvents: "none",
-          zIndex:        9999,
-          fontSize:      "clamp(12px,1.3vw,16px)",
-          fontWeight:    600,
-          color:         "#222",
-          maxWidth:      "220px",
-          textAlign:     "center",
-          lineHeight:    1.3,
-        }}>
-          {touchItem.value}
-        </div>
-      )}
     </div>
   );
 }

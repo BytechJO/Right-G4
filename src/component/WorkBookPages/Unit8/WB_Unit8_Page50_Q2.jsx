@@ -1,311 +1,295 @@
 import React, { useState } from "react";
 import Button from "../Button";
 import ValidationAlert from "../../Popup/ValidationAlert";
-import AudioWithCaption from "../../AudioWithCaption";
 
-import sound1 from "../../../assets/audio/ClassBook/Grade 3/cd10pg50instruction1-adult-lady_B8YFlmMv.mp3"; // ← غيّر المسار حسب ملف الأوديو
+// ─────────────────────────────────────────────
+//  🖼️  IMAGES
+// ─────────────────────────────────────────────
+import img1a from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U8 Folder/Page 50/SVG/Asset 47.svg";
+import img1b from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U8 Folder/Page 50/SVG/Asset 48.svg";
+import img2a from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U8 Folder/Page 50/SVG/Asset 61.svg";
+import img2b from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U8 Folder/Page 50/SVG/Asset 54.svg";
+import img3a from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U8 Folder/Page 50/SVG/Asset 50.svg";
+import img3b from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U8 Folder/Page 50/SVG/Asset 49.svg";
+import img4a from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U8 Folder/Page 50/SVG/Asset 55.svg";
+import img4b from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U8 Folder/Page 50/SVG/Asset 59.svg";
+import img5a from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U8 Folder/Page 50/SVG/Asset 58.svg";
+import img5b from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U8 Folder/Page 50/SVG/Asset 51.svg";
+import img6a from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U8 Folder/Page 50/SVG/Asset 52.svg";
+import img6b from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U8 Folder/Page 50/SVG/Asset 58.svg";
 
-import img1 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U8 Folder/Page 50/SVG/6.svg";
-import img2 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U8 Folder/Page 50/SVG/7.svg";
-import img3 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U8 Folder/Page 50/SVG/8.svg";
-import img4 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U8 Folder/Page 50/SVG/9.svg";
-import img5 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U8 Folder/Page 50/SVG/10.svg";
-import img6 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U8 Folder/Page 50/SVG/11.svg";
+// ─────────────────────────────────────────────
+//  🎨  COLORS
+// ─────────────────────────────────────────────
+const CHECK_COLOR      = "#e53935";
+const WRONG_BADGE_BG   = "#ef4444";
+const WRONG_BADGE_TEXT = "#ffffff";
+const SENTENCE_COLOR   = "#2b2b2b";
+const NUMBER_COLOR     = "#2b2b2b";
+const IMG_BORDER       = "#d0d0d0";
 
-const BORDER_COLOR = "#f39b42";
-const WRONG_COLOR = "#ef4444";
-const captions = [
-  { start: 0.44, end: 3.08, text: "Page 50, phonics exercise B." },
-  { start: 3.08, end: 4.90, text: "Listen and circle." },
-  { start: 5.98, end: 7.66, text: "1- princess." },
-  { start: 8.70, end: 10.50, text: "2- bracelet." },
-  { start: 11.54, end: 13.32, text: "3- present." },
-  { start: 13.32, end: 16.32, text: "4- grandfather." },
-  { start: 16.32, end: 19.02, text: "5- broom." },
-];
+// ─────────────────────────────────────────────
+//  📝  EXERCISE DATA
+// ─────────────────────────────────────────────
 const ITEMS = [
-  {
-    id: 1,
-    img: img1,
-    options: ["cr", "dr", "jr"],
-    correct: "jr",
-  },
-  {
-    id: 2,
-    img: img2,
-    options: ["jq", "tr", "dr"],
-    correct: "jq",
-  },
-  {
-    id: 3,
-    img: img3,
-    options: ["fr", "jq", "cr"],
-    correct: "jq",
-  },
-  {
-    id: 4,
-    img: img4,
-    options: ["tr", "jq", "pr"],
-    correct: "jq",
-  },
-  {
-    id: 5,
-    img: img5,
-    options: ["cr", "tr", "jq"],
-    correct: "jq",
-  },
-  {
-    id: 6,
-    img: img6,
-    options: ["jq", "fr", "dr"],
-    correct: "jq",
-  },
+  { id: 1, sentence: "She watered the flowers.",    imgA: img1a, imgB: img1b, correctSide: "a" },
+  { id: 2, sentence: "They played in the snow.",    imgA: img2a, imgB: img2b, correctSide: "b" },
+  { id: 3, sentence: "He listened to the radio.",   imgA: img3a, imgB: img3b, correctSide: "b" },
+  { id: 4, sentence: "He cooked food.",             imgA: img4a, imgB: img4b, correctSide: "b" },
+  { id: 5, sentence: "They watched a movie.",       imgA: img5a, imgB: img5b, correctSide: "a" },
+  { id: 6, sentence: "I played the violin.",        imgA: img6a, imgB: img6b, correctSide: "b" },
 ];
 
-export default function WB_LookReadCircle_PageJ() {
-  const [answers, setAnswers] = useState({});
+// ─────────────────────────────────────────────
+//  COMPONENT
+// ─────────────────────────────────────────────
+export default function WB_ReadLookWriteCheck_QL() {
+  const [selected,    setSelected]    = useState({});
   const [showResults, setShowResults] = useState(false);
-  const [showAns, setShowAns] = useState(false);
+  const [showAns,     setShowAns]     = useState(false);
 
-  const handleSelect = (id, value) => {
-    if (showAns) return;
-    setAnswers((prev) => ({ ...prev, [id]: value }));
-    setShowResults(false);
+  const isLocked = showResults || showAns;
+
+  const handleSelect = (itemId, side) => {
+    if (isLocked) return;
+    setSelected((prev) => ({ ...prev, [itemId]: prev[itemId] === side ? null : side }));
   };
 
   const handleCheck = () => {
-    if (showAns) return;
-    const allAnswered = ITEMS.every((i) => answers[i.id]);
-    if (!allAnswered) {
-      ValidationAlert.info("Please answer all questions first.");
-      return;
-    }
-
+    if (isLocked) return;
+    const allAnswered = ITEMS.every((item) => selected[item.id]);
+    if (!allAnswered) { ValidationAlert.info("Please choose a picture for each sentence."); return; }
     let score = 0;
-    ITEMS.forEach((i) => {
-      if (answers[i.id] === i.correct) score++;
-    });
-
+    ITEMS.forEach((item) => { if (selected[item.id] === item.correctSide) score++; });
     setShowResults(true);
-    const total = ITEMS.length;
-
-    if (score === total) ValidationAlert.success(`Score: ${score} / ${total}`);
-    else if (score > 0) ValidationAlert.warning(`Score: ${score} / ${total}`);
-    else ValidationAlert.error(`Score: ${score} / ${total}`);
+    if (score === ITEMS.length) ValidationAlert.success(`Score: ${score} / ${ITEMS.length}`);
+    else if (score > 0)         ValidationAlert.warning(`Score: ${score} / ${ITEMS.length}`);
+    else                        ValidationAlert.error(`Score: ${score} / ${ITEMS.length}`);
   };
 
   const handleShowAnswer = () => {
     const filled = {};
-    ITEMS.forEach((i) => {
-      filled[i.id] = i.correct;
-    });
-    setAnswers(filled);
-    setShowResults(true);
+    ITEMS.forEach((item) => { filled[item.id] = item.correctSide; });
+    setSelected(filled);
+    setShowResults(false);
     setShowAns(true);
   };
 
-  const handleStartAgain = () => {
-    setAnswers({});
+  const handleReset = () => {
+    setSelected({});
     setShowResults(false);
     setShowAns(false);
   };
 
-  const getOptionStyle = (item, opt) => {
-    const isSelected = answers[item.id] === opt;
-    const isWrong =
-      showResults && !showAns && answers[item.id] === opt && opt !== item.correct;
-    const isCorrectShown = showAns && opt === item.correct;
+  const getBoxState = (item, side) => {
+    const isSel = selected[item.id] === side;
+    if (!isSel) return "none";
+    if (showAns) return "correct";
+    if (showResults) return item.correctSide === side ? "correct" : "wrong";
+    return "selected";
+  };
 
-    if (isWrong) {
-      return {
-        border: `2.5px solid ${WRONG_COLOR}`,
-        color: WRONG_COLOR,
-      };
-    }
-
-    if (isSelected || isCorrectShown) {
-      return {
-        border: `2.5px solid ${BORDER_COLOR}`,
-        color: "#111",
-      };
-    }
-
-    return {
-      border: "2.5px solid transparent",
-      color: "#444",
-    };
+  const getCheckmark = (state) => {
+    if (state === "none") return null;
+    if (state === "wrong") return "✕";
+    return "✓";
   };
 
   return (
     <div className="main-container-component">
+      <style>{`
+        /* ── 2-column grid ── */
+        .rlwc-grid {
+          display: grid;
+          grid-template-columns: repeat(2, 1fr);
+          gap: clamp(16px, 2.4vw, 30px) clamp(20px, 3vw, 40px);
+          width: 100%;
+        }
+
+        /* ── Single card ── */
+        .rlwc-card {
+          display: flex;
+          flex-direction: column;
+          gap: clamp(6px, 0.9vw, 10px);
+          min-width: 0;
+        }
+
+        /* Number + sentence */
+        .rlwc-sentence-row {
+          display: flex;
+          align-items: center;
+          gap: clamp(5px, 0.7vw, 8px);
+        }
+
+        .rlwc-num {
+          font-size: clamp(14px, 1.7vw, 20px);
+          font-weight: 700;
+          color: ${NUMBER_COLOR};
+          flex-shrink: 0;
+        }
+
+        .rlwc-sentence {
+          font-size: clamp(13px, 1.6vw, 19px);
+          color: ${SENTENCE_COLOR};
+          line-height: 1.4;
+        }
+
+        /* Two images side by side */
+        .rlwc-imgs {
+          display: flex;
+          gap: clamp(4px, 0.6vw, 8px);
+        }
+
+        .rlwc-img-wrap {
+          position: relative;
+          flex: 1;
+          cursor: pointer;
+          user-select: none;
+          overflow: hidden;
+        }
+        .rlwc-img-wrap--locked { cursor: default; }
+
+        .rlwc-img {
+        height : auto ; 
+          width: 100%;
+          display: block;
+        }
+
+        /* Checkbox top right */
+        .rlwc-checkbox {
+          position: absolute;
+          top: 0; right: 0;
+          width: clamp(22px, 2.8vw, 32px);
+          height: clamp(22px, 2.8vw, 32px);
+          border: 2px solid #2096a6;
+          border-radius: 0 6px 0 4px;
+          background: #fff;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: clamp(13px, 1.6vw, 18px);
+          font-weight: 700;
+          color: #2b2b2b;
+          line-height: 1;
+        }
+
+        .rlwc-checkbox--selected { color: ${CHECK_COLOR}; }
+        .rlwc-checkbox--correct  { border-color: ${CHECK_COLOR}; color: ${CHECK_COLOR}; }
+        .rlwc-checkbox--wrong    { border-color: ${WRONG_BADGE_BG}; color: ${WRONG_BADGE_BG}; }
+
+        /* ✕ badge */
+        .rlwc-badge {
+          position: absolute;
+          top: 25px; right: 25px;
+          width: clamp(15px, 1.7vw, 19px);
+          height: clamp(15px, 1.7vw, 19px);
+          border-radius: 50%;
+          background: ${WRONG_BADGE_BG};
+          color: ${WRONG_BADGE_TEXT};
+          display: flex; align-items: center; justify-content: center;
+          font-size: clamp(7px, 0.8vw, 10px);
+          font-weight: 700;
+          border: 2px solid #fff;
+          box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+          pointer-events: none;
+          z-index: 3;
+        }
+
+        /* Buttons */
+        .rlwc-buttons {
+          display: flex;
+          justify-content: center;
+          margin-top: clamp(8px, 1.6vw, 18px);
+        }
+
+        @media (max-width: 500px) {
+          .rlwc-grid { grid-template-columns: 1fr; }
+        }
+      `}</style>
+
       <div
         className="div-forall"
         style={{
           display: "flex",
           flexDirection: "column",
-          gap: "clamp(18px,2.5vw,28px)",
+          gap: "clamp(14px, 2vw, 22px)",
           maxWidth: "1100px",
           margin: "0 auto",
         }}
       >
+        {/* ── Header ── */}
         <h1
           className="WB-header-title-page8"
-          style={{
-            margin: 0,
-            display: "flex",
-            alignItems: "center",
-            gap: "12px",
-            flexWrap: "wrap",
-          }}
+          style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
         >
-          <span className="WB-ex-A">J</span> Look, read, and circle.
+          <span className="WB-ex-A">L</span>
+          Read, look, and write ✓.
         </h1>
-<div style={{ display: "flex", justifyContent: "center" }}>
-  <AudioWithCaption src={sound1} captions={captions} />
-</div>
 
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(3, minmax(0,1fr))",
-            gap: "clamp(16px,2.5vw,32px)",
-            width: "100%",
-          }}
-        >
-          {ITEMS.map((item) => (
-            <div
-              key={item.id}
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                gap: "clamp(6px,0.8vw,10px)",
-              }}
-            >
-              <span
-                style={{
-                  fontSize: "clamp(16px,1.8vw,24px)",
-                  fontWeight: 700,
-                  color: "#111",
-                  alignSelf: "flex-start",
-                }}
-              >
-                {item.id}
-              </span>
+        {/* ── Grid ── */}
+        <div className="rlwc-grid">
+          {ITEMS.map((item) => {
+            const stateA = getBoxState(item, "a");
+            const stateB = getBoxState(item, "b");
 
-              <div
-                style={{
-                  width: "100%",
-                  aspectRatio: "1.4 / 1",
-                  border: `2px solid ${BORDER_COLOR}`,
-                  borderRadius: "clamp(10px,1.2vw,16px)",
-                  overflow: "hidden",
-                  background: "#f7f7f7",
-                }}
-              >
-                <img
-                  src={item.img}
-                  alt={`item-${item.id}`}
-                  style={{
-                    width: "100%",
-                    height: "100%",
-                    objectFit: "cover",
-                    display: "block",
-                  }}
-                />
-              </div>
+            return (
+              <div key={item.id} className="rlwc-card">
 
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "row",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  gap: "12px",
-                  width: "100%",
-                  flexWrap: "nowrap",
-                }}
-              >
-                {item.options.map((opt) => {
-                  const isSelected = answers[item.id] === opt;
-                  const isWrong =
-                    showResults &&
-                    !showAns &&
-                    answers[item.id] === opt &&
-                    opt !== item.correct;
+                {/* Sentence */}
+                <div className="rlwc-sentence-row">
+                  <span className="rlwc-num">{item.id}</span>
+                  <span className="rlwc-sentence">{item.sentence}</span>
+                </div>
 
-                  return (
-                    <div
-                      key={opt}
-                      style={{
-                        position: "relative",
-                        width: "auto",
-                      }}
-                    >
-                      <button
-                        onClick={() => handleSelect(item.id, opt)}
-                        style={{
-                          width: "auto",
-                          minWidth: "44px",
-                          padding: "clamp(4px,0.6vw,8px) clamp(10px,1.2vw,16px)",
-                          borderRadius: "999px",
-                          fontSize: "clamp(13px,1.4vw,18px)",
-                          fontWeight: isSelected ? 700 : 500,
-                          cursor: showAns ? "default" : "pointer",
-                          transition: "all 0.15s",
-                          userSelect: "none",
-                          textAlign: "center",
-                          boxSizing: "border-box",
-                          background: "transparent",
-                          ...getOptionStyle(item, opt),
-                        }}
-                      >
-                        {opt}
-                      </button>
+                {/* Two images */}
+                <div className="rlwc-imgs">
 
-                      {isWrong && (
-                        <div
-                          style={{
-                            position: "absolute",
-                            top: "-6px",
-                            right: "-6px",
-                            width: "clamp(16px,1.8vw,20px)",
-                            height: "clamp(16px,1.8vw,20px)",
-                            borderRadius: "50%",
-                            border: "1px solid #fff",
-                            backgroundColor: WRONG_COLOR,
-                            color: "#fff",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            fontSize: "clamp(9px,0.9vw,11px)",
-                            fontWeight: 700,
-                            boxShadow: "0 1px 4px rgba(0,0,0,0.2)",
-                            pointerEvents: "none",
-                          }}
-                        >
-                          ✕
-                        </div>
-                      )}
+                  {/* Image A */}
+                  <div
+                    className={`rlwc-img-wrap${isLocked ? " rlwc-img-wrap--locked" : ""}`}
+                    onClick={() => handleSelect(item.id, "a")}
+                  >
+                    <img src={item.imgA} alt={`${item.id}a`} className="rlwc-img" />
+                    <div className={[
+                      "rlwc-checkbox",
+                      stateA === "selected" ? "rlwc-checkbox--selected" : "",
+                      stateA === "correct"  ? "rlwc-checkbox--correct"  : "",
+                      stateA === "wrong"    ? "rlwc-checkbox--wrong"    : "",
+                    ].filter(Boolean).join(" ")}>
+                      {getCheckmark(stateA)}
+                      {stateA === "wrong" && <div className="rlwc-badge">✕</div>}
                     </div>
-                  );
-                })}
+                  </div>
+
+                  {/* Image B */}
+                  <div
+                    className={`rlwc-img-wrap${isLocked ? " rlwc-img-wrap--locked" : ""}`}
+                    onClick={() => handleSelect(item.id, "b")}
+                  >
+                    <img src={item.imgB} alt={`${item.id}b`} className="rlwc-img" />
+                    <div className={[
+                      "rlwc-checkbox",
+                      stateB === "selected" ? "rlwc-checkbox--selected" : "",
+                      stateB === "correct"  ? "rlwc-checkbox--correct"  : "",
+                      stateB === "wrong"    ? "rlwc-checkbox--wrong"    : "",
+                    ].filter(Boolean).join(" ")}>
+                      {getCheckmark(stateB)}
+                      {stateB === "wrong" && <div className="rlwc-badge">✕</div>}
+                    </div>
+                  </div>
+
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            marginTop: "clamp(6px,1vw,12px)",
-          }}
-        >
+        {/* ── Buttons ── */}
+        <div className="rlwc-buttons">
           <Button
             checkAnswers={handleCheck}
             handleShowAnswer={handleShowAnswer}
-            handleStartAgain={handleStartAgain}
+            handleStartAgain={handleReset}
           />
         </div>
       </div>
