@@ -152,7 +152,7 @@ export default function WB_LookUnscrambleWrite_QC() {
 
         .lusw-img {
           height: auto;
-          width: 15%;
+          width: 10%;
           display: block;
           flex-shrink: 0;
         }

@@ -195,10 +195,11 @@ font-size: clamp(15px, 1.9vw, 18px);
           align-items: flex-end;
           flex-wrap: wrap;
           gap: clamp(4px, 0.6vw, 8px);
-font-size: clamp(15px, 1.9vw, 18px);
+font-size: clamp(16px, 1.9vw, 18px);
           color: ${SENTENCE_COLOR};
           line-height: 1.5;
-                            bottom : -5%
+                            bottom : -5%;
+                            padding : 0 13% ;
 
         }
 

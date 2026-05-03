@@ -6,8 +6,8 @@ import ValidationAlert from "../../Popup/ValidationAlert";
 //  🖼️  IMAGES — 9 صور
 // ─────────────────────────────────────────────
 import img1 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U4 Folder/Page 23/Asset 1.svg";
-import img2 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U4 Folder/Page 23/Asset 2.svg";
-import img3 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U4 Folder/Page 23/Asset 3.svg";
+import img2 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U4 Folder/Page 23/Asset 27.svg";
+import img3 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U4 Folder/Page 23/Asset 28.svg";
 import img4 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U4 Folder/Page 23/Asset 4.svg";
 import img5 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U4 Folder/Page 23/Asset 5.svg";
 import img6 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U4 Folder/Page 23/Asset 6.svg";

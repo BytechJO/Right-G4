@@ -49,9 +49,9 @@ export default function WB_LookWriteSentences_QF() {
       <style>{`
         /* ── Farm image ── */
         .lwsf-img {
-          width: 100%;
+          width: 50%;
           display: block;
-          max-height: 111%
+          height : auto ;
         }
 
         /* ── Word pairs grid ── */
@@ -143,10 +143,10 @@ line-height: 1.5;
           <span style={{ fontStyle: "italic", fontWeight: 700 , color : "#f89631" }}>-est</span>
           {" "}word for each sentence.
         </h1>
-
+<div style={{ width : "100%", display : "flex" , justifyContent : "center"}}>
         {/* ── Farm image ── */}
         <img src={farmImg} alt="farm scene" className="lwsf-img" />
-
+</div>
         {/* ── Word pairs ── */}
         <div className="lwsf-pairs">
           {WORD_PAIRS.map((p, i) => (

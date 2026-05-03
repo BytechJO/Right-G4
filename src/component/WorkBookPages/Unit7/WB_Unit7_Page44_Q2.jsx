@@ -5,7 +5,7 @@ import ValidationAlert from "../../Popup/ValidationAlert";
 // ─────────────────────────────────────────────
 //  🖼️  IMAGES
 // ─────────────────────────────────────────────
-import imgScene from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U7 Folder/Page 44/SVG/Asset 7.svg";
+import imgScene from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U7 Folder/Page 44/SVG/0000.svg";
 
 // ─────────────────────────────────────────────
 //  🎨  COLORS

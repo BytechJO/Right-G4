@@ -154,6 +154,7 @@ export default function WB_ReadLookMatch_D() {
           align-items: stretch;
           width: 100%;
           row-gap: clamp(12px, 2vw, 24px);
+          margin : 4% 0 ; 
         }
 
         .rlm-left {
@@ -178,9 +179,10 @@ export default function WB_ReadLookMatch_D() {
           flex-shrink: 0;
         }
         .rlm-question {
-          font-size: clamp(14px, 1.7vw, 20px);
+    font-size: clamp(14px, 1.7vw, 18px);
           color: #2b2b2b;
-          line-height: 1.4;
+          line-height: 1.5;
+              white-space: nowrap;
         }
 
         .rlm-img-dot {
@@ -216,7 +218,9 @@ export default function WB_ReadLookMatch_D() {
           user-select: none;
         }
         .rlm-answer {
-          font-size: clamp(14px, 1.7vw, 20px);
+   
+          font-size: clamp(14px, 1.7vw, 18px);
+
           color: #2b2b2b;
           line-height: 1.5;
         }

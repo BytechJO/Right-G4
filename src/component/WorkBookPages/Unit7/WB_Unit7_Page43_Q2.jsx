@@ -126,7 +126,7 @@ export default function WB_LookReadWrite_QJ() {
         /* Top row: num + img */
         .lrwj-top {
           display: flex;
-          align-items: flex-end;
+          align-items: center;
           gap: clamp(8px, 1.2vw, 14px);
         }
 

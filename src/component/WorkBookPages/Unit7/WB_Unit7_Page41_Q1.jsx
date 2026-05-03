@@ -117,7 +117,7 @@ export default function WB_ReadWrite_QE() {
       <style>{`
         /* ── Paragraph ── */
         .rwe-para {
-          font-size: clamp(13px, 1.5vw, 18px);
+          font-size: clamp(13px, 1.5vw, 15px);
           color: ${PARAGRAPH_COLOR};
           line-height: 1.8;
           text-indent: clamp(16px, 2vw, 26px);
@@ -156,12 +156,11 @@ export default function WB_ReadWrite_QE() {
         }
 
         .rwe-question {
-          font-size: clamp(14px, 1.7vw, 20px);
+          font-size: clamp(14px, 1.7vw, 18px);
           font-weight: 400;
           color: ${QUESTION_COLOR};
           white-space: nowrap;
           flex-shrink: 0;
-          padding-bottom: 4px;
           line-height: 1;
         }
 
@@ -178,12 +177,10 @@ export default function WB_ReadWrite_QE() {
           border-bottom: 1px solid ${INPUT_UNDERLINE_DEFAULT};
           outline: none;
           font-size: clamp(14px, 1.7vw, 20px);
-          font-weight: 400;
           color: ${INPUT_TEXT_COLOR};
-          padding: 4px 6px 5px;
+
           line-height: 1.5;
           box-sizing: border-box;
-          font-family: inherit;
           transition: border-color 0.2s;
         }
         .rwe-input:disabled   { opacity: 1; cursor: default; }

@@ -357,23 +357,22 @@ export default function WB_ReadLookMatch_QI() {
 
               return (
                 <React.Fragment key={left.id}>
-
-                  {/* Left */}
-                  <div
-                    className={`rlm2-left${isSelected ? " rlm2-left--selected" : ""}`}
-                    onClick={() => handleLeftClick(left.id)}
-                  >
-                    <span className="rlm2-num">{left.id}</span>
-                    <span className="rlm2-text">{left.text}</span>
-                    <div style={{ position: "relative", flexShrink: 0 }}>
-                      <div
-                        ref={(el) => (leftRefs.current[left.id] = el)}
-                        className="rlm2-dot"
-                        style={{ background: dotColorL }}
-                      />
-                      {isWrongMatch && <div className="rlm2-badge">✕</div>}
-                    </div>
-                  </div>
+{/* Left */}
+<div
+  className={`rlm2-left${isSelected ? " rlm2-left--selected" : ""}`}
+  onClick={() => handleLeftClick(left.id)}
+>
+  <span className="rlm2-num">{left.id}</span>
+  <span className="rlm2-text">{left.text}</span>
+  <div style={{ position: "relative", flexShrink: 0, marginLeft: "auto" }}>
+    <div
+      ref={(el) => (leftRefs.current[left.id] = el)}
+      className="rlm2-dot"
+      style={{ background: dotColorL }}
+    />
+    {isWrongMatch && <div className="rlm2-badge">✕</div>}
+  </div>
+</div>
 
                   {/* Spacer */}
                   <div className="rlm2-spacer" />

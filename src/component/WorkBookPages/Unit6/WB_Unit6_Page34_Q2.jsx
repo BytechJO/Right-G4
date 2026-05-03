@@ -327,7 +327,7 @@ export default function WB_ReadMatch_QD() {
                   <div
                     ref={(el) => (dotRefs.current[`left-${item.id}`] = el)}
                     className={`rdm-dot ${selected ? "rdm-dot--selected" : ""}`}
-                    style={{ backgroundColor: dotColor(connected, selected) }}
+                    style={{ backgroundColor: dotColor(connected, selected) , marginLeft: "auto",  marginRight: "20%", }}
                   />
                 </div>
               );

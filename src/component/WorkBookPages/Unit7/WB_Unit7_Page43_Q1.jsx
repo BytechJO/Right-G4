@@ -126,7 +126,7 @@ export default function WB_LookReadWrite_QI() {
         .lrwi2-list {
           display: flex;
           flex-direction: column;
-          gap: clamp(12px, 1.8vw, 22px);
+          gap: clamp(6px, 1.8vw, 6px);
           width: 100%;
         }
 
@@ -134,7 +134,6 @@ export default function WB_LookReadWrite_QI() {
         .lrwi2-item {
           display: flex;
           flex-direction: column;
-          gap: clamp(4px, 0.5vw, 6px);
         }
 
         /* Top row: num + img */
@@ -176,7 +175,6 @@ export default function WB_LookReadWrite_QI() {
           font-weight: 400;
           color: ${INPUT_TEXT_COLOR};
 
-                    line-height: 1.5;
           box-sizing: border-box;
           transition: border-color 0.2s;
         }

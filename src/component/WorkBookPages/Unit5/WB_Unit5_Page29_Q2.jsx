@@ -163,7 +163,6 @@ export default function WB_Unit5_Page28_Q2() {
         .lrwp-list {
           display: flex;
           flex-direction: column;
-          gap: clamp(14px, 2.2vw, 28px);
           width: 100%;
         }
 

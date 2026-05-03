@@ -129,7 +129,6 @@ export default function WB_LookReadWrite_QG() {
         .lrwg-list {
           display: flex;
           flex-direction: column;
-          gap: clamp(14px, 2.2vw, 26px);
           width: 100%;
     margin-top: 5%;
         }

@@ -120,6 +120,7 @@ export default function WB_ReadWrite_QC() {
           display: grid;
           grid-template-columns: 1fr 1fr;
           gap: clamp(4px, 0.6vw, 8px) clamp(16px, 3vw, 40px);
+          margin : 4% 0 ; 
         }
 
         .rwc-box-phrase {
