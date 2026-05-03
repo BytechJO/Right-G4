@@ -1,406 +1,275 @@
-import React, { useState, useRef } from "react";
+import React, { useState } from "react";
 import Button from "../Button";
 import ValidationAlert from "../../Popup/ValidationAlert";
 
-import img1 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U10 Folder/Page 57/SVG/1.svg";
-import img2 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U10 Folder/Page 57/SVG/2.svg";
-import img3 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U10 Folder/Page 57/SVG/3.svg";
-import img4 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U10 Folder/Page 57/SVG/4.svg";
-import img5 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U10 Folder/Page 57/SVG/5.svg";
-import img6 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U10 Folder/Page 57/SVG/6.svg";
+// ─────────────────────────────────────────────
+//  🖼️  IMAGES
+// ─────────────────────────────────────────────
+import imgScene from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U10 Folder/Page 57/SVG/Asset 5.svg";
 
-// ── ثوابت ──────────────────────────────────────────────────────
-const WRONG_COLOR  = "#ef4444";
-const DRAG_COLOR   = "#ffca94";
-const BORDER_COLOR = "#f39b42";
+// ─────────────────────────────────────────────
+//  🎨  COLORS
+// ─────────────────────────────────────────────
+const INPUT_UNDERLINE_DEFAULT = "#3f3f3f";
+const INPUT_UNDERLINE_WRONG   = "#ef4444";
+const INPUT_TEXT_COLOR        = "#2b2b2b";
+const INPUT_ANSWER_COLOR      = "#c81e1e";
+const SCRAMBLE_COLOR          = "#2b2b2b";
+const NUMBER_COLOR            = "#2b2b2b";
+const WRONG_BADGE_BG          = "#ef4444";
+const WRONG_BADGE_TEXT        = "#ffffff";
 
-// ── بيانات ─────────────────────────────────────────────────────
-const SENTENCES = [
-  { id: 1, text: "He will swim in the sea."       },
-  { id: 2, text: "She won't fly a kite."           },
-  { id: 3, text: "They will go to the beach."      },
-  { id: 4, text: "She will do her homework."       },
-  { id: 5, text: "She won't plant a flower."       },
-  { id: 6, text: "He won't play the drum."         },
-];
-
+// ─────────────────────────────────────────────
+//  📝  EXERCISE DATA
+// ─────────────────────────────────────────────
 const ITEMS = [
-  { id: 1, img: img1 },
-  { id: 2, img: img2 },
-  { id: 3, img: img3 },
-  { id: 4, img: img4 },
-  { id: 5, img: img5 },
-  { id: 6, img: img6 },
+  { id: 1, scramble: "zesi",       correct: ["size"],        answer: "size"        },
+  { id: 2, scramble: "krca",       correct: ["rack"],        answer: "rack"        },
+  { id: 3, scramble: "trishs",     correct: ["shirts"],      answer: "shirts"      },
+  { id: 4, scramble: "lsacau",     correct: ["casual"],      answer: "casual"      },
+  { id: 5, scramble: "roladls",    correct: ["dollars"],     answer: "dollars"     },
+  { id: 6, scramble: "schperua",   correct: ["purchase"],    answer: "purchase"    },
+  { id: 7, scramble: "tiprcaulra", correct: ["particular"],  answer: "particular"  },
+  { id: 8, scramble: "tamcofrlebo",correct: ["comfortable"], answer: "comfortable" },
 ];
 
-const CORRECT_ANSWERS = { 1: 4, 2: 2, 3: 5, 4: 3, 5: 6, 6: 1 };
-const NUMBERS         = [1, 2, 3, 4, 5, 6];
+// ─────────────────────────────────────────────
+//  🔧  NORMALIZE
+// ─────────────────────────────────────────────
+const normalize = (str) =>
+  str.toLowerCase().replace(/[^a-z0-9'\s]/g, "").replace(/\s+/g, " ").trim();
 
-// ── بادج الخطأ ─────────────────────────────────────────────────
-const ErrorBadge = () => (
-  <div
-    style={{
-      position:        "absolute",
-      top:             -8,
-      right:           -8,
-      width:           "clamp(16px,1.8vw,22px)",
-      height:          "clamp(16px,1.8vw,22px)",
-      borderRadius:    "50%",
-      backgroundColor: WRONG_COLOR,
-      color:           "#fff",
-      display:         "flex",
-      alignItems:      "center",
-      justifyContent:  "center",
-      fontSize:        "clamp(9px,0.9vw,12px)",
-      fontWeight:      700,
-      border:          "1.5px solid #fff",
-      boxShadow:       "0 1px 4px rgba(0,0,0,0.25)",
-      zIndex:          5,
-      pointerEvents:   "none",
-    }}
-  >
-    ✕
-  </div>
-);
+const isCorrect = (userVal, correctArr) =>
+  correctArr.some((c) => normalize(userVal) === normalize(c));
 
-// ── المكوّن الرئيسي ─────────────────────────────────────────────
-export default function WB_Unit10_Page57_QA() {
-  const [answers,       setAnswers]       = useState({});
-  const [draggedNumber, setDraggedNumber] = useState(null);
-  const [touchItem,     setTouchItem]     = useState(null);
-  const [touchPos,      setTouchPos]      = useState({ x: 0, y: 0 });
-  const [checked,       setChecked]       = useState(false);
-  const [showAns,       setShowAns]       = useState(false);
+// ─────────────────────────────────────────────
+//  COMPONENT
+// ─────────────────────────────────────────────
+export default function WB_UnscrambleWrite_QA() {
+  const [answers,     setAnswers]     = useState({});
+  const [showResults, setShowResults] = useState(false);
+  const [showAns,     setShowAns]     = useState(false);
 
-  const dropRefs    = useRef({});
-  const usedNumbers = Object.values(answers);
+  const isLocked = showAns;
 
-  // ── applyDrop مشترك ──
-  const applyDrop = (id, num) => {
-    if (!num || showAns) return;
-    setChecked(false);
-    setAnswers((prev) => {
-      const updated = { ...prev };
-      Object.keys(updated).forEach((k) => { if (updated[k] === num) delete updated[k]; });
-      updated[id] = num;
-      return updated;
-    });
+  const handleChange = (id, value) => {
+    if (isLocked) return;
+    const item = ITEMS.find((i) => i.id === id);
+    if (showResults && item && isCorrect(answers[id] || "", item.correct)) return;
+    setAnswers((prev) => ({ ...prev, [id]: value }));
   };
 
-  // ── Mouse drag ──
-  const handleDragStart = (num) => {
-    if (showAns || usedNumbers.includes(num)) return;
-    setDraggedNumber(num);
-  };
-
-  const handleDrop = (id) => {
-    if (draggedNumber === null) return;
-    applyDrop(id, draggedNumber);
-    setDraggedNumber(null);
-  };
-
-  // ── Touch drag ──
-  const handleTouchStart = (e, num) => {
-    if (showAns || usedNumbers.includes(num)) return;
-    const t = e.touches[0];
-    setTouchItem(num);
-    setDraggedNumber(num);
-    setTouchPos({ x: t.clientX, y: t.clientY });
-  };
-
-  const handleTouchMove = (e) => {
-    if (touchItem === null) return;
-    const t = e.touches[0];
-    setTouchPos({ x: t.clientX, y: t.clientY });
-  };
-
-  const handleTouchEnd = () => {
-    if (touchItem === null) return;
-    Object.entries(dropRefs.current).forEach(([key, ref]) => {
-      if (!ref) return;
-      const r = ref.getBoundingClientRect();
-      if (
-        touchPos.x >= r.left && touchPos.x <= r.right &&
-        touchPos.y >= r.top  && touchPos.y <= r.bottom
-      ) applyDrop(Number(key), touchItem);
-    });
-    setTouchItem(null);
-    setDraggedNumber(null);
-  };
-
-  const handleRemove = (id) => {
-    if (showAns) return;
-    setChecked(false);
-    setAnswers((prev) => { const u = { ...prev }; delete u[id]; return u; });
-  };
-
-  // ── Check / Show / Reset ──
   const handleCheck = () => {
-    if (showAns) return;
-    const allAnswered = ITEMS.every((item) => answers[item.id]);
-    if (!allAnswered) {
-      ValidationAlert.error("Please complete all answers first! ✏️");
-      return;
-    }
-    let correct = 0;
-    ITEMS.forEach((item) => { if (answers[item.id] === CORRECT_ANSWERS[item.id]) correct++; });
-    setChecked(true);
-    const total = ITEMS.length;
-    if (correct === total) ValidationAlert.success("Excellent! All correct! 🎉");
-    else                   ValidationAlert.error(`${correct} / ${total} correct. Try again! 💪`);
+    if (isLocked) return;
+    const allAnswered = ITEMS.every((item) => answers[item.id]?.trim());
+    if (!allAnswered) { ValidationAlert.info("Please complete all answers first."); return; }
+    let score = 0;
+    ITEMS.forEach((item) => { if (isCorrect(answers[item.id] || "", item.correct)) score++; });
+    setShowResults(true);
+    if (score === ITEMS.length)   ValidationAlert.success(`Score: ${score} / ${ITEMS.length}`);
+    else if (score > 0)           ValidationAlert.warning(`Score: ${score} / ${ITEMS.length}`);
+    else                          ValidationAlert.error(`Score: ${score} / ${ITEMS.length}`);
   };
 
   const handleShowAnswer = () => {
-    setAnswers({ ...CORRECT_ANSWERS });
-    setChecked(false);
+    const filled = {};
+    ITEMS.forEach((item) => { filled[item.id] = item.answer; });
+    setAnswers(filled);
+    setShowResults(false);
     setShowAns(true);
-    setTouchItem(null);
-    setDraggedNumber(null);
   };
 
   const handleReset = () => {
     setAnswers({});
-    setDraggedNumber(null);
-    setTouchItem(null);
-    setChecked(false);
+    setShowResults(false);
     setShowAns(false);
   };
 
-  const isWrong = (id) => checked && answers[id] !== CORRECT_ANSWERS[id];
+  const isWrong = (item) => {
+    if (!showResults || showAns) return false;
+    return !isCorrect(answers[item.id] || "", item.correct);
+  };
+
+  const isDisabled = (item) => {
+    if (showAns) return true;
+    if (showResults && isCorrect(answers[item.id] || "", item.correct)) return true;
+    return false;
+  };
 
   return (
     <div className="main-container-component">
-      <div className="div-forall" style={{ gap: "clamp(16px,2vw,24px)" }}>
+      <style>{`
+        /* ── 2-column grid ── */
+        .usw-grid {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: clamp(16px, 2.4vw, 30px) clamp(24px, 4vw, 50px);
+          width: 100%;
+          margin: 4% 0;
+        }
 
-        {/* ── العنوان ── */}
-        <h1 className="WB-header-title-page8">
-          <span className="WB-ex-A">A</span>{" "}
-          Read, look, and number the pictures.
+        /* ── Single cell: num + scramble + input ── */
+        .usw-cell {
+          display: flex;
+          flex-direction: column;
+          gap: clamp(4px, 0.5vw, 7px);
+        }
+
+        /* Top row: num + scrambled word */
+        .usw-top {
+          display: flex;
+          align-items: baseline;
+          gap: clamp(6px, 0.8vw, 10px);
+        }
+
+        .usw-num {
+          font-size: clamp(14px, 1.7vw, 20px);
+          font-weight: 700;
+          color: ${NUMBER_COLOR};
+          flex-shrink: 0;
+          line-height: 1.5;
+        }
+
+        .usw-scramble {
+          font-size: clamp(13px, 1.6vw, 19px);
+          color: ${SCRAMBLE_COLOR};
+          letter-spacing: clamp(2px, 0.4vw, 5px);
+          line-height: 1.5;
+        }
+
+        /* Input wrap */
+        .usw-input-wrap {
+          position: relative;
+          width: 100%;
+        }
+
+        .usw-input {
+          width: 100%;
+          background: transparent;
+          border: none;
+          border-bottom: 1px solid ${INPUT_UNDERLINE_DEFAULT};
+          outline: none;
+          font-size: clamp(13px, 1.6vw, 19px);
+          color: ${INPUT_TEXT_COLOR};
+          line-height: 1.5;
+          box-sizing: border-box;
+          transition: border-color 0.2s;
+        }
+        .usw-input:disabled   { opacity: 1; cursor: default; }
+        .usw-input--wrong     { border-bottom-color: ${INPUT_UNDERLINE_WRONG}; }
+        .usw-input--answer    { color: ${INPUT_ANSWER_COLOR}; }
+
+        /* ✕ badge */
+        .usw-badge {
+          position: absolute;
+          top: -8px; right: 0;
+          width: clamp(16px, 1.8vw, 20px);
+          height: clamp(16px, 1.8vw, 20px);
+          border-radius: 50%;
+          background: ${WRONG_BADGE_BG};
+          color: ${WRONG_BADGE_TEXT};
+          display: flex; align-items: center; justify-content: center;
+          font-size: clamp(8px, 0.9vw, 11px);
+          font-weight: 700;
+          border: 2px solid #fff;
+          box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+          pointer-events: none;
+          z-index: 2;
+        }
+
+        /* Scene image */
+        .usw-scene {
+          width: clamp(220px, 40vw, 480px);
+          height: auto;
+          display: block;
+          margin: 0 auto;
+        }
+
+        /* Buttons */
+        .usw-buttons {
+          display: flex;
+          justify-content: center;
+          margin-top: clamp(8px, 1.6vw, 18px);
+        }
+
+        @media (max-width: 500px) {
+          .usw-grid { grid-template-columns: 1fr; }
+        }
+      `}</style>
+
+      <div
+        className="div-forall"
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: "clamp(14px, 2vw, 22px)",
+          maxWidth: "1100px",
+          margin: "0 auto",
+        }}
+      >
+        {/* ── Header ── */}
+        <h1
+          className="WB-header-title-page8"
+          style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
+        >
+          <span className="WB-ex-A">A</span>
+          Unscramble and write.
         </h1>
 
-        {/* ── الأرقام للسحب ── */}
-        <div
-          style={{
-            display:        "flex",
-            justifyContent: "center",
-            gap:            "clamp(10px,1.5vw,16px)",
-            flexWrap:       "wrap",
-          }}
-        >
-          {NUMBERS.map((num) => {
-            const disabled = usedNumbers.includes(num);
-            const selected = draggedNumber === num || touchItem === num;
+        {/* ── Grid ── */}
+        <div className="usw-grid">
+          {ITEMS.map((item) => {
+            const wrong    = isWrong(item);
+            const value    = answers[item.id] || "";
+            const tColor   = showAns ? INPUT_ANSWER_COLOR : INPUT_TEXT_COLOR;
+            const uColor   = wrong ? INPUT_UNDERLINE_WRONG : INPUT_UNDERLINE_DEFAULT;
+            const disabled = isDisabled(item);
 
             return (
-              <div
-                key={num}
-                draggable={!disabled && !showAns}
-                onDragStart={() => handleDragStart(num)}
-                onTouchStart={(e) => handleTouchStart(e, num)}
-                onTouchMove={handleTouchMove}
-                onTouchEnd={handleTouchEnd}
-                style={{
-                  width:           "clamp(38px,5vw,52px)",
-                  height:          "clamp(38px,5vw,52px)",
-                  borderRadius:    "50%",
-                  backgroundColor: disabled || showAns ? "#cfcfd4" : DRAG_COLOR,
-                  color:           "#fff",
-                  display:         "flex",
-                  alignItems:      "center",
-                  justifyContent:  "center",
-                  fontWeight:      700,
-                  fontSize:        "clamp(17px,2.2vw,26px)",
-                  cursor:          disabled || showAns ? "not-allowed" : "grab",
-                  opacity:         disabled ? 0.55 : 1,
-                  userSelect:      "none",
-                  touchAction:     "none",
-                  transition:      "0.2s ease",
-                  transform:       selected ? "scale(1.1)" : "scale(1)",
-                  boxShadow:       selected
-                    ? "0 0 0 3px rgba(242,154,31,0.35)"
-                    : "0 3px 10px rgba(0,0,0,0.12)",
-                }}
-              >
-                {num}
+              <div key={item.id} className="usw-cell">
+
+                {/* num + scrambled */}
+                <div className="usw-top">
+                  <span className="usw-num">{item.id}</span>
+                  <span className="usw-scramble">{item.scramble}</span>
+                </div>
+
+                {/* input */}
+                <div className="usw-input-wrap">
+                  <input
+                    type="text"
+                    className={[
+                      "usw-input",
+                      wrong   ? "usw-input--wrong"  : "",
+                      showAns ? "usw-input--answer" : "",
+                    ].filter(Boolean).join(" ")}
+                    value={value}
+                    disabled={disabled}
+                    onChange={(e) => handleChange(item.id, e.target.value)}
+                    style={{ borderBottomColor: uColor, color: tColor }}
+                    spellCheck={false}
+                    autoComplete="off"
+                  />
+                  {wrong && <div className="usw-badge">✕</div>}
+                </div>
+
               </div>
             );
           })}
         </div>
 
-        {/* ── اليسار: الجمل | اليمين: الصور ── */}
-        <div
-          style={{
-            display:             "grid",
-            gridTemplateColumns: "1.1fr 0.95fr",
-            gap:                 "clamp(16px,3vw,30px)",
-            alignItems:          "start",
-          }}
-        >
-          {/* الجمل */}
-          <div style={{ display: "flex", flexDirection: "column", gap: "clamp(14px,2vw,24px)" }}>
-            {SENTENCES.map((item) => (
-              <div
-                key={item.id}
-                style={{
-                  display:    "flex",
-                  alignItems: "flex-start",
-                  gap:        "clamp(8px,1vw,14px)",
-                }}
-              >
-                <span
-                  style={{
-                    fontSize:   "clamp(15px,1.9vw,22px)",
-                    fontWeight: 700,
-                    color:      "#111",
-                    minWidth:   "clamp(16px,1.9vw,22px)",
-                    lineHeight: 1.4,
-                    flexShrink: 0,
-                  }}
-                >
-                  {item.id}
-                </span>
-                <p
-                  style={{
-                    margin:     0,
-                    fontSize:   "clamp(14px,1.7vw,20px)",
-                    color:      "#222",
-                    lineHeight: 1.45,
-                    fontWeight: 500,
-                  }}
-                >
-                  {item.text}
-                </p>
-              </div>
-            ))}
-          </div>
+        {/* ── Scene image ── */}
+        <img src={imgScene} alt="scene" className="usw-scene" />
 
-          {/* الصور 2×3 */}
-          <div
-            style={{
-              display:             "grid",
-              gridTemplateColumns: "repeat(2, minmax(0,1fr))",
-              gap:                 "clamp(8px,1.2vw,14px)",
-            }}
-          >
-            {ITEMS.map((item) => {
-              const wrong = isWrong(item.id);
-              const num   = answers[item.id];
-
-              return (
-                <div
-                  key={item.id}
-                  ref={(el) => (dropRefs.current[item.id] = el)}
-                  onDragOver={(e) => e.preventDefault()}
-                  onDrop={() => handleDrop(item.id)}
-                  style={{
-                    position:     "relative",
-                    width:        "100%",
-                    aspectRatio:  "3 / 2",
-                    borderRadius: "clamp(10px,1.2vw,16px)",
-                    overflow:     "visible",
-                    border:       `2px solid ${wrong ? WRONG_COLOR : BORDER_COLOR}`,
-                    background:   "#f7f7f7",
-                    boxSizing:    "border-box",
-                    transition:   "border-color 0.2s",
-                  }}
-                >
-                  {/* الصورة داخل clip */}
-                  <div
-                    style={{
-                      position:     "absolute",
-                      inset:        0,
-                      borderRadius: "clamp(10px,1.2vw,16px)",
-                      overflow:     "hidden",
-                    }}
-                  >
-                    <img
-                      src={item.img}
-                      alt={`item-${item.id}`}
-                      style={{
-                        width:         "100%",
-                        height:        "100%",
-                        objectFit:     "cover",
-                        display:       "block",
-                        userSelect:    "none",
-                        pointerEvents: "none",
-                      }}
-                    />
-                  </div>
-
-                  {/* صندوق الرقم */}
-                  <div
-                    onClick={() => handleRemove(item.id)}
-                    onDragOver={(e) => e.preventDefault()}
-                    onDrop={() => handleDrop(item.id)}
-                    style={{
-                      position:        "absolute",
-                      top:             "clamp(4px,0.8vw,8px)",
-                      right:           "clamp(4px,0.8vw,8px)",
-                      width:           "clamp(26px,3.5vw,40px)",
-                      height:          "clamp(26px,3.5vw,40px)",
-                      borderRadius:    "clamp(5px,0.7vw,8px)",
-                      border:          `2px solid  #f39b42`,
-                      backgroundColor: "#fff",
-                      display:         "flex",
-                      alignItems:      "center",
-                      justifyContent:  "center",
-                      fontSize:        "clamp(13px,2vw,24px)",
-                      fontWeight:      700,
-                      color:           wrong ? WRONG_COLOR : DRAG_COLOR,
-                      boxShadow:       "0 2px 6px rgba(0,0,0,0.15)",
-                      zIndex:          4,
-                      cursor:          num && !showAns ? "pointer" : "default",
-                      transition:      "border-color 0.2s, color 0.2s",
-                      boxSizing:       "border-box",
-                    }}
-                  >
-                    {num || ""}
-                  </div>
-
-                  {/* بادج الخطأ */}
-                  {wrong && <ErrorBadge />}
-                </div>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* ── الأزرار ── */}
-        <div className="mt-4 flex justify-center">
+        {/* ── Buttons ── */}
+        <div className="usw-buttons">
           <Button
             checkAnswers={handleCheck}
             handleShowAnswer={handleShowAnswer}
             handleStartAgain={handleReset}
           />
         </div>
-
       </div>
-
-      {/* ── Ghost للمس ── */}
-      {touchItem !== null && (
-        <div
-          style={{
-            position:        "fixed",
-            left:            touchPos.x - 26,
-            top:             touchPos.y - 26,
-            width:           "clamp(38px,5vw,52px)",
-            height:          "clamp(38px,5vw,52px)",
-            borderRadius:    "50%",
-            backgroundColor: DRAG_COLOR,
-            color:           "#fff",
-            display:         "flex",
-            alignItems:      "center",
-            justifyContent:  "center",
-            fontSize:        "clamp(17px,2.2vw,26px)",
-            fontWeight:      700,
-            pointerEvents:   "none",
-            zIndex:          9999,
-            boxShadow:       "0 4px 10px rgba(0,0,0,0.2)",
-          }}
-        >
-          {touchItem}
-        </div>
-      )}
     </div>
   );
 }

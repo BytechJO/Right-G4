@@ -1,5 +1,5 @@
 import React from 'react'
-import page_1 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U10 Folder/Page 572.png";
+import page_1 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U10 Folder/Page 58.png";
 
 import "./WB_unit10.css"
 import arrowBtn from "../../../assets/Page 01/Arrow.svg";

@@ -1,5 +1,5 @@
 import React from 'react'
-import page_1 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U1 Folder/Page 2.png";
+import page_1 from "../../../assets/imgs/pages/Activity Book/WB_Right Int.  G4_Content Folder/WB_Right Int.  G4_Content2.png";
 const WB_Unit2_Page1 = () => {
   return (
     <div className="page1-img-wrapper"
