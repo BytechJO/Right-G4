@@ -118,8 +118,9 @@ export default function WB_UnscrambleWrite_QK() {
         .usw-list {
           display: flex;
           flex-direction: column;
-          gap: clamp(16px, 2.4vw, 30px);
+          gap: clamp(10px, 2.4vw, 10px);
           width: 100%;
+
         }
 
         /* ── Single item ── */

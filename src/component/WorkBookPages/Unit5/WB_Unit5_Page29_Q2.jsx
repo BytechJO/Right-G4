@@ -164,6 +164,8 @@ export default function WB_Unit5_Page28_Q2() {
           display: flex;
           flex-direction: column;
           width: 100%;
+                              margin : -2% 0 ; 
+
         }
 
         /* ── Single row: num | img | right ── */
@@ -175,6 +177,8 @@ export default function WB_Unit5_Page28_Q2() {
             1fr;
           gap: clamp(10px, 1.6vw, 24px);
           align-items: center;
+                                        margin : -2% 0 ; 
+
         }
 
         /* Number */
