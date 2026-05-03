@@ -2,335 +2,246 @@ import React, { useState } from "react";
 import Button from "../Button";
 import ValidationAlert from "../../Popup/ValidationAlert";
 
-import img1 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U10 Folder/Page 58/SVG/7.svg";
-import img2 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U10 Folder/Page 58/SVG/8.svg";
-import img3 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U10 Folder/Page 58/SVG/9.svg";
-import img4 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U10 Folder/Page 58/SVG/10.svg";
+// ─────────────────────────────────────────────
+//  🎨  COLORS
+// ─────────────────────────────────────────────
+const INPUT_UNDERLINE_DEFAULT = "#3f3f3f";
+const INPUT_UNDERLINE_WRONG   = "#ef4444";
+const INPUT_TEXT_COLOR        = "#2b2b2b";
+const INPUT_ANSWER_COLOR      = "#c81e1e";
+const HINT_COLOR              = "#2b2b2b";
+const NUMBER_COLOR            = "#2b2b2b";
+const WRONG_BADGE_BG          = "#ef4444";
+const WRONG_BADGE_TEXT        = "#ffffff";
 
-// ── ثوابت ──────────────────────────────────────────────────────
-const WRONG_COLOR  = "#ef4444";
-const SELECT_COLOR = "#f39b42";
-const RED_MARK     = "#d92525";
-
-// ── بيانات ─────────────────────────────────────────────────────
+// ─────────────────────────────────────────────
+//  📝  EXERCISE DATA
+// ─────────────────────────────────────────────
 const ITEMS = [
   {
-    id: 1, img: img1, subject: "He",   boxMark: "x",
-    modalOptions:  ["will", "won't"],
-    actionOptions: ["sit in the sun.", "build a sandcastle."],
-    correctModal:  "won't", correctAction: "sit in the sun.",
+    id:      1,
+    hint:    "they / have / clean the room",
+    correct: ["They have cleaned the room.", "they have cleaned the room"],
+    answer:  "They have cleaned the room.",
   },
   {
-    id: 2, img: img2, subject: "She",  boxMark: "check",
-    modalOptions:  ["will", "won't"],
-    actionOptions: ["go to the beach.", "read a book."],
-    correctModal:  "will",  correctAction: "read a book.",
+    id:      2,
+    hint:    "I / have / fix the computer",
+    correct: ["I have fixed the computer.", "i have fixed the computer"],
+    answer:  "I have fixed the computer.",
   },
   {
-    id: 3, img: img3, subject: "They", boxMark: "x",
-    modalOptions:  ["will", "won't"],
-    actionOptions: ["watch a movie.", "go to the mall."],
-    correctModal:  "won't", correctAction: "watch a movie.",
-  },
-  {
-    id: 4, img: img4, subject: "He",   boxMark: "check",
-    modalOptions:  ["will", "won't"],
-    actionOptions: ["plant a tree.", "swim in the sea."],
-    correctModal:  "will",  correctAction: "plant a tree.",
+    id:      3,
+    hint:    "we / have / cook breakfast",
+    correct: ["We have cooked breakfast.", "we have cooked breakfast"],
+    answer:  "We have cooked breakfast.",
   },
 ];
 
-// ── بادج الخطأ ─────────────────────────────────────────────────
-const ErrorBadge = () => (
-  <div
-    style={{
-      position:        "absolute",
-      top:             -7,
-      right:           -7,
-      width:           "clamp(13px,1.5vw,17px)",
-      height:          "clamp(13px,1.5vw,17px)",
-      borderRadius:    "50%",
-      backgroundColor: WRONG_COLOR,
-      color:           "#fff",
-      display:         "flex",
-      alignItems:      "center",
-      justifyContent:  "center",
-      fontSize:        "clamp(7px,0.8vw,10px)",
-      fontWeight:      700,
-      border:          "1.5px solid #fff",
-      pointerEvents:   "none",
-      zIndex:          6,
-    }}
-  >
-    ✕
-  </div>
-);
+// ─────────────────────────────────────────────
+//  🔧  NORMALIZE
+// ─────────────────────────────────────────────
+const normalize = (str) =>
+  str.toLowerCase().replace(/[^a-z0-9'\s]/g, "").replace(/\s+/g, " ").trim();
 
-// ── المكوّن الرئيسي ─────────────────────────────────────────────
-export default function WB_Unit8_Page58_QD() {
-  const [answers, setAnswers] = useState({});
-  const [checked, setChecked] = useState(false);
-  const [showAns, setShowAns] = useState(false);
+const isCorrect = (userVal, correctArr) =>
+  correctArr.some((c) => normalize(userVal) === normalize(c));
 
-  const handleSelect = (id, field, value) => {
+// ─────────────────────────────────────────────
+//  COMPONENT
+// ─────────────────────────────────────────────
+export default function WB_ReadWriteSentences_QD() {
+  const [answers,     setAnswers]     = useState({});
+  const [showResults, setShowResults] = useState(false);
+  const [showAns,     setShowAns]     = useState(false);
+
+  const handleChange = (id, value) => {
     if (showAns) return;
-    setChecked(false);
-    setAnswers((prev) => ({ ...prev, [id]: { ...prev[id], [field]: value } }));
+    const item = ITEMS.find((i) => i.id === id);
+    if (showResults && item && isCorrect(answers[id] || "", item.correct)) return;
+    setAnswers((prev) => ({ ...prev, [id]: value }));
   };
 
-  const isItemCorrect = (item) => {
-    const ans = answers[item.id];
-    return ans?.modal === item.correctModal && ans?.action === item.correctAction;
-  };
-
-  // ── هل هاد الخيار بالذات غلط؟ ──
-  const isOptionWrong = (item, field, value) => {
-    if (!checked || showAns) return false;
-    const ans = answers[item.id];
-    return ans?.[field] === value && value !== (field === "modal" ? item.correctModal : item.correctAction);
-  };
-
-  // ── handlers ──
   const handleCheck = () => {
     if (showAns) return;
-    const allAnswered = ITEMS.every((i) => answers[i.id]?.modal && answers[i.id]?.action);
-    if (!allAnswered) {
-      ValidationAlert.error("Please answer all questions first! ✏️");
-      return;
-    }
-    let correct = 0;
-    ITEMS.forEach((i) => { if (isItemCorrect(i)) correct++; });
-    setChecked(true);
-    const total = ITEMS.length;
-    if (correct === total) ValidationAlert.success("Excellent! All correct! 🎉");
-    else                   ValidationAlert.error(`${correct} / ${total} correct. Try again! 💪`);
+    const allAnswered = ITEMS.every((item) => answers[item.id]?.trim());
+    if (!allAnswered) { ValidationAlert.info("Please complete all answers first."); return; }
+    let score = 0;
+    ITEMS.forEach((item) => { if (isCorrect(answers[item.id] || "", item.correct)) score++; });
+    setShowResults(true);
+    if (score === ITEMS.length)   ValidationAlert.success(`Score: ${score} / ${ITEMS.length}`);
+    else if (score > 0)           ValidationAlert.warning(`Score: ${score} / ${ITEMS.length}`);
+    else                          ValidationAlert.error(`Score: ${score} / ${ITEMS.length}`);
   };
 
   const handleShowAnswer = () => {
     const filled = {};
-    ITEMS.forEach((i) => { filled[i.id] = { modal: i.correctModal, action: i.correctAction }; });
+    ITEMS.forEach((item) => { filled[item.id] = item.answer; });
     setAnswers(filled);
-    setChecked(false);
+    setShowResults(false);
     setShowAns(true);
   };
 
   const handleReset = () => {
     setAnswers({});
-    setChecked(false);
+    setShowResults(false);
     setShowAns(false);
   };
 
-  // ── رسم خيار واحد كدائرة ──
-  const renderOption = (item, field, value) => {
-    const selected = answers[item.id]?.[field] === value;
-    const wrong    = isOptionWrong(item, field, value);
-
-    return (
-      <div
-        key={value}
-        onClick={() => handleSelect(item.id, field, value)}
-        style={{
-          position:       "relative",
-          display:        "inline-flex",
-          alignItems:     "center",
-          justifyContent: "center",
-          padding:        "clamp(2px,0.4vw,4px) clamp(8px,1.2vw,14px)",
-          cursor:         showAns ? "default" : "pointer",
-          userSelect:     "none",
-          fontSize:       "clamp(13px,1.7vw,20px)",
-          lineHeight:     1.3,
-          color:          wrong ? WRONG_COLOR : "#222",
-          fontWeight:     selected ? 700 : 500,
-          transition:     "color 0.15s",
-          whiteSpace:     "nowrap",
-        }}
-      >
-        {/* الدائرة — تظهر عند الاختيار */}
-        {selected && (
-          <div
-            style={{
-              position:     "absolute",
-              inset:        "-2px -4px",
-              border:       `2.5px solid ${wrong ? WRONG_COLOR : SELECT_COLOR}`,
-              borderRadius: "999px",
-              pointerEvents:"none",
-              transition:   "border-color 0.15s",
-            }}
-          />
-        )}
-        <span style={{ position: "relative", zIndex: 1 }}>{value}</span>
-
-        {/* بادج الخطأ على الدائرة */}
-        {wrong && selected && <ErrorBadge />}
-      </div>
-    );
+  const isWrong = (item) => {
+    if (!showResults || showAns) return false;
+    return !isCorrect(answers[item.id] || "", item.correct);
   };
 
-  const renderCornerMark = (type) => (
-    <span
-      style={{
-        color:      RED_MARK,
-        fontSize:   "clamp(22px,3.2vw,42px)",
-        fontWeight: 700,
-        lineHeight: 1,
-        userSelect: "none",
-      }}
-    >
-      {type === "check" ? "✓" : "✕"}
-    </span>
-  );
+  const isDisabled = (item) => {
+    if (showAns) return true;
+    if (showResults && isCorrect(answers[item.id] || "", item.correct)) return true;
+    return false;
+  };
 
   return (
     <div className="main-container-component">
-      <div className="div-forall" style={{ gap: "clamp(18px,2.5vw,30px)" }}>
+      <style>{`
+        /* ── Items list ── */
+        .rws-list {
+          display: flex;
+          flex-direction: column;
+          gap: clamp(20px, 3vw, 40px);
+          width: 100%;
+          margin: 7% 0;
+        }
 
-        {/* ── العنوان ── */}
-        <h1 className="WB-header-title-page8">
-          <span className="WB-ex-A">D</span>{" "}
-          Look, read, and circle. Say.
+        /* ── Single item ── */
+        .rws-item {
+          display: flex;
+          flex-direction: column;
+          gap: clamp(8px, 1.2vw, 14px);
+        }
+
+        /* Hint row: num + hint */
+        .rws-hint-row {
+          display: flex;
+          align-items: center;
+          gap: clamp(8px, 1vw, 14px);
+        }
+
+        .rws-num {
+          font-size: clamp(14px, 1.7vw, 20px);
+          font-weight: 700;
+          color: ${NUMBER_COLOR};
+          flex-shrink: 0;
+          line-height: 1.5;
+        }
+
+        .rws-hint {
+          font-size: clamp(13px, 1.6vw, 19px);
+          color: ${HINT_COLOR};
+          line-height: 1.5;
+        }
+
+        /* Input wrap */
+        .rws-input-wrap {
+          position: relative;
+          width: 100%;
+          padding-left: clamp(20px, 2.6vw, 32px);
+        }
+
+        .rws-input {
+          width: 100%;
+          background: transparent;
+          border: none;
+          border-bottom: 1px solid ${INPUT_UNDERLINE_DEFAULT};
+          outline: none;
+          font-size: clamp(13px, 1.6vw, 19px);
+          color: ${INPUT_TEXT_COLOR};
+          line-height: 1.5;
+          box-sizing: border-box;
+          transition: border-color 0.2s;
+        }
+        .rws-input:disabled   { opacity: 1; cursor: default; }
+        .rws-input--wrong     { border-bottom-color: ${INPUT_UNDERLINE_WRONG}; }
+        .rws-input--answer    { color: ${INPUT_ANSWER_COLOR}; }
+
+        /* ✕ badge */
+        .rws-badge {
+          position: absolute;
+          top: -8px; right: 0;
+          width: clamp(16px, 1.8vw, 20px);
+          height: clamp(16px, 1.8vw, 20px);
+          border-radius: 50%;
+          background: ${WRONG_BADGE_BG};
+          color: ${WRONG_BADGE_TEXT};
+          display: flex; align-items: center; justify-content: center;
+          font-size: clamp(8px, 0.9vw, 11px);
+          font-weight: 700;
+          border: 2px solid #fff;
+          box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+          pointer-events: none;
+          z-index: 2;
+        }
+
+        /* Buttons */
+        .rws-buttons {
+          display: flex;
+          justify-content: center;
+          margin-top: clamp(8px, 1.6vw, 18px);
+        }
+      `}</style>
+
+      <div
+        className="div-forall"
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: "clamp(14px, 2vw, 22px)",
+          maxWidth: "1100px",
+          margin: "0 auto",
+        }}
+      >
+        {/* ── Header ── */}
+        <h1
+          className="WB-header-title-page8"
+          style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
+        >
+          <span className="WB-ex-A">D</span>
+          Read and write sentences.
         </h1>
 
-        {/* ── شبكة 2×2 ── */}
-        <div
-          style={{
-            display:             "grid",
-            gridTemplateColumns: "repeat(2, minmax(0,1fr))",
-            gap:                 "clamp(20px,3.5vw,48px) clamp(20px,4vw,55px)",
-            alignItems:          "start",
-          }}
-        >
+        {/* ── Items ── */}
+        <div className="rws-list">
           {ITEMS.map((item) => {
-            const current = answers[item.id] || {};
+            const wrong    = isWrong(item);
+            const value    = answers[item.id] || "";
+            const tColor   = showAns ? INPUT_ANSWER_COLOR : INPUT_TEXT_COLOR;
+            const uColor   = wrong ? INPUT_UNDERLINE_WRONG : INPUT_UNDERLINE_DEFAULT;
+            const disabled = isDisabled(item);
 
             return (
-              <div
-                key={item.id}
-                style={{
-                  position:      "relative",
-                  display:       "flex",
-                  flexDirection: "column",
-                  gap:           "clamp(10px,1.4vw,16px)",
-                  minWidth:      0,
-                }}
-              >
-                {/* رقم + صورة */}
-                <div
-                  style={{
-                    display:    "flex",
-                    alignItems: "flex-start",
-                    gap:        "clamp(8px,1vw,14px)",
-                  }}
-                >
-                  <span
-                    style={{
-                      fontSize:   "clamp(16px,1.9vw,26px)",
-                      fontWeight: 700,
-                      color:      "#111",
-                      flexShrink: 0,
-                      minWidth:   "clamp(14px,1.8vw,22px)",
-                    }}
-                  >
-                    {item.id}
-                  </span>
+              <div key={item.id} className="rws-item">
 
-                  <div
-                    style={{
-                      position:     "relative",
-                      width:        "clamp(120px,20vw,220px)",
-                      height:       "clamp(90px,15vw,170px)",
-                      border:       "2px solid #f39b42",
-                      borderRadius: "clamp(10px,1.2vw,16px)",
-                      overflow:     "hidden",
-                      background:   "#fff",
-                      flexShrink:   0,
-                    }}
-                  >
-                    <img
-                      src={item.img}
-                      alt={`item-${item.id}`}
-                      style={{
-                        width:         "100%",
-                        height:        "100%",
-                        objectFit:     "cover",
-                        display:       "block",
-                        userSelect:    "none",
-                        pointerEvents: "none",
-                      }}
-                    />
-
-                    {/* صندوق ✓/✕ في الزاوية */}
-                    <div
-                      style={{
-                        position:        "absolute",
-                        top:             "clamp(4px,0.6vw,8px)",
-                        right:           "clamp(4px,0.6vw,8px)",
-                        width:           "clamp(28px,3.8vw,44px)",
-                        height:          "clamp(28px,3.8vw,44px)",
-                        backgroundColor: "#fff",
-                        border:          "2px solid #f39b42",
-                        borderRadius:    "clamp(5px,0.6vw,8px)",
-                        display:         "flex",
-                        alignItems:      "center",
-                        justifyContent:  "center",
-                        boxSizing:       "border-box",
-                      }}
-                    >
-                      {renderCornerMark(item.boxMark)}
-                    </div>
-                  </div>
+                {/* Hint row */}
+                <div className="rws-hint-row">
+                  <span className="rws-num">{item.id}</span>
+                  <span className="rws-hint">{item.hint}</span>
                 </div>
 
-                {/* الجملة: subject | modal | action */}
-                <div
-                  style={{
-                    display:     "flex",
-                    alignItems:  "flex-start",
-                    gap:         "clamp(6px,0.8vw,12px)",
-                    paddingLeft: "clamp(20px,2.5vw,32px)",
-                    flexWrap:    "wrap",
-                  }}
-                >
-                  {/* subject */}
-                  <span
-                    style={{
-                      fontSize:   "clamp(13px,1.7vw,20px)",
-                      color:      "#222",
-                      lineHeight: "clamp(28px,4vw,42px)",
-                      fontWeight: 500,
-                      flexShrink: 0,
-                    }}
-                  >
-                    {item.subject}
-                  </span>
-
-                  {/* modal options */}
-                  <div
-                    style={{
-                      borderLeft:    "2.5px solid #222",
-                      paddingLeft:   "clamp(6px,0.8vw,12px)",
-                      display:       "flex",
-                      flexDirection: "column",
-                      gap:           "clamp(2px,0.4vw,6px)",
-                      flexShrink:    0,
-                    }}
-                  >
-                    {item.modalOptions.map((opt) => renderOption(item, "modal", opt))}
-                  </div>
-
-                  {/* action options */}
-                  <div
-                    style={{
-                      borderLeft:    "2.5px solid #222",
-                      paddingLeft:   "clamp(6px,0.8vw,12px)",
-                      display:       "flex",
-                      flexDirection: "column",
-                      gap:           "clamp(2px,0.4vw,6px)",
-                      flex:          1,
-                      minWidth:      0,
-                    }}
-                  >
-                    {item.actionOptions.map((opt) => renderOption(item, "action", opt))}
-                  </div>
+                {/* Input */}
+                <div className="rws-input-wrap">
+                  <input
+                    type="text"
+                    className={[
+                      "rws-input",
+                      wrong   ? "rws-input--wrong"  : "",
+                      showAns ? "rws-input--answer" : "",
+                    ].filter(Boolean).join(" ")}
+                    value={value}
+                    disabled={disabled}
+                    onChange={(e) => handleChange(item.id, e.target.value)}
+                    style={{ borderBottomColor: uColor, color: tColor }}
+                    spellCheck={false}
+                    autoComplete="off"
+                  />
+                  {wrong && <div className="rws-badge">✕</div>}
                 </div>
 
               </div>
@@ -338,15 +249,14 @@ export default function WB_Unit8_Page58_QD() {
           })}
         </div>
 
-        {/* ── الأزرار ── */}
-        <div className="mt-4 flex justify-center">
+        {/* ── Buttons ── */}
+        <div className="rws-buttons">
           <Button
             checkAnswers={handleCheck}
             handleShowAnswer={handleShowAnswer}
             handleStartAgain={handleReset}
           />
         </div>
-
       </div>
     </div>
   );

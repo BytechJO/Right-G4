@@ -1,313 +1,328 @@
-import React, { useState, useCallback } from "react";
+import React, { useState } from "react";
 import Button from "../Button";
 import ValidationAlert from "../../Popup/ValidationAlert";
 
-const WRONG_COLOR  = "#ef4444";
-const ACTIVE_COLOR = "#f39b42";
-const SOFT_COLOR   = "#ffca94";
-const LINE_COLOR   = "#333";
+// ─────────────────────────────────────────────
+//  🖼️  IMAGES
+// ─────────────────────────────────────────────
+import img1 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U10 Folder/Page 60/SVG/Asset 18.svg";
+import img2 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U10 Folder/Page 60/SVG/Asset 19.svg";
+import img3 from"../../../assets/imgs/pages/Activity Book/Right Int WB G4 U10 Folder/Page 60/SVG/Asset 20.svg";
+import img4 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U10 Folder/Page 60/SVG/Asset 21.svg";
+import img5 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U10 Folder/Page 60/SVG/Asset 22.svg";
+import img6 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U10 Folder/Page 60/SVG/Asset 23.svg";
 
-const EXERCISES = [
-  { id: 1, scrambled: ["he",  "won't", "plant",  "a",   "tree."    ], correct: "He won't plant a tree."       },
-  { id: 2, scrambled: ["they","will",  "wash",   "the", "car."     ], correct: "They will wash the car."      },
-  { id: 3, scrambled: ["she", "will",  "build",  "a",   "snowman." ], correct: "She will build a snowman."    },
-  { id: 4, scrambled: ["I",   "won't", "watch",  "a",   "movie."   ], correct: "I won't watch a movie."       },
-  { id: 5, scrambled: ["she", "won't", "lie",    "in",  "the","sun."], correct: "She won't lie in the sun."   },
-  { id: 6, scrambled: ["he",  "will",  "read",   "a",   "book."    ], correct: "He will read a book."         },
+// ─────────────────────────────────────────────
+//  🎨  COLORS
+// ─────────────────────────────────────────────
+const INPUT_UNDERLINE_DEFAULT = "#3f3f3f";
+const INPUT_UNDERLINE_WRONG   = "#ef4444";
+const INPUT_TEXT_COLOR        = "#2b2b2b";
+const INPUT_ANSWER_COLOR      = "#c81e1e";
+const QUESTION_COLOR          = "#2b2b2b";
+const NUMBER_COLOR            = "#2b2b2b";
+const WRONG_BADGE_BG          = "#ef4444";
+const WRONG_BADGE_TEXT        = "#ffffff";
+
+// ─────────────────────────────────────────────
+//  📝  EXERCISE DATA
+//  icon: "check" ✓ | "cross" ✕
+// ─────────────────────────────────────────────
+const ITEMS = [
+  {
+    id:       1,
+    src:      img1,
+    icon:     "check",
+    question: "Have they run in a race?",
+    correct:  ["Yes, they have.", "yes they have", "yes, they have"],
+    answer:   "Yes, they have.",
+  },
+  {
+    id:       2,
+    src:      img2,
+    icon:     "check",
+    question: "Has he read a book?",
+    correct:  ["Yes, he has.", "yes he has", "yes, he has"],
+    answer:   "Yes, he has.",
+  },
+  {
+    id:       3,
+    src:      img3,
+    icon:     "check",
+    question: "Have they watched a movie?",
+    correct:  ["Yes, they have.", "yes they have", "yes, they have"],
+    answer:   "Yes, they have.",
+  },
+  {
+    id:       4,
+    src:      img4,
+    icon:     "cross",
+    question: "Has she cooked dinner?",
+    correct:  ["No, she hasn't.", "no she hasnot", "no, she hasnt", "No, she has not."],
+    answer:   "No, she hasn't.",
+  },
+  {
+    id:       5,
+    src:      img5,
+    icon:     "cross",
+    question: "Have they played on the swings?",
+    correct:  ["No, they haven't.", "no they havenot", "no, they havent", "No, they have not."],
+    answer:   "No, they haven't.",
+  },
+  {
+    id:       6,
+    src:      img6,
+    icon:     "check",
+    question: "Has she listened to music?",
+    correct:  ["Yes, she has.", "yes she has", "yes, she has"],
+    answer:   "Yes, she has.",
+  },
 ];
 
-// ── Single exercise row ──
-function ExerciseRow({ item, showResults, showAns, onUpdate, resetKey }) {
-  const initWords = () =>
-    item.scrambled.map((w, i) => ({ id: `${item.id}-${i}`, text: w }));
+// ─────────────────────────────────────────────
+//  🔧  NORMALIZE
+// ─────────────────────────────────────────────
+const normalize = (str) =>
+  str.toLowerCase().replace(/[^a-z0-9'\s]/g, "").replace(/\s+/g, " ").trim();
 
-  const [available, setAvailable] = useState(initWords);
-  const [chosen,    setChosen]    = useState([]);
+const isCorrect = (userVal, correctArr) =>
+  correctArr.some((c) => normalize(userVal) === normalize(c));
 
-  // reset when resetKey changes
-  React.useEffect(() => {
-    setAvailable(initWords());
-    setChosen([]);
-    onUpdate("");
-  }, [resetKey]);
-
-  // show answer
-  React.useEffect(() => {
-    if (!showAns) return;
-    const words = item.correct.split(" ").map((w, i) => ({
-      id: `${item.id}-ans-${i}`,
-      text: w,
-    }));
-    setChosen(words);
-    setAvailable([]);
-    onUpdate(item.correct);
-  }, [showAns]);
-
-  const addWord = (word) => {
-    if (showAns) return;
-    const newChosen = [...chosen, word];
-    setChosen(newChosen);
-    setAvailable((prev) => prev.filter((w) => w.id !== word.id));
-    onUpdate(newChosen.map((w) => w.text).join(" "));
-  };
-
-  const removeWord = (word) => {
-    if (showAns) return;
-    const newChosen = chosen.filter((w) => w.id !== word.id);
-    setChosen(newChosen);
-    setAvailable((prev) =>
-      [...prev, word].sort((a, b) => a.id.localeCompare(b.id))
-    );
-    onUpdate(newChosen.map((w) => w.text).join(" "));
-  };
-
-  const userAnswer  = chosen.map((w) => w.text).join(" ").trim().toLowerCase();
-  const correctLow  = item.correct.trim().toLowerCase();
-  const isWrong     = showResults && !showAns && !!userAnswer && userAnswer !== correctLow;
-
-  return (
-    <div
-      style={{
-        display:    "flex",
-        alignItems: "flex-start",
-        gap:        "clamp(8px,1.2vw,16px)",
-        width:      "100%",
-        minWidth:   0,
-      }}
-    >
-      {/* number */}
-      <span
-        style={{
-          fontSize:   "clamp(16px,1.9vw,26px)",
-          fontWeight: 700,
-          color:      "#111",
-          lineHeight: 1.4,
-          flexShrink: 0,
-          minWidth:   "clamp(14px,1.8vw,22px)",
-        }}
-      >
-        {item.id}
-      </span>
-
-      <div
-        style={{
-          display:       "flex",
-          flexDirection: "column",
-          gap:           "clamp(8px,1vw,12px)",
-          flex:          1,
-          minWidth:      0,
-        }}
-      >
-        {/* scrambled words — الكلمات المبعثرة */}
-        <div
-          style={{
-            fontSize:   "clamp(14px,1.7vw,22px)",
-            fontWeight: 500,
-            color:      "#555",
-            lineHeight: 1.3,
-          }}
-        >
-          {item.scrambled.join(" / ")}
-        </div>
-
-        {/* word bank للسؤال */}
-        <div
-          style={{
-            display:      "flex",
-            flexWrap:     "wrap",
-            gap:          "clamp(5px,0.7vw,9px)",
-            minHeight:    "clamp(32px,4vw,44px)",
-            padding:      "clamp(6px,0.8vw,10px)",
-            borderRadius: "clamp(8px,1vw,12px)",
-            background:   "#f3f4f6",
-            border:       "1px solid #e5e7eb",
-            boxSizing:    "border-box",
-          }}
-        >
-          {available.map((word) => (
-            <div
-              key={word.id}
-              onClick={() => addWord(word)}
-              style={{
-                padding:      "clamp(4px,0.5vw,7px) clamp(8px,1vw,14px)",
-                borderRadius: "clamp(6px,0.8vw,10px)",
-                border:       `1.5px solid ${ACTIVE_COLOR}`,
-                background:   SOFT_COLOR,
-                color:        "#222",
-                fontSize:     "clamp(13px,1.6vw,20px)",
-                fontWeight:   500,
-                cursor:       "pointer",
-                userSelect:   "none",
-                transition:   "0.15s ease",
-                lineHeight:   1.2,
-              }}
-            >
-              {word.text}
-            </div>
-          ))}
-        </div>
-
-        {/* answer line — الكلمات المختارة */}
-        <div style={{ position: "relative", width: "100%" }}>
-          <div
-            style={{
-              display:       "flex",
-              flexWrap:      "wrap",
-              gap:           "clamp(5px,0.7vw,9px)",
-              minHeight:     "clamp(32px,4vw,44px)",
-              padding:       "clamp(4px,0.5vw,7px) clamp(4px,0.5vw,7px) clamp(8px,1vw,12px)",
-              borderBottom:  `2.5px solid ${isWrong ? WRONG_COLOR : LINE_COLOR}`,
-              boxSizing:     "border-box",
-            }}
-          >
-            {chosen.map((word) => (
-              <div
-                key={word.id}
-                onClick={() => removeWord(word)}
-                style={{
-                  padding:      "clamp(4px,0.5vw,7px) clamp(8px,1vw,14px)",
-                  borderRadius: "clamp(6px,0.8vw,10px)",
-                  border:       `1.5px solid ${isWrong ? WRONG_COLOR : ACTIVE_COLOR}`,
-                  background:   isWrong ? "rgba(239,68,68,0.08)" : "rgba(243,155,66,0.12)",
-                  color:        isWrong ? WRONG_COLOR : "#222",
-                  fontSize:     "clamp(13px,1.6vw,20px)",
-                  fontWeight:   600,
-                  cursor:       showAns ? "default" : "pointer",
-                  userSelect:   "none",
-                  lineHeight:   1.2,
-                }}
-              >
-                {word.text}
-              </div>
-            ))}
-          </div>
-
-          {/* wrong badge — يسار أعلى */}
-          {isWrong && (
-            <div
-              style={{
-                position:        "absolute",
-                top:             "-8px",
-                left:            "-8px",
-                width:           "clamp(16px,1.8vw,22px)",
-                height:          "clamp(16px,1.8vw,22px)",
-                borderRadius:    "50%",
-                backgroundColor: WRONG_COLOR,
-                border:          "1px solid #fff",
-                color:           "#fff",
-                display:         "flex",
-                alignItems:      "center",
-                justifyContent:  "center",
-                fontSize:        "clamp(9px,0.9vw,12px)",
-                fontWeight:      700,
-                boxShadow:       "0 1px 4px rgba(0,0,0,0.2)",
-                zIndex:          3,
-                pointerEvents:   "none",
-              }}
-            >
-              ✕
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-export default function WB_Unit8_Page60_QH() {
-  const [userAnswers, setUserAnswers] = useState({});
+// ─────────────────────────────────────────────
+//  COMPONENT
+// ─────────────────────────────────────────────
+export default function WB_ReadLookWrite_QH() {
+  const [answers,     setAnswers]     = useState({});
   const [showResults, setShowResults] = useState(false);
   const [showAns,     setShowAns]     = useState(false);
-  const [resetKey,    setResetKey]    = useState(0);
 
-  const handleUpdate = useCallback((id, answer) => {
-    setUserAnswers((prev) => ({ ...prev, [id]: answer }));
-    setShowResults(false);
-  }, []);
+  const handleChange = (id, value) => {
+    if (showAns) return;
+    const item = ITEMS.find((i) => i.id === id);
+    if (showResults && item && isCorrect(answers[id] || "", item.correct)) return;
+    setAnswers((prev) => ({ ...prev, [id]: value }));
+  };
 
   const handleCheck = () => {
     if (showAns) return;
-    const allAnswered = EXERCISES.every((e) => userAnswers[e.id]?.trim());
-    if (!allAnswered) { ValidationAlert.info("Please complete all sentences first."); return; }
+    const allAnswered = ITEMS.every((item) => answers[item.id]?.trim());
+    if (!allAnswered) { ValidationAlert.info("Please complete all answers first."); return; }
     let score = 0;
-    EXERCISES.forEach((e) => {
-      if (userAnswers[e.id]?.trim().toLowerCase() === e.correct.trim().toLowerCase()) score++;
-    });
+    ITEMS.forEach((item) => { if (isCorrect(answers[item.id] || "", item.correct)) score++; });
     setShowResults(true);
-    const total = EXERCISES.length;
-    if (score === total)  ValidationAlert.success(`Score: ${score} / ${total}`);
-    else if (score > 0)   ValidationAlert.warning(`Score: ${score} / ${total}`);
-    else                  ValidationAlert.error(`Score: ${score} / ${total}`);
+    if (score === ITEMS.length)   ValidationAlert.success(`Score: ${score} / ${ITEMS.length}`);
+    else if (score > 0)           ValidationAlert.warning(`Score: ${score} / ${ITEMS.length}`);
+    else                          ValidationAlert.error(`Score: ${score} / ${ITEMS.length}`);
   };
 
   const handleShowAnswer = () => {
     const filled = {};
-    EXERCISES.forEach((e) => { filled[e.id] = e.correct; });
-    setUserAnswers(filled);
-    setShowResults(true);
+    ITEMS.forEach((item) => { filled[item.id] = item.answer; });
+    setAnswers(filled);
+    setShowResults(false);
     setShowAns(true);
   };
 
-  const handleStartAgain = () => {
-    setUserAnswers({});
+  const handleReset = () => {
+    setAnswers({});
     setShowResults(false);
     setShowAns(false);
-    setResetKey((prev) => prev + 1);
+  };
+
+  const isWrong = (item) => {
+    if (!showResults || showAns) return false;
+    return !isCorrect(answers[item.id] || "", item.correct);
+  };
+
+  const isDisabled = (item) => {
+    if (showAns) return true;
+    if (showResults && isCorrect(answers[item.id] || "", item.correct)) return true;
+    return false;
   };
 
   return (
     <div className="main-container-component">
+      <style>{`
+        /* ── 2×3 grid ── */
+        .rlw-grid {
+          display: grid;
+          grid-template-columns: repeat(2, 1fr);
+          gap: clamp(20px, 3vw, 40px) clamp(24px, 3.5vw, 48px);
+          width: 100%;
+          margin: 4% 0;
+        }
+
+        /* ── Single card ── */
+        .rlw-card {
+          display: flex;
+          flex-direction: column;
+          gap: clamp(8px, 1.2vw, 14px);
+          width: 70%;
+
+        }
+
+        /* Question row: num + text */
+        .rlw-question-row {
+          display: flex;
+          align-items: center;
+          gap: clamp(6px, 0.8vw, 10px);
+        }
+
+        .rlw-num {
+          font-size: clamp(14px, 1.7vw, 20px);
+          font-weight: 700;
+          color: ${NUMBER_COLOR};
+          flex-shrink: 0;
+          line-height: 1.5;
+        }
+
+        .rlw-question {
+          font-size: clamp(13px, 1.5vw, 18px);
+          color: ${QUESTION_COLOR};
+          line-height: 1.5;
+        }
+
+        /* Image wrap */
+        .rlw-img-wrap {
+          position: relative;
+          width: 100%;
+        }
+
+        .rlw-img {
+          width: 100%;
+          height: auto;
+          display: block;
+          border-radius: 8px;
+        }
+
+        /* Icon badge على الصورة */
+
+
+        /* Input wrap */
+        .rlw-input-wrap {
+          position: relative;
+          width: 100%;
+        }
+
+        .rlw-input {
+          width: 100%;
+          background: transparent;
+          border: none;
+          border-bottom: 1px solid ${INPUT_UNDERLINE_DEFAULT};
+          outline: none;
+          font-size: clamp(13px, 1.5vw, 18px);
+          color: ${INPUT_TEXT_COLOR};
+          line-height: 1.5;
+          box-sizing: border-box;
+          transition: border-color 0.2s;
+        }
+        .rlw-input:disabled   { opacity: 1; cursor: default; }
+        .rlw-input--wrong     { border-bottom-color: ${INPUT_UNDERLINE_WRONG}; }
+        .rlw-input--answer    { color: ${INPUT_ANSWER_COLOR}; }
+
+        /* ✕ badge */
+        .rlw-badge {
+          position: absolute;
+          top: -8px; right: 0;
+          width: clamp(16px, 1.8vw, 20px);
+          height: clamp(16px, 1.8vw, 20px);
+          border-radius: 50%;
+          background: ${WRONG_BADGE_BG};
+          color: ${WRONG_BADGE_TEXT};
+          display: flex; align-items: center; justify-content: center;
+          font-size: clamp(8px, 0.9vw, 11px);
+          font-weight: 700;
+          border: 2px solid #fff;
+          box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+          pointer-events: none;
+          z-index: 2;
+        }
+
+        /* Buttons */
+        .rlw-buttons {
+          display: flex;
+          justify-content: center;
+          margin-top: clamp(8px, 1.6vw, 18px);
+        }
+
+        @media (max-width: 520px) {
+          .rlw-grid { grid-template-columns: 1fr; }
+        }
+      `}</style>
+
       <div
         className="div-forall"
         style={{
-          display:       "flex",
+          display: "flex",
           flexDirection: "column",
-          gap:           "clamp(18px,2.5vw,28px)",
-          maxWidth:      "1100px",
-          margin:        "0 auto",
+          gap: "clamp(14px, 2vw, 22px)",
+          maxWidth: "1100px",
+          margin: "0 auto",
         }}
       >
-        {/* Title */}
+        {/* ── Header ── */}
         <h1
           className="WB-header-title-page8"
-          style={{ margin: 0 }}
+          style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
         >
-          <span className="WB-ex-A">H</span> Read and write sentences.
+          <span className="WB-ex-A">H</span>
+          Read, look, and write.
         </h1>
 
-        {/* Exercises */}
-        <div
-          style={{
-            display:       "flex",
-            flexDirection: "column",
-            gap:           "clamp(20px,3vw,36px)",
-            width:         "100%",
-          }}
-        >
-          {EXERCISES.map((item) => (
-            <ExerciseRow
-              key={`${item.id}-${resetKey}`}
-              item={item}
-              showResults={showResults}
-              showAns={showAns}
-              onUpdate={(ans) => handleUpdate(item.id, ans)}
-              resetKey={resetKey}
-            />
-          ))}
+        {/* ── Grid ── */}
+        <div className="rlw-grid">
+          {ITEMS.map((item) => {
+            const wrong    = isWrong(item);
+            const value    = answers[item.id] || "";
+            const tColor   = showAns ? INPUT_ANSWER_COLOR : INPUT_TEXT_COLOR;
+            const uColor   = wrong ? INPUT_UNDERLINE_WRONG : INPUT_UNDERLINE_DEFAULT;
+            const disabled = isDisabled(item);
+
+            return (
+              <div key={item.id} className="rlw-card">
+
+                {/* Question */}
+                <div className="rlw-question-row">
+                  <span className="rlw-num">{item.id}</span>
+                  <span className="rlw-question">{item.question}</span>
+                </div>
+
+                {/* Image + icon */}
+                <div className="rlw-img-wrap">
+                  <img src={item.src} alt={`scene-${item.id}`} className="rlw-img" />
+        
+                </div>
+
+                {/* Input */}
+                <div className="rlw-input-wrap">
+                  <input
+                    type="text"
+                    className={[
+                      "rlw-input",
+                      wrong   ? "rlw-input--wrong"  : "",
+                      showAns ? "rlw-input--answer" : "",
+                    ].filter(Boolean).join(" ")}
+                    value={value}
+                    disabled={disabled}
+                    onChange={(e) => handleChange(item.id, e.target.value)}
+                    style={{ borderBottomColor: uColor, color: tColor }}
+                    spellCheck={false}
+                    autoComplete="off"
+                  />
+                  {wrong && <div className="rlw-badge">✕</div>}
+                </div>
+
+              </div>
+            );
+          })}
         </div>
 
-        {/* Buttons */}
-        <div
-          style={{
-            display:        "flex",
-            justifyContent: "center",
-            marginTop:      "clamp(6px,1vw,12px)",
-          }}
-        >
+        {/* ── Buttons ── */}
+        <div className="rlw-buttons">
           <Button
             checkAnswers={handleCheck}
             handleShowAnswer={handleShowAnswer}
-            handleStartAgain={handleStartAgain}
+            handleStartAgain={handleReset}
           />
         </div>
       </div>
