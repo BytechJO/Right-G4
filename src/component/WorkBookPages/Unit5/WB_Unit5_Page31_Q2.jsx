@@ -9,7 +9,7 @@ import imgA from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U5 Fo
 import imgB from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U5 Folder/Page 31/SVG/Asset 38.svg";
 import imgC from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U5 Folder/Page 31/SVG/Asset 39.svg";
 import imgD from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U5 Folder/Page 31/SVG/Asset 40.svg";
-import imgE from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U5 Folder/Page 31/SVG/Asset 34.svg";
+import imgE from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U5 Folder/Page 31/SVG/Asset 41.svg";
 import imgF from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U5 Folder/Page 31/SVG/Asset 42.svg";
 
 // ─────────────────────────────────────────────

@@ -6,14 +6,14 @@ import ValidationAlert from "../../Popup/ValidationAlert";
 //  🎨  COLORS
 // ─────────────────────────────────────────────
 const INPUT_UNDERLINE_DEFAULT = "#3f3f3f";
-const INPUT_UNDERLINE_WRONG   = "#ef4444";
+const INPUT_UNDERLINE_WRONG   = "#2b2b2b";
 const INPUT_TEXT_COLOR        = "#2b2b2b";
 const INPUT_ANSWER_COLOR      = "#c81e1e";
 const NUMBER_COLOR            = "#2b2b2b";
 const SENTENCE_COLOR          = "#2b2b2b";
 const DOT_COLOR               = "#2096a6";
 const LINE_DEFAULT_COLOR      = "#2096a6";
-const LINE_WRONG_COLOR        = "#ef4444";
+const LINE_WRONG_COLOR        = "#2096a6";
 const WRONG_BADGE_BG          = "#ef4444";
 const WRONG_BADGE_TEXT        = "#ffffff";
 
@@ -181,7 +181,7 @@ export default function WB_ReadMatchWrite_QB() {
         .rmw-container {
           position: relative;
           width: 100%;
-          margin : 11% 0 ;
+              margin: 10% 0;
         }
 
         .rmw-svg {
@@ -194,7 +194,7 @@ export default function WB_ReadMatchWrite_QB() {
 
         .rmw-layout {
           display: grid;
-          grid-template-columns: 1fr auto clamp(60px, 10vw, 120px) auto auto;
+          grid-template-columns: 1fr auto clamp(100px, 15vw, 180px) auto auto;
           align-items: center;
           row-gap: clamp(14px, 2.2vw, 26px);
           column-gap: clamp(8px, 1.2vw, 16px);
@@ -228,7 +228,8 @@ export default function WB_ReadMatchWrite_QB() {
           font-size: clamp(13px, 1.6vw, 19px);
           color: ${SENTENCE_COLOR};
           flex-shrink: 0;
-          line-height: 1.5;
+          padding-bottom: 5px;
+          line-height: 1;
           white-space: nowrap;
         }
 
@@ -246,9 +247,8 @@ export default function WB_ReadMatchWrite_QB() {
           outline: none;
           font-size: clamp(13px, 1.6vw, 19px);
           color: ${INPUT_TEXT_COLOR};
-          line-height: 1.5;
+                  line-height: 1.5;
           box-sizing: border-box;
-          font-family: inherit;
           transition: border-color 0.2s;
           text-align: center;
         }
@@ -284,6 +284,14 @@ export default function WB_ReadMatchWrite_QB() {
           display: block;
         }
         .rmw-dot:hover     { transform: scale(1.3); }
+
+        /* Border على الجملة المحددة */
+        .rmw-left--selected {
+          border: 2px solid #2096a6;
+          border-radius: 8px;
+          padding: clamp(3px, 0.4vw, 5px) clamp(5px, 0.7vw, 8px);
+          background: rgba(32, 150, 166, 0.05);
+        }
 
         .rmw-right-dot {
           display: flex;
@@ -358,7 +366,7 @@ export default function WB_ReadMatchWrite_QB() {
                 <React.Fragment key={item.id}>
 
                   {/* Col 1: sentence + input */}
-                  <div className="rmw-left">
+                  <div className={`rmw-left${isSelected ? " rmw-left--selected" : ""}`}>
                     <div className="rmw-sentence">
                       <span className="rmw-num">{item.id}</span>
                       <span className="rmw-text">{item.before}</span>

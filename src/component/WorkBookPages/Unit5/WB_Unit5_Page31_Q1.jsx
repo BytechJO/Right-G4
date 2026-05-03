@@ -6,7 +6,7 @@ import ValidationAlert from "../../Popup/ValidationAlert";
 //  🖼️  IMAGES
 // ─────────────────────────────────────────────
 import img1 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U5 Folder/Page 31/SVG/Asset 1.svg"; // boy in tunnel
-import img2 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U5 Folder/Page 31/SVG/Asset 2.svg"; // boy going into restaurant
+import img2 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U5 Folder/Page 31/SVG/020.svg"; // boy going into restaurant
 import img3 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U5 Folder/Page 31/SVG/Asset 3.svg"; // boy behind rabbit
 import img4 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U5 Folder/Page 31/SVG/Asset 4.svg"; // boy going over fence
 

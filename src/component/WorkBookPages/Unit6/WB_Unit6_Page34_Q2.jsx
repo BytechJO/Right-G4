@@ -11,7 +11,7 @@ import sceneImg from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U
 //  🎨  COLORS
 // ─────────────────────────────────────────────
 const LINE_COLOR       = "#2096a6";
-const WRONG_LINE_COLOR = "#ef4444";
+const WRONG_LINE_COLOR = "#2096a6";
 const SENTENCE_COLOR   = "#2b2b2b";
 const NUMBER_COLOR     = "#2b2b2b";
 const WRONG_BADGE_BG   = "#ef4444";

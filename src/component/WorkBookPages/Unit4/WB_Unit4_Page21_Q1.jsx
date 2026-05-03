@@ -168,8 +168,7 @@ export default function WB_ReadChangeRewrite_QA() {
           display: flex;
           gap: clamp(8px, 1.2vw, 16px);
           flex-wrap: wrap;
-          align-items: center;
-        }
+    justify-content: space-around;        }
 
         .rcr-bank-word {
           border: 2px solid ${WORD_BANK_BORDER};
