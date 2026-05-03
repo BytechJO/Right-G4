@@ -1,369 +1,322 @@
-import React, { useLayoutEffect, useRef, useState } from "react";
+import React, { useState } from "react";
 import Button from "../Button";
 import ValidationAlert from "../../Popup/ValidationAlert";
 
-import img1 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U10 Folder/Page 62/SVG/1.svg";
-import img2 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U10 Folder/Page 62/SVG/2.svg";
-import img3 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U10 Folder/Page 62/SVG/3.svg";
+// ─────────────────────────────────────────────
+//  🖼️  IMAGES
+// ─────────────────────────────────────────────
+import imgWhale    from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U10 Folder/Page 62/SVG/Asset 1.svg";
+import imgTiger    from"../../../assets/imgs/pages/Activity Book/Right Int WB G4 U10 Folder/Page 62/SVG/Asset 1.svg";
+import imgCamel    from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U10 Folder/Page 62/SVG/Asset 1.svg";
+import imgHorse    from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U10 Folder/Page 62/SVG/Asset 1.svg";
+import imgSnake    from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U10 Folder/Page 62/SVG/Asset 1.svg";
+import imgShark    from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U10 Folder/Page 62/SVG/Asset 1.svg";
+import imgElephant from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U10 Folder/Page 62/SVG/Asset 1.svg";
 
-const DOT_COLOR    = "#9ca3af";
-const ACTIVE_COLOR = "#f39b42";
-const BORDER_COLOR = "#e0e0e0";
-const WRONG_COLOR  = "#ef4444";
-const PATH_COLOR   = "#f39b42";
-const TEXT_COLOR   = "#111";
+// ─────────────────────────────────────────────
+//  🎨  COLORS
+// ─────────────────────────────────────────────
+const INPUT_UNDERLINE_DEFAULT = "#3f3f3f";
+const INPUT_UNDERLINE_WRONG   = "#ef4444";
+const INPUT_TEXT_COLOR        = "#2b2b2b";
+const INPUT_ANSWER_COLOR      = "#c81e1e";
+const NUMBER_COLOR            = "#2b2b2b";
+const WRONG_BADGE_BG          = "#ef4444";
+const WRONG_BADGE_TEXT        = "#ffffff";
 
-const LEFT_ITEMS = [
-  { id: 1, text: "A bear is in a dress and dreams at its desk." },
-  { id: 2, text: "Tracy and Trudy trade trucks on the tree."    },
-  { id: 3, text: "The crabs cry as they cross the creek."       },
+// ─────────────────────────────────────────────
+//  📝  IMAGE BANK — صور مع إشارة ✓/✕
+// ─────────────────────────────────────────────
+const IMAGE_BANK = [
+  { id: "whale",    src: imgWhale,    icon: "check" },
+  { id: "tiger",    src: imgTiger,    icon: "cross" },
+  { id: "camel",    src: imgCamel,    icon: "check" },
+  { id: "horse",    src: imgHorse,    icon: "cross" },
+  { id: "snake",    src: imgSnake,    icon: "check" },
+  { id: "shark",    src: imgShark,    icon: "cross" },
+  { id: "elephant", src: imgElephant, icon: "check" },
 ];
 
-const RIGHT_ITEMS = [
-  { id: 1, img: img1 },
-  { id: 2, img: img2 },
-  { id: 3, img: img3 },
+// ─────────────────────────────────────────────
+//  📝  EXERCISE DATA
+// ─────────────────────────────────────────────
+const ITEMS = [
+  {
+    id:      1,
+    correct: ["I have seen a whale, but I haven't seen a tiger.", "i have seen a whale but i havent seen a tiger"],
+    answer:  "I have seen a whale, but I haven't seen a tiger.",
+  },
+  {
+    id:      2,
+    correct: ["I have seen a camel, but I haven't seen a horse.", "i have seen a camel but i havent seen a horse"],
+    answer:  "I have seen a camel, but I haven't seen a horse.",
+  },
+  {
+    id:      3,
+    correct: ["I have seen an elephant, but I haven't seen a shark.", "i have seen an elephant but i havent seen a shark"],
+    answer:  "I have seen an elephant, but I haven't seen a shark.",
+  },
 ];
 
-const CORRECT_MATCHES = { 1: 2, 2: 3, 3: 1 };
+// ─────────────────────────────────────────────
+//  🔧  NORMALIZE
+// ─────────────────────────────────────────────
+const normalize = (str) =>
+  str.toLowerCase().replace(/[^a-z0-9'\s]/g, "").replace(/\s+/g, " ").trim();
 
-export default function WB_ReadAndMatch_PageA() {
-  const [selectedLeft, setSelectedLeft] = useState(null);
-  const [matches,      setMatches]      = useState({});
-  const [showResults,  setShowResults]  = useState(false);
-  const [showAns,      setShowAns]      = useState(false);
-  const [paths,        setPaths]        = useState([]);
+const isCorrect = (userVal, correctArr) =>
+  correctArr.some((c) => normalize(userVal) === normalize(c));
 
-  const boardRef  = useRef(null);
-  const pointRefs = useRef({});
+// ─────────────────────────────────────────────
+//  COMPONENT
+// ─────────────────────────────────────────────
+export default function WB_LookReadWrite_QJ() {
+  const [answers,     setAnswers]     = useState({});
+  const [showResults, setShowResults] = useState(false);
+  const [showAns,     setShowAns]     = useState(false);
 
-  useLayoutEffect(() => {
-    const update = () => {
-      if (!boardRef.current) return;
-      const br = boardRef.current.getBoundingClientRect();
-
-      const newPaths = Object.entries(matches).map(([leftId, rightId]) => {
-        const s = pointRefs.current[`left-${leftId}`];
-        const e = pointRefs.current[`right-${rightId}`];
-        if (!s || !e) return null;
-
-        const sr = s.getBoundingClientRect();
-        const er = e.getBoundingClientRect();
-        const x1 = sr.left + sr.width  / 2 - br.left;
-        const y1 = sr.top  + sr.height / 2 - br.top;
-        const x2 = er.left + er.width  / 2 - br.left;
-        const y2 = er.top  + er.height / 2 - br.top;
-        const dx = Math.abs(x2 - x1);
-
-        return {
-          id:    `path-${leftId}-${rightId}`,
-          d:     `M ${x1} ${y1} C ${x1 + dx * 0.42} ${y1}, ${x2 - dx * 0.42} ${y2}, ${x2} ${y2}`,
-          color: PATH_COLOR,
-        };
-      }).filter(Boolean);
-
-      setPaths(newPaths);
-    };
-
-    update();
-    window.addEventListener("resize", update);
-    let obs;
-    if (boardRef.current && typeof ResizeObserver !== "undefined") {
-      obs = new ResizeObserver(update);
-      obs.observe(boardRef.current);
-    }
-    return () => { window.removeEventListener("resize", update); obs?.disconnect(); };
-  }, [matches, showResults]);
-
-  const handleLeftSelect = (id) => {
+  const handleChange = (id, value) => {
     if (showAns) return;
-    setSelectedLeft((prev) => prev === id ? null : id);
-    setShowResults(false);
-  };
-
-  const handleRightSelect = (rightId) => {
-    if (showAns || selectedLeft === null) return;
-    const upd = { ...matches };
-    Object.keys(upd).forEach((k) => { if (upd[k] === rightId) delete upd[k]; });
-    upd[selectedLeft] = rightId;
-    setMatches(upd);
-    setSelectedLeft(null);
-    setShowResults(false);
+    const item = ITEMS.find((i) => i.id === id);
+    if (showResults && item && isCorrect(answers[id] || "", item.correct)) return;
+    setAnswers((prev) => ({ ...prev, [id]: value }));
   };
 
   const handleCheck = () => {
     if (showAns) return;
-    const allConnected = LEFT_ITEMS.every((i) => matches[i.id]);
-    if (!allConnected) {
-      ValidationAlert.info("Please connect all sentences first.");
-      return;
-    }
+    const allAnswered = ITEMS.every((item) => answers[item.id]?.trim());
+    if (!allAnswered) { ValidationAlert.info("Please complete all answers first."); return; }
     let score = 0;
-    LEFT_ITEMS.forEach((i) => { if (matches[i.id] === CORRECT_MATCHES[i.id]) score++; });
+    ITEMS.forEach((item) => { if (isCorrect(answers[item.id] || "", item.correct)) score++; });
     setShowResults(true);
-    const total = LEFT_ITEMS.length;
-    if (score === total)  ValidationAlert.success(`Score: ${score} / ${total}`);
-    else if (score > 0)   ValidationAlert.warning(`Score: ${score} / ${total}`);
-    else                  ValidationAlert.error(`Score: ${score} / ${total}`);
+    if (score === ITEMS.length)   ValidationAlert.success(`Score: ${score} / ${ITEMS.length}`);
+    else if (score > 0)           ValidationAlert.warning(`Score: ${score} / ${ITEMS.length}`);
+    else                          ValidationAlert.error(`Score: ${score} / ${ITEMS.length}`);
   };
 
   const handleShowAnswer = () => {
-    setMatches({ ...CORRECT_MATCHES });
-    setShowResults(true);
+    const filled = {};
+    ITEMS.forEach((item) => { filled[item.id] = item.answer; });
+    setAnswers(filled);
+    setShowResults(false);
     setShowAns(true);
-    setSelectedLeft(null);
   };
 
-  const handleStartAgain = () => {
-    setSelectedLeft(null);
-    setMatches({});
+  const handleReset = () => {
+    setAnswers({});
     setShowResults(false);
     setShowAns(false);
-    setPaths([]);
   };
 
-  const getLeftConn  = (id) => !!matches[id];
-  const getRightConn = (id) => Object.values(matches).includes(id);
-  const isWrongMatch = (leftId) =>
-    showResults && !showAns && !!matches[leftId] &&
-    matches[leftId] !== CORRECT_MATCHES[leftId];
+  const isWrong = (item) => {
+    if (!showResults || showAns) return false;
+    return !isCorrect(answers[item.id] || "", item.correct);
+  };
 
-  const WrongBadge = () => (
-    <div
-      style={{
-        position:        "absolute",
-        top:             "-7px",
-        left:            "-7px",
-        width:           "clamp(15px,1.7vw,20px)",
-        height:          "clamp(15px,1.7vw,20px)",
-        borderRadius:    "50%",
-        backgroundColor: WRONG_COLOR,
-        color:           "#fff",
-        display:         "flex",
-        alignItems:      "center",
-        justifyContent:  "center",
-        fontSize:        "clamp(8px,0.9vw,11px)",
-        fontWeight:      700,
-        boxShadow:       "0 1px 4px rgba(0,0,0,0.25)",
-        zIndex:          5,
-        pointerEvents:   "none",
-      }}
-    >
-      ✕
-    </div>
-  );
+  const isDisabled = (item) => {
+    if (showAns) return true;
+    if (showResults && isCorrect(answers[item.id] || "", item.correct)) return true;
+    return false;
+  };
 
   return (
     <div className="main-container-component">
+      <style>{`
+        /* ── Image bank row ── */
+        .lrwj-bank {
+          display: flex;
+          flex-wrap: wrap;
+          gap: clamp(6px, 0.9vw, 12px);
+          width: 100%;
+        }
+
+        /* Single image card */
+        .lrwj-img-card {
+          position: relative;
+          border: 2px solid #d0d0d0;
+          border-radius: 8px;
+          overflow: hidden;
+          flex: 1;
+          min-width: clamp(70px, 9vw, 120px);
+          max-width: clamp(100px, 14vw, 170px);
+          background: #fff;
+        }
+
+        .lrwj-img {
+          width: 100%;
+          aspect-ratio: 1 / 1;
+          object-fit: contain;
+          display: block;
+          padding: clamp(4px, 0.5vw, 8px);
+          box-sizing: border-box;
+        }
+
+        /* ✓ / ✕ icon — top right */
+        .lrwj-icon {
+          position: absolute;
+          top: 0; right: 0;
+          width: clamp(22px, 2.8vw, 32px);
+          height: clamp(22px, 2.8vw, 32px);
+          border-radius: 0 6px 0 4px;
+          background: #fff;
+          border-left: 1.5px solid #d0d0d0;
+          border-bottom: 1.5px solid #d0d0d0;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: clamp(12px, 1.6vw, 18px);
+          font-weight: 700;
+          color: #2b2b2b;
+          z-index: 2;
+        }
+
+        /* ── Sentences list ── */
+        .lrwj-list {
+          display: flex;
+          flex-direction: column;
+          gap: clamp(14px, 2.2vw, 26px);
+          width: 100%;
+        }
+
+        /* Single sentence row */
+        .lrwj-row {
+          display: flex;
+          align-items: flex-end;
+          gap: clamp(6px, 0.8vw, 12px);
+          min-width: 0;
+        }
+
+        .lrwj-num {
+          font-size: clamp(15px, 1.8vw, 22px);
+          font-weight: 700;
+          color: ${NUMBER_COLOR};
+          flex-shrink: 0;
+          padding-bottom: 4px;
+          line-height: 1;
+        }
+
+        /* Input wrap */
+        .lrwj-input-wrap {
+          position: relative;
+          flex: 1;
+          min-width: clamp(120px, 18vw, 300px);
+        }
+
+        .lrwj-input {
+          width: 100%;
+          background: transparent;
+          border: none;
+          border-bottom: 2px solid ${INPUT_UNDERLINE_DEFAULT};
+          outline: none;
+          font-size: clamp(14px, 1.7vw, 20px);
+          color: ${INPUT_TEXT_COLOR};
+          padding: 4px 6px 5px;
+          line-height: 1.5;
+          box-sizing: border-box;
+          font-family: inherit;
+          transition: border-color 0.2s;
+        }
+        .lrwj-input:disabled   { opacity: 1; cursor: default; }
+        .lrwj-input--wrong     { border-bottom-color: ${INPUT_UNDERLINE_WRONG}; }
+        .lrwj-input--answer    { color: ${INPUT_ANSWER_COLOR}; }
+
+        /* ✕ badge */
+        .lrwj-badge {
+          position: absolute;
+          top: -8px; right: 0;
+          width: clamp(17px, 1.9vw, 22px);
+          height: clamp(17px, 1.9vw, 22px);
+          border-radius: 50%;
+          background: ${WRONG_BADGE_BG};
+          color: ${WRONG_BADGE_TEXT};
+          display: flex; align-items: center; justify-content: center;
+          font-size: clamp(9px, 1vw, 12px);
+          font-weight: 700;
+          border: 2px solid #fff;
+          box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+          pointer-events: none;
+          z-index: 2;
+        }
+
+        /* Buttons */
+        .lrwj-buttons {
+          display: flex;
+          justify-content: center;
+          margin-top: clamp(8px, 1.6vw, 18px);
+        }
+      `}</style>
+
       <div
         className="div-forall"
         style={{
-          display:       "flex",
+          display: "flex",
           flexDirection: "column",
-          gap:           "18px",
-          maxWidth:      "1100px",
-          margin:        "0 auto",
+          gap: "clamp(14px, 2vw, 22px)",
+          maxWidth: "1100px",
+          margin: "0 auto",
         }}
       >
-        {/* Title */}
+        {/* ── Header ── */}
         <h1
           className="WB-header-title-page8"
-          style={{
-            margin:     0,
-            display:    "flex",
-            alignItems: "center",
-            gap:        "12px",
-            flexWrap:   "wrap",
-          }}
+          style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
         >
-          <span className="WB-ex-A">A</span> Read and match.
+          <span className="WB-ex-A">J</span>
+          Look, read, and write. You can use pictures more than once.
         </h1>
 
-        {/* Board */}
-        <div ref={boardRef} style={{ position: "relative", width: "100%" }}>
-
-          {/* SVG lines */}
-          <svg
-            style={{
-              position:      "absolute",
-              inset:         0,
-              width:         "100%",
-              height:        "100%",
-              pointerEvents: "none",
-              overflow:      "visible",
-              zIndex:        1,
-            }}
-          >
-            {paths.map((p) => (
-              <path
-                key={p.id}
-                d={p.d}
-                fill="none"
-                stroke={p.color}
-                strokeWidth="2.4"
-                strokeLinecap="round"
-              />
-            ))}
-          </svg>
-
-          {/* Grid: sentence | left-dot | right-dot | image */}
-          <div
-            style={{
-              display:             "grid",
-              gridTemplateColumns: "1fr auto auto auto",
-              columnGap:           "clamp(10px,2vw,28px)",
-              rowGap:              "clamp(18px,3vw,36px)",
-              alignItems:          "center",
-              width:               "100%",
-            }}
-          >
-            {LEFT_ITEMS.map((lItem, idx) => {
-              const rItem     = RIGHT_ITEMS[idx];
-              const lConn     = getLeftConn(lItem.id);
-              const rConn     = getRightConn(rItem.id);
-              const lSelected = selectedLeft === lItem.id;
-              const wrong     = isWrongMatch(lItem.id);
-
-              return (
-                <React.Fragment key={lItem.id}>
-
-                  {/* ── sentence ── */}
-                  <div
-                    onClick={() => handleLeftSelect(lItem.id)}
-                    style={{
-                      position:     "relative",
-                      display:      "flex",
-                      alignItems:   "center",
-                      gap:          "clamp(6px,0.9vw,12px)",
-                      minWidth:     0,
-                      zIndex:       2,
-                      padding:      "clamp(4px,0.6vw,8px) clamp(8px,1vw,14px)",
-                      borderRadius: "clamp(8px,1vw,12px)",
-                      border:       lSelected
-                        ? `2.5px solid ${ACTIVE_COLOR}`
-                        : "2px solid transparent",
-                      background:   lSelected ? "rgba(243,155,66,0.08)" : "transparent",
-                      cursor:       showAns ? "default" : "pointer",
-                      transition:   "border-color 0.2s, background 0.2s",
-                      userSelect:   "none",
-                    }}
-                  >
-                    {/* number */}
-                    <span
-                      style={{
-                        fontSize:   "clamp(16px,1.9vw,28px)",
-                        fontWeight: 700,
-                        color:      TEXT_COLOR,
-                        lineHeight: 1,
-                        flexShrink: 0,
-                      }}
-                    >
-                      {lItem.id}
-                    </span>
-
-                    {/* text */}
-                    <span
-                      style={{
-                        fontSize:   "clamp(13px,1.6vw,22px)",
-                        fontWeight: 500,
-                        color:      lSelected ? ACTIVE_COLOR : TEXT_COLOR,
-                        lineHeight: 1.3,
-                        wordBreak:  "break-word",
-                        transition: "color 0.2s",
-                      }}
-                    >
-                      {lItem.text}
-                    </span>
-
-                    {/* wrong badge يسار */}
-                    {wrong && <WrongBadge />}
-                  </div>
-
-                  {/* ── left dot ── */}
-                  <div
-                    ref={(el) => (pointRefs.current[`left-${lItem.id}`] = el)}
-                    onClick={() => handleLeftSelect(lItem.id)}
-                    style={{
-                      width:        "clamp(10px,1.3vw,16px)",
-                      height:       "clamp(10px,1.3vw,16px)",
-                      borderRadius: "50%",
-                      flexShrink:   0,
-                      background:   lSelected
-                        ? ACTIVE_COLOR
-                        : lConn ? ACTIVE_COLOR : DOT_COLOR,
-                      cursor:       showAns ? "default" : "pointer",
-                      transition:   "background 0.2s",
-                      boxShadow:    lSelected ? `0 0 0 3px rgba(243,155,66,0.3)` : "none",
-                      zIndex:       2,
-                    }}
-                  />
-
-                  {/* ── right dot ── */}
-                  <div
-                    ref={(el) => (pointRefs.current[`right-${rItem.id}`] = el)}
-                    onClick={() => handleRightSelect(rItem.id)}
-                    style={{
-                      width:        "clamp(10px,1.3vw,16px)",
-                      height:       "clamp(10px,1.3vw,16px)",
-                      borderRadius: "50%",
-                      flexShrink:   0,
-                      background:   rConn ? ACTIVE_COLOR : DOT_COLOR,
-                      cursor:       showAns || selectedLeft === null ? "default" : "pointer",
-                      transition:   "background 0.2s",
-                      zIndex:       2,
-                    }}
-                  />
-
-                  {/* ── image ── */}
-                  <div
-                    onClick={() => handleRightSelect(rItem.id)}
-                    style={{
-                      width:          "clamp(100px,18vw,200px)",
-                      aspectRatio:    "1.6 / 1",
-                      overflow:       "hidden",
-                      borderRadius:   "clamp(8px,1vw,14px)",
-                      border:         `2px solid ${rConn ? ACTIVE_COLOR : BORDER_COLOR}`,
-                      background:     "#f7f7f7",
-                      flexShrink:     0,
-                      cursor:         showAns || selectedLeft === null ? "default" : "pointer",
-                      transition:     "border-color 0.2s",
-                      boxSizing:      "border-box",
-                      zIndex:         2,
-                    }}
-                  >
-                    <img
-                      src={rItem.img}
-                      alt={`img-${rItem.id}`}
-                      style={{
-                        width:         "100%",
-                        height:        "100%",
-                        objectFit:     "cover",
-                        display:       "block",
-                        userSelect:    "none",
-                        pointerEvents: "none",
-                      }}
-                    />
-                  </div>
-
-                </React.Fragment>
-              );
-            })}
-          </div>
+        {/* ── Image bank ── */}
+        <div className="lrwj-bank">
+          {IMAGE_BANK.map((img) => (
+            <div key={img.id} className="lrwj-img-card">
+              <img src={img.src} alt={img.id} className="lrwj-img" />
+              <div className="lrwj-icon">
+                {img.icon === "check" ? "✓" : "✕"}
+              </div>
+            </div>
+          ))}
         </div>
 
-        {/* Buttons */}
-        <div
-          style={{
-            display:        "flex",
-            justifyContent: "center",
-            marginTop:      "clamp(8px,1.5vw,16px)",
-            zIndex:         100,
-          }}
-        >
+        {/* ── Sentences ── */}
+        <div className="lrwj-list">
+          {ITEMS.map((item) => {
+            const wrong    = isWrong(item);
+            const value    = answers[item.id] || "";
+            const tColor   = showAns ? INPUT_ANSWER_COLOR : INPUT_TEXT_COLOR;
+            const uColor   = wrong ? INPUT_UNDERLINE_WRONG : INPUT_UNDERLINE_DEFAULT;
+            const disabled = isDisabled(item);
+
+            return (
+              <div key={item.id} className="lrwj-row">
+                <span className="lrwj-num">{item.id}</span>
+                <div className="lrwj-input-wrap">
+                  <input
+                    type="text"
+                    className={[
+                      "lrwj-input",
+                      wrong   ? "lrwj-input--wrong"  : "",
+                      showAns ? "lrwj-input--answer" : "",
+                    ].filter(Boolean).join(" ")}
+                    value={value}
+                    disabled={disabled}
+                    onChange={(e) => handleChange(item.id, e.target.value)}
+                    style={{ borderBottomColor: uColor, color: tColor }}
+                    spellCheck={false}
+                    autoComplete="off"
+                  />
+                  {wrong && <div className="lrwj-badge">✕</div>}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* ── Buttons ── */}
+        <div className="lrwj-buttons">
           <Button
             checkAnswers={handleCheck}
             handleShowAnswer={handleShowAnswer}
-            handleStartAgain={handleStartAgain}
+            handleStartAgain={handleReset}
           />
         </div>
       </div>

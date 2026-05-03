@@ -38,7 +38,7 @@ export default function WB_ReadWrite_QJ() {
           flex-direction: column;
           gap: clamp(18px, 2.8vw, 36px);
           width: 100%;
-              margin-top: 5%;
+              margin:5% 0 ;
         }
 
         /* ── Single item ── */

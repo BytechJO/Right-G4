@@ -6,11 +6,11 @@ import ValidationAlert from "../../Popup/ValidationAlert";
 //  🖼️  IMAGES
 // ─────────────────────────────────────────────
 import img1 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U10 Folder/Page 60/SVG/Asset 18.svg";
-import img2 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U10 Folder/Page 60/SVG/Asset 19.svg";
-import img3 from"../../../assets/imgs/pages/Activity Book/Right Int WB G4 U10 Folder/Page 60/SVG/Asset 20.svg";
-import img4 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U10 Folder/Page 60/SVG/Asset 21.svg";
+import img2 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U10 Folder/Page 60/SVG/Asset 21.svg";
+import img3 from"../../../assets/imgs/pages/Activity Book/Right Int WB G4 U10 Folder/Page 60/SVG/Asset 23.svg";
+import img4 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U10 Folder/Page 60/SVG/Asset 19.svg";
 import img5 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U10 Folder/Page 60/SVG/Asset 22.svg";
-import img6 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U10 Folder/Page 60/SVG/Asset 23.svg";
+import img6 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U10 Folder/Page 60/SVG/Asset 20.svg";
 
 // ─────────────────────────────────────────────
 //  🎨  COLORS
@@ -149,7 +149,6 @@ export default function WB_ReadLookWrite_QH() {
           grid-template-columns: repeat(2, 1fr);
           gap: clamp(20px, 3vw, 40px) clamp(24px, 3.5vw, 48px);
           width: 100%;
-          margin: 4% 0;
         }
 
         /* ── Single card ── */

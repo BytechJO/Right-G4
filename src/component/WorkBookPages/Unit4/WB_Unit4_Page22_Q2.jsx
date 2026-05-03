@@ -140,7 +140,7 @@ export default function WB_SolveWrite_QD() {
 .sw-box {
   border: 2px solid ${BOX_BORDER_COLOR};
   border-radius: 15px;
-  padding: clamp(10px, 1.4vw, 18px) clamp(14px, 2vw, 24px);
+  padding: 5px;
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: clamp(8px, 0.6vw, 16px) clamp(24px, 2vw, 56px);
@@ -159,7 +159,7 @@ font-size: clamp(15px, 1.9vw, 20px);
         .sw-list {
           display: flex;
           flex-direction: column;
-          gap: clamp(10px, 1.6vw, 20px);
+          gap: clamp(15px, 1.6vw, 15px);
           width: 100%;
         }
 
@@ -182,8 +182,8 @@ font-size: clamp(15px, 1.9vw, 20px);
         }
 
         .sw-clue {
-font-size: clamp(15px, 1.9vw, 20px);
-          color: ${CLUE_TEXT_COLOR};
+    font-size: clamp(15px, 1.9vw, 18px);
+              color: ${CLUE_TEXT_COLOR};
           white-space: nowrap;
           flex-shrink: 0;
           line-height: 1.5;
@@ -238,6 +238,9 @@ font-size: clamp(15px, 1.9vw, 20px);
           justify-content: center;
           margin-top: clamp(8px, 1.6vw, 18px);
         }
+          .div-forall {
+  gap: 15px !important;
+}
 
         @media (max-width: 560px) {
           .sw-box { grid-template-columns: repeat(2, 1fr); }
@@ -250,7 +253,6 @@ font-size: clamp(15px, 1.9vw, 20px);
         style={{
           display: "flex",
           flexDirection: "column",
-          gap: "clamp(14px, 2vw, 22px)",
           maxWidth: "1100px",
           margin: "0 auto",
         }}

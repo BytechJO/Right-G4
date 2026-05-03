@@ -130,7 +130,8 @@ export default function WB_LookReadWrite_QG() {
           display: flex;
           flex-direction: column;
           width: 100%;
-    margin-top: 5%;
+    margin: 8% 0;
+    gap : 20px ;
         }
 
         /* ── Single row: num | img | before + input + after ── */

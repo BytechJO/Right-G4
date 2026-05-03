@@ -4,7 +4,7 @@ import Button from "../Button";
 // ─────────────────────────────────────────────
 //  🖼️  IMAGE — صورة المزرعة
 // ─────────────────────────────────────────────
-import farmImg from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U4 Folder/Page 24/Asset 3.svg";
+import farmImg from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U4 Folder/Page 24/SVG/Asset 3.svg";
 
 // ─────────────────────────────────────────────
 //  🎨  COLORS
@@ -49,7 +49,7 @@ export default function WB_LookWriteSentences_QF() {
       <style>{`
         /* ── Farm image ── */
         .lwsf-img {
-          width: 50%;
+          width: 65%;
           display: block;
           height : auto ;
         }

@@ -135,7 +135,6 @@ export default function WB_LookWrite_QH() {
         .lwh-list {
           display: flex;
           flex-direction: column;
-          gap: clamp(14px, 2.2vw, 26px);
           width: 100%;
         }
 
@@ -144,6 +143,7 @@ export default function WB_LookWrite_QH() {
           display: flex;
           align-items: center;
           gap: clamp(10px, 1.6vw, 20px);
+          margin : -1% 0 ; 
         }
 
         .lwh-num {

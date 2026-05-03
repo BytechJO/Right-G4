@@ -131,6 +131,8 @@ export default function WB_UseCodeWrite_QC() {
           grid-template-columns: repeat(3, minmax(0, 1fr));
           gap: clamp(16px, 2.4vw, 30px) clamp(20px, 3vw, 40px);
           width: 100%;
+                        margin:2.5% 0 ;
+
         }
 
         /* ── Single word card ── */

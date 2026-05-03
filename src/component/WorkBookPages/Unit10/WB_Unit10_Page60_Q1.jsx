@@ -119,9 +119,9 @@ export default function WB_LookReadWrite_QG() {
 
         /* ── Single item: num | img | right-col ── */
         .lrwg-item {
-          display: grid;
-          grid-template-columns: auto clamp(160px, 22vw, 280px) 1fr;
-          gap: clamp(10px, 1.6vw, 22px);
+          display: flex;
+          flex : row ; 
+          gap: clamp(30px, 1.6vw, 30px);
           align-items: center;
         }
 
@@ -138,14 +138,13 @@ export default function WB_LookReadWrite_QG() {
         /* Image wrap */
         .lrwg-img-wrap {
           position: relative;
-          width: 80%;
+          width: 20%;
         }
 
         .lrwg-img {
           width: 100%;
           height: auto;
           display: block;
-          border-radius: 8px;
         }
 
         /* Icon badge على الصورة */

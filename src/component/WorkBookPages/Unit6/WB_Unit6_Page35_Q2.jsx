@@ -105,7 +105,7 @@ export default function WB_ReadWritePhrases_QF() {
   const isDisabled = (item) => showAns || (showResults && isCorrect(answers[item.id] || "", item.correct));
 
   return (
-    <div className="main-container-component">
+    <div className="main-container-component" >
       <style>{`
         /* Example sentence */
         .rwp-example {
@@ -243,6 +243,7 @@ export default function WB_ReadWritePhrases_QF() {
           <span className="WB-ex-A">F</span>
           Read and write the phrases below into new sentences.
         </h1>
+        <div style={{margin:" 5% 0 "}}> 
 
         {/* ── Example ── */}
         <p className="rwp-example">
@@ -302,7 +303,7 @@ export default function WB_ReadWritePhrases_QF() {
             handleShowAnswer={handleShowAnswer}
             handleStartAgain={handleReset}
           />
-        </div>
+        </div></div>
       </div>
     </div>
   );

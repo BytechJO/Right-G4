@@ -132,8 +132,8 @@ export default function WB_LookUnscrambleRewrite_QA() {
         .lur-list {
           display: flex;
           flex-direction: column;
-          gap: clamp(16px, 2.4vw, 30px);
           width: 100%;
+
         }
 
         /* ── Single row: num | img | right ── */
@@ -145,7 +145,7 @@ export default function WB_LookUnscrambleRewrite_QA() {
             1fr;
           gap: clamp(10px, 1.6vw, 24px);
           align-items: center;
-        }
+          margin : -1.5% 0        }
 
         /* Number */
         .lur-num {

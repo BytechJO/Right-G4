@@ -153,7 +153,8 @@ export default function WB_ReadWriteNumber_QI() {
           display: flex;
           flex-wrap: wrap;
           gap: clamp(6px, 0.9vw, 12px);
-          justify-content: center;
+         justify-content: space-around;
+             margin: 1% 0;
         }
 
         .rwni-pill {
@@ -250,6 +251,7 @@ export default function WB_ReadWriteNumber_QI() {
           gap: clamp(6px, 1vw, 14px);
           flex-wrap: wrap;
           width: 100%;
+              margin: 3% 0;
         }
 
         .rwni-img-card {
@@ -273,7 +275,7 @@ export default function WB_ReadWriteNumber_QI() {
           border-left: 2px solid #2096a6;
           border-bottom: 2px solid #2096a6;
           border-top: 2px solid #2096a6;
-          border-right: 2px solid #2096a6;
+          border-right: 2px solid #2096a6;3
           border-radius: 0 8px 0 4px;
           background: #fff;
           text-align: center;
@@ -289,12 +291,12 @@ export default function WB_ReadWriteNumber_QI() {
           cursor: text;
         }
         .rwni-img-input:disabled        { opacity: 1; cursor: default; }
-        .rwni-img-input--wrong          { border-color: ${WRONG_BADGE_BG}; color: ${WRONG_BADGE_BG}; }
+        .rwni-img-input--wrong          {  color: ${WRONG_BADGE_BG}; }
         .rwni-img-input--answer         { color: ${INPUT_ANSWER_COLOR}; border-color: ${INPUT_ANSWER_COLOR}; }
 
         .rwni-img-badge {
           position: absolute;
-          top: -8px; right: -8px;
+          top: 25px; right: 25px;
           width: clamp(15px, 1.7vw, 19px);
           height: clamp(15px, 1.7vw, 19px);
           border-radius: 50%;

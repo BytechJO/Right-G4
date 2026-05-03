@@ -364,7 +364,7 @@ export default function WB_ReadLookMatch_QI() {
 >
   <span className="rlm2-num">{left.id}</span>
   <span className="rlm2-text">{left.text}</span>
-  <div style={{ position: "relative", flexShrink: 0, marginLeft: "auto" }}>
+  <div style={{ position: "relative", flexShrink: 0, marginLeft: "auto" , marginRight: "40%" }}>
     <div
       ref={(el) => (leftRefs.current[left.id] = el)}
       className="rlm2-dot"
