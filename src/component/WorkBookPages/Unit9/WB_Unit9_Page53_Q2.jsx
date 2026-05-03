@@ -1,466 +1,360 @@
-import { useState, useRef, useLayoutEffect } from "react";
-import ValidationAlert from "../../Popup/ValidationAlert";
+import React, { useState, useRef } from "react";
 import Button from "../Button";
+import ValidationAlert from "../../Popup/ValidationAlert";
 
-import img1 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U9 Folder/Page 53/SVG/1.svg";
-import img2 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U9 Folder/Page 53/SVG/2.svg";
-import img3 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U9 Folder/Page 53/SVG/3.svg";
-import img4 from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U9 Folder/Page 53/SVG/4.svg";
+// ─────────────────────────────────────────────
+//  🎨  COLORS
+// ─────────────────────────────────────────────
+const BOX_BORDER_DEFAULT = "#2096a6";
+const BOX_BORDER_WRONG   = "#ef4444";
+const BOX_TEXT_DEFAULT   = "#2b2b2b";
+const BOX_TEXT_ANSWER    = "#c81e1e";
+const WORD_COLOR         = "#2b2b2b";
+const NUMBER_COLOR       = "#2b2b2b";
+const WRONG_BADGE_BG     = "#ef4444";
+const WRONG_BADGE_TEXT   = "#ffffff";
 
-const exerciseData = {
-  left: [
-    {
-      id: 1,
-      img: img1,
-      text: "Where were they this morning?",
-    },
-    {
-      id: 2,
-      img: img2,
-      text: "Where is she now?",
-    },
-    {
-      id: 3,
-      img: img3,
-      text: "Where was she this morning?",
-    },
-    {
-      id: 4,
-      img: img4,
-      text: "Where is he now?",
-    },
-  ],
-  right: [
-    {
-      id: 1,
-      text: "She was in the computer lab.",
-    },
-    {
-      id: 2,
-      text: "She is on the playground.",
-    },
-    {
-      id: 3,
-      text: "He is at the swimming pool.",
-    },
-    {
-      id: 4,
-      text: "They were at the circus.",
-    },
-  ],
-  correctMatches: {
-    1: 4,
-    2: 2,
-    3: 1,
-    4: 3,
+// ─────────────────────────────────────────────
+//  📝  EXERCISE DATA
+//  كل sentence فيها words مرتبة بشكل مبعثر
+//  كل word فيها: word + correctNum (الرقم الصحيح في الجملة)
+// ─────────────────────────────────────────────
+const SENTENCES = [
+  {
+    id: 1,
+    words: [
+      { word: "want", correct: "4" },
+      { word: "go",   correct: "6" },
+      { word: "Why",  correct: "1" },
+      { word: "cave", correct: "9" },
+      { word: "you",  correct: "3" },
+      { word: "to",   correct: "5" },
+      { word: "do",   correct: "2" },
+      { word: "to",   correct: "7" },
+      { word: "the",  correct: "8" },
+    ],
   },
-};
+  {
+    id: 2,
+    words: [
+      { word: "you",  correct: "3" },
+      { word: "to",   correct: "7" },
+      { word: "zoo",  correct: "9" },
+      { word: "the",  correct: "8" },
+      { word: "go",   correct: "6" },
+      { word: "Why",  correct: "1" },
+      { word: "do",   correct: "2" },
+      { word: "want", correct: "4" },
+      { word: "to",   correct: "5" },
+    ],
+  },
+  {
+    id: 3,
+    words: [
+      { word: "do",   correct: "2" },
+      { word: "the",  correct: "8" },
+      { word: "you",  correct: "3" },
+      { word: "to",   correct: "7" },
+      { word: "mall", correct: "9" },
+      { word: "want", correct: "4" },
+      { word: "go",   correct: "6" },
+      { word: "to",   correct: "5" },
+      { word: "Why",  correct: "1" },
+    ],
+  },
+  {
+    id: 4,
+    words: [
+      { word: "go",   correct: "6" },
+      { word: "want", correct: "4" },
+      { word: "park", correct: "9" },
+      { word: "to",   correct: "5" },
+      { word: "to",   correct: "7" },
+      { word: "the",  correct: "8" },
+      { word: "Why",  correct: "1" },
+      { word: "do",   correct: "2" },
+      { word: "you",  correct: "3" },
+    ],
+  },
+  {
+    id: 5,
+    words: [
+      { word: "circus", correct: "9" },
+      { word: "go",     correct: "6" },
+      { word: "the",    correct: "8" },
+      { word: "you",    correct: "3" },
+      { word: "Why",    correct: "1" },
+      { word: "don't",  correct: "2" },
+      { word: "to",     correct: "7" },
+      { word: "want",   correct: "4" },
+      { word: "to",     correct: "5" },
+    ],
+  },
+];
 
-const WB_Unit8_Page53_QF = () => {
-  const [selectedLeft, setSelectedLeft] = useState(null);
-  const [matches, setMatches] = useState({});
+// بناء ALL_INPUTS من كل جملة
+const ALL_INPUTS = SENTENCES.flatMap((s) =>
+  s.words.map((w, wi) => ({ key: `${s.id}-${wi}`, correct: [w.correct], answer: w.correct }))
+);
+
+// ─────────────────────────────────────────────
+//  🔧  HELPERS
+// ─────────────────────────────────────────────
+const isCorrect = (userVal, correctArr) =>
+  correctArr.some((c) => userVal.trim() === c);
+
+// ─────────────────────────────────────────────
+//  COMPONENT
+// ─────────────────────────────────────────────
+export default function WB_ReadNumberOrder_QF() {
+  const [answers,     setAnswers]     = useState({});
   const [showResults, setShowResults] = useState(false);
-  const [lines, setLines] = useState([]);
+  const [showAns,     setShowAns]     = useState(false);
 
-  const containerRef = useRef(null);
-  const elementRefs = useRef({});
+  const inputRefs = useRef({});
 
-  useLayoutEffect(() => {
-    const updateLines = () => {
-      if (!containerRef.current) return;
+  const handleChange = (key, value) => {
+    if (showAns) return;
+    const inp = ALL_INPUTS.find((i) => i.key === key);
+    if (showResults && inp && isCorrect(answers[key] || "", inp.correct)) return;
+    // أرقام 1-9 فقط
+    if (value !== "" && !/^[1-9]$/.test(value)) return;
+    setAnswers((prev) => ({ ...prev, [key]: value }));
 
-      const containerRect = containerRef.current.getBoundingClientRect();
-
-      const newLines = Object.entries(matches)
-        .map(([leftId, rightId]) => {
-          const leftEl = elementRefs.current[`left-${leftId}`];
-          const rightEl = elementRefs.current[`right-${rightId}`];
-
-          if (leftEl && rightEl) {
-            const leftRect = leftEl.getBoundingClientRect();
-            const rightRect = rightEl.getBoundingClientRect();
-
-            return {
-              id: `${leftId}-${rightId}`,
-              x1: leftRect.right - containerRect.left,
-              y1: leftRect.top + leftRect.height / 2 - containerRect.top,
-              x2: rightRect.left - containerRect.left,
-              y2: rightRect.top + rightRect.height / 2 - containerRect.top,
-            };
-          }
-
-          return null;
-        })
-        .filter(Boolean);
-
-      setLines(newLines);
-    };
-
-    updateLines();
-    window.addEventListener("resize", updateLines);
-    return () => window.removeEventListener("resize", updateLines);
-  }, [matches]);
-
-  const handleLeftClick = (id) => {
-    setSelectedLeft(id);
-    setShowResults(false);
-  };
-
-  const handleRightClick = (rightId) => {
-    if (selectedLeft === null) return;
-
-    const newMatches = { ...matches };
-
-    Object.keys(newMatches).forEach((key) => {
-      if (newMatches[key] === rightId) {
-        delete newMatches[key];
-      }
-    });
-
-    newMatches[selectedLeft] = rightId;
-
-    setMatches(newMatches);
-    setSelectedLeft(null);
-  };
-
-  const isWrongMatch = (leftId) => {
-    if (!showResults) return false;
-    if (!matches[leftId]) return false;
-
-    return matches[leftId] !== exerciseData.correctMatches[leftId];
-  };
-
-  const checkAnswers = () => {
-    const totalQuestions = exerciseData.left.length;
-
-    const allConnected = exerciseData.left.every((item) => matches[item.id]);
-
-    if (!allConnected) {
-      ValidationAlert.info("Please connect all items first.");
-      return;
+    // انتقال تلقائي للتالي
+    if (value.length === 1) {
+      const currentIdx = ALL_INPUTS.findIndex((i) => i.key === key);
+      const next = ALL_INPUTS[currentIdx + 1];
+      if (next) inputRefs.current[next.key]?.focus();
     }
+  };
 
+  const handleCheck = () => {
+    if (showAns) return;
+    const allAnswered = ALL_INPUTS.every((inp) => answers[inp.key]?.trim());
+    if (!allAnswered) { ValidationAlert.info("Please complete all answers first."); return; }
+    let score = 0;
+    ALL_INPUTS.forEach((inp) => { if (isCorrect(answers[inp.key] || "", inp.correct)) score++; });
     setShowResults(true);
-
-    let currentScore = 0;
-
-    Object.keys(exerciseData.correctMatches).forEach((leftId) => {
-      if (matches[leftId] === exerciseData.correctMatches[leftId]) {
-        currentScore++;
-      }
-    });
-
-    if (currentScore === totalQuestions) {
-      ValidationAlert.success(`Score: ${currentScore} / ${totalQuestions}`);
-    } else if (currentScore > 0) {
-      ValidationAlert.warning(`Score: ${currentScore} / ${totalQuestions}`);
-    } else {
-      ValidationAlert.error(`Score: ${currentScore} / ${totalQuestions}`);
-    }
+    if (score === ALL_INPUTS.length)   ValidationAlert.success(`Score: ${score} / ${ALL_INPUTS.length}`);
+    else if (score > 0)                ValidationAlert.warning(`Score: ${score} / ${ALL_INPUTS.length}`);
+    else                               ValidationAlert.error(`Score: ${score} / ${ALL_INPUTS.length}`);
   };
 
   const handleShowAnswer = () => {
-    setMatches(exerciseData.correctMatches);
-    setShowResults(true);
-    setSelectedLeft(null);
-  };
-
-  const handleStartAgain = () => {
-    setMatches({});
-    setSelectedLeft(null);
+    const filled = {};
+    ALL_INPUTS.forEach((inp) => { filled[inp.key] = inp.answer; });
+    setAnswers(filled);
     setShowResults(false);
-    setLines([]);
+    setShowAns(true);
   };
 
-  const getLineColor = () => {
-    return "#f39b42";
+  const handleReset = () => {
+    setAnswers({});
+    setShowResults(false);
+    setShowAns(false);
   };
 
-  const getDotColor = (side, id) => {
-    if (side === "left" && selectedLeft === id) {
-      return "#f39b42";
-    }
-
-    const isConnected =
-      side === "left" ? !!matches[id] : Object.values(matches).includes(id);
-
-    if (!isConnected) return "#9ca3af";
-
-    return "#f39b42";
+  const isWrong = (key, correctArr) => {
+    if (!showResults || showAns) return false;
+    return !isCorrect(answers[key] || "", correctArr);
   };
 
-  const isLeftSelected = (id) => selectedLeft === id;
+  const isDisabled = (key, correctArr) => {
+    if (showAns) return true;
+    if (showResults && isCorrect(answers[key] || "", correctArr)) return true;
+    return false;
+  };
 
   return (
-<div className="main-container-component">
+    <div className="main-container-component">
+      <style>{`
+        /* ── Sentences list ── */
+        .rno-list {
+          display: flex;
+          flex-direction: column;
+          gap: clamp(16px, 2.4vw, 28px);
+          width: 100%;
+        }
+
+        /* ── Single sentence ── */
+        .rno-sentence {
+          display: flex;
+          flex-direction: column;
+          gap: clamp(4px, 0.5vw, 6px);
+        }
+
+        /* Sentence number */
+        .rno-sentence-num {
+          font-size: clamp(14px, 1.7vw, 20px);
+          font-weight: 700;
+          color: ${NUMBER_COLOR};
+          line-height: 1;
+        }
+
+        /* Words row */
+        .rno-words-row {
+          display: flex;
+    justify-content: space-around;
+
+          flex-wrap: wrap;
+          gap: clamp(6px, 0.9vw, 12px);
+        }
+
+        /* Single word cell: word text + box below */
+        .rno-word-cell {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: clamp(3px, 0.4vw, 5px);
+        }
+
+        .rno-word {
+          font-size: clamp(13px, 1.5vw, 18px);
+          font-weight: 400;
+          color: ${WORD_COLOR};
+          line-height: 1.3;
+          white-space: nowrap;
+        }
+
+        /* Input box wrap */
+        .rno-input-wrap {
+          position: relative;
+        }
+
+        .rno-input {
+          width: clamp(30px, 3.8vw, 44px);
+          height: clamp(30px, 3.8vw, 44px);
+          border: 2px solid ${BOX_BORDER_DEFAULT};
+          border-radius: 6px;
+          background: #fff;
+          text-align: center;
+          font-size: clamp(13px, 1.6vw, 18px);
+          font-weight: 700;
+          color: ${BOX_TEXT_DEFAULT};
+          outline: none;
+          font-family: inherit;
+          transition: border-color 0.2s;
+          padding: 0;
+          box-sizing: border-box;
+          cursor: text;
+        }
+        .rno-input:disabled   { opacity: 1; cursor: default; }
+        .rno-input--wrong     { border-color: ${BOX_BORDER_WRONG}; }
+        .rno-input--answer    { color: ${BOX_TEXT_ANSWER}; }
+
+        /* ✕ badge */
+        .rno-badge {
+          position: absolute;
+          top: -7px; right: -7px;
+          width: clamp(14px, 1.6vw, 18px);
+          height: clamp(14px, 1.6vw, 18px);
+          border-radius: 50%;
+          background: ${WRONG_BADGE_BG};
+          color: ${WRONG_BADGE_TEXT};
+          display: flex; align-items: center; justify-content: center;
+          font-size: clamp(7px, 0.8vw, 10px);
+          font-weight: 700;
+          border: 2px solid #fff;
+          box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+          pointer-events: none;
+          z-index: 2;
+        }
+
+        /* Question mark at end */
+        .rno-qmark {
+          font-size: clamp(14px, 1.7vw, 20px);
+          color: ${WORD_COLOR};
+          align-self: flex-end;
+          padding-bottom: clamp(4px, 0.5vw, 7px);
+        }
+
+        /* Buttons */
+        .rno-buttons {
+          display: flex;
+          justify-content: center;
+          margin-top: clamp(8px, 1.6vw, 18px);
+        }
+      `}</style>
+
       <div
         className="div-forall"
         style={{
           display: "flex",
           flexDirection: "column",
-          gap: "clamp(18px,2.5vw,28px)",
+          gap: "clamp(14px, 2vw, 22px)",
           maxWidth: "1100px",
           margin: "0 auto",
         }}
       >
-        <h1 className="WB-header-title-page8">
+        {/* ── Header ── */}
+        <h1
+          className="WB-header-title-page8"
+          style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
+        >
           <span className="WB-ex-A">F</span>
-          Look, read, and match.
+          Read and number in sentence order.
         </h1>
 
-        <div
-          ref={containerRef}
-          style={{
-            position: "relative",
-            width: "100%",
-            display: "grid",
-            gridTemplateColumns: "230px 280px 260px",
-            gap: "26px",
-            alignItems: "start",
-          }}
-        >
-          {/* الصور */}
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              gap: "24px",
-            }}
-          >
-            {exerciseData.left.map((item) => (
-              <div
-                key={`img-${item.id}`}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "10px",
-                }}
-              >
-                <div
-                  style={{
-                    fontSize: "18px",
-                    fontWeight: "700",
-                    color: "#111",
-                    minWidth: "16px",
-                  }}
-                >
-                  {item.id}
-                </div>
+        {/* ── Sentences ── */}
+        <div className="rno-list">
+          {SENTENCES.map((s) => (
+            <div key={s.id} className="rno-sentence">
 
-                <div
-                  style={{
-                    width: "170px",
-                    height: "130px",
-                    border: isLeftSelected(item.id)
-                      ? "4px solid #f39b42"
-                      : "2px solid #f39b42",
-                    borderRadius: "16px",
-                    backgroundColor: "#fff",
-                    overflow: "hidden",
-                    boxSizing: "border-box",
-                    transition: "all 0.2s ease",
-                    boxShadow: isLeftSelected(item.id)
-                      ? "0 0 0 4px rgba(59,130,246,0.12)"
-                      : "none",
-                  }}
-                >
-                  <img
-                    src={item.img}
-                    alt={`question-${item.id}`}
-                    style={{
-                      width: "100%",
-                      height: "100%",
-                      objectFit: "cover",
-                      display: "block",
-                    }}
-                  />
-                </div>
+              {/* Sentence number */}
+              <span className="rno-sentence-num">{s.id}</span>
+
+              {/* Words + boxes */}
+              <div className="rno-words-row">
+                {s.words.map((w, wi) => {
+                  const key      = `${s.id}-${wi}`;
+                  const wrong    = isWrong(key, [w.correct]);
+                  const value    = answers[key] || "";
+                  const tColor   = showAns ? BOX_TEXT_ANSWER : BOX_TEXT_DEFAULT;
+                  const bColor   = wrong ? BOX_BORDER_WRONG : BOX_BORDER_DEFAULT;
+                  const disabled = isDisabled(key, [w.correct]);
+
+                  return (
+                    <div key={key} className="rno-word-cell">
+                      <span className="rno-word">{w.word}</span>
+                      <div className="rno-input-wrap">
+                        <input
+                          ref={(el) => (inputRefs.current[key] = el)}
+                          type="text"
+                          maxLength={1}
+                          className={[
+                            "rno-input",
+                            wrong   ? "rno-input--wrong"  : "",
+                            showAns ? "rno-input--answer" : "",
+                          ].filter(Boolean).join(" ")}
+                          value={value}
+                          disabled={disabled}
+                          onChange={(e) => handleChange(key, e.target.value)}
+                          style={{ borderColor: bColor, color: tColor }}
+                          spellCheck={false}
+                          autoComplete="off"
+                        />
+                        {wrong && <div className="rno-badge">✕</div>}
+                      </div>
+                    </div>
+                  );
+                })}
+                <span className="rno-qmark">?</span>
               </div>
-            ))}
-          </div>
 
-          {/* الأسئلة */}
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              gap: "24px",
-            }}
-          >
-            {exerciseData.left.map((item) => (
-              <div
-                key={item.id}
-                style={{
-                  position: "relative",
-                  minHeight: "130px",
-                  display: "flex",
-                  alignItems: "center",
-                }}
-              >
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                   
-                    gap: "14px",
-                    width: "100%",
-                  }}
-                >
-                  <div
-                    ref={(el) => (elementRefs.current[`left-${item.id}`] = el)}
-                    onClick={() => handleLeftClick(item.id)}
-                    style={{
-                      width: "16px",
-                      height: "16px",
-                      borderRadius: "50%",
-                      backgroundColor: getDotColor("left", item.id),
-                      cursor: "pointer",
-                      flexShrink: 0,
-                      transition: "all 0.2s ease",
-                      transform: selectedLeft === item.id ? "scale(1.2)" : "scale(1)",
-                    }}
-                  />
-
-                  <div
-                    onClick={() => handleLeftClick(item.id)}
-                    style={{
-                      fontSize: "22px",
-                      color: "#222",
-                      lineHeight: "1.3",
-                      cursor: "pointer",
-                      userSelect: "none",
-                    }}
-                  >
-                    {item.text}
-                  </div>
-                </div>
-
-                {isWrongMatch(item.id) && (
-                  <div
-                    style={{
-                      position: "absolute",
-                      right: "-10px",
-                      top: "50%",
-                      transform: "translateY(-50%)",
-                      width: "22px",
-                      height: "22px",
-                      borderRadius: "50%",
-                      backgroundColor: "#ef4444",
-                      color: "#fff",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      fontSize: "12px",
-                      fontWeight: "700",
-                      boxShadow: "0 2px 6px rgba(0,0,0,0.2)",
-                    }}
-                  >
-                    ✕
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-
-          {/* الإجابات */}
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              gap: "24px",
-            }}
-          >
-            {exerciseData.right.map((item) => (
-              <div
-                key={item.id}
-                style={{
-                  minHeight: "130px",
-                  display: "flex",
-                  alignItems: "center",
-                }}
-              >
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "14px",
-                    width: "100%",
-                  }}
-                >
-                  <div
-                    ref={(el) => (elementRefs.current[`right-${item.id}`] = el)}
-                    onClick={() => handleRightClick(item.id)}
-                    style={{
-                      width: "16px",
-                      height: "16px",
-                      borderRadius: "50%",
-                      backgroundColor: getDotColor("right", item.id),
-                      cursor: "pointer",
-                      flexShrink: 0,
-                      transition: "all 0.2s ease",
-                    }}
-                  />
-
-                  <div
-                    onClick={() => handleRightClick(item.id)}
-                    style={{
-                      fontSize: "22px",
-                      color: "#222",
-                      lineHeight: "1.3",
-                      cursor: "pointer",
-                      userSelect: "none",
-                    }}
-                  >
-                    {item.text}
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* SVG Lines */}
-          <svg
-            style={{
-              position: "absolute",
-              top: 0,
-              left: 0,
-              width: "100%",
-              height: "100%",
-              pointerEvents: "none",
-              overflow: "visible",
-            }}
-          >
-            {lines.map((line) => (
-              <line
-                key={line.id}
-                x1={line.x1}
-                y1={line.y1}
-                x2={line.x2}
-                y2={line.y2}
-                stroke={getLineColor(line.id)}
-                strokeWidth="2.5"
-                strokeLinecap="round"
-              />
-            ))}
-          </svg>
+            </div>
+          ))}
         </div>
 
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            marginTop: "8px",
-          }}
-        >
+        {/* ── Buttons ── */}
+        <div className="rno-buttons">
           <Button
+            checkAnswers={handleCheck}
             handleShowAnswer={handleShowAnswer}
-            handleStartAgain={handleStartAgain}
-            checkAnswers={checkAnswers}
+            handleStartAgain={handleReset}
           />
         </div>
       </div>
     </div>
   );
-};
-
-export default WB_Unit8_Page53_QF;
+}

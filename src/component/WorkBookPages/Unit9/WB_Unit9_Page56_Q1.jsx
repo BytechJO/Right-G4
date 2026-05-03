@@ -1,221 +1,286 @@
 import React, { useState } from "react";
 import Button from "../Button";
 import ValidationAlert from "../../Popup/ValidationAlert";
-import AudioWithCaption from "../../AudioWithCaption";
 
-import sound1 from "../../../assets/audio/ClassBook/Grade 3/cd2pg14instruction-adult-lady_tUKGw1L9.mp3"; 
+// ─────────────────────────────────────────────
+//  🖼️  IMAGES
+// ─────────────────────────────────────────────
+import img1 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U9 Folder/Page 56/SVG/Asset 31.svg";
+import img2 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U9 Folder/Page 56/SVG/Asset 37.svg";
+import img3 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U9 Folder/Page 56/SVG/Asset 33.svg";
 
+// ─────────────────────────────────────────────
+//  🎨  COLORS
+// ─────────────────────────────────────────────
+const INPUT_UNDERLINE_DEFAULT = "#3f3f3f";
+const INPUT_UNDERLINE_WRONG   = "#ef4444";
+const INPUT_TEXT_COLOR        = "#2b2b2b";
+const INPUT_ANSWER_COLOR      = "#c81e1e";
+const QUESTION_COLOR          = "#2b2b2b";
+const NUMBER_COLOR            = "#2b2b2b";
+const WRONG_BADGE_BG          = "#ef4444";
+const WRONG_BADGE_TEXT        = "#ffffff";
+
+// ─────────────────────────────────────────────
+//  📝  EXERCISE DATA
+// ─────────────────────────────────────────────
 const ITEMS = [
   {
-    id: 1,
-    text: "The cats have cups and bats.",
-    correct: true,
+    id:       1,
+    src:      img1,
+    question: "Why do you want to go to the zoo?",
+    correct:  ["I want to go to the zoo because I want to see the animals.", "i want to go to the zoo because i want to see the animals"],
+    answer:   "I want to go to the zoo because I want to see the animals.",
   },
   {
-    id: 2,
-    text: "The bees and dogs see the trees.",
-    correct: true,
+    id:       2,
+    src:      img2,
+    question: "Why do you want to go to the basketball game?",
+    correct:  ["I want to go to the basketball game because I want to watch the game.", "i want to go to the basketball game because i want to watch the game"],
+    answer:   "I want to go to the basketball game because I want to watch the game.",
   },
   {
-    id: 3,
-    text: "The girl has books, peas, and dogs.",
-    correct: false,
+    id:       3,
+    src:      img3,
+    question: "Why do you want to go to the beach?",
+    correct:  ["I want to go to the beach because I want to swim.", "i want to go to the beach because i want to swim"],
+    answer:   "I want to go to the beach because I want to swim.",
   },
 ];
 
-export default function Phonics_QA() {
-  const [answers, setAnswers] = useState({});
-  const [checked, setChecked] = useState(false);
-  const [showAns, setShowAns] = useState(false);
-const captions = [
-  { start: 0.44, end: 3.08, text: "Page 50, phonics exercise B." },
-  { start: 3.08, end: 4.90, text: "Listen and circle." },
-  { start: 5.98, end: 7.66, text: "1- princess." },
-  { start: 8.70, end: 10.50, text: "2- bracelet." },
-  { start: 11.54, end: 13.32, text: "3- present." },
-  { start: 13.32, end: 16.32, text: "4- grandfather." },
-  { start: 16.32, end: 19.02, text: "5- broom." },
-];
-  const handleSelect = (id, value) => {
-    if (showAns) return;
+// ─────────────────────────────────────────────
+//  🔧  NORMALIZE
+// ─────────────────────────────────────────────
+const normalize = (str) =>
+  str.toLowerCase().replace(/[^a-z0-9'\s]/g, "").replace(/\s+/g, " ").trim();
 
-    setAnswers((prev) => ({
-      ...prev,
-      [id]: prev[id] === value ? undefined : value,
-    }));
-  };
+const isCorrect = (userVal, correctArr) =>
+  correctArr.some((c) => normalize(userVal) === normalize(c));
 
-  const isWrong = (item) => {
-    if (!checked) return false;
-    return answers[item.id] !== item.correct;
+// ─────────────────────────────────────────────
+//  COMPONENT
+// ─────────────────────────────────────────────
+export default function WB_LookReadWrite_QI() {
+  const [answers,     setAnswers]     = useState({});
+  const [showResults, setShowResults] = useState(false);
+  const [showAns,     setShowAns]     = useState(false);
+
+  const isLocked = showAns;
+
+  const handleChange = (id, value) => {
+    if (isLocked) return;
+    const item = ITEMS.find((i) => i.id === id);
+    if (showResults && item && isCorrect(answers[id] || "", item.correct)) return;
+    setAnswers((prev) => ({ ...prev, [id]: value }));
   };
 
   const handleCheck = () => {
-    if (showAns) return;
-
-    const allAnswered = ITEMS.every(
-      (item) => answers[item.id] !== undefined
-    );
-
-    if (!allAnswered) {
-      ValidationAlert.info("Please answer all questions!");
-      return;
-    }
-const captions = [
-  { start: 0.46, end: 3.42, text: "Page 56, phonics exercise A." },
-  { start: 3.42, end: 8.62, text: "Do the words ending in S have the same S sound?" },
-  { start: 8.62, end: 11.88, text: "Listen and write check or X." },
-  { start: 13.00, end: 17.42, text: "1- the cats have cups and bats." },
-  { start: 17.42, end: 21.58, text: "2- the bees and dogs see the trees." },
-  { start: 21.58, end: 27.88, text: "3- the girl has books, peas, and dogs." },
-];
+    if (isLocked) return;
+    const allAnswered = ITEMS.every((item) => answers[item.id]?.trim());
+    if (!allAnswered) { ValidationAlert.info("Please complete all answers first."); return; }
     let score = 0;
-
-    ITEMS.forEach((item) => {
-      if (answers[item.id] === item.correct) score++;
-    });
-
-    setChecked(true);
-
-    if (score === ITEMS.length) {
-      ValidationAlert.success(`Score: ${score} / ${ITEMS.length}`);
-    } else if (score > 0) {
-      ValidationAlert.warning(`Score: ${score} / ${ITEMS.length}`);
-    } else {
-      ValidationAlert.error(`Score: ${score} / ${ITEMS.length}`);
-    }
+    ITEMS.forEach((item) => { if (isCorrect(answers[item.id] || "", item.correct)) score++; });
+    setShowResults(true);
+    if (score === ITEMS.length)   ValidationAlert.success(`Score: ${score} / ${ITEMS.length}`);
+    else if (score > 0)           ValidationAlert.warning(`Score: ${score} / ${ITEMS.length}`);
+    else                          ValidationAlert.error(`Score: ${score} / ${ITEMS.length}`);
   };
 
   const handleShowAnswer = () => {
-    const ans = {};
-    ITEMS.forEach((item) => {
-      ans[item.id] = item.correct;
-    });
-
-    setAnswers(ans);
-    setChecked(true);
+    const filled = {};
+    ITEMS.forEach((item) => { filled[item.id] = item.answer; });
+    setAnswers(filled);
+    setShowResults(false);
     setShowAns(true);
   };
 
   const handleReset = () => {
     setAnswers({});
-    setChecked(false);
+    setShowResults(false);
     setShowAns(false);
   };
 
-  const renderBox = (id, value) => {
-    const selected = answers[id] === value;
+  const isWrong = (item) => {
+    if (!showResults || showAns) return false;
+    return !isCorrect(answers[item.id] || "", item.correct);
+  };
 
-    return (
-      <div
-        onClick={() => handleSelect(id, value)}
-        style={{
-          width: "38px",
-          height: "38px",
-          border: "2px solid #f39b42",
-          borderRadius: "6px",
-          backgroundColor: "#fff",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          cursor: showAns ? "default" : "pointer",
-        }}
-      >
-        {selected && (
-          <span
-            style={{
-              fontSize: "24px",
-              fontWeight: "bold",
-              color: value ? "#ef4444" : "#ef4444",
-            }}
-          >
-            {value ? "✓" : "✕"}
-          </span>
-        )}
-      </div>
-    );
+  const isDisabled = (item) => {
+    if (showAns) return true;
+    if (showResults && isCorrect(answers[item.id] || "", item.correct)) return true;
+    return false;
   };
 
   return (
-          <div className="main-container-component">
+    <div className="main-container-component">
+      <style>{`
+        .lrw-list {
+          display: flex;
+          flex-direction: column;
+          gap: clamp(50px, 2.6vw, 50px);
+          width: 100%;
+        }
+
+        /* num + img + right side */
+        .lrw-row {
+          display: grid;
+          grid-template-columns: auto clamp(130px, 18vw, 220px) 1fr;
+          gap: clamp(10px, 1.4vw, 18px);
+          align-items: center;
+        }
+
+        .lrw-num {
+          font-size: clamp(14px, 1.7vw, 20px);
+          font-weight: 700;
+          color: ${NUMBER_COLOR};
+          flex-shrink: 0;
+          align-self: flex-start;
+          line-height: 1.5;
+        }
+
+        .lrw-img {
+          width: 100%;
+          height: auto;
+          display: block;
+          border-radius: 6px;
+        }
+
+        /* Right: question + input */
+        .lrw-right {
+          display: flex;
+          flex-direction: column;
+          gap: clamp(8px, 1.2vw, 14px);
+          min-width: 0;
+        }
+
+        .lrw-question {
+          font-size: clamp(13px, 1.6vw, 19px);
+          color: ${QUESTION_COLOR};
+          line-height: 1.5;
+        }
+
+        .lrw-input-wrap {
+          position: relative;
+          width: 100%;
+        }
+
+        .lrw-input {
+          width: 100%;
+          background: transparent;
+          border: none;
+          border-bottom: 1.5px solid ${INPUT_UNDERLINE_DEFAULT};
+          outline: none;
+          font-size: clamp(13px, 1.6vw, 19px);
+          color: ${INPUT_TEXT_COLOR};
+          padding: 4px 4px 5px;
+          line-height: 1.5;
+          box-sizing: border-box;
+          font-family: inherit;
+          transition: border-color 0.2s;
+        }
+        .lrw-input:disabled   { opacity: 1; cursor: default; }
+        .lrw-input--wrong     { border-bottom-color: ${INPUT_UNDERLINE_WRONG}; }
+        .lrw-input--answer    { color: ${INPUT_ANSWER_COLOR}; }
+
+        .lrw-badge {
+          position: absolute;
+          top: -8px; right: 0;
+          width: clamp(16px, 1.8vw, 20px);
+          height: clamp(16px, 1.8vw, 20px);
+          border-radius: 50%;
+          background: ${WRONG_BADGE_BG};
+          color: ${WRONG_BADGE_TEXT};
+          display: flex; align-items: center; justify-content: center;
+          font-size: clamp(8px, 0.9vw, 11px);
+          font-weight: 700;
+          border: 2px solid #fff;
+          box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+          pointer-events: none;
+          z-index: 2;
+        }
+
+        .lrw-buttons {
+          display: flex;
+          justify-content: center;
+          margin-top: clamp(8px, 1.6vw, 18px);
+        }
+
+        @media (max-width: 500px) {
+          .lrw-row { grid-template-columns: auto 1fr; grid-template-rows: auto auto; }
+          .lrw-right { grid-column: 1 / -1; }
+        }
+      `}</style>
+
       <div
         className="div-forall"
         style={{
           display: "flex",
           flexDirection: "column",
-          gap: "clamp(20px,3vw,36px)",
+          gap: "clamp(14px, 2vw, 22px)",
           maxWidth: "1100px",
           margin: "0 auto",
         }}
       >
-
-        <h1 className="WB-header-title-page8">
-          <span className="WB-ex-A">A</span>
-          Do the words ending in "s" have the same -s sound? Write ✓ or ✕.
+        {/* ── Header ── */}
+        <h1
+          className="WB-header-title-page8"
+          style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
+        >
+          <span className="WB-ex-A">I</span>
+          Look, read, and write.
         </h1>
-<div style={{ display: "flex", justifyContent: "center" }}>
-  <AudioWithCaption src={sound1} captions={captions} />
-</div>
 
-        {ITEMS.map((item) => (
-          <div
-            key={item.id}
-            style={{
-              position: "relative",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              gap: "20px",
-            }}
-          >
-            {/* sentence */}
-            <div
-              style={{
-                display: "flex",
-                gap: "10px",
-                alignItems: "center",
-              }}
-            >
-              <span style={{ fontWeight: "700" }}>{item.id}</span>
-              <p style={{ margin: 0, fontSize: "18px" }}>{item.text}</p>
-            </div>
+        {/* ── Items ── */}
+        <div className="lrw-list">
+          {ITEMS.map((item) => {
+            const wrong    = isWrong(item);
+            const value    = answers[item.id] || "";
+            const tColor   = showAns ? INPUT_ANSWER_COLOR : INPUT_TEXT_COLOR;
+            const uColor   = wrong ? INPUT_UNDERLINE_WRONG : INPUT_UNDERLINE_DEFAULT;
+            const disabled = isDisabled(item);
 
-            {/* choices */}
-            <div style={{ display: "flex", gap: "10px" }}>
-              {renderBox(item.id, true)}
-              {renderBox(item.id, false)}
-            </div>
+            return (
+              <div key={item.id} className="lrw-row">
 
-            {/* wrong mark */}
-            {isWrong(item) && (
-              <div
-                style={{
-                  position: "absolute",
-                  right: "-8px",
-                  top: "-8px",
-                  width: "22px",
-                  height: "22px",
-                  borderRadius: "50%",
-                  background: "#ef4444",
-                  color: "#fff",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontSize: "12px",
-                  fontWeight: "700",
-                }}
-              >
-                ✕
+                {/* Number */}
+                <span className="lrw-num">{item.id}</span>
+
+                {/* Image */}
+                <img src={item.src} alt={`scene-${item.id}`} className="lrw-img" />
+
+                {/* Right: question + input */}
+                <div className="lrw-right">
+                  <span className="lrw-question">{item.question}</span>
+                  <div className="lrw-input-wrap">
+                    <input
+                      type="text"
+                      className={[
+                        "lrw-input",
+                        wrong   ? "lrw-input--wrong"  : "",
+                        showAns ? "lrw-input--answer" : "",
+                      ].filter(Boolean).join(" ")}
+                      value={value}
+                      disabled={disabled}
+                      onChange={(e) => handleChange(item.id, e.target.value)}
+                      style={{ borderBottomColor: uColor, color: tColor }}
+                      spellCheck={false}
+                      autoComplete="off"
+                    />
+                    {wrong && <div className="lrw-badge">✕</div>}
+                  </div>
+                </div>
+
               </div>
-            )}
-          </div>
-        ))}
+            );
+          })}
+        </div>
 
-        <div style={{ display: "flex", justifyContent: "center" }}>
+        {/* ── Buttons ── */}
+        <div className="lrw-buttons">
           <Button
+            checkAnswers={handleCheck}
             handleShowAnswer={handleShowAnswer}
             handleStartAgain={handleReset}
-            checkAnswers={handleCheck}
           />
         </div>
       </div>
