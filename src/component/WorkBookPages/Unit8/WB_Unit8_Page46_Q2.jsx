@@ -127,7 +127,7 @@ export default function WB_ReadWrite_QD() {
   };
 
   return (
-    <div className="main-container-component">
+    <div className="main-container-component" >
       <style>{`
         /* ── Word bank ── */
         .rwd-bank {
@@ -262,6 +262,7 @@ export default function WB_ReadWrite_QD() {
           margin: "0 auto",
         }}
       >
+
         {/* ── Header ── */}
         <h1
           className="WB-header-title-page8"
@@ -270,9 +271,10 @@ export default function WB_ReadWrite_QD() {
           <span className="WB-ex-A">D</span>
           Read and write.
         </h1>
+<div style={{margin : "5% 0"}}>
 
         {/* ── Word bank ── */}
-        <div className="rwd-bank">
+        <div className="rwd-bank" style={{marginBottom : "20px"}}>
           {WORD_BANK.map((w) => (
             <span key={w} className="rwd-bank-word">{w}</span>
           ))}
@@ -331,9 +333,10 @@ export default function WB_ReadWrite_QD() {
             checkAnswers={handleCheck}
             handleShowAnswer={handleShowAnswer}
             handleStartAgain={handleReset}
-          />
+            />
         </div>
       </div>
+            </div>
     </div>
   );
 }

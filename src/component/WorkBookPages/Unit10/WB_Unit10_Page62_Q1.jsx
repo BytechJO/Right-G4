@@ -6,12 +6,12 @@ import ValidationAlert from "../../Popup/ValidationAlert";
 //  🖼️  IMAGES
 // ─────────────────────────────────────────────
 import imgWhale    from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U10 Folder/Page 62/SVG/Asset 1.svg";
-import imgTiger    from"../../../assets/imgs/pages/Activity Book/Right Int WB G4 U10 Folder/Page 62/SVG/Asset 1.svg";
-import imgCamel    from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U10 Folder/Page 62/SVG/Asset 1.svg";
-import imgHorse    from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U10 Folder/Page 62/SVG/Asset 1.svg";
-import imgSnake    from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U10 Folder/Page 62/SVG/Asset 1.svg";
-import imgShark    from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U10 Folder/Page 62/SVG/Asset 1.svg";
-import imgElephant from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U10 Folder/Page 62/SVG/Asset 1.svg";
+import imgTiger    from"../../../assets/imgs/pages/Activity Book/Right Int WB G4 U10 Folder/Page 62/SVG/Asset 2.svg";
+import imgCamel    from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U10 Folder/Page 62/SVG/Asset 3.svg";
+import imgHorse    from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U10 Folder/Page 62/SVG/Asset 4.svg";
+import imgSnake    from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U10 Folder/Page 62/SVG/Asset 5.svg";
+import imgShark    from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U10 Folder/Page 62/SVG/Asset 6.svg";
+import imgElephant from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U10 Folder/Page 62/SVG/Asset 7.svg";
 
 // ─────────────────────────────────────────────
 //  🎨  COLORS
@@ -43,17 +43,17 @@ const IMAGE_BANK = [
 const ITEMS = [
   {
     id:      1,
-    correct: ["I have seen a whale, but I haven't seen a tiger.", "i have seen a whale but i havent seen a tiger"],
+    correct: ["I have seen a whale, but I haven't seen a tiger.", "i have seen a whale but i havent seen a tiger", "i have seen a whale but i havenot seen a tiger", "i have seen a whale but i have not seen a tiger"],
     answer:  "I have seen a whale, but I haven't seen a tiger.",
   },
   {
     id:      2,
-    correct: ["I have seen a camel, but I haven't seen a horse.", "i have seen a camel but i havent seen a horse"],
+    correct: ["I have seen a camel, but I haven't seen a horse.", "i have seen a camel but i havent seen a horse", "i have seen a camel but i havenot seen a horse", "i have seen a camel but i have not seen a horse"],
     answer:  "I have seen a camel, but I haven't seen a horse.",
   },
   {
     id:      3,
-    correct: ["I have seen an elephant, but I haven't seen a shark.", "i have seen an elephant but i havent seen a shark"],
+    correct: ["I have seen an elephant, but I haven't seen a shark.", "i have seen an elephant but i havent seen a shark", "i have seen an elephant but i havenot seen a shark", "i have seen an elephant but i have not seen a shark"],
     answer:  "I have seen an elephant, but I haven't seen a shark.",
   },
 ];
@@ -125,7 +125,7 @@ export default function WB_LookReadWrite_QJ() {
         /* ── Image bank row ── */
         .lrwj-bank {
           display: flex;
-          flex-wrap: wrap;
+          flex-wrap: nowrap;
           gap: clamp(6px, 0.9vw, 12px);
           width: 100%;
         }
@@ -133,9 +133,8 @@ export default function WB_LookReadWrite_QJ() {
         /* Single image card */
         .lrwj-img-card {
           position: relative;
-          border: 2px solid #d0d0d0;
+          border: 2px solid #2096a6;
           border-radius: 8px;
-          overflow: hidden;
           flex: 1;
           min-width: clamp(70px, 9vw, 120px);
           max-width: clamp(100px, 14vw, 170px);
@@ -144,8 +143,6 @@ export default function WB_LookReadWrite_QJ() {
 
         .lrwj-img {
           width: 100%;
-          aspect-ratio: 1 / 1;
-          object-fit: contain;
           display: block;
           padding: clamp(4px, 0.5vw, 8px);
           box-sizing: border-box;
@@ -159,14 +156,14 @@ export default function WB_LookReadWrite_QJ() {
           height: clamp(22px, 2.8vw, 32px);
           border-radius: 0 6px 0 4px;
           background: #fff;
-          border-left: 1.5px solid #d0d0d0;
-          border-bottom: 1.5px solid #d0d0d0;
+          border-left: 2px solid #2096a6;
+          border-bottom:2px solid #2096a6;
           display: flex;
           align-items: center;
           justify-content: center;
           font-size: clamp(12px, 1.6vw, 18px);
           font-weight: 700;
-          color: #2b2b2b;
+          color: #ff0000ff;
           z-index: 2;
         }
 
@@ -176,6 +173,7 @@ export default function WB_LookReadWrite_QJ() {
           flex-direction: column;
           gap: clamp(14px, 2.2vw, 26px);
           width: 100%;
+          margin-top : 3%;
         }
 
         /* Single sentence row */
@@ -192,7 +190,8 @@ export default function WB_LookReadWrite_QJ() {
           color: ${NUMBER_COLOR};
           flex-shrink: 0;
           padding-bottom: 4px;
-          line-height: 1;
+          line-height: 1.5;
+
         }
 
         /* Input wrap */
@@ -206,14 +205,12 @@ export default function WB_LookReadWrite_QJ() {
           width: 100%;
           background: transparent;
           border: none;
-          border-bottom: 2px solid ${INPUT_UNDERLINE_DEFAULT};
+          border-bottom: 1px solid ${INPUT_UNDERLINE_DEFAULT};
           outline: none;
           font-size: clamp(14px, 1.7vw, 20px);
           color: ${INPUT_TEXT_COLOR};
-          padding: 4px 6px 5px;
           line-height: 1.5;
           box-sizing: border-box;
-          font-family: inherit;
           transition: border-color 0.2s;
         }
         .lrwj-input:disabled   { opacity: 1; cursor: default; }
@@ -264,12 +261,13 @@ export default function WB_LookReadWrite_QJ() {
           <span className="WB-ex-A">J</span>
           Look, read, and write. You can use pictures more than once.
         </h1>
-
         {/* ── Image bank ── */}
+<div style={{margin:"5% 0"}}>
+
         <div className="lrwj-bank">
           {IMAGE_BANK.map((img) => (
             <div key={img.id} className="lrwj-img-card">
-              <img src={img.src} alt={img.id} className="lrwj-img" />
+              <img src={img.src} alt={img.id} className="lrwj-img"style={{height: "auto"}} />
               <div className="lrwj-icon">
                 {img.icon === "check" ? "✓" : "✕"}
               </div>
@@ -319,6 +317,7 @@ export default function WB_LookReadWrite_QJ() {
             handleStartAgain={handleReset}
           />
         </div>
+            </div>
       </div>
     </div>
   );

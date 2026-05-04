@@ -281,6 +281,7 @@ export default function WB_ReadWriteVerbs_QG() {
           <span className="WB-ex-A">G</span>
           Read and write the verbs.
         </h1>
+<div style={{margin : "3% 0 "}}>
 
         {/* ── Paragraph ── */}
         <p className="rwvg-para">{PARAGRAPH}</p>
@@ -301,8 +302,9 @@ export default function WB_ReadWriteVerbs_QG() {
             checkAnswers={handleCheck}
             handleShowAnswer={handleShowAnswer}
             handleStartAgain={handleReset}
-          />
+            />
         </div>
+            </div>
       </div>
     </div>
   );

@@ -2,12 +2,12 @@ import React, { useState } from "react";
 import Button from "../Button";
 import ValidationAlert from "../../Popup/ValidationAlert";
 
-import imgMountain from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U10 Folder/Page 62/SVG/Asset 12.svg";
-import imgAirplane from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U10 Folder/Page 62/SVG/Asset 12.svg";
-import imgBoat     from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U10 Folder/Page 62/SVG/Asset 12.svg";
+import imgMountain from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U10 Folder/Page 62/SVG/Asset 9.svg";
+import imgAirplane from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U10 Folder/Page 62/SVG/Asset 10.svg";
+import imgBoat     from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U10 Folder/Page 62/SVG/Asset 11.svg";
 import imgHotel    from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U10 Folder/Page 62/SVG/Asset 12.svg";
-import imgPath     from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U10 Folder/Page 62/SVG/Asset 12.svg";
-import imgPool     from"../../../assets/imgs/pages/Activity Book/Right Int WB G4 U10 Folder/Page 62/SVG/Asset 12.svg";
+import imgPath     from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U10 Folder/Page 62/SVG/Asset 13.svg";
+import imgPool     from"../../../assets/imgs/pages/Activity Book/Right Int WB G4 U10 Folder/Page 62/SVG/Asset 14.svg";
 
 const INPUT_UNDERLINE_DEFAULT = "#3f3f3f";
 const INPUT_UNDERLINE_WRONG   = "#ef4444";
@@ -30,17 +30,17 @@ const IMAGE_BANK = [
 const ITEMS = [
   {
     id:      1,
-    correct: ["I have climbed a mountain, but I haven't been on an airplane.", "i have climbed a mountain but i havent been on an airplane"],
+    correct: ["I have climbed a mountain, but I haven't been on an airplane.", "i have climbed a mountain but i havent been on an airplane", "i have climbed a mountain but i havenot been on an airplane", "i have climbed a mountain but i have not been on an airplane"],
     answer:  "I have climbed a mountain, but I haven't been on an airplane.",
   },
   {
     id:      2,
-    correct: ["I have sailed in a boat, but I haven't stayed in a hotel.", "i have sailed in a boat but i havent stayed in a hotel"],
+    correct: ["I have sailed in a boat, but I haven't stayed in a hotel.", "i have sailed in a boat but i havent stayed in a hotel", "i have sailed in a boat but i havenot stayed in a hotel", "i have sailed in a boat but i have not stayed in a hotel"],
     answer:  "I have sailed in a boat, but I haven't stayed in a hotel.",
   },
   {
     id:      3,
-    correct: ["I have walked on a path, but I haven't jumped in the swimming pool.", "i have walked on a path but i havent jumped in the swimming pool"],
+    correct: ["I have walked on a path, but I haven't jumped in the swimming pool.", "i have walked on a path but i havent jumped in the swimming pool", "i have walked on a path but i havenot jumped in the swimming pool", "i have walked on a path but i have not jumped in the swimming pool"],
     answer:  "I have walked on a path, but I haven't jumped in the swimming pool.",
   },
 ];
@@ -105,7 +105,7 @@ export default function WB_LookReadWrite_QK() {
       <style>{`
         .lrwk-bank {
           display: flex;
-          flex-wrap: wrap;
+          flex-wrap: nowrap;
           gap: clamp(6px, 0.9vw, 14px);
           width: 100%;
         }
@@ -122,7 +122,7 @@ export default function WB_LookReadWrite_QK() {
 
         .lrwk-img-wrap {     
              background: #fff;
-          width: 20%;
+          width: 100%;
           margin : 10% 0 
         }
 

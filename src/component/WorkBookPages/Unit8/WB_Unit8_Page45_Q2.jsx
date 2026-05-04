@@ -196,8 +196,8 @@ export default function WB_ReadMatchWrite_QB() {
           display: grid;
           grid-template-columns: 1fr auto clamp(100px, 15vw, 180px) auto auto;
           align-items: center;
-          row-gap: clamp(14px, 2.2vw, 26px);
-          column-gap: clamp(8px, 1.2vw, 16px);
+          row-gap: clamp(30px, 2.2vw, 30px);
+          column-gap: clamp(30px, 1.2vw, 30px);
           width: 100%;
         }
 
@@ -220,20 +220,20 @@ export default function WB_ReadMatchWrite_QB() {
           font-weight: 700;
           color: ${NUMBER_COLOR};
           flex-shrink: 0;
-          padding-bottom: 5px;
-          line-height: 1;
+          line-height: 1.5;
         }
 
         .rmw-text {
           font-size: clamp(13px, 1.6vw, 19px);
           color: ${SENTENCE_COLOR};
           flex-shrink: 0;
-          padding-bottom: 5px;
-          line-height: 1;
+          line-height: 1.5;
           white-space: nowrap;
         }
 
         .rmw-input-wrap {
+                  white-space: nowrap;
+
           position: relative;
           flex: 0 1 clamp(80px, 10vw, 150px);
           min-width: clamp(70px, 9vw, 130px);
@@ -299,7 +299,7 @@ export default function WB_ReadMatchWrite_QB() {
           justify-content: center;
           position: relative;
         }
-
+  .rmw-sentence { flex-wrap: nowrap; margin : 2% 0 ; }
         .rmw-right-word {
           display: flex;
           align-items: center;
@@ -320,7 +320,7 @@ export default function WB_ReadMatchWrite_QB() {
         }
 
         @media (max-width: 520px) {
-          .rmw-sentence { flex-wrap: wrap; }
+          .rmw-sentence { flex-wrap: nowrap; }
           .rmw-text { white-space: normal; }
         }
       `}</style>

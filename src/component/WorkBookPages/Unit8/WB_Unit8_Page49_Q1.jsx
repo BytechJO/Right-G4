@@ -188,8 +188,7 @@ export default function WB_ReadWriteNumber_QI() {
           font-weight: 700;
           color: ${NUMBER_COLOR};
           flex-shrink: 0;
-          padding-bottom: 4px;
-          line-height: 1;
+          line-height: 1.5;
         }
 
         /* Sentence input wrap */
@@ -203,14 +202,12 @@ export default function WB_ReadWriteNumber_QI() {
           width: 100%;
           background: transparent;
           border: none;
-          border-bottom: 2px solid ${INPUT_UNDERLINE_DEFAULT};
+          border-bottom: 1px solid ${INPUT_UNDERLINE_DEFAULT};
           outline: none;
           font-size: clamp(13px, 1.6vw, 19px);
           color: ${INPUT_TEXT_COLOR};
-          padding: 4px 4px 5px;
-          line-height: 1;
+          line-height: 1.5;
           box-sizing: border-box;
-          font-family: inherit;
           transition: border-color 0.2s;
           text-align: center;
         }

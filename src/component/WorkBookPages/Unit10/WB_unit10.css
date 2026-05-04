@@ -1,58 +1,59 @@
 .q1-10{
   position: absolute;
   padding: 5px;
-  top: 13%;
-
-  left:58.5%;
+    top: 12%;
+    left: 41.5%;
   
 }
 .q2-10{
   position: absolute;
   padding: 5px;
-  top: 60%;
-  left: 89.5%;
+    top: 65.2%;
+    left: 18.5%;
+
 }
 .q3-10{  position: absolute;
   padding: 5px;
-  top: 2%;
-  left:39.5%;
+top: 3%;
+    left: 39.5%;
 
 }
 .q4-10{
   position: absolute;
   padding: 5px;
-  top: 45%;
-  left:45.5%;
+top: 65%;
+    left: 46.5%;
 }
 .q5-10{  position: absolute;
   padding: 5px;
-  top: 2%;
-  left:38.5%;
+    top: 2.7%;
+    left: 39.5%;
 
 }
 .q6-10{
   position: absolute;
   padding: 5px;
-  top: 47%;
-  left:30.5%;
+      top: 62.3%;
+    left: 49%;
+
 }
 .q7-10{  
 position: absolute;
   padding: 5px;
-  top: 2%;
-  left:39.5%;
+    top: 3%;
+    left: 39%;
 }
 .q8-10{
  position: absolute;
   padding: 5px;
-  top: 56%;
-  left:44.5%;
+    top: 32.3%;
+    left: 39.5%;
 }
 .q9-10{  
  position: absolute;
   padding: 5px;
-  top:2%;
-  left: 39.5%;
+    top: 3%;
+    left: 54.5%
 }
 .q10-10{
   position: absolute;
@@ -62,20 +63,21 @@ position: absolute;
 }
 .q11-10{  position: absolute;
   padding: 5px;
-  top: 8%;
-  left:33.5%;
+    top: 3%;
+    left: 90.5%;
+
 
 }
 .q12-10{
   position: absolute;
   padding: 5px;
-  top:40%;
-  left: 55.5%;}
+     top: 32.6%;
+    left: 40%;}
   
 .q13-10{position: absolute;
   padding: 5px;
-  top:76%;
-  left:37.5%;
+    top: 72%;
+    left: 89.5%;
 } 
  
 

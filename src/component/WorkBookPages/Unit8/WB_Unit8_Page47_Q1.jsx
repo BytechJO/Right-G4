@@ -440,7 +440,7 @@ export default function WB_ReadReplaceWrite_QE() {
             const tColor   = showAns ? INPUT_ANSWER_COLOR : INPUT_TEXT_COLOR;
             const uColor   = wrong ? INPUT_UNDERLINE_WRONG : INPUT_UNDERLINE_DEFAULT;
             const disabled = isWriteDisabled(item);
-
+            
             return (
               <div key={item.id} className="rrw-item">
                 <div className="rrw-coded-row">
@@ -476,7 +476,7 @@ export default function WB_ReadReplaceWrite_QE() {
             const state    = getImgBoxState(img.id);
             const val      = imgAnswers[img.id] || "";
             const disabled = showAns;
-
+            
             const inputClass = [
               "rrw-img-input",
               state === "correct"  ? "rrw-img-input--correct"  : "",
@@ -484,7 +484,7 @@ export default function WB_ReadReplaceWrite_QE() {
               showAns              ? "rrw-img-input--answer"   : "",
               state === "selected" ? "rrw-img-input--selected" : "",
             ].filter(Boolean).join(" ");
-
+            
             return (
               <div key={img.id} className="rrw-img-card">
                 <img src={img.src} alt={`img-${img.id}`} className="rrw-img" />
@@ -498,7 +498,7 @@ export default function WB_ReadReplaceWrite_QE() {
                   onChange={(e) => handleImgChange(img.id, e.target.value)}
                   spellCheck={false}
                   autoComplete="off"
-                />
+                  />
                 {state === "wrong" && <div className="rrw-img-badge">✕</div>}
               </div>
             );
@@ -511,9 +511,9 @@ export default function WB_ReadReplaceWrite_QE() {
             checkAnswers={handleCheck}
             handleShowAnswer={handleShowAnswer}
             handleStartAgain={handleReset}
-          />
+            />
         </div>
-      </div>
+            </div>
     </div>
   );
 }

@@ -5,12 +5,12 @@ import ValidationAlert from "../../Popup/ValidationAlert";
 // ─────────────────────────────────────────────
 //  🖼️  IMAGES — صورة واحدة لكل item
 // ─────────────────────────────────────────────
-import img1 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U10 Folder/Page 61/SVG/Asset 1.svg";
-import img2 from"../../../assets/imgs/pages/Activity Book/Right Int WB G4 U10 Folder/Page 61/SVG/Asset 2.svg";
-import img3 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U10 Folder/Page 61/SVG/Asset 3.svg";
-import img4 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U10 Folder/Page 61/SVG/Asset 4.svg";
-import img5 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U10 Folder/Page 61/SVG/Asset 5.svg";
-import img6 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U10 Folder/Page 61/SVG/Asset 6.svg";
+import img1 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U10 Folder/Page 61/SVG/Asset 50.svg";
+import img2 from"../../../assets/imgs/pages/Activity Book/Right Int WB G4 U10 Folder/Page 61/SVG/Asset 51.svg";
+import img3 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U10 Folder/Page 61/SVG/Asset 52.svg";
+import img4 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U10 Folder/Page 61/SVG/Asset 53.svg";
+import img5 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U10 Folder/Page 61/SVG/Asset 54.svg";
+import img6 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U10 Folder/Page 61/SVG/Asset 55.svg";
 
 // ─────────────────────────────────────────────
 //  🎨  COLORS
@@ -41,9 +41,9 @@ const ITEMS = [
     src:  img2,
     icon: "cross",
     parts: [
-      { type: "text",  value: "He" },
-      { type: "input", key: "2a", correct: ["hasn't", "has not","hasnot" ,"hasnt"], answer: "hasn't" },
-      { type: "text",  value: "been on a tractor." },
+      { type: "input",  key: "02a", correct: ["he"], answer: "He" },
+      { type: "text",  value: "hasn't" },
+       { type: "input",  key: "2a", correct: ["been on a tractor."], answer: "been on a tractor." },
     ],
   },
   {
@@ -187,9 +187,9 @@ export default function WB_LookReadWriteSentences_QI() {
 
         /* ── Single row: num | img+icon | sentence ── */
         .lrws-row {
-          display: grid;
-          grid-template-columns: auto auto 1fr;
-          gap: clamp(10px, 1.4vw, 18px);
+          display: flex;
+         flex : row ; 
+          gap: clamp(30px, 1.4vw, 30px);
           align-items: center;
         }
 
@@ -203,14 +203,16 @@ export default function WB_LookReadWriteSentences_QI() {
 
         /* Image wrap: صورة كاملة + أيقونة فوقها */
         .lrws-img-wrap {
+                  width: 20%;
+
           position: relative;
           display: inline-flex;
           flex-shrink: 0;
         }
 
         .lrws-img {
-          width: clamp(90px, 12vw, 150px);
-          height: clamp(68px, 9vw, 112px);
+          width: 100%;
+          height: auto;
           display: block;
         }
 

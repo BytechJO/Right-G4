@@ -1,493 +1,293 @@
-import React, { useState, useRef } from "react";
+import React, { useState } from "react";
 import Button from "../Button";
 import ValidationAlert from "../../Popup/ValidationAlert";
 
-import girlImg from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U9 Folder/Page 52/SVG/1.svg";
-import boy1Img from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U9 Folder/Page 52/SVG/2.svg";
-import boy2Img from "../../../assets/imgs/pages/WB_Right_3/Right Int WB G3 U9 Folder/Page 52/SVG/3.svg";
+// ─────────────────────────────────────────────
+//  🖼️  TABLE IMAGE — صورة الجدول كاملة
+// ─────────────────────────────────────────────
+import imgTable from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U9 Folder/Page 52/SVG/Asset 49.svg";
 
-const PEOPLE = [
+// ─────────────────────────────────────────────
+//  🎨  COLORS
+// ─────────────────────────────────────────────
+const INPUT_UNDERLINE_DEFAULT = "#3f3f3f";
+const INPUT_UNDERLINE_WRONG   = "#ef4444";
+const INPUT_TEXT_COLOR        = "#2b2b2b";
+const INPUT_ANSWER_COLOR      = "#c81e1e";
+const NUMBER_COLOR            = "#2b2b2b";
+const QUESTION_COLOR          = "#2b2b2b";
+const WRONG_BADGE_BG          = "#ef4444";
+const WRONG_BADGE_TEXT        = "#ffffff";
+
+// ─────────────────────────────────────────────
+//  📝  EXERCISE DATA
+// ─────────────────────────────────────────────
+const ITEMS = [
   {
-    id: 1,
-    img: girlImg,
-    lines: [
-      "She was in the swimming pool this morning.",
-      "She is in the post office now.",
-    ],
+    id:       1,
+    question: "Why doesn't Tom want to hold the spider?",
+    correct:  ["Because he doesn't like bugs.", "because he doesnt like bugs", "Because he doesnt like bugs", "Because he doesnot like bugs", "Because he does not like bugs"],
+    answer:   "Because he doesn't like bugs.",
   },
   {
-    id: 2,
-    img: boy1Img,
-    lines: [
-      "He is at the gym now.",
-      "He was at the bus stop this morning.",
-    ],
+    id:       2,
+    question: "Why doesn't Sarah want to eat eggplant?",
+    correct:  ["Because she likes oranges."],
+    answer:   "Because she likes oranges.",
   },
   {
-    id: 3,
-    img: boy2Img,
-    lines: [
-      "He was at the bakery this morning.",
-      "He is on the playground now.",
-    ],
+    id:       3,
+    question: "Why doesn't Jack want any chicken?",
+    correct:  ["Because he likes steak."],
+    answer:   "Because he likes steak.",
+  },
+  {
+    id:       4,
+    question: "Why does Helen want to buy a skirt?",
+    correct:  ["Because she likes skirts.", "because she likes skirts"],
+    answer:   "Because she likes skirts.",
+  },
+  {
+    id:       5,
+    question: "Why doesn't John want to wear hats?",
+    correct:  ["Because he doesn't like hats.", "because he doesnt like hats" , "because he doesnot like hats", "because he does not like hats"],
+    answer:   "Because he doesn't like hats.",
+  },
+  {
+    id:       6,
+    question: "Why does Stella want to go to the baseball field?",
+    correct:  ["Because she likes baseball.", "because she likes baseball"],
+    answer:   "Because she likes baseball.",
   },
 ];
 
-const DRAG_ITEMS = [
-  "at the swimming pool",
-  "at the bus stop",
-  "at the bakery",
-  "at the post office",
-  "at the gym",
-  "on the playground",
-];
+// ─────────────────────────────────────────────
+//  🔧  NORMALIZE
+// ─────────────────────────────────────────────
+const normalize = (str) =>
+  str.toLowerCase().replace(/[^a-z0-9'\s]/g, "").replace(/\s+/g, " ").trim();
 
-const CORRECT_ANSWERS = {
-  "morning-1": "at the swimming pool",
-  "morning-2": "at the bus stop",
-  "morning-3": "at the bakery",
-  "now-1": "at the post office",
-  "now-2": "at the gym",
-  "now-3": "on the playground",
-};
+const isCorrect = (userVal, correctArr) =>
+  correctArr.some((c) => normalize(userVal) === normalize(c));
 
-const BORDER_COLOR = "#f39b42";
-const WRONG_COLOR  = "#ef4444";
-
-export default function WB_Unit8_Page52_QC() {
-  const [answers, setAnswers]       = useState({});
-  const [draggedText, setDraggedText] = useState(null);
+// ─────────────────────────────────────────────
+//  COMPONENT
+// ─────────────────────────────────────────────
+export default function WB_ReadComplete_QC() {
+  const [answers,     setAnswers]     = useState({});
   const [showResults, setShowResults] = useState(false);
-  const [showAns, setShowAns]       = useState(false);
+  const [showAns,     setShowAns]     = useState(false);
 
-  // Touch drag support
-  const touchItemRef  = useRef(null); // text being dragged
-  const ghostRef      = useRef(null); // visual ghost element
-  const cellRefs      = useRef({});   // refs for drop cells
-
-  const usedValues = Object.values(answers);
-
-  /* ─── Mouse drag handlers ─── */
-  const handleDragStart = (value) => {
-    if (showAns || usedValues.includes(value)) return;
-    setDraggedText(value);
+  const handleChange = (id, value) => {
+    if (showAns) return;
+    const item = ITEMS.find((i) => i.id === id);
+    if (showResults && item && isCorrect(answers[id] || "", item.correct)) return;
+    setAnswers((prev) => ({ ...prev, [id]: value }));
   };
 
-  const handleDrop = (cellKey) => {
-    if (showAns || !draggedText) return;
-    const newAnswers = { ...answers };
-    Object.keys(newAnswers).forEach((key) => {
-      if (newAnswers[key] === draggedText) delete newAnswers[key];
-    });
-    newAnswers[cellKey] = draggedText;
-    setAnswers(newAnswers);
-    setDraggedText(null);
-  };
-
-  /* ─── Touch drag handlers ─── */
-  const createGhost = (text, x, y) => {
-    const ghost = document.createElement("div");
-    ghost.innerText = text;
-    ghost.style.cssText = `
-      position: fixed;
-      left: ${x - 60}px;
-      top:  ${y - 20}px;
-      padding: 8px 14px;
-      border-radius: 10px;
-      background: #e39c56ff;
-      color: #fff;
-      font-size: 14px;
-      font-weight: 600;
-      pointer-events: none;
-      z-index: 9999;
-      opacity: 0.9;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.25);
-      white-space: nowrap;
-    `;
-    document.body.appendChild(ghost);
-    ghostRef.current = ghost;
-  };
-
-  const removeGhost = () => {
-    if (ghostRef.current) {
-      document.body.removeChild(ghostRef.current);
-      ghostRef.current = null;
-    }
-  };
-
-  const getCellKeyAtPoint = (x, y) => {
-    for (const [key, ref] of Object.entries(cellRefs.current)) {
-      if (!ref) continue;
-      const rect = ref.getBoundingClientRect();
-      if (x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom) {
-        return key;
-      }
-    }
-    return null;
-  };
-
-  const handleTouchStart = (value, e) => {
-    if (showAns || usedValues.includes(value)) return;
-    e.preventDefault();
-    touchItemRef.current = value;
-    setDraggedText(value);
-    const touch = e.touches[0];
-    createGhost(value, touch.clientX, touch.clientY);
-  };
-
-  const handleTouchMove = (e) => {
-    if (!ghostRef.current) return;
-    e.preventDefault();
-    const touch = e.touches[0];
-    ghostRef.current.style.left = `${touch.clientX - 60}px`;
-    ghostRef.current.style.top  = `${touch.clientY - 20}px`;
-  };
-
-  const handleTouchEnd = (e) => {
-    removeGhost();
-    if (!touchItemRef.current) return;
-    const touch = e.changedTouches[0];
-    const cellKey = getCellKeyAtPoint(touch.clientX, touch.clientY);
-    if (cellKey && !showAns) {
-      const newAnswers = { ...answers };
-      Object.keys(newAnswers).forEach((key) => {
-        if (newAnswers[key] === touchItemRef.current) delete newAnswers[key];
-      });
-      newAnswers[cellKey] = touchItemRef.current;
-      setAnswers(newAnswers);
-    }
-    touchItemRef.current = null;
-    setDraggedText(null);
-  };
-
-  /* ─── Button handlers ─── */
   const handleCheck = () => {
     if (showAns) return;
-    const allFilled = Object.keys(CORRECT_ANSWERS).every((key) => answers[key]);
-    if (!allFilled) {
-      ValidationAlert.info("Please complete all answers first.");
-      return;
-    }
+    const allAnswered = ITEMS.every((item) => answers[item.id]?.trim());
+    if (!allAnswered) { ValidationAlert.info("Please complete all answers first."); return; }
     let score = 0;
-    Object.keys(CORRECT_ANSWERS).forEach((key) => {
-      if (answers[key] === CORRECT_ANSWERS[key]) score++;
-    });
+    ITEMS.forEach((item) => { if (isCorrect(answers[item.id] || "", item.correct)) score++; });
     setShowResults(true);
-    const total = Object.keys(CORRECT_ANSWERS).length;
-    if (score === total)       ValidationAlert.success(`Score: ${score} / ${total}`);
-    else if (score > 0)        ValidationAlert.warning(`Score: ${score} / ${total}`);
-    else                       ValidationAlert.error(`Score: ${score} / ${total}`);
+    if (score === ITEMS.length)   ValidationAlert.success(`Score: ${score} / ${ITEMS.length}`);
+    else if (score > 0)           ValidationAlert.warning(`Score: ${score} / ${ITEMS.length}`);
+    else                          ValidationAlert.error(`Score: ${score} / ${ITEMS.length}`);
   };
 
   const handleShowAnswer = () => {
-    setAnswers(CORRECT_ANSWERS);
-    setShowResults(true);
+    const filled = {};
+    ITEMS.forEach((item) => { filled[item.id] = item.answer; });
+    setAnswers(filled);
+    setShowResults(false);
     setShowAns(true);
   };
 
   const handleReset = () => {
     setAnswers({});
-    setDraggedText(null);
     setShowResults(false);
     setShowAns(false);
   };
 
-  const isWrongCell = (cellKey) => {
+  const isWrong = (item) => {
     if (!showResults || showAns) return false;
-    if (!answers[cellKey]) return false;
-    return answers[cellKey] !== CORRECT_ANSWERS[cellKey];
+    return !isCorrect(answers[item.id] || "", item.correct);
   };
 
-  /* ─── Drop cell renderer ─── */
-  const renderDropCell = (cellKey) => {
-    const value = answers[cellKey];
-    const wrong = isWrongCell(cellKey);
-
-    return (
-      <div
-        ref={(el) => (cellRefs.current[cellKey] = el)}
-        onDragOver={(e) => e.preventDefault()}
-        onDrop={() => handleDrop(cellKey)}
-        style={{
-          position:       "relative",
-          minHeight:      "clamp(48px,6vw,68px)",
-          display:        "flex",
-          alignItems:     "center",
-          justifyContent: "flex-start",
-          padding:        "6px 10px",
-          fontSize:       "clamp(12px,1.5vw,18px)",
-          lineHeight:     "1.3",
-          backgroundColor:"transparent",
-          boxSizing:      "border-box",
-          transition:     "color 0.2s",
-        }}
-      >
-        {value || ""}
-
-        {wrong && (
-          <div
-            style={{
-              position:        "absolute",
-              top:             "-7px",
-              right:           "-7px",
-              width:           "clamp(14px,1.6vw,20px)",
-              height:          "clamp(14px,1.6vw,20px)",
-              borderRadius:    "50%",
-              backgroundColor: WRONG_COLOR,
-              border:          "1px solid #fff",
-              color:           "#fff",
-              display:         "flex",
-              alignItems:      "center",
-              justifyContent:  "center",
-              fontSize:        "clamp(8px,0.8vw,11px)",
-              fontWeight:      700,
-              boxShadow:       "0 1px 4px rgba(0,0,0,0.25)",
-              zIndex:          5,
-              pointerEvents:   "none",
-            }}
-          >
-            ✕
-          </div>
-        )}
-      </div>
-    );
+  const isDisabled = (item) => {
+    if (showAns) return true;
+    if (showResults && isCorrect(answers[item.id] || "", item.correct)) return true;
+    return false;
   };
 
   return (
     <div className="main-container-component">
+      <style>{`
+        /* ── Table image ── */
+.rcc-table-wrap {
+    width: 80%;
+    border-radius: 10px;
+    /* overflow: hidden; */
+    align-self: center;
+}
+
+        .rcc-table-img {
+          width: 100%;
+          height: auto;
+          display: block;
+        }
+
+        /* ── Questions list ── */
+        .rcc-list {
+          display: flex;
+          flex-direction: column;
+          gap: clamp(12px, 1.8vw, 22px);
+          width: 100%;
+        }
+
+        /* ── Single row ── */
+        .rcc-row {
+          display: flex;
+          align-items: flex-end;
+          gap: clamp(5px, 0.7vw, 9px);
+          flex-wrap: wrap;
+          min-width: 0;
+        }
+
+        .rcc-num {
+          font-size: clamp(14px, 1.7vw, 20px);
+          font-weight: 700;
+          color: ${NUMBER_COLOR};
+          flex-shrink: 0;
+          line-height: 1.5;
+        }
+
+        .rcc-question {
+          font-size: clamp(13px, 1.6vw, 19px);
+          color: ${QUESTION_COLOR};
+          white-space: nowrap;
+          flex-shrink: 0;
+          line-height: 1.5;
+        }
+
+        /* Input wrap */
+        .rcc-input-wrap {
+          position: relative;
+          flex: 1;
+          min-width: clamp(100px, 14vw, 220px);
+        }
+
+        .rcc-input {
+          width: 100%;
+          background: transparent;
+          border: none;
+          border-bottom: 1px solid ${INPUT_UNDERLINE_DEFAULT};
+          outline: none;
+          font-size: clamp(13px, 1.6vw, 19px);
+          color: ${INPUT_TEXT_COLOR};
+
+          line-height: 1.5;
+          box-sizing: border-box;
+          transition: border-color 0.2s;
+        }
+        .rcc-input:disabled   { opacity: 1; cursor: default; }
+        .rcc-input--wrong     { border-bottom-color: ${INPUT_UNDERLINE_WRONG}; }
+        .rcc-input--answer    { color: ${INPUT_ANSWER_COLOR}; }
+
+        /* ✕ badge */
+        .rcc-badge {
+          position: absolute;
+          top: -8px; right: 0;
+          width: clamp(16px, 1.8vw, 20px);
+          height: clamp(16px, 1.8vw, 20px);
+          border-radius: 50%;
+          background: ${WRONG_BADGE_BG};
+          color: ${WRONG_BADGE_TEXT};
+          display: flex; align-items: center; justify-content: center;
+          font-size: clamp(8px, 0.9vw, 11px);
+          font-weight: 700;
+          border: 2px solid #fff;
+          box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+          pointer-events: none;
+          z-index: 2;
+        }
+
+        /* Buttons */
+        .rcc-buttons {
+          display: flex;
+          justify-content: center;
+          margin-top: clamp(8px, 1.6vw, 18px);
+        }
+
+        @media (max-width: 560px) {
+          .rcc-row { flex-wrap: wrap; }
+          .rcc-question { white-space: normal; }
+        }
+      `}</style>
+
       <div
         className="div-forall"
         style={{
-          display:       "flex",
+          display: "flex",
           flexDirection: "column",
-          gap:           "clamp(14px,2vw,24px)",
-          maxWidth:      "1100px",
-          margin:        "0 auto",
+          gap: "clamp(14px, 2vw, 22px)",
+          maxWidth: "1100px",
+          margin: "0 auto",
         }}
       >
-        {/* Title */}
+        {/* ── Header ── */}
         <h1
           className="WB-header-title-page8"
-          style={{ margin: 0 }}
+          style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
         >
-          <span className="WB-ex-A">C</span> Read and write in the chart.
+          <span className="WB-ex-A">C</span>
+          Read and complete.
         </h1>
 
-        {/* Sentences */}
-        <div
-          style={{
-            display:       "flex",
-            flexDirection: "column",
-            gap:           "clamp(10px,1.5vw,18px)",
-            marginBottom:  "4px",
-          }}
-        >
-          {PEOPLE.map((person) => (
-            <div
-              key={person.id}
-              style={{
-                display:        "grid",
-                gridTemplateColumns: "clamp(18px,2.5vw,28px) clamp(48px,6vw,70px) 1fr",
-                alignItems:     "center",
-                columnGap:      "clamp(8px,1.2vw,16px)",
-              }}
-            >
-              <div
-                style={{
-                  fontSize:   "clamp(16px,2vw,22px)",
-                  fontWeight: "700",
-                  color:      "#222",
-                }}
-              >
-                {person.id}
-              </div>
-
-              <img
-                src={person.img}
-                alt={`person-${person.id}`}
-                style={{
-                  width:      "clamp(40px,5vw,56px)",
-                  height:     "clamp(52px,7vw,74px)",
-                  objectFit:  "contain",
-                  display:    "block",
-                }}
-              />
-
-              <div
-                style={{
-                  fontSize:   "clamp(13px,1.6vw,18px)",
-                  lineHeight: "1.35",
-                  color:      "#222",
-                }}
-              >
-                <div>{person.lines[0]}</div>
-                <div>{person.lines[1]}</div>
-              </div>
-            </div>
-          ))}
+        {/* ── Table image ── */}
+        <div className="rcc-table-wrap">
+          <img src={imgTable} alt="table" className="rcc-table-img" />
         </div>
 
-        {/* Drag bank */}
-        <div
-          style={{
-            display:        "flex",
-            justifyContent: "center",
-            gap:            "clamp(6px,1vw,10px)",
-            flexWrap:       "wrap",
-            marginBottom:   "4px",
-          }}
-        >
-          {DRAG_ITEMS.map((item, index) => {
-            const disabled = usedValues.includes(item);
+        {/* ── Questions ── */}
+        <div className="rcc-list">
+          {ITEMS.map((item) => {
+            const wrong    = isWrong(item);
+            const value    = answers[item.id] || "";
+            const tColor   = showAns ? INPUT_ANSWER_COLOR : INPUT_TEXT_COLOR;
+            const uColor   = wrong ? INPUT_UNDERLINE_WRONG : INPUT_UNDERLINE_DEFAULT;
+            const disabled = isDisabled(item);
 
             return (
-              <div
-                key={`${item}-${index}`}
-                draggable={!disabled && !showAns}
-                onDragStart={() => handleDragStart(item)}
-                onTouchStart={(e) => handleTouchStart(item, e)}
-                onTouchMove={handleTouchMove}
-                onTouchEnd={handleTouchEnd}
-                style={{
-                  padding:         "clamp(6px,0.8vw,8px) clamp(10px,1.2vw,14px)",
-                  borderRadius:    "10px",
-                  backgroundColor: "#ffca94",
-                                            border:     "2px solid #f39b42",
-
-                  color:           "#fff",
-                  fontSize:        "clamp(12px,1.4vw,15px)",
-                  fontWeight:      "600",
-                  cursor:          disabled || showAns ? "not-allowed" : "grab",
-                  opacity:         disabled ? 0.5 : 1,
-                  userSelect:      "none",
-                  boxShadow:       "0 2px 6px rgba(0,0,0,0.12)",
-                  touchAction:     "none",
-                  transition:      "opacity 0.2s, background-color 0.2s",
-                }}
-              >
-                {item}
+              <div key={item.id} className="rcc-row">
+                <span className="rcc-num">{item.id}</span>
+                <span className="rcc-question">{item.question}</span>
+                <div className="rcc-input-wrap">
+                  <input
+                    type="text"
+                    className={[
+                      "rcc-input",
+                      wrong   ? "rcc-input--wrong"  : "",
+                      showAns ? "rcc-input--answer" : "",
+                    ].filter(Boolean).join(" ")}
+                    value={value}
+                    disabled={disabled}
+                    onChange={(e) => handleChange(item.id, e.target.value)}
+                    style={{ borderBottomColor: uColor, color: tColor }}
+                    spellCheck={false}
+                    autoComplete="off"
+                  />
+                  {wrong && <div className="rcc-badge">✕</div>}
+                </div>
               </div>
             );
           })}
         </div>
 
-        {/* Table */}
-        <div
-          style={{
-            width:           "100%",
-            display:         "flex",
-            justifyContent:  "center",
-            overflowX:       "auto",
-          }}
-        >
-          <div
-            style={{
-              width:           "100%",
-              maxWidth:        "760px",
-              minWidth:        "320px",
-              border:          `2px solid ${BORDER_COLOR}`,
-              borderRadius:    "clamp(10px,1.5vw,18px)",
-              overflow:        "hidden",
-              backgroundColor: "#fff",
-            }}
-          >
-            {/* Header row */}
-            <div
-              style={{
-                display:             "grid",
-                gridTemplateColumns: "clamp(70px,12vw,130px) 1fr 1fr 1fr",
-                borderBottom:        `2px solid ${BORDER_COLOR}`,
-              }}
-            >
-              <div style={{ minHeight: "clamp(60px,8vw,86px)", borderRight: `2px solid ${BORDER_COLOR}` }} />
-              {PEOPLE.map((person, index) => (
-                <div
-                  key={person.id}
-                  style={{
-                    minHeight:      "clamp(60px,8vw,86px)",
-                    borderRight:    index !== PEOPLE.length - 1 ? `2px solid ${BORDER_COLOR}` : "none",
-                    display:        "flex",
-                    alignItems:     "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  <img
-                    src={person.img}
-                    alt={`head-${person.id}`}
-                    style={{
-                      width:     "clamp(36px,5vw,56px)",
-                      height:    "clamp(44px,6vw,68px)",
-                      objectFit: "contain",
-                      display:   "block",
-                    }}
-                  />
-                </div>
-              ))}
-            </div>
-
-            {/* Morning row */}
-            <div
-              style={{
-                display:             "grid",
-                gridTemplateColumns: "clamp(70px,12vw,130px) 1fr 1fr 1fr",
-                borderBottom:        `2px solid ${BORDER_COLOR}`,
-              }}
-            >
-              <div
-                style={{
-                  minHeight:      "clamp(56px,7vw,82px)",
-                  borderRight:    `2px solid ${BORDER_COLOR}`,
-                  display:        "flex",
-                  alignItems:     "center",
-                  justifyContent: "center",
-                  fontSize:       "clamp(14px,1.8vw,20px)",
-                  color:          "#222",
-                  fontWeight:     600,
-                }}
-              >
-                Morning
-              </div>
-              <div style={{ borderRight: `2px solid ${BORDER_COLOR}` }}>{renderDropCell("morning-1")}</div>
-              <div style={{ borderRight: `2px solid ${BORDER_COLOR}` }}>{renderDropCell("morning-2")}</div>
-              <div>{renderDropCell("morning-3")}</div>
-            </div>
-
-            {/* Now row */}
-            <div
-              style={{
-                display:             "grid",
-                gridTemplateColumns: "clamp(70px,12vw,130px) 1fr 1fr 1fr",
-              }}
-            >
-              <div
-                style={{
-                  minHeight:      "clamp(56px,7vw,82px)",
-                  borderRight:    `2px solid ${BORDER_COLOR}`,
-                  display:        "flex",
-                  alignItems:     "center",
-                  justifyContent: "center",
-                  fontSize:       "clamp(14px,1.8vw,20px)",
-                  color:          "#222",
-                  fontWeight:     600,
-                }}
-              >
-                Now
-              </div>
-              <div style={{ borderRight: `2px solid ${BORDER_COLOR}` }}>{renderDropCell("now-1")}</div>
-              <div style={{ borderRight: `2px solid ${BORDER_COLOR}` }}>{renderDropCell("now-2")}</div>
-              <div>{renderDropCell("now-3")}</div>
-            </div>
-          </div>
-        </div>
-
-        {/* Buttons */}
-        <div
-          style={{
-            display:        "flex",
-            justifyContent: "center",
-            marginTop:      "clamp(4px,0.8vw,8px)",
-          }}
-        >
+        {/* ── Buttons ── */}
+        <div className="rcc-buttons">
           <Button
             checkAnswers={handleCheck}
             handleShowAnswer={handleShowAnswer}

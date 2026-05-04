@@ -45,15 +45,15 @@
 .q1-1 {
 position: absolute !important;
     padding: 5px !important;
-     top: 14.5% !important;
-    left: 37.5% !important;
+    top: 13.5% !important;
+    left: 39.5% !important;
 }
 
 .q2-1 {
  position: absolute !important;
     padding: 5px !important;
-    top: 64% !important;
-    left: 42.5% !important;
+     top: 63% !important;
+    left: 43.5% !important;
 
 }
 
@@ -61,71 +61,75 @@ position: absolute !important;
 .q3-1 {
   position: absolute !important;
     padding: 5px !important;
-    top: 4% !important;
-    left: 47.5% !important;
+   top: 3% !important;
+    left: 48.5% !important;
 }
 
 .q4-1{
 position: absolute !important;
     padding: 5px !important;
-    top: 64.5% !important;
-    left: 49.5% !important;
+    top: 63.5% !important;
+    left: 50.5% !important
 }
 
 .q5-1 {
 position: absolute !important;
     padding: 5px !important;
-top: 4% !important;
-    left: 44.5% !important;
+    top: 3% !important;
+    left: 45.5% !important;
+
 }
 
 .q6-1 {
 position: absolute !important;
     padding: 5px !important;
-    top: 40.5% !important;
-    left: 17.5% !important;
+    top: 40% !important;
+    left: 18.5% !important;
+
 }
 
 .q7-1 {
     position: absolute !important;
     padding: 5px !important;
- top: 4% !important;
-    left: 52.5% !important;
+    top: 3% !important;
+    left: 53.5% !important;
 }
 
 .q8-1 {
     position: absolute !important;
     padding: 5px !important;
-top: 53% !important;
-    left: 55.5% !important;
+    top: 52% !important;
+    left: 56.5% !important;
+
 }
 
 .q9-1 {
   position: absolute !important;
   padding: 5px !important;
-    top: 4% !important;
-    left: 30.5% !important;
+    top: 3% !important;
+    left: 31% !important;
 }
 
 .q10-1 {
  position: absolute !important;
     padding: 5px !important;
-    top: 42% !important;
-    left: 41% !important;
+       top: 41% !important;
+    left: 41.5% !important;
 }
 
 .q11-1 {
     position: absolute !important;
     padding: 5px !important;
-top: 3.5% !important;
-    left: 44% !important;
+    top: 2.5% !important;
+    left: 45% !important;
 }
+
 
 .q12-1 {
 position: absolute !important;
     padding: 5px !important;
-top: 40.5% !important;
-    left: 41% !important;
+    top: 39.5% !important;
+    left: 42% !important;
 }
 
 .q13-1{

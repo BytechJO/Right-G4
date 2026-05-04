@@ -24,19 +24,17 @@ const WRONG_BADGE_TEXT        = "#ffffff";
 
 // ─────────────────────────────────────────────
 //  📝  EXERCISE DATA
-//  question / answer: أجزاء — { type: "text" } أو { type: "input", key, correct, answer }
 // ─────────────────────────────────────────────
 const ITEMS = [
   {
     id:  1,
     src: img1,
     question: [
-      { type: "text",  value: "Did she chop the vegetables?" },
+      { type: "text", value: "Did she chop the vegetables?" },
     ],
     answer: [
-      { type: "text",  value: "Yes, she did." },
+      { type: "text", value: "Yes, she did." },
     ],
-    // لا توجد inputs — الجملتان ثابتتان (مثال للطالب)
     inputs: [],
   },
   {
@@ -68,8 +66,7 @@ const ITEMS = [
     src: img4,
     question: [
       { type: "text",  value: "Did" },
-      { type: "input", key: "4q", correct: ["Did she fly a kite?", "she fly a kite?"], answer: "Did she fly a kite?" },
-      { type: "text",  value: "?" },
+      { type: "input", key: "4q", correct: ["she fly a kite?", "Did she fly a kite?"], answer: "she fly a kite?" },
     ],
     answer: [
       { type: "input", key: "4a", correct: ["Yes, she did.", "Yes, she did"], answer: "Yes, she did." },
@@ -144,7 +141,6 @@ export default function WB_ReadLookWrite_QF() {
     return false;
   };
 
-  // render part (text or input)
   const renderPart = (part, i) => {
     if (part.type === "text") {
       return <span key={i} className="rlwf-text">{part.value}</span>;
@@ -178,42 +174,59 @@ export default function WB_ReadLookWrite_QF() {
   return (
     <div className="main-container-component">
       <style>{`
-        /* ── Items list ── */
-        .rlwf-list {
-          display: flex;
-          flex-direction: column;
-          gap: clamp(12px, 1.8vw, 22px);
-          width: 100%;
-        }
-
-        /* ── Single row: num | question | img | answer ── */
-        .rlwf-row {
+        /* ── Outer table: 4 fixed columns ── */
+        .rlwf-table {
           display: grid;
-          grid-template-columns: auto 1fr auto 1fr;
+          grid-template-columns:
+            clamp(20px, 3vw, 36px)          /* col-num */
+            1fr                              /* col-question */
+            clamp(60px, 9vw, 140px)          /* col-img */
+            1fr;                             /* col-answer */
           gap: clamp(8px, 1.2vw, 16px);
+          width: 100%;
           align-items: center;
-          min-width: 0;
+          row-gap: clamp(14px, 2vw, 24px);
+          margin : 2% 0 ; 
         }
 
-        .rlwf-num {
+        /* ── Col: Number ── */
+        .rlwf-col-num {
           font-size: clamp(14px, 1.7vw, 20px);
           font-weight: 700;
           color: ${NUMBER_COLOR};
-          flex-shrink: 0;
           line-height: 1;
-          margin-left: 10% ; 
+          justify-self: center;   /* ← غيّر هنا حسب رأيك */
         }
 
-        /* Question / answer parts */
-        .rlwf-parts {
+        /* ── Col: Question ── */
+        .rlwf-col-question {
+          display: flex;
+          flex-wrap: nowrap;
+          gap: clamp(3px, 0.4vw, 6px);
+justify-content: start;        }
+
+        /* ── Col: Image ── */
+        .rlwf-col-img {
+          display: flex;
+          justify-content: center;     /* ← غيّر هنا حسب رأيك */
+        }
+
+        .rlwf-img {
+          height: 110%;
+          width: 110%;
+          display: block;
+        }
+
+        /* ── Col: Answer ── */
+        .rlwf-col-answer {
           display: flex;
           align-items: flex-end;
           flex-wrap: wrap;
           gap: clamp(3px, 0.4vw, 6px);
-          min-width: 0;
-          justify-content: center;
+          justify-content: center;  /* ← غيّر هنا حسب رأيك */
         }
 
+        /* ── Shared: text part ── */
         .rlwf-text {
           font-size: clamp(13px, 1.6vw, 19px);
           color: ${TEXT_COLOR};
@@ -223,7 +236,7 @@ export default function WB_ReadLookWrite_QF() {
           line-height: 1;
         }
 
-        /* Input wrap */
+        /* ── Shared: input wrap ── */
         .rlwf-input-wrap {
           position: relative;
           flex: 0 1 clamp(80px, 11vw, 160px);
@@ -234,14 +247,12 @@ export default function WB_ReadLookWrite_QF() {
           width: 100%;
           background: transparent;
           border: none;
-          border-bottom: 2px solid ${INPUT_UNDERLINE_DEFAULT};
+          border-bottom: 1px solid ${INPUT_UNDERLINE_DEFAULT};
           outline: none;
           font-size: clamp(13px, 1.6vw, 19px);
           color: ${INPUT_TEXT_COLOR};
-          padding: 4px 4px 5px;
-          line-height: 1;
+        line-height: 1.5;
           box-sizing: border-box;
-          font-family: inherit;
           transition: border-color 0.2s;
         }
         .rlwf-input:disabled   { opacity: 1; cursor: default; }
@@ -257,24 +268,13 @@ export default function WB_ReadLookWrite_QF() {
           border-radius: 50%;
           background: ${WRONG_BADGE_BG};
           color: ${WRONG_BADGE_TEXT};
-          display: flex;
-          align-items: center;
-          justify-content: center;
+          display: flex; align-items: center; justify-content: center;
           font-size: clamp(8px, 0.9vw, 11px);
           font-weight: 700;
           border: 2px solid #fff;
           box-shadow: 0 2px 6px rgba(0,0,0,0.2);
           pointer-events: none;
           z-index: 2;
-        }
-
-        /* Image */
-        .rlwf-img {
-          height: clamp(50px, 7vw, 90px);
-          width: auto;
-          display: block;
-          border-radius: 6px;
-          flex-shrink: 0;
         }
 
         /* Buttons */
@@ -285,11 +285,12 @@ export default function WB_ReadLookWrite_QF() {
         }
 
         @media (max-width: 560px) {
-          .rlwf-row {
-            grid-template-columns: auto 1fr;
-            grid-template-rows: auto auto;
+          .rlwf-table {
+            grid-template-columns: clamp(20px, 3vw, 36px) 1fr;
+            grid-template-rows: auto;
           }
-          .rlwf-img { grid-column: 2; }
+          .rlwf-col-img   { grid-column: 2; }
+          .rlwf-col-answer { grid-column: 2; }
         }
       `}</style>
 
@@ -312,28 +313,30 @@ export default function WB_ReadLookWrite_QF() {
           Read, look, and write.
         </h1>
 
-        {/* ── Items ── */}
-        <div className="rlwf-list">
+        {/* ── Table ── */}
+        <div className="rlwf-table">
           {ITEMS.map((item) => (
-            <div key={item.id} className="rlwf-row">
+            <React.Fragment key={item.id}>
 
-              {/* Number */}
-              <span className="rlwf-num">{item.id}</span>
+              {/* col-num */}
+              <div className="rlwf-col-num">{item.id}</div>
 
-              {/* Question parts */}
-              <div className="rlwf-parts">
+              {/* col-question */}
+              <div className="rlwf-col-question">
                 {item.question.map((part, i) => renderPart(part, i))}
               </div>
 
-              {/* Image */}
-              <img src={item.src} alt={`scene-${item.id}`} className="rlwf-img" />
+              {/* col-img */}
+              <div className="rlwf-col-img">
+                <img src={item.src} alt={`scene-${item.id}`} className="rlwf-img" />
+              </div>
 
-              {/* Answer parts */}
-              <div className="rlwf-parts">
+              {/* col-answer */}
+              <div className="rlwf-col-answer">
                 {item.answer.map((part, i) => renderPart(part, i))}
               </div>
 
-            </div>
+            </React.Fragment>
           ))}
         </div>
 
