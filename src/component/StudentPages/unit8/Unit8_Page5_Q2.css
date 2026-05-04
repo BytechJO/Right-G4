@@ -1,0 +1,218 @@
+/* ====== CONTAINER ====== */
+.CB-review1-p2-q1-container {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); /* 3 كروت بالصف */
+  gap: 30px;
+  margin-top: 20px;
+}
+
+/* ====== QUESTION CARD ====== */
+.CB-review1-p2-q1-question-box {
+  border: 2px solid #ff6b57;
+  border-radius: 16px;
+  padding: 16px;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  position: relative;
+}
+
+/* رقم السؤال */
+.CB-review1-p2-q1-question-text {
+  width: 100%;
+  text-align: left;
+}
+
+/* ====== IMAGES ====== */
+.CB-review1-p2-q1-flex {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+
+/* صورتين جنب بعض */
+.CB-review1-p2-q1-flex > div:first-child {
+  display: flex;
+  gap: 14px;
+}
+
+.CB-review1-p2-q1-img {
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
+}
+
+/* ====== OPTIONS ====== */
+.CB-review1-p2-q1-options-box {
+  display: flex;
+  gap: 20px;
+}
+
+/* wrapper لكل زر */
+.CB-review1-p2-q1-option-wrapper {
+  position: relative;
+}
+
+/* زر ✓ و ✗ */
+.CB-review1-p2-q1-option-btn {
+  width: 45px;
+  height: 45px;
+  border: 2px solid #ff6b57;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 22px;
+  font-weight: bold;
+  background: #fff;
+  transition: all 0.15s ease;
+}
+
+.CB-review1-p2-q1-option-btn:hover {
+  background: #ffe3df;
+}
+
+/* لما يختار الطالب */
+.CB-review1-p2-q1-option-btn.is-selected {
+  background: #777cfd;
+  color: white;
+}
+
+/* ====== WRONG ICON ====== */
+.CB-review1-p2-q1-wrong-icon {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+
+  background: red;
+  color: white;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 14px;
+  font-weight: bold;
+  border: 2px solid white;
+  /* box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25); */
+  z-index: 3;
+}
+/* ========== شاشات صغيرة أقل من 1200 ========== */
+@media (max-width: 1200px) and (min-width: 1025px) {
+  .u8p5-wrapper {
+    padding: 24px !important;
+  }
+  .u8p5-container {
+    width: 78% !important;
+  }
+  .u8p5-grid {
+    gap: 22px !important;
+  }
+  .u8p5-images-box {
+    width: 100% !important;
+    padding: 10px !important;
+  }
+  .u8p5-img-cell {
+    height: 130px !important;
+  }
+  .u8p5-img-cell img {
+    height: 105px !important;
+  }
+  .u8p5-opt-btn {
+    width: 43px !important;
+    height: 43px !important;
+    font-size: 21px !important;
+  }
+}
+
+/* ========== iPad Landscape ========== */
+@media (max-width: 1024px) and (min-width: 769px) {
+  .u8p5-wrapper {
+    padding: 20px !important;
+  }
+  .u8p5-container {
+    width: 88% !important;
+  }
+  .u8p5-grid {
+    gap: 16px !important;
+  }
+  .u8p5-card {
+    padding: 10px !important;
+  }
+  .u8p5-images-box {
+    padding: 8px !important;
+  }
+  .u8p5-img-cell {
+    height: 115px !important;
+  }
+  .u8p5-img-cell img {
+    height: 92px !important;
+  }
+  .u8p5-opt-btn {
+    width: 40px !important;
+    height: 40px !important;
+    font-size: 19px !important;
+  }
+}
+
+/* ========== iPad Portrait ========== */
+@media (max-width: 768px) {
+  .u8p5-wrapper {
+    padding: 12px !important;
+  }
+  .u8p5-container {
+    width: 96% !important;
+  }
+  .u8p5-grid {
+    gap: 10px !important;
+  }
+  .u8p5-card {
+    padding: 8px !important;
+  }
+  .u8p5-img-cell {
+    height: 95px !important;
+  }
+  .u8p5-img-cell img {
+    height: 75px !important;
+  }
+  .u8p5-opt-btn {
+    width: 36px !important;
+    height: 36px !important;
+    font-size: 17px !important;
+  }
+}
+
+/* ========== موبايل ========== */
+@media (max-width: 600px) {
+  .u8p5-wrapper {
+    padding: 8px !important;
+  }
+  .u8p5-container {
+    width: 100% !important;
+  }
+  .u8p5-grid {
+    gap: 8px !important;
+  }
+  .u8p5-card {
+    padding: 6px !important;
+  }
+  .u8p5-img-cell {
+    height: 75px !important;
+  }
+  .u8p5-img-cell img {
+    height: 58px !important;
+  }
+  .u8p5-opt-btn {
+    width: 32px !important;
+    height: 32px !important;
+    font-size: 15px !important;
+  }
+}

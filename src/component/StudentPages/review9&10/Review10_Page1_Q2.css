@@ -1,0 +1,13 @@
+.questions-grid {
+  display: grid;
+  grid-template-columns: 1fr; /* 🔥 الافتراضي عامودي */
+  gap: 30px;
+  width: 100%;
+  max-width: 1000px;
+}
+
+@media (min-width: 1024px) {
+  .questions-grid {
+    grid-template-columns: repeat(2, 1fr); /* 🔥 بس على lg */
+  }
+}
