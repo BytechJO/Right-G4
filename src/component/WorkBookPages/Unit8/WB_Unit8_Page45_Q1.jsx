@@ -124,7 +124,7 @@ export default function WB_LookUnscrambleWrite_QA() {
         .luswa-grid {
           display: grid;
           grid-template-columns: repeat(2, 1fr);
-          gap: clamp(16px, 2.8vw, 36px) clamp(24px, 4vw, 52px);
+          gap: clamp(16px, 2.8vw, 16px) clamp(16px, 4vw, 16px);
           width: 100%;
         }
 
@@ -133,7 +133,6 @@ export default function WB_LookUnscrambleWrite_QA() {
           display: flex;
           flex-direction: column;
           align-items: center;
-          gap: clamp(6px, 0.9vw, 10px);
           min-width: 0;
         }
 
@@ -142,7 +141,7 @@ export default function WB_LookUnscrambleWrite_QA() {
           display: flex;
           align-items: flex-start;
           gap: clamp(6px, 0.8vw, 10px);
-          width: 70%;
+          width: 50%;
         }
 
         .luswa-num {
@@ -150,8 +149,7 @@ export default function WB_LookUnscrambleWrite_QA() {
           font-weight: 700;
           color: ${NUMBER_COLOR};
           flex-shrink: 0;
-          line-height: 1;
-          padding-top: 3px;
+          line-height: 1.5;
         }
 
         .luswa-img-wrap {
@@ -171,7 +169,7 @@ export default function WB_LookUnscrambleWrite_QA() {
           font-weight: 400;
           color: ${SCRAMBLED_COLOR};
           text-align: center;
-          line-height: 1.4;
+          line-height: 1.5;
         }
 
         /* Input wrap */

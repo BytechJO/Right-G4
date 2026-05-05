@@ -7,8 +7,8 @@ import ValidationAlert from "../../Popup/ValidationAlert";
 // ─────────────────────────────────────────────
 import imgSoccer      from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U8 Folder/Page 49/SVG/Asset 37.svg";
 import imgViolin      from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U8 Folder/Page 49/SVG/Asset 38.svg";
-import imgComputer    from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U8 Folder/Page 49/SVG/Asset 40.svg";
-import imgGrandparents from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U8 Folder/Page 49/SVG/Asset 41.svg";
+import imgComputer    from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U8 Folder/Page 49/SVG/Asset 46.svg";
+import imgGrandparents from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U8 Folder/Page 49/SVG/Asset 40.svg";
 import imgRoom        from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U8 Folder/Page 49/SVG/Asset 41.svg";
 import imgRadio       from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U8 Folder/Page 49/SVG/Asset 42.svg";
 

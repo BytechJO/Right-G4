@@ -281,10 +281,10 @@ export default function WB_ReadWriteVerbs_QG() {
           <span className="WB-ex-A">G</span>
           Read and write the verbs.
         </h1>
-<div style={{margin : "3% 0 "}}>
+<div style={{margin : "0.5% 0 "}}>
 
         {/* ── Paragraph ── */}
-        <p className="rwvg-para">{PARAGRAPH}</p>
+        <p className="rwvg-para" style={{marginBottom : "5%"}}>{PARAGRAPH}</p>
 
         {/* ── Items ── */}
         <div className="rwvg-list">

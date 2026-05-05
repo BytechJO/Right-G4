@@ -1,254 +1,298 @@
 import React, { useState } from "react";
-import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
+import Button from "../../Button";
 import ValidationAlert from "../../Popup/ValidationAlert";
 
-import imgA from "../../../assets/imgs/pages/classbook/Right 3 Unit 2 Summer Vacation Folder/Pahe 15/Ex D 1.svg";
-import imgB from "../../../assets/imgs/pages/classbook/Right 3 Unit 2 Summer Vacation Folder/Pahe 15/Ex D 2.svg";
-import imgC from "../../../assets/imgs/pages/classbook/Right 3 Unit 2 Summer Vacation Folder/Pahe 15/Ex D 3.svg";
-import imgD from "../../../assets/imgs/pages/classbook/Right 3 Unit 2 Summer Vacation Folder/Pahe 15/Ex D 4.svg";
-import Button from "../../Button";
-import WrongMark from "../../WrongMark";
+// ─────────────────────────────────────────────
+//  🖼️  IMAGES
+// ─────────────────────────────────────────────
+import imgJapan  from "../../../assets/imgs/pages/Class Book/Right 4 Unit 2 Welcome to the Big Apple Folder/Page 15/SVG/Asset 2.svg";
+import imgRussia from "../../../assets/imgs/pages/Class Book/Right 4 Unit 2 Welcome to the Big Apple Folder/Page 15/SVG/Asset 2.svg";
+import imgUK     from "../../../assets/imgs/pages/Class Book/Right 4 Unit 2 Welcome to the Big Apple Folder/Page 15/SVG/Asset 2.svg";
+import imgAus    from "../../../assets/imgs/pages/Class Book/Right 4 Unit 2 Welcome to the Big Apple Folder/Page 15/SVG/Asset 2.svg";
 
-const Unit2_Page6_Q1 = () => {
-  const questions = [
-    {
-      id: 1,
-      img: imgA,
-      options: ["take the subway", "take a taxi"],
-      correct: "take the subway",
-    },
-    {
-      id: 2,
-      img: imgB,
-      options: ["take a bus", "ride a bike"],
-      correct: "ride a bike",
-    },
-    {
-      id: 3,
-      img: imgC,
-      options: ["ride a bike", "walk"],
-      correct: "walk",
-    },
-    {
-      id: 4,
-      img: imgD,
-      options: ["take a bus", "take a train"],
-      correct: "take a bus",
-    },
-  ];
-  const [selected, setSelected] = useState({});
-  const [showResult, setShowResult] = useState(false);
-  const [locked, setLocked] = useState(false);
-  const handleSelect = (qId, option) => {
-    if (locked) return;
+// ─────────────────────────────────────────────
+//  🎨  COLORS
+// ─────────────────────────────────────────────
+const INPUT_UNDERLINE_DEFAULT = "#3f3f3f";
+const INPUT_UNDERLINE_WRONG   = "#ef4444";
+const INPUT_TEXT_COLOR        = "#2b2b2b";
+const INPUT_ANSWER_COLOR      = "#c81e1e";
+const NUMBER_COLOR            = "#2b2b2b";
+const TEXT_COLOR              = "#2b2b2b";
+const WRONG_BADGE_BG          = "#ef4444";
+const WRONG_BADGE_TEXT        = "#ffffff";
 
-    setSelected((prev) => ({
-      ...prev,
-      [qId]: option,
-    }));
+// ─────────────────────────────────────────────
+//  📝  EXERCISE DATA
+// ─────────────────────────────────────────────
+const WORD_BANK = ["Australia", "Japan", "United Kingdom", "Russia"];
+
+const ITEMS = [
+  { id: 1, prefix: "Stella is going to...", src: imgJapan,  correct: ["Japan"],          answer: "Japan"          },
+  { id: 2, prefix: "He's going to...",      src: imgRussia, correct: ["Russia"],         answer: "Russia"         },
+  { id: 3, prefix: "They're going to...",   src: imgUK,     correct: ["United Kingdom"], answer: "United Kingdom" },
+  { id: 4, prefix: "I'm going to...",       src: imgAus,    correct: ["Australia"],      answer: "Australia"      },
+];
+
+// ─────────────────────────────────────────────
+//  🔧  NORMALIZE
+// ─────────────────────────────────────────────
+const normalize = (str) =>
+  str.toLowerCase().replace(/[^a-z0-9\s]/g, "").replace(/\s+/g, " ").trim();
+
+const isCorrect = (userVal, correctArr) =>
+  correctArr.some((c) => normalize(userVal) === normalize(c));
+
+// ─────────────────────────────────────────────
+//  COMPONENT
+// ─────────────────────────────────────────────
+export default function WB_ListenReadWrite_QD() {
+  const [answers,     setAnswers]     = useState({});
+  const [showResults, setShowResults] = useState(false);
+  const [showAns,     setShowAns]     = useState(false);
+
+  const handleChange = (id, value) => {
+    if (showAns) return;
+    const item = ITEMS.find((i) => i.id === id);
+    if (showResults && item && isCorrect(answers[id] || "", item.correct)) return;
+    setAnswers((prev) => ({ ...prev, [id]: value }));
   };
-  const reset = () => {
-    setSelected({});
-    setLocked(false);
-    setShowResult(false);
+
+  const handleCheck = () => {
+    if (showAns) return;
+    const allAnswered = ITEMS.every((item) => answers[item.id]?.trim());
+    if (!allAnswered) { ValidationAlert.info("Please complete all answers first."); return; }
+    let score = 0;
+    ITEMS.forEach((item) => { if (isCorrect(answers[item.id] || "", item.correct)) score++; });
+    setShowResults(true);
+    if (score === ITEMS.length)   ValidationAlert.success(`Score: ${score} / ${ITEMS.length}`);
+    else if (score > 0)           ValidationAlert.warning(`Score: ${score} / ${ITEMS.length}`);
+    else                          ValidationAlert.error(`Score: ${score} / ${ITEMS.length}`);
   };
 
-  const showAnswers = () => {
+  const handleShowAnswer = () => {
     const filled = {};
-    questions.forEach((q) => {
-      filled[q.id] = q.correct;
-    });
-    setSelected(filled);
-    setLocked(true);
+    ITEMS.forEach((item) => { filled[item.id] = item.answer; });
+    setAnswers(filled);
+    setShowResults(false);
+    setShowAns(true);
   };
-  const checkAnswers = () => {
-    if (locked) return;
-    const hasEmpty = questions.some((q) => !selected[q.id]);
 
-    if (hasEmpty) {
-      ValidationAlert.info();
-      return;
-    }
-    let correct = 0;
-
-    questions.forEach((q) => {
-      if (selected[q.id] === q.correct) correct++;
-    });
-
-    const total = questions.length;
-    const color =
-      correct === total ? "green" : correct === 0 ? "red" : "orange";
-
-    const msg = `
-  <div style="font-size:20px;text-align:center;">
-    <span style="color:${color}; font-weight:bold;">
-      Score: ${correct} / ${total}
-    </span>
-  </div>
-`;
-
-    if (correct === total) ValidationAlert.success(msg);
-    else if (correct === 0) ValidationAlert.error(msg);
-    else ValidationAlert.warning(msg);
-    setShowResult(true);
-    setLocked(true);
+  const handleReset = () => {
+    setAnswers({});
+    setShowResults(false);
+    setShowAns(false);
   };
+
+  const isWrong = (item) => {
+    if (!showResults || showAns) return false;
+    return !isCorrect(answers[item.id] || "", item.correct);
+  };
+
+  const isDisabled = (item) => {
+    if (showAns) return true;
+    if (showResults && isCorrect(answers[item.id] || "", item.correct)) return true;
+    return false;
+  };
+
   return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        padding: "30px",
-      }}
-    >
-      <div className="div-forall">
-        <h5 className="header-title-page8 pb-2.5">
-          <span className="ex-A" style={{ marginRight: "10px" }}>
-            D
-          </span>
-          Look, read, and circle.
-        </h5>
+    <div className="main-container-component">
+      <style>{`
+        /* ── Word bank ── */
+        .lrwd-bank {
+          display: flex;
+          flex-wrap: wrap;
+          gap: clamp(8px, 1.2vw, 14px);
+          justify-content: center;
+          width: 100%;
+        }
 
-        <div className=" mx-auto">
-          <div className="flex flex-col gap-10 items-center mb-10">
-            {[0, 2].map((startIndex) => (
-              <div key={startIndex} className="w-full">
-                <div className="flex justify-between px-10">
-                  {questions.slice(startIndex, startIndex + 2).map((q) => (
-                    <div
-                      key={q.id}
-                      className="flex flex-col items-start  w-[45%]"
-                    >
-                      {/* الصورة */}
-                      <div className="flex gap-2 items-start">
-                        <span className="font-bold text-lg">{q.id}</span>
-                        <img
-                          src={q.img}
-                          style={{
-                            height: "10vw",
-                            border: "2px solid #F79530",
-                            borderRadius: "10px",
-                          }}
-                        />
-                      </div>
+        .lrwd-pill {
+          border: 2px solid #e8eff1;
+          border-radius: 8px;
+          padding: clamp(4px, 0.5vw, 6px) clamp(14px, 2vw, 22px);
+          font-size: clamp(14px, 1.7vw, 20px);
+          color: #2b2b2b;
+          background: #e8eff1;
+          white-space: nowrap;
+          user-select: none;
+        }
 
-                      <div className="flex flex-col items-start  mt-2">
-                        <div
-                          onClick={() => handleSelect(q.id, q.options[0])}
-                          style={{
-                            position: "relative",
-                            cursor: "pointer",
-                            padding: "4px 8px",
-                            marginLeft: "20px",
-                            fontSize: "18px",
-                            display: "inline-block",
-                          }}
-                        >
-                          {q.options[0]}
+        /* ── 2×2 grid ── */
+        .lrwd-grid {
+          display: grid;
+          grid-template-columns: repeat(2, 1fr);
+          gap: clamp(16px, 2.4vw, 30px) clamp(20px, 3vw, 40px);
+          width: 100%;
+        }
 
-                          {/* الدائرة */}
-                          {selected[q.id] === q.options[0] && (
-                            <div
-                              style={{
-                                position: "absolute",
-                                top: "-5px",
-                                left: "-8px",
-                                right: "-8px",
-                                bottom: "-5px",
-                                border:
-                                  selected[q.id] === q.options[0]
-                                    ? showResult
-                                      ? q.options[0] === q.correct
-                                        ? "2px solid #1C398E"
-                                        : "2px solid #ef4444"
-                                      : "2px solid #1C398E"
-                                    : "none",
-                                borderRadius: "20px",
-                                pointerEvents: "none",
-                              }}
-                            />
-                          )}
+        /* Single card: num+prefix | image | input */
+        .lrwd-card {
+          display: flex;
+          flex-direction: column;
+          gap: clamp(6px, 0.9vw, 10px);
+        }
 
-                          {/* ❌ إذا غلط */}
-                          {showResult &&
-                            selected[q.id] === q.options[0] &&
-                            selected[q.id] !== q.correct && <WrongMark />}
-                        </div>
+        /* Prefix row */
+        .lrwd-prefix-row {
+          display: flex;
+          align-items: center;
+          gap: clamp(5px, 0.7vw, 8px);
+        }
 
-                        <div
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            width: "220px",
-                            fontSize: "18px",
-                            justifyContent: "space-between",
-                          }}
-                        >
-                          <span>I</span>
-                          <span>to school.</span>
-                        </div>
+        .lrwd-num {
+          font-size: clamp(14px, 1.7vw, 20px);
+          font-weight: 700;
+          color: ${NUMBER_COLOR};
+          flex-shrink: 0;
+          line-height: 1.5;
+        }
 
-                        <div style={{ width: "100%" }}>
-                          <div
-                            onClick={() => handleSelect(q.id, q.options[1])}
-                            style={{
-                              position: "relative",
-                              cursor: "pointer",
-                              padding: "4px 8px",
-                              marginLeft: "20px",
-                              fontSize: "18px",
-                              display: "inline-block",
-                            }}
-                          >
-                            {q.options[1]}
+        .lrwd-prefix {
+          font-size: clamp(13px, 1.6vw, 19px);
+          color: ${TEXT_COLOR};
+          line-height: 1.4;
+        }
 
-                            {/* الدائرة */}
-                            {selected[q.id] === q.options[1] && (
-                              <div
-                                style={{
-                                  position: "absolute",
-                                  top: "-5px",
-                                  left: "-8px",
-                                  right: "-8px",
-                                  bottom: "-5px",
-                                  border:
-                                    selected[q.id] === q.options[1]
-                                      ? showResult
-                                        ? q.options[1] === q.correct
-                                          ? "2px solid #1C398E"
-                                          : "2px solid #ef4444"
-                                        : "2px solid #1C398E"
-                                      : "none",
-                                  borderRadius: "20px",
-                                  pointerEvents: "none",
-                                }}
-                              />
-                            )}
+        /* Image */
+        .lrwd-img {
+          width: 80%;
+          height : auto ;
+          object-fit: cover;
+          display: block;
+        }
 
-                            {/* ❌ إذا غلط */}
-                            {showResult &&
-                              selected[q.id] === q.options[1] &&
-                              selected[q.id] !== q.correct && <WrongMark />}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
+        /* Input wrap */
+        .lrwd-input-wrap {
+          position: relative;
+          width: 100%;
+        }
+
+        .lrwd-input {
+          width: 100%;
+          background: transparent;
+          border: none;
+          border-bottom: 1px solid ${INPUT_UNDERLINE_DEFAULT};
+          outline: none;
+          font-size: clamp(14px, 1.7vw, 20px);
+          color: ${INPUT_TEXT_COLOR};
+          line-height: 1.5;
+          box-sizing: border-box;
+          transition: border-color 0.2s;
+        }
+        .lrwd-input:disabled   { opacity: 1; cursor: default; }
+        .lrwd-input--answer    { color: ${INPUT_ANSWER_COLOR}; }
+
+        /* ✕ badge */
+        .lrwd-badge {
+          position: absolute;
+          top: -8px; right: 0;
+          width: clamp(17px, 1.9vw, 22px);
+          height: clamp(17px, 1.9vw, 22px);
+          border-radius: 50%;
+          background: ${WRONG_BADGE_BG};
+          color: ${WRONG_BADGE_TEXT};
+          display: flex; align-items: center; justify-content: center;
+          font-size: clamp(9px, 1vw, 12px);
+          font-weight: 700;
+          border: 2px solid #fff;
+          box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+          pointer-events: none;
+          z-index: 2;
+        }
+
+        /* Buttons */
+        .lrwd-buttons {
+          display: flex;
+          justify-content: center;
+          margin-top: clamp(8px, 1.6vw, 18px);
+        }
+
+        @media (max-width: 480px) {
+          .lrwd-grid { grid-template-columns: 1fr; }
+        }
+      `}</style>
+
+      <div
+        className="div-forall"
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: "clamp(14px, 2vw, 22px)",
+          maxWidth: "1100px",
+          margin: "0 auto",
+        }}
+      >
+        {/* ── Header ── */}
+        <h1
+          className="WB-header-title-page8"
+          style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
+        >
+          <span className="WB-ex-A">D</span>
+          Listen, read, and write.
+        </h1>
+
+        {/* ── Word bank ── */}
+        <div className="lrwd-bank">
+          {WORD_BANK.map((w) => (
+            <div key={w} className="lrwd-pill">{w}</div>
+          ))}
         </div>
-        {/* BUTTONS */}
-        <Button
-          handleShowAnswer={showAnswers}
-          handleStartAgain={reset}
-          checkAnswers={checkAnswers}
-        />
+
+        {/* ── 2×2 grid ── */}
+        <div className="lrwd-grid">
+          {ITEMS.map((item) => {
+            const wrong    = isWrong(item);
+            const value    = answers[item.id] || "";
+            const tColor   = showAns ? INPUT_ANSWER_COLOR : INPUT_TEXT_COLOR;
+            const uColor   = wrong ? INPUT_UNDERLINE_WRONG : INPUT_UNDERLINE_DEFAULT;
+            const disabled = isDisabled(item);
+
+            return (
+              <div key={item.id} className="lrwd-card">
+
+                {/* Prefix */}
+                <div className="lrwd-prefix-row">
+                  <span className="lrwd-num">{item.id}</span>
+                  <span className="lrwd-prefix">{item.prefix}</span>
+                </div>
+
+                {/* Image */}
+                <img src={item.src} alt={`img-${item.id}`} className="lrwd-img" />
+
+                {/* Input */}
+                <div className="lrwd-input-wrap">
+                  <input
+                    type="text"
+                    className={[
+                      "lrwd-input",
+                      wrong   ? "lrwd-input--wrong"  : "",
+                      showAns ? "lrwd-input--answer" : "",
+                    ].filter(Boolean).join(" ")}
+                    value={value}
+                    disabled={disabled}
+                    onChange={(e) => handleChange(item.id, e.target.value)}
+                    style={{ borderBottomColor: uColor, color: tColor }}
+                    spellCheck={false}
+                    autoComplete="off"
+                  />
+                  {wrong && <div className="lrwd-badge">✕</div>}
+                </div>
+
+              </div>
+            );
+          })}
+        </div>
+
+        {/* ── Buttons ── */}
+        <div className="lrwd-buttons">
+          <Button
+            checkAnswers={handleCheck}
+            handleShowAnswer={handleShowAnswer}
+            handleStartAgain={handleReset}
+          />
+        </div>
       </div>
     </div>
   );
-};
-
-export default Unit2_Page6_Q1;
+}

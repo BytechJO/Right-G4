@@ -3,197 +3,198 @@ import Button from "../../Button";
 import ValidationAlert from "../../Popup/ValidationAlert";
 
 // ─────────────────────────────────────────────
-//  🖼️  IMAGES
+//  🖼️  IMAGE
 // ─────────────────────────────────────────────
-import imgJapan  from "../../../assets/imgs/pages/Class Book/Right 4 Unit 2 Welcome to the Big Apple Folder/Page 15/SVG/Asset 2.svg";
-import imgRussia from "../../../assets/imgs/pages/Class Book/Right 4 Unit 2 Welcome to the Big Apple Folder/Page 15/SVG/Asset 2.svg";
-import imgUK     from "../../../assets/imgs/pages/Class Book/Right 4 Unit 2 Welcome to the Big Apple Folder/Page 15/SVG/Asset 2.svg";
-import imgAus    from "../../../assets/imgs/pages/Class Book/Right 4 Unit 2 Welcome to the Big Apple Folder/Page 15/SVG/Asset 2.svg";
+import imgScene from "../../../assets/imgs/pages/Class Book/Right 4 Unit 2 Welcome to the Big Apple Folder/Page 15/SVG/Asset 2.svg";
 
 // ─────────────────────────────────────────────
 //  🎨  COLORS
 // ─────────────────────────────────────────────
-const INPUT_UNDERLINE_DEFAULT = "#3f3f3f";
-const INPUT_UNDERLINE_WRONG   = "#ef4444";
-const INPUT_TEXT_COLOR        = "#2b2b2b";
-const INPUT_ANSWER_COLOR      = "#c81e1e";
-const NUMBER_COLOR            = "#2b2b2b";
-const TEXT_COLOR              = "#2b2b2b";
-const WRONG_BADGE_BG          = "#ef4444";
-const WRONG_BADGE_TEXT        = "#ffffff";
+const CHECK_COLOR    = "#e53935";
+const CROSS_COLOR    = "#e53935";
+const BOX_BORDER     = "#2195a6";
+const SENTENCE_COLOR = "#2b2b2b";
+const NUMBER_COLOR   = "#2b2b2b";
+const PARA_COLOR     = "#2b2b2b";
+const WRONG_BADGE_BG = "#ef4444";
+const WRONG_BADGE_TEXT = "#ffffff";
+
+// ─────────────────────────────────────────────
+//  📝  PARAGRAPH
+// ─────────────────────────────────────────────
+const PARAGRAPH = `Darren is going to the United Kingdom for the summer. He hopes to visit many places while he's there. He plans to take a tour of the English countryside first. Next, he is going to see Buckingham Palace. He will make sure to take his camera with him, so he can take lots of pictures. He is going to take a tour of London in a double-decker bus. Lastly, he is going to visit the Clock Tower.`;
 
 // ─────────────────────────────────────────────
 //  📝  EXERCISE DATA
+//  correctBox: "check" | "cross"
 // ─────────────────────────────────────────────
-const WORD_BANK = ["Australia", "Japan", "United Kingdom", "Russia"];
-
 const ITEMS = [
-  { id: 1, prefix: "Stella is going to...", src: imgJapan,  correct: ["Japan"],          answer: "Japan"          },
-  { id: 2, prefix: "He's going to...",      src: imgRussia, correct: ["Russia"],         answer: "Russia"         },
-  { id: 3, prefix: "They're going to...",   src: imgUK,     correct: ["United Kingdom"], answer: "United Kingdom" },
-  { id: 4, prefix: "I'm going to...",       src: imgAus,    correct: ["Australia"],      answer: "Australia"      },
+  { id: 1, sentence: "Darren is going to take a tour of the English countryside.", correctBox: "check" },
+  { id: 2, sentence: "He isn't going to visit Buckingham Palace.",                  correctBox: "cross" },
+  { id: 3, sentence: "He is going to take a tour of London in a double-decker bus.", correctBox: "check" },
+  { id: 4, sentence: "First, he will visit the Clock Tower.",                       correctBox: "cross" },
+  { id: 5, sentence: "He is going to take his camera with him.",                    correctBox: "check" },
 ];
-
-// ─────────────────────────────────────────────
-//  🔧  NORMALIZE
-// ─────────────────────────────────────────────
-const normalize = (str) =>
-  str.toLowerCase().replace(/[^a-z0-9\s]/g, "").replace(/\s+/g, " ").trim();
-
-const isCorrect = (userVal, correctArr) =>
-  correctArr.some((c) => normalize(userVal) === normalize(c));
 
 // ─────────────────────────────────────────────
 //  COMPONENT
 // ─────────────────────────────────────────────
-export default function WB_ListenReadWrite_QD() {
-  const [answers,     setAnswers]     = useState({});
+export default function WB_ListenReadWriteCheckCross_QC() {
+  // selected: { itemId: "check" | "cross" | null }
+  const [selected,    setSelected]    = useState({});
   const [showResults, setShowResults] = useState(false);
   const [showAns,     setShowAns]     = useState(false);
 
-  const handleChange = (id, value) => {
-    if (showAns) return;
-    const item = ITEMS.find((i) => i.id === id);
-    if (showResults && item && isCorrect(answers[id] || "", item.correct)) return;
-    setAnswers((prev) => ({ ...prev, [id]: value }));
+  const isLocked = showResults || showAns;
+
+  const handleSelect = (itemId, box) => {
+    if (isLocked) return;
+    setSelected((prev) => ({
+      ...prev,
+      [itemId]: prev[itemId] === box ? null : box,
+    }));
   };
 
   const handleCheck = () => {
-    if (showAns) return;
-    const allAnswered = ITEMS.every((item) => answers[item.id]?.trim());
-    if (!allAnswered) { ValidationAlert.info("Please complete all answers first."); return; }
+    if (isLocked) return;
+    const allAnswered = ITEMS.every((item) => selected[item.id]);
+    if (!allAnswered) { ValidationAlert.info("Please choose ✓ or ✕ for each sentence."); return; }
     let score = 0;
-    ITEMS.forEach((item) => { if (isCorrect(answers[item.id] || "", item.correct)) score++; });
+    ITEMS.forEach((item) => { if (selected[item.id] === item.correctBox) score++; });
     setShowResults(true);
-    if (score === ITEMS.length)   ValidationAlert.success(`Score: ${score} / ${ITEMS.length}`);
-    else if (score > 0)           ValidationAlert.warning(`Score: ${score} / ${ITEMS.length}`);
-    else                          ValidationAlert.error(`Score: ${score} / ${ITEMS.length}`);
+    if (score === ITEMS.length) ValidationAlert.success(`Score: ${score} / ${ITEMS.length}`);
+    else if (score > 0)         ValidationAlert.warning(`Score: ${score} / ${ITEMS.length}`);
+    else                        ValidationAlert.error(`Score: ${score} / ${ITEMS.length}`);
   };
 
   const handleShowAnswer = () => {
     const filled = {};
-    ITEMS.forEach((item) => { filled[item.id] = item.answer; });
-    setAnswers(filled);
+    ITEMS.forEach((item) => { filled[item.id] = item.correctBox; });
+    setSelected(filled);
     setShowResults(false);
     setShowAns(true);
   };
 
   const handleReset = () => {
-    setAnswers({});
+    setSelected({});
     setShowResults(false);
     setShowAns(false);
   };
 
-  const isWrong = (item) => {
-    if (!showResults || showAns) return false;
-    return !isCorrect(answers[item.id] || "", item.correct);
+  // Get box state for a specific box type ("check"/"cross") for an item
+  const getBoxState = (item, box) => {
+    const sel = selected[item.id];
+    const isActive = sel === box;
+    if (!isActive) return "idle";
+    if (showAns) return "correct";
+    if (showResults) return item.correctBox === box ? "correct" : "wrong";
+    return "selected";
   };
 
-  const isDisabled = (item) => {
-    if (showAns) return true;
-    if (showResults && isCorrect(answers[item.id] || "", item.correct)) return true;
-    return false;
-  };
+  const getBoxSymbol = (box) => box === "check" ? "✓" : "✕";
 
   return (
     <div className="main-container-component">
       <style>{`
-        /* ── Word bank ── */
-        .lrwd-bank {
-          display: flex;
-          flex-wrap: wrap;
-          gap: clamp(8px, 1.2vw, 14px);
-          justify-content: center;
-          width: 100%;
-        }
-
-        .lrwd-pill {
-          border: 2px solid #e8eff1;
-          border-radius: 8px;
-          padding: clamp(4px, 0.5vw, 6px) clamp(14px, 2vw, 22px);
-          font-size: clamp(14px, 1.7vw, 20px);
-          color: #2b2b2b;
-          background: #e8eff1;
-          white-space: nowrap;
-          user-select: none;
-        }
-
-        /* ── 2×2 grid ── */
-        .lrwd-grid {
+        /* ── Top: paragraph + image ── */
+        .lrcc-top {
           display: grid;
-          grid-template-columns: repeat(2, 1fr);
-          gap: clamp(16px, 2.4vw, 30px) clamp(20px, 3vw, 40px);
+          grid-template-columns: 1fr auto;
+          gap: clamp(12px, 1.8vw, 22px);
+          align-items: flex-start;
           width: 100%;
         }
 
-        /* Single card: num+prefix | image | input */
-        .lrwd-card {
+        .lrcc-para {
+          font-size: clamp(13px, 1.5vw, 18px);
+          color: ${PARA_COLOR};
+          line-height: 1.8;
+          text-indent: clamp(14px, 1.8vw, 22px);
+          margin: 0;
+        }
+
+        .lrcc-img {
+          width: clamp(160px, 22vw, 280px);
+          height: auto;
+          display: block;
+          border-radius: 8px;
+          flex-shrink: 0;
+        }
+
+        /* ── Items list ── */
+        .lrcc-list {
           display: flex;
           flex-direction: column;
-          gap: clamp(6px, 0.9vw, 10px);
+          gap: clamp(10px, 1.6vw, 20px);
+          width: 100%;
         }
 
-        /* Prefix row */
-        .lrwd-prefix-row {
-          display: flex;
+        /* Single row: num | sentence | boxes */
+        .lrcc-row {
+          display: grid;
+          grid-template-columns: auto 1fr auto;
           align-items: center;
-          gap: clamp(5px, 0.7vw, 8px);
+          gap: clamp(8px, 1.2vw, 16px);
         }
 
-        .lrwd-num {
+        .lrcc-num {
           font-size: clamp(14px, 1.7vw, 20px);
           font-weight: 700;
           color: ${NUMBER_COLOR};
           flex-shrink: 0;
-          line-height: 1.5;
+          line-height: 1;
         }
 
-        .lrwd-prefix {
+        .lrcc-sentence {
           font-size: clamp(13px, 1.6vw, 19px);
-          color: ${TEXT_COLOR};
-          line-height: 1.4;
-        }
-
-        /* Image */
-        .lrwd-img {
-          width: 80%;
-          height : auto ;
-          object-fit: cover;
-          display: block;
-        }
-
-        /* Input wrap */
-        .lrwd-input-wrap {
-          position: relative;
-          width: 100%;
-        }
-
-        .lrwd-input {
-          width: 100%;
-          background: transparent;
-          border: none;
-          border-bottom: 1px solid ${INPUT_UNDERLINE_DEFAULT};
-          outline: none;
-          font-size: clamp(14px, 1.7vw, 20px);
-          color: ${INPUT_TEXT_COLOR};
+          color: ${SENTENCE_COLOR};
           line-height: 1.5;
-          box-sizing: border-box;
-          transition: border-color 0.2s;
         }
-        .lrwd-input:disabled   { opacity: 1; cursor: default; }
-        .lrwd-input--answer    { color: ${INPUT_ANSWER_COLOR}; }
 
-        /* ✕ badge */
-        .lrwd-badge {
+        /* Two boxes */
+        .lrcc-boxes {
+          display: flex;
+          gap: clamp(5px, 0.7vw, 9px);
+          flex-shrink: 0;
+        }
+
+        /* Single box */
+        .lrcc-box {
+          width: clamp(40px, 4.6vw, 40px);
+          height: clamp(40px, 4.6vw, 40px);
+          border: 2px solid ${BOX_BORDER};
+          border-radius: 8px;
+          background: #fff;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: clamp(16px, 2.2vw, 28px);
+          font-weight: 700;
+          cursor: pointer;
+          user-select: none;
+          color: transparent;
+          position: relative;
+          transition: border-color 0.15s;
+        }
+        .lrcc-box--locked { cursor: default; }
+
+        /* States */
+        .lrcc-box--selected-check { color: ${CHECK_COLOR}; }
+        .lrcc-box--selected-cross { color: ${CROSS_COLOR}; }
+        .lrcc-box--correct        { color: ${CHECK_COLOR};  }
+        .lrcc-box--wrong          { color: ${WRONG_BADGE_BG};  }
+
+        /* ✕ wrong badge */
+        .lrcc-wrong-badge {
           position: absolute;
-          top: -8px; right: 0;
-          width: clamp(17px, 1.9vw, 22px);
-          height: clamp(17px, 1.9vw, 22px);
+          top: -7px; right: -7px;
+          width: clamp(14px, 1.6vw, 18px);
+          height: clamp(14px, 1.6vw, 18px);
           border-radius: 50%;
           background: ${WRONG_BADGE_BG};
           color: ${WRONG_BADGE_TEXT};
           display: flex; align-items: center; justify-content: center;
-          font-size: clamp(9px, 1vw, 12px);
+          font-size: clamp(7px, 0.8vw, 10px);
           font-weight: 700;
           border: 2px solid #fff;
           box-shadow: 0 2px 6px rgba(0,0,0,0.2);
@@ -202,14 +203,15 @@ export default function WB_ListenReadWrite_QD() {
         }
 
         /* Buttons */
-        .lrwd-buttons {
+        .lrcc-buttons {
           display: flex;
           justify-content: center;
           margin-top: clamp(8px, 1.6vw, 18px);
         }
 
-        @media (max-width: 480px) {
-          .lrwd-grid { grid-template-columns: 1fr; }
+        @media (max-width: 560px) {
+          .lrcc-top { grid-template-columns: 1fr; }
+          .lrcc-img { width: 100%; }
         }
       `}</style>
 
@@ -228,64 +230,61 @@ export default function WB_ListenReadWrite_QD() {
           className="WB-header-title-page8"
           style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
         >
-          <span className="WB-ex-A">D</span>
-          Listen, read, and write.
+          <span className="WB-ex-A">C</span>
+          Listen, read, and write <span style={{ color: "#ff0000ff" }}> ✓</span> or<span style={{ color: "#ff0000ff" }}> ✕</span>.
         </h1>
 
-        {/* ── Word bank ── */}
-        <div className="lrwd-bank">
-          {WORD_BANK.map((w) => (
-            <div key={w} className="lrwd-pill">{w}</div>
+        {/* ── Paragraph + Image ── */}
+        <div className="lrcc-top">
+          <p className="lrcc-para">{PARAGRAPH}</p>
+          <img src={imgScene} alt="london" className="lrcc-img" />
+        </div>
+
+        {/* ── Items ── */}
+        <div className="lrcc-list">
+          {ITEMS.map((item) => (
+            <div key={item.id} className="lrcc-row">
+
+              {/* Number */}
+              <span className="lrcc-num">{item.id}</span>
+
+              {/* Sentence */}
+              <span className="lrcc-sentence">{item.sentence}</span>
+
+              {/* Two boxes: ✓ and ✕ */}
+              <div className="lrcc-boxes">
+                {["check", "cross"].map((box) => {
+                  const state = getBoxState(item, box);
+                  const sym   = getBoxSymbol(box);
+
+                  const cls = [
+                    "lrcc-box",
+                    isLocked ? "lrcc-box--locked" : "",
+                    state === "selected" && box === "check" ? "lrcc-box--selected-check" : "",
+                    state === "selected" && box === "cross" ? "lrcc-box--selected-cross" : "",
+                    state === "correct"  ? "lrcc-box--correct" : "",
+                    state === "wrong"    ? "lrcc-box--wrong"   : "",
+                  ].filter(Boolean).join(" ");
+
+                  return (
+                    <div
+                      key={box}
+                      className={cls}
+                      onClick={() => handleSelect(item.id, box)}
+                    >
+                      {state !== "idle" ? sym : ""}
+                      {state === "wrong" && <div className="lrcc-wrong-badge">✕</div>}
+                    </div>
+                  );
+                })}
+              </div>
+
+            </div>
           ))}
         </div>
 
-        {/* ── 2×2 grid ── */}
-        <div className="lrwd-grid">
-          {ITEMS.map((item) => {
-            const wrong    = isWrong(item);
-            const value    = answers[item.id] || "";
-            const tColor   = showAns ? INPUT_ANSWER_COLOR : INPUT_TEXT_COLOR;
-            const uColor   = wrong ? INPUT_UNDERLINE_WRONG : INPUT_UNDERLINE_DEFAULT;
-            const disabled = isDisabled(item);
-
-            return (
-              <div key={item.id} className="lrwd-card">
-
-                {/* Prefix */}
-                <div className="lrwd-prefix-row">
-                  <span className="lrwd-num">{item.id}</span>
-                  <span className="lrwd-prefix">{item.prefix}</span>
-                </div>
-
-                {/* Image */}
-                <img src={item.src} alt={`img-${item.id}`} className="lrwd-img" />
-
-                {/* Input */}
-                <div className="lrwd-input-wrap">
-                  <input
-                    type="text"
-                    className={[
-                      "lrwd-input",
-                      wrong   ? "lrwd-input--wrong"  : "",
-                      showAns ? "lrwd-input--answer" : "",
-                    ].filter(Boolean).join(" ")}
-                    value={value}
-                    disabled={disabled}
-                    onChange={(e) => handleChange(item.id, e.target.value)}
-                    style={{ borderBottomColor: uColor, color: tColor }}
-                    spellCheck={false}
-                    autoComplete="off"
-                  />
-                  {wrong && <div className="lrwd-badge">✕</div>}
-                </div>
-
-              </div>
-            );
-          })}
-        </div>
-
         {/* ── Buttons ── */}
-        <div className="lrwd-buttons">
+        <div className="lrcc-buttons">
           <Button
             checkAnswers={handleCheck}
             handleShowAnswer={handleShowAnswer}

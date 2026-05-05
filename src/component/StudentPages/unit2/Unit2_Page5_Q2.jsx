@@ -156,6 +156,7 @@ export default function WB_ReadWrite_QB() {
           font-weight: 700;
           color: ${NUMBER_COLOR};
           flex-shrink: 0;
+          padding-bottom: 4px;
           line-height: 1.5;
         }
 

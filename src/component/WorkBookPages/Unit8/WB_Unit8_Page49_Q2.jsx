@@ -115,8 +115,8 @@ export default function WB_LookReadWrite_QJ() {
         .lrwj2-list {
           display: flex;
           flex-direction: column;
-          gap: clamp(16px, 2.4vw, 30px);
-          width: 100%;
+          gap : 20px
+
         }
 
         .lrwj2-row {
@@ -124,6 +124,7 @@ export default function WB_LookReadWrite_QJ() {
           grid-template-columns: auto clamp(140px, 18vw, 220px) 1fr;
           gap: clamp(10px, 1.6vw, 20px);
           align-items: center;
+
         }
 
         .lrwj2-num {
@@ -136,8 +137,8 @@ export default function WB_LookReadWrite_QJ() {
         }
 
         .lrwj2-img {
-          width: 100%;
-          height: clamp(100px, 14vw, 180px);
+          width: 70%;
+          height: auto;
           display: block;
         }
 
@@ -146,6 +147,8 @@ export default function WB_LookReadWrite_QJ() {
           flex-direction: column;
           gap: clamp(8px, 1.2vw, 14px);
           min-width: 0;
+              margin-left: -10%;
+
         }
 
         .lrwj2-question {
@@ -224,7 +227,16 @@ export default function WB_LookReadWrite_QJ() {
           <span className="WB-ex-A">J</span>
           Look, read, and write.
         </h1>
-
+<div
+        className="div-forall"
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: "clamp(14px, 2vw, 22px)",
+          maxWidth: "1100px",
+          margin: "0 auto",
+        }}
+      ></div>
         <div className="lrwj2-list">
           {ITEMS.map((item) => {
             const wrong    = isWrong(item);
@@ -237,7 +249,7 @@ export default function WB_LookReadWrite_QJ() {
               <div key={item.id} className="lrwj2-row">
                 <span className="lrwj2-num">{item.id}</span>
                 <img src={item.src} alt={`scene-${item.id}`} className="lrwj2-img" />
-                <div className="lrwj2-right">
+             <div className="lrwj2-right">
                   <span className="lrwj2-question">{item.question}</span>
                   <div className="lrwj2-input-wrap">
                     <input

@@ -13,9 +13,9 @@ import img3a from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U8 F
 import img3b from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U8 Folder/Page 50/SVG/Asset 49.svg";
 import img4a from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U8 Folder/Page 50/SVG/Asset 55.svg";
 import img4b from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U8 Folder/Page 50/SVG/Asset 59.svg";
-import img5a from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U8 Folder/Page 50/SVG/Asset 58.svg";
-import img5b from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U8 Folder/Page 50/SVG/Asset 51.svg";
-import img6a from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U8 Folder/Page 50/SVG/Asset 52.svg";
+import img5a from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U8 Folder/Page 50/SVG/Asset 51.svg";
+import img5b from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U8 Folder/Page 50/SVG/Asset 52.svg";
+import img6a from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U8 Folder/Page 50/SVG/Asset 60.svg";
 import img6b from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U8 Folder/Page 50/SVG/Asset 58.svg";
 
 // ─────────────────────────────────────────────
@@ -223,7 +223,7 @@ export default function WB_ReadLookWriteCheck_QL() {
           style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
         >
           <span className="WB-ex-A">L</span>
-          Read, look, and write ✓.
+          Read, look, and write <span style={{color : "#ff0000ff"}}>✓</span>.
         </h1>
 
         {/* ── Grid ── */}

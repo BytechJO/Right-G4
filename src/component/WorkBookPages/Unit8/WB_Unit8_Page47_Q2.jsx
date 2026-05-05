@@ -6,9 +6,9 @@ import ValidationAlert from "../../Popup/ValidationAlert";
 //  🖼️  IMAGES
 // ─────────────────────────────────────────────
 import img1 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U8 Folder/Page 47/SVG/Asset 32.svg";
-import img2 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U8 Folder/Page 47/SVG/Asset 34.svg";
-import img3 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U8 Folder/Page 47/SVG/Asset 35.svg";
-import img4 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U8 Folder/Page 47/SVG/Asset 36.svg";
+import img2 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U8 Folder/Page 47/SVG/Asset 36.svg";
+import img3 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U8 Folder/Page 47/SVG/Asset 34.svg";
+import img4 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U8 Folder/Page 47/SVG/Asset 35.svg";
 
 // ─────────────────────────────────────────────
 //  🎨  COLORS
