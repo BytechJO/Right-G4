@@ -4,10 +4,12 @@ import { TbMessageCircle } from "react-icons/tb";
 import { IoMdSettings } from "react-icons/io";
 import "./AudioWithCaption.css";
 
-const AudioWithCaption = ({ src, captions, onCaptionChange }) => {
+const AudioWithCaption = ({ src, captions, onCaptionChange, stops = [] }) => {
   const audioRef = useRef(null);
   const settingsRef = useRef(null);
   const captionRef = useRef(null);
+  const triggeredStops = useRef(new Set());
+
   const [isPlaying, setIsPlaying] = useState(false);
   const [current, setCurrent] = useState(0);
   const [duration, setDuration] = useState(0);
@@ -16,19 +18,15 @@ const AudioWithCaption = ({ src, captions, onCaptionChange }) => {
   const [volume, setVolume] = useState(1);
   const [showSettings, setShowSettings] = useState(false);
 
-  // تحديث الهايلايت حسب الوقت
   const updateCaption = (time) => {
     if (!captions || captions.length === 0) return;
-
     const index = captions.findIndex(
       (cap) => time >= cap.start && time <= cap.end
     );
-
     setActiveIndex(index);
     if (onCaptionChange) onCaptionChange(index);
   };
 
-  // تشغيل/إيقاف
   const togglePlay = () => {
     if (isPlaying) {
       audioRef.current.pause();
@@ -39,6 +37,38 @@ const AudioWithCaption = ({ src, captions, onCaptionChange }) => {
     setIsPlaying(!isPlaying);
   };
 
+  // معالجة الـ stops
+  useEffect(() => {
+    if (!stops || stops.length === 0) return;
+
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    const interval = setInterval(() => {
+      const currentTime = audio.currentTime;
+
+      for (const stop of stops) {
+        if (
+          currentTime >= stop.stopAt &&
+          !triggeredStops.current.has(stop.stopAt)
+        ) {
+          triggeredStops.current.add(stop.stopAt);
+          audio.pause();
+          setIsPlaying(false);
+
+          if (stop.resumeFrom !== undefined) {
+            audio.currentTime = stop.resumeFrom;
+            updateCaption(stop.resumeFrom);
+          }
+
+          break;
+        }
+      }
+    }, 100);
+
+    return () => clearInterval(interval);
+  }, [stops]);
+
   // إغلاق settings عند الضغط خارج
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -46,26 +76,20 @@ const AudioWithCaption = ({ src, captions, onCaptionChange }) => {
         setShowSettings(false);
       }
     };
-
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
   useEffect(() => {
     if (activeIndex === -1) return;
-
     const activeElement = document.getElementById(`caption-${activeIndex}`);
-
     if (activeElement) {
-      activeElement.scrollIntoView({
-        block: "start",
-        behavior: "smooth",
-      });
+      activeElement.scrollIntoView({ block: "start", behavior: "smooth" });
     }
   }, [activeIndex]);
 
   return (
     <div className="audio-popup">
-      {/* مؤشر السرعة */}
       <div className="audio-inner player-ui">
         <audio
           ref={audioRef}
@@ -78,9 +102,10 @@ const AudioWithCaption = ({ src, captions, onCaptionChange }) => {
           onEnded={() => {
             audioRef.current.currentTime = 0;
             setIsPlaying(false);
-            setActiveIndex(-1); // يرجّع الهايلايت لأول سطر
+            setActiveIndex(-1);
           }}
         />
+
         {/* الوقت - السلايدر - الوقت */}
         <div className="top-row">
           <span className="audio-time">
@@ -108,9 +133,9 @@ const AudioWithCaption = ({ src, captions, onCaptionChange }) => {
             {new Date(duration * 1000).toISOString().substring(14, 19)}
           </span>
         </div>
-        {/* الأزرار 3 أزرار بنفس السطر */}
+
+        {/* الأزرار */}
         <div className="bottom-row">
-          {/* فقاعة */}
           {captions && captions.length > 0 ? (
             <div
               className={`round-btn ${showCaption ? "active" : ""}`}
@@ -122,12 +147,10 @@ const AudioWithCaption = ({ src, captions, onCaptionChange }) => {
             <div></div>
           )}
 
-          {/* Play */}
           <button className="play-btn2" onClick={togglePlay}>
             {isPlaying ? <FaPause size={26} /> : <FaPlay size={26} />}
           </button>
 
-          {/* Settings */}
           <div className="settings-wrapper" ref={settingsRef}>
             <button
               className={`round-btn ${showSettings ? "active" : ""}`}
@@ -153,8 +176,9 @@ const AudioWithCaption = ({ src, captions, onCaptionChange }) => {
               </div>
             )}
           </div>
-        </div>{" "}
-        {/* الكابشن تحت الأزرار */}
+        </div>
+
+        {/* الكابشن */}
         {captions && captions.length > 0 && showCaption && (
           <>
             <h3 style={{ fontSize: "20px", fontWeight: "500" }}>

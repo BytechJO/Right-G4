@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import QuestionAudioPlayer from "./QuestionAudioPlayer";
+import QuestionAudioPlayer from "../QuestionAudioPlayer";
 
 const Vocabulary = ({
   words = [],
@@ -7,52 +7,48 @@ const Vocabulary = ({
   captions,
   stopAtSecond,
   wordTimings = [],
-  sounds = [],
 }) => {
-  const audioRefs = React.useRef([]);
-
-  const [currentTime, setCurrentTime] = useState(0);
   const mainAudioRef = React.useRef(null);
+  const [currentTime, setCurrentTime] = useState(0);
+
   if (words.length === 0) return null;
-  const playWordAudio = (index) => {
-    // 🔥 وقف صوت السؤال أول
-    if (mainAudioRef.current) {
-      mainAudioRef.current.pause();
-    }
 
-    // وقف كل أصوات الكلمات
-    audioRefs.current.forEach((audio) => {
-      if (audio) {
-        audio.pause();
-        audio.currentTime = 0;
-      }
-    });
+  const playWordAtTime = (index) => {
+    const timing = wordTimings[index];
+    const audio = mainAudioRef.current;
+    if (!audio || !timing) return;
 
-    // شغل الصوت الجديد
-    const audio = audioRefs.current[index];
-    if (!audio) return;
-
-    audio.currentTime = 0;
+    audio.currentTime = timing.start;
     audio.play();
+
+    // وقف عند نهاية الكلمة
+    const checkEnd = setInterval(() => {
+      if (audio.currentTime >= timing.end) {
+        audio.pause();
+        clearInterval(checkEnd);
+      }
+    }, 50);
+
+    audio.onended = () => clearInterval(checkEnd);
   };
+
   const columns = chunkWords(words, 3);
   const perCol = Math.ceil(words.length / 3);
 
   const activeIndex = wordTimings.findIndex(
-    (w) => currentTime >= w.start && currentTime <= w.end,
+    (w) => currentTime >= w.start && currentTime <= w.end
   );
 
   return (
-    <div className="relative bg-white/70 backdrop-blur-sm border-2 border-[#6D2980] rounded-2xl shadow-lg p-6 pt-8 w-full max-w-[60%] mt-8">
+    <div style={{margin : "4.5% 0"}} className="relative bg-[#e8eff1] backdrop-blur-sm border-2 border-[#2195a6] rounded-2xl shadow-lg p-6 pt-8 w-full max-w-[60%] ">
       {/* Header */}
-      <div className="absolute top-0 left-0 bg-[#6D2980] text-white font-bold px-4 py-1 rounded-tl-2xl">
+      <div className="absolute top-0 left-0 bg-[#2195a6] text-white font-bold px-4 py-1 rounded-tl-2xl">
         VOCABULARY
       </div>
 
       {/* Subtitle */}
       <h2 className="mb-5 pl-4 mt-4 font-bold">
-        Listen and repeat. Find the words and expressions in the conversation
-        above.
+        Listen and repeat. Find the words and expressions in the conversation above.
       </h2>
 
       {/* Audio */}
@@ -75,30 +71,25 @@ const Vocabulary = ({
               return (
                 <div
                   key={i}
-                  onClick={() => playWordAudio(num - 1)}
+                  onClick={() => playWordAtTime(num - 1)}
                   className={`group flex items-center justify-between border rounded-xl px-4 py-3 cursor-pointer transition-all duration-300 shadow-sm
-${
-  isActive
-    ? "bg-[#6D2980] text-white border-[#6D2980] shadow-md scale-[1.02]"
-    : "bg-[#f8f5fc] hover:bg-[#6D2980] border-transparent hover:border-[#6D2980]"
-}`}
+                    ${
+                      isActive
+                        ? "bg-[#2195a6] text-white border-[#2195a6] shadow-md scale-[1.02]"
+                        : "bg-[#f5fdff] hover:bg-[#2195a6] border-transparent hover:border-[#2195a6]"
+                    }`}
                 >
                   <div className="flex items-center">
                     <span
                       className={`font-bold text-sm mr-3 ${
-                        isActive
-                          ? "text-white"
-                          : "text-[#6D2980] group-hover:text-white"
+                        isActive ? "text-white" : "text-[#2195a6] group-hover:text-white"
                       }`}
                     >
                       {num}.
                     </span>
-
                     <span
                       className={`font-medium ${
-                        isActive
-                          ? "text-white"
-                          : "text-gray-700 group-hover:text-white"
+                        isActive ? "text-white" : "text-gray-700 group-hover:text-white"
                       }`}
                     >
                       {word}
@@ -110,9 +101,6 @@ ${
           </div>
         ))}
       </div>
-      {sounds.map((src, i) => (
-        <audio key={i} ref={(el) => (audioRefs.current[i] = el)} src={src} />
-      ))}
     </div>
   );
 };
@@ -120,7 +108,7 @@ ${
 const chunkWords = (words, cols) => {
   const perCol = Math.ceil(words.length / cols);
   return Array.from({ length: cols }, (_, i) =>
-    words.slice(i * perCol, (i + 1) * perCol),
+    words.slice(i * perCol, (i + 1) * perCol)
   );
 };
 

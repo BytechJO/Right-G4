@@ -80,29 +80,7 @@ const Page8 = ({ openPopup }) => {
           />
         </svg>
       </div>
-      <div
-        className="click-icon-page8-4 hover:scale-110 transition"
-        style={{ overflow: "visible" }}
-      >
-        <svg
-          width="22"
-          height="22"
-          viewBox="0 0 90 90"
-          onClick={() => openPopup("exercise", { startIndex: 3 })}
-          // className="click-icon-page8-4 hover:scale-110 transition"
-          style={{ overflow: "visible" }}
-        >
-          <image
-            className="svg-img"
-            href={arrowBtn}
-            x="0"
-            y="0"
-            width="100%"
-            height="100%"
-            preserveAspectRatio="xMidYMid meet"
-          />
-        </svg>
-      </div>
+     
     </div>
   );
 };

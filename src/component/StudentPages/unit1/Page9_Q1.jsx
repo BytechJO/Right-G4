@@ -1,291 +1,307 @@
 import React, { useState } from "react";
-import img1 from "../../../assets/imgs/pages/classbook/Right 3 Unit 1 At The Basketball Game Folder/Page 9/Asset 2.svg";
-import img2 from "../../../assets/imgs/pages/classbook/Right 3 Unit 1 At The Basketball Game Folder/Page 9/Asset 3.svg";
-import img3 from "../../../assets/imgs/pages/classbook/Right 3 Unit 1 At The Basketball Game Folder/Page 9/Asset 4.svg";
-import img4 from "../../../assets/imgs/pages/classbook/Right 3 Unit 1 At The Basketball Game Folder/Page 9/Asset 5.svg";
-import img5 from "../../../assets/imgs/pages/classbook/Right 3 Unit 1 At The Basketball Game Folder/Page 9/Asset 6.svg";
-import img6 from "../../../assets/imgs/pages/classbook/Right 3 Unit 1 At The Basketball Game Folder/Page 9/Asset 7.svg";
-import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
-
-import ValidationAlert from "../../Popup/ValidationAlert";
-import "./Page9_Q1.css";
 import Button from "../../Button";
-import WrongMark from "../../WrongMark";
+import ValidationAlert from "../../Popup/ValidationAlert";
 
-const Page9_Q1 = () => {
-  const questions = [
-    { id: 1, text: "The clown is taller than the boy.", answer: 2 },
-    { id: 2, text: "The car is faster than the bike.", answer: 3 },
-    { id: 3, text: "The couch is bigger than the TV.", answer: 6 },
-    { id: 4, text: "The book is heavier than the pen.", answer: 1 },
-    { id: 5, text: "The clown is thinner than the panda bear.", answer: 5 },
-    { id: 6, text: "The feather is lighter than the bag.", answer: 4 },
-  ];
-  const wordBank = ["1", "2", "3", "4", "5", "6"];
-  const images = [img1, img2, img3, img4, img5, img6];
-  const [answers, setAnswers] = useState({});
-  const [locked, setLocked] = useState(false); // ⭐ NEW — قفل التعديل
-  const [showResult, setShowResult] = useState(false);
-  const onDragEnd = (result) => {
-    if (locked) return;
+// ─────────────────────────────────────────────
+//  🖼️  IMAGES
+// ─────────────────────────────────────────────
+import img1a from "../../../assets/imgs/pages/Class Book/Right 4 Unit 1 Robots of the Future Folder/Page9/1-01.svg";
+import img1b from "../../../assets/imgs/pages/Class Book/Right 4 Unit 1 Robots of the Future Folder/Page9/1-01.svg";
+import img2a from "../../../assets/imgs/pages/Class Book/Right 4 Unit 1 Robots of the Future Folder/Page9/1-01.svg";
+import img2b from "../../../assets/imgs/pages/Class Book/Right 4 Unit 1 Robots of the Future Folder/Page9/1-01.svg";
+import img3a from "../../../assets/imgs/pages/Class Book/Right 4 Unit 1 Robots of the Future Folder/Page9/1-01.svg";
+import img3b from "../../../assets/imgs/pages/Class Book/Right 4 Unit 1 Robots of the Future Folder/Page9/1-01.svg";
+import img4a from"../../../assets/imgs/pages/Class Book/Right 4 Unit 1 Robots of the Future Folder/Page9/1-01.svg";
+import img4b from "../../../assets/imgs/pages/Class Book/Right 4 Unit 1 Robots of the Future Folder/Page9/1-01.svg";
 
-    const { destination, draggableId } = result;
+// ─────────────────────────────────────────────
+//  🎨  COLORS
+// ─────────────────────────────────────────────
+const CHECK_COLOR    = "#e53935";
+const CROSS_COLOR    = "#e53935";
+const IMG_BORDER     = "#d0d0d0";
+const SENTENCE_COLOR = "#2b2b2b";
+const NUMBER_COLOR   = "#2b2b2b";
+const WRONG_BADGE_BG = "#ef4444";
+const WRONG_BADGE_TEXT = "#ffffff";
 
-    if (!destination) return;
+// ─────────────────────────────────────────────
+//  📝  EXERCISE DATA
+//  correctSide: "a"=left image gets ✓, "b"=right image gets ✓
+//  The other image gets ✕
+// ─────────────────────────────────────────────
+const ITEMS = [
+  { id: 1, sentence: "Sarah will go to the beach tomorrow.", imgA: img1a, imgB: img1b, correctSide: "a" },
+  { id: 2, sentence: "Stella will study for her test.",       imgA: img2a, imgB: img2b, correctSide: "b" },
+  { id: 3, sentence: "They will eat at a restaurant.",        imgA: img3a, imgB: img3b, correctSide: "a" },
+  { id: 4, sentence: "They will watch a movie at the cinema.", imgA: img4a, imgB: img4b, correctSide: "b" },
+];
 
-    const value = Number(draggableId.replace("season-", ""));
+// ─────────────────────────────────────────────
+//  COMPONENT
+// ─────────────────────────────────────────────
+export default function WB_ReadLookWriteCheckCross_QD() {
+  // selected: { itemId: "a" | "b" | null }
+  // The student clicks one image to assign ✓ — the other automatically gets ✕
+  const [selected,    setSelected]    = useState({});
+  const [showResults, setShowResults] = useState(false);
+  const [showAns,     setShowAns]     = useState(false);
 
-    // ✅ إذا رجع للبنك
-    if (destination.droppableId === "bank") {
-      setAnswers((prev) => {
-        const newAnswers = { ...prev };
+  const isLocked = showResults || showAns;
 
-        Object.keys(newAnswers).forEach((key) => {
-          if (newAnswers[key] === value) {
-            delete newAnswers[key];
-          }
-        });
-
-        return newAnswers;
-      });
-
-      return;
-    }
-
-    // ✅ إذا راح على صورة
-    const imageIndex = Number(destination.droppableId.split("-")[1]);
-
-    setAnswers((prev) => ({
+  const handleSelect = (itemId, side) => {
+    if (isLocked) return;
+    setSelected((prev) => ({
       ...prev,
-      [imageIndex]: value,
+      [itemId]: prev[itemId] === side ? null : side,
     }));
   };
-  const checkAnswers = () => {
-    if (locked) return;
 
-    if (Object.keys(answers).length < images.length) {
-      ValidationAlert.info();
-      return;
+  const handleCheck = () => {
+    if (isLocked) return;
+    const allAnswered = ITEMS.every((item) => selected[item.id]);
+    if (!allAnswered) { ValidationAlert.info("Please choose a picture for each sentence."); return; }
+    let score = 0;
+    ITEMS.forEach((item) => { if (selected[item.id] === item.correctSide) score++; });
+    setShowResults(true);
+    if (score === ITEMS.length) ValidationAlert.success(`Score: ${score} / ${ITEMS.length}`);
+    else if (score > 0)         ValidationAlert.warning(`Score: ${score} / ${ITEMS.length}`);
+    else                        ValidationAlert.error(`Score: ${score} / ${ITEMS.length}`);
+  };
+
+  const handleShowAnswer = () => {
+    const filled = {};
+    ITEMS.forEach((item) => { filled[item.id] = item.correctSide; });
+    setSelected(filled);
+    setShowResults(false);
+    setShowAns(true);
+  };
+
+  const handleReset = () => {
+    setSelected({});
+    setShowResults(false);
+    setShowAns(false);
+  };
+
+  // Get what symbol to show on each image
+  const getSymbol = (item, side) => {
+    const sel = selected[item.id];
+    if (!sel) return null; // nothing selected yet
+
+    if (showAns) {
+      return side === item.correctSide ? "✓" : "✕";
     }
-
-    setShowResult(true); // 🔥 مهم
-
-    let correct = 0;
-
-    questions.forEach((q, index) => {
-      if (answers[index] === q.answer) {
-        correct++;
+    if (showResults) {
+      if (side === sel) {
+        return sel === item.correctSide ? "✓" : "✕";
       }
-    });
-
-    const total = questions.length;
-
-    const color =
-      correct === total ? "green" : correct === 0 ? "red" : "orange";
-
-    const msg = `
-    <div style="font-size:20px;text-align:center;">
-      <b style="color:${color};">Score: ${correct} / ${total}</b>
-    </div>
-  `;
-
-    if (correct === total) ValidationAlert.success(msg);
-    else if (correct === 0) ValidationAlert.error(msg);
-    else ValidationAlert.warning(msg);
-
-    setLocked(true);
+      // the unselected side — show ✓ if it's the correct one after wrong selection
+      if (sel !== item.correctSide && side === item.correctSide) return null;
+      return null;
+    }
+    // before check: selected side gets ✓, other gets ✕
+    return side === sel ? "✓" : "✕";
   };
 
-  const reset = () => {
-    setAnswers({});
-    setLocked(false); // ⭐ NEW — إعادة التعديل
-    setShowResult(false);
+  const getSymbolColor = (item, side) => {
+    const sym = getSymbol(item, side);
+    if (!sym) return CHECK_COLOR;
+    if (showResults || showAns) {
+      return side === item.correctSide ? CHECK_COLOR : CROSS_COLOR;
+    }
+    return sym === "✓" ? CHECK_COLOR : CROSS_COLOR;
   };
 
-  // ⭐⭐⭐ NEW — showAnswer
-  const showAnswer = () => {
-    const correct = {};
-
-    questions.forEach((q, index) => {
-      correct[index] = q.answer;
-    });
-
-    setAnswers(correct);
-    setLocked(true);
+  const isWrongSelected = (item, side) => {
+    if (!showResults || showAns) return false;
+    return selected[item.id] === side && side !== item.correctSide;
   };
-  const usedWords = Object.values(answers).filter(Boolean);
+
   return (
-    <DragDropContext onDragEnd={onDragEnd}>
+    <div className="main-container-component">
+      <style>{`
+        /* ── Items list ── */
+        .rlcc-list {
+          display: flex;
+          flex-direction: column;
+          gap: clamp(12px, 1.8vw, 22px);
+          width: 100%;
+        }
+
+        /* Single row: images-pair | num + sentence */
+        .rlcc-row {
+          display: grid;
+          grid-template-columns: auto 1fr;
+          gap: clamp(12px, 1.8vw, 22px);
+          align-items: center;
+        }
+
+        /* Left: two images side by side */
+        .rlcc-imgs {
+          display: flex;
+          gap: clamp(4px, 0.6vw, 8px);
+          flex-shrink: 0;
+        }
+
+        .rlcc-img-wrap {
+          position: relative;
+          cursor: pointer;
+          user-select: none;
+          border: 2px solid ${IMG_BORDER};
+          border-radius: 8px;
+          overflow: hidden;
+          width: clamp(100px, 14vw, 180px);
+        }
+        .rlcc-img-wrap--locked { cursor: default; }
+
+        .rlcc-img {
+          width: 100%;
+          aspect-ratio: 4/3;
+          object-fit: cover;
+          display: block;
+                    height : auto
+
+        }
+
+        /* Symbol box — bottom right corner, square */
+        .rlcc-symbol {
+          position: absolute;
+          bottom: 0;
+          right: 0;
+          width: clamp(24px, 3.2vw, 38px);
+          height: clamp(24px, 3.2vw, 38px);
+          border-radius: 8px 0 8px 0;
+          background: #fff;
+          border-top: 2px solid #ccc;
+          border-left: 2px solid #ccc;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: clamp(13px, 1.8vw, 22px);
+          font-weight: 700;
+          line-height: 1;
+          z-index: 2;
+        }
+
+        /* ✕ wrong badge */
+        .rlcc-wrong-badge {
+          position: absolute;
+          top: -7px; right: -7px;
+          width: clamp(15px, 1.7vw, 19px);
+          height: clamp(15px, 1.7vw, 19px);
+          border-radius: 50%;
+          background: ${WRONG_BADGE_BG};
+          color: ${WRONG_BADGE_TEXT};
+          display: flex; align-items: center; justify-content: center;
+          font-size: clamp(7px, 0.8vw, 10px);
+          font-weight: 700;
+          border: 2px solid #fff;
+          box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+          pointer-events: none;
+          z-index: 3;
+        }
+
+        /* Right: number + sentence */
+        .rlcc-right {
+          display: flex;
+          align-items: center;
+          gap: clamp(6px, 0.8vw, 10px;
+          min-width: 0;
+        }
+
+        .rlcc-num {
+          font-size: clamp(15px, 1.8vw, 22px);
+          font-weight: 700;
+          color: ${NUMBER_COLOR};
+          flex-shrink: 0;
+          line-height: 1;
+        }
+
+        .rlcc-sentence {
+          font-size: clamp(13px, 1.6vw, 19px);
+          color: ${SENTENCE_COLOR};
+          line-height: 1.5;
+        }
+
+        /* Buttons */
+        .rlcc-buttons {
+          display: flex;
+          justify-content: center;
+          margin-top: clamp(8px, 1.6vw, 18px);
+        }
+
+        @media (max-width: 520px) {
+          .rlcc-row { grid-template-columns: 1fr; }
+        }
+      `}</style>
+
       <div
+        className="div-forall"
         style={{
           display: "flex",
           flexDirection: "column",
-          alignItems: "center",
-          padding: "30px",
+          gap: "clamp(14px, 2vw, 22px)",
+          maxWidth: "1100px",
+          margin: "0 auto",
         }}
       >
-        <div className="div-forall">
-          <h5 className="header-title-page8 pb-2.5">
-            <span className="ex-A" style={{ marginRight: "10px" }}>
-              D
-            </span>
-            Read and number the pictures.
-          </h5>
-          <Droppable droppableId="bank" direction="horizontal">
-            {(provided) => (
-              <div
-                ref={provided.innerRef}
-                {...provided.droppableProps}
-                style={{
-                  display: "flex",
-                  gap: "12px",
-                  padding: "10px",
-                  border: "2px dashed #ccc",
-                  borderRadius: "10px",
-                  marginTop: "20px",
-                  justifyContent: "center",
-                  width: "100%",
-                }}
-              >
-                {wordBank.map((word, index) => {
-                  const isUsed = usedWords.includes(Number(word));
+        {/* ── Header ── */}
+        <h1
+          className="WB-header-title-page8"
+          style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
+        >
+          <span className="WB-ex-A">D</span>
+          Read, look, and write ✓ and ✕.
+        </h1>
+
+        {/* ── Items ── */}
+        <div className="rlcc-list">
+          {ITEMS.map((item) => (
+            <div key={item.id} className="rlcc-row">
+
+              {/* Two images */}
+              <div className="rlcc-imgs">
+                {["a", "b"].map((side) => {
+                  const sym   = getSymbol(item, side);
+                  const color = getSymbolColor(item, side);
+                  const wrong = isWrongSelected(item, side);
+                  const src   = side === "a" ? item.imgA : item.imgB;
 
                   return (
-                    <Draggable
-                      key={word}
-                      draggableId={`season-${word}`}
-                      index={index}
-                      isDragDisabled={locked || isUsed}
+                    <div
+                      key={side}
+                      className={`rlcc-img-wrap${isLocked ? " rlcc-img-wrap--locked" : ""}`}
+                      onClick={() => handleSelect(item.id, side)}
                     >
-                      {(provided) => (
-                        <span
-                          ref={provided.innerRef}
-                          {...provided.draggableProps}
-                          {...provided.dragHandleProps}
-                          className="season-chip"
-                          style={{
-                            padding: "7px 14px",
-                            border: "2px solid #2c5287",
-                            borderRadius: "8px",
-                            background: "white",
-                            fontWeight: "bold",
-                            cursor: isUsed ? "not-allowed" : "grab",
-                            fontSize: "16px",
-                            opacity: isUsed ? 0.4 : 1,
-                            ...provided.draggableProps.style,
-                          }}
-                        >
-                          {word}
-                        </span>
-                      )}
-                    </Draggable>
+                      <img src={src} alt={`${item.id}${side}`} className="rlcc-img" />
+                      <div className="rlcc-symbol" style={{ color: sym ? color : "transparent", borderColor: "#ccc" }}>
+                        {sym || ""}
+                        {wrong && <div className="rlcc-wrong-badge">✕</div>}
+                      </div>
+                    </div>
                   );
                 })}
-                {provided.placeholder}
               </div>
-            )}
-          </Droppable>
-          <div className=" mt-6 flex gap-10">
-            <div className="flex flex-col gap-12 w-1/2">
-              {questions.map((q) => (
-                <p key={q.id}>
-                  <span className="font-bold mr-2">{q.id}</span>
-                  {q.text}
-                </p>
-              ))}
+
+              {/* Number + Sentence */}
+              <div className="rlcc-right">
+                <span className="rlcc-num">{item.id}</span>
+                <span className="rlcc-sentence">{item.sentence}</span>
+              </div>
+
             </div>
+          ))}
+        </div>
 
-            <div className="grid grid-cols-2 gap-4 w-1/2">
-              {images.map((img, i) => (
-                <div
-                  key={i}
-                  className="border-2 border-orange-400 rounded-xl relative overflow-hidden"
-                  style={{ height: "100px" }}
-                >
-                  <img
-                    src={img}
-                    alt=""
-                    style={{
-                      width: "100%",
-                      height: "100%",
-                      objectFit: "contain",
-                    }}
-                  />
-
-                  {showResult && answers[i] && (
-                    <div
-                      style={{
-                        position: "absolute",
-                        top: "-6px",
-                        left: "-6px",
-                        right: "-6px",
-                        bottom: "-6px",
-                        border:
-                          Number(answers[i]) === questions[i].answer
-                            ? "3px solid green"
-                            : "3px solid red",
-                        borderRadius: "16px",
-                        pointerEvents: "none",
-                      }}
-                    />
-                  )}
-
-                  {/* ❌ WrongMark */}
-                  {showResult &&
-                    answers[i] &&
-                    Number(answers[i]) !== questions[i].answer && (
-                      <div
-                        style={{
-                          position: "absolute",
-                          zIndex: 10, // 🔥 هذا المهم
-                        }}
-                      >
-                        <WrongMark
-                          top="bottom-2.5"
-                          left="left-6"
-                          marginLeft=""
-                        />
-                      </div>
-                    )}
-
-                  {/* input */}
-                  <Droppable droppableId={`image-${i}`}>
-                    {(provided) => (
-                      <div
-                        ref={provided.innerRef}
-                        {...provided.droppableProps}
-                        className="
-                                          absolute bottom-0 left-0
-                                          w-10 h-10
-                                          border border-orange-400
-                                          bg-white
-                                          flex items-center justify-center
-                                          rounded-xl rounded-bl-none
-                                          font-bold
-                                        "
-                      >
-                        <span style={{ color: "#2c5287" }}>
-                          {answers[i] && answers[i]}
-                        </span>
-
-                        {provided.placeholder}
-                      </div>
-                    )}
-                  </Droppable>
-                </div>
-              ))}
-            </div>
-          </div>
-          {/* BUTTONS */}
+        {/* ── Buttons ── */}
+        <div className="rlcc-buttons">
           <Button
-            handleShowAnswer={showAnswer}
-            handleStartAgain={reset}
-            checkAnswers={checkAnswers}
+            checkAnswers={handleCheck}
+            handleShowAnswer={handleShowAnswer}
+            handleStartAgain={handleReset}
           />
         </div>
       </div>
-    </DragDropContext>
+    </div>
   );
-};
-
-export default Page9_Q1;
+}

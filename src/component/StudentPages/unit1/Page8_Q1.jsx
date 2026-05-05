@@ -1,378 +1,296 @@
 import React, { useState } from "react";
-import ValidationAlert from "../../Popup/ValidationAlert";
-import "./Page8_Q1.css";
 import Button from "../../Button";
+import ValidationAlert from "../../Popup/ValidationAlert";
 
-const Page8_Q1 = () => {
-  const [locked, setLocked] = useState(false); // ⭐ NEW — قفل التعديل بعد Show Answer
+// ─────────────────────────────────────────────
+//  🖼️  IMAGES
+// ─────────────────────────────────────────────
+import img1 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 1 Robots of the Future Folder/Page8/SVG/Asset 4.svg";
+import img2 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 1 Robots of the Future Folder/Page8/SVG/Asset 5.svg";
+import img3 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 1 Robots of the Future Folder/Page8/SVG/Asset 6.svg";
+import img4 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 1 Robots of the Future Folder/Page8/SVG/Asset 7.svg";
+//  🎨  COLORS
+// ─────────────────────────────────────────────
+const INPUT_UNDERLINE_DEFAULT = "#3f3f3f";
+const INPUT_UNDERLINE_WRONG   = "#ef4444";
+const INPUT_TEXT_COLOR        = "#2b2b2b";
+const INPUT_ANSWER_COLOR      = "#c81e1e";
+const NUMBER_COLOR            = "#2b2b2b";
+const WORD_BANK_BG            = "#e8eff1";
+const WORD_BANK_BORDER        = "#e8eff1";
+const WRONG_BADGE_BG          = "#ef4444";
+const WRONG_BADGE_TEXT        = "#ffffff";
 
-  const rows = [
-    {
-      vowel: "a",
-      color: "#2ecc71",
-      letters: [
-        "n",
-        "s",
-        "m",
-        "a",
-        "p",
-        "h",
-        "i",
-        "c",
-        "a",
-        "t",
-        "y",
-        "b",
-        "a",
-        "g",
-        "a",
-        "o",
-        "t",
-      ],
-      words: ["map", "cat", "bag"],
-    },
-    {
-      vowel: "e",
-      color: "#e84393",
-      letters: [
-        "p",
-        "e",
-        "n",
-        "b",
-        "y",
-        "b",
-        "e",
-        "d",
-        "m",
-        "n",
-        "e",
-        "t",
-        "b",
-        "e",
-        "v",
-        "c",
-        "t",
-      ],
-      words: ["pen", "bed", "net"],
-    },
-    {
-      vowel: "i",
-      color: "#0984e3",
-      letters: [
-        "d",
-        "b",
-        "d",
-        "x",
-        "g",
-        "s",
-        "i",
-        "t",
-        "f",
-        "i",
-        "s",
-        "h",
-        "d",
-        "s",
-        "i",
-        "c",
-        "k",
-      ],
-      words: ["sit", "fish", "sick"],
-    },
-    {
-      vowel: "o",
-      color: "#8e44ad",
-      letters: [
-        "p",
-        "t",
-        "b",
-        "o",
-        "x",
-        "m",
-        "m",
-        "o",
-        "p",
-        "g",
-        "i",
-        "s",
-        "o",
-        "c",
-        "k",
-        "u",
-        "n",
-      ],
-      words: ["box", "mop", "sock"],
-    },
-    {
-      vowel: "u",
-      color: "#e74c3c",
-      letters: [
-        "a",
-        "p",
-        "i",
-        "s",
-        "n",
-        "u",
-        "t",
-        "z",
-        "y",
-        "g",
-        "u",
-        "m",
-        "c",
-        "b",
-        "u",
-        "s",
-        "r",
-      ],
-      words: ["nut", "gum", "bus"],
-    },
-  ];
+// ─────────────────────────────────────────────
+//  📝  EXERCISE DATA
+// ─────────────────────────────────────────────
+const WORD_BANK = ["learn", "robot", "drive", "buildings"];
 
-  const [selected, setSelected] = useState([]);
-  const [currentRow, setCurrentRow] = useState(null);
-  const [foundSelections, setFoundSelections] = useState([]);
+const ITEMS = [
+  { id: 1, src: img1, correct: ["learn"],     answer: "learn"     },
+  { id: 2, src: img2, correct: ["buildings"], answer: "buildings" },
+  { id: 3, src: img3, correct: ["drive"],     answer: "drive"     },
+  { id: 4, src: img4, correct: ["robot"],     answer: "robot"     },
+];
 
-  /* ================= Selection ================= */
-  const startSelect = (rowIndex, colIndex) => {
-    setCurrentRow(rowIndex);
-    setSelected([{ row: rowIndex, col: colIndex }]);
+// ─────────────────────────────────────────────
+//  🔧  NORMALIZE
+// ─────────────────────────────────────────────
+const normalize = (str) =>
+  str.toLowerCase().replace(/[^a-z0-9\s]/g, "").replace(/\s+/g, " ").trim();
+
+const isCorrect = (userVal, correctArr) =>
+  correctArr.some((c) => normalize(userVal) === normalize(c));
+
+// ─────────────────────────────────────────────
+//  COMPONENT
+// ─────────────────────────────────────────────
+export default function WB_ReadLookWrite_QA() {
+  const [answers,     setAnswers]     = useState({});
+  const [showResults, setShowResults] = useState(false);
+  const [showAns,     setShowAns]     = useState(false);
+
+  const handleChange = (id, value) => {
+    if (showAns) return;
+    const item = ITEMS.find((i) => i.id === id);
+    if (showResults && item && isCorrect(answers[id] || "", item.correct)) return;
+    setAnswers((prev) => ({ ...prev, [id]: value }));
   };
 
-  const addSelect = (rowIndex, colIndex) => {
-    if (currentRow !== rowIndex) return;
-
-    setSelected((prev) => {
-      if (prev.some((c) => c.col === colIndex && c.row === rowIndex))
-        return prev;
-      return [...prev, { row: rowIndex, col: colIndex }];
-    });
+  const handleCheck = () => {
+    if (showAns) return;
+    const allAnswered = ITEMS.every((item) => answers[item.id]?.trim());
+    if (!allAnswered) { ValidationAlert.info("Please complete all answers first."); return; }
+    let score = 0;
+    ITEMS.forEach((item) => { if (isCorrect(answers[item.id] || "", item.correct)) score++; });
+    setShowResults(true);
+    if (score === ITEMS.length)   ValidationAlert.success(`Score: ${score} / ${ITEMS.length}`);
+    else if (score > 0)           ValidationAlert.warning(`Score: ${score} / ${ITEMS.length}`);
+    else                          ValidationAlert.error(`Score: ${score} / ${ITEMS.length}`);
   };
 
-  const endSelect = () => {
-    if (!selected.length) return;
-
-    const rowIndex = selected[0].row;
-    const row = rows[rowIndex];
-
-    const word = selected
-      .map((c) => row.letters[c.col])
-      .join("")
-      .toLowerCase();
-
-    const reversed = word.split("").reverse().join("");
-
-    if (row.words.includes(word) || row.words.includes(reversed)) {
-      const correctWord = row.words.includes(word) ? word : reversed;
-
-      setFoundSelections((prev) => {
-        if (prev.some((f) => f.word === correctWord)) return prev;
-
-        return [
-          ...prev,
-          {
-            word: correctWord,
-            cells: [...selected],
-            row: rowIndex,
-          },
-        ];
-      });
-    }
-
-    setSelected([]);
-    setCurrentRow(null);
+  const handleShowAnswer = () => {
+    const filled = {};
+    ITEMS.forEach((item) => { filled[item.id] = item.answer; });
+    setAnswers(filled);
+    setShowResults(false);
+    setShowAns(true);
   };
 
-  /* ================= Check ================= */
-  const checkAnswers = () => {
-    if (locked) return;
-
-    if (foundSelections.length === 0) {
-      ValidationAlert.info();
-      return;
-    }
-
-    const total = rows.reduce((acc, r) => acc + r.words.length, 0);
-    const score = foundSelections.length;
-
-    const color = score === total ? "green" : score === 0 ? "red" : "orange";
-
-    const msg = `
-    <div style="font-size:20px;text-align:center;">
-      <span style="color:${color}; font-weight:bold;">
-        Score: ${score} / ${total}
-      </span>
-    </div>
-  `;
-
-    if (score === total) ValidationAlert.success(msg);
-    else if (score === 0) ValidationAlert.error(msg);
-    else ValidationAlert.warning(msg);
-
-    setLocked(true);
+  const handleReset = () => {
+    setAnswers({});
+    setShowResults(false);
+    setShowAns(false);
   };
 
-  const showAnswers = () => {
-    let answers = [];
-
-    rows.forEach((row, i) => {
-      row.words.forEach((word) => {
-        const start = row.letters.join("").indexOf(word);
-        if (start !== -1) {
-          const cells = [];
-          for (let j = 0; j < word.length; j++) {
-            cells.push({ row: i, col: start + j });
-          }
-          answers.push({ word, cells, row: i });
-        }
-      });
-    });
-    setLocked(true);
-    setFoundSelections(answers);
+  const isWrong = (item) => {
+    if (!showResults || showAns) return false;
+    return !isCorrect(answers[item.id] || "", item.correct);
   };
 
-  const resetAll = () => {
-    setFoundSelections([]);
-    setSelected([]);
-    setCurrentRow(null);
-    setLocked(false);
+  const isDisabled = (item) => {
+    if (showAns) return true;
+    if (showResults && isCorrect(answers[item.id] || "", item.correct)) return true;
+    return false;
   };
 
-  /* ================= UI ================= */
   return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        padding: "30px",
-      }}
-    >
-      <div className="div-forall">
-        <h5 className="header-title-page8">
-          <span className="ex-A" style={{ marginRight: "10px" }}>
-            A
-          </span>
-          <span style={{ color: "#2e3192", marginRight: "10px" }}>1</span>
-          Find and circle three words in each box with{" "}
-          <span style={{ color: "#2e3192" }}>short vowel</span> sounds.
-        </h5>
+    <div className="main-container-component">
+      <style>{`
+        /* ── Word bank ── */
+        .rlwa-bank {
+          display: flex;
+          flex-wrap: wrap;
+          gap: clamp(8px, 1.2vw, 16px);
+          justify-content: space-around;
+          width: 100%;
+        }
 
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            width: "100%",
-          }}
+        .rlwa-pill {
+          border: 2px solid ${WORD_BANK_BORDER};
+          border-radius: 8px;
+          padding: clamp(4px, 0.5vw, 7px) clamp(14px, 2vw, 24px);
+          font-size: clamp(14px, 1.7vw, 20px);
+          font-weight: 400;
+          color: #2b2b2b;
+          background: ${WORD_BANK_BG};
+          white-space: nowrap;
+          user-select: none;
+              margin-right: -7%;
+
+        }
+
+        /* ── Images row ── */
+        .rlwa-grid {
+          display: grid;
+          grid-template-columns: repeat(${ITEMS.length}, 1fr);
+          gap: clamp(30px, 1.4vw, 20px);
+          width: 100%;
+        }
+
+        /* Single card: (num+img) on top, input below */
+        .rlwa-card {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: clamp(5px, 0.7vw, 8px);
+        }
+
+        /* num + img side by side */
+        .rlwa-img-row {
+          display: flex;
+          align-items: flex-start;
+          gap: clamp(3px, 0.4vw, 6px);
+          width: 100%;
+        }
+
+        .rlwa-num {
+          font-size: clamp(13px, 1.5vw, 18px);
+          font-weight: 700;
+          color: ${NUMBER_COLOR};
+          flex-shrink: 0;
+          line-height: 1.5;
+        }
+
+        .rlwa-img {
+          flex: 1;
+          width: 100%;
+          object-fit: cover;
+          display: block;
+          height : auto ; 
+        }
+
+        /* Input wrap */
+        .rlwa-input-wrap {
+          position: relative;
+          width: 90%;
+                        margin-right: -15%;
+
+        }
+
+        .rlwa-input {
+          width: 100%;
+          background: transparent;
+          border: none;
+          border-bottom: 1px solid ${INPUT_UNDERLINE_DEFAULT};
+          outline: none;
+          font-size: clamp(13px, 1.6vw, 19px);
+          color: ${INPUT_TEXT_COLOR};
+          line-height: 1.5;
+          box-sizing: border-box;
+          transition: border-color 0.2s;
+          text-align: center;
+
+        }
+        .rlwa-input:disabled   { opacity: 1; cursor: default; }
+        .rlwa-input--wrong     { border-bottom-color: ${INPUT_UNDERLINE_WRONG}; }
+        .rlwa-input--answer    { color: ${INPUT_ANSWER_COLOR}; }
+
+        /* ✕ badge */
+        .rlwa-badge {
+          position: absolute;
+          top: -8px; right: 0;
+          width: clamp(16px, 1.8vw, 20px);
+          height: clamp(16px, 1.8vw, 20px);
+          border-radius: 50%;
+          background: ${WRONG_BADGE_BG};
+          color: ${WRONG_BADGE_TEXT};
+          display: flex; align-items: center; justify-content: center;
+          font-size: clamp(8px, 0.9vw, 11px);
+          font-weight: 700;
+          border: 2px solid #fff;
+          box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+          pointer-events: none;
+          z-index: 2;
+        }
+
+        /* Buttons */
+        .rlwa-buttons {
+          display: flex;
+          justify-content: center;
+          margin-top: clamp(8px, 1.6vw, 18px);
+        }
+
+        @media (max-width: 480px) {
+          .rlwa-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+      `}</style>
+
+      <div
+        className="div-forall"
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: "clamp(14px, 2vw, 22px)",
+          maxWidth: "1100px",
+          margin: "0 auto",
+        }}
+      >
+        {/* ── Header ── */}
+        <h1
+          className="WB-header-title-page8"
+          style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
         >
-          {rows.map((row, rowIndex) => (
-            <div
-              key={rowIndex}
-              style={{
-                margin: "15px 0",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: "15px",
-              }}
-            >
-              <div
-                style={{
-                  color: row.color,
-                  fontWeight: "bold",
-                  minWidth: "80px",
-                  textAlign: "right",
-                }}
-              >
-                Short {row.vowel}
-              </div>
+          <span className="WB-ex-A">A</span>
+          Read, look, and write. Use the words below.
+        </h1>
 
-              <div
-                style={{
-                  border: "2px solid orange",
-                  borderRadius: "20px",
-                  padding: "10px 15px",
-                  display: "flex",
-                  flexWrap: "nowrap",
-                  justifyContent: "center",
-                  gap: "6px",
-                  background: "#fff",
-                }}
-              >
-                {row.letters.map((letter, colIndex) => {
-                  const isSelected = selected.some(
-                    (c) => c.row === rowIndex && c.col === colIndex,
-                  );
+        {/* ── Word bank ── */}
+        <div style={{margin : "7% 0 "}}   >
 
-                  const isFound = foundSelections.some((f) =>
-                    f.cells.some(
-                      (c) => c.row === rowIndex && c.col === colIndex,
-                    ),
-                  );
-
-                  return (
-                    <span
-                      key={colIndex}
-                      data-row={rowIndex}
-                      data-col={colIndex}
-                      onMouseDown={() => startSelect(rowIndex, colIndex)}
-                      onMouseEnter={() => addSelect(rowIndex, colIndex)}
-                      onMouseUp={endSelect}
-                      onTouchStart={() => startSelect(rowIndex, colIndex)}
-                      onTouchMove={(e) => {
-                        const touch = e.touches[0];
-                        const element = document.elementFromPoint(
-                          touch.clientX,
-                          touch.clientY,
-                        );
-
-                        if (!element) return;
-
-                        const col = element.getAttribute("data-col");
-                        const row = element.getAttribute("data-row");
-
-                        if (row !== null && col !== null) {
-                          addSelect(Number(row), Number(col));
-                        }
-                      }}
-                      onTouchEnd={endSelect}
-                      style={{
-                        width: "32px",
-                        height: "32px",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        fontSize: "16px",
-                        fontWeight: "bold",
-                        cursor: "pointer",
-                        borderRadius: "4px",
-                        border: "1px solid #ccc",
-                        userSelect: "none",
-                        WebkitUserSelect: "none",
-                        background: isFound
-                          ? "rgba(231, 76, 60, 0.4)"
-                          : isSelected
-                            ? "rgba(52, 152, 219, 0.4)"
-                            : "#fff",
-                      }}
-                    >
-                      {letter}
-                    </span>
-                  );
-                })}
-              </div>
-            </div>
+        <div className="rlwa-bank " style={{marginBottom : " 5% "}}  >
+          {WORD_BANK.map((w) => (
+            <div key={w} className="rlwa-pill">{w}</div>
           ))}
         </div>
-        <Button
-          handleShowAnswer={showAnswers}
-          handleStartAgain={resetAll}
-          checkAnswers={checkAnswers}
-        />
+
+        {/* ── Images + inputs ── */}
+        <div className="rlwa-grid">
+          {ITEMS.map((item) => {
+            const wrong    = isWrong(item);
+            const value    = answers[item.id] || "";
+            const tColor   = showAns ? INPUT_ANSWER_COLOR : INPUT_TEXT_COLOR;
+            const uColor   = wrong ? INPUT_UNDERLINE_WRONG : INPUT_UNDERLINE_DEFAULT;
+            const disabled = isDisabled(item);
+            
+            return (
+              <div key={item.id} className="rlwa-card">
+                <div className="rlwa-img-row">
+                  <span className="rlwa-num">{item.id}</span>
+                  <img src={item.src} alt={`img-${item.id}`} className="rlwa-img" />
+                </div>
+                <div className="rlwa-input-wrap">
+                  <input
+                    type="text"
+                    className={[
+                      "rlwa-input",
+                      wrong   ? "rlwa-input--wrong"  : "",
+                      showAns ? "rlwa-input--answer" : "",
+                    ].filter(Boolean).join(" ")}
+                    value={value}
+                    disabled={disabled}
+                    onChange={(e) => handleChange(item.id, e.target.value)}
+                    style={{ borderBottomColor: uColor, color: tColor }}
+                    spellCheck={false}
+                    autoComplete="off"
+                  />
+                  {wrong && <div className="rlwa-badge">✕</div>}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* ── Buttons ── */}
+        <div className="rlwa-buttons">
+          <Button
+            checkAnswers={handleCheck}
+            handleShowAnswer={handleShowAnswer}
+            handleStartAgain={handleReset}
+          />
+        </div>
+            </div>
       </div>
     </div>
   );
-};
-
-export default Page8_Q1;
+}

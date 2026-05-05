@@ -1,263 +1,298 @@
-/* eslint-disable react-refresh/only-export-components */
 import React, { useState } from "react";
-import {
-  DndContext,
-  useSensor,
-  useSensors,
-  PointerSensor,
-  MouseSensor,
-  TouchSensor,
-  DragOverlay,
-} from "@dnd-kit/core";
-import { SortableContext, useSortable } from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
-import ValidationAlert from "../../Popup/ValidationAlert";
 import Button from "../../Button";
+import ValidationAlert from "../../Popup/ValidationAlert";
 
-import imgShower from "../../../assets/imgs/pages/classbook/Right 3 Unit 2 Summer Vacation Folder/Pahe 14/Ex B 1.svg";
-import imgBike from "../../../assets/imgs/pages/classbook/Right 3 Unit 2 Summer Vacation Folder/Pahe 14/Ex B 2.svg";
-import imgSoccer from "../../../assets/imgs/pages/classbook/Right 3 Unit 2 Summer Vacation Folder/Pahe 14/Ex B 3.svg";
-import imgFlowers from "../../../assets/imgs/pages/classbook/Right 3 Unit 2 Summer Vacation Folder/Pahe 14/Ex B 4.svg";
-import WrongMark from "../../WrongMark";
+// ─────────────────────────────────────────────
+//  🖼️  IMAGES
+// ─────────────────────────────────────────────
+import imgJapan  from "../../../assets/imgs/pages/Class Book/Right 4 Unit 2 Welcome to the Big Apple Folder/Page 15/SVG/Asset 2.svg";
+import imgRussia from "../../../assets/imgs/pages/Class Book/Right 4 Unit 2 Welcome to the Big Apple Folder/Page 15/SVG/Asset 2.svg";
+import imgUK     from "../../../assets/imgs/pages/Class Book/Right 4 Unit 2 Welcome to the Big Apple Folder/Page 15/SVG/Asset 2.svg";
+import imgAus    from "../../../assets/imgs/pages/Class Book/Right 4 Unit 2 Welcome to the Big Apple Folder/Page 15/SVG/Asset 2.svg";
 
-const ACTIVITIES = [
-  { id: "act4", text: "take a taxi." },
-  { id: "act1", text: "take the subway." },
-  { id: "act3", text: "take a bus." },
-  { id: "act2", text: "ride a bike." },
+// ─────────────────────────────────────────────
+//  🎨  COLORS
+// ─────────────────────────────────────────────
+const INPUT_UNDERLINE_DEFAULT = "#3f3f3f";
+const INPUT_UNDERLINE_WRONG   = "#ef4444";
+const INPUT_TEXT_COLOR        = "#2b2b2b";
+const INPUT_ANSWER_COLOR      = "#c81e1e";
+const NUMBER_COLOR            = "#2b2b2b";
+const TEXT_COLOR              = "#2b2b2b";
+const WRONG_BADGE_BG          = "#ef4444";
+const WRONG_BADGE_TEXT        = "#ffffff";
+
+// ─────────────────────────────────────────────
+//  📝  EXERCISE DATA
+// ─────────────────────────────────────────────
+const WORD_BANK = ["Australia", "Japan", "United Kingdom", "Russia"];
+
+const ITEMS = [
+  { id: 1, prefix: "Stella is going to...", src: imgJapan,  correct: ["Japan"],          answer: "Japan"          },
+  { id: 2, prefix: "He's going to...",      src: imgRussia, correct: ["Russia"],         answer: "Russia"         },
+  { id: 3, prefix: "They're going to...",   src: imgUK,     correct: ["United Kingdom"], answer: "United Kingdom" },
+  { id: 4, prefix: "I'm going to...",       src: imgAus,    correct: ["Australia"],      answer: "Australia"      },
 ];
 
-const CORRECT_ANSWERS = {
-  q1: "act1",
-  q2: "act2",
-  q3: "act3",
-  q4: "act4",
-};
+// ─────────────────────────────────────────────
+//  🔧  NORMALIZE
+// ─────────────────────────────────────────────
+const normalize = (str) =>
+  str.toLowerCase().replace(/[^a-z0-9\s]/g, "").replace(/\s+/g, " ").trim();
 
-function DraggableActivity({ item, isUsed }) {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({ id: item.id });
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-    opacity: isDragging || isUsed ? 0.5 : 1,
-  };
-  return (
-    <div
-      ref={setNodeRef}
-      style={{ ...style, touchAction: "none" }}
-      {...attributes}
-      {...listeners}
-      className={`p-2 bg-white border-2 border-gray-200 rounded-xl shadow-sm cursor-grab text-blue-700 font-medium text-xs text-center ${isUsed ? "bg-gray-50 text-gray-300 pointer-events-none" : "hover:border-blue-400 hover:shadow-md transition-all"}`}
-    >
-      {item.text}
-    </div>
-  );
-}
+const isCorrect = (userVal, correctArr) =>
+  correctArr.some((c) => normalize(userVal) === normalize(c));
 
-function DropSlot({ id, content, isCorrect, isSubmitted }) {
-  const { setNodeRef, isOver } = useSortable({ id });
-  const borderColor = isSubmitted
-    ? isCorrect
-      ? "border-black"
-      : "border-red-500"
-    : isOver
-      ? "border-blue-400 bg-blue-50"
-      : "border-black";
-  return (
-    <div
-      ref={setNodeRef}
-      className={`w-full min-h-10 border-b-2 flex items-center justify-center px-2 transition-all ${borderColor}`}
-    >
-      {content ? (
-        <div className="relative flex items-center justify-center">
-          <span className="text-blue-900 font-bold text-sm text-center">
-            {ACTIVITIES.find((a) => a.id === content).text}
-          </span>
-
-          {/* ❌ إذا الجواب غلط */}
-          {isSubmitted && !isCorrect && (
-            <div className="absolute -right-4">
-              <WrongMark />
-            </div>
-          )}
-        </div>
-      ) : (
-        <span className="text-gray-300 italic text-xs">
-          Drop answer here...
-        </span>
-      )}
-    </div>
-  );
-}
-
-const Unit2_Page5_Q3 = () => {
-  const [answers, setAnswers] = useState({
-    q1: null,
-    q2: null,
-    q3: null,
-    q4: null,
-    q5: null,
-    q6: null,
-    q7: null,
-    q8: null,
-  });
-  const [activeId, setActiveId] = useState(null);
+// ─────────────────────────────────────────────
+//  COMPONENT
+// ─────────────────────────────────────────────
+export default function WB_ListenReadWrite_QD() {
+  const [answers,     setAnswers]     = useState({});
   const [showResults, setShowResults] = useState(false);
-  const [locked, setLocked] = useState(false);
+  const [showAns,     setShowAns]     = useState(false);
 
-  const sensors = useSensors(
-    useSensor(MouseSensor),
-    useSensor(TouchSensor, {
-      activationConstraint: {
-        delay: 150,
-        tolerance: 5,
-      },
-    }),
-    useSensor(PointerSensor),
-  );
+  const handleChange = (id, value) => {
+    if (showAns) return;
+    const item = ITEMS.find((i) => i.id === id);
+    if (showResults && item && isCorrect(answers[id] || "", item.correct)) return;
+    setAnswers((prev) => ({ ...prev, [id]: value }));
+  };
 
-  const checkAnswers = () => {
-    if (locked) return;
-
-    const unanswered = Object.keys(CORRECT_ANSWERS).filter(
-      (id) => !answers[id],
-    );
-    if (unanswered.length > 0) {
-      ValidationAlert.info();
-      return;
-    }
-    setShowResults(true);
+  const handleCheck = () => {
+    if (showAns) return;
+    const allAnswered = ITEMS.every((item) => answers[item.id]?.trim());
+    if (!allAnswered) { ValidationAlert.info("Please complete all answers first."); return; }
     let score = 0;
-    let total = Object.keys(CORRECT_ANSWERS).length;
-    Object.keys(CORRECT_ANSWERS).forEach((id) => {
-      if (answers[id] === CORRECT_ANSWERS[id]) score++;
-    });
-    if (score === total) ValidationAlert.success(`Score: ${score} / ${total}`);
-    else if (score > 0) ValidationAlert.warning(`Score: ${score} / ${total}`);
-    else ValidationAlert.error(`Score: ${score} / ${total}`);
+    ITEMS.forEach((item) => { if (isCorrect(answers[item.id] || "", item.correct)) score++; });
+    setShowResults(true);
+    if (score === ITEMS.length)   ValidationAlert.success(`Score: ${score} / ${ITEMS.length}`);
+    else if (score > 0)           ValidationAlert.warning(`Score: ${score} / ${ITEMS.length}`);
+    else                          ValidationAlert.error(`Score: ${score} / ${ITEMS.length}`);
+  };
+
+  const handleShowAnswer = () => {
+    const filled = {};
+    ITEMS.forEach((item) => { filled[item.id] = item.answer; });
+    setAnswers(filled);
+    setShowResults(false);
+    setShowAns(true);
   };
 
   const handleReset = () => {
-    setAnswers({
-      q1: null,
-      q2: null,
-      q3: null,
-      q4: null,
-      q5: null,
-      q6: null,
-      q7: null,
-      q8: null,
-    });
+    setAnswers({});
     setShowResults(false);
-    setLocked(false);
+    setShowAns(false);
   };
 
-  const QUESTIONS = [
-    { id: "q1", img: imgShower },
-    { id: "q2", img: imgBike },
-    { id: "q3", img: imgSoccer },
-    { id: "q4", img: imgFlowers },
-  ];
+  const isWrong = (item) => {
+    if (!showResults || showAns) return false;
+    return !isCorrect(answers[item.id] || "", item.correct);
+  };
+
+  const isDisabled = (item) => {
+    if (showAns) return true;
+    if (showResults && isCorrect(answers[item.id] || "", item.correct)) return true;
+    return false;
+  };
 
   return (
-    <DndContext
-      sensors={sensors}
-      onDragStart={(e) => setActiveId(e.active.id)}
-      onDragEnd={(e) => {
-        if (e.over)
-          setAnswers((prev) => ({ ...prev, [e.over.id]: e.active.id }));
-        setActiveId(null);
-      }}
-    >
+    <div className="main-container-component">
+      <style>{`
+        /* ── Word bank ── */
+        .lrwd-bank {
+          display: flex;
+          flex-wrap: wrap;
+          gap: clamp(8px, 1.2vw, 14px);
+          justify-content: center;
+          width: 100%;
+        }
+
+        .lrwd-pill {
+          border: 2px solid #e8eff1;
+          border-radius: 8px;
+          padding: clamp(4px, 0.5vw, 6px) clamp(14px, 2vw, 22px);
+          font-size: clamp(14px, 1.7vw, 20px);
+          color: #2b2b2b;
+          background: #e8eff1;
+          white-space: nowrap;
+          user-select: none;
+        }
+
+        /* ── 2×2 grid ── */
+        .lrwd-grid {
+          display: grid;
+          grid-template-columns: repeat(2, 1fr);
+          gap: clamp(16px, 2.4vw, 30px) clamp(20px, 3vw, 40px);
+          width: 100%;
+        }
+
+        /* Single card: num+prefix | image | input */
+        .lrwd-card {
+          display: flex;
+          flex-direction: column;
+          gap: clamp(6px, 0.9vw, 10px);
+        }
+
+        /* Prefix row */
+        .lrwd-prefix-row {
+          display: flex;
+          align-items: center;
+          gap: clamp(5px, 0.7vw, 8px);
+        }
+
+        .lrwd-num {
+          font-size: clamp(14px, 1.7vw, 20px);
+          font-weight: 700;
+          color: ${NUMBER_COLOR};
+          flex-shrink: 0;
+          line-height: 1.5;
+        }
+
+        .lrwd-prefix {
+          font-size: clamp(13px, 1.6vw, 19px);
+          color: ${TEXT_COLOR};
+          line-height: 1.4;
+        }
+
+        /* Image */
+        .lrwd-img {
+          width: 80%;
+          height : auto ;
+          object-fit: cover;
+          display: block;
+        }
+
+        /* Input wrap */
+        .lrwd-input-wrap {
+          position: relative;
+          width: 100%;
+        }
+
+        .lrwd-input {
+          width: 100%;
+          background: transparent;
+          border: none;
+          border-bottom: 1px solid ${INPUT_UNDERLINE_DEFAULT};
+          outline: none;
+          font-size: clamp(14px, 1.7vw, 20px);
+          color: ${INPUT_TEXT_COLOR};
+          line-height: 1.5;
+          box-sizing: border-box;
+          transition: border-color 0.2s;
+        }
+        .lrwd-input:disabled   { opacity: 1; cursor: default; }
+        .lrwd-input--answer    { color: ${INPUT_ANSWER_COLOR}; }
+
+        /* ✕ badge */
+        .lrwd-badge {
+          position: absolute;
+          top: -8px; right: 0;
+          width: clamp(17px, 1.9vw, 22px);
+          height: clamp(17px, 1.9vw, 22px);
+          border-radius: 50%;
+          background: ${WRONG_BADGE_BG};
+          color: ${WRONG_BADGE_TEXT};
+          display: flex; align-items: center; justify-content: center;
+          font-size: clamp(9px, 1vw, 12px);
+          font-weight: 700;
+          border: 2px solid #fff;
+          box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+          pointer-events: none;
+          z-index: 2;
+        }
+
+        /* Buttons */
+        .lrwd-buttons {
+          display: flex;
+          justify-content: center;
+          margin-top: clamp(8px, 1.6vw, 18px);
+        }
+
+        @media (max-width: 480px) {
+          .lrwd-grid { grid-template-columns: 1fr; }
+        }
+      `}</style>
+
       <div
+        className="div-forall"
         style={{
           display: "flex",
           flexDirection: "column",
-          alignItems: "center",
-          padding: "30px",
+          gap: "clamp(14px, 2vw, 22px)",
+          maxWidth: "1100px",
+          margin: "0 auto",
         }}
       >
-        <div
-          className="div-forall"
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            gap: "30px",
-          }}
+        {/* ── Header ── */}
+        <h1
+          className="WB-header-title-page8"
+          style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
         >
-          <h5 className="header-title-page8">
-            <span className="ex-A" style={{ marginRight: "10px" }}>
-              B
-            </span>
-            Look, read, and write. Use the words below.
-          </h5>
-          <div className="flex flex-col lg:flex-row gap-8">
-            <div className="flex-1 bg-blue-50 p-5 rounded-2xl border-2 border-blue-100 h-fit sticky top-4">
-              <h3 className="font-bold text-blue-800 mb-4 text-center">
-                Activities Bank
-              </h3>
-              <div className="grid grid-cols-1 gap-2">
-                <SortableContext items={ACTIVITIES.map((a) => a.id)}>
-                  {ACTIVITIES.map((act) => (
-                    <DraggableActivity
-                      key={act.id}
-                      item={act}
-                      isUsed={Object.values(answers).includes(act.id)}
-                    />
-                  ))}
-                </SortableContext>
-              </div>
-            </div>
+          <span className="WB-ex-A">D</span>
+          Listen, read, and write.
+        </h1>
 
-            <div className="flex-2 grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-8">
-              {QUESTIONS.map((q) => (
-                <div key={q.id} className="space-y-3">
-                  <div className="bg-gray-50 p-2 rounded-xl border border-gray-100 flex justify-center">
-                    <img
-                      src={q.img}
-                      alt="activity"
-                      className="max-h-32 object-contain rounded-lg"
-                    />
-                  </div>
-                  <DropSlot
-                    id={q.id}
-                    content={answers[q.id]}
-                    isCorrect={answers[q.id] === CORRECT_ANSWERS[q.id]}
-                    isSubmitted={showResults}
-                  />
+        {/* ── Word bank ── */}
+        <div className="lrwd-bank">
+          {WORD_BANK.map((w) => (
+            <div key={w} className="lrwd-pill">{w}</div>
+          ))}
+        </div>
+
+        {/* ── 2×2 grid ── */}
+        <div className="lrwd-grid">
+          {ITEMS.map((item) => {
+            const wrong    = isWrong(item);
+            const value    = answers[item.id] || "";
+            const tColor   = showAns ? INPUT_ANSWER_COLOR : INPUT_TEXT_COLOR;
+            const uColor   = wrong ? INPUT_UNDERLINE_WRONG : INPUT_UNDERLINE_DEFAULT;
+            const disabled = isDisabled(item);
+
+            return (
+              <div key={item.id} className="lrwd-card">
+
+                {/* Prefix */}
+                <div className="lrwd-prefix-row">
+                  <span className="lrwd-num">{item.id}</span>
+                  <span className="lrwd-prefix">{item.prefix}</span>
                 </div>
-              ))}
-            </div>
-          </div>
 
+                {/* Image */}
+                <img src={item.src} alt={`img-${item.id}`} className="lrwd-img" />
+
+                {/* Input */}
+                <div className="lrwd-input-wrap">
+                  <input
+                    type="text"
+                    className={[
+                      "lrwd-input",
+                      wrong   ? "lrwd-input--wrong"  : "",
+                      showAns ? "lrwd-input--answer" : "",
+                    ].filter(Boolean).join(" ")}
+                    value={value}
+                    disabled={disabled}
+                    onChange={(e) => handleChange(item.id, e.target.value)}
+                    style={{ borderBottomColor: uColor, color: tColor }}
+                    spellCheck={false}
+                    autoComplete="off"
+                  />
+                  {wrong && <div className="lrwd-badge">✕</div>}
+                </div>
+
+              </div>
+            );
+          })}
+        </div>
+
+        {/* ── Buttons ── */}
+        <div className="lrwd-buttons">
           <Button
-            handleShowAnswer={() => {
-              setAnswers(CORRECT_ANSWERS);
-              setShowResults(true);
-              setLocked(true);
-            }}
+            checkAnswers={handleCheck}
+            handleShowAnswer={handleShowAnswer}
             handleStartAgain={handleReset}
-            checkAnswers={checkAnswers}
           />
         </div>
       </div>
-
-      <DragOverlay>
-        {activeId ? (
-          <div className="p-3 bg-white border-2 border-blue-500 rounded-xl shadow-2xl text-blue-700 font-bold text-xs scale-105">
-            {ACTIVITIES.find((a) => a.id === activeId).text}
-          </div>
-        ) : null}
-      </DragOverlay>
-    </DndContext>
+    </div>
   );
-};
-
-export default Unit2_Page5_Q3;
+}

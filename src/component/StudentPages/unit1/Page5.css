@@ -31,14 +31,12 @@
 }
 
 .click-icon-page5 {
-  position: absolute;
-  /* background-color: #6bcff6;
-  border-radius: 20px;
-  border: rgb(255, 255, 255) solid 3px; */
-  padding: 5px;
-  bottom: 14%;
-  left: 52%;
-  cursor: pointer;
+position: absolute;
+    padding: 5px;
+    /* bottom: 14%; */
+    left: 20%;
+    top: 4%;
+    cursor: pointer;
 }
 .headset-icon-CD-page5-1 {
   position: absolute;
@@ -46,9 +44,9 @@
   border-radius: 20px;
   border: rgb(255, 255, 255) solid 3px; */
   padding: 5px;
-  top: 4%;
-  left: 20.5%;
-  cursor: pointer;
+    top: 15.5%;
+    left: 26.5%;
+    cursor: pointer;
 }
 .headset-icon-CD-page5-2 {
   position: absolute;

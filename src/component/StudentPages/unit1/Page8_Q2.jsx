@@ -1,273 +1,245 @@
-/* eslint-disable no-unused-vars */
-import React, { useState, useRef, useEffect } from "react";
-import "./Page8_Q2.css";
-import sound1 from "../../../assets/audio/ClassBook/Unit 1/P 8/unit1-pg8-EX-A.mp3";
-import ValidationAlert from "../../Popup/ValidationAlert";
+import React, { useState } from "react";
 import Button from "../../Button";
-import WrongMark from "../../WrongMark";
-import QuestionAudioPlayer from "../../QuestionAudioPlayer";
+import ValidationAlert from "../../Popup/ValidationAlert";
 
-const Page8_Q2 = () => {
-  const groups = [
-    { words: ["may", "lake", "jam", "paint"], correct: [0, 1, 3] },
-    { words: ["bee", "bed", "feet", "tea"], correct: [0, 2, 3] },
-    { words: ["kite", "bike", "light", "fish"], correct: [0, 1, 2] },
-    { words: ["home", "boat", "box", "note"], correct: [0, 1, 3] },
-    { words: ["run", "blue", "sue", "tube"], correct: [1, 2, 3] },
-  ];
-  const [showResult2, setShowResult2] = useState(false);
-  const [selected, setSelected] = useState(groups.map(() => []));
-  const [showResult, setShowResult] = useState(false);
-  const [locked, setLocked] = useState(false);
+// ─────────────────────────────────────────────
+//  🎨  COLORS
+// ─────────────────────────────────────────────
+const INPUT_UNDERLINE_DEFAULT = "#3f3f3f";
+const INPUT_UNDERLINE_WRONG   = "#ef4444";
+const INPUT_TEXT_COLOR        = "#2b2b2b";
+const INPUT_ANSWER_COLOR      = "#c81e1e";
+const NUMBER_COLOR            = "#2b2b2b";
+const SCRAMBLED_COLOR         = "#2b2b2b";
+const WRONG_BADGE_BG          = "#ef4444";
+const WRONG_BADGE_TEXT        = "#ffffff";
 
-  // ================================
-  // ✔ Captions Array
-  // ================================
-  const captions = [
-    {
-      start: 0.259,
-      end: 18.899,
-      text: "Page eight. Write activities. Exercise A, Number 2. Listen and circle the words with long vowel sounds. One, may, lake, jam, paint. Two, bee, bed,",
-    },
-    {
-      start: 19.939,
-      end: 26.959,
-      text: "feet, tea. Three, kite, bike, light,",
-    },
-    {
-      start: 27.979,
-      end: 28.379,
-      text: "fish.",
-    },
-    {
-      start: 29.739,
-      end: 31.319,
-      text: "Four, home,",
-    },
-    {
-      start: 32.34,
-      end: 32.799,
-      text: "boat,",
-    },
-    {
-      start: 33.86,
-      end: 34.36,
-      text: "box,",
-    },
-    {
-      start: 35.419,
-      end: 39.779,
-      text: "note. Five, run, blue,",
-    },
-    {
-      start: 40.819,
-      end: 42.919,
-      text: "Sue, tube",
-    },
-  ];
-  const showAnswers = () => {
-    const correctSelections = groups.map((g) => g.correct);
+// ─────────────────────────────────────────────
+//  📝  EXERCISE DATA
+// ─────────────────────────────────────────────
+const ITEMS = [
+  { id: 1, scrambled: "kniht",    correct: ["think"],    answer: "think"    },
+  { id: 2, scrambled: "smroo",    correct: ["rooms"],    answer: "rooms"    },
+  { id: 3, scrambled: "bluid",    correct: ["build"],    answer: "build"    },
+  { id: 4, scrambled: "enlac",    correct: ["clean"],    answer: "clean"    },
+  { id: 5, scrambled: "neral",    correct: ["learn"],    answer: "learn"    },
+  { id: 6, scrambled: "chamisne", correct: ["machines"], answer: "machines" },
+];
 
-    setSelected(correctSelections);
-    setShowResult2(true);
-    setLocked(true);
+// ─────────────────────────────────────────────
+//  🔧  NORMALIZE
+// ─────────────────────────────────────────────
+const normalize = (str) =>
+  str.toLowerCase().replace(/[^a-z0-9\s]/g, "").replace(/\s+/g, " ").trim();
+
+const isCorrect = (userVal, correctArr) =>
+  correctArr.some((c) => normalize(userVal) === normalize(c));
+
+// ─────────────────────────────────────────────
+//  COMPONENT
+// ─────────────────────────────────────────────
+export default function WB_UnscrambleWrite_QB() {
+  const [answers,     setAnswers]     = useState({});
+  const [showResults, setShowResults] = useState(false);
+  const [showAns,     setShowAns]     = useState(false);
+
+  const handleChange = (id, value) => {
+    if (showAns) return;
+    const item = ITEMS.find((i) => i.id === id);
+    if (showResults && item && isCorrect(answers[id] || "", item.correct)) return;
+    setAnswers((prev) => ({ ...prev, [id]: value }));
   };
 
-  const checkAnswers = () => {
-    if (locked || showResult2) return;
-
-    const hasEmpty = selected.some((arr) => arr.length === 0);
-
-    if (hasEmpty) {
-      ValidationAlert.info("Please select at least one word in each group!");
-      return;
-    }
-
-    let correctCount = 0;
-    let total = 0;
-
-    groups.forEach((group, index) => {
-      total += group.correct.length;
-
-      group.correct.forEach((correctIndex) => {
-        if (selected[index].includes(correctIndex)) {
-          correctCount++;
-        }
-      });
-    });
-
-    const color =
-      correctCount === total ? "green" : correctCount === 0 ? "red" : "orange";
-
-    const msg = `
-    <div style="font-size:20px;text-align:center;">
-      <span style="color:${color}; font-weight:bold;">
-        Score: ${correctCount} / ${total}
-      </span>
-    </div>
-  `;
-
-    if (correctCount === total) ValidationAlert.success(msg);
-    else if (correctCount === 0) ValidationAlert.error(msg);
-    else ValidationAlert.warning(msg);
-
-    setShowResult2(true);
-    setLocked(true);
+  const handleCheck = () => {
+    if (showAns) return;
+    const allAnswered = ITEMS.every((item) => answers[item.id]?.trim());
+    if (!allAnswered) { ValidationAlert.info("Please complete all answers first."); return; }
+    let score = 0;
+    ITEMS.forEach((item) => { if (isCorrect(answers[item.id] || "", item.correct)) score++; });
+    setShowResults(true);
+    if (score === ITEMS.length)   ValidationAlert.success(`Score: ${score} / ${ITEMS.length}`);
+    else if (score > 0)           ValidationAlert.warning(`Score: ${score} / ${ITEMS.length}`);
+    else                          ValidationAlert.error(`Score: ${score} / ${ITEMS.length}`);
   };
 
-  const reset = () => {
-    setSelected(groups.map(() => []));
-    setShowResult(false);
-    setShowResult2(false);
-    setLocked(false);
+  const handleShowAnswer = () => {
+    const filled = {};
+    ITEMS.forEach((item) => { filled[item.id] = item.answer; });
+    setAnswers(filled);
+    setShowResults(false);
+    setShowAns(true);
+  };
+
+  const handleReset = () => {
+    setAnswers({});
+    setShowResults(false);
+    setShowAns(false);
+  };
+
+  const isWrong = (item) => {
+    if (!showResults || showAns) return false;
+    return !isCorrect(answers[item.id] || "", item.correct);
+  };
+
+  const isDisabled = (item) => {
+    if (showAns) return true;
+    if (showResults && isCorrect(answers[item.id] || "", item.correct)) return true;
+    return false;
   };
 
   return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        padding: "30px",
-      }}
-    >
-      <div className="div-forall">
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            gap: "30px",
-          }}
+    <div className="main-container-component">
+      <style>{`
+        /* ── 2-column grid ── */
+        .usw-grid {
+          display: grid;
+          grid-template-columns: repeat(2, 1fr);
+          gap: clamp(10px, 1.6vw, 20px) clamp(20px, 3vw, 40px);
+          width: 100%;
+          margin : 12% 0 ; 
+        }
+
+        /* Single row: num + scrambled + input */
+        .usw-row {
+          display: flex;
+          align-items: flex-end;
+          gap: clamp(5px, 0.7vw, 9px);
+          min-width: 0;
+        }
+
+        .usw-num {
+          font-size: clamp(14px, 1.7vw, 20px);
+          font-weight: 700;
+          color: ${NUMBER_COLOR};
+          flex-shrink: 0;
+          padding-bottom: 4px;
+          line-height: 1;
+        }
+
+        .usw-scrambled {
+          font-size: clamp(13px, 1.6vw, 19px);
+          color: ${SCRAMBLED_COLOR};
+          white-space: nowrap;
+          flex-shrink: 0;
+          line-height: 1.5;
+        }
+
+        /* Input wrap */
+        .usw-input-wrap {
+          position: relative;
+          flex: 1;
+          min-width: clamp(60px, 8vw, 130px);
+        }
+
+        .usw-input {
+          width: 100%;
+          background: transparent;
+          border: none;
+          border-bottom: 1px solid ${INPUT_UNDERLINE_DEFAULT};
+          outline: none;
+          font-size: clamp(13px, 1.6vw, 19px);
+          color: ${INPUT_TEXT_COLOR};
+          line-height: 1.5;
+          box-sizing: border-box;
+          transition: border-color 0.2s;
+        }
+        .usw-input:disabled   { opacity: 1; cursor: default; }
+        .usw-input--wrong     { border-bottom-color: ${INPUT_UNDERLINE_WRONG}; }
+        .usw-input--answer    { color: ${INPUT_ANSWER_COLOR}; }
+
+        /* ✕ badge */
+        .usw-badge {
+          position: absolute;
+          top: -8px; right: 0;
+          width: clamp(16px, 1.8vw, 20px);
+          height: clamp(16px, 1.8vw, 20px);
+          border-radius: 50%;
+          background: ${WRONG_BADGE_BG};
+          color: ${WRONG_BADGE_TEXT};
+          display: flex; align-items: center; justify-content: center;
+          font-size: clamp(8px, 0.9vw, 11px);
+          font-weight: 700;
+          border: 2px solid #fff;
+          box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+          pointer-events: none;
+          z-index: 2;
+        }
+
+        /* Buttons */
+        .usw-buttons {
+          display: flex;
+          justify-content: center;
+          margin-top: clamp(8px, 1.6vw, 18px);
+        }
+
+        @media (max-width: 480px) {
+          .usw-grid { grid-template-columns: 1fr; }
+        }
+      `}</style>
+
+      <div
+        className="div-forall"
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: "clamp(14px, 2vw, 22px)",
+          maxWidth: "1100px",
+          margin: "0 auto",
+        }}
+      >
+        {/* ── Header ── */}
+        <h1
+          className="WB-header-title-page8"
+          style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
         >
-          <h5 className="header-title-page8">
-            <span style={{ color: "#2e3192", marginRight: "10px" }}>2</span>
-            Listen and circle the words with
-            <span style={{ color: "#2e3192" }}>long vowel</span> sounds.
-          </h5>
-          <QuestionAudioPlayer
-            src={sound1}
-            captions={captions}
-            stopAtSecond={9.2}
-          />
+          <span className="WB-ex-A">B</span>
+          Unscramble and write.
+        </h1>
 
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "center",
-              gap: "25px",
-            }}
-          >
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "center",
-                gap: "35px",
-                marginTop: "30px",
-              }}
-            >
-              {groups.map((group, index) => (
-                <div
-                  key={index}
-                  style={{
-                    position: "relative",
-                  }}
-                >
-                  <div
-                    style={{
-                      position: "absolute",
-                      left: "-20px",
-                      fontWeight: "bold",
-                      fontSize: "16px",
-                    }}
-                  >
-                    {index + 1}
-                  </div>
+        {/* ── Grid ── */}
+        <div className="usw-grid">
+          {ITEMS.map((item) => {
+            const wrong    = isWrong(item);
+            const value    = answers[item.id] || "";
+            const tColor   = showAns ? INPUT_ANSWER_COLOR : INPUT_TEXT_COLOR;
+            const uColor   = wrong ? INPUT_UNDERLINE_WRONG : INPUT_UNDERLINE_DEFAULT;
+            const disabled = isDisabled(item);
 
-                  <div
-                    style={{
-                      background: "#FEF3E6",
-                      padding: "1vw 2.5vw",
-                      borderRadius: "1vw",
-                      minWidth: "7vw",
-                      display: "flex",
-                      flexDirection: "column",
-                      gap: "10px",
-                    }}
-                  >
-                    {group.words.map((word, i) => {
-                      const isSelected = selected[index].includes(i);
-                      const isCorrect = group.correct.includes(i);
-
-                      return (
-                        <div
-                          key={i}
-                          onClick={() => {
-                            if (locked) return;
-
-                            const newSelected = [...selected];
-
-                            if (newSelected[index].includes(i)) {
-                              newSelected[index] = newSelected[index].filter(
-                                (x) => x !== i,
-                              );
-                            } else {
-                              newSelected[index].push(i);
-                            }
-
-                            setSelected(newSelected);
-                          }}
-                          style={{
-                            fontSize: "18px",
-                            cursor: "pointer",
-                            position: "relative",
-                          }}
-                        >
-                          {word}
-
-                          {isSelected && (
-                            <>
-                              {isSelected && (
-                                <div
-                                  style={{
-                                    position: "absolute",
-                                    top: "-4px",
-                                    left: "-6px",
-                                    right: "-6px",
-                                    bottom: "-4px",
-                                    border: isSelected
-                                      ? showResult2
-                                        ? isCorrect
-                                          ? "2px solid #1C398E" // صح → يضل أزرق
-                                          : "2px solid #ef4444" // غلط → أحمر
-                                        : "2px solid #1C398E" // قبل check
-                                      : "none",
-                                    borderRadius: "20px",
-                                    pointerEvents: "none",
-                                  }}
-                                />
-                              )}
-
-                              {/* ❌ علامة الغلط */}
-                              {showResult2 && !isCorrect && <WrongMark />}
-                            </>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
+            return (
+              <div key={item.id} className="usw-row">
+                <span className="usw-num">{item.id}</span>
+                <span className="usw-scrambled">{item.scrambled}</span>
+                <div className="usw-input-wrap">
+                  <input
+                    type="text"
+                    className={[
+                      "usw-input",
+                      wrong   ? "usw-input--wrong"  : "",
+                      showAns ? "usw-input--answer" : "",
+                    ].filter(Boolean).join(" ")}
+                    value={value}
+                    disabled={disabled}
+                    onChange={(e) => handleChange(item.id, e.target.value)}
+                    style={{ borderBottomColor: uColor, color: tColor }}
+                    spellCheck={false}
+                    autoComplete="off"
+                  />
+                  {wrong && <div className="usw-badge">✕</div>}
                 </div>
-              ))}
-            </div>
-          </div>
+              </div>
+            );
+          })}
         </div>
-        <Button
-          handleShowAnswer={showAnswers}
-          handleStartAgain={reset}
-          checkAnswers={checkAnswers}
-        />
+
+        {/* ── Buttons ── */}
+        <div className="usw-buttons">
+          <Button
+            checkAnswers={handleCheck}
+            handleShowAnswer={handleShowAnswer}
+            handleStartAgain={handleReset}
+          />
+        </div>
       </div>
     </div>
   );
-};
-
-export default Page8_Q2;
+}

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import Rabbit from "../assets/Page 01/Rabbit.svg";
+import Rabbit from "../../assets/Page 01/Rabbit.svg";
 
 const CriticalThinking = ({ title }) => {
   const [answer, setAnswer] = useState("");
