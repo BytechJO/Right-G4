@@ -9,6 +9,8 @@ import imgJapan  from "../../../assets/imgs/pages/Class Book/Right 4 Unit 2 Welc
 import imgRussia from "../../../assets/imgs/pages/Class Book/Right 4 Unit 2 Welcome to the Big Apple Folder/Page 15/SVG/Asset 16.svg";
 import imgUK     from "../../../assets/imgs/pages/Class Book/Right 4 Unit 2 Welcome to the Big Apple Folder/Page 15/SVG/Asset 17.svg";
 import imgAus    from "../../../assets/imgs/pages/Class Book/Right 4 Unit 2 Welcome to the Big Apple Folder/Page 15/SVG/Asset 18.svg";
+import sound from "../../../assets/audio/ClassBook/Grade 4/cd11pg15-instruction1-adult-lady_e6nQ5x9d.mp3";
+import QuestionAudioPlayer from "../../QuestionAudioPlayer";
 
 // ─────────────────────────────────────────────
 //  🎨  COLORS
@@ -32,6 +34,39 @@ const ITEMS = [
   { id: 2, prefix: "He's going to...",      src: imgRussia, correct: ["Russia"],         answer: "Russia"         },
   { id: 3, prefix: "They're going to...",   src: imgUK,     correct: ["United Kingdom"], answer: "United Kingdom" },
   { id: 4, prefix: "I'm going to...",       src: imgAus,    correct: ["Australia"],      answer: "Australia"      },
+];
+
+const captions = [
+  {
+    start: 0.62,
+    end: 3.28,
+    text: "Page 15, write activities.",
+  },
+  {
+    start: 3.28,
+    end: 7.58,
+    text: "Exercise D, listen, read, and write.",
+  },
+  {
+    start: 8.88,
+    end: 10.78,
+    text: "Stella is going to Japan.",
+  },
+  {
+    start: 10.78,
+    end: 12.82,
+    text: "He's going to Russia.",
+  },
+  {
+    start: 13.86,
+    end: 16.06,
+    text: "They're going to England.",
+  },
+  {
+    start: 16.06,
+    end: 18.38,
+    text: "Four. I'm going to France.",
+  },
 ];
 
 // ─────────────────────────────────────────────
@@ -232,7 +267,13 @@ export default function WB_ListenReadWrite_QD() {
           <span className="WB-ex-A">D</span>
           Listen, read, and write.
         </h1>
-
+         <div style={{marginTop:"10px"}}>
+        <QuestionAudioPlayer
+          src={sound}
+          captions={captions}
+          stopAtSecond={7.7}
+        />
+      </div>
         {/* ── Word bank ── */}
         <div className="lrwd-bank">
           {WORD_BANK.map((w) => (

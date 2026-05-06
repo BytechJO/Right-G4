@@ -2,7 +2,7 @@ import ComprehensionA from "./ComprehensionA";
 import ComprehensionB from "./ComprehensionB";
 
 import imgReading from "../../../assets/imgs/pages/Class Book/Right 4 Unit 3 Harley Eats All the Sweets Folder/Page 23/SVG/Asset 1.svg";
-import readingAudio from "../../../assets/audio/ClassBook/Grade 4/cd3pg5-reading-adult-lady_sHccBvXt.mp3";
+import readingAudio from "../../../assets/audio/ClassBook/Grade 4/cd16pg23-reading-adult-lady_Feoi9jgI.mp3";
 import ReadingSection from "../ReadingSection";
 
 import img from "../../../assets/imgs/pages/Class Book/Right 4 Unit 3 Harley Eats All the Sweets Folder/Page 23/SVG/Asset 2.svg";
@@ -15,107 +15,41 @@ const ReadingSection_U1 = () => {
 
 const captions = [
   {
-    start: 0.12,
-    end: 5.16,
-    text: "Page 5 reading. What would you like to see invented in the future?",
+    start: 0.52,
+    end: 2.14,
+    text: "Page 23, Reading.",
   },
   {
-    start: 5.16,
-    end: 8.06,
-    text: "Do you have an idea for a future invention?",
+    start: 3.82,
+    end: 16.84,
+    text: "Do you have your own room? What does your room look like? Has your room changed? Has your room ever changed? Is it the same as when you were a baby? Is it different? It probably has changed.",
   },
   {
-    start: 8.06,
-    end: 10.24,
-    text: "Inventions of the Future.",
+    start: 16.84,
+    end: 24.00,
+    text: "When you were small, you had a crib. Your toys were probably different too. You probably have different ones now.",
   },
   {
-    start: 11.42,
-    end: 14.18,
-    text: "What kinds of things will be invented in the future?",
+    start: 25.02,
+    end: 34.76,
+    text: "Did you have soft toys when you were a baby? Maybe you had a rattle or a mobile. These kinds of toys are fun for babies. What kinds of things do you play with now?",
   },
   {
-    start: 14.18,
-    end: 18.52,
-    text: "Many people like to talk about what will happen in the future.",
+    start: 35.86,
+    end: 42.32,
+    text: "Now, you can choose your toys, but when you were little, your parents got your toys. They were probably safe for you.",
   },
   {
-    start: 18.52,
-    end: 21.04,
-    text: "Will there be things that we won't use anymore?",
+    start: 43.64,
+    end: 52.66,
+    text: "Did you have different colors in your room when you were a baby? Are any of those colors in your room now? Do you share a room or do you have your own room?",
   },
   {
-    start: 22.24,
-    end: 25.08,
-    text: "There are some people who like to think about the future.",
-  },
-  {
-    start: 25.08,
-    end: 26.90,
-    text: "They are building a museum.",
-  },
-  {
-    start: 26.90,
-    end: 30.74,
-    text: "It will be called The Museum of Future Inventions.",
-  },
-  {
-    start: 32.12,
-    end: 36.12,
-    text: "This museum will show scientists' ideas about future technology.",
-  },
-  {
-    start: 37.28,
-    end: 41.00,
-    text: "There will be tiny phones, and their screens will be projected.",
-  },
-  {
-    start: 41.00,
-    end: 44.70,
-    text: "There will be new computers and games at this museum.",
-  },
-  {
-    start: 44.70,
-    end: 52.02,
-    text: "Some of the items won't actually work because they haven't been invented yet, but they will be possibilities for the future.",
-  },
-  {
-    start: 53.20,
-    end: 56.62,
-    text: "There will be a large room, like a library, for the future.",
-  },
-  {
-    start: 56.62,
-    end: 60.66,
-    text: "Do you think there will be more books or more computers in that room?",
-  },
-  {
-    start: 62.62,
-    end: 66.68,
-    text: "There will be ideas for a future cinema at this museum, too.",
-  },
-  {
-    start: 66.68,
-    end: 70.36,
-    text: "There will even be an idea room for students.",
-  },
-  {
-    start: 71.54,
-    end: 75.20,
-    text: "They will be able to give their ideas for future inventions.",
-  },
-  {
-    start: 77.52,
-    end: 81.64,
-    text: "The museum will choose the best ideas and put them in the museum.",
-  },
-  {
-    start: 81.64,
-    end: 86.32,
-    text: "Is there an idea that you would like to send to the Museum of Future Inventions?",
+    start: 53.96,
+    end: 67.20,
+    text: "There are probably many ways your room has changed. Ask your parents or look at old pictures of your room. Find out what you had in your room when you were a baby. Do you remember any of the things?",
   },
 ];
-
   return (
     
     <div className="flex flex-col items-center">
@@ -128,7 +62,7 @@ const captions = [
         question="Do you think new inventions will be good or bad for Earth?"
         sound={readingAudio}
         captions={captions}
-        stopAtSecond={8}
+        stopAtSecond={2.5}
       />
 
  </div>

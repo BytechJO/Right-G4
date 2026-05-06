@@ -6,6 +6,8 @@ import ValidationAlert from "../../Popup/ValidationAlert";
 //  🖼️  IMAGE
 // ─────────────────────────────────────────────
 import imgScene from "../../../assets/imgs/pages/Class Book/Right 4 Unit 2 Welcome to the Big Apple Folder/Page 16/SVG/Asset 5.svg";
+import sound from "../../../assets/audio/ClassBook/Grade 4/cd12pg16-instruction-adult-lady_gGpt9qB6.mp3";
+import QuestionAudioPlayer from "../../QuestionAudioPlayer";
 
 // ─────────────────────────────────────────────
 //  🎨  COLORS
@@ -79,7 +81,43 @@ export default function WB_ReadListenChoose_QC() {
     setShowResults(false);
     setShowAns(false);
   };
-
+const captions = [
+  {
+    start: 0.20,
+    end: 6.60,
+    text: "Page 16, review one, exercise C. Read, listen, and choose.",
+  },
+  {
+    start: 7.82,
+    end: 10.10,
+    text: "Hansel will go to the beach on Saturday.",
+  },
+  {
+    start: 10.10,
+    end: 13.22,
+    text: "He won't lie in the sun.",
+  },
+  {
+    start: 13.22,
+    end: 15.30,
+    text: "Harley will go swimming in the sea.",
+  },
+  {
+    start: 15.30,
+    end: 18.78,
+    text: "He will stay near the shore when he swims.",
+  },
+  {
+    start: 19.86,
+    end: 22.74,
+    text: "John won't fly a kite while at the beach.",
+  },
+  {
+    start: 22.74,
+    end: 25.92,
+    text: "He will sit in the sand while reading a book.",
+  },
+];
   const getOptionState = (choice, option) => {
     const sel = selected[choice.id];
     if (sel !== option) return "idle";
@@ -135,7 +173,6 @@ export default function WB_ReadListenChoose_QC() {
           gap: clamp(12px, 1.8vw, 22px);
           align-items: flex-start;
           width: 100%;
-          margin : 10% 0 ;
         }
 
         .rlcq-img {
@@ -253,7 +290,13 @@ export default function WB_ReadListenChoose_QC() {
           <span className="WB-ex-A-1">C</span>
           Read, listen, and choose.
         </h1>
-
+     <div style={{marginTop:"10px"}}>
+        <QuestionAudioPlayer
+          src={sound}
+          captions={captions}
+          stopAtSecond={7}
+        />
+      </div>
         {/* ── Image + Paragraph ── */}
         <div className="rlcq-top">
           <img src={imgScene} alt="beach" className="rlcq-img" />

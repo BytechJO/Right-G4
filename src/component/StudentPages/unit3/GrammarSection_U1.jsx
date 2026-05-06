@@ -4,39 +4,38 @@ import GrammarC from "./GrammarC";
 import image1 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 3 Harley Eats All the Sweets Folder/Page 24/SVG/Asset 7.svg";
 import image  from "../../../assets/imgs/pages/Class Book/Right 4 Unit 3 Harley Eats All the Sweets Folder/Page 24/SVG/1.svg";
 
-import sound from "../../../assets/audio/ClassBook/Grade 4/cd4pg6-grammar-adult-lady_5dpYBbN9.mp3";
+import sound from "../../../assets/audio/ClassBook/Grade 4/cd17pg24-grammar-adult-lady_DyQEJqoO.mp3";
 import QuestionAudioPlayer from "../../QuestionAudioPlayer";
 import SectionBanner from "../SectionBanner";
 const GrammarSection_U1 = () => {
- 
 const captions = [
   {
-    start: 0.22,
-    end: 2.16,
-    text: "Page six. Grammar.",
+    start: 0.80,
+    end: 2.78,
+    text: "Page 24. Grammar.",
   },
   {
-    start: 2.16,
-    end: 4.72,
-    text: "Future: will and won't.",
+    start: 2.78,
+    end: 4.96,
+    text: "Past of have.",
   },
   {
-    start: 5.94,
-    end: 8.12,
-    text: "We will go to the coast.",
+    start: 4.96,
+    end: 8.72,
+    text: "She had a bike. Did she have a kitten?",
   },
   {
-    start: 8.12,
-    end: 9.92,
-    text: "We won't go into space.",
+    start: 8.72,
+    end: 13.42,
+    text: "She did not have a kitten. Why did she have a kitten?",
   },
   {
-    start: 9.92,
-    end: 17.80,
-    text: "Future plus verb \"to be.\" Will they go to the moon? When will we travel into space?",
+    start: 13.42,
+    end: 18.06,
+    text: "I did not have books. What did she have?",
   },
 ];
-const stopAtSecond = 2;
+const stopAtSecond = 2.8;
  return (
     <div className="flex flex-col items-center ">
       <div className="w-[60%] mx-auto">

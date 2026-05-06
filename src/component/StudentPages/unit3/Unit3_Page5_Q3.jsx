@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import Button from "../../Button";
 import ValidationAlert from "../../Popup/ValidationAlert";
+import sound from "../../../assets/audio/ClassBook/Grade 4/cd18pg26-instruction1-adult-lady_6tvKwa0U.mp3";
+import QuestionAudioPlayer from "../../QuestionAudioPlayer";
 
 // ─────────────────────────────────────────────
 //  🖼️  IMAGE
@@ -34,7 +36,28 @@ const ITEMS = [
   { id: 3, sentence: "It had large windows.",          correct: ["true",  "True"],  answer: "True"  },
   { id: 4, sentence: "The tree house had a desk.",     correct: ["false", "False"], answer: "False" },
 ];
-
+const captions = [
+  {
+    start: 0.44,
+    end: 2.88,
+    text: "Page 26, write activities.",
+  },
+  {
+    start: 2.88,
+    end: 9.74,
+    text: "Exercise C. Listen, read, and write. True or false.",
+  },
+  {
+    start: 9.74,
+    end: 19.98,
+    text: "Two years ago, my friends and I built a tree house in my backyard. It was big. It had chairs and tables. It had large windows.",
+  },
+  {
+    start: 21.40,
+    end: 27.58,
+    text: "There were two bookcases in the tree house. We had a TV so we could watch movies on the weekends.",
+  },
+];
 // ─────────────────────────────────────────────
 //  🔧  HELPERS
 // ─────────────────────────────────────────────
@@ -213,7 +236,13 @@ export default function WB_ListenReadTrueFalse_QC() {
           <span className="WB-ex-A">C</span>
           Listen, read, and write <span style={{ color: "#ff9900ff", margin: "0 4px" }}>true</span> or <span style={{ color: "#ff9900ff", margin: "0 4px" }}>false</span>.
         </h1>
-
+  <div style={{marginTop:"10px"}}>
+        <QuestionAudioPlayer
+          src={sound}
+          captions={captions}
+          stopAtSecond={10}
+        />
+      </div>
         {/* ── Paragraph + Image ── */}
         <div className="lrtf-top">
           <p className="lrtf-para">{PARAGRAPH}</p>

@@ -13,6 +13,8 @@ import img3a from "../../../assets/imgs/pages/Class Book/Right 4 Unit 2 Welcome 
 import img3b from "../../../assets/imgs/pages/Class Book/Right 4 Unit 2 Welcome to the Big Apple Folder/Page 19/SVG/Asset 38.svg";
 import img4a from "../../../assets/imgs/pages/Class Book/Right 4 Unit 2 Welcome to the Big Apple Folder/Page 19/SVG/Asset 38.svg";
 import img4b from "../../../assets/imgs/pages/Class Book/Right 4 Unit 2 Welcome to the Big Apple Folder/Page 19/SVG/Asset 38.svg";
+import sound from "../../../assets/audio/ClassBook/Grade 4/cd13pg19-instruction-adult-lady_CJNDmPbC.mp3";
+import QuestionAudioPlayer from "../../QuestionAudioPlayer";
 
 // ─────────────────────────────────────────────
 //  🎨  COLORS
@@ -23,7 +25,53 @@ const WRONG_BADGE_BG   = "#ef4444";
 const WRONG_BADGE_TEXT = "#ffffff";
 const PARA_COLOR       = "#2b2b2b";
 const NUMBER_COLOR     = "#2b2b2b";
-
+const captions = [
+  {
+    start: 0.16,
+    end: 7.78,
+    text: "Page 19, review two, exercise D. Read, listen, and write check and X.",
+  },
+  {
+    start: 9.06,
+    end: 10.18,
+    text: "It's Tuesday morning.",
+  },
+  {
+    start: 10.18,
+    end: 13.02,
+    text: "John is going to school at half past eight.",
+  },
+  {
+    start: 13.02,
+    end: 16.26,
+    text: "He is going to wear an orange shirt and black pants.",
+  },
+  {
+    start: 16.34,
+    end: 18.76,
+    text: "He isn't going to wear a cap.",
+  },
+  {
+    start: 18.76,
+    end: 21.90,
+    text: "He isn't going to ride his bike to school.",
+  },
+  {
+    start: 21.90,
+    end: 23.64,
+    text: "He is going to take a bus.",
+  },
+  {
+    start: 23.64,
+    end: 27.36,
+    text: "After school, he isn't going to watch TV.",
+  },
+  {
+    start: 27.36,
+    end: 28.84,
+    text: "He's going to do his homework.",
+  },
+];
 // ─────────────────────────────────────────────
 //  📝  PARAGRAPH
 // ─────────────────────────────────────────────
@@ -242,7 +290,13 @@ export default function WB_ReadListenWriteCheckCross_QD() {
           <span className="WB-ex-A">D</span>
           Read, listen, and write ✓ and ✕.
         </h1>
-
+         <div style={{marginTop:"10px"}}>
+        <QuestionAudioPlayer
+          src={sound}
+          captions={captions}
+          stopAtSecond={7.5}
+        />
+      </div>
         {/* ── Paragraph ── */}
         <p className="rlwcd-para">{PARAGRAPH}</p>
 

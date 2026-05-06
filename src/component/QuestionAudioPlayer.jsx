@@ -136,7 +136,6 @@ const QuestionAudioPlayer = forwardRef(function QuestionAudioPlayer(
       style={{
         display: "flex",
         justifyContent: "center",
-        margin: "50px 0px",
         width: "100%",
       }}
     >
