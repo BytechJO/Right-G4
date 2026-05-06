@@ -169,7 +169,7 @@ export default function WB_ListenReadWrite_QD() {
         }
 
         .lrwd-input {
-          width: 100%;
+    width: 80%;
           background: transparent;
           border: none;
           border-bottom: 1px solid ${INPUT_UNDERLINE_DEFAULT};
@@ -186,7 +186,8 @@ export default function WB_ListenReadWrite_QD() {
         /* ✕ badge */
         .lrwd-badge {
           position: absolute;
-          top: -8px; right: 0;
+          top: -8px;     right: 5em;
+
           width: clamp(17px, 1.9vw, 22px);
           height: clamp(17px, 1.9vw, 22px);
           border-radius: 50%;

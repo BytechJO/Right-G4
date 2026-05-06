@@ -1,66 +1,96 @@
-.headset-icon-CD-unit2-page2-1,
-.click-icon-unit2-page2-1,
-.headset-icon-CD-unit2-page2-2 {
+
+/*===========page5============*/
+
+.headset-icon-CD-page5 {
   position: absolute;
-  transform: translate(-50%, -50%);
-  cursor: pointer;
-  position: absolute;
+  /* background-color: #6bcff6;
+  border-radius: 20px;
+  border: rgb(255, 255, 255) solid 2px; */
   padding: 5px;
+  cursor: pointer;
 }
 
-.headset-icon-CD-unit2-page2-1 {
-  top: 6%;
-  right: 70%;
+#CD-1-page5 {
+  top: 3%;
+  right: 4%;
 }
 
-.headset-icon-CD-unit2-page2-2 {
-  bottom: 31.5%;
-  right: 47%;
+#CD-2-page5 {
+  bottom: 30.5%;
+  right: 9.2%;
 }
 
-.click-icon-unit2-page2-1 {
-  bottom: 11%;
-  right: 37%;
+#num-2-page5 {
+  top: 46%;
+  left: 8%;
 }
-@media screen and (max-width: 1024px) and (max-height: 600px) {
-      .headset-icon-CD-unit2-page2-1 {
-        top: 5.5% !important;
-        right: -2% !important;
-    }
-    .headset-icon-CD-unit2-page2-2 {
-        bottom: 24.5% !important;
-        right: 3% !important;
-    }
-        .click-icon-unit2-page2-1 {
-        bottom: 9% !important;
-        right: 33% !important;
-    }
+
+#num-3-page5 {
+  top: 43%;
+  left: 34%;
 }
-@media (max-width: 1024px) {
-  .headset-icon-CD-unit2-page2-1 {
-    top: 3.5%;
-    right: 4%;
-  }
-  .headset-icon-CD-unit2-page2-2 {
-    bottom: 30.5%;
-    right: 11%;
-  }
-  .click-icon-unit2-page2-1 {
-    bottom: 15%;
-    right: 41%;
-  }
+
+.click-icon-page5 {
+position: absolute;
+    padding: 5px;
+    /* bottom: 14%; */
+    left: 20%;
+    top: 4%;
+    cursor: pointer;
 }
-@media (max-width: 820px) {
-  .headset-icon-CD-unit2-page2-1 {
-    top: 5%;
-    right: 2%;
-  }
-  .headset-icon-CD-unit2-page2-2 {
-    bottom: 28.5%;
-    right: 8%;
-  }
-  .click-icon-unit2-page2-1 {
-    bottom: 13.5%;
-    right: 40%;
-  }
+.headset-icon-CD-page5-1 {
+  position: absolute;
+  /* background-color: #6bcff6;
+  border-radius: 20px;
+  border: rgb(255, 255, 255) solid 3px; */
+  padding: 5px;
+    top: 15.5%;
+    left: 26.5%;
+    cursor: pointer;
+}
+.headset-icon-CD-page5-2 {
+  position: absolute;
+  /* background-color: #6bcff6;
+  border-radius: 20px;
+  border: rgb(255, 255, 255) solid 3px; */
+  padding: 5px;
+  top: 66.1%;
+  left: 42.5%;
+  cursor: pointer;
+}
+#t {
+  color: darkblue !important;
+  font-size: 30px;
+  position: absolute;
+  top: 45%;
+  left: 18.5%;
+}
+
+#tiger {
+  bottom: 28%;
+  right: 15%;
+}
+
+#taxi {
+  bottom: 28%;
+  left: 54%;
+}
+
+#table {
+  bottom: 28%;
+  left: 31%;
+}
+
+#text-0 {
+  position: absolute;
+  top: 30%;
+  left: 7%;
+  font-size: 43px;
+}
+#text-1 {
+  cursor: pointer;
+  font-size: 43px;
+  position: absolute;
+  right: 20%;
+  top: 30%;
 }

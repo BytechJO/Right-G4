@@ -5,9 +5,9 @@ import ValidationAlert from "../../Popup/ValidationAlert";
 // ─────────────────────────────────────────────
 //  🖼️  IMAGES
 // ─────────────────────────────────────────────
-import img1 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 2 Welcome to the Big Apple Folder/Page 15/SVG/Asset 7.svg";
+import img1 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 2 Welcome to the Big Apple Folder/Page 15/SVG/Asset 6.svg";
 import img2 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 2 Welcome to the Big Apple Folder/Page 15/SVG/Asset 7.svg";
-import img3 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 2 Welcome to the Big Apple Folder/Page 15/SVG/Asset 7.svg";
+import img3 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 2 Welcome to the Big Apple Folder/Page 15/SVG/Asset 8.svg";
 
 // ─────────────────────────────────────────────
 //  🎨  COLORS
@@ -62,7 +62,7 @@ const ITEMS = [
       { type: "text",  value: "?" },
     ],
     Aparts: [
-      { type: "input", key: "3a", correct: ["They're going to go to a farm", "They're going to go to a farm."], answer: "They're going to go to a farm" },
+      { type: "input", key: "3a", correct: ["They're going to go to a farm", "Theyre going to go to a farm.", "They are going to go to a farm."], answer: "They're going to go to a farm" },
       { type: "text",  value: "." },
     ],
   },
@@ -228,19 +228,16 @@ export default function WB_ReadWrite_QE() {
           width: 100%;
           background: transparent;
           border: none;
-          border-bottom: 2px solid ${INPUT_UNDERLINE_DEFAULT};
+          border-bottom: 1px solid ${INPUT_UNDERLINE_DEFAULT};
           outline: none;
           font-size: clamp(13px, 1.6vw, 19px);
           color: ${INPUT_TEXT_COLOR};
-          padding: 4px 4px 5px;
-          line-height: 1;
+          line-height: 1.5;
           box-sizing: border-box;
-          font-family: inherit;
           transition: border-color 0.2s;
         }
         .rwqe-input:disabled   { opacity: 1; cursor: default; }
         .rwqe-input--wrong     { border-bottom-color: ${INPUT_UNDERLINE_WRONG}; }
-        .rwqe-input--answer    { color: ${INPUT_ANSWER_COLOR}; }
 
         .rwqe-badge {
           position: absolute;

@@ -5,12 +5,13 @@ import ValidationAlert from "../../Popup/ValidationAlert";
 // ─────────────────────────────────────────────
 //  🖼️  IMAGES
 // ─────────────────────────────────────────────
-import img1 from  "../../../assets/imgs/pages/Class Book/Right 4 Unit 2 Welcome to the Big Apple Folder/Page 15/SVG/Asset 17.svg";
-import img2 from  "../../../assets/imgs/pages/Class Book/Right 4 Unit 2 Welcome to the Big Apple Folder/Page 15/SVG/Asset 17.svg";
-import img3 from  "../../../assets/imgs/pages/Class Book/Right 4 Unit 2 Welcome to the Big Apple Folder/Page 15/SVG/Asset 17.svg";
-import img4 from  "../../../assets/imgs/pages/Class Book/Right 4 Unit 2 Welcome to the Big Apple Folder/Page 15/SVG/Asset 17.svg";
-import img5 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 2 Welcome to the Big Apple Folder/Page 15/SVG/Asset 17.svg";
+import img1 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 2 Welcome to the Big Apple Folder/Page 14/SVG/Asset 10.svg";
+import img2 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 2 Welcome to the Big Apple Folder/Page 14/SVG/Asset 11.svg"
+import img3 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 2 Welcome to the Big Apple Folder/Page 14/SVG/Asset 12.svg"
+import img4 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 2 Welcome to the Big Apple Folder/Page 14/SVG/Asset 13.svg"
+import img5 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 2 Welcome to the Big Apple Folder/Page 14/SVG/Asset 14.svg"
 
+// ─────────────────────────────────────────────
 //  🎨  COLORS
 // ─────────────────────────────────────────────
 const INPUT_UNDERLINE_DEFAULT = "#3f3f3f";
@@ -18,23 +19,20 @@ const INPUT_UNDERLINE_WRONG   = "#ef4444";
 const INPUT_TEXT_COLOR        = "#2b2b2b";
 const INPUT_ANSWER_COLOR      = "#c81e1e";
 const NUMBER_COLOR            = "#2b2b2b";
-const WORD_BANK_BG            = "#e8eff1";
-const WORD_BANK_BORDER        = "#e8eff1";
 const WRONG_BADGE_BG          = "#ef4444";
 const WRONG_BADGE_TEXT        = "#ffffff";
 
 // ─────────────────────────────────────────────
 //  📝  EXERCISE DATA
 // ─────────────────────────────────────────────
-const WORD_BANK = ["learn", "robot", "drive", "buildings"];
+const WORD_BANK = ["summer", "Statue of Liberty", "Australia", "New York City", "mall"];
 
 const ITEMS = [
-  { id: 1, src: img1, correct: ["learn"],     answer: "learn"     },
-  { id: 2, src: img2, correct: ["buildings"], answer: "buildings" },
-  { id: 3, src: img3, correct: ["drive"],     answer: "drive"     },
-  { id: 4, src: img4, correct: ["robot"],     answer: "robot"     },
-  { id: 5, src: img5, correct: ["robot"],     answer: "robot"     },
-
+  { id: 1, src: img1, correct: ["summer"],            answer: "summer"            },
+  { id: 2, src: img2, correct: ["mall"],              answer: "mall"              },
+  { id: 3, src: img3, correct: ["Australia"],         answer: "Australia"         },
+  { id: 4, src: img4, correct: ["New York City"],     answer: "New York City"     },
+  { id: 5, src: img5, correct: ["Statue of Liberty"], answer: "Statue of Liberty" },
 ];
 
 // ─────────────────────────────────────────────
@@ -49,7 +47,7 @@ const isCorrect = (userVal, correctArr) =>
 // ─────────────────────────────────────────────
 //  COMPONENT
 // ─────────────────────────────────────────────
-export default function WB_ReadLookWrite_QA() {
+export default function WB_ReadLookWrite_QA_5() {
   const [answers,     setAnswers]     = useState({});
   const [showResults, setShowResults] = useState(false);
   const [showAns,     setShowAns]     = useState(false);
@@ -102,105 +100,104 @@ export default function WB_ReadLookWrite_QA() {
     <div className="main-container-component">
       <style>{`
         /* ── Word bank ── */
-        .rlwa-bank {
+        .rlwa5-bank {
           display: flex;
           flex-wrap: wrap;
-          gap: clamp(8px, 1.2vw, 16px);
+          gap: clamp(8px, 1.2vw, 14px);
           justify-content: space-around;
           width: 100%;
+              margin-bottom: 4%;
+
         }
 
-        .rlwa-pill {
-          border: 2px solid ${WORD_BANK_BORDER};
-          border-radius: 8px;
-          padding: clamp(4px, 0.5vw, 7px) clamp(14px, 2vw, 24px);
-          font-size: clamp(14px, 1.7vw, 20px);
-          font-weight: 400;
+        .rlwa5-pill {
+          border: 2px solid #e8eff1;
+          border-radius: 10px;
+          padding: clamp(5px, 0.6vw, 8px) clamp(16px, 2.2vw, 16px);
+          font-size: clamp(16px, 1.7vw, 16px);
           color: #2b2b2b;
-          background: ${WORD_BANK_BG};
+          background: #e8eff1;
           white-space: nowrap;
           user-select: none;
-              margin-right: -7%;
-
         }
 
-        /* ── Images row ── */
-        .rlwa-grid {
+        /* ── 5-col grid ── */
+        .rlwa5-grid {
           display: grid;
-          grid-template-columns: repeat(${ITEMS.length}, 1fr);
-          gap: clamp(30px, 1.4vw, 20px);
+          grid-template-columns: repeat(5, 1fr);
+          gap: clamp(30px, 1.2vw, 30px);
           width: 100%;
         }
 
-        /* Single card: (num+img) on top, input below */
-        .rlwa-card {
+        /* Single card */
+        .rlwa5-card {
           display: flex;
           flex-direction: column;
           align-items: center;
           gap: clamp(5px, 0.7vw, 8px);
         }
 
-        /* num + img side by side */
-        .rlwa-img-row {
+        /* num + img row */
+        .rlwa5-img-row {
           display: flex;
           align-items: flex-start;
-          gap: clamp(3px, 0.4vw, 6px);
+          gap: clamp(3px, 0.4vw, 5px);
           width: 100%;
         }
 
-        .rlwa-num {
+        .rlwa5-num {
           font-size: clamp(13px, 1.5vw, 18px);
           font-weight: 700;
           color: ${NUMBER_COLOR};
           flex-shrink: 0;
-          line-height: 1.5;
+          line-height: 1;
+          padding-top: 2px;
         }
 
-        .rlwa-img {
+        .rlwa5-img {
           flex: 1;
           width: 100%;
+          height : auto ;
           object-fit: cover;
           display: block;
-          height : auto ; 
         }
 
         /* Input wrap */
-        .rlwa-input-wrap {
+        .rlwa5-input-wrap {
           position: relative;
-          width: 90%;
-                        margin-right: -15%;
-
+          width: 100%;
+          left : 15px ;
         }
 
-        .rlwa-input {
+        .rlwa5-input {
           width: 100%;
           background: transparent;
           border: none;
           border-bottom: 1px solid ${INPUT_UNDERLINE_DEFAULT};
           outline: none;
-          font-size: clamp(13px, 1.6vw, 19px);
+          font-size: clamp(12px, 1.4vw, 17px);
           color: ${INPUT_TEXT_COLOR};
           line-height: 1.5;
           box-sizing: border-box;
           transition: border-color 0.2s;
           text-align: center;
-
+          padding: 4px 2px;
         }
-        .rlwa-input:disabled   { opacity: 1; cursor: default; }
-        .rlwa-input--wrong     { border-bottom-color: ${INPUT_UNDERLINE_WRONG}; }
-        .rlwa-input--answer    { color: ${INPUT_ANSWER_COLOR}; }
+        .rlwa5-input:disabled   { opacity: 1; cursor: default; }
+        .rlwa5-input--wrong     { border-bottom-color: ${INPUT_UNDERLINE_WRONG}; }
+        .rlwa5-input--answer    { color: ${INPUT_ANSWER_COLOR}; }
 
         /* ✕ badge */
-        .rlwa-badge {
+        .rlwa5-badge {
           position: absolute;
           top: -8px; right: 0;
-          width: clamp(16px, 1.8vw, 20px);
-          height: clamp(16px, 1.8vw, 20px);
+          width: clamp(15px, 1.7vw, 19px);
+          height: clamp(15px, 1.7vw, 19px);
           border-radius: 50%;
           background: ${WRONG_BADGE_BG};
           color: ${WRONG_BADGE_TEXT};
           display: flex; align-items: center; justify-content: center;
-          font-size: clamp(8px, 0.9vw, 11px);
+          font-size: clamp(7px, 0.8vw, 10px);
           font-weight: 700;
           border: 2px solid #fff;
           box-shadow: 0 2px 6px rgba(0,0,0,0.2);
@@ -209,14 +206,17 @@ export default function WB_ReadLookWrite_QA() {
         }
 
         /* Buttons */
-        .rlwa-buttons {
+        .rlwa5-buttons {
           display: flex;
           justify-content: center;
           margin-top: clamp(8px, 1.6vw, 18px);
         }
 
-        @media (max-width: 480px) {
-          .rlwa-grid { grid-template-columns: repeat(2, 1fr); }
+        @media (max-width: 560px) {
+          .rlwa5-grid { grid-template-columns: repeat(3, 1fr); }
+        }
+        @media (max-width: 380px) {
+          .rlwa5-grid { grid-template-columns: repeat(2, 1fr); }
         }
       `}</style>
 
@@ -238,38 +238,41 @@ export default function WB_ReadLookWrite_QA() {
           <span className="WB-ex-A">A</span>
           Read, look, and write. Use the words below.
         </h1>
+<div
+        style={{
+   
+          margin: "8% 0",
+        }}
+      >
 
-        {/* ── Word bank ── */}
-        <div style={{margin : "7% 0 "}}   >
-
-        <div className="rlwa-bank " style={{marginBottom : " 5% "}}  >
+        <div className="rlwa5-bank">
           {WORD_BANK.map((w) => (
-            <div key={w} className="rlwa-pill">{w}</div>
+            <div key={w} className="rlwa5-pill">{w}</div>
           ))}
         </div>
 
-        {/* ── Images + inputs ── */}
-        <div className="rlwa-grid">
+        {/* ── 5 images ── */}
+        <div className="rlwa5-grid">
           {ITEMS.map((item) => {
             const wrong    = isWrong(item);
             const value    = answers[item.id] || "";
             const tColor   = showAns ? INPUT_ANSWER_COLOR : INPUT_TEXT_COLOR;
             const uColor   = wrong ? INPUT_UNDERLINE_WRONG : INPUT_UNDERLINE_DEFAULT;
             const disabled = isDisabled(item);
-            
+
             return (
-              <div key={item.id} className="rlwa-card">
-                <div className="rlwa-img-row">
-                  <span className="rlwa-num">{item.id}</span>
-                  <img src={item.src} alt={`img-${item.id}`} className="rlwa-img" />
+              <div key={item.id} className="rlwa5-card">
+                <div className="rlwa5-img-row">
+                  <span className="rlwa5-num">{item.id}</span>
+                  <img src={item.src} alt={`img-${item.id}`} className="rlwa5-img" />
                 </div>
-                <div className="rlwa-input-wrap">
+                <div className="rlwa5-input-wrap">
                   <input
                     type="text"
                     className={[
-                      "rlwa-input",
-                      wrong   ? "rlwa-input--wrong"  : "",
-                      showAns ? "rlwa-input--answer" : "",
+                      "rlwa5-input",
+                      wrong   ? "rlwa5-input--wrong"  : "",
+                      showAns ? "rlwa5-input--answer" : "",
                     ].filter(Boolean).join(" ")}
                     value={value}
                     disabled={disabled}
@@ -278,7 +281,7 @@ export default function WB_ReadLookWrite_QA() {
                     spellCheck={false}
                     autoComplete="off"
                   />
-                  {wrong && <div className="rlwa-badge">✕</div>}
+                  {wrong && <div className="rlwa5-badge">✕</div>}
                 </div>
               </div>
             );
@@ -286,14 +289,14 @@ export default function WB_ReadLookWrite_QA() {
         </div>
 
         {/* ── Buttons ── */}
-        <div className="rlwa-buttons">
+        <div className="rlwa5-buttons">
           <Button
             checkAnswers={handleCheck}
             handleShowAnswer={handleShowAnswer}
             handleStartAgain={handleReset}
           />
         </div>
-            </div>
+      </div>
       </div>
     </div>
   );
