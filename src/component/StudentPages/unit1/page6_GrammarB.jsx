@@ -1,52 +1,79 @@
-import React, { useState } from "react";
-import { FaCheck, FaRedo, FaEye } from "react-icons/fa";
+import { useState } from "react";
 import ValidationAlert from "../../Popup/ValidationAlert";
+import { FaCheck, FaRedo, FaEye } from "react-icons/fa";
 
 const GrammarB = () => {
-  const correct = ["How long", "How much", "How far", "How high"];
-
   const questions = [
-    "are your fingernails?",
-    "does this cost?",
-    "can you run?",
-    "can you climb?",
+    {
+      symbol: "✓",
+      pronoun: "she",
+      place: "market",
+      answers: [
+        "She will go to the market.",
+        "She will go to the market",
+      ],
+    },
+    {
+      symbol: "✗",
+      pronoun: "you",
+      place: "playground",
+      answers: [
+        "You won't go to the playground.",
+        "You wont go to the playground",
+        "You willnot go to the playground.",
+        "You will not go to the playground",
+      ],
+    },
+    {
+      symbol: "✓",
+      pronoun: "I",
+      place: "swimming pool",
+      answers: [
+        "I will go to the swimming pool.",
+        "I will go to the swimming pool",
+      ],
+    },
   ];
 
-  const [answers, setAnswers] = useState(["", "", "", ""]);
-  const [errors, setErrors] = useState([]);
+  const [answers, setAnswers] = useState(Array(questions.length).fill(""));
+  const [errors, setErrors] = useState({});
   const [locked, setLocked] = useState(false);
+  const [showed, setShowed] = useState(false);
 
-  // 🔥 normalize
-  const normalize = (text) => {
-    return text.trim().toLowerCase().replace(/\.$/, "").replace(/\s+/g, " ");
+  const handleChange = (index, value) => {
+    if (locked || errors[index] === false) return;
+    const updated = [...answers];
+    updated[index] = value;
+    setAnswers(updated);
   };
 
-  // ✅ CHECK
   const handleCheck = () => {
     if (locked) return;
 
-    const isEmpty = answers.some((a) => !a || a.trim() === "");
-
+    const isEmpty = answers.some((a) => a.trim() === "");
     if (isEmpty) {
-      ValidationAlert.info("Please complete all fields.");
+      ValidationAlert.info("Please answer all questions.");
       return;
     }
 
     let correctCount = 0;
-    const newErrors = [];
+    const newErrors = {};
 
     answers.forEach((ans, i) => {
-      if (normalize(ans) === normalize(correct[i])) {
+      const isCorrect = questions[i].answers.some(
+        (a) => a.toLowerCase() === ans.trim().toLowerCase()
+      );
+      if (isCorrect) {
         correctCount++;
-        newErrors[i] = false; // ✅
+        newErrors[i] = false;
       } else {
-        newErrors[i] = true; // ❌
+        newErrors[i] = true;
       }
     });
 
     setErrors(newErrors);
 
-    const total = correct.length;
+    const total = questions.length;
     const color =
       correctCount === total ? "green" : correctCount === 0 ? "red" : "orange";
 
@@ -68,85 +95,112 @@ const GrammarB = () => {
     }
   };
 
-  // 👁️ SHOW
   const handleShow = () => {
-    setAnswers(correct);
-    setErrors([]); // 🔥 يمسح الأخطاء
+    setAnswers(questions.map((q) => q.answers[0]));
+    setErrors({});
     setLocked(true);
+    setShowed(true);
   };
 
-  // 🔄 RESET
   const handleReset = () => {
-    setAnswers(["", "", "", ""]);
-    setErrors([]);
+    setAnswers(Array(questions.length).fill(""));
+    setErrors({});
     setLocked(false);
+    setShowed(false);
   };
-
-  const renderInput = (i) => (
-    <span className="relative inline-block mx-2">
-      <input
-        value={answers[i]}
-        disabled={locked || errors[i] === false}
-        onChange={(e) => {
-          const updated = [...answers];
-          updated[i] = e.target.value;
-          setAnswers(updated);
-        }}
-        className={`border-b outline-none w-[210px] text-center text-[#6D2980] font-semibold pr-6
-          ${errors[i] ? "border-red-500" : "border-black"}
-        `}
-      />
-
-      {/* ❌ X */}
-      {errors[i] && (
-        <div
-          style={{
-            position: "absolute",
-            top: "15px",
-            left: "250%",
-            transform: "translateY(-50%)",
-            width: "22px",
-            height: "22px",
-            background: "#ef4444",
-            color: "white",
-            borderRadius: "50%",
-            fontSize: "12px",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            fontWeight: "bold",
-            border: "2px solid white",
-            boxShadow: "0 1px 6px rgba(0,0,0,0.2)",
-            pointerEvents: "none",
-          }}
-        >
-          ✕
-        </div>
-      )}
-    </span>
-  );
 
   return (
-    <div>
-      {/* Title */}
-      <h5 className="header-title-page8-read mb-12">
+    <div className="mb-6 mx-auto">
+      <h5 className="header-title-page8-read mb-8">
         <span className="ex-A-read mr-2">B</span>
-        Read and complete the questions.
+        Read and write. Write the sentence using{" "}
+        <span className="text-[#f89631] font-bold">will</span> or{" "}
+        <span className="text-[#f89631] font-bold">won't</span>.
       </h5>
 
-      {/* Questions */}
-      <div className="grid grid-cols-2 gap-x-20 gap-y-12 text-[15px] mt-15">
+      <div className="flex flex-col gap-5">
         {questions.map((q, i) => (
-          <div key={i}>
-            <span className="font-bold mr-1">{i + 1}</span>
-            {renderInput(i)} {q}
+          <div key={i} className="flex items-center gap-4">
+            {/* Number */}
+            <span
+              style={{
+                fontWeight: "400",
+                WebkitTextStroke: "1px black",
+                color: "#1a1a1a",
+                minWidth: "18px",
+              }}
+            >
+              {i + 1}
+            </span>
+
+            {/* Symbol ✓ or ✗ */}
+            <span
+              style={{
+                fontSize: "30px",
+                fontWeight: "bold",
+                color: "#ff0000ff",
+                minWidth: "20px",
+              }}
+            >
+              {q.symbol}
+            </span>
+
+            {/* Pronoun */}
+            <span className="text-[18px] min-w-[40px]">{q.pronoun}</span>
+
+            {/* Place */}
+            <span className="text-[18px] min-w-[100px]">{q.place}</span>
+
+            {/* Input */}
+            <div className="relative flex items-center flex-1">
+              <input
+                style={{ fontSize: "18px" }}
+                type="text"
+                disabled={locked || errors[i] === false}
+                value={answers[i]}
+                onChange={(e) => handleChange(i, e.target.value)}
+                autoComplete="off"
+                className={`w-full px-2 py-1 border-b-1 bg-transparent outline-none transition disabled:pointer-events-none
+                  ${
+                    errors[i] === true
+                      ? "border-red-500 text-gray-800"
+                      : showed
+                      ? "border-[#333] text-red-500"
+                      : "border-[#333] text-gray-800"
+                  }
+                `}
+              />
+
+              {/* ❌ Error Badge */}
+              {errors[i] === true && (
+                <div
+                  style={{
+                    position: "absolute",
+                    right: "-28px",
+                    width: "22px",
+                    height: "22px",
+                    background: "#ef4444",
+                    color: "white",
+                    borderRadius: "50%",
+                    fontSize: "12px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontWeight: "bold",
+                    border: "2px solid white",
+                    boxShadow: "0 1px 6px rgba(0,0,0,0.2)",
+                  }}
+                >
+                  ✕
+                </div>
+              )}
+            </div>
           </div>
         ))}
       </div>
 
       {/* Buttons */}
       <div className="flex justify-center gap-6 mt-8">
-        {/* Reset */}
         <div className="relative group">
           <div
             onClick={handleReset}
@@ -161,7 +215,6 @@ const GrammarB = () => {
           </span>
         </div>
 
-        {/* Show */}
         <div className="relative group">
           <div
             onClick={handleShow}
@@ -176,7 +229,6 @@ const GrammarB = () => {
           </span>
         </div>
 
-        {/* Check */}
         <div className="relative group">
           <div
             onClick={handleCheck}

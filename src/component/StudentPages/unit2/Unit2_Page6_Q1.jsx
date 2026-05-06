@@ -5,10 +5,10 @@ import ValidationAlert from "../../Popup/ValidationAlert";
 // ─────────────────────────────────────────────
 //  🖼️  IMAGES
 // ─────────────────────────────────────────────
-import imgJapan  from "../../../assets/imgs/pages/Class Book/Right 4 Unit 2 Welcome to the Big Apple Folder/Page 15/SVG/Asset 2.svg";
-import imgRussia from "../../../assets/imgs/pages/Class Book/Right 4 Unit 2 Welcome to the Big Apple Folder/Page 15/SVG/Asset 2.svg";
-import imgUK     from "../../../assets/imgs/pages/Class Book/Right 4 Unit 2 Welcome to the Big Apple Folder/Page 15/SVG/Asset 2.svg";
-import imgAus    from "../../../assets/imgs/pages/Class Book/Right 4 Unit 2 Welcome to the Big Apple Folder/Page 15/SVG/Asset 2.svg";
+import imgJapan  from "../../../assets/imgs/pages/Class Book/Right 4 Unit 2 Welcome to the Big Apple Folder/Page 15/SVG/Asset 15.svg";
+import imgRussia from "../../../assets/imgs/pages/Class Book/Right 4 Unit 2 Welcome to the Big Apple Folder/Page 15/SVG/Asset 16.svg";
+import imgUK     from "../../../assets/imgs/pages/Class Book/Right 4 Unit 2 Welcome to the Big Apple Folder/Page 15/SVG/Asset 17.svg";
+import imgAus    from "../../../assets/imgs/pages/Class Book/Right 4 Unit 2 Welcome to the Big Apple Folder/Page 15/SVG/Asset 18.svg";
 
 // ─────────────────────────────────────────────
 //  🎨  COLORS

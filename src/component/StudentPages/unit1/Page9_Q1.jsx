@@ -5,14 +5,14 @@ import ValidationAlert from "../../Popup/ValidationAlert";
 // ─────────────────────────────────────────────
 //  🖼️  IMAGES
 // ─────────────────────────────────────────────
-import img1a from "../../../assets/imgs/pages/Class Book/Right 4 Unit 1 Robots of the Future Folder/Page9/1-01.svg";
-import img1b from "../../../assets/imgs/pages/Class Book/Right 4 Unit 1 Robots of the Future Folder/Page9/1-01.svg";
-import img2a from "../../../assets/imgs/pages/Class Book/Right 4 Unit 1 Robots of the Future Folder/Page9/1-01.svg";
-import img2b from "../../../assets/imgs/pages/Class Book/Right 4 Unit 1 Robots of the Future Folder/Page9/1-01.svg";
-import img3a from "../../../assets/imgs/pages/Class Book/Right 4 Unit 1 Robots of the Future Folder/Page9/1-01.svg";
-import img3b from "../../../assets/imgs/pages/Class Book/Right 4 Unit 1 Robots of the Future Folder/Page9/1-01.svg";
-import img4a from"../../../assets/imgs/pages/Class Book/Right 4 Unit 1 Robots of the Future Folder/Page9/1-01.svg";
-import img4b from "../../../assets/imgs/pages/Class Book/Right 4 Unit 1 Robots of the Future Folder/Page9/1-01.svg";
+import img1a from "../../../assets/imgs/pages/Class Book/Right 4 Unit 1 Robots of the Future Folder/Page9/SVG/Asset 24.svg";
+import img1b from "../../../assets/imgs/pages/Class Book/Right 4 Unit 1 Robots of the Future Folder/Page9/SVG/Asset 23.svg";
+import img2a from "../../../assets/imgs/pages/Class Book/Right 4 Unit 1 Robots of the Future Folder/Page9/SVG/Asset 22.svg";
+import img2b from "../../../assets/imgs/pages/Class Book/Right 4 Unit 1 Robots of the Future Folder/Page9/SVG/Asset 21.svg";
+import img3a from "../../../assets/imgs/pages/Class Book/Right 4 Unit 1 Robots of the Future Folder/Page9/SVG/Asset 20.svg";
+import img3b from "../../../assets/imgs/pages/Class Book/Right 4 Unit 1 Robots of the Future Folder/Page9/SVG/Asset 19.svg";
+import img4a from"../../../assets/imgs/pages/Class Book/Right 4 Unit 1 Robots of the Future Folder/Page9/SVG/Asset 18.svg";
+import img4b from "../../../assets/imgs/pages/Class Book/Right 4 Unit 1 Robots of the Future Folder/Page9/SVG/Asset 17.svg";
 
 // ─────────────────────────────────────────────
 //  🎨  COLORS
@@ -34,7 +34,7 @@ const ITEMS = [
   { id: 1, sentence: "Sarah will go to the beach tomorrow.", imgA: img1a, imgB: img1b, correctSide: "a" },
   { id: 2, sentence: "Stella will study for her test.",       imgA: img2a, imgB: img2b, correctSide: "b" },
   { id: 3, sentence: "They will eat at a restaurant.",        imgA: img3a, imgB: img3b, correctSide: "a" },
-  { id: 4, sentence: "They will watch a movie at the cinema.", imgA: img4a, imgB: img4b, correctSide: "b" },
+  { id: 4, sentence: "They will watch a movie at the cinema.", imgA: img4a, imgB: img4b, correctSide: "a" },
 ];
 
 // ─────────────────────────────────────────────
@@ -147,8 +147,6 @@ export default function WB_ReadLookWriteCheckCross_QD() {
           position: relative;
           cursor: pointer;
           user-select: none;
-          border: 2px solid ${IMG_BORDER};
-          border-radius: 8px;
           overflow: hidden;
           width: clamp(100px, 14vw, 180px);
         }
@@ -156,7 +154,6 @@ export default function WB_ReadLookWriteCheckCross_QD() {
 
         .rlcc-img {
           width: 100%;
-          aspect-ratio: 4/3;
           object-fit: cover;
           display: block;
                     height : auto
@@ -172,8 +169,11 @@ export default function WB_ReadLookWriteCheckCross_QD() {
           height: clamp(24px, 3.2vw, 38px);
           border-radius: 8px 0 8px 0;
           background: #fff;
-          border-top: 2px solid #ccc;
-          border-left: 2px solid #ccc;
+          border-top: 2px solid #2195a6;
+          border-left: 2px solid #2195a6;
+          border-right: 2px solid #2195a6;
+          border-bottom: 2px solid #2195a6;
+
           display: flex;
           align-items: center;
           justify-content: center;
@@ -186,7 +186,7 @@ export default function WB_ReadLookWriteCheckCross_QD() {
         /* ✕ wrong badge */
         .rlcc-wrong-badge {
           position: absolute;
-          top: -7px; right: -7px;
+          top: -10px; right: 25px;
           width: clamp(15px, 1.7vw, 19px);
           height: clamp(15px, 1.7vw, 19px);
           border-radius: 50%;
@@ -214,7 +214,7 @@ export default function WB_ReadLookWriteCheckCross_QD() {
           font-weight: 700;
           color: ${NUMBER_COLOR};
           flex-shrink: 0;
-          line-height: 1;
+          line-height: 1.5;
         }
 
         .rlcc-sentence {
@@ -251,11 +251,11 @@ export default function WB_ReadLookWriteCheckCross_QD() {
           style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
         >
           <span className="WB-ex-A">D</span>
-          Read, look, and write ✓ and ✕.
+          Read, look, and write<span className="text-[#ff0000ff] font-bold"> ✓ </span>and<span className="text-[#ff0000ff] font-bold"> ✕</span>.
         </h1>
 
         {/* ── Items ── */}
-        <div className="rlcc-list">
+        <div className="rlcc-list" style={{margin : "1% 0"}} >
           {ITEMS.map((item) => (
             <div key={item.id} className="rlcc-row">
 
@@ -274,7 +274,7 @@ export default function WB_ReadLookWriteCheckCross_QD() {
                       onClick={() => handleSelect(item.id, side)}
                     >
                       <img src={src} alt={`${item.id}${side}`} className="rlcc-img" />
-                      <div className="rlcc-symbol" style={{ color: sym ? color : "transparent", borderColor: "#ccc" }}>
+                      <div className="rlcc-symbol" style={{ color: sym ? color : "transparent" }}>
                         {sym || ""}
                         {wrong && <div className="rlcc-wrong-badge">✕</div>}
                       </div>
@@ -285,7 +285,11 @@ export default function WB_ReadLookWriteCheckCross_QD() {
 
               {/* Number + Sentence */}
               <div className="rlcc-right">
-                <span className="rlcc-num">{item.id}</span>
+                <span className="rlcc-num" style={{  fontSize: "clamp(15px, 1.8vw, 22px);",
+          fontWeight: "700",
+          color:` ${NUMBER_COLOR}`,
+          lineHeight:" 1.5", 
+          marginRight : "5px"}}>{item.id}</span>
                 <span className="rlcc-sentence">{item.sentence}</span>
               </div>
 

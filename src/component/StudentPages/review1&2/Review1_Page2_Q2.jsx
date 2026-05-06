@@ -1,218 +1,339 @@
 import React, { useState } from "react";
-import ValidationAlert from "../../Popup/ValidationAlert";
-import WrongMark from "../../WrongMark";
-
-import img1 from "../../../assets/imgs/pages/classbook/Right 3 Unit 2 Summer Vacation Folder/Pahe 17/Ex D 1.svg";
-import img2 from "../../../assets/imgs/pages/classbook/Right 3 Unit 2 Summer Vacation Folder/Pahe 17/Ex D 2.svg";
-import img3 from "../../../assets/imgs/pages/classbook/Right 3 Unit 2 Summer Vacation Folder/Pahe 17/Ex D 3.svg";
-import img4 from "../../../assets/imgs/pages/classbook/Right 3 Unit 2 Summer Vacation Folder/Pahe 17/Ex D 4.svg";
-
-import blue from "../../../assets/audio/ClassBook/Unit 2/P 17/unit2-pg17-EXD.mp3";
-
 import Button from "../../Button";
-import QuestionAudioPlayer from "../../QuestionAudioPlayer";
-const Review1_Page2_Q2 = () => {
-  const items = [
-    { img: img1, correct: "no" },
-    { img: img2, correct: "no" },
-    { img: img3, correct: "yes" },
-    { img: img4, correct: "yes" },
-  ];
+import ValidationAlert from "../../Popup/ValidationAlert";
 
-  const [selected, setSelected] = useState(Array(items.length).fill(""));
-  const [locked, setLocked] = useState(false);
-  const captions = [
-    {
-      start: 0.419,
-      end: 19.079,
-      text: "Page 17, review one, exercise D. Does it have a long vowel sound? Listen and write check or X. One, sit. Two, desk. Three, dates. Four, green.",
-    },
-  ];
-  const choose = (i, value) => {
-    if (locked) return;
+// ─────────────────────────────────────────────
+//  🖼️  IMAGES
+// ─────────────────────────────────────────────
+import img1 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 2 Welcome to the Big Apple Folder/Page 17/SVG/Asset 27.svg";
+import img2 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 2 Welcome to the Big Apple Folder/Page 17/SVG/Asset 28.svg";
+import img3 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 2 Welcome to the Big Apple Folder/Page 17/SVG/Asset 29.svg";
 
-    const updated = [...selected];
-    updated[i] = value;
-    setSelected(updated);
+// ─────────────────────────────────────────────
+//  🎨  COLORS
+// ─────────────────────────────────────────────
+const INPUT_UNDERLINE_DEFAULT = "#3f3f3f";
+const INPUT_UNDERLINE_WRONG   = "#ef4444";
+const INPUT_TEXT_COLOR        = "#2b2b2b";
+const INPUT_ANSWER_COLOR      = "#c81e1e";
+const NUMBER_COLOR            = "#2b2b2b";
+const HINT_COLOR              = "#2b2b2b";
+const WRONG_BADGE_BG          = "#ef4444";
+const WRONG_BADGE_TEXT        = "#ffffff";
+
+// ─────────────────────────────────────────────
+//  📝  EXERCISE DATA
+// ─────────────────────────────────────────────
+const ITEMS = [
+  {
+    id:       1,
+    src:      img1,
+    icon:     "check",
+    hint:     "+ they",
+    correctQ: ["Will they go to the moon?", "will they go to the moon"],
+    answerQ:  "Will they go to the moon?",
+    correctA: ["Yes, they will.", "yes they will"],
+    answerA:  "Yes, they will.",
+  },
+  {
+    id:       2,
+    src:      img2,
+    icon:     "cross",
+    hint:     "+ she",
+    correctQ: ["Will she go to the beach?", "will she go to the beach"],
+    answerQ:  "Will she go to the beach?",
+    correctA: ["No, she won't go to the beach.", "No, she won't.", "no she won't go to the beach", "no she won't"],
+    answerA:  "No, she won't go to the beach.",
+  },
+  {
+    id:       3,
+    src:      img3,
+    icon:     "check",
+    hint:     "+ you",
+    correctQ: ["Will you go to the library?", "will you go to the library"],
+    answerQ:  "Will you go to the library?",
+    correctA: ["Yes, I will go to the library.", "Yes, I will.", "yes i will go to the library", "yes i will"],
+    answerA:  "Yes, I will go to the library.",
+  },
+];
+
+// all inputs: Q then A per item
+const ALL_INPUTS = ITEMS.flatMap((item) => [
+  { key: `${item.id}q`, correct: item.correctQ, answer: item.answerQ },
+  { key: `${item.id}a`, correct: item.correctA, answer: item.answerA },
+]);
+
+// ─────────────────────────────────────────────
+//  🔧  NORMALIZE
+// ─────────────────────────────────────────────
+const normalize = (str) =>
+  str.toLowerCase().replace(/[^a-z0-9'\s]/g, "").replace(/\s+/g, " ").trim();
+
+const isCorrect = (userVal, correctArr) =>
+  correctArr.some((c) => normalize(userVal) === normalize(c));
+
+// ─────────────────────────────────────────────
+//  COMPONENT
+// ─────────────────────────────────────────────
+export default function WB_LookWriteQA_QE() {
+  const [answers,     setAnswers]     = useState({});
+  const [showResults, setShowResults] = useState(false);
+  const [showAns,     setShowAns]     = useState(false);
+
+  const handleChange = (key, value) => {
+    if (showAns) return;
+    const inp = ALL_INPUTS.find((i) => i.key === key);
+    if (showResults && inp && isCorrect(answers[key] || "", inp.correct)) return;
+    setAnswers((prev) => ({ ...prev, [key]: value }));
   };
 
-  const checkAnswers = () => {
-    if (locked) return;
-
-    if (selected.includes("")) {
-      ValidationAlert.info();
-      return;
-    }
-
+  const handleCheck = () => {
+    if (showAns) return;
+    const allAnswered = ALL_INPUTS.every((inp) => answers[inp.key]?.trim());
+    if (!allAnswered) { ValidationAlert.info("Please complete all answers first."); return; }
     let score = 0;
+    ALL_INPUTS.forEach((inp) => { if (isCorrect(answers[inp.key] || "", inp.correct)) score++; });
+    setShowResults(true);
+    if (score === ALL_INPUTS.length)   ValidationAlert.success(`Score: ${score} / ${ALL_INPUTS.length}`);
+    else if (score > 0)                ValidationAlert.warning(`Score: ${score} / ${ALL_INPUTS.length}`);
+    else                               ValidationAlert.error(`Score: ${score} / ${ALL_INPUTS.length}`);
+  };
 
-    items.forEach((item, i) => {
-      if (selected[i] === item.correct) score++;
-    });
+  const handleShowAnswer = () => {
+    const filled = {};
+    ALL_INPUTS.forEach((inp) => { filled[inp.key] = inp.answer; });
+    setAnswers(filled);
+    setShowResults(false);
+    setShowAns(true);
+  };
 
-    const total = items.length;
+  const handleReset = () => {
+    setAnswers({});
+    setShowResults(false);
+    setShowAns(false);
+  };
 
-    const color = score === total ? "green" : score === 0 ? "red" : "orange";
+  const getWrong = (key, correctArr) => {
+    if (!showResults || showAns) return false;
+    return !isCorrect(answers[key] || "", correctArr);
+  };
 
-    const msg = `
-      <div style="font-size:20px;text-align:center;">
-        <span style="color:${color};font-weight:bold">
-        Score: ${score} / ${total}
-        </span>
+  const getDisabled = (key, correctArr) => {
+    if (showAns) return true;
+    if (showResults && isCorrect(answers[key] || "", correctArr)) return true;
+    return false;
+  };
+
+  const renderInput = (key, correctArr) => {
+    const wrong    = getWrong(key, correctArr);
+    const value    = answers[key] || "";
+    const tColor   = showAns ? INPUT_ANSWER_COLOR : INPUT_TEXT_COLOR;
+    const uColor   = wrong ? INPUT_UNDERLINE_WRONG : INPUT_UNDERLINE_DEFAULT;
+    const disabled = getDisabled(key, correctArr);
+    return (
+      <div className="lwqa-input-wrap">
+        <input
+          type="text"
+          className={[
+            "lwqa-input",
+            wrong   ? "lwqa-input--wrong"  : "",
+            showAns ? "lwqa-input--answer" : "",
+          ].filter(Boolean).join(" ")}
+          value={value}
+          disabled={disabled}
+          onChange={(e) => handleChange(key, e.target.value)}
+          style={{ borderBottomColor: uColor, color: tColor }}
+          spellCheck={false}
+          autoComplete="off"
+        />
+        {wrong && <div className="lwqa-badge">✕</div>}
       </div>
-    `;
-
-    if (score === total) ValidationAlert.success(msg);
-    else if (score === 0) ValidationAlert.error(msg);
-    else ValidationAlert.warning(msg);
-
-    setLocked(true);
-  };
-
-  const showAnswers = () => {
-    setSelected(items.map((i) => i.correct));
-    setLocked(true);
-  };
-
-  const reset = () => {
-    setSelected(Array(items.length).fill(""));
-    setLocked(false);
+    );
   };
 
   return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        padding: "30px",
-      }}
-    >
-      <div className="div-forall">
-        <h5 className="header-title-page8">
-          <span style={{ marginRight: "20px" }}>D</span>
-          Does it have a{" "}
-          <span style={{ color: "#2e3192" }}>long vowel sound</span>? Listen and
-          write<span style={{ color: "#D52328" }}> ✓ </span>or
-          <span style={{ color: "#D52328" }}> ✗</span>
-        </h5>
-        <QuestionAudioPlayer src={blue} captions={captions} stopAtSecond={11} />
+    <div className="main-container-component">
+      <style>{`
+        /* ── Items list ── */
+        .lwqa-list {
+          display: flex;
+          flex-direction: column;
+          gap: clamp(16px, 2.4vw, 30px);
+          width: 100%;
+        }
 
-        {/* GRID */}
-        <div className="grid grid-cols-4 gap-8 mt-10 justify-items-center">
-          {items.map((item, i) => (
-            <div key={i} className="relative flex flex-col items-center">
-              {/* الرقم */}
-              <span className="absolute -top-2 -left-2 text-lg font-bold">
-                {i + 1}
-              </span>
+        /* Single row: num | img+icon | hint + Q + A */
+        .lwqa-row {
+          display: grid;
+          grid-template-columns: auto auto 1fr;
+          gap: clamp(10px, 1.4vw, 18px);
+          align-items: center;
+        }
 
-              {/* الصورة */}
-              <img
-                src={item.img}
-                style={{
-                  width: "15vw",
-                  height: "15vh",
-                  objectFit: "contain",
-                }}
-              />
+        .lwqa-num {
+          font-size: clamp(15px, 1.8vw, 22px);
+          font-weight: 700;
+          color: ${NUMBER_COLOR};
+          flex-shrink: 0;
+          align-self: flex-start;
+          padding-top: 4px;
+          line-height: 1;
+        }
 
-              <div className="flex gap-3 mt-3 items-center">
-                <div
-                  className="flex items-center gap-1"
-                  style={{ position: "relative" }}
-                >
-                  <button
-                    onClick={() => choose(i, "yes")}
-                    style={{
-                      width: "40px",
-                      height: "40px",
-                      borderRadius: "8px",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      fontSize: "18px",
-                      cursor: "pointer",
+        /* img + icon */
+        .lwqa-img-wrap {
+          position: relative;
+          width: 70%;
+          flex-shrink: 0;
+          overflow: hidden;
+        }
 
-                      background: selected[i] === "yes" ? "#1C398E" : "#fff", // 🔵 دايماً
-                      color: selected[i] === "yes" ? "#fff" : "#000",
+        .lwqa-img {
+          width: 100%;
+height : auto ; 
+          object-fit: cover;
+          display: block;
+        }
 
-                      border: "2px solid #ccc",
-                    }}
-                  >
-                    ✓
-                  </button>
+     
 
-                  {locked &&
-                    selected[i] === "yes" &&
-                    item.correct !== "yes" && (
-                      <div
-                        style={{
-                          position: "absolute",
-                          left: "-35px",
-                          top: "50%",
-                          transform: "translateY(-50%)",
-                          zIndex: 10,
-                        }}
-                      >
-                        <WrongMark />
-                      </div>
-                    )}
-                </div>
+        /* Right side: hint + Q + A */
+        .lwqa-right {
+          display: flex;
+          flex-direction: column;
+          gap: clamp(6px, 0.9vw, 10px);
+          min-width: 0;
+        }
 
-                {/* NO */}
-                <div
-                  className="flex items-center gap-1"
-                  style={{ position: "relative" }}
-                >
-                  <button
-                    onClick={() => choose(i, "no")}
-                    style={{
-                      width: "40px",
-                      height: "40px",
-                      borderRadius: "8px",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      fontSize: "18px",
-                      cursor: "pointer",
+        /* Hint + Q line */
+        .lwqa-q-line {
+          display: flex;
+          align-items: flex-end;
+          gap: clamp(5px, 0.7vw, 8px);
+          min-width: 0;
+        }
 
-                      background: selected[i] === "no" ? "#1C398E" : "#fff",
-                      color: selected[i] === "no" ? "#fff" : "#000",
+        .lwqa-hint {
+          font-size: clamp(13px, 1.6vw, 19px);
+          color: ${HINT_COLOR};
+          white-space: nowrap;
+          flex-shrink: 0;
+          padding-bottom: 4px;
+          line-height: 1;
+        }
 
-                      border: "2px solid #ccc",
-                    }}
-                  >
-                    ✗
-                  </button>
-                  {locked && selected[i] === "no" && item.correct !== "no" && (
-                    <div
-                      style={{
-                        position: "absolute",
-                        left: "35px",
-                        top: "50%",
-                        transform: "translateY(-50%)",
-                        zIndex: 10,
-                      }}
-                    >
-                      <WrongMark />
-                    </div>
-                  )}
-                </div>
+        /* Input wrap */
+        .lwqa-input-wrap {
+          position: relative;
+          flex: 1;
+          min-width: clamp(100px, 14vw, 260px);
+        }
+
+        .lwqa-input {
+          width: 100%;
+          background: transparent;
+          border: none;
+          border-bottom: 1px solid ${INPUT_UNDERLINE_DEFAULT};
+          outline: none;
+          font-size: clamp(13px, 1.6vw, 19px);
+          color: ${INPUT_TEXT_COLOR};
+          line-height: 1;
+          box-sizing: border-box;
+          font-family: inherit;
+          transition: border-color 0.2s;
+        }
+        .lwqa-input:disabled   { opacity: 1; cursor: default; }
+        .lwqa-input--wrong     { border-bottom-color: ${INPUT_UNDERLINE_WRONG}; }
+        .lwqa-input--answer    { color: ${INPUT_ANSWER_COLOR}; }
+
+        /* ✕ badge */
+        .lwqa-badge {
+          position: absolute;
+          top: -8px; right: 0;
+          width: clamp(16px, 1.8vw, 20px);
+          height: clamp(16px, 1.8vw, 20px);
+          border-radius: 50%;
+          background: ${WRONG_BADGE_BG};
+          color: ${WRONG_BADGE_TEXT};
+          display: flex; align-items: center; justify-content: center;
+          font-size: clamp(8px, 0.9vw, 11px);
+          font-weight: 700;
+          border: 2px solid #fff;
+          box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+          pointer-events: none;
+          z-index: 2;
+        }
+
+        /* Buttons */
+        .lwqa-buttons {
+          display: flex;
+          justify-content: center;
+          margin-top: clamp(8px, 1.6vw, 18px);
+        }
+
+        @media (max-width: 500px) {
+          .lwqa-row { grid-template-columns: auto 1fr; grid-template-rows: auto auto; }
+          .lwqa-right { grid-column: 1 / -1; }
+        }
+      `}</style>
+
+      <div
+        className="div-forall"
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: "clamp(14px, 2vw, 22px)",
+          maxWidth: "1100px",
+          margin: "0 auto",
+        }}
+      >
+        {/* ── Header ── */}
+        <h1
+          className="WB-header-title-page8"
+          style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
+        >
+          <span className="WB-ex-A-1">E</span>
+          Look and write a question and an answer.
+        </h1>
+
+        {/* ── Items ── */}
+        <div className="lwqa-list">
+          {ITEMS.map((item) => (
+            <div key={item.id} className="lwqa-row">
+
+              {/* Number */}
+              <span className="lwqa-num">{item.id}</span>
+
+              {/* Image + icon */}
+              <div className="lwqa-img-wrap">
+                <img src={item.src} alt={`img-${item.id}`} className="lwqa-img" />
+           
               </div>
+
+              {/* Hint + Q + A */}
+              <div className="lwqa-right">
+                {/* Question line */}
+                <div className="lwqa-q-line">
+                  <span className="lwqa-hint">{item.hint}</span>
+                  {renderInput(`${item.id}q`, item.correctQ)}
+                </div>
+                {/* Answer line */}
+                {renderInput(`${item.id}a`, item.correctA)}
+              </div>
+
             </div>
           ))}
         </div>
 
-        {/* buttons */}
-        <Button
-          handleShowAnswer={showAnswers}
-          handleStartAgain={reset}
-          checkAnswers={checkAnswers}
-        />
+        {/* ── Buttons ── */}
+        <div className="lwqa-buttons">
+          <Button
+            checkAnswers={handleCheck}
+            handleShowAnswer={handleShowAnswer}
+            handleStartAgain={handleReset}
+          />
+        </div>
       </div>
     </div>
   );
-};
-
-export default Review1_Page2_Q2;
+}

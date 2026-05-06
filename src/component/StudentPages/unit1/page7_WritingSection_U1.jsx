@@ -1,7 +1,6 @@
 import WritingA from "./page7_WritingA";
 import WritingB from "./page7_WritingB";
-import WritingC from "./page7_WritingC";
-import img from "../../../assets/test.svg";
+import img from "../../../assets/imgs/pages/Class Book/Right 4 Unit 1 Robots of the Future Folder/Page7/SVG/Asset 26.svg";
 import SectionBanner from "../SectionBanner";
 
 const WritingSection_U1 = () => {
@@ -10,18 +9,18 @@ const WritingSection_U1 = () => {
       {/* العنوان */}
       <div className="w-[60%] mx-auto mb-4 flex items-center">
               <SectionBanner title="Writing" />
-      </div>
 
+        </div>
       {/* المحتوى */}
-      <div className="flex flex-col  space-y-10">
+      <div className="flex flex-col mb-6">
         <img
           src={img}
           alt=""
-          style={{ width: "auto", height: "500px", objectFit: "contain" }}
-        />
+          style={{ width: "60%", height: "auto", objectFit: "contain" , alignSelf :"center" }}
+        /></div>
+        <div className="flex flex-col gap-6 ">
         <WritingA />
         <WritingB />
-        <WritingC />
       </div>
     </div>
   );

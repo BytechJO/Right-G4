@@ -24,25 +24,18 @@ const GrammarA = () => {
 
           <div>
             <p className=" text-[18px]">
-              The students{" "}
+              She will go to the{" "}
               <span className="text-[#12C8F9]">
                 {" "}
-                who design the best roller coaster{" "}
-              </span>{" "}
-              get a special trophy.
+               theater
+              </span>.
             </p>
 
             <div className="grid grid-cols-3 gap-10 mt-5 text-[17px] w-[900px]">
               <span>
-                <b>1</b> who win the race
+                <b>1</b> beach
               </span>
-              <span>
-                <b>2</b> who help with the charity project
-              </span>
-              <span>
-                <b>3</b> who were on the winning team
-              </span>
-            </div>
+              </div>
           </div>
         </div>
       </div>
@@ -58,23 +51,21 @@ const GrammarA = () => {
 
           <div>
             <p className=" text-[18px]">
-              Did you ride the elephant{" "}
+              I won’t go into the {" "}
               <span className="text-[#12C8F9]">
                 {" "}
-                that has the bells on its feet
-              </span>{" "}
-              ?
+kitchen             </span>. 
             </p>
 
             <div className="grid grid-cols-3 gap-10 mt-5 text-[17px] w-[900px]">
               <span>
-                <b>1</b> that ate the peanuts
+                <b>1</b> living room
               </span>
               <span>
-                <b>2</b> that has the big ears
+                <b>2</b> basement
               </span>
               <span>
-                <b>3</b> that touched me with its trunk
+                <b>3</b> garage
               </span>
             </div>
           </div>

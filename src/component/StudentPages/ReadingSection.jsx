@@ -1,10 +1,10 @@
 import React from "react";
 import QuestionAudioPlayer from "../QuestionAudioPlayer";
 import SectionBanner from "./SectionBanner";
-import think from "../../assets/imgs/think.svg"
 const ReadingSection = ({
   mainTitle,
   image,
+  image1,
   sound,
   captions,
   stopAtSecond,
@@ -18,11 +18,13 @@ const ReadingSection = ({
             {mainTitle}
           </h2>
         </div>
+        <div style={{marginTop:"10px"}}>
         <QuestionAudioPlayer
           src={sound}
           captions={captions}
           stopAtSecond={stopAtSecond}
         />
+      </div>
       </div>
 
       {/* ✅ شلنا الـ title badge والـ paragraphs، والصورة تملأ كل شي */}
@@ -33,21 +35,22 @@ const ReadingSection = ({
         />
       </div>
 
-      <div className="w-[100%]  mt-2">
+      <div className="w-[100%]  my-5">
         <img
           style={{ width: "100%", height: "auto", display: "block" }}
-          src={think}
+          src={image1}
           alt="think"
         />
       </div>
 
-      <div className="mt-3 space-y-6">
+      <div className="mt-3 space-y-6 w-[100%] mb-3">
         <div className="flex items-center gap-4">
           <SectionBanner title="Comprehension" />
-          <h2 style={{ position: "relative", top: "0.5em" }} className="font-bold text-[18px] text-black nowrap">
+          <h2 style={{ display: "flex", flexDirection: "row", gap: "10px", whiteSpace: "nowrap", marginLeft: "auto" }} className="font-bold text-[18px] text-black nowrap">
             {mainTitle}
           </h2>
         </div>
+      
       </div>
     </div>
   );

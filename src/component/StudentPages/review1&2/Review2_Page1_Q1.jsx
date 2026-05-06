@@ -1,298 +1,314 @@
 import React, { useState } from "react";
-import ValidationAlert from "../../Popup/ValidationAlert";
-import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
-import WrongMark from "../../WrongMark";
-
-import img1 from "../../../assets/imgs/pages/classbook/Right 3 Unit 2 Summer Vacation Folder/Pahe 18/Asset 18.svg";
-import img2 from "../../../assets/imgs/pages/classbook/Right 3 Unit 2 Summer Vacation Folder/Pahe 18/Asset 19.svg";
-import img3 from "../../../assets/imgs/pages/classbook/Right 3 Unit 2 Summer Vacation Folder/Pahe 18/Asset 21.svg";
-import img4 from "../../../assets/imgs/pages/classbook/Right 3 Unit 2 Summer Vacation Folder/Pahe 18/Asset 20.svg";
 import Button from "../../Button";
+import ValidationAlert from "../../Popup/ValidationAlert";
 
-const Review2_Page1_Q1 = () => {
-  const questions = [
-    { id: 1, img: img1, correct: "never", sentence: "clean my room." },
-    { id: 2, img: img2, correct: "usually", sentence: "jump rope." },
-    { id: 3, img: img3, correct: "sometimes", sentence: "go to the store." },
-    { id: 4, img: img4, correct: "always", sentence: "go to bed." },
-  ];
+// ─────────────────────────────────────────────
+//  🖼️  IMAGES — a through f
+// ─────────────────────────────────────────────
+import imgA from "../../../assets/imgs/pages/Class Book/Right 4 Unit 2 Welcome to the Big Apple Folder/Page 18/SVG/Asset 30.svg";
+import imgB from "../../../assets/imgs/pages/Class Book/Right 4 Unit 2 Welcome to the Big Apple Folder/Page 18/SVG/Asset 31.svg";
+import imgC from "../../../assets/imgs/pages/Class Book/Right 4 Unit 2 Welcome to the Big Apple Folder/Page 18/SVG/Asset 32.svg";
+import imgD from "../../../assets/imgs/pages/Class Book/Right 4 Unit 2 Welcome to the Big Apple Folder/Page 18/SVG/Asset 35.svg";
+import imgE from "../../../assets/imgs/pages/Class Book/Right 4 Unit 2 Welcome to the Big Apple Folder/Page 18/SVG/Asset 34.svg";
+import imgF from "../../../assets/imgs/pages/Class Book/Right 4 Unit 2 Welcome to the Big Apple Folder/Page 18/SVG/Asset 33.svg";
 
-  const words = ["always", "usually", "sometimes", "never"];
-  const [showResult, setShowResult] = useState(false);
-  const [answers, setAnswers] = useState({});
-  const [locked, setLocked] = useState(false);
-  const onDragEnd = (result) => {
-    if (!result.destination || locked) return;
+// ─────────────────────────────────────────────
+//  🎨  COLORS
+// ─────────────────────────────────────────────
+const INPUT_UNDERLINE_DEFAULT = "#3f3f3f";
+const INPUT_UNDERLINE_WRONG   = "#ef4444";
+const INPUT_TEXT_COLOR        = "#2b2b2b";
+const INPUT_ANSWER_COLOR      = "#c81e1e";
+const NUMBER_COLOR            = "#2b2b2b";
+const WORD_COLOR              = "#2b2b2b";
+const IMG_LABEL_BG            = "#ffffff";
+const IMG_LABEL_BORDER        = "#2b2b2b";
+const WRONG_BADGE_BG          = "#ef4444";
+const WRONG_BADGE_TEXT        = "#ffffff";
 
-    const sentence = result.draggableId;
-    const slotId = result.destination.droppableId;
+// ─────────────────────────────────────────────
+//  📝  EXERCISE DATA
+// ─────────────────────────────────────────────
+const WORDS = [
+  { id: 1, word: "kangaroo",      correct: ["b", "B"], answer: "b" },
+  { id: 2, word: "New York City",    correct: ["c", "C"], answer: "c" },
+  { id: 3, word: "Australia", correct: ["d", "D"], answer: "d" },
+  { id: 4, word: "Japan",   correct: ["a", "A"], answer: "a" },
+  { id: 5, word: "Statue of Liberty",   correct: ["f", "F"], answer: "f" },
+  { id: 6, word: "summer",    correct: ["e", "E"], answer: "e" },
+];
 
-    setAnswers((prev) => ({
-      ...prev,
-      [slotId]: sentence,
-    }));
+const IMAGES = [
+  { label: "a", src: imgA },
+  { label: "b", src: imgB },
+  { label: "c", src: imgC },
+  { label: "d", src: imgD },
+  { label: "e", src: imgE },
+  { label: "f", src: imgF },
+];
+
+// ─────────────────────────────────────────────
+//  🔧  NORMALIZE
+// ─────────────────────────────────────────────
+const isCorrect = (userVal, correctArr) =>
+  correctArr.some((c) => userVal.trim().toLowerCase() === c.toLowerCase());
+
+// ─────────────────────────────────────────────
+//  COMPONENT
+// ─────────────────────────────────────────────
+export default function WB_ReadLookMatch_QJ() {
+  const [answers,     setAnswers]     = useState({});
+  const [showResults, setShowResults] = useState(false);
+  const [showAns,     setShowAns]     = useState(false);
+
+  const handleChange = (id, value) => {
+    if (showAns) return;
+    const item = WORDS.find((w) => w.id === id);
+    if (showResults && item && isCorrect(answers[id] || "", item.correct)) return;
+    if (value.length > 1) return;
+    setAnswers((prev) => ({ ...prev, [id]: value }));
   };
 
-  const checkAnswers = () => {
-    if (locked) return;
-
-    const empty = questions.some((q) => !answers[`slot-${q.id}`]);
-
-    if (empty) {
-      ValidationAlert.info();
-      return;
-    }
-
+  const handleCheck = () => {
+    if (showAns) return;
+    const allAnswered = WORDS.every((w) => answers[w.id]?.trim());
+    if (!allAnswered) { ValidationAlert.info("Please complete all answers first."); return; }
     let score = 0;
-
-    questions.forEach((q) => {
-      if (answers[`slot-${q.id}`] === q.correct) {
-        score++;
-      }
-    });
-
-    const total = questions.length;
-
-    const color = score === total ? "green" : score === 0 ? "red" : "orange";
-
-    const msg = `
-    <div style="font-size:20px;text-align:center;">
-      <span style="color:${color};font-weight:bold">
-        Score: ${score} / ${total}
-      </span>
-    </div>
-  `;
-
-    if (score === total) ValidationAlert.success(msg);
-    else if (score === 0) ValidationAlert.error(msg);
-    else ValidationAlert.warning(msg);
-    setShowResult(true);
-    setLocked(true);
-  };
-  const showAnswers = () => {
-    const correctAnswers = {};
-
-    questions.forEach((q) => {
-      correctAnswers[`slot-${q.id}`] = q.correct;
-    });
-
-    setAnswers(correctAnswers);
-    setLocked(true);
+    WORDS.forEach((w) => { if (isCorrect(answers[w.id] || "", w.correct)) score++; });
+    setShowResults(true);
+    if (score === WORDS.length)   ValidationAlert.success(`Score: ${score} / ${WORDS.length}`);
+    else if (score > 0)           ValidationAlert.warning(`Score: ${score} / ${WORDS.length}`);
+    else                          ValidationAlert.error(`Score: ${score} / ${WORDS.length}`);
   };
 
-  const reset = () => {
+  const handleShowAnswer = () => {
+    const filled = {};
+    WORDS.forEach((w) => { filled[w.id] = w.answer; });
+    setAnswers(filled);
+    setShowResults(false);
+    setShowAns(true);
+  };
+
+  const handleReset = () => {
     setAnswers({});
-    setLocked(false);
-    setShowResult(false);
+    setShowResults(false);
+    setShowAns(false);
+  };
+
+  const isWrong = (w) => {
+    if (!showResults || showAns) return false;
+    return !isCorrect(answers[w.id] || "", w.correct);
+  };
+
+  const isDisabled = (w) => {
+    if (showAns) return true;
+    if (showResults && isCorrect(answers[w.id] || "", w.correct)) return true;
+    return false;
   };
 
   return (
-    <DragDropContext onDragEnd={onDragEnd}>
+    <div className="main-container-component">
+      <style>{`
+        .rlm-layout {
+          display: grid;
+          grid-template-columns: clamp(160px, 22vw, 280px) 1fr;
+          gap: clamp(20px, 3vw, 40px);
+          align-items: start;
+          width: 100%;
+        }
+
+        .rlm-words {
+          display: flex;
+          flex-direction: column;
+          gap: inherit;
+        }
+
+        .rlm-word-row {
+          display: flex;
+          align-items: flex-end;
+          gap: clamp(6px, 0.8vw, 12px);
+
+        }
+
+        .rlm-input-wrap {
+          position: relative;
+          flex-shrink: 0;
+        }
+
+        .rlm-input {
+          width: clamp(100px, 4.5vw, 100px);
+          background: transparent;
+          border: none;
+          border-bottom: 1px solid ${INPUT_UNDERLINE_DEFAULT};
+          outline: none;
+          font-size: clamp(14px, 1.7vw, 20px);
+          font-weight: 700;
+          color: ${INPUT_TEXT_COLOR};
+          text-align: center;
+          box-sizing: border-box;
+          font-family: inherit;
+          transition: border-color 0.2s;
+        }
+        .rlm-input:disabled  { opacity: 1; cursor: default; }
+        .rlm-input--wrong    { border-bottom-color: ${INPUT_UNDERLINE_WRONG}; }
+        .rlm-input--answer   { color: ${INPUT_ANSWER_COLOR}; }
+
+        .rlm-badge {
+          position: absolute;
+          top: -8px; right: -6px;
+          width: clamp(16px, 1.8vw, 20px);
+          height: clamp(16px, 1.8vw, 20px);
+          border-radius: 50%;
+          background: ${WRONG_BADGE_BG};
+          color: ${WRONG_BADGE_TEXT};
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: clamp(8px, 0.9vw, 11px);
+          font-weight: 700;
+          border: 2px solid #fff;
+          box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+          pointer-events: none;
+          z-index: 2;
+        }
+
+        .rlm-num {
+          font-size: clamp(14px, 1.7vw, 20px);
+          font-weight: 700;
+          color: ${NUMBER_COLOR};
+          flex-shrink: 0;
+          line-height: 1;
+          min-width: clamp(12px, 1.4vw, 18px);
+        }
+
+        .rlm-word {
+          font-size: clamp(14px, 1.7vw, 20px);
+          font-weight: 400;
+          color: ${WORD_COLOR};
+          line-height: 1;
+        }
+
+        /* Images grid — aspect-ratio يضمن تساوي الارتفاعات */
+        .rlm-images {
+          display: grid;
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+          gap: clamp(8px, 1.2vw, 16px);
+          align-items: start;
+        }
+
+        .rlm-img-card {
+          position: relative;
+            width: 100%;
+              height: 100%;
+        }
+
+        .rlm-img {
+          width: 100%;
+              height: 100%;
+
+          display: block;
+        }
+
+        .rlm-img-label {
+          position: absolute;
+          top: 4px; right: 4px;
+          width: clamp(20px, 2.4vw, 28px);
+          height: clamp(20px, 2.4vw, 28px);
+          border-radius: 5px;
+          background: ${IMG_LABEL_BG};
+          border: 1.5px solid ${IMG_LABEL_BORDER};
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: clamp(12px, 1.4vw, 16px);
+          font-weight: 700;
+          color: ${IMG_LABEL_BORDER};
+          line-height: 1;
+          user-select: none;
+        }
+
+        .rlm-buttons {
+          display: flex;
+          justify-content: center;
+          margin-top: clamp(8px, 1.6vw, 18px);
+        }
+
+        @media (max-width: 520px) {
+          .rlm-layout { grid-template-columns: 1fr; }
+        }
+      `}</style>
+
       <div
+        className="div-forall"
         style={{
           display: "flex",
           flexDirection: "column",
-          alignItems: "center",
-          padding: "30px",
+          gap: "clamp(14px, 2vw, 22px)",
+          maxWidth: "1100px",
+          margin: "0 auto",
         }}
       >
-        <div className="div-forall">
-          <h5 className="header-title-page8">
-            <span style={{ marginRight: "20px" }}>A</span>
-            Write sentences. Use the words below.
-          </h5>
-          {/* بنك الكلمات */}
-          <Droppable droppableId="bank" direction="horizontal">
-            {(provided) => (
-              <div
-                ref={provided.innerRef}
-                {...provided.droppableProps}
-                className="flex gap-3 p-3 border-2 border-dashed border-gray-300 rounded-xl justify-center mt-3"
-                style={{
-                  display: "flex",
-                  gap: "15px",
-                  flexWrap: "wrap",
-                }}
-              >
-                {words.map((w, index) => {
-                  const isUsed = Object.values(answers).includes(w);
-                  return (
-                    <Draggable
-                      key={w}
-                      draggableId={w}
-                      index={index}
-                      isDragDisabled={locked || isUsed}
-                    >
-                      {(provided) => (
-                        <div
-                          ref={provided.innerRef}
-                          {...provided.draggableProps}
-                          {...provided.dragHandleProps}
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "8px",
-                            background: "#eee",
-                            padding: "6px 10px",
-                            borderRadius: "20px",
-                            cursor: isUsed ? "not-allowed" : "grab",
-                            opacity: isUsed ? 0.4 : 1,
-                            ...provided.draggableProps.style,
-                          }}
-                        >
-                          {/* البار */}
-                          <div style={{ display: "flex" }}>
-                            {[1, 2, 3, 4].map((i) => {
-                              const activeCount =
-                                w === "always"
-                                  ? 4
-                                  : w === "usually"
-                                    ? 3
-                                    : w === "sometimes"
-                                      ? 2
-                                      : 0;
+        <h1
+          className="WB-header-title-page8"
+          style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
+        >
+          <span className="WB-ex-A-1">J</span>
+          Read, look, and match.
+        </h1>
 
-                              return (
-                                <div
-                                  key={i}
-                                  style={{
-                                    width: "12px",
-                                    height: "12px",
-                                    marginRight: "2px",
-                                    background:
-                                      i <= activeCount ? "#ef4444" : "#fff",
-                                    border: "1px solid #ef4444",
-                                  }}
-                                />
-                              );
-                            })}
-                          </div>
+        <div className="rlm-layout">
 
-                          {/* النص */}
-                          <span style={{ fontSize: "14px" }}>= {w}</span>
-                        </div>
-                      )}
-                    </Draggable>
-                  );
-                })}
-                {provided.placeholder}
-              </div>
-            )}
-          </Droppable>
+          {/* Words */}
+          <div className="rlm-words">
+            {WORDS.map((w) => {
+              const wrong    = isWrong(w);
+              const value    = answers[w.id] || "";
+              const tColor   = showAns ? INPUT_ANSWER_COLOR : INPUT_TEXT_COLOR;
+              const uColor   = wrong ? INPUT_UNDERLINE_WRONG : INPUT_UNDERLINE_DEFAULT;
+              const disabled = isDisabled(w);
 
-          {/* الأسئلة */}
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "auto auto", // 🔥 بدل 1fr
-              gap: "20px",
-              justifyContent: "center",
-              columnGap: "80px",
-              rowGap: "2px",
-            }}
-          >
-            {questions.map((q) => (
-              <div key={q.id} style={{ marginBottom: "20px" }}>
-                <div style={{ fontWeight: "bold" }}>{q.id}</div>
+              return (
+                <div key={w.id} className="rlm-word-row">
+                  <div className="rlm-input-wrap">
+                    <input
+                      type="text"
+                      maxLength={1}
+                      className={["rlm-input", wrong ? "rlm-input--wrong" : "", showAns ? "rlm-input--answer" : ""].filter(Boolean).join(" ")}
+                      value={value}
+                      disabled={disabled}
+                      onChange={(e) => handleChange(w.id, e.target.value)}
+                      style={{ borderBottomColor: uColor, color: tColor }}
+                      spellCheck={false}
+                      autoComplete="off"
+                    />
+                    {wrong && <div className="rlm-badge">✕</div>}
+                  </div>
+                  <span className="rlm-num">{w.id}</span>
+                  <span className="rlm-word">{w.word}</span>
+                </div>
+              );
+            })}
+          </div>
 
-                <img
-                  src={q.img}
-                  style={{
-                    width: "300px",
-                    height: "150px",
-                    objectFit: "contain",
-                  }}
-                />
-
-                <Droppable droppableId={`slot-${q.id}`}>
-                  {(provided) => (
-                    <div
-                      ref={provided.innerRef}
-                      {...provided.droppableProps}
-                      style={{
-                        marginTop: "10px",
-                        minHeight: "35px",
-                      }}
-                    >
-                      <div
-                        style={{
-                          position: "relative",
-                          display: "inline-block", // 🔥 هذا الحل
-                        }}
-                      >
-                        I{" "}
-                        <span
-                          style={{
-                            display: "inline-block",
-                            minWidth: "80px",
-                            borderBottom: locked
-                              ? answers[`slot-${q.id}`] === q.correct
-                                ? "2px solid #000"
-                                : "2px solid #ef4444"
-                              : "2px solid #000",
-                            textAlign: "center",
-                            margin: "0 5px",
-                          }}
-                        >
-                          {answers[`slot-${q.id}`] && (
-                            <Draggable
-                              draggableId={`slot-${q.id}-${answers[`slot-${q.id}`]}`}
-                              index={0}
-                              isDragDisabled={locked}
-                            >
-                              {(provided) => (
-                                <span
-                                  ref={provided.innerRef}
-                                  {...provided.draggableProps}
-                                  {...provided.dragHandleProps}
-                                  style={{
-                                    color: answers[`slot-${q.id}`]
-                                      ? "#1C398E"
-                                      : "#000",
-                                    fontWeight: answers[`slot-${q.id}`]
-                                      ? "bold"
-                                      : "normal",
-                                  }}
-                                >
-                                  {answers[`slot-${q.id}`]}
-                                </span>
-                              )}
-                            </Draggable>
-                          )}
-                        </span>{" "}
-                        {q.sentence}
-                        {/* ❌ WrongMark */}
-                        {showResult &&
-                          answers[`slot-${q.id}`] &&
-                          answers[`slot-${q.id}`] !== q.correct && (
-                            <div
-                              style={{
-                                position: "absolute",
-                                left: "100%", // 🔥 يجي جنب الجملة
-                                marginLeft: "8px", // مسافة صغيرة
-                                top: "50%",
-                                transform: "translateY(-50%)",
-                              }}
-                            >
-                              <WrongMark />
-                            </div>
-                          )}
-                      </div>
-                    </div>
-                  )}
-                </Droppable>
+          {/* Images 3×2 */}
+          <div className="rlm-images">
+            {IMAGES.map((img) => (
+              <div key={img.label} className="rlm-img-card">
+                <img src={img.src} alt={`img-${img.label}`} className="rlm-img" />
               </div>
             ))}
           </div>
+
+        </div>
+
+        <div className="rlm-buttons">
           <Button
-            handleShowAnswer={showAnswers}
-            handleStartAgain={reset}
-            checkAnswers={checkAnswers}
+            checkAnswers={handleCheck}
+            handleShowAnswer={handleShowAnswer}
+            handleStartAgain={handleReset}
           />
         </div>
       </div>
-    </DragDropContext>
+    </div>
   );
-};
-
-export default Review2_Page1_Q1;
+}

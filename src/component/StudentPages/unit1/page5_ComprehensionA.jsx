@@ -85,7 +85,7 @@ const ComprehensionA = () => {
 
   return (
     <div className="mb-6 mx-auto">
-      <h5 className="header-title-page8-read mb-4">
+      <h5 className="header-title-page8-read mb-8">
         <span className="ex-A-read mr-2">A</span>
         Read and write <span className="text-[#f89631] font-bold">true</span> or{" "}
         <span className="text-[#f89631] font-bold">false</span>.
@@ -120,7 +120,7 @@ const ComprehensionA = () => {
                     errors[i] === true
                       ? "border-red-400 bg-white text-gray-800"
                       : showed
-                      ? "border-[#5bbcb8] bg-white text-red-500"
+                      ? "border-[#2195a6] bg-white text-red-500"
                       : "border-[#2195a6] bg-white text-gray-800 focus:border-[#2195a6]"
                   }
                   disabled:pointer-events-none

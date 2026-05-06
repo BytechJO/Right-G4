@@ -5,10 +5,10 @@ import ValidationAlert from "../../Popup/ValidationAlert";
 // ─────────────────────────────────────────────
 //  🖼️  IMAGES
 // ─────────────────────────────────────────────
-import img1 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 1 Robots of the Future Folder/Page8/SVG/Asset 4.svg";
-import img2 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 1 Robots of the Future Folder/Page8/SVG/Asset 5.svg";
-import img3 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 1 Robots of the Future Folder/Page8/SVG/Asset 6.svg";
-import img4 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 1 Robots of the Future Folder/Page8/SVG/Asset 7.svg";
+import img1 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 1 Robots of the Future Folder/Page8/SVG/Asset 16.svg";
+import img2 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 1 Robots of the Future Folder/Page8/SVG/Asset 15.svg";
+import img3 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 1 Robots of the Future Folder/Page8/SVG/Asset 25.svg";
+import img4 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 1 Robots of the Future Folder/Page8/SVG/Asset 13.svg";
 //  🎨  COLORS
 // ─────────────────────────────────────────────
 const INPUT_UNDERLINE_DEFAULT = "#3f3f3f";

@@ -1,198 +1,218 @@
 import React, { useState } from "react";
-import ValidationAlert from "../../Popup/ValidationAlert";
 import Button from "../../Button";
-const COLORS = [
-  { key: "long a", color: "#D1232A" },
-  { key: "long e", color: "#FFF101" },
-  { key: "long i", color: "#ED028C" },
-  { key: "long o", color: "#962A90" },
-  { key: "long u", color: "#EE5625" },
-  { key: "short a", color: "#40AE49" },
-  { key: "short e", color: "#A3CF9A" },
-  { key: "short i", color: "#7B4521" },
-  { key: "short o", color: "#3730A3" },
-  { key: "short u", color: "#00AEEF" },
+import ValidationAlert from "../../Popup/ValidationAlert";
+
+const INPUT_UNDERLINE_DEFAULT = "#3f3f3f";
+const INPUT_UNDERLINE_WRONG   = "#ef4444";
+const INPUT_TEXT_COLOR        = "#2b2b2b";
+const INPUT_ANSWER_COLOR      = "#c81e1e";
+const NUMBER_COLOR            = "#2b2b2b";
+const CUE_COLOR               = "#2b2b2b";
+const WRONG_BADGE_BG          = "#ef4444";
+const WRONG_BADGE_TEXT        = "#ffffff";
+
+const ITEMS = [
+  {
+    id:      1,
+    cue:     "he / won't / mall",
+    correct: ["He won't go to the mall.", "he wont go to the mall" , "he willnot go to the mall" , , "he will not go to the mall"],
+    answer:  "He won't go to the mall.",
+  },
+  {
+    id:      2,
+    cue:     "they / won't / doctor",
+    correct: ["They won't go to the doctor.", "they wont go to the doctor" , "they willnot go to the doctor" , "they  will not to the doctor"],
+    answer:  "They won't go to the doctor.",
+  },
+  {
+    id:      3,
+    cue:     "we / won't / playground",
+    correct: ["We won't play on the playground.", "we wont play on the playground", "We willnot go to the playground.", "we won't go to the playground"],
+    answer:  "We won't play on the playground.",
+  },
 ];
-const WORDS = [
-  ["snow", "soap", "cup", "date", "may", "make", "cape", "coat", "grow"],
-  ["five", "time", "chat", "hat", "desk", "man", "act", "glue", "mine"],
-  ["kid", "sit", "bee", "log", "pop", "pen", "he", "see", "blue"],
-];
-const CORRECT = {
-  snow: "long o",
-  soap: "long o",
-  cup: "short u",
-  date: "long a",
-  may: "long a",
-  make: "long a",
-  cape: "long a",
-  coat: "long o",
-  grow: "long o",
-  five: "long i",
-  time: "long i",
-  chat: "short a",
-  hat: "short a",
-  desk: "short e",
-  man: "short a",
-  act: "short a",
-  glue: "long u",
-  mine: "long i",
-  kid: "short i",
-  sit: "short i",
-  bee: "long e",
-  log: "short o",
-  pop: "short o",
-  pen: "short e",
-  he: "long e",
-  see: "long e",
-  blue: "long u",
-};
-const Review2_Page2_Q2 = () => {
-  const [selectedColor, setSelectedColor] = useState(null);
-  const [answers, setAnswers] = useState({});
-  const [locked, setLocked] = useState(false);
-  const handleSelectColor = (key) => {
-    if (locked) return;
-    setSelectedColor(key);
+
+const normalize = (str) =>
+  str.toLowerCase().replace(/[^a-z0-9'\s]/g, "").replace(/\s+/g, " ").trim();
+
+const isCorrect = (userVal, correctArr) =>
+  correctArr.some((c) => normalize(userVal) === normalize(c));
+
+export default function WB_ReadWriteSentences_QE() {
+  const [answers,     setAnswers]     = useState({});
+  const [showResults, setShowResults] = useState(false);
+  const [showAns,     setShowAns]     = useState(false);
+
+  const handleChange = (id, value) => {
+    if (showAns) return;
+    const item = ITEMS.find((i) => i.id === id);
+    if (showResults && item && isCorrect(answers[id] || "", item.correct)) return;
+    setAnswers((prev) => ({ ...prev, [id]: value }));
   };
-  const handleClickWord = (word) => {
-    if (locked || !selectedColor) return;
-    setAnswers((prev) => ({ ...prev, [word]: selectedColor }));
-  };
-  const checkAnswers = () => {
-    if (locked) return;
-    const allWords = Object.keys(CORRECT);
-    if (allWords.some((w) => !answers[w])) {
-      ValidationAlert.info();
-      return;
-    }
+
+  const handleCheck = () => {
+    if (showAns) return;
+    const allAnswered = ITEMS.every((item) => answers[item.id]?.trim());
+    if (!allAnswered) { ValidationAlert.info("Please complete all answers first."); return; }
     let score = 0;
-    allWords.forEach((w) => {
-      if (answers[w] === CORRECT[w]) score++;
-    });
-    const total = allWords.length;
-    if (score === total) ValidationAlert.success(`Score: ${score}/${total}`);
-    else if (score > 0) ValidationAlert.warning(`Score: ${score}/${total}`);
-    else ValidationAlert.error(`Score: ${score}/${total}`);
-    setLocked(true);
+    ITEMS.forEach((item) => { if (isCorrect(answers[item.id] || "", item.correct)) score++; });
+    setShowResults(true);
+    if (score === ITEMS.length)   ValidationAlert.success(`Score: ${score} / ${ITEMS.length}`);
+    else if (score > 0)           ValidationAlert.warning(`Score: ${score} / ${ITEMS.length}`);
+    else                          ValidationAlert.error(`Score: ${score} / ${ITEMS.length}`);
   };
-  const reset = () => {
+
+  const handleShowAnswer = () => {
+    const filled = {};
+    ITEMS.forEach((item) => { filled[item.id] = item.answer; });
+    setAnswers(filled);
+    setShowResults(false);
+    setShowAns(true);
+  };
+
+  const handleReset = () => {
     setAnswers({});
-    setSelectedColor(null);
-    setLocked(false);
+    setShowResults(false);
+    setShowAns(false);
   };
-  const showAnswer = () => {
-    setAnswers(CORRECT);
-    setLocked(true);
-  };
+
+  const isWrong    = (item) => showResults && !showAns && !isCorrect(answers[item.id] || "", item.correct);
+  const isDisabled = (item) => showAns || (showResults && isCorrect(answers[item.id] || "", item.correct));
+
   return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        padding: "30px",
-      }}
-    >
-      <div className="div-forall">
-        <h5 className="header-title-page8">
-          <span style={{ marginRight: "20px" }}>D</span>
-          Color each square according to the{" "}
-          <span style={{ color: "#2e3192" }}>vowel sound</span> you hear in the
-          word.
-        </h5>
+    <div className="main-container-component">
+      <style>{`
+        .rwse-list {
+          display: flex;
+          flex-direction: column;
+          gap: clamp(14px, 2.2vw, 26px);
+          width: 100%;
+          margin : 10% 0 ; 
+        }
 
-        <div className="flex flex-col items-center px-6 mt-3">
-          {" "}
-          {/* 🎨 COLOR BAR */}{" "}
-          <div className="mb-6">
-            <table className="border-2 border-gray-500 text-center text-lg scale-100">
-              <tbody>
-                <tr>
-                  <td className="border px-3 py-2 text-sm font-medium">
-                    color
-                  </td>
-                  {COLORS.map((c) => (
-                    <td
-                      key={c.key}
-                      onClick={() => handleSelectColor(c.key)}
-                      className={`border cursor-pointer ${
-                        selectedColor === c.key ? `ring-2 ${c.color}` : ""
-                      }`}
-                      style={{
-                        background: c.color,
-                        width: "60px",
-                        height: "40px",
-                      }}
-                    />
-                  ))}
-                </tr>
+        /* Single row: num + cue + input */
+        .rwse-row {
+          display: grid;
+          grid-template-columns: auto clamp(120px, 16vw, 200px) 1fr;
+          align-items: flex-end;
+          gap: clamp(8px, 1.2vw, 16px);
+          min-width: 0;
+        }
 
-                <tr>
-                  <td className="border px-3 py-2 text-sm font-medium">
-                    sound
-                  </td>
-                  {COLORS.map((c) => (
-                    <td key={c.key} className="border px-2 text-xs">
-                      {c.key}
-                    </td>
-                  ))}
-                </tr>
-              </tbody>
-            </table>
-          </div>
-          <div className="w-full ">
-            <div className="flex flex-col gap-6"></div>
-            {/* 🧩 WORDS */}{" "}
-            <div className="flex flex-col gap-4">
-              {" "}
-              {WORDS.map((row, i) => (
-                <div
-                  key={i}
-                  className="grid grid-cols-9 border-2 border-orange-400 rounded-xl overflow-hidden w-full"
-                >
-                  {" "}
-                  {row.map((word) => {
-                    const colorKey = answers[word];
-                    const colorObj = COLORS.find((c) => c.key === colorKey);
-                    const isWrong =
-                      locked && colorKey && colorKey !== CORRECT[word];
-                    return (
-                      <div
-                        key={word}
-                        onClick={() => handleClickWord(word)}
-                        className="relative py-5 text-lg font-semibold cursor-pointer border-r last:border-r-0 flex items-center justify-center"
-                        style={{
-                          backgroundColor: colorObj?.color || "#f3f4f6",
-                        }}
-                      >
-                        {word}
-                        {isWrong && (
-                          <div
-                            className="absolute top-3 right-3 translate-x-1/2 -translate-y-1/2
-                     w-5 h-5 text-xs bg-red-500 text-white rounded-full
-                     flex items-center justify-center font-bold border-2 border-white
-                     pointer-events-none shadow"
-                          >
-                            ✕
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
+        .rwse-num {
+          font-size: clamp(15px, 1.8vw, 22px);
+          font-weight: 700;
+          color: ${NUMBER_COLOR};
+          flex-shrink: 0;
+          padding-bottom: 4px;
+          line-height: 1;
+        }
+
+        .rwse-cue {
+          font-size: clamp(13px, 1.6vw, 19px);
+          color: ${CUE_COLOR};
+          padding-bottom: 4px;
+          line-height: 1;
+          white-space: nowrap;
+        }
+
+        .rwse-input-wrap {
+          position: relative;
+        }
+
+        .rwse-input {
+          width: 100%;
+          background: transparent;
+          border: none;
+          border-bottom: 2px solid ${INPUT_UNDERLINE_DEFAULT};
+          outline: none;
+          font-size: clamp(14px, 1.7vw, 20px);
+          color: ${INPUT_TEXT_COLOR};
+          padding: 4px 6px 5px;
+          line-height: 1.5;
+          box-sizing: border-box;
+          font-family: inherit;
+          transition: border-color 0.2s;
+        }
+        .rwse-input:disabled   { opacity: 1; cursor: default; }
+        .rwse-input--wrong     { border-bottom-color: ${INPUT_UNDERLINE_WRONG}; }
+        .rwse-input--answer    { color: ${INPUT_ANSWER_COLOR}; }
+
+        .rwse-badge {
+          position: absolute;
+          top: -8px; right: 0;
+          width: clamp(17px, 1.9vw, 22px);
+          height: clamp(17px, 1.9vw, 22px);
+          border-radius: 50%;
+          background: ${WRONG_BADGE_BG};
+          color: ${WRONG_BADGE_TEXT};
+          display: flex; align-items: center; justify-content: center;
+          font-size: clamp(9px, 1vw, 12px);
+          font-weight: 700;
+          border: 2px solid #fff;
+          box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+          pointer-events: none;
+          z-index: 2;
+        }
+
+        .rwse-buttons {
+          display: flex;
+          justify-content: center;
+          margin-top: clamp(8px, 1.6vw, 18px);
+        }
+
+        @media (max-width: 500px) {
+          .rwse-row { grid-template-columns: auto 1fr; grid-template-rows: auto auto; }
+          .rwse-input-wrap { grid-column: 1 / -1; }
+        }
+      `}</style>
+
+      <div
+        className="div-forall"
+        style={{ display: "flex", flexDirection: "column", gap: "clamp(14px, 2vw, 22px)", maxWidth: "1100px", margin: "0 auto" }}
+      >
+        <h1
+          className="WB-header-title-page8"
+          style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
+        >
+          <span className="WB-ex-A-1">E</span>
+          Read and write sentences. You will need to add words.
+        </h1>
+
+        <div className="rwse-list">
+          {ITEMS.map((item) => {
+            const wrong    = isWrong(item);
+            const value    = answers[item.id] || "";
+            const tColor   = showAns ? INPUT_ANSWER_COLOR : INPUT_TEXT_COLOR;
+            const uColor   = wrong ? INPUT_UNDERLINE_WRONG : INPUT_UNDERLINE_DEFAULT;
+            const disabled = isDisabled(item);
+
+            return (
+              <div key={item.id} className="rwse-row">
+                <span className="rwse-num">{item.id}</span>
+                <span className="rwse-cue">{item.cue}</span>
+                <div className="rwse-input-wrap">
+                  <input
+                    type="text"
+                    className={["rwse-input", wrong ? "rwse-input--wrong" : "", showAns ? "rwse-input--answer" : ""].filter(Boolean).join(" ")}
+                    value={value}
+                    disabled={disabled}
+                    onChange={(e) => handleChange(item.id, e.target.value)}
+                    style={{ borderBottomColor: uColor, color: tColor }}
+                    spellCheck={false}
+                    autoComplete="off"
+                  />
+                  {wrong && <div className="rwse-badge">✕</div>}
                 </div>
-              ))}
-            </div>
-            {/* 🔘 BUTTON */}{" "}
-            <Button
-              handleShowAnswer={showAnswer}
-              handleStartAgain={reset}
-              checkAnswers={checkAnswers}
-            />{" "}
-          </div>
+              </div>
+            );
+          })}
+        </div>
+
+        <div className="rwse-buttons">
+          <Button checkAnswers={handleCheck} handleShowAnswer={handleShowAnswer} handleStartAgain={handleReset} />
         </div>
       </div>
     </div>
   );
-};
-export default Review2_Page2_Q2;
+}

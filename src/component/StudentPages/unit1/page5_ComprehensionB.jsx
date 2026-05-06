@@ -101,7 +101,7 @@ const ComprehensionB = () => {
 
   return (
     <div className="mb-6 mx-auto">
-      <h5 className="header-title-page8-read mb-4">
+      <h5 className="header-title-page8-read mb-8">
         <span className="ex-A-read mr-2">B</span>
         Read and write. Use the words below.
       </h5>

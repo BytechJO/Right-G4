@@ -21,6 +21,8 @@ const SectionBanner = ({ title, fontSize = "1.2rem" }) => {
         padding: "0.25em 1.2em 0.25em 0.25em",
         borderRadius: "0.35em",
         boxShadow: "inset 0 0.1em 0.3em rgba(255,255,255,0.6), inset 0 -0.1em 0.2em rgba(180,140,0,0.3)",
+            position: "relative",
+    top: "-3px"
       }}>
         <span style={{
           fontWeight: "900",

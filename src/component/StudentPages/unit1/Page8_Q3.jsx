@@ -2,10 +2,11 @@ import React, { useState, useRef } from "react";
 import Button from "../../Button";
 import ValidationAlert from "../../Popup/ValidationAlert";
 
-// ─────────────────────────────────────────────
+import sound from "../../../assets/audio/ClassBook/Grade 4/cd5pg8-instruction1-adult-lady_YJxh5Hg5.mp3";
 //  🖼️  IMAGE
 // ─────────────────────────────────────────────
-import imgScene from "../../../assets/imgs/pages/Class Book/Right 4 Unit 1 Robots of the Future Folder/Page8/SVG/1.svg";
+import imgScene from "../../../assets/imgs/pages/Class Book/Right 4 Unit 1 Robots of the Future Folder/Page8/SVG/Asset 1.svg";
+import QuestionAudioPlayer from "../../QuestionAudioPlayer";
 
 // ─────────────────────────────────────────────
 //  🎨  COLORS
@@ -19,7 +20,43 @@ const LABEL_COLOR        = "#2b2b2b";
 const PARA_COLOR         = "#2b2b2b";
 const WRONG_BADGE_BG     = "#ef4444";
 const WRONG_BADGE_TEXT   = "#ffffff";
-
+const captions = [
+  {
+    start: 0.26,
+    end: 5.84,
+    text: "Page eight, write activities, exercise C. Listen, read, and number.",
+  },
+  {
+    start: 7.36,
+    end: 10.48,
+    text: "Tim will visit the new Museum of Inventions tomorrow.",
+  },
+  {
+    start: 10.48,
+    end: 13.52,
+    text: "He will take his little brother and friend with him.",
+  },
+  {
+    start: 13.52,
+    end: 18.56,
+    text: "They will take a bus at eight o'clock and arrive at the museum at nine o'clock.",
+  },
+  {
+    start: 18.56,
+    end: 21.92,
+    text: "Tim will pack a lunch in case they get hungry.",
+  },
+  {
+    start: 21.92,
+    end: 28.00,
+    text: "He will have to remember to take his camera with him so he can take pictures in the museum.",
+  },
+  {
+    start: 28.00,
+    end: 32.68,
+    text: "Tim is certain they will have a lot of fun at the museum tomorrow.",
+  },
+];
 // ─────────────────────────────────────────────
 //  📝  PARAGRAPH
 // ─────────────────────────────────────────────
@@ -237,7 +274,13 @@ export default function WB_ReadNumber_QC() {
           <span className="WB-ex-A">C</span>
           Listen, read, and number.
         </h1>
-
+ <div style={{marginTop:"10px"}}>
+        <QuestionAudioPlayer
+          src={sound}
+          captions={captions}
+          stopAtSecond={6}
+        />
+      </div>
         {/* ── Paragraph + Image ── */}
         <div className="rnqc-top">
           <p className="rnqc-para">{PARAGRAPH}</p>
@@ -271,8 +314,7 @@ export default function WB_ReadNumber_QC() {
                     className={[
                       "rnqc-input",
                       wrong   ? "rnqc-input--wrong"  : "",
-                      showAns ? "rnqc-input--answer" : "",
-                    ].filter(Boolean).join(" ")}
+                   ].filter(Boolean).join(" ")}
                     value={value}
                     disabled={disabled}
                     onChange={(e) => handleChange(item.id, e.target.value)}

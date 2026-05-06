@@ -1,61 +1,77 @@
 import GrammarA from "./page6_GrammarA";
 import GrammarB from "./page6_GrammarB";
 import GrammarC from "./page6_GrammarC";
-import ReadingBG from "../../../assets/imgs/conversation.svg";
-import img from "../../../assets/imgs/Asset.svg";
-import grammer_u1 from "../../../assets/audio/ClassBook/Grade 4/Sounds/U1/P 4/True audio/CD1.Pg4_Conversation_Adult Lady (T).mp3";
+import image1 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 1 Robots of the Future Folder/Page 6/SVG/Asset 28.svg";
+import image  from "../../../assets/imgs/pages/Class Book/Right 4 Unit 1 Robots of the Future Folder/Page 6/SVG/Asset 29.svg";
+
+import sound from "../../../assets/audio/ClassBook/Grade 4/cd4pg6-grammar-adult-lady_5dpYBbN9.mp3";
 import QuestionAudioPlayer from "../../QuestionAudioPlayer";
+import SectionBanner from "../SectionBanner";
 const GrammarSection_U1 = () => {
  
-  const captions = [
-    {
-      start: 0.34,
-      end: 17.539,
-      text: "Page six. Grammar. Questions with how. How much is the beach ball? How can you measure a giraffe? How does your grandma make such delicious cookies? Answering a how question. The swimmer dives ten meters deep. It is ten kilometers away.",
-    },
-  ];
-
-
-  return (
-    <div>
-      <div className="w-[60%] mx-auto mb-4 flex items-center mt-3">
-        <div
-          className="px-4 py-1 font-bold text-black w-fit"
-          style={{
-            backgroundImage: `url(${ReadingBG})`,
-            backgroundSize: "cover",
-            backgroundRepeat: "no-repeat",
-            backgroundPosition: "center",
-          }}
-        >
-          Grammar
+const captions = [
+  {
+    start: 0.22,
+    end: 2.16,
+    text: "Page six. Grammar.",
+  },
+  {
+    start: 2.16,
+    end: 4.72,
+    text: "Future: will and won't.",
+  },
+  {
+    start: 5.94,
+    end: 8.12,
+    text: "We will go to the coast.",
+  },
+  {
+    start: 8.12,
+    end: 9.92,
+    text: "We won't go into space.",
+  },
+  {
+    start: 9.92,
+    end: 17.80,
+    text: "Future plus verb \"to be.\" Will they go to the moon? When will we travel into space?",
+  },
+];
+const stopAtSecond = 2;
+ return (
+    <div className="flex flex-col items-center ">
+      <div className="w-[60%] mx-auto">
+        <div style={{ display: "flex", flexDirection: "row", gap: "10px", whiteSpace: "nowrap", marginLeft: "auto" }}>
+          <SectionBanner title="Grammer" />
+       
         </div>
-      </div>
-      <div className="w-[70%] mx-auto">
+        <div style={{marginTop:"10px"}}>
         <QuestionAudioPlayer
-          src={grammer_u1}
+          src={sound}
           captions={captions}
-          stopAtSecond={2}
+          stopAtSecond={stopAtSecond}
         />
       </div>
+      </div>
 
-      <div className="flex flex-col w-[60%] mx-auto">
+      {/* ✅ شلنا الـ title badge والـ paragraphs، والصورة تملأ كل شي */}
+      <div className="w-[62.5%] mt-2">
         <img
-          src={img}
-          alt=""
-          style={{ width: "100%", height: "auto" }}
-          className="w-full object-contain"
+          src={image}
+          style={{ width: "100%", height: "auto", display: "block" }}
         />
-        <div className=" mt-4 space-y-15 ">
-          <GrammarA />
-
-          <GrammarB
-          />
-
-          <GrammarC
-          />
-        </div>
       </div>
+
+      <div className="w-[60%]  my-5">
+        <img
+          style={{ width: "100%", height: "auto", display: "block"  }}
+          src={image1}
+        />
+      </div>
+       <div className=" mt-2 space-y-10 w-[60%] ">
+          <GrammarA />
+          <GrammarB />
+          <GrammarC />
+        </div>
     </div>
   );
 };

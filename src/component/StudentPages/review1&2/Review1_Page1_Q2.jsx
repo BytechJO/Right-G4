@@ -1,308 +1,298 @@
 import React, { useState } from "react";
-import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
-import ValidationAlert from "../../Popup/ValidationAlert";
 import Button from "../../Button";
-import WrongMark from "../../WrongMark";
+import ValidationAlert from "../../Popup/ValidationAlert";
 
-import img1 from "../../../assets/imgs/pages/classbook/Right 3 Unit 2 Summer Vacation Folder/Pahe 16/Ex B 1.svg";
-import img2 from "../../../assets/imgs/pages/classbook/Right 3 Unit 2 Summer Vacation Folder/Pahe 16/Ex B 2.svg";
-import img3 from "../../../assets/imgs/pages/classbook/Right 3 Unit 2 Summer Vacation Folder/Pahe 16/Ex B 3.svg";
-import img4 from "../../../assets/imgs/pages/classbook/Right 3 Unit 2 Summer Vacation Folder/Pahe 16/Ex B 4.svg";
-import img5 from "../../../assets/imgs/pages/classbook/Right 3 Unit 2 Summer Vacation Folder/Pahe 16/Ex B 5.svg";
-import img6 from "../../../assets/imgs/pages/classbook/Right 3 Unit 2 Summer Vacation Folder/Pahe 16/Ex B 6.svg";
-import img7 from "../../../assets/imgs/pages/classbook/Right 3 Unit 2 Summer Vacation Folder/Pahe 16/Ex B 7.svg";
-import img8 from "../../../assets/imgs/pages/classbook/Right 3 Unit 2 Summer Vacation Folder/Pahe 16/Ex B 8.svg";
-import img9 from "../../../assets/imgs/pages/classbook/Right 3 Unit 2 Summer Vacation Folder/Pahe 16/Ex B 9.svg";
+// ─────────────────────────────────────────────
+//  🎨  COLORS
+// ─────────────────────────────────────────────
+const INPUT_UNDERLINE_DEFAULT = "#3f3f3f";
+const INPUT_UNDERLINE_WRONG   = "#ef4444";
+const INPUT_TEXT_COLOR        = "#2b2b2b";
+const INPUT_ANSWER_COLOR      = "#c81e1e";
+const NUMBER_COLOR            = "#2b2b2b";
+const TEXT_COLOR              = "#2b2b2b";
+const WRONG_BADGE_BG          = "#ef4444";
+const WRONG_BADGE_TEXT        = "#ffffff";
 
-const Review1_Page1_Q2 = () => {
-  const answersBank = ["A", "B", "C"];
+// ─────────────────────────────────────────────
+//  📝  EXERCISE DATA
+// ─────────────────────────────────────────────
+const WORD_BANK = ["least", "won't", "bet", "what"];
 
-  const questions = [
-    {
-      id: 1,
-      label: "fast",
-      images: [img1, img2, img3],
-      answers: { fastest: "C", slowest: "A" },
-    },
-    {
-      id: 2,
-      label: "short",
-      images: [img4, img5, img6],
-      answers: { shortest: "C", tallest: "B" },
-    },
-    {
-      id: 3,
-      label: "old",
-      images: [img7, img8, img9],
-      answers: { oldest: "A", youngest: "C" },
-    },
-  ];
+const ITEMS = [
+  {
+    id:      1,
+    before:  "At",
+    after:   "we got to go to the park.",
+    correct: ["least"],
+    answer:  "least",
+  },
+  {
+    id:      2,
+    before:  "Like",
+    after:   "?",
+    correct: ["what"],
+    answer:  "what",
+  },
+  {
+    id:      3,
+    before:  "He",
+    after:   "mind.",
+    correct: ["won't"],
+    answer:  "won't",
+  },
+  {
+    id:      4,
+    before:  "You",
+    after:   "!",
+    correct: ["bet"],
+    answer:  "bet",
+  },
+];
 
-  const [answers, setAnswers] = useState({});
-  const [locked, setLocked] = useState(false);
-  const [showResult, setShowResult] = useState(false);
+// ─────────────────────────────────────────────
+//  🔧  NORMALIZE
+// ─────────────────────────────────────────────
+const normalize = (str) =>
+  str.toLowerCase().replace(/[^a-z0-9'\s]/g, "").replace(/\s+/g, " ").trim();
 
-  const onDragEnd = (result) => {
-    if (!result.destination || locked) return;
+const isCorrect = (userVal, correctArr) =>
+  correctArr.some((c) => normalize(userVal) === normalize(c));
 
-    const key = result.destination.droppableId;
-    const draggedLetter = result.draggableId;
+// ─────────────────────────────────────────────
+//  COMPONENT
+// ─────────────────────────────────────────────
+export default function WB_ReadWrite_Review_QB() {
+  const [answers,     setAnswers]     = useState({});
+  const [showResults, setShowResults] = useState(false);
+  const [showAns,     setShowAns]     = useState(false);
 
-    const qIndex = key.split("-")[0];
-
-    const alreadyUsed = Object.keys(answers).some(
-      (k) => k.startsWith(qIndex + "-") && answers[k] === draggedLetter,
-    );
-
-    if (alreadyUsed) return;
-
-    setAnswers((prev) => ({
-      ...prev,
-      [key]: draggedLetter,
-    }));
+  const handleChange = (id, value) => {
+    if (showAns) return;
+    const item = ITEMS.find((i) => i.id === id);
+    if (showResults && item && isCorrect(answers[id] || "", item.correct)) return;
+    setAnswers((prev) => ({ ...prev, [id]: value }));
   };
 
-  const reset = () => {
-    setAnswers({});
-    setLocked(false);
-    setShowResult(false);
+  const handleCheck = () => {
+    if (showAns) return;
+    const allAnswered = ITEMS.every((item) => answers[item.id]?.trim());
+    if (!allAnswered) { ValidationAlert.info("Please complete all answers first."); return; }
+    let score = 0;
+    ITEMS.forEach((item) => { if (isCorrect(answers[item.id] || "", item.correct)) score++; });
+    setShowResults(true);
+    if (score === ITEMS.length)   ValidationAlert.success(`Score: ${score} / ${ITEMS.length}`);
+    else if (score > 0)           ValidationAlert.warning(`Score: ${score} / ${ITEMS.length}`);
+    else                          ValidationAlert.error(`Score: ${score} / ${ITEMS.length}`);
   };
 
-  const showAnswers = () => {
+  const handleShowAnswer = () => {
     const filled = {};
-    questions.forEach((q, qIndex) => {
-      Object.entries(q.answers).forEach(([type, value]) => {
-        filled[`${qIndex}-${type}`] = value;
-      });
-    });
+    ITEMS.forEach((item) => { filled[item.id] = item.answer; });
     setAnswers(filled);
-    setLocked(true);
+    setShowResults(false);
+    setShowAns(true);
   };
 
-  const checkAnswers = () => {
-    if (locked) return;
-    const totalInputs = questions.reduce(
-      (acc, q) => acc + Object.keys(q.answers).length,
-      0,
-    );
+  const handleReset = () => {
+    setAnswers({});
+    setShowResults(false);
+    setShowAns(false);
+  };
 
-    if (Object.keys(answers).length < totalInputs) {
-      ValidationAlert.info();
-      return;
-    }
+  const isWrong = (item) => {
+    if (!showResults || showAns) return false;
+    return !isCorrect(answers[item.id] || "", item.correct);
+  };
 
-    let correct = 0;
-    let total = 0;
-
-    questions.forEach((q, qIndex) => {
-      Object.entries(q.answers).forEach(([type, value]) => {
-        total++;
-        if (answers[`${qIndex}-${type}`] === value) correct++;
-      });
-    });
-
-    const color =
-      correct === total ? "green" : correct === 0 ? "red" : "orange";
-
-    const msg = `
-  <div style="font-size:20px;text-align:center;">
-    <span style="color:${color}; font-weight:bold;">
-      Score: ${correct} / ${total}
-    </span>
-  </div>
-`;
-
-    if (correct === total) ValidationAlert.success(msg);
-    else if (correct === 0) ValidationAlert.error(msg);
-    else ValidationAlert.warning(msg);
-
-    setShowResult(true);
-    setLocked(true);
+  const isDisabled = (item) => {
+    if (showAns) return true;
+    if (showResults && isCorrect(answers[item.id] || "", item.correct)) return true;
+    return false;
   };
 
   return (
-    <DragDropContext onDragEnd={onDragEnd}>
+    <div className="main-container-component">
+      <style>{`
+        /* ── Word bank ── */
+        .rwrb-bank {
+          display: flex;
+          flex-wrap: wrap;
+          gap: clamp(8px, 1.2vw, 14px);
+          justify-content: space-around;
+          width: 100%;
+          margin-top :5%  ; 
+        }
+
+        .rwrb-pill {
+          border: 2px solid #e8eff1;
+          border-radius: 8px;
+          padding: clamp(5px, 0.6vw, 8px) clamp(18px, 2.4vw, 28px);
+          font-size: clamp(14px, 1.7vw, 20px);
+          color: #2b2b2b;
+          background: #e8eff1;
+          white-space: nowrap;
+          user-select: none;
+        }
+
+        /* ── Items list ── */
+        .rwrb-list {
+          display: flex;
+          flex-direction: column;
+          gap: clamp(14px, 2.2vw, 26px);
+          width: 100%;
+        }
+
+        /* Single row */
+        .rwrb-row {
+          display: flex;
+          align-items: flex-end;
+          gap: clamp(5px, 0.7vw, 9px);
+          flex-wrap: nowrap;
+          min-width: 0;
+        }
+
+        .rwrb-num {
+          font-size: clamp(15px, 1.8vw, 22px);
+          font-weight: 700;
+          color: ${NUMBER_COLOR};
+          flex-shrink: 0;
+          line-height: 1.5;
+        }
+
+        .rwrb-text {
+          font-size: clamp(14px, 1.7vw, 20px);
+          color: ${TEXT_COLOR};
+          white-space: nowrap;
+          flex-shrink: 0;
+          line-height: 1.5;
+        }
+
+        /* Input wrap — takes remaining space */
+        .rwrb-input-wrap {
+          position: relative;
+          flex: 1;
+          min-width: clamp(80px, 10vw, 160px);
+        }
+
+        .rwrb-input {
+          width: 100%;
+          background: transparent;
+          border: none;
+          border-bottom: 1px solid ${INPUT_UNDERLINE_DEFAULT};
+          outline: none;
+          font-size: clamp(14px, 1.7vw, 20px);
+          color: ${INPUT_TEXT_COLOR};
+          line-height: 1.5;
+          box-sizing: border-box;
+          transition: border-color 0.2s;
+        }
+        .rwrb-input:disabled   { opacity: 1; cursor: default; }
+        .rwrb-input--wrong     { border-bottom-color: ${INPUT_UNDERLINE_WRONG}; }
+        .rwrb-input--answer    { color: ${INPUT_ANSWER_COLOR}; }
+
+        /* ✕ badge */
+        .rwrb-badge {
+          position: absolute;
+          top: -8px; right: 0;
+          width: clamp(17px, 1.9vw, 22px);
+          height: clamp(17px, 1.9vw, 22px);
+          border-radius: 50%;
+          background: ${WRONG_BADGE_BG};
+          color: ${WRONG_BADGE_TEXT};
+          display: flex; align-items: center; justify-content: center;
+          font-size: clamp(9px, 1vw, 12px);
+          font-weight: 700;
+          border: 2px solid #fff;
+          box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+          pointer-events: none;
+          z-index: 2;
+        }
+
+        /* Buttons */
+        .rwrb-buttons {
+          display: flex;
+          justify-content: center;
+          margin-top: clamp(8px, 1.6vw, 18px);
+        }
+
+        @media (max-width: 480px) {
+          .rwrb-row { flex-wrap: wrap; }
+          .rwrb-text { white-space: normal; }
+        }
+      `}</style>
+
       <div
+        className="div-forall"
         style={{
           display: "flex",
           flexDirection: "column",
-          alignItems: "center",
-          padding: "30px",
+          gap: "clamp(14px, 2vw, 22px)",
+          maxWidth: "1100px",
+          margin: "0 auto",
         }}
       >
-        <div className="div-forall">
-          <h5 className="header-title-page8">
-            <span style={{ marginRight: "10px" }}>B</span>
-            Read, look, and write. You can answer in two ways.
-          </h5>
+        {/* ── Header ── */}
+        <h1
+          className="WB-header-title-page8"
+          style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
+        >
+          <span className="WB-ex-A-1">B</span>
+          Read and write. Use the words below.
+        </h1>
 
-          {/* ANSWER BANK */}
-          <Droppable droppableId="bank" direction="horizontal">
-            {(provided) => (
-              <div style={{ textAlign: "center" }}>
-                <div
-                  ref={provided.innerRef}
-                  {...provided.droppableProps}
-                  style={{
-                    display: "inline-flex",
-                    justifyContent: "center",
-                    gap: "10px",
-                    marginBottom: "20px",
-                    border: "2px dashed #2c5287",
-                    borderRadius: "12px",
-                    padding: "10px",
-                  }}
-                >
-                  {answersBank.map((a, index) => (
-                    <Draggable
-                      key={a}
-                      draggableId={a}
-                      index={index}
-                      isDragDisabled={locked}
-                    >
-                      {(provided) => (
-                        <div
-                          ref={provided.innerRef}
-                          {...provided.draggableProps}
-                          {...provided.dragHandleProps}
-                          style={{
-                            padding: "6px 14px",
-                            border: "2px solid #2c5287",
-                            borderRadius: "10px",
-                            background: "#fff",
-                            fontWeight: "bold",
-                            ...provided.draggableProps.style,
-                          }}
-                        >
-                          {a}
-                        </div>
-                      )}
-                    </Draggable>
-                  ))}
-                  {provided.placeholder}
-                </div>
-              </div>
-            )}
-          </Droppable>
-
-          {/* QUESTIONS */}
-          {questions.map((q, qIndex) => (
-            <div
-              key={q.id}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "50px",
-                marginBottom: "40px",
-              }}
-            >
-              {/* LEFT */}
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "80px auto",
-                  alignItems: "center",
-                  gap: "20px",
-                }}
-              >
-                <div style={{ fontWeight: "bold", gap: "10px" }}>
-                  {q.id} {q.label}
-                </div>
-
-                <div style={{ display: "flex", gap: "20px" }}>
-                  {q.images.map((img, i) => {
-                    const letter = ["A", "B", "C"][i];
-                    return (
-                      <div key={i} style={{ textAlign: "center" }}>
-                        <img
-                          src={img}
-                          alt=""
-                          style={{
-                            width: "80px",
-                            height: "80px",
-                            objectFit: "contain",
-                          }}
-                        />
-                        <p style={{ fontWeight: "bold" }}>{letter}</p>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* RIGHT */}
-              <div style={{ width: "320px" }}>
-                {Object.keys(q.answers).map((type) => (
-                  <Droppable key={type} droppableId={`${qIndex}-${type}`}>
-                    {(provided, snapshot) => (
-                      <div
-                        ref={provided.innerRef}
-                        {...provided.droppableProps}
-                        style={{
-                          marginBottom: "12px",
-                          minHeight: "40px",
-                          background: snapshot.isDraggingOver
-                            ? "#dbeafe"
-                            : "#f9f9f9",
-                          borderBottom: locked
-                            ? answers[`${qIndex}-${type}`] === q.answers[type]
-                              ? "2px solid #000"
-                              : "2px solid #ef4444"
-                            : "2px solid #000",
-                          padding: "5px",
-                          position: "relative",
-                        }}
-                      >
-                        <p>
-                          <span
-                            style={{
-                              color: answers[`${qIndex}-${type}`]
-                                ? "#1C398E"
-                                : "#000",
-                              fontWeight: answers[`${qIndex}-${type}`]
-                                ? "bold"
-                                : "normal",
-                            }}
-                          >
-                            {answers[`${qIndex}-${type}`] || "___"}
-                          </span>{" "}
-                          is the {type}.
-                        </p>
-
-                        {/* WRONG MARK */}
-                        {showResult &&
-                          answers[`${qIndex}-${type}`] &&
-                          answers[`${qIndex}-${type}`] !== q.answers[type] && (
-                            <div
-                              style={{
-                                position: "absolute",
-                                right: "-20px",
-                                top: "0",
-                              }}
-                            >
-                              <WrongMark />
-                            </div>
-                          )}
-
-                        {provided.placeholder}
-                      </div>
-                    )}
-                  </Droppable>
-                ))}
-              </div>
-            </div>
+        {/* ── Word bank ── */}
+        <div className="rwrb-bank">
+          {WORD_BANK.map((w) => (
+            <div key={w} className="rwrb-pill">{w}</div>
           ))}
+        </div>
 
-          {/* BUTTONS */}
+        {/* ── Items ── */}
+        <div className="rwrb-list">
+          {ITEMS.map((item) => {
+            const wrong    = isWrong(item);
+            const value    = answers[item.id] || "";
+            const tColor   = showAns ? INPUT_ANSWER_COLOR : INPUT_TEXT_COLOR;
+            const uColor   = wrong ? INPUT_UNDERLINE_WRONG : INPUT_UNDERLINE_DEFAULT;
+            const disabled = isDisabled(item);
+
+            return (
+              <div key={item.id} className="rwrb-row">
+                <span className="rwrb-num">{item.id}</span>
+                <span className="rwrb-text">{item.before}</span>
+                <div className="rwrb-input-wrap">
+                  <input
+                    type="text"
+                    className={[
+                      "rwrb-input",
+                      wrong   ? "rwrb-input--wrong"  : "",
+                      showAns ? "rwrb-input--answer" : "",
+                    ].filter(Boolean).join(" ")}
+                    value={value}
+                    disabled={disabled}
+                    onChange={(e) => handleChange(item.id, e.target.value)}
+                    style={{ borderBottomColor: uColor, color: tColor }}
+                    spellCheck={false}
+                    autoComplete="off"
+                  />
+                  {wrong && <div className="rwrb-badge">✕</div>}
+                </div>
+                {item.after && <span className="rwrb-text">{item.after}</span>}
+              </div>
+            );
+          })}
+        </div>
+
+        {/* ── Buttons ── */}
+        <div className="rwrb-buttons">
           <Button
-            handleShowAnswer={showAnswers}
-            handleStartAgain={reset}
-            checkAnswers={checkAnswers}
+            checkAnswers={handleCheck}
+            handleShowAnswer={handleShowAnswer}
+            handleStartAgain={handleReset}
           />
         </div>
       </div>
-    </DragDropContext>
+    </div>
   );
-};
-
-export default Review1_Page1_Q2;
+}
