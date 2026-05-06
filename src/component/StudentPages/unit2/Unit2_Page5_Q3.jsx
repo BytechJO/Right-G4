@@ -2,10 +2,12 @@ import React, { useState } from "react";
 import Button from "../../Button";
 import ValidationAlert from "../../Popup/ValidationAlert";
 
+import sound from "../../../assets/audio/ClassBook/Grade 4/cd10pg14-instruction1-adult-lady_8RPyYe6a.mp3";
 // ─────────────────────────────────────────────
 //  🖼️  IMAGE
 // ─────────────────────────────────────────────
-import imgScene from "../../../assets/imgs/pages/Class Book/Right 4 Unit 2 Welcome to the Big Apple Folder/Page 14/SVG/Asset 14.svg";
+import imgScene from "../../../assets/imgs/pages/Class Book/Right 4 Unit 2 Welcome to the Big Apple Folder/Page 14/SVG/Asset 77.svg";
+import QuestionAudioPlayer from "../../QuestionAudioPlayer";
 
 // ─────────────────────────────────────────────
 //  🎨  COLORS
@@ -35,7 +37,48 @@ const ITEMS = [
   { id: 4, sentence: "First, he will visit the Clock Tower.",                       correctBox: "cross" },
   { id: 5, sentence: "He is going to take his camera with him.",                    correctBox: "check" },
 ];
-
+const captions = [
+  {
+    start: 0.28,
+    end: 7.46,
+    text: "Page 14, write activities, exercise C. Listen, read, and write check or X.",
+  },
+  {
+    start: 8.72,
+    end: 12.76,
+    text: "Darren is going to the United Kingdom for the summer.",
+  },
+  {
+    start: 12.76,
+    end: 15.56,
+    text: "He hopes to visit many places while he's there.",
+  },
+  {
+    start: 15.56,
+    end: 20.18,
+    text: "He plans to take a tour of the English countryside first.",
+  },
+  {
+    start: 21.20,
+    end: 24.24,
+    text: "Next, he is going to see Buckingham Palace.",
+  },
+  {
+    start: 24.24,
+    end: 29.34,
+    text: "He will make sure to take his camera with him so he can take lots of pictures.",
+  },
+  {
+    start: 29.34,
+    end: 33.82,
+    text: "He is going to take a tour of London in a double-decker bus.",
+  },
+  {
+    start: 33.82,
+    end: 37.52,
+    text: "Lastly, he is going to visit the Clock Tower.",
+  },
+];
 // ─────────────────────────────────────────────
 //  COMPONENT
 // ─────────────────────────────────────────────
@@ -233,6 +276,13 @@ export default function WB_ListenReadWriteCheckCross_QC() {
           <span className="WB-ex-A">C</span>
           Listen, read, and write <span style={{ color: "#ff0000ff" }}> ✓</span> or<span style={{ color: "#ff0000ff" }}> ✕</span>.
         </h1>
+          <div style={{marginTop:"10px"}}>
+        <QuestionAudioPlayer
+          src={sound}
+          captions={captions}
+          stopAtSecond={7.5}
+        />
+      </div>
 
         {/* ── Paragraph + Image ── */}
         <div className="lrcc-top">

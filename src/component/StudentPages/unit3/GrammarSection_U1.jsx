@@ -1,46 +1,42 @@
 import GrammarA from "./GrammarA";
 import GrammarB from "./GrammarB";
 import GrammarC from "./GrammarC";
-import image1 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 2 Welcome to the Big Apple Folder/Page 12/SVG/Asset 5.svg";
-import image  from "../../../assets/imgs/pages/Class Book/Right 4 Unit 2 Welcome to the Big Apple Folder/Page 12/SVG/Asset 4.svg";
+import image1 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 3 Harley Eats All the Sweets Folder/Page 24/SVG/Asset 7.svg";
+import image  from "../../../assets/imgs/pages/Class Book/Right 4 Unit 3 Harley Eats All the Sweets Folder/Page 24/SVG/1.svg";
 
-import sound from "../../../assets/audio/ClassBook/Grade 4/cd9pg12-grammar-adult-lady_lABu1hND.mp3";
+import sound from "../../../assets/audio/ClassBook/Grade 4/cd4pg6-grammar-adult-lady_5dpYBbN9.mp3";
 import QuestionAudioPlayer from "../../QuestionAudioPlayer";
 import SectionBanner from "../SectionBanner";
 const GrammarSection_U1 = () => {
- const captions = [
+ 
+const captions = [
   {
-    start: 0.42,
-    end: 2.20,
-    text: "Page 12, grammar.",
+    start: 0.22,
+    end: 2.16,
+    text: "Page six. Grammar.",
   },
   {
-    start: 2.20,
-    end: 5.50,
-    text: "Present progressive, going to.",
+    start: 2.16,
+    end: 4.72,
+    text: "Future: will and won't.",
   },
   {
-    start: 5.50,
-    end: 10.12,
-    text: "She is going to the beach. Is she going to the beach?",
+    start: 5.94,
+    end: 8.12,
+    text: "We will go to the coast.",
   },
   {
-    start: 10.12,
-    end: 15.58,
-    text: "I am going to the mall. Are you going to the mall?",
+    start: 8.12,
+    end: 9.92,
+    text: "We won't go into space.",
   },
   {
-    start: 15.58,
-    end: 19.14,
-    text: "Future plus verbs to be questions.",
-  },
-  {
-    start: 19.14,
-    end: 24.38,
-    text: "They are going to play on the weekend. Are they going to play on the weekend?",
+    start: 9.92,
+    end: 17.80,
+    text: "Future plus verb \"to be.\" Will they go to the moon? When will we travel into space?",
   },
 ];
-const stopAtSecond =  2.20;
+const stopAtSecond = 2;
  return (
     <div className="flex flex-col items-center ">
       <div className="w-[60%] mx-auto">

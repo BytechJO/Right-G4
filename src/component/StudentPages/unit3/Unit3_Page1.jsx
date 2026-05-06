@@ -1,5 +1,5 @@
 import React, { useRef, useState } from "react";
-import page_6 from  "../../../assets/imgs/pages/Class Book/Right 4 Unit 3 Harley Eats All the Sweets Folder/Page 22.png";
+import page_6 from"../../../assets/imgs/pages/Class Book/Right 4 Unit 3 Harley Eats All the Sweets Folder/Page 22.png";
 import mainSound from "../../../assets/audio/ClassBook/Grade 4/cd1pg4-conversation-adult-lady-t_1cApuaJF.mp3";
 import vocSound from "../../../assets/audio/ClassBook/Grade 4/cd1pg4-conversation-adult-lady-t_1cApuaJF.mp3";
 import AudioWithCaption from "../../AudioWithCaption";
@@ -61,10 +61,10 @@ const captions = [
        },
     },
         {
-  x1: 7.37,
-  y1: 25,
-  x2: 28.37,
-  y2: 31.5,      slice: { startFrom:captions[1].start,  stopAt: captions[1].end 
+  x1: 19.37,
+  y1: 26.8,
+  x2: 48.17,
+  y2: 30.8,     slice: { startFrom:captions[1].start,  stopAt: captions[1].end 
        },
     },
 
@@ -87,10 +87,10 @@ const captions = [
   y2: 53.87,    slice: { startFrom:captions[5].start,  stopAt: captions[5].end  },
     },
     {
-  x1: 5.37,
-  y1: 68.2,
-  x2: 50.77,
-  y2: 74.57,      slice: { startFrom:captions[6].start,  stopAt: captions[6].end  },
+  x1: 6.37,
+  y1: 68.8,
+  x2: 32.77,
+  y2: 73.17,      slice: { startFrom:captions[6].start,  stopAt: captions[6].end  },
     },
     {
   x1: 65.6,
@@ -105,6 +105,7 @@ const captions = [
   y2: 73.1,      slice: { startFrom:captions[10].start,  stopAt: captions[10].end  },
     },
   ];
+
 
   const handleImageClick = (e) => {
     const rect = e.target.getBoundingClientRect();

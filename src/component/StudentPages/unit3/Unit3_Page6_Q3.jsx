@@ -3,59 +3,49 @@ import Button from "../../Button";
 import ValidationAlert from "../../Popup/ValidationAlert";
 
 // ─────────────────────────────────────────────
-//  🖼️  IMAGE
-// ─────────────────────────────────────────────
-import imgScene from "../../../assets/imgs/pages/Class Book/Right 4 Unit 3 Harley Eats All the Sweets Folder/Page 27/SVG/Asset 1.svg";
-
-// ─────────────────────────────────────────────
 //  🎨  COLORS
 // ─────────────────────────────────────────────
-const INPUT_UNDERLINE_DEFAULT = "#2b2b2b";
+const INPUT_UNDERLINE_DEFAULT = "#3f3f3f";
 const INPUT_UNDERLINE_WRONG   = "#ef4444";
 const INPUT_TEXT_COLOR        = "#2b2b2b";
 const INPUT_ANSWER_COLOR      = "#c81e1e";
 const TEXT_COLOR              = "#2b2b2b";
 const NUMBER_COLOR            = "#2b2b2b";
+const HINT_COLOR              = "#2b2b2b";
 const WRONG_BADGE_BG          = "#ef4444";
 const WRONG_BADGE_TEXT        = "#ffffff";
 
 // ─────────────────────────────────────────────
 //  📝  EXERCISE DATA
-//  Qtype: "fixed" = question is shown, "input" = student writes question
+//  Qtype: "fixed" | "input"
+//  hint: shown after Q input (like "(skateboard)")
 // ─────────────────────────────────────────────
 const ITEMS = [
   {
     id:       1,
     Qtype:    "fixed",
-    question: "Did he have a chair?",
-    correctA: ["Yes, he had a chair.", "yes he had a chair"],
-    answerA:  "Yes, he had a chair.",
+    question: "What did she have? (scarf)",
+    correctA: ["She had a scarf.", "she had a scarf"],
+    answerA:  "She had a scarf.",
   },
   {
     id:       2,
-    Qtype:    "input",
-    correctQ: ["Did he have a robot?", "did he have a robot"],
-    answerQ:  "Did he have a robot?",
-    correctA: ["Yes, he had a robot.", "yes he had a robot"],
-    answerA:  "Yes, he had a robot.",
+    Qtype:    "fixed",
+    question: "What did he have? (car)",
+    correctA: ["He had a car.", "he had a car"],
+    answerA:  "He had a car.",
   },
   {
     id:       3,
-    Qtype:    "fixed",
-    question: "Did he have a ball?",
-    correctA: ["No, he didn't have a ball.", "no he didn't have a ball", "No, he didn't.", "no he didn't"],
-    answerA:  "No, he didn't have a ball.",
-  },
-  {
-    id:       4,
-    Qtype:    "fixed",
-    question: "Did he have a bike in his room?",
-    correctA: ["No, he didn't have a bike.", "no he didn't have a bike", "No, he didn't.", "no he didn't"],
-    answerA:  "No, he didn't have a bike.",
+    Qtype:    "input",
+    hint:     "(skateboard)",
+    correctQ: ["What did they have?", "what did they have"],
+    answerQ:  "What did they have?",
+    correctA: ["They had a skateboard.", "they had a skateboard"],
+    answerA:  "They had a skateboard.",
   },
 ];
 
-// build ALL_INPUTS
 const ALL_INPUTS = ITEMS.flatMap((item) => {
   const arr = [];
   if (item.Qtype === "input") arr.push({ key: `${item.id}q`, correct: item.correctQ, answer: item.answerQ });
@@ -75,7 +65,7 @@ const isCorrect = (userVal, correctArr) =>
 // ─────────────────────────────────────────────
 //  COMPONENT
 // ─────────────────────────────────────────────
-export default function WB_LookReadAnswer_QD() {
+export default function WB_ReadWriteQA_QF() {
   const [answers,     setAnswers]     = useState({});
   const [showResults, setShowResults] = useState(false);
   const [showAns,     setShowAns]     = useState(false);
@@ -116,17 +106,17 @@ export default function WB_LookReadAnswer_QD() {
   const getWrong    = (key, correctArr) => showResults && !showAns && !isCorrect(answers[key] || "", correctArr);
   const getDisabled = (key, correctArr) => showAns || (showResults && isCorrect(answers[key] || "", correctArr));
 
-  const renderInput = (key, correctArr) => {
+  const renderInput = (key, correctArr, flex = 1) => {
     const wrong    = getWrong(key, correctArr);
     const value    = answers[key] || "";
     const tColor   = showAns ? INPUT_ANSWER_COLOR : INPUT_TEXT_COLOR;
     const uColor   = wrong ? INPUT_UNDERLINE_WRONG : INPUT_UNDERLINE_DEFAULT;
     const disabled = getDisabled(key, correctArr);
     return (
-      <div className="lrad-input-wrap">
+      <div className="rwqf-input-wrap" style={{ flex }}>
         <input
           type="text"
-          className={["lrad-input", wrong ? "lrad-input--wrong" : "", showAns ? "lrad-input--answer" : ""].filter(Boolean).join(" ")}
+          className={["rwqf-input", wrong ? "rwqf-input--wrong" : "", showAns ? "rwqf-input--answer" : ""].filter(Boolean).join(" ")}
           value={value}
           disabled={disabled}
           onChange={(e) => handleChange(key, e.target.value)}
@@ -134,7 +124,7 @@ export default function WB_LookReadAnswer_QD() {
           spellCheck={false}
           autoComplete="off"
         />
-        {wrong && <div className="lrad-badge">✕</div>}
+        {wrong && <div className="rwqf-badge">✕</div>}
       </div>
     );
   };
@@ -142,45 +132,31 @@ export default function WB_LookReadAnswer_QD() {
   return (
     <div className="main-container-component">
       <style>{`
-        /* ── Layout: left QA | right image ── */
-        .lrad-layout {
-          display: grid;
-          grid-template-columns: 1fr auto;
-          gap: clamp(12px, 1.8vw, 22px);
-          align-items: flex-start;
-          width: 100%;
-        }
-
-        .lrad-img {
-          width: clamp(180px, 26vw, 340px);
-          height: auto;
-          display: block;
-          border-radius: 8px;
-          flex-shrink: 0;
-        }
-
-        /* Items list */
-        .lrad-list {
+        /* ── Items list ── */
+        .rwqf-list {
           display: flex;
           flex-direction: column;
-          gap: clamp(12px, 1.8vw, 22px);
+          gap: clamp(14px, 2.2vw, 26px);
+          width: 100%;
+          margin-top :8%
         }
 
         /* Single item */
-        .lrad-item {
+        .rwqf-item {
           display: flex;
           flex-direction: column;
-          gap: clamp(4px, 0.5vw, 6px;
+          gap: clamp(5px, 0.7vw, 8px);
         }
 
         /* Q line */
-        .lrad-q-line {
+        .rwqf-q-line {
           display: flex;
           align-items: flex-end;
           gap: clamp(4px, 0.5vw, 7px);
+          min-width: 0;
         }
 
-        .lrad-num {
+        .rwqf-num {
           font-size: clamp(15px, 1.8vw, 22px);
           font-weight: 700;
           color: ${NUMBER_COLOR};
@@ -189,53 +165,52 @@ export default function WB_LookReadAnswer_QD() {
           line-height: 1;
         }
 
-        .lrad-qlabel {
+        .rwqf-qfixed {
           font-size: clamp(13px, 1.6vw, 19px);
           color: ${TEXT_COLOR};
+          padding-bottom: 4px;
+          line-height: 1;
+        }
+
+        .rwqf-hint {
+          font-size: clamp(13px, 1.6vw, 19px);
+          color: ${HINT_COLOR};
+          white-space: nowrap;
           flex-shrink: 0;
           padding-bottom: 4px;
           line-height: 1;
         }
 
-        .lrad-qfixed {
-          font-size: clamp(13px, 1.6vw, 19px);
-          color: ${TEXT_COLOR};
-          padding-bottom: 4px;
-          line-height: 1;
-        }
-
-        /* Answer line — indented */
-        .lrad-a-line {
+        /* A line — indented */
+        .rwqf-a-line {
           padding-left: clamp(22px, 2.8vw, 34px);
         }
 
         /* Input wrap */
-        .lrad-input-wrap {
+        .rwqf-input-wrap {
           position: relative;
-          flex: 1;
           min-width: clamp(100px, 14vw, 260px);
         }
 
-        .lrad-input {
+        .rwqf-input {
           width: 100%;
           background: transparent;
           border: none;
-          border-bottom: 2px solid ${INPUT_UNDERLINE_DEFAULT};
+          border-bottom: 1px solid ${INPUT_UNDERLINE_DEFAULT};
           outline: none;
           font-size: clamp(13px, 1.6vw, 19px);
           color: ${INPUT_TEXT_COLOR};
-          padding: 4px 4px 5px;
           line-height: 1;
           box-sizing: border-box;
           font-family: inherit;
           transition: border-color 0.2s;
         }
-        .lrad-input:disabled   { opacity: 1; cursor: default; }
-        .lrad-input--wrong     { border-bottom-color: ${INPUT_UNDERLINE_WRONG}; }
-        .lrad-input--answer    { color: ${INPUT_ANSWER_COLOR}; }
+        .rwqf-input:disabled   { opacity: 1; cursor: default; }
+        .rwqf-input--wrong     { border-bottom-color: ${INPUT_UNDERLINE_WRONG}; }
+        .rwqf-input--answer    { color: ${INPUT_ANSWER_COLOR}; }
 
         /* ✕ badge */
-        .lrad-badge {
+        .rwqf-badge {
           position: absolute;
           top: -8px; right: 0;
           width: clamp(16px, 1.8vw, 20px);
@@ -253,15 +228,10 @@ export default function WB_LookReadAnswer_QD() {
         }
 
         /* Buttons */
-        .lrad-buttons {
+        .rwqf-buttons {
           display: flex;
           justify-content: center;
           margin-top: clamp(8px, 1.6vw, 18px);
-        }
-
-        @media (max-width: 560px) {
-          .lrad-layout { grid-template-columns: 1fr; }
-          .lrad-img { width: 100%; }
         }
       `}</style>
 
@@ -274,47 +244,39 @@ export default function WB_LookReadAnswer_QD() {
           className="WB-header-title-page8"
           style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
         >
-          <span className="WB-ex-A">D</span>
-          Look, read, and answer. Use a long answer.
+          <span className="WB-ex-A">F</span>
+          Read and write the question or answer.
         </h1>
 
-        {/* ── Layout ── */}
-        <div className="lrad-layout">
+        {/* ── Items ── */}
+        <div className="rwqf-list">
+          {ITEMS.map((item) => (
+            <div key={item.id} className="rwqf-item">
 
-          {/* Left: items */}
-          <div className="lrad-list">
-            {ITEMS.map((item) => (
-              <div key={item.id} className="lrad-item">
-
-                {/* Question line */}
-                <div className="lrad-q-line">
-                  <span className="lrad-num">{item.id}</span>
-                  {item.Qtype === "fixed" ? (
-                    <span className="lrad-qfixed">{item.question}</span>
-                  ) : (
-                    <>
-                      <span className="lrad-qlabel">Q:</span>
-                      {renderInput(`${item.id}q`, item.correctQ)}
-                    </>
-                  )}
-                </div>
-
-                {/* Answer line */}
-                <div className="lrad-a-line">
-                  {renderInput(`${item.id}a`, item.correctA)}
-                </div>
-
+              {/* Q line */}
+              <div className="rwqf-q-line">
+                <span className="rwqf-num">{item.id}</span>
+                {item.Qtype === "fixed" ? (
+                  <span className="rwqf-qfixed">{item.question}</span>
+                ) : (
+                  <>
+                    {renderInput(`${item.id}q`, item.correctQ)}
+                    {item.hint && <span className="rwqf-hint">{item.hint}</span>}
+                  </>
+                )}
               </div>
-            ))}
-          </div>
 
-          {/* Right: image */}
-          <img src={imgScene} alt="bedroom" className="lrad-img" />
+              {/* A line */}
+              <div className="rwqf-a-line">
+                {renderInput(`${item.id}a`, item.correctA)}
+              </div>
 
+            </div>
+          ))}
         </div>
 
         {/* ── Buttons ── */}
-        <div className="lrad-buttons">
+        <div className="rwqf-buttons">
           <Button
             checkAnswers={handleCheck}
             handleShowAnswer={handleShowAnswer}

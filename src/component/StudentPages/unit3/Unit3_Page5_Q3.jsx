@@ -1,424 +1,270 @@
 import React, { useState } from "react";
 import Button from "../../Button";
 import ValidationAlert from "../../Popup/ValidationAlert";
-import img1 from "../../../assets/imgs/pages/classbook/Right 3 Unit 3 Lala Goes Shopping Folder/Page 26/Ex C 1.svg";
-import img2 from "../../../assets/imgs/pages/classbook/Right 3 Unit 3 Lala Goes Shopping Folder/Page 26/Ex C 2.svg";
 
-const Page8_Q4 = () => {
-  const grid = [
-    [
-      "p",
-      "l",
-      "k",
-      "j",
-      "t",
-      "h",
-      "e",
-      "b",
-      "g",
-      "h",
-      "j",
-      "n",
-      "s",
-      "h",
-      "o",
-      "p",
-      "k",
-      "e",
-      "e",
-      "p",
-      "e",
-      "r",
-      "v",
-      "e",
-      "r",
-      "x",
-      "b",
-      "h",
-      "a",
-      "s",
-      "u",
-      "v",
-    ],
-    [
-      "i",
-      "e",
-      "y",
-      "p",
-      "u",
-      "r",
-      "p",
-      "l",
-      "e",
-      "d",
-      "c",
-      "x",
-      "d",
-      "s",
-      "x",
-      "o",
-      "b",
-      "x",
-      "g",
-      "r",
-      "e",
-      "e",
-      "n",
-      "r",
-      "e",
-      "x",
-      "n",
-      "a",
-      "n",
-      "d",
-      "c",
-    ],
-    [
-      "f",
-      "d",
-      "s",
-      "s",
-      "n",
-      "j",
-      "b",
-      "l",
-      "u",
-      "e",
-      "k",
-      "l",
-      "j",
-      "m",
-      "i",
-      "n",
-      "w",
-      "q",
-      "s",
-      "z",
-      "g",
-      "l",
-      "o",
-      "v",
-      "e",
-      "s",
-      "p",
-    ],
-  ];
+// ─────────────────────────────────────────────
+//  🖼️  IMAGE
+// ─────────────────────────────────────────────
+import imgScene from "../../../assets/imgs/pages/Class Book/Right 4 Unit 3 Harley Eats All the Sweets Folder/Page 26/SVG/Asset 5.svg";
 
-  const letters = grid;
-  const wordsToFind = [
-    "the",
-    "shopkeeper",
-    "has",
-    "purple",
-    "green",
-    "and",
-    "blue",
-    "gloves",
-  ];
+// ─────────────────────────────────────────────
+//  🎨  COLORS
+// ─────────────────────────────────────────────
+const BOX_BORDER_DEFAULT = "#2096a6";
+const BOX_BORDER_WRONG   = "#2096a6";
+const BOX_TEXT_DEFAULT   = "#2b2b2b";
+const BOX_TEXT_ANSWER    = "#c81e1e";
+const SENTENCE_COLOR     = "#2b2b2b";
+const NUMBER_COLOR       = "#2b2b2b";
+const PARA_COLOR         = "#2b2b2b";
+const WRONG_BADGE_BG     = "#ef4444";
+const WRONG_BADGE_TEXT   = "#ffffff";
 
-  const correctPositions = {
-    the: [4, 5, 6],
+// ─────────────────────────────────────────────
+//  📝  PARAGRAPH
+// ─────────────────────────────────────────────
+const PARAGRAPH = `Two years ago, my friends and I built a tree house in my backyard. It was big. It had chairs and tables. It had large windows. There were two bookcases in the tree house. We had a TV, so we could watch movies on the weekends.`;
 
-    shopkeeper: [12, 13, 14, 15, 16, 17, 18, 19, 20, 21],
+// ─────────────────────────────────────────────
+//  📝  EXERCISE DATA
+// ─────────────────────────────────────────────
+const ITEMS = [
+  { id: 1, sentence: "The tree house had a TV.",      correct: ["true",  "True"],  answer: "True"  },
+  { id: 2, sentence: "It had beds and tables.",        correct: ["false", "False"], answer: "False" },
+  { id: 3, sentence: "It had large windows.",          correct: ["true",  "True"],  answer: "True"  },
+  { id: 4, sentence: "The tree house had a desk.",     correct: ["false", "False"], answer: "False" },
+];
 
-    has: [27, 28, 29],
+// ─────────────────────────────────────────────
+//  🔧  HELPERS
+// ─────────────────────────────────────────────
+const isCorrect = (userVal, correctArr) =>
+  correctArr.some((c) => userVal.trim().toLowerCase() === c.toLowerCase());
 
-    purple: [100 + 3, 100 + 4, 100 + 5, 100 + 6, 100 + 7, 100 + 8],
+// ─────────────────────────────────────────────
+//  COMPONENT
+// ─────────────────────────────────────────────
+export default function WB_ListenReadTrueFalse_QC() {
+  const [answers,     setAnswers]     = useState({});
+  const [showResults, setShowResults] = useState(false);
+  const [showAns,     setShowAns]     = useState(false);
 
-    green: [100 + 18, 100 + 19, 100 + 20, 100 + 21, 100 + 22],
-
-    and: [100 + 27, 100 + 28, 100 + 29],
-
-    blue: [200 + 6, 200 + 7, 200 + 8, 200 + 9],
-
-    gloves: [200 + 20, 200 + 21, 200 + 22, 200 + 23, 200 + 24, 200 + 25],
-  };
-  const [locked, setLocked] = useState(false);
-  const [sentence, setSentence] = useState("");
-  const [selected, setSelected] = useState([]);
-  const [foundWords, setFoundWords] = useState([]);
-  const [coloredCells, setColoredCells] = useState([]);
-  const [isDragging, setIsDragging] = useState(false);
-
-  const handleMouseDown = (index) => {
-    if (locked) return;
-    setIsDragging(true);
-    setSelected([index]);
-  };
-  const handleMouseEnter = (index) => {
-    if (!isDragging || locked) return;
-
-    const lastIndex = selected[selected.length - 1];
-
-    if (index === lastIndex + 1 || index === lastIndex - 1) {
-      if (!selected.includes(index)) {
-        setSelected((prev) => [...prev, index]);
-      }
-    }
+  const handleChange = (id, value) => {
+    if (showAns) return;
+    const item = ITEMS.find((i) => i.id === id);
+    if (showResults && item && isCorrect(answers[id] || "", item.correct)) return;
+    // only allow "true", "false" or partial typing
+    setAnswers((prev) => ({ ...prev, [id]: value }));
   };
 
-  const handleTouchMove = (e) => {
-    if (!isDragging || locked) return;
-    e.preventDefault(); // منع التمرير في الصفحة أثناء السحب
-
-    const touch = e.touches[0];
-    const element = document.elementFromPoint(touch.clientX, touch.clientY);
-    if (!element) return;
-
-    const index = element.getAttribute("data-index");
-    if (index !== null) {
-      handleMouseEnter(Number(index));
-    }
+  const handleCheck = () => {
+    if (showAns) return;
+    const allAnswered = ITEMS.every((item) => answers[item.id]?.trim());
+    if (!allAnswered) { ValidationAlert.info("Please complete all answers first."); return; }
+    let score = 0;
+    ITEMS.forEach((item) => { if (isCorrect(answers[item.id] || "", item.correct)) score++; });
+    setShowResults(true);
+    if (score === ITEMS.length) ValidationAlert.success(`Score: ${score} / ${ITEMS.length}`);
+    else if (score > 0)         ValidationAlert.warning(`Score: ${score} / ${ITEMS.length}`);
+    else                        ValidationAlert.error(`Score: ${score} / ${ITEMS.length}`);
   };
 
-  const handleMouseUp = () => {
-    if (locked) return;
-    setIsDragging(false);
-
-    const matchedWord = wordsToFind.find((word) => {
-      const positions = correctPositions[word];
-      if (!positions) return false;
-
-      // تحقق نفس الترتيب
-      const isSame =
-        positions.length === selected.length &&
-        positions.every((pos, i) => pos === selected[i]);
-
-      // تحقق بالعكس (reverse)
-      const isReverse =
-        positions.length === selected.length &&
-        positions
-          .slice()
-          .reverse()
-          .every((pos, i) => pos === selected[i]);
-
-      return isSame || isReverse;
-    });
-    if (matchedWord && !foundWords.includes(matchedWord)) {
-      setFoundWords((prev) => [...prev, matchedWord]);
-      setColoredCells((prev) => [...prev, ...selected]);
-      setSentence(
-        wordsToFind
-          .filter((word) => [...foundWords, matchedWord].includes(word))
-          .join(" "),
-      );
-    }
-
-    setSelected([]);
+  const handleShowAnswer = () => {
+    const filled = {};
+    ITEMS.forEach((item) => { filled[item.id] = item.answer; });
+    setAnswers(filled);
+    setShowResults(false);
+    setShowAns(true);
   };
 
-  const reset = () => {
-    setSelected([]);
-    setFoundWords([]);
-    setColoredCells([]);
-    setSentence("");
-    setLocked(false);
+  const handleReset = () => {
+    setAnswers({});
+    setShowResults(false);
+    setShowAns(false);
   };
 
-  const showAnswers = () => {
-    let allCells = [];
-    wordsToFind.forEach((word) => {
-      if (correctPositions[word]) {
-        allCells.push(...correctPositions[word]);
-      }
-    });
-    setFoundWords(wordsToFind);
-    setColoredCells(allCells);
-    setSelected([]);
-    setSentence(wordsToFind.join(" "));
-    setLocked(true);
-  };
-
-  const checkAnswers = () => {
-    if (locked) return;
-    const total = wordsToFind.length;
-    const score = foundWords.length;
-
-    if (score === 0) {
-      ValidationAlert.info();
-      return;
-    }
-
-    if (score < total) {
-      ValidationAlert.warning(`
-        <div style="font-size:20px;text-align:center;">
-          <b style="color:orange;">Score: ${score} / ${total}</b>
-        </div>
-      `);
-    } else {
-      ValidationAlert.success(`
-        <div style="font-size:20px;text-align:center;">
-          <b style="color:green;">Score: ${score} / ${total}</b>
-        </div>
-      `);
-    }
-    setLocked(true);
-  };
+  const isWrong    = (item) => showResults && !showAns && !isCorrect(answers[item.id] || "", item.correct);
+  const isDisabled = (item) => showAns || (showResults && isCorrect(answers[item.id] || "", item.correct));
 
   return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        padding: "30px",
-        width: "100%",
-        boxSizing: "border-box",
-      }}
-    >
-      <div className="div-forall">
-        <h5 className="header-title-page8 pb-2.5">
-          <span className="ex-A" style={{ marginRight: "10px" }}>
-            C
-          </span>
-          What color gloves does the shopkeeper have in Picky Shopper on page
-          23?
-        </h5>
+    <div className="main-container-component">
+      <style>{`
+        /* ── Top: paragraph + image ── */
+        .lrtf-top {
+          display: grid;
+          grid-template-columns: 1fr auto;
+          gap: clamp(12px, 1.8vw, 22px);
+          align-items: flex-start;
+          width: 100%;
+        }
 
-        {/* Words List */}
-        <div className="flex flex-wrap justify-center gap-3 mb-5 border-2 border-dashed border-gray-300 rounded-[14px] p-3">
-          {wordsToFind.map((word) => (
-            <span
-              key={word}
-              className={`px-3 py-1.5 rounded-[10px] border-2 border-[#2c5287] font-semibold transition duration-200 ${
-                foundWords.includes(word)
-                  ? "bg-[#2c5287] text-white border-[#2c5287]"
-                  : "bg-white text-black"
-              }`}
-              style={{ fontSize: "clamp(12px, 2vw, 15px)" }}
-            >
-              {word}
-            </span>
-          ))}
-        </div>
+        .lrtf-para {
+          font-size: clamp(13px, 1.5vw, 18px);
+          color: ${PARA_COLOR};
+          line-height: 1.8;
+          margin: 0;
+        }
 
-        <div
-          style={{ width: "100%", display: "flex", justifyContent: "center" }}
+        .lrtf-img {
+          width: clamp(160px, 22vw, 280px);
+          height: auto;
+          display: block;
+          border-radius: 8px;
+          flex-shrink: 0;
+        }
+
+        /* ── Items list ── */
+        .lrtf-list {
+          display: flex;
+          flex-direction: column;
+          gap: clamp(10px, 1.4vw, 16px);
+          width: 100%;
+        }
+
+        /* Single row: num | sentence | box */
+        .lrtf-row {
+          display: grid;
+          grid-template-columns: auto 1fr auto;
+          align-items: center;
+          gap: clamp(8px, 1.2vw, 16px);
+        }
+
+        .lrtf-num {
+          font-size: clamp(14px, 1.7vw, 20px);
+          font-weight: 700;
+          color: ${NUMBER_COLOR};
+          flex-shrink: 0;
+          line-height: 1;
+        }
+
+        .lrtf-sentence {
+          font-size: clamp(13px, 1.6vw, 19px);
+          color: ${SENTENCE_COLOR};
+          line-height: 1.5;
+        }
+
+        /* Input box */
+        .lrtf-input-wrap {
+          position: relative;
+          flex-shrink: 0;
+        }
+
+        .lrtf-input {
+          width: clamp(70px, 9vw, 110px);
+          height: clamp(34px, 4.2vw, 46px);
+          border: 2px solid ${BOX_BORDER_DEFAULT};
+          border-radius: 8px;
+          background: #fff;
+          text-align: center;
+          font-size: clamp(13px, 1.6vw, 18px);
+          font-weight: 600;
+          color: ${BOX_TEXT_DEFAULT};
+          outline: none;
+          font-family: inherit;
+          transition: border-color 0.2s;
+          padding: 0 4px;
+          box-sizing: border-box;
+          cursor: text;
+        }
+        .lrtf-input:disabled   { opacity: 1; cursor: default; }
+        .lrtf-input--wrong     { border-color: ${BOX_BORDER_WRONG}; }
+        .lrtf-input--answer    { color: ${BOX_TEXT_ANSWER}; }
+
+        /* ✕ badge */
+        .lrtf-badge {
+          position: absolute;
+          top: -8px; right: -8px;
+          width: clamp(16px, 1.8vw, 20px);
+          height: clamp(16px, 1.8vw, 20px);
+          border-radius: 50%;
+          background: ${WRONG_BADGE_BG};
+          color: ${WRONG_BADGE_TEXT};
+          display: flex; align-items: center; justify-content: center;
+          font-size: clamp(8px, 0.9vw, 11px);
+          font-weight: 700;
+          border: 2px solid #fff;
+          box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+          pointer-events: none;
+          z-index: 2;
+        }
+
+        /* Buttons */
+        .lrtf-buttons {
+          display: flex;
+          justify-content: center;
+          margin-top: clamp(8px, 1.6vw, 18px);
+        }
+
+        @media (max-width: 560px) {
+          .lrtf-top { grid-template-columns: 1fr; }
+          .lrtf-img { width: 100%; }
+        }
+      `}</style>
+
+      <div
+        className="div-forall"
+        style={{ display: "flex", flexDirection: "column", gap: "clamp(14px, 2vw, 22px)", maxWidth: "1100px", margin: "0 auto" }}
+      >
+        {/* ── Header ── */}
+        <h1
+          className="WB-header-title-page8"
+          style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
         >
-          {/* Grid Wrapper */}
-          <div
-            className="border-2 border-[#f28c63] px-4 pt-4 pb-5"
-            style={{ width: "fit-content", margin: "0 auto" }}
-          >
-            <div
-              className="bg-[#daf5ff] rounded-[15px] p-2 sm:p-[15px]"
-              style={{
-                userSelect: "none",
-                width: "max-content",
-                touchAction: "none", // 🔥 الحل السحري لمنع تحريك الصفحة أثناء السحب على الآيباد
-                WebkitOverflowScrolling: "touch",
-              }}
-            >
-              {letters.map((row, rowIndex) => (
-                <div
-                  key={rowIndex}
-                  style={{
-                    display: "flex",
-                    gap: "clamp(1px, 0.3vw, 4px)", // مسافة تتغير حسب الشاشة
-                    width: "fit-content",
-                  }}
-                >
-                  {row.map((letter, colIndex) => {
-                    const index = rowIndex * 100 + colIndex;
-                    const isSelected = selected.includes(index);
-                    const isFound = coloredCells.includes(index);
+          <span className="WB-ex-A">C</span>
+          Listen, read, and write <span style={{ color: "#ff9900ff", margin: "0 4px" }}>true</span> or <span style={{ color: "#ff9900ff", margin: "0 4px" }}>false</span>.
+        </h1>
 
-                    return (
-                      <span
-                        key={index}
-                        data-index={index}
-                        onMouseDown={() => handleMouseDown(index)}
-                        onMouseEnter={() => handleMouseEnter(index)}
-                        onMouseUp={handleMouseUp}
-                        onDragStart={(e) => e.preventDefault()}
-                        onTouchStart={(e) => {
-                          e.preventDefault(); // 🔥 منع تحريك الصفحة عند بدء اللمس
-                          handleMouseDown(index);
-                        }}
-                        onTouchMove={handleTouchMove}
-                        onTouchEnd={handleMouseUp}
-                        className={`
-                          flex items-center justify-center
-                          cursor-pointer
-                          transition
-                          ${isSelected ? "bg-[#ffd54f] rounded-sm" : ""}
-                          ${isFound ? "bg-[#4caf50] text-white rounded-sm" : ""}
-                        `}
-                        style={{
-                          width: "clamp(16px, 2.5vw, 25px)", // 🔥 عرض ديناميكي
-                          height: "clamp(22px, 3.5vw, 35px)", // 🔥 طول ديناميكي
-                          fontSize: "clamp(12px, 1.8vw, 18px)", // 🔥 حجم خط ديناميكي
-                        }}
-                      >
-                        {letter}
-                      </span>
-                    );
-                  })}
-                </div>
-              ))}
-            </div>
-
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: "10px",
-                marginTop: "15px",
-              }}
-            >
-              <img
-                src={img1}
-                alt="start"
-                style={{
-                  width: "clamp(40px, 10vw, 100px)", // 🔥 حجم ديناميكي للصور
-                  height: "auto",
-                }}
-              />
-
-              <div
-                style={{
-                  flex: 1,
-                  borderBottom: "2px solid black",
-                  height: "30px",
-                  display: "flex",
-                  alignItems: "center",
-                }}
-              >
-                <input
-                  value={sentence}
-                  readOnly
-                  style={{
-                    width: "100%",
-                    border: "none",
-                    outline: "none",
-                    background: "transparent",
-                    fontSize: "clamp(14px, 2vw, 18px)", // 🔥 حجم خط ديناميكي للإجابة
-                  }}
-                />
-              </div>
-
-              <img
-                src={img2}
-                alt="end"
-                style={{
-                  width: "clamp(40px, 10vw, 100px)", // 🔥 حجم ديناميكي للصور
-                  height: "auto",
-                }}
-              />
-            </div>
-          </div>
+        {/* ── Paragraph + Image ── */}
+        <div className="lrtf-top">
+          <p className="lrtf-para">{PARAGRAPH}</p>
+          <img src={imgScene} alt="treehouse" className="lrtf-img" />
         </div>
 
-        {/* BUTTONS */}
-        <Button
-          handleShowAnswer={showAnswers}
-          handleStartAgain={reset}
-          checkAnswers={checkAnswers}
-        />
+        {/* ── Items ── */}
+        <div className="lrtf-list">
+          {ITEMS.map((item) => {
+            const wrong    = isWrong(item);
+            const value    = answers[item.id] || "";
+            const tColor   = showAns ? BOX_TEXT_ANSWER : BOX_TEXT_DEFAULT;
+            const bColor   = wrong ? BOX_BORDER_WRONG : BOX_BORDER_DEFAULT;
+            const disabled = isDisabled(item);
+
+            return (
+              <div key={item.id} className="lrtf-row">
+                <span className="lrtf-num">{item.id}</span>
+                <span className="lrtf-sentence">{item.sentence}</span>
+                <div className="lrtf-input-wrap">
+                  <input
+                    type="text"
+                    className={[
+                      "lrtf-input",
+                      wrong   ? "lrtf-input--wrong"  : "",
+                      showAns ? "lrtf-input--answer" : "",
+                    ].filter(Boolean).join(" ")}
+                    value={value}
+                    disabled={disabled}
+                    onChange={(e) => handleChange(item.id, e.target.value)}
+                    style={{ borderColor: bColor, color: tColor }}
+                    spellCheck={false}
+                    autoComplete="off"
+                    placeholder="true / false"
+                  />
+                  {wrong && <div className="lrtf-badge">✕</div>}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* ── Buttons ── */}
+        <div className="lrtf-buttons">
+          <Button
+            checkAnswers={handleCheck}
+            handleShowAnswer={handleShowAnswer}
+            handleStartAgain={handleReset}
+          />
+        </div>
       </div>
     </div>
   );
-};
-
-export default Page8_Q4;
+}

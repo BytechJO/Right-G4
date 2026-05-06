@@ -1,321 +1,198 @@
 import React, { useState } from "react";
-import "./Unit3_Page5_Q2.css";
-import ValidationAlert from "../../Popup/ValidationAlert";
-import WrongMark from "../../WrongMark";
-
-import img1 from "../../../assets/imgs/pages/classbook/Right 3 Unit 3 Lala Goes Shopping Folder/Page 26/Ex B 1.svg";
-import img2 from "../../../assets/imgs/pages/classbook/Right 3 Unit 3 Lala Goes Shopping Folder/Page 26/Ex B 2.svg";
-import img3 from "../../../assets/imgs/pages/classbook/Right 3 Unit 3 Lala Goes Shopping Folder/Page 26/Ex B 3.svg";
-import img4 from "../../../assets/imgs/pages/classbook/Right 3 Unit 3 Lala Goes Shopping Folder/Page 26/Ex B 4.svg";
-import img5 from "../../../assets/imgs/pages/classbook/Right 3 Unit 3 Lala Goes Shopping Folder/Page 26/Ex B 5.svg";
-import img6 from "../../../assets/imgs/pages/classbook/Right 3 Unit 3 Lala Goes Shopping Folder/Page 26/Ex B 6.svg";
-
-import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import Button from "../../Button";
+import ValidationAlert from "../../Popup/ValidationAlert";
 
-const data = [
+const INPUT_UNDERLINE_DEFAULT = "#3f3f3f";
+const INPUT_UNDERLINE_WRONG = "#ef4444";
+const INPUT_TEXT_COLOR = "#2b2b2b";
+const INPUT_ANSWER_COLOR = "#c81e1e";
+const NUMBER_COLOR = "#2b2b2b";
+const WRONG_BADGE_BG = "#ef4444";
+const WRONG_BADGE_TEXT = "#ffffff";
+
+const ITEMS = [
   {
-    img: img1,
-    before: "There are",
-    after: "bananas in the fridge.",
-    answer: "a few",
+    id: 1,
+    scrambled: "all at Not",
+    correct: ["Not at all.", "Not at all"],
+    answer: "Not at all.",
   },
   {
-    img: img2,
-    before: "There’s",
-    after: "orange juice.",
-    answer: "a little",
+    id: 2,
+    scrambled: "part That best the was",
+    correct: ["That was the best part.", "That was the best part"],
+    answer: "That was the best part.",
   },
   {
-    img: img3,
-    before: "There is",
-    after: "water in the glass.",
-    answer: "a little",
-  },
-  {
-    img: img4,
-    before: "There is",
-    after: "chocolate cake.",
-    answer: "a little",
-  },
-  {
-    img: img5,
-    before: "There’s",
-    after: "sugar.",
-    answer: "a little",
-  },
-  {
-    img: img6,
-    before: "There are",
-    after: "apples in the bowl.",
-    answer: "a few",
+    id: 3,
+    scrambled: "party a was it Yeah, great",
+    correct: ["Yeah, it was quite a party.", "Yeah, it was quite a party"],
+    answer: "Yeah, it was quite a party.",
   },
 ];
 
-const options = [
-  { id: "o1", value: "a little" },
-  { id: "o2", value: "a few" },
-];
+const normalize = (str) =>
+  str
+    .toLowerCase()
+    .replace(/[^a-z0-9'\s]/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
 
-export default function Unit3_Page5_Q2() {
-  const [inputs, setInputs] = useState(Array(data.length).fill(""));
-  const [wrongInputs, setWrongInputs] = useState(
-    Array(data.length).fill(false),
-  );
-  const [showAnswer, setShowAnswer] = useState(false);
+const isCorrect = (userVal, correctArr) =>
+  correctArr.some((c) => normalize(userVal) === normalize(c));
 
-  const onDragEnd = (result) => {
-    if (!result.destination || showAnswer) return;
+export default function WB_UnscrambleWrite_QB_U3() {
+  const [answers, setAnswers] = useState({});
+  const [showResults, setShowResults] = useState(false);
+  const [showAns, setShowAns] = useState(false);
 
-    const value = options.find((o) => o.id === result.draggableId)?.value;
-
-    const index = Number(result.destination.droppableId);
-
-    setInputs((prev) => {
-      const copy = [...prev];
-      copy[index] = value;
-      return copy;
-    });
-
-    setWrongInputs(Array(data.length).fill(false));
+  const handleChange = (id, value) => {
+    if (showAns) return;
+    const item = ITEMS.find((i) => i.id === id);
+    if (showResults && item && isCorrect(answers[id] || "", item.correct))
+      return;
+    setAnswers((prev) => ({ ...prev, [id]: value }));
   };
 
-  const checkAnswers = () => {
-    if (showAnswer) return;
-
-    if (inputs.some((i) => i === "")) {
-      ValidationAlert.info(
-        "Oops!",
-        "Please fill in all the answers before checking.",
-      );
+  const handleCheck = () => {
+    if (showAns) return;
+    const allAnswered = ITEMS.every((item) => answers[item.id]?.trim());
+    if (!allAnswered) {
+      ValidationAlert.info("Please complete all answers first.");
       return;
     }
-
-    let correct = 0;
-    const wrong = [];
-
-    data.forEach((item, i) => {
-      if (inputs[i] === item.answer) {
-        correct++;
-        wrong[i] = false;
-      } else {
-        wrong[i] = true;
-      }
+    let score = 0;
+    ITEMS.forEach((item) => {
+      if (isCorrect(answers[item.id] || "", item.correct)) score++;
     });
-
-    setWrongInputs(wrong);
-    setShowAnswer(true);
-
-    const total = data.length;
-    const color =
-      correct === total ? "green" : correct === 0 ? "red" : "orange";
-
-    const scoreMessage = `
-    <div style="font-size:20px;text-align:center;">
-      <span style="color:${color};font-weight:bold;">
-        Score: ${correct} / ${total}
-      </span>
-    </div>
-  `;
-
-    if (correct === total) ValidationAlert.success(scoreMessage);
-    else if (correct === 0) ValidationAlert.error(scoreMessage);
-    else ValidationAlert.warning(scoreMessage);
+    setShowResults(true);
+    if (score === ITEMS.length)
+      ValidationAlert.success(`Score: ${score} / ${ITEMS.length}`);
+    else if (score > 0)
+      ValidationAlert.warning(`Score: ${score} / ${ITEMS.length}`);
+    else ValidationAlert.error(`Score: ${score} / ${ITEMS.length}`);
   };
 
   const handleShowAnswer = () => {
-    setInputs(data.map((d) => d.answer));
-    setWrongInputs(Array(data.length).fill(false));
-    setShowAnswer(true);
+    const filled = {};
+    ITEMS.forEach((item) => {
+      filled[item.id] = item.answer;
+    });
+    setAnswers(filled);
+    setShowResults(false);
+    setShowAns(true);
   };
 
   const handleReset = () => {
-    setInputs(Array(data.length).fill(""));
-    setWrongInputs(Array(data.length).fill(false));
-    setShowAnswer(false);
+    setAnswers({});
+    setShowResults(false);
+    setShowAns(false);
   };
 
+  const isWrong = (item) =>
+    showResults && !showAns && !isCorrect(answers[item.id] || "", item.correct);
+  const isDisabled = (item) =>
+    showAns || (showResults && isCorrect(answers[item.id] || "", item.correct));
+
   return (
-    <DragDropContext onDragEnd={onDragEnd}>
+    <div className="main-container-component">
+      <style>{`
+        .usw3-list { display: flex; flex-direction: column; gap: clamp(30px, 1.8vw, 30px); width: 100%; margin-top : 10%  }
+        .usw3-row  { display: flex; align-items: flex-end; gap: clamp(5px, 0.7vw, 9px); min-width: 0; }
+        .usw3-num  { font-size: clamp(14px, 1.7vw, 20px); font-weight: 700; color: ${NUMBER_COLOR}; flex-shrink: 0; padding-bottom: 4px; line-height: 1; }
+        .usw3-scrambled { font-size: clamp(13px, 1.6vw, 19px); color: #2b2b2b; white-space: nowrap; flex-shrink: 0; padding-bottom: 4px; line-height: 1; }
+        .usw3-input-wrap { position: relative; flex: 1; min-width: clamp(80px, 10vw, 200px); }
+        .usw3-input {
+          width: 100%; background: transparent; border: none;
+          border-bottom: 1px solid ${INPUT_UNDERLINE_DEFAULT};
+          outline: none; font-size: clamp(13px, 1.6vw, 19px); color: ${INPUT_TEXT_COLOR};
+          line-height: 1; box-sizing: border-box;
+          font-family: inherit; transition: border-color 0.2s;
+        }
+        .usw3-input:disabled   { opacity: 1; cursor: default; }
+        .usw3-input--wrong     { border-bottom-color: ${INPUT_UNDERLINE_WRONG}; }
+        .usw3-input--answer    { color: ${INPUT_ANSWER_COLOR}; }
+        .usw3-badge {
+          position: absolute; top: -8px; right: 0;
+          width: clamp(17px, 1.9vw, 22px); height: clamp(17px, 1.9vw, 22px);
+          border-radius: 50%; background: ${WRONG_BADGE_BG}; color: ${WRONG_BADGE_TEXT};
+          display: flex; align-items: center; justify-content: center;
+          font-size: clamp(9px, 1vw, 12px); font-weight: 700;
+          border: 2px solid #fff; box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+          pointer-events: none; z-index: 2;
+        }
+        .usw3-buttons { display: flex; justify-content: center; margin-top: clamp(8px, 1.6vw, 18px); }
+      `}</style>
+
       <div
+        className="div-forall"
         style={{
           display: "flex",
           flexDirection: "column",
-          justifyContent: "center",
-          alignItems: "center",
-          padding: "30px",
+          gap: "clamp(14px, 2vw, 22px)",
+          maxWidth: "1100px",
+          margin: "0 auto",
         }}
       >
-        <div
-          className="div-forall"
+        <h1
+          className="WB-header-title-page8"
           style={{
+            margin: 0,
             display: "flex",
-            flexDirection: "column",
-            gap: "30px",
-            width: "60%",
-            justifyContent: "flex-start",
+            alignItems: "center",
+            gap: "12px",
+            flexWrap: "wrap",
           }}
         >
-          <div className="unscramble-container">
-            <h5 className="header-title-page8 pb-2.5">
-              <span className="ex-A" style={{ marginRight: "10px" }}>
-                B
-              </span>
-             Look, read, and write.
-            </h5>
+          <span className="WB-ex-A">B</span>
+          Unscramble and write.
+        </h1>
 
-            {/* OPTIONS */}
-            <Droppable droppableId="options" direction="horizontal">
-              {(provided) => (
-                <div
-                  ref={provided.innerRef}
-                  {...provided.droppableProps}
-                  style={{
-                    display: "flex",
-                    gap: "15px",
-                    margin: "20px 0",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    width: "100%",
-                  }}
-                >
-                  {options.map((opt, i) => (
-                    <Draggable
-                      key={opt.id}
-                      draggableId={opt.id}
-                      index={i}
-                      isDragDisabled={showAnswer}
-                    >
-                      {(provided) => (
-                        <div
-                          ref={provided.innerRef}
-                          {...provided.draggableProps}
-                          {...provided.dragHandleProps}
-                          style={{
-                            padding: "8px 16px",
-                            border: "2px solid #2c5287",
-                            borderRadius: "20px",
-                            background: "#eee",
-                            fontWeight: "bold",
-                            cursor: "grab",
-                            ...provided.draggableProps.style,
-                          }}
-                        >
-                          {opt.value}
-                        </div>
-                      )}
-                    </Draggable>
-                  ))}
-                  {provided.placeholder}
+        <div className="usw3-list">
+          {ITEMS.map((item) => {
+            const wrong = isWrong(item);
+            const value = answers[item.id] || "";
+            const tColor = showAns ? INPUT_ANSWER_COLOR : INPUT_TEXT_COLOR;
+            const uColor = wrong
+              ? INPUT_UNDERLINE_WRONG
+              : INPUT_UNDERLINE_DEFAULT;
+            const disabled = isDisabled(item);
+            return (
+              <div key={item.id} className="usw3-row">
+                <span className="usw3-num">{item.id}</span>
+                <span className="usw3-scrambled">{item.scrambled}</span>
+                <div className="usw3-input-wrap">
+                  <input
+                    type="text"
+                    className={[
+                      "usw3-input",
+                      wrong ? "usw3-input--wrong" : "",
+                      showAns ? "usw3-input--answer" : "",
+                    ]
+                      .filter(Boolean)
+                      .join(" ")}
+                    value={value}
+                    disabled={disabled}
+                    onChange={(e) => handleChange(item.id, e.target.value)}
+                    style={{ borderBottomColor: uColor, color: tColor }}
+                    spellCheck={false}
+                    autoComplete="off"
+                  />
+                  {wrong && <div className="usw3-badge">✕</div>}
                 </div>
-              )}
-            </Droppable>
+              </div>
+            );
+          })}
+        </div>
 
-            {/* QUESTIONS */}
-            <div
-              style={{
-                width: "100%",
-                display: "grid",
-                gridTemplateColumns: "1fr 1fr", // 🔥 عمودين
-                gap: "30px 60px",
-              }}
-            >
-              {data.map((item, index) => (
-                <div
-                  key={index}
-                  style={{
-                    display: "flex",
-                    alignItems: "flex-start",
-                    gap: "15px",
-                  }}
-                >
-                  <span style={{ fontWeight: "bold" }}>{index + 1}</span>
-                  <div style={{ position: "relative" }}>
-                    <img
-                      src={item.img}
-                      style={{ width: "90px", height: "90px" }}
-                    />
-                    {wrongInputs[index] && (
-                      <div
-                        style={{
-                          position: "absolute",
-                          top: "6px",
-                          right: "-6px",
-                          width: "22px",
-                          height: "22px",
-                          background: "#ef4444",
-                          color: "white",
-                          borderRadius: "50%",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          fontSize: "14px",
-                          fontWeight: "bold",
-                          boxShadow: "0 2px 6px rgba(0,0,0,0.2)",
-                        }}
-                      >
-                        ✕
-                      </div>
-                    )}
-                  </div>
-
-                  {/* 🔥 الجمل */}
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "8px",
-                      flexWrap: "wrap", // 🔥 يخليها ذكية
-                    }}
-                  >
-                    {/* السطر الأول (فيه drag) */}
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "8px",
-                      }}
-                    >
-                      <span>{item.before}</span>
-
-                      <Droppable droppableId={String(index)}>
-                        {(provided) => (
-                          <div
-                            ref={provided.innerRef}
-                            {...provided.droppableProps}
-                            style={{
-                              minWidth: "100px",
-                              borderBottom: `3px solid ${
-                                wrongInputs[index] ? "red" : "#000"
-                              }`,
-                              textAlign: "center",
-                              color: inputs[index] ? "#1C398E" : "#000",
-                              fontWeight: "bold",
-                            }}
-                          >
-                            {inputs[index]}
-                            {provided.placeholder}
-                          </div>
-                        )}
-                      </Droppable>
-                    </div>
-
-                    {/* السطر الثاني */}
-                    <span>{item.after}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* BUTTONS */}
-            <Button
-              handleShowAnswer={handleShowAnswer}
-              handleStartAgain={handleReset}
-              checkAnswers={checkAnswers}
-            />
-          </div>
+        <div className="usw3-buttons">
+          <Button
+            checkAnswers={handleCheck}
+            handleShowAnswer={handleShowAnswer}
+            handleStartAgain={handleReset}
+          />
         </div>
       </div>
-    </DragDropContext>
+    </div>
   );
 }
