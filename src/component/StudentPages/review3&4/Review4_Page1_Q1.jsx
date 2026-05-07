@@ -8,7 +8,7 @@ import ValidationAlert from "../../Popup/ValidationAlert";
 const TEXT_COLOR              = "#2b2b2b";
 const NUMBER_COLOR            = "#2b2b2b";
 const OPTION_LABEL_CLR        = "#2b2b2b";
-const CIRCLE_DEFAULT          = "#9ca3af";
+const CIRCLE_DEFAULT          = "transparent";
 const CIRCLE_SELECTED         = "#2096a6";
 const CIRCLE_WRONG            = "#ef4444";
 const CIRCLE_CORRECT          = "#2096a6";
@@ -83,14 +83,13 @@ const normalize = (str) =>
 //  COMPONENT
 // ─────────────────────────────────────────────
 export default function WB_ReadChooseWrite_QA() {
-  const [selected,    setSelected]    = useState({});   // { 1: "c", ... }
-  const [written,     setWritten]     = useState({});   // { 1: "baby", ... }
+  const [selected,    setSelected]    = useState({});
+  const [written,     setWritten]     = useState({});
   const [showResults, setShowResults] = useState(false);
   const [showAns,     setShowAns]     = useState(false);
 
   const isLocked = showResults || showAns;
 
-  // ── Handlers ──
   const handleSelect = (id, label) => {
     if (isLocked) return;
     setSelected((prev) => ({ ...prev, [id]: label }));
@@ -143,8 +142,7 @@ export default function WB_ReadChooseWrite_QA() {
     setShowAns(false);
   };
 
-  // ── State helpers ──
-  const getCircleState = (item, label) => {
+  const getOptionState = (item, label) => {
     const sel = selected[item.id];
     if (sel !== label) return "idle";
     if (showAns)       return "correct";
@@ -152,20 +150,13 @@ export default function WB_ReadChooseWrite_QA() {
     return "selected";
   };
 
-  const isWriteWrong = (item) => {
-    if (!showResults || showAns) return false;
-    return normalize(written[item.id] || "") !== normalize(item.answer);
-  };
-
-  const isWriteDisabled = (item) => {
-    if (showAns) return true;
-    if (showResults && normalize(written[item.id] || "") === normalize(item.answer)) return true;
-    return false;
-  };
+  const isWriteWrong    = (item) => showResults && !showAns && normalize(written[item.id] || "") !== normalize(item.answer);
+  const isWriteDisabled = (item) => showAns || (showResults && normalize(written[item.id] || "") === normalize(item.answer));
 
   return (
     <div className="main-container-component">
       <style>{`
+
         .rcwa-list {
           display: flex;
           flex-direction: column;
@@ -202,7 +193,7 @@ export default function WB_ReadChooseWrite_QA() {
           white-space: nowrap;
         }
 
-        /* Input wrap inline in sentence */
+        /* Input inline */
         .rcwa-input-wrap {
           position: relative;
           flex: 0 1 clamp(80px, 10vw, 150px);
@@ -247,54 +238,42 @@ export default function WB_ReadChooseWrite_QA() {
         .rcwa-options {
           display: flex;
           flex-wrap: wrap;
-          gap: clamp(10px, 1.8vw, 24px);
+          gap: clamp(8px, 1.4vw, 18px);
           padding-left: clamp(18px, 2.2vw, 28px);
         }
 
+        /* ── Single option: الدائرة تلف label + text معاً ── */
         .rcwa-option {
+          position: relative;
           display: flex;
           align-items: center;
-          gap: clamp(5px, 0.6vw, 8px);
+          gap: clamp(3px, 0.4vw, 5px);
           cursor: pointer;
           user-select: none;
-        }
-        .rcwa-option--locked { cursor: default; }
-
-        .rcwa-circle {
-          position: relative;
-          width: clamp(18px, 2.2vw, 26px);
-          height: clamp(18px, 2.2vw, 26px);
-          border-radius: 50%;
-          border: 2px solid ${CIRCLE_DEFAULT};
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          flex-shrink: 0;
+          /* الـ oval border */
+          border: 2px solid transparent;
+          border-radius: 999px;
+          padding: clamp(3px, 0.4vw, 6px) clamp(10px, 1.2vw, 16px);
           transition: border-color 0.15s;
         }
-        .rcwa-circle--selected { border-color: ${CIRCLE_SELECTED}; }
-        .rcwa-circle--correct  { border-color: ${CIRCLE_CORRECT}; }
-        .rcwa-circle--wrong    { border-color: ${CIRCLE_WRONG}; }
+        .rcwa-option--locked   { cursor: default; }
 
-        .rcwa-dot {
-          width: clamp(8px, 1vw, 12px);
-          height: clamp(8px, 1vw, 12px);
-          border-radius: 50%;
-          background: ${CIRCLE_SELECTED};
-        }
-        .rcwa-dot--correct { background: ${CIRCLE_CORRECT}; }
-        .rcwa-dot--wrong   { background: ${CIRCLE_WRONG}; }
+        /* States — border حول الكلمة كاملة */
+        .rcwa-option--selected { border-color: ${CIRCLE_SELECTED}; }
+        .rcwa-option--correct  { border-color: ${CIRCLE_CORRECT}; }
+        .rcwa-option--wrong    { border-color: ${CIRCLE_WRONG}; }
 
-        .rcwa-circle-badge {
+        /* ✕ badge على الـ option */
+        .rcwa-option-badge {
           position: absolute;
-          top: -6px; right: -6px;
-          width: clamp(13px, 1.5vw, 16px);
-          height: clamp(13px, 1.5vw, 16px);
+          top: -7px; right: -7px;
+          width: clamp(14px, 1.6vw, 18px);
+          height: clamp(14px, 1.6vw, 18px);
           border-radius: 50%;
           background: ${WRONG_BADGE_BG};
           color: ${WRONG_BADGE_TEXT};
           display: flex; align-items: center; justify-content: center;
-          font-size: clamp(6px, 0.7vw, 9px);
+          font-size: clamp(7px, 0.8vw, 10px);
           font-weight: 700;
           border: 2px solid #fff;
           box-shadow: 0 2px 6px rgba(0,0,0,0.2);
@@ -379,35 +358,27 @@ export default function WB_ReadChooseWrite_QA() {
                   <span className="rcwa-text">{item.after}</span>
                 </div>
 
-                {/* ── Options with circles ── */}
+                {/* ── Options — oval border around each option ── */}
                 <div className="rcwa-options">
                   {item.options.map((opt) => {
-                    const state   = getCircleState(item, opt.label);
+                    const state   = getOptionState(item, opt.label);
                     const isWrong = state === "wrong";
 
                     return (
                       <div
                         key={opt.label}
-                        className={["rcwa-option", isLocked ? "rcwa-option--locked" : ""].filter(Boolean).join(" ")}
+                        className={[
+                          "rcwa-option",
+                          state === "selected" ? "rcwa-option--selected" : "",
+                          state === "correct"  ? "rcwa-option--correct"  : "",
+                          state === "wrong"    ? "rcwa-option--wrong"    : "",
+                          isLocked             ? "rcwa-option--locked"   : "",
+                        ].filter(Boolean).join(" ")}
                         onClick={() => handleSelect(item.id, opt.label)}
                       >
-                        <div className={[
-                          "rcwa-circle",
-                          state === "selected" ? "rcwa-circle--selected" : "",
-                          state === "correct"  ? "rcwa-circle--correct"  : "",
-                          state === "wrong"    ? "rcwa-circle--wrong"    : "",
-                        ].filter(Boolean).join(" ")}>
-                          {state !== "idle" && (
-                            <div className={[
-                              "rcwa-dot",
-                              state === "correct" ? "rcwa-dot--correct" : "",
-                              state === "wrong"   ? "rcwa-dot--wrong"   : "",
-                            ].filter(Boolean).join(" ")} />
-                          )}
-                          {isWrong && <div className="rcwa-circle-badge">✕</div>}
-                        </div>
                         <span className="rcwa-option-label">{opt.label}</span>
                         <span className="rcwa-option-text">{opt.text}</span>
+                        {isWrong && <div className="rcwa-option-badge">✕</div>}
                       </div>
                     );
                   })}

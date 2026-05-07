@@ -3,224 +3,240 @@ import Button from "../../Button";
 import ValidationAlert from "../../Popup/ValidationAlert";
 
 // ─────────────────────────────────────────────
+//  🖼️  IMAGES
+// ─────────────────────────────────────────────
+import img1 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 4 Joy Makes a Friend Folder/Page 35/SVG/Asset 21.svg";
+import img2 from"../../../assets/imgs/pages/Class Book/Right 4 Unit 4 Joy Makes a Friend Folder/Page 35/SVG/Asset 18.svg"
+import img3 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 4 Joy Makes a Friend Folder/Page 35/SVG/Asset 19.svg"
+import img4 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 4 Joy Makes a Friend Folder/Page 35/SVG/Asset 20.svg"
+
+// ─────────────────────────────────────────────
 //  🎨  COLORS
 // ─────────────────────────────────────────────
-const TEXT_COLOR       = "#2b2b2b";
-const NUMBER_COLOR     = "#2b2b2b";
-const OPTION_LABEL_CLR = "#2b2b2b";
-const CIRCLE_DEFAULT   = "#9ca3af";
-const CIRCLE_SELECTED  = "#2096a6";
-const CIRCLE_WRONG     = "#ef4444";
-const CIRCLE_CORRECT   = "#2096a6";
-const ANSWER_COLOR     = "#c81e1e";
-const WRONG_BADGE_BG   = "#ef4444";
-const WRONG_BADGE_TEXT = "#ffffff";
+const INPUT_UNDERLINE_DEFAULT = "#3f3f3f";
+const INPUT_UNDERLINE_WRONG   = "#ef4444";
+const INPUT_TEXT_COLOR        = "#2b2b2b";
+const INPUT_ANSWER_COLOR      = "#c81e1e";
+const NUMBER_COLOR            = "#2b2b2b";
+const WRONG_BADGE_BG          = "#ef4444";
+const WRONG_BADGE_TEXT        = "#ffffff";
 
 // ─────────────────────────────────────────────
 //  📝  EXERCISE DATA
+//  Each item has TWO inputs: question + negative answer
 // ─────────────────────────────────────────────
 const ITEMS = [
   {
-    id:      1,
-    before:  "Tim was very happy to have ___________ a new",
-    after:   "sister.",
-    correct: "c",
-    options: [
-      { label: "a", text: "picnic" },
-      { label: "b", text: "cousin" },
-      { label: "c", text: "baby" },
-    ],
+    id:             1,
+    src:            img1,
+    correctQ:       ["Did she have a swimming pool?", "did she have a swimming pool"],
+    answerQ:        "Did she have a swimming pool?",
+    correctA:       ["She didn't have a swimming pool.", "she didn't have a swimming pool", "she did not have a swimming pool"],
+    answerA:        "She didn't have a swimming pool.",
   },
   {
-    id:      2,
-    before:  "The",
-    after:   "is very green and lush.",
-    correct: "c",
-    options: [
-      { label: "a", text: "cousin" },
-      { label: "b", text: "baby" },
-      { label: "c", text: "grass" },
-    ],
+    id:             2,
+    src:            img2,
+    correctQ:       ["Did she have a tree house?", "did she have a tree house"],
+    answerQ:        "Did she have a tree house?",
+    correctA:       ["She didn't have a tree house.", "she didn't have a tree house", "she did not have a tree house"],
+    answerA:        "She didn't have a tree house.",
   },
   {
-    id:      3,
-    before:  "We are going on a",
-    after:   "the park.",
-    correct: "b",
-    options: [
-      { label: "a", text: "today" },
-      { label: "b", text: "picnic" },
-      { label: "c", text: "leave" },
-    ],
+    id:             3,
+    src:            img3,
+    correctQ:       ["Did she have a turtle?", "did she have a turtle"],
+    answerQ:        "Did she have a turtle?",
+    correctA:       ["She didn't have a turtle.", "she didn't have a turtle", "she did not have a turtle"],
+    answerA:        "She didn't have a turtle.",
   },
   {
-    id:      4,
-    before:  "Jake will",
-    after:   "for Australia next month.",
-    correct: "a",
-    options: [
-      { label: "a", text: "leave" },
-      { label: "b", text: "over" },
-      { label: "c", text: "taller" },
-    ],
+    id:             4,
+    src:            img4,
+    correctQ:       ["Did she have a camera?", "did she have a camera"],
+    answerQ:        "Did she have a camera?",
+    correctA:       ["She didn't have a camera.", "she didn't have a camera", "she did not have a camera"],
+    answerA:        "She didn't have a camera.",
   },
 ];
 
 // ─────────────────────────────────────────────
+//  🔧  NORMALIZE
+// ─────────────────────────────────────────────
+const normalize = (str) =>
+  str.toLowerCase().replace(/[^a-z0-9'\s]/g, "").replace(/\s+/g, " ").trim();
+
+const isCorrect = (userVal, correctArr) =>
+  correctArr.some((c) => normalize(userVal) === normalize(c));
+
+// ─────────────────────────────────────────────
 //  COMPONENT
 // ─────────────────────────────────────────────
-export default function WB_ReadChooseWrite_QA() {
-  const [selected,    setSelected]    = useState({});
+export default function WB_LookWriteQA_QD() {
+  // answers: { "1q": "...", "1a": "...", "2q": "...", ... }
+  const [answers,     setAnswers]     = useState({});
   const [showResults, setShowResults] = useState(false);
   const [showAns,     setShowAns]     = useState(false);
 
-  const isLocked = showResults || showAns;
+  const keyQ = (id) => `${id}q`;
+  const keyA = (id) => `${id}a`;
 
-  const handleSelect = (id, label) => {
-    if (isLocked) return;
-    setSelected((prev) => ({ ...prev, [id]: label }));
+  const handleChange = (key, value, correctArr) => {
+    if (showAns) return;
+    if (showResults && isCorrect(answers[key] || "", correctArr)) return;
+    setAnswers((prev) => ({ ...prev, [key]: value }));
   };
 
   const handleCheck = () => {
-    if (isLocked) return;
-    const allAnswered = ITEMS.every((item) => selected[item.id]);
-    if (!allAnswered) { ValidationAlert.info("Please choose an answer for each question."); return; }
+    if (showAns) return;
+    const allAnswered = ITEMS.every(
+      (item) => answers[keyQ(item.id)]?.trim() && answers[keyA(item.id)]?.trim()
+    );
+    if (!allAnswered) { ValidationAlert.info("Please complete all answers first."); return; }
     let score = 0;
-    ITEMS.forEach((item) => { if (selected[item.id] === item.correct) score++; });
+    const total = ITEMS.length * 2;
+    ITEMS.forEach((item) => {
+      if (isCorrect(answers[keyQ(item.id)] || "", item.correctQ)) score++;
+      if (isCorrect(answers[keyA(item.id)] || "", item.correctA)) score++;
+    });
     setShowResults(true);
-    if (score === ITEMS.length)   ValidationAlert.success(`Score: ${score} / ${ITEMS.length}`);
-    else if (score > 0)           ValidationAlert.warning(`Score: ${score} / ${ITEMS.length}`);
-    else                          ValidationAlert.error(`Score: ${score} / ${ITEMS.length}`);
+    if (score === total)   ValidationAlert.success(`Score: ${score} / ${total}`);
+    else if (score > 0)    ValidationAlert.warning(`Score: ${score} / ${total}`);
+    else                   ValidationAlert.error(`Score: ${score} / ${total}`);
   };
 
   const handleShowAnswer = () => {
     const filled = {};
-    ITEMS.forEach((item) => { filled[item.id] = item.correct; });
-    setSelected(filled);
+    ITEMS.forEach((item) => {
+      filled[keyQ(item.id)] = item.answerQ;
+      filled[keyA(item.id)] = item.answerA;
+    });
+    setAnswers(filled);
     setShowResults(false);
     setShowAns(true);
   };
 
   const handleReset = () => {
-    setSelected({});
+    setAnswers({});
     setShowResults(false);
     setShowAns(false);
   };
 
-  const getOptionState = (item, label) => {
-    const sel = selected[item.id];
-    if (sel !== label) return "idle";
-    if (showAns)       return "correct";
-    if (showResults)   return label === item.correct ? "correct" : "wrong";
-    return "selected";
+  const isWrongKey = (key, correctArr) => {
+    if (!showResults || showAns) return false;
+    return !isCorrect(answers[key] || "", correctArr);
+  };
+
+  const isDisabledKey = (key, correctArr) => {
+    if (showAns) return true;
+    if (showResults && isCorrect(answers[key] || "", correctArr)) return true;
+    return false;
+  };
+
+  const renderInput = (key, correctArr, placeholder = "") => {
+    const wrong    = isWrongKey(key, correctArr);
+    const value    = answers[key] || "";
+    const tColor   = showAns ? INPUT_ANSWER_COLOR : INPUT_TEXT_COLOR;
+    const uColor   = wrong ? INPUT_UNDERLINE_WRONG : INPUT_UNDERLINE_DEFAULT;
+    const disabled = isDisabledKey(key, correctArr);
+
+    return (
+      <div className="lwqa-input-wrap">
+        <input
+          type="text"
+          className={[
+            "lwqa-input",
+            wrong   ? "lwqa-input--wrong"  : "",
+            showAns ? "lwqa-input--answer" : "",
+          ].filter(Boolean).join(" ")}
+          value={value}
+          disabled={disabled}
+          placeholder={placeholder}
+          onChange={(e) => handleChange(key, e.target.value, correctArr)}
+          style={{ borderBottomColor: uColor, color: tColor }}
+          spellCheck={false}
+          autoComplete="off"
+        />
+        {wrong && <div className="lwqa-badge">✕</div>}
+      </div>
+    );
   };
 
   return (
     <div className="main-container-component">
       <style>{`
-        .rcwa-list {
+        .lwqa-list {
           display: flex;
           flex-direction: column;
-          gap: clamp(16px, 2.4vw, 30px);
+          gap: clamp(14px, 2.2vw, 26px);
           width: 100%;
         }
 
-        /* Single item */
-        .rcwa-item {
-          display: flex;
-          flex-direction: column;
-          gap: clamp(6px, 0.8vw, 10px);
+        /* Single row: num | img | lines */
+        .lwqa-row {
+          display: grid;
+          grid-template-columns: auto clamp(70px, 9vw, 120px) 1fr;
+          gap: clamp(8px, 1.2vw, 16px);
+          align-items: center;
         }
 
-        /* Sentence row */
-        .rcwa-sentence {
-          display: flex;
-          align-items: baseline;
-          flex-wrap: wrap;
-          gap: clamp(4px, 0.5vw, 7px);
-        }
-
-        .rcwa-num {
+        .lwqa-num {
           font-size: clamp(14px, 1.7vw, 20px);
           font-weight: 700;
           color: ${NUMBER_COLOR};
           flex-shrink: 0;
-          line-height: 1.5;
+          align-self: center;
         }
 
-        .rcwa-text {
-          font-size: clamp(13px, 1.6vw, 19px);
-          color: ${TEXT_COLOR};
-          line-height: 1.5;
-          white-space: nowrap;
+        .lwqa-img {
+          width: 100%;
+          height: auto ;
+          object-fit: cover;
+          display: block;
         }
 
-        /* Answer word shown inline */
-        .rcwa-answer-word {
-          font-size: clamp(13px, 1.6vw, 19px);
-          font-weight: 700;
-          color: ${ANSWER_COLOR};
-          border-bottom: 1px solid ${ANSWER_COLOR};
-          padding-bottom: 1px;
-          line-height: 1.5;
-          white-space: nowrap;
-        }
-
-        /* Options row */
-        .rcwa-options {
+        /* Two lines stacked */
+        .lwqa-lines {
           display: flex;
-          flex-wrap: wrap;
-          gap: clamp(10px, 1.6vw, 20px);
-          padding-left: clamp(18px, 2.2vw, 28px);
+          flex-direction: column;
+          gap: clamp(6px, 0.8vw, 10px);
+          min-width: 0;
         }
 
-        /* Single option */
-        .rcwa-option {
-          display: flex;
-          align-items: center;
-          gap: clamp(5px, 0.6vw, 8px);
-          cursor: pointer;
-          user-select: none;
-        }
-        .rcwa-option--locked { cursor: default; }
-
-        /* Circle */
-        .rcwa-circle {
+        /* Input wrap */
+        .lwqa-input-wrap {
           position: relative;
-          width: clamp(18px, 2.2vw, 26px);
-          height: clamp(18px, 2.2vw, 26px);
-          border-radius: 50%;
-          border: 2px solid ${CIRCLE_DEFAULT};
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          flex-shrink: 0;
-          transition: border-color 0.15s;
+          width: 100%;
         }
-        .rcwa-circle--selected { border-color: ${CIRCLE_SELECTED}; }
-        .rcwa-circle--correct  { border-color: ${CIRCLE_CORRECT}; }
-        .rcwa-circle--wrong    { border-color: ${CIRCLE_WRONG}; }
 
-        .rcwa-dot {
-          width: clamp(8px, 1vw, 12px);
-          height: clamp(8px, 1vw, 12px);
-          border-radius: 50%;
-          background: ${CIRCLE_SELECTED};
+        .lwqa-input {
+          width: 100%;
+          background: transparent;
+          border: none;
+          border-bottom: 1px solid ${INPUT_UNDERLINE_DEFAULT};
+          outline: none;
+          font-size: clamp(13px, 1.6vw, 19px);
+          color: ${INPUT_TEXT_COLOR};
+          line-height: 1.5;
+          box-sizing: border-box;
+          font-family: inherit;
+          transition: border-color 0.2s;
         }
-        .rcwa-dot--correct { background: ${CIRCLE_CORRECT}; }
-        .rcwa-dot--wrong   { background: ${CIRCLE_WRONG}; }
+        .lwqa-input:disabled  { opacity: 1; cursor: default; }
+        .lwqa-input--wrong    { border-bottom-color: ${INPUT_UNDERLINE_WRONG}; }
+        .lwqa-input--answer   { color: ${INPUT_ANSWER_COLOR}; }
 
         /* ✕ badge */
-        .rcwa-badge {
+        .lwqa-badge {
           position: absolute;
-          top: -6px; right: -6px;
-          width: clamp(13px, 1.5vw, 16px);
-          height: clamp(13px, 1.5vw, 16px);
+          top: -8px; right: 0;
+          width: clamp(16px, 1.8vw, 20px);
+          height: clamp(16px, 1.8vw, 20px);
           border-radius: 50%;
           background: ${WRONG_BADGE_BG};
           color: ${WRONG_BADGE_TEXT};
           display: flex; align-items: center; justify-content: center;
-          font-size: clamp(6px, 0.7vw, 9px);
+          font-size: clamp(8px, 0.9vw, 11px);
           font-weight: 700;
           border: 2px solid #fff;
           box-shadow: 0 2px 6px rgba(0,0,0,0.2);
@@ -228,23 +244,14 @@ export default function WB_ReadChooseWrite_QA() {
           z-index: 2;
         }
 
-        .rcwa-option-label {
-          font-size: clamp(12px, 1.4vw, 17px);
-          color: ${OPTION_LABEL_CLR};
-          font-weight: 600;
-          line-height: 1;
-        }
-
-        .rcwa-option-text {
-          font-size: clamp(13px, 1.6vw, 19px);
-          color: ${TEXT_COLOR};
-          line-height: 1;
-        }
-
-        .rcwa-buttons {
+        .lwqa-buttons {
           display: flex;
           justify-content: center;
           margin-top: clamp(8px, 1.6vw, 18px);
+        }
+
+        @media (max-width: 480px) {
+          .lwqa-row { grid-template-columns: auto clamp(55px,14vw,80px) 1fr; }
         }
       `}</style>
 
@@ -263,75 +270,33 @@ export default function WB_ReadChooseWrite_QA() {
           className="WB-header-title-page8"
           style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
         >
-          <span className="WB-ex-A-1">A</span>
-          Read, choose, and write.
+          <span className="WB-ex-A-1">D</span>
+          Look and write a question and a negative answer.
         </h1>
 
         {/* ── Items ── */}
-        <div className="rcwa-list">
-          {ITEMS.map((item) => {
-            const sel         = selected[item.id];
-            const correctOpt  = item.options.find((o) => o.label === item.correct);
-            const selectedOpt = sel ? item.options.find((o) => o.label === sel) : null;
-            const showWord    = showAns ? correctOpt : (showResults && sel ? selectedOpt : null);
-            const wordColor   = showAns || (showResults && sel === item.correct) ? ANSWER_COLOR : CIRCLE_WRONG;
+        <div className="lwqa-list">
+          {ITEMS.map((item) => (
+            <div key={item.id} className="lwqa-row">
 
-            return (
-              <div key={item.id} className="rcwa-item">
+              {/* Number */}
+              <span className="lwqa-num">{item.id}</span>
 
-                {/* Sentence */}
-                <div className="rcwa-sentence">
-                  <span className="rcwa-num">{item.id}</span>
-                  <span className="rcwa-text">{item.before}</span>
-                  {showWord && (
-                    <span className="rcwa-answer-word" style={{ color: wordColor, borderBottomColor: wordColor }}>
-                      {showWord.text}
-                    </span>
-                  )}
-                  <span className="rcwa-text">{item.after}</span>
-                </div>
+              {/* Image */}
+              <img src={item.src} alt={`img-${item.id}`} className="lwqa-img" />
 
-                {/* Options */}
-                <div className="rcwa-options">
-                  {item.options.map((opt) => {
-                    const state = getOptionState(item, opt.label);
-                    const isWrong = state === "wrong";
-
-                    return (
-                      <div
-                        key={opt.label}
-                        className={["rcwa-option", isLocked ? "rcwa-option--locked" : ""].filter(Boolean).join(" ")}
-                        onClick={() => handleSelect(item.id, opt.label)}
-                      >
-                        <div className={[
-                          "rcwa-circle",
-                          state === "selected" ? "rcwa-circle--selected" : "",
-                          state === "correct"  ? "rcwa-circle--correct"  : "",
-                          state === "wrong"    ? "rcwa-circle--wrong"    : "",
-                        ].filter(Boolean).join(" ")}>
-                          {state !== "idle" && (
-                            <div className={[
-                              "rcwa-dot",
-                              state === "correct" ? "rcwa-dot--correct" : "",
-                              state === "wrong"   ? "rcwa-dot--wrong"   : "",
-                            ].filter(Boolean).join(" ")} />
-                          )}
-                          {isWrong && <div className="rcwa-badge">✕</div>}
-                        </div>
-                        <span className="rcwa-option-label">{opt.label}</span>
-                        <span className="rcwa-option-text">{opt.text}</span>
-                      </div>
-                    );
-                  })}
-                </div>
-
+              {/* Two input lines */}
+              <div className="lwqa-lines">
+                {renderInput(keyQ(item.id), item.correctQ)}
+                {renderInput(keyA(item.id), item.correctA)}
               </div>
-            );
-          })}
+
+            </div>
+          ))}
         </div>
 
         {/* ── Buttons ── */}
-        <div className="rcwa-buttons">
+        <div className="lwqa-buttons">
           <Button
             checkAnswers={handleCheck}
             handleShowAnswer={handleShowAnswer}

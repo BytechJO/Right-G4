@@ -1,334 +1,248 @@
-import React, { useState, useRef } from "react";
+import React, { useState } from "react";
+import Button from "../../Button";
 import ValidationAlert from "../../Popup/ValidationAlert";
 
-import img1 from "../../../assets/imgs/pages/classbook/Right 3 Unit 4 My E-Friend Folder/Page 36/Ex C 1.svg";
-import img2 from "../../../assets/imgs/pages/classbook/Right 3 Unit 4 My E-Friend Folder/Page 36/Ex C 2.svg";
-import img3 from "../../../assets/imgs/pages/classbook/Right 3 Unit 4 My E-Friend Folder/Page 36/Ex C 3.svg";
-import img4 from "../../../assets/imgs/pages/classbook/Right 3 Unit 4 My E-Friend Folder/Page 36/Ex C 4.svg";
-import img5 from "../../../assets/imgs/pages/classbook/Right 3 Unit 4 My E-Friend Folder/Page 36/Asset 82.svg";
+// ─────────────────────────────────────────────
+//  🎨  COLORS
+// ─────────────────────────────────────────────
+const INPUT_UNDERLINE_DEFAULT = "#3f3f3f";
+const INPUT_UNDERLINE_WRONG   = "#ef4444";
+const INPUT_TEXT_COLOR        = "#2b2b2b";
+const INPUT_ANSWER_COLOR      = "#c81e1e";
+const NUMBER_COLOR            = "#2b2b2b";
+const CUE_COLOR               = "#2b2b2b";
+const WRONG_BADGE_BG          = "#ef4444";
+const WRONG_BADGE_TEXT        = "#ffffff";
 
-const Review4_Page1_Q3 = () => {
-  const [lines, setLines] = useState([]);
-  const [startDot, setStartDot] = useState(null);
+// ─────────────────────────────────────────────
+//  📝  EXERCISE DATA
+// ─────────────────────────────────────────────
+const ITEMS = [
+  {
+    id:      1,
+    cue:     "Daniel / smarter / Sam",
+    correct: ["Daniel is smarter than Sam.", "daniel is smarter than sam"],
+    answer:  "Daniel is smarter than Sam.",
+  },
+  {
+    id:      2,
+    cue:     "snake / longest",
+    correct: ["The snake is the longest of all the snakes.", "the snake is the longest of all the snakes"],
+    answer:  "The snake is the longest of all the snakes.",
+  },
+  {
+    id:      3,
+    cue:     "Meg / youngest",
+    correct: ["Meg is the youngest of the sisters.", "meg is the youngest of the sisters"],
+    answer:  "Meg is the youngest of the sisters.",
+  },
+];
 
-  const imageDotRefs = useRef([]);
-  const textDotRefs = useRef([]);
-  const containerRef = useRef(null);
-  const [isChecked, setIsChecked] = useState(false);
-  const [showedAnswer, setShowedAnswer] = useState(false);
-  const images = [
-    { image: img1 },
-    { image: img2 },
-    { image: img3 },
-    { image: img4 },
-    { image: img5 },
-  ];
+// ─────────────────────────────────────────────
+//  🔧  NORMALIZE
+// ─────────────────────────────────────────────
+const normalize = (str) =>
+  str.toLowerCase().replace(/[^a-z0-9'\s]/g, "").replace(/\s+/g, " ").trim();
 
-  const words = [`cloudy`, `rainy`, `cold`, `warm`, `hot`];
-  const correctMatches = {
-    4: 0, 
-    3: 1, 
-    0: 2,
-    1: 3,
-    2: 4,
+const isCorrect = (userVal, correctArr) =>
+  correctArr.some((c) => normalize(userVal) === normalize(c));
+
+// ─────────────────────────────────────────────
+//  COMPONENT
+// ─────────────────────────────────────────────
+export default function WB_ReadWriteSentences_QC() {
+  const [answers,     setAnswers]     = useState({});
+  const [showResults, setShowResults] = useState(false);
+  const [showAns,     setShowAns]     = useState(false);
+
+  const handleChange = (id, value) => {
+    if (showAns) return;
+    const item = ITEMS.find((i) => i.id === id);
+    if (showResults && item && isCorrect(answers[id] || "", item.correct)) return;
+    setAnswers((prev) => ({ ...prev, [id]: value }));
   };
 
-  const handleDotClick = (index, type) => {
-    if (isChecked || showedAnswer) return;
-    if (!startDot) {
-      setStartDot({ index, type });
-      return;
-    }
-
-    if (startDot.type === type) {
-      setStartDot(null);
-      return;
-    }
-
-    const imageIndex = startDot.type === "image" ? startDot.index : index;
-
-    const textIndex = startDot.type === "text" ? startDot.index : index;
-
-    setLines((prevLines) => {
-      let updatedLines = [...prevLines];
-
-      updatedLines = updatedLines.filter((line) => {
-        const img =
-          line.from.type === "image" ? line.from.index : line.to.index;
-
-        return img !== imageIndex;
-      });
-
-      updatedLines = updatedLines.filter((line) => {
-        const txt = line.from.type === "text" ? line.from.index : line.to.index;
-
-        return txt !== textIndex;
-      });
-
-      updatedLines.push({
-        from: { index: imageIndex, type: "image" },
-        to: { index: textIndex, type: "text" },
-      });
-
-      return updatedLines;
-    });
-
-    setStartDot(null);
-  };
-
-  const showAnswers = () => {
-    if (isChecked) return;
-
-    const answerLines = Object.keys(correctMatches).map((imgIndex) => ({
-      from: { index: parseInt(imgIndex), type: "image" },
-      to: { index: correctMatches[imgIndex], type: "text" },
-    }));
-
-    setLines(answerLines);
-    setShowedAnswer(true);
-  };
-  const resetAll = () => {
-    setLines([]);
-    setStartDot(null);
-    setIsChecked(false);
-    setShowedAnswer(false);
-  };
-
-  const checkAnswers = () => {
-    if (showedAnswer) return;
-    if (lines.length !== images.length) {
-      ValidationAlert.info(
-        "Oops!",
-        "Please complete all matches before checking.",
-      );
-      return;
-    }
-
+  const handleCheck = () => {
+    if (showAns) return;
+    const allAnswered = ITEMS.every((item) => answers[item.id]?.trim());
+    if (!allAnswered) { ValidationAlert.info("Please complete all answers first."); return; }
     let score = 0;
-
-    lines.forEach((line) => {
-      const imageIndex =
-        line.from.type === "image" ? line.from.index : line.to.index;
-
-      const textIndex =
-        line.from.type === "text" ? line.from.index : line.to.index;
-
-      if (correctMatches[imageIndex] === textIndex) {
-        score++;
-      }
-    });
-
-    const total = images.length;
-
-    const color = score === total ? "green" : score === 0 ? "red" : "orange";
-
-    const msg = `
-      <div style="font-size:20px;text-align:center;">
-        <span style="color:${color};font-weight:bold">
-          Score: ${score} / ${total}
-        </span>
-      </div>
-    `;
-    setIsChecked(true);
-    if (score === total) ValidationAlert.success(msg);
-    else if (score === 0) ValidationAlert.error(msg);
-    else ValidationAlert.warning(msg);
+    ITEMS.forEach((item) => { if (isCorrect(answers[item.id] || "", item.correct)) score++; });
+    setShowResults(true);
+    if (score === ITEMS.length)   ValidationAlert.success(`Score: ${score} / ${ITEMS.length}`);
+    else if (score > 0)           ValidationAlert.warning(`Score: ${score} / ${ITEMS.length}`);
+    else                          ValidationAlert.error(`Score: ${score} / ${ITEMS.length}`);
   };
-  const wrongWords = [];
 
-  if (isChecked) {
-    lines.forEach((line) => {
-      const imageIndex =
-        line.from.type === "image" ? line.from.index : line.to.index;
+  const handleShowAnswer = () => {
+    const filled = {};
+    ITEMS.forEach((item) => { filled[item.id] = item.answer; });
+    setAnswers(filled);
+    setShowResults(false);
+    setShowAns(true);
+  };
 
-      const textIndex =
-        line.from.type === "text" ? line.from.index : line.to.index;
+  const handleReset = () => {
+    setAnswers({});
+    setShowResults(false);
+    setShowAns(false);
+  };
 
-      if (correctMatches[imageIndex] !== textIndex) {
-        wrongWords.push(textIndex);
-      }
-    });
-  }
+  const isWrong    = (item) => showResults && !showAns && !isCorrect(answers[item.id] || "", item.correct);
+  const isDisabled = (item) => showAns || (showResults && isCorrect(answers[item.id] || "", item.correct));
+
   return (
-    <div
-      ref={containerRef}
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        padding: "30px",
-        position: "relative",
-      }}
-    >
-      <div className="div-forall">
-        <h5 className="header-title-page8">
-          <span style={{ marginRight: "10px" }}>C</span> Match and write the
-          words.
-        </h5>
+    <div className="main-container-component">
+      <style>{`
+        .rwsc-list {
+          display: flex;
+          flex-direction: column;
+          gap: clamp(14px, 2.2vw, 26px);
+          width: 100%;
+          margin: 8% 0;
+        }
 
-        {/* TEXTS TOP */}
-        <div className="flex flex-wrap justify-center gap-10 md:gap-12 lg:gap-15 mb-10 md:mb-20 lg:mb-30 mt-5 md:mt-10 lg:mt-7">
-          {words.map((word, i) => {
-            const isWrong = wrongWords.includes(i);
+        /* Single row: num + cue + input */
+        .rwsc-row {
+          display: grid;
+          grid-template-columns: auto clamp(120px, 16vw, 200px) 1fr;
+          align-items: flex-end;
+          gap: clamp(8px, 1.2vw, 16px);
+          min-width: 0;
+        }
+
+        .rwsc-num {
+          font-size: clamp(15px, 1.8vw, 22px);
+          font-weight: 700;
+          color: ${NUMBER_COLOR};
+          flex-shrink: 0;
+          padding-bottom: 4px;
+          line-height: 1;
+        }
+
+        .rwsc-cue {
+          font-size: clamp(13px, 1.6vw, 19px);
+          color: ${CUE_COLOR};
+          padding-bottom: 4px;
+          line-height: 1;
+          white-space: nowrap;
+        }
+
+        .rwsc-input-wrap {
+          position: relative;
+        }
+
+        .rwsc-input {
+          width: 100%;
+          background: transparent;
+          border: none;
+          border-bottom: 1px solid ${INPUT_UNDERLINE_DEFAULT};
+          outline: none;
+          font-size: clamp(14px, 1.7vw, 20px);
+          color: ${INPUT_TEXT_COLOR};
+          line-height: 1.5;
+          box-sizing: border-box;
+          transition: border-color 0.2s;
+        }
+        .rwsc-input:disabled  { opacity: 1; cursor: default; }
+        .rwsc-input--wrong    { border-bottom-color: ${INPUT_UNDERLINE_WRONG}; }
+        .rwsc-input--answer   { color: ${INPUT_ANSWER_COLOR}; }
+
+        .rwsc-badge {
+          position: absolute;
+          top: -8px; right: 0;
+          width: clamp(17px, 1.9vw, 22px);
+          height: clamp(17px, 1.9vw, 22px);
+          border-radius: 50%;
+          background: ${WRONG_BADGE_BG};
+          color: ${WRONG_BADGE_TEXT};
+          display: flex; align-items: center; justify-content: center;
+          font-size: clamp(9px, 1vw, 12px);
+          font-weight: 700;
+          border: 2px solid #fff;
+          box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+          pointer-events: none;
+          z-index: 2;
+        }
+
+        .rwsc-buttons {
+          display: flex;
+          justify-content: center;
+          margin-top: clamp(8px, 1.6vw, 18px);
+        }
+
+        @media (max-width: 500px) {
+          .rwsc-row {
+            grid-template-columns: auto 1fr;
+            grid-template-rows: auto auto;
+          }
+          .rwsc-input-wrap { grid-column: 1 / -1; }
+        }
+      `}</style>
+
+      <div
+        className="div-forall"
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: "clamp(14px, 2vw, 22px)",
+          maxWidth: "1100px",
+          margin: "0 auto",
+        }}
+      >
+        {/* ── Header ── */}
+        <h1
+          className="WB-header-title-page8"
+          style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
+        >
+          <span className="WB-ex-A-1">C</span>
+          Read and write sentences. You will need to add words.
+        </h1>
+
+        {/* ── Items ── */}
+        <div className="rwsc-list">
+          {ITEMS.map((item) => {
+            const wrong    = isWrong(item);
+            const value    = answers[item.id] || "";
+            const tColor   = showAns ? INPUT_ANSWER_COLOR : INPUT_TEXT_COLOR;
+            const uColor   = wrong ? INPUT_UNDERLINE_WRONG : INPUT_UNDERLINE_DEFAULT;
+            const disabled = isDisabled(item);
 
             return (
-              <div key={`text-${i}`} className="relative inline-block">
-                <p
-                  className={`px-10 py-2 rounded-[20px] font-semibold text-[15px] cursor-pointer min-w-[120px] text-center whitespace-pre-line
-        ${
-          startDot?.index === i && startDot?.type === "text"
-            ? "border-2 border-[#F79530] bg-[#fdecea]"
-            : "bg-[#FEF3E6]"
-        }
-        ${isChecked && isWrong ? "border-red-500" : ""}
-        `}
-                  onClick={() => handleDotClick(i, "text")}
-                >
-                  {word}
-                </p>
-
-                {/* ❌ */}
-                {isChecked && isWrong && (
-                  <div
-                    style={{
-                      position: "absolute",
-                      right: "-20px",
-                      top: "50%",
-                      transform: "translateY(-50%)",
-                      width: "22px",
-                      height: "22px",
-                      background: "#ef4444",
-                      color: "white",
-                      borderRadius: "50%",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      fontWeight: "bold",
-                      border: "2px solid white",
-                      boxShadow: "0 2px 6px rgba(0,0,0,0.2)",
-                      pointerEvents: "none",
-                    }}
-                  >
-                    <span
-                      style={{
-                        fontSize: "13px",
-                        lineHeight: "1",
-                        transform: "translateY(-1px)",
-                      }}
-                    >
-                      ✕
-                    </span>
-                  </div>
-                )}
-
-                <div
-                  ref={(el) => (textDotRefs.current[i] = el)}
-                  onClick={() => handleDotClick(i, "text")}
-                  className="absolute left-1/2 -bottom-2 -translate-x-1/2 w-3 h-3 bg-[#F79530] rounded-full cursor-pointer"
-                />
+              <div key={item.id} className="rwsc-row">
+                <span className="rwsc-num">{item.id}</span>
+                <span className="rwsc-cue">{item.cue}</span>
+                <div className="rwsc-input-wrap">
+                  <input
+                    type="text"
+                    className={[
+                      "rwsc-input",
+                      wrong   ? "rwsc-input--wrong"  : "",
+                      showAns ? "rwsc-input--answer" : "",
+                    ].filter(Boolean).join(" ")}
+                    value={value}
+                    disabled={disabled}
+                    onChange={(e) => handleChange(item.id, e.target.value)}
+                    style={{ borderBottomColor: uColor, color: tColor }}
+                    spellCheck={false}
+                    autoComplete="off"
+                  />
+                  {wrong && <div className="rwsc-badge">✕</div>}
+                </div>
               </div>
             );
           })}
         </div>
 
-        {/* IMAGES BOTTOM */}
-        <div className="flex flex-wrap justify-center gap-4 mt-16">
-          {images.map((item, i) => (
-            <div
-              key={`img-${i}`}
-              className="flex flex-col items-center relative"
-            >
-              <div
-                ref={(el) => (imageDotRefs.current[i] = el)}
-                onClick={() => handleDotClick(i, "image")}
-                className="w-3 h-3 bg-[#F79530] rounded-full cursor-pointer "
-              />
-
-              <img
-                src={item.image}
-                onClick={() => handleDotClick(i, "image")}
-                style={{
-                  height:
-                    window.innerWidth >= 768 && window.innerWidth < 1024
-                      ? "120px" // iPad
-                      : "120px", // باقي الأجهزة
-                  width:
-                    window.innerWidth >= 768 && window.innerWidth < 1024
-                      ? "180px"
-                      : "150px",
-                  objectFit: "cover",
-                  cursor: "pointer",
-                  borderRadius: "16px",
-                  border: "2px solid #F79530",
-                  transition: "all 0.3s ease",
-                  transform:
-                    startDot?.index === i && startDot?.type === "image"
-                      ? "scale(1.05)"
-                      : "scale(1)",
-                  boxShadow:
-                    startDot?.index === i && startDot?.type === "image"
-                      ? "0 4px 10px rgba(0,0,0,0.2)"
-                      : "none",
-                }}
-              />
-            </div>
-          ))}
+        {/* ── Buttons ── */}
+        <div className="rwsc-buttons">
+          <Button
+            checkAnswers={handleCheck}
+            handleShowAnswer={handleShowAnswer}
+            handleStartAgain={handleReset}
+          />
         </div>
-      </div>
-
-      <svg className="absolute top-0 left-0 w-full h-full pointer-events-none">
-        {lines.map((line, i) => {
-          const imageIndex =
-            line.from.type === "image" ? line.from.index : line.to.index;
-
-          const textIndex =
-            line.from.type === "text" ? line.from.index : line.to.index;
-
-          const imgDot = imageDotRefs.current[imageIndex];
-          const txtDot = textDotRefs.current[textIndex];
-
-          if (!imgDot || !txtDot || !containerRef.current) return null;
-
-          const imgRect = imgDot.getBoundingClientRect();
-          const txtRect = txtDot.getBoundingClientRect();
-          const containerRect = containerRef.current.getBoundingClientRect();
-
-          const x1 = txtRect.left + txtRect.width / 2 - containerRect.left;
-          const y1 = txtRect.top + txtRect.height / 2 - containerRect.top;
-
-          const x2 = imgRect.left + imgRect.width / 2 - containerRect.left;
-          const y2 = imgRect.top + imgRect.height / 2 - containerRect.top;
-
-          const midY = (y1 + y2) / 2;
-
-          return (
-            <path
-              key={i}
-              d={`M ${x1} ${y1} C ${x1} ${midY}, ${x2} ${midY}, ${x2} ${y2}`}
-              stroke="#F79530"
-              strokeWidth="3"
-              fill="none"
-              strokeLinecap="round"
-            />
-          );
-        })}
-      </svg>
-
-      <div className="action-buttons-container">
-        <button onClick={resetAll} className="try-again-button">
-          Start Again ↻
-        </button>
-
-        <button onClick={showAnswers} className="show-answer-btn">
-          Show Answer
-        </button>
-
-        <button onClick={checkAnswers} className="check-button2">
-          Check Answer ✓
-        </button>
       </div>
     </div>
   );
-};
-
-export default Review4_Page1_Q3;
+}
