@@ -225,7 +225,7 @@ export default function WB_LookWriteGoingTo_QF() {
           style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
         >
           <span className="WB-ex-A-1">F</span>
-          Look and write sentences using <em style={{ margin: "0 4px" }}>going to</em>.
+          Look and write sentences using <em style={{ margin: "0 4px" ,color : "#ff8c00ff" }}>going to</em>.
         </h1>
 
         {/* ── Items ── */}
