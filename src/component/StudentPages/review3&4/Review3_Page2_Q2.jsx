@@ -2,7 +2,6 @@ import React, { useState } from "react";
 
 import ValidationAlert from "../../Popup/ValidationAlert";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
-import "./Review3_Page2_Q2.css";
 import Button from "../../Button";
 
 const Review3_Page2_Q2 = () => {

@@ -1,280 +1,278 @@
 import React, { useState } from "react";
-import ValidationAlert from "../../Popup/ValidationAlert";
-import image from "../../../assets/imgs/pages/classbook/Right 3 Unit 4 My E-Friend Folder/Page 32/Ex A 1.svg";
 import Button from "../../Button";
+import ValidationAlert from "../../Popup/ValidationAlert";
 
-const Unit4_Page5_Q1 = () => {
-  const [selected, setSelected] = useState([]);
-  const [locked, setLocked] = useState(false);
-  const [showAnswer, setShowAnswer] = useState(false);
-  const [wrongWords, setWrongWords] = useState([]);
-  // ✅ الكلمات + أماكنها (بالنسب)
-  const words = [
-    { id: "they", top: "23.32%", left: "32.21%", correct: true },
-    { id: "that", top: "49.82%", left: "14.31%", correct: true },
-    { id: "this", top: "48.10%", left: "43%", correct: true },
-    { id: "mother", top: "30.25%", left: "59.5%", correct: true },
-    { id: "brother", top: "65.43%", left: "79.94%", correct: true },
-    { id: "father", top: "93.68%", left: "23.92%", correct: true },
-    { id: "birthday", top: "73%", left: "60%", correct: true },
+// ─────────────────────────────────────────────
+//  🖼️  IMAGES
+// ────────────────────────────────────────────
+import img1 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 4 Joy Makes a Friend Folder/Page 32/SVG/Asset 12.svg";
+import img2 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 4 Joy Makes a Friend Folder/Page 32/SVG/Asset 12.svg";
+import img3 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 4 Joy Makes a Friend Folder/Page 32/SVG/Asset 12.svg";
 
-    // ❌ غلط
-    { id: "bath", top: "10.53%", left: "79.13%", correct: false },
-    { id: "thirsty", top: "73.42%", left: "16.03%", correct: false },
-    { id: "thick", top: "73%", left: "38%", correct: false },
-    { id: "thin", top: "92.48%", left: "45.68%", correct: false },
-  ];
+// ─────────────────────────────────────────────
+//  🎨  COLORS
+// ─────────────────────────────────────────────
+const CIRCLE_COLOR     = "#2096a6";
+const CIRCLE_WRONG     = "#ef4444";
+const TEXT_DEFAULT     = "#2b2b2b";
+const NUMBER_COLOR     = "#2b2b2b";
+const WRONG_BADGE_BG   = "#ef4444";
+const WRONG_BADGE_TEXT = "#ffffff";
 
-  const handleClick = (word) => {
-    if (locked) return;
+// ─────────────────────────────────────────────
+//  📝  EXERCISE DATA
+// ─────────────────────────────────────────────
+const ITEMS = [
+  { id: 1, src: img1, words: ["video games", "chores"],  correct: "video games" },
+  { id: 2, src: img2, words: ["bored", "call"],          correct: "bored"       },
+  { id: 3, src: img3, words: ["call", "room"],           correct: "room"        },
+];
 
-    const exists = selected.find((w) => w.id === word.id);
+// ─────────────────────────────────────────────
+//  COMPONENT
+// ─────────────────────────────────────────────
+export default function WB_LookReadCircle_QA() {
+  const [selected,    setSelected]    = useState({});
+  const [showResults, setShowResults] = useState(false);
+  const [showAns,     setShowAns]     = useState(false);
 
-    if (exists) {
-      setSelected(selected.filter((w) => w.id !== word.id));
-    } else {
-      setSelected([...selected, word]);
-    }
+  const isLocked = showResults || showAns;
+
+  const handleSelect = (itemId, word) => {
+    if (isLocked) return;
+    setSelected((prev) => ({ ...prev, [itemId]: prev[itemId] === word ? null : word }));
   };
 
   const handleCheck = () => {
-    if (locked || showAnswer) return;
-    if (locked || showAnswer) return;
-
-    const totalCorrect = words.filter((w) => w.correct).length;
-
-    // ❌ ما اختار ولا شي
-    if (selected.length === 0) {
-      return ValidationAlert.info();
-    }
-
-    let correctCount = 0;
-    let wrong = [];
-
-    selected.forEach((w) => {
-      if (w.correct) {
-        correctCount++;
-      } else {
-        wrong.push(w.id);
-      }
-    });
-
-    setWrongWords(wrong);
-    setLocked(true);
-
-    const color =
-      correctCount === totalCorrect
-        ? "green"
-        : correctCount === 0
-          ? "red"
-          : "orange";
-
-    ValidationAlert[
-      correctCount === totalCorrect
-        ? "success"
-        : correctCount === 0
-          ? "error"
-          : "warning"
-    ](`<b style="color:${color}">Score: ${correctCount} / ${totalCorrect}</b>`);
-
-    setLocked(true);
+    if (isLocked) return;
+    const allAnswered = ITEMS.every((item) => selected[item.id]);
+    if (!allAnswered) { ValidationAlert.info("Please circle a word for each picture."); return; }
+    let score = 0;
+    ITEMS.forEach((item) => { if (selected[item.id] === item.correct) score++; });
+    setShowResults(true);
+    if (score === ITEMS.length)  ValidationAlert.success(`Score: ${score} / ${ITEMS.length}`);
+    else if (score > 0)          ValidationAlert.warning(`Score: ${score} / ${ITEMS.length}`);
+    else                         ValidationAlert.error(`Score: ${score} / ${ITEMS.length}`);
   };
 
   const handleShowAnswer = () => {
-    setShowAnswer(true);
-    setLocked(true);
-    setSelected(words.filter((w) => w.correct));
+    const filled = {};
+    ITEMS.forEach((item) => { filled[item.id] = item.correct; });
+    setSelected(filled);
+    setShowResults(false);
+    setShowAns(true);
   };
 
   const handleReset = () => {
-    setSelected([]);
-    setWrongWords([]);
-    setLocked(false);
-    setShowAnswer(false);
+    setSelected({});
+    setShowResults(false);
+    setShowAns(false);
+  };
+
+  const getWordState = (item, word) => {
+    const isSel = selected[item.id] === word;
+    if (!isSel) return "none";
+    if (showAns) return "correct";
+    if (showResults) return item.correct === word ? "correct" : "wrong";
+    return "selected";
   };
 
   return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "center",
-        alignItems: "center",
-        padding: "30px",
-      }}
-    >
+    <div className="main-container-component">
+      <style>{`
+
+        /* ── Grid: 3 عناصر في صف ── */
+        .lrc-grid {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: clamp(28px, 2vw, 28px);
+          width: 100%;
+          margin : 5%  0;
+        }
+
+        /* ── الكارد الكامل: رقم+صورة في الأعلى، كلمات في الأسفل ── */
+        .lrc-card {
+          display: flex;
+          flex-direction: column;
+          align-items: flex-start;
+          min-width: 0;
+        }
+
+        /* ── الجزء العلوي: رقم جنب الصورة ── */
+        .lrc-top {
+          display: flex;
+          align-items: flex-start;
+          gap: 6px;
+          width: 100%;
+        }
+
+        /* الرقم: يسار الصورة ومرتفع قليلاً */
+        .lrc-num {
+          font-size: clamp(14px, 1.6vw, 20px);
+          font-weight: 700;
+          color: ${NUMBER_COLOR};
+          flex-shrink: 0;
+          /* مرتفع قليلاً عن الصورة */
+          line-height: 1;
+        }
+
+        /* الصورة تملأ باقي العرض */
+        .lrc-img-wrapper {
+          flex: 1;
+          min-width: 0;
+        }
+
+        .lrc-img {
+          width: 70%;
+          height: auto;
+          display: block;
+        }
+
+        /* ── الكلمات تحت الصورة بنفس محاذاة الصورة ── */
+        .lrc-words {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: clamp(6px, 1vw, 10px);
+          /* تبدأ من نفس موضع الصورة (بعد عرض الرقم + الـ gap) */
+          margin-top: 8px;
+          width: 100%;
+          box-sizing: border-box;
+        }
+
+        /* كلمة واحدة */
+        .lrc-word-wrap {
+          position: relative;
+          display: inline-block;
+          padding: clamp(3px, 0.4vw, 5px) clamp(14px, 1.8vw, 22px);
+          cursor: pointer;
+          user-select: none;
+        }
+        .lrc-word-wrap--locked { cursor: default; }
+
+        /* الدائرة البيضاوية */
+        .lrc-oval {
+          position: absolute;
+          inset: 0;
+          border-radius: 999px;
+          border: 2.5px solid transparent;
+          pointer-events: none;
+          transition: border-color 0.15s;
+        }
+
+        .lrc-word-wrap--selected .lrc-oval { border-color: ${CIRCLE_COLOR}; }
+        .lrc-word-wrap--correct  .lrc-oval { border-color: ${CIRCLE_COLOR}; }
+        .lrc-word-wrap--wrong    .lrc-oval { border-color: ${CIRCLE_WRONG}; }
+
+        .lrc-word {
+          font-size: clamp(13px, 1.4vw, 18px);
+          font-weight: 400;
+          color: ${TEXT_DEFAULT};
+          line-height: 1.4;
+          position: relative;
+          z-index: 1;
+          white-space: nowrap;
+        }
+
+        /* ✕ badge */
+        .lrc-badge {
+          position: absolute;
+          top: -8px; right: -8px;
+          width: clamp(16px, 1.8vw, 20px);
+          height: clamp(16px, 1.8vw, 20px);
+          border-radius: 50%;
+          background: ${WRONG_BADGE_BG};
+          color: ${WRONG_BADGE_TEXT};
+          display: flex; align-items: center; justify-content: center;
+          font-size: clamp(8px, 0.9vw, 11px);
+          font-weight: 700;
+          border: 2px solid #fff;
+          box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+          pointer-events: none;
+          z-index: 2;
+        }
+
+        /* Buttons */
+        .lrc-buttons {
+          display: flex;
+          justify-content: center;
+          margin-top: clamp(10px, 1.8vw, 20px);
+        }
+
+        @media (max-width: 500px) {
+          .lrc-grid { grid-template-columns: 1fr; }
+        }
+      `}</style>
+
       <div
         className="div-forall"
         style={{
           display: "flex",
           flexDirection: "column",
-          gap: "30px",
-          justifyContent: "flex-start",
+          gap: "clamp(14px, 2vw, 22px)",
+          maxWidth: "1100px",
+          margin: "0 auto",
         }}
       >
-        <div className="unscramble-container">
-          <h5 className="header-title-page8 pb-2.5">
-            <span className="ex-A" style={{ marginRight: "10px" }}>
-              A
-            </span>
-            Follow the words with the
-            <span style={{ color: "#2e3192" }}>voiced th</span>sound.
-          </h5>
+        {/* ── Header ── */}
+        <h1
+          className="WB-header-title-page8"
+          style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
+        >
+          <span className="WB-ex-A">A</span>
+          Look, read, and circle.
+        </h1>
 
-          <div
-            style={{
-              position: "relative",
-              width: "100%",
-              maxWidth: "1000px", // ⭐ تحكم بالحجم العام
-              margin: "0 auto",
-            }}
-          >
-            {/* الصورة */}
-            <img
-              src={image}
-              alt="interactive"
-              style={{
-                width: "100%",
-                height: "auto",
-                display: "block",
-              }}
-            />
-            {/* START */}
-            <div
-              style={{
-                position: "absolute",
-                top: "10.53%",
-                left: "10.18%",
-                transform: "translate(-50%, -50%) rotate(-15deg)",
-                fontSize: "clamp(20px, 1vw, 16px)",
-                fontWeight: "bold",
-                pointerEvents: "none",
-              }}
-            >
-              Start
-            </div>
+        {/* ── Grid ── */}
+        <div className="lrc-grid">
+          {ITEMS.map((item) => (
+            <div key={item.id} className="lrc-card">
 
-            {/* FINISH */}
-            <div
-              style={{
-                position: "absolute",
-                top: "82.75%",
-                left: "88.65%",
-                transform: "translate(-50%, -50%) rotate(-15deg)",
-                fontSize: "clamp(20px, 1vw, 16px)",
-                fontWeight: "bold",
-                pointerEvents: "none",
-              }}
-            >
-              Finish
-            </div>
-            {/* ✅ الدوائر */}
-            {selected.map((word, i) => {
-              const isWrong = wrongWords.includes(word.id);
-
-              return (
-                <div
-                  key={i}
-                  style={{
-                    position: "absolute",
-                    top: word.top,
-                    left: word.left,
-                    width: "10%",
-                    height: "16%",
-                    border: `0.2vw solid ${isWrong ? "red" : "#1C398E"}`, // 🔥 التغيير
-                    borderRadius: "50%",
-                    transform: "translate(-50%, -50%)",
-                    pointerEvents: "none",
-                    zIndex: 5,
-                  }}
-                >
-                  {/* ❌ X */}
-                  {isWrong && (
-                    <div
-                      style={{
-                        position: "absolute",
-                        top: "-6px",
-                        right: "-6px",
-                        width: "20px",
-                        height: "20px",
-                        background: "#ef4444",
-                        color: "white",
-                        borderRadius: "50%",
-                        fontSize: "12px",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        fontWeight: "bold",
-                        border: "2px solid white",
-                        boxShadow: "0 2px 6px rgba(0,0,0,0.2)",
-                        pointerEvents: "none",
-                      }}
-                    >
-                      ✕
-                    </div>
-                  )}
+              {/* الرقم يسار الصورة ومرتفع */}
+              <div className="lrc-top">
+                <span className="lrc-num">{item.id}</span>
+                <div className="lrc-img-wrapper">
+                  <img src={item.src} alt={`scene-${item.id}`} className="lrc-img" />
                 </div>
-              );
-            })}
-
-            {/* ✅ مناطق الضغط */}
-            {words.map((word, i) => {
-              return (
-                <div
-                  key={i}
-                  onClick={() => handleClick(word)}
-                  style={{
-                    position: "absolute",
-                    top: word.top,
-                    left: word.left,
-                    transform: "translate(-50%, -50%)",
-                    fontSize: "clamp(10px, 1vw, 16px)",
-                    padding: "0.2vw 0.6vw",
-                    borderRadius: "0.5vw",
-                    whiteSpace: "nowrap",
-                    cursor: "pointer",
-
-                    // 🔥 هذا المهم
-                    border: "0.2vw solid orange",
-                  }}
-                >
-                  {word.id}
-                </div>
-              );
-            })}
-
-            {/* ✅ الكلمات */}
-            {words.map((word, i) => (
-              <div
-                key={i}
-                style={{
-                  position: "absolute",
-                  top: word.top,
-                  left: word.left,
-                  transform: "translate(-50%, -50%)",
-                  fontSize: "clamp(10px, 1vw, 16px)", // ⭐ responsive ذكي
-                  background: "white",
-                  padding: "0.2vw 0.6vw",
-                  borderRadius: "0.5vw",
-                  whiteSpace: "nowrap",
-                  pointerEvents: "none",
-                }}
-              >
-                {word.id}
               </div>
-            ))}
-          </div>
+
+              {/* الكلمات تحت الصورة بنفس محاذاتها */}
+              <div className="lrc-words">
+                {item.words.map((word) => {
+                  const state = getWordState(item, word);
+                  return (
+                    <div
+                      key={word}
+                      className={[
+                        "lrc-word-wrap",
+                        isLocked ? "lrc-word-wrap--locked" : "",
+                        state === "selected" ? "lrc-word-wrap--selected" : "",
+                        state === "correct"  ? "lrc-word-wrap--correct"  : "",
+                        state === "wrong"    ? "lrc-word-wrap--wrong"    : "",
+                      ].filter(Boolean).join(" ")}
+                      onClick={() => handleSelect(item.id, word)}
+                    >
+                      <div className="lrc-oval" />
+                      <span className="lrc-word">{word}</span>
+                      {state === "wrong" && <div className="lrc-badge">✕</div>}
+                    </div>
+                  );
+                })}
+              </div>
+
+            </div>
+          ))}
+        </div>
+
+        {/* ── Buttons ── */}
+        <div className="lrc-buttons">
+          <Button
+            checkAnswers={handleCheck}
+            handleShowAnswer={handleShowAnswer}
+            handleStartAgain={handleReset}
+          />
         </div>
       </div>
-
-      {/* ⭐ BUTTONS */}
-      <Button
-        handleShowAnswer={handleShowAnswer}
-        handleStartAgain={handleReset}
-        checkAnswers={handleCheck}
-      />
     </div>
   );
-};
-
-export default Unit4_Page5_Q1;
+}

@@ -1,259 +1,277 @@
 import React, { useState } from "react";
-import "./Unit4_Page5_Q2.css";
-import ValidationAlert from "../../Popup/ValidationAlert";
-import img1 from "../../../assets/imgs/pages/classbook/Right 3 Unit 4 My E-Friend Folder/Page 32/Ex B 1.svg";
-import img2 from "../../../assets/imgs/pages/classbook/Right 3 Unit 4 My E-Friend Folder/Page 32/Ex B 2.svg";
-import img3 from "../../../assets/imgs/pages/classbook/Right 3 Unit 4 My E-Friend Folder/Page 32/Ex B 3.svg";
-import img4 from "../../../assets/imgs/pages/classbook/Right 3 Unit 4 My E-Friend Folder/Page 32/Ex B 4.svg";
 import Button from "../../Button";
-const questions = [
-  {
-    id: 1,
-    image: img1,
-    options: ["His", "Our"],
-    correct: "His",
-    word: "cap",
-    rest: "flies away.",
-  },
-  {
-    id: 2,
-    image: img2,
-    options: ["Their", "Her"],
-    correct: "Their",
-    word: "pets",
-    rest: "have fun.",
-  },
-  {
-    id: 3,
-    image: img3,
-    options: ["His", "Her"],
-    correct: "Her",
-    word: "pet",
-    rest: "wins the race.",
-  },
-  {
-    id: 4,
-    image: img4,
-    options: ["Our", "His"],
-    correct: "Our",
-    word: "feet",
-    rest: "hurt.",
-  },
+import ValidationAlert from "../../Popup/ValidationAlert";
+
+// ─────────────────────────────────────────────
+//  🖼️  IMAGE
+// ─────────────────────────────────────────────
+import familyImg from "../../../assets/imgs/pages/Class Book/Right 4 Unit 4 Joy Makes a Friend Folder/Page 32/SVG/Asset 4.svg";
+
+// ─────────────────────────────────────────────
+//  🎨  COLORS
+// ─────────────────────────────────────────────
+const ANSWER_COLOR = "#c0392b";
+const TEXT_DEFAULT = "#2b2b2b";
+const LINE_COLOR   = "#2b2b2b";
+const WRONG_COLOR  = "#ef4444";
+const RIGHT_COLOR  = "#2096a6";
+
+// ─────────────────────────────────────────────
+//  📝  EXERCISE DATA
+// ─────────────────────────────────────────────
+const ITEMS = [
+  { id: 1, base: "big",  baseBlank: false, comp: "bigger",  compBlank: false, super: "biggest", superBlank: false },
+  { id: 2, base: "tall", baseBlank: true,  comp: "taller",  compBlank: false, super: "tallest", superBlank: true  },
+  { id: 3, base: "slow", baseBlank: false, comp: "slower",  compBlank: true,  super: "slowest", superBlank: true  },
 ];
-const Unit4_Page5_Q2 = () => {
-  const [showResult, setShowResult] = useState(false);
-  const [locked, setLocked] = useState(false);
-  const [answers, setAnswers] = useState({});
-  const [wrong, setWrong] = useState({});
-  const handleSelect = (qIndex, option) => {
-    if (locked) return;
 
-    setAnswers({
-      ...answers,
-      [qIndex]: option,
-    });
+// ─────────────────────────────────────────────
+//  COMPONENT
+// ─────────────────────────────────────────────
+export default function CB_ReadAndWrite_QA() {
+  const [answers,     setAnswers]     = useState({});
+  const [showResults, setShowResults] = useState(false);
+  const [showAns,     setShowAns]     = useState(false);
+
+  const isLocked = showResults || showAns;
+
+  const getKey     = (id, field) => `${id}-${field}`;
+
+  const getCorrect = (item, field) => {
+    if (field === "base")  return item.base  ?? "";
+    if (field === "comp")  return item.comp  ?? "";
+    if (field === "super") return item.super ?? "";
+    return "";
   };
-  // ===============================
-  // 🔵 4) فحص الإجابات
-  // ===============================
-  const checkAnswers = () => {
-    if (locked || showResult) return;
 
-    if (Object.keys(answers).length !== questions.length) {
-      return ValidationAlert.info("Oops!", "Please answer all questions.");
+  const isBlank = (item, field) => {
+    if (field === "base")  return item.baseBlank;
+    if (field === "comp")  return item.compBlank;
+    if (field === "super") return item.superBlank;
+    return false;
+  };
+
+  const handleChange = (id, field, val) => {
+    if (isLocked) return;
+    setAnswers((prev) => ({ ...prev, [getKey(id, field)]: val }));
+  };
+
+  // جمع كل الخانات الفارغة
+  const allBlanks = [];
+  ITEMS.forEach((item) => {
+    ["base", "comp", "super"].forEach((field) => {
+      if (isBlank(item, field)) allBlanks.push({ item, field });
+    });
+  });
+
+  const handleCheck = () => {
+    if (isLocked) return;
+    const allFilled = allBlanks.every(({ item, field }) => {
+      const val = answers[getKey(item.id, field)] || "";
+      return val.trim() !== "";
+    });
+    if (!allFilled) { ValidationAlert.info("Please fill in all the blanks."); return; }
+
+    let score = 0;
+    allBlanks.forEach(({ item, field }) => {
+      const val  = (answers[getKey(item.id, field)] || "").trim().toLowerCase();
+      const corr = getCorrect(item, field).toLowerCase();
+      if (val === corr) score++;
+    });
+    setShowResults(true);
+    if (score === allBlanks.length)  ValidationAlert.success(`Score: ${score} / ${allBlanks.length}`);
+    else if (score > 0)              ValidationAlert.warning(`Score: ${score} / ${allBlanks.length}`);
+    else                             ValidationAlert.error(`Score: ${score} / ${allBlanks.length}`);
+  };
+
+  const handleShowAnswer = () => {
+    const filled = {};
+    allBlanks.forEach(({ item, field }) => {
+      filled[getKey(item.id, field)] = getCorrect(item, field);
+    });
+    setAnswers(filled);
+    setShowResults(false);
+    setShowAns(true);
+  };
+
+  const handleReset = () => {
+    setAnswers({});
+    setShowResults(false);
+    setShowAns(false);
+  };
+
+  const getFieldState = (item, field) => {
+    if (!isBlank(item, field)) return "static";
+    const val  = (answers[getKey(item.id, field)] || "").trim().toLowerCase();
+    const corr = getCorrect(item, field).toLowerCase();
+    if (showAns)     return "answer";
+    if (showResults) return val === corr ? "correct" : "wrong";
+    return "editing";
+  };
+
+  const renderCell = (item, field) => {
+    const blank = isBlank(item, field);
+    const state = getFieldState(item, field);
+    const val   = answers[getKey(item.id, field)] || "";
+    const corr  = getCorrect(item, field);
+
+    if (!blank) {
+      return <span className="raw-cell">{corr}</span>;
     }
 
-    let correct = 0;
-    const wrongMap = {};
+    let color = TEXT_DEFAULT;
+    if (state === "answer")  color = ANSWER_COLOR;
+    if (state === "correct") color = RIGHT_COLOR;
+    if (state === "wrong")   color = WRONG_COLOR;
 
-    questions.forEach((q, qIndex) => {
-      if (answers[qIndex] === q.correct) {
-        correct++;
-      } else {
-        wrongMap[qIndex] = true;
-      }
-    });
-
-    setWrong(wrongMap);
-    setShowResult(true);
-    setLocked(true);
-
-    const total = questions.length;
-    const color =
-      correct === total ? "green" : correct === 0 ? "red" : "orange";
-
-    ValidationAlert[
-      correct === total ? "success" : correct === 0 ? "error" : "warning"
-    ](`<b style="color:${color}">Score: ${correct} / ${total}</b>`);
-  };
-  const showAnswers = () => {
-    const filled = {};
-    questions.forEach((q, i) => {
-      filled[i] = q.correct;
-    });
-
-    setAnswers(filled);
-    setShowResult(true);
-    setLocked(true);
-  };
-  const reset = () => {
-    setAnswers({});
-    setWrong({});
-    setShowResult(false);
-    setLocked(false);
+    return (
+      <span className="input-cell">
+        <input
+          className="rw-input"
+          type="text"
+          value={state === "answer" ? corr : val}
+          disabled={isLocked}
+          onChange={(e) => handleChange(item.id, field, e.target.value)}
+          style={{ color, borderBottomColor: color }}
+        />
+        {state === "wrong" && (
+          <span className="wrong-hint" style={{ color: ANSWER_COLOR }}>{corr}</span>
+        )}
+      </span>
+    );
   };
 
-  // ===============================
-  // 🔵 JSX
-  // ===============================
   return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "center",
-        alignItems: "center",
-        padding: "30px",
-      }}
-    >
+    <div className="main-container-component">
+      <style>{`
+        .rw-layout {
+          display: flex;
+          align-items: center;
+          gap: clamp(16px, 3vw, 40px);
+          width: 100%;
+          margin : 10% 0 ;
+        }
+
+        .rw-left {
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+          gap: clamp(18px, 2.6vw, 32px);
+          min-width: 0;
+        }
+
+        .rw-right img {
+          width: clamp(180px, 28vw, 340px);
+          height: auto;
+          display: block;
+        }
+
+        .rw-row {
+          display: flex;
+          align-items: baseline;
+          gap: clamp(10px, 1.6vw, 22px);
+          flex-wrap: nowrap;
+        }
+
+        .rw-num {
+          font-size: clamp(14px, 1.6vw, 20px);
+          font-weight: 700;
+          color: ${TEXT_DEFAULT};
+          flex-shrink: 0;
+          min-width: 1.2em;
+        }
+
+        .raw-cell {
+          font-size: clamp(14px, 1.6vw, 20px);
+          color: ${TEXT_DEFAULT};
+          white-space: nowrap;
+        }
+
+        .input-cell {
+          display: inline-flex;
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 2px;
+          min-width: clamp(80px, 10vw, 130px);
+        }
+
+        .rw-input {
+          width: 100%;
+          border: none;
+          border-bottom: 1px solid ${LINE_COLOR};
+          outline: none;
+          background: transparent;
+          font-size: clamp(14px, 1.6vw, 20px);
+          font-weight: 500;
+          text-align: center;
+          transition: border-color 0.2s, color 0.2s;
+          color: ${TEXT_DEFAULT};
+        }
+        .rw-input:disabled { opacity: 1; cursor: default; }
+
+        .wrong-hint {
+          font-size: clamp(11px, 1.1vw, 14px);
+          font-weight: 600;
+          padding: 0 4px;
+        }
+
+        .rw-buttons {
+          display: flex;
+          justify-content: center;
+          margin-top: clamp(10px, 1.8vw, 20px);
+        }
+      `}</style>
+
       <div
         className="div-forall"
         style={{
           display: "flex",
           flexDirection: "column",
-          gap: "30px",
-          justifyContent: "flex-start",
+          gap: "clamp(14px, 2vw, 22px)",
+          maxWidth: "1100px",
+          margin: "0 auto",
         }}
       >
-        <h5 className="header-title-page8 pb-2.5">
-          <span className="ex-A" style={{ marginRight: "10px" }}>
-            B
-          </span>
-          Look, read, and choose
-        </h5>
-        <div className="grid grid-cols-2 gap-10 max-w-[1000px] w-full">
-          {questions.map((q, qIndex) => (
-            <div key={q.id} className="flex items-center gap-4">
-              <span style={{ fontWeight: "bold" }}>{q.id}</span>
-              {/* الصورة */}
-              <img
-                src={q.image}
-                style={{
-                  width: "120px",
-                  height: "auto",
-                }}
-              />
+        {/* Header */}
+        <h1
+          className="WB-header-title-page8"
+          style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
+        >
+          <span className="WB-ex-A">C</span>
+          Read and write.
+        </h1>
 
-              {/* الخيارات فوق بعض */}
-              <div className="flex flex-col gap-2">
-                {q.options.map((opt, i) => {
-                  const isSelected = answers[qIndex] === opt;
-                  const isWrong = wrong[qIndex];
+        {/* Layout */}
+        <div className="rw-layout">
 
-                  return (
-                    <div
-                      key={i}
-                      onClick={() => handleSelect(qIndex, opt)}
-                      style={{
-                        position: "relative",
-                        cursor: "pointer",
-                        padding: "2px 6px",
-                        width: "fit-content",
-                      }}
-                    >
-                      {/* النص */}
-                      <span
-                        style={{
-                          color: "black",
-                          fontSize: "14px",
-                        }}
-                      >
-                        {opt}
-                      </span>
-
-                      {/* ✅ الدائرة */}
-                      {isSelected && (
-                        <div
-                          style={{
-                            position: "absolute",
-                            top: "50%",
-                            left: "50%",
-                            width: "50px",
-                            height: "50px",
-                            border: `2px solid ${isWrong ? "red" : "#1C398E"}`,
-                            borderRadius: "50%",
-                            transform: "translate(-50%, -50%)",
-                            pointerEvents: "none",
-                          }}
-                        >
-                          {/* ❌ X */}
-                          {showResult && isWrong && (
-                            <div
-                              style={{
-                                position: "absolute",
-                                top: "-6px",
-                                right: "-6px",
-                                width: "20px",
-                                height: "20px",
-                                background: "#ef4444",
-                                color: "white",
-                                borderRadius: "50%",
-                                fontSize: "12px",
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "center",
-                                fontWeight: "bold",
-                                border: "2px solid white",
-                                boxShadow: "0 2px 6px rgba(0,0,0,0.2)",
-                                pointerEvents: "none",
-                              }}
-                            >
-                              ✕
-                            </div>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
+          {/* الصفوف */}
+          <div className="rw-left">
+            {ITEMS.map((item) => (
+              <div key={item.id} className="rw-row">
+                <span className="rw-num">{item.id}</span>
+                {renderCell(item, "base")}
+                {renderCell(item, "comp")}
+                {renderCell(item, "super")}
               </div>
+            ))}
+          </div>
 
-              {/* الخط الأول */}
-              <div
-                style={{
-                  width: "1px", // ⭐ أهم تعديل
-                  height: "1.5em", // ⭐ مرتبط بالنص
-                  background: "#444",
-                  alignSelf: "center",
-                }}
-              />
+          {/* الصورة */}
+          <div className="rw-right">
+            <img src={familyImg} alt="family illustration" />
+          </div>
 
-              {/* الكلمة */}
-              <span className="text-[16px]">{q.word}</span>
+        </div>
 
-              {/* الخط الثاني */}
-              <div
-                style={{
-                  width: "1px", // ⭐ أهم تعديل
-                  height: "1.5em", // ⭐ مرتبط بالنص
-                  background: "#444",
-                  alignSelf: "center",
-                }}
-              />
-
-              {/* باقي الجملة */}
-              <span className="text-[16px]">{q.rest}</span>
-            </div>
-          ))}
+        {/* Buttons */}
+        <div className="rw-buttons">
+          <Button
+            checkAnswers={handleCheck}
+            handleShowAnswer={handleShowAnswer}
+            handleStartAgain={handleReset}
+          />
         </div>
       </div>
-      <Button
-        handleShowAnswer={showAnswers}
-        handleStartAgain={reset}
-        checkAnswers={checkAnswers}
-      />
     </div>
   );
-};
-
-export default Unit4_Page5_Q2;
+}

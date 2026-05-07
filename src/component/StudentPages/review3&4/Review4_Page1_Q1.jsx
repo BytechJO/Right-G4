@@ -1,471 +1,432 @@
 import React, { useState } from "react";
+import Button from "../../Button";
 import ValidationAlert from "../../Popup/ValidationAlert";
-import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
-import img1 from "../../../assets/imgs/pages/classbook/Right 3 Unit 4 My E-Friend Folder/Page 36/Ex A 1.svg";
-import img2 from "../../../assets/imgs/pages/classbook/Right 3 Unit 4 My E-Friend Folder/Page 36/Ex A 2.svg";
-import img3 from "../../../assets/imgs/pages/classbook/Right 3 Unit 4 My E-Friend Folder/Page 36/Ex A 3.svg";
-import img4 from "../../../assets/imgs/pages/classbook/Right 3 Unit 4 My E-Friend Folder/Page 36/Ex A 4.svg";
 
-const Review4_Page1_Q1 = () => {
-  const questions = [
-    {
-      text: "It is cold. There is snow on the ground. The trees have no leaves.",
-      answer: "winter",
-      correctImage: 3,
-    },
-    {
-      text: "It is hot. The sun is shining. We are playing in the yard.",
-      answer: "summer",
-      correctImage: 4,
-    },
-    {
-      text: "It is cool. The leaves on the trees are turning brown. We like to play in the leaves.",
-      answer: "autumn",
-      correctImage: 1,
-    },
-    {
-      text: "It is warm. The flowers and plants are growing. There are baby birds in the trees.",
-      answer: "spring",
-      correctImage: 2,
-    },
-  ];
+// ─────────────────────────────────────────────
+//  🎨  COLORS
+// ─────────────────────────────────────────────
+const TEXT_COLOR              = "#2b2b2b";
+const NUMBER_COLOR            = "#2b2b2b";
+const OPTION_LABEL_CLR        = "#2b2b2b";
+const CIRCLE_DEFAULT          = "#9ca3af";
+const CIRCLE_SELECTED         = "#2096a6";
+const CIRCLE_WRONG            = "#ef4444";
+const CIRCLE_CORRECT          = "#2096a6";
+const INPUT_UNDERLINE_DEFAULT = "#3f3f3f";
+const INPUT_UNDERLINE_WRONG   = "#ef4444";
+const INPUT_TEXT_COLOR        = "#2b2b2b";
+const INPUT_ANSWER_COLOR      = "#c81e1e";
+const WRONG_BADGE_BG          = "#ef4444";
+const WRONG_BADGE_TEXT        = "#ffffff";
 
-  const wordBank = ["spring", "summer", "autumn", "winter"];
-  const numbers = [1, 2, 3, 4];
-  const images = [img1, img2, img3, img4];
+// ─────────────────────────────────────────────
+//  📝  EXERCISE DATA
+// ─────────────────────────────────────────────
+const ITEMS = [
+  {
+    id:      1,
+    before:  "Tim was very happy to have a new",
+    after:   "sister.",
+    correct: "c",
+    answer:  "baby",
+    options: [
+      { label: "a", text: "picnic" },
+      { label: "b", text: "cousin" },
+      { label: "c", text: "baby" },
+    ],
+  },
+  {
+    id:      2,
+    before:  "The",
+    after:   "is very green and lush.",
+    correct: "c",
+    answer:  "grass",
+    options: [
+      { label: "a", text: "cousin" },
+      { label: "b", text: "baby" },
+      { label: "c", text: "grass" },
+    ],
+  },
+  {
+    id:      3,
+    before:  "We are going on a",
+    after:   "the park.",
+    correct: "b",
+    answer:  "picnic",
+    options: [
+      { label: "a", text: "today" },
+      { label: "b", text: "picnic" },
+      { label: "c", text: "leave" },
+    ],
+  },
+  {
+    id:      4,
+    before:  "Jake will",
+    after:   "for Australia next month.",
+    correct: "a",
+    answer:  "leave",
+    options: [
+      { label: "a", text: "leave" },
+      { label: "b", text: "over" },
+      { label: "c", text: "taller" },
+    ],
+  },
+];
 
-  const [answers, setAnswers] = useState(Array(4).fill(""));
-  const [imageNumbers, setImageNumbers] = useState([null, null, null, null]);
-  const [showCorrect, setShowCorrect] = useState(false);
-  const [wrongMarks, setWrongMarks] = useState([]);
+// ─────────────────────────────────────────────
+//  🔧  NORMALIZE
+// ─────────────────────────────────────────────
+const normalize = (str) =>
+  str.toLowerCase().replace(/[^a-z0-9\s]/g, "").replace(/\s+/g, " ").trim();
 
-  // =========================
-  // DRAG END
-  // =========================
-  const onDragEnd = (result) => {
-    const { destination, draggableId } = result;
-    if (!destination) return;
+// ─────────────────────────────────────────────
+//  COMPONENT
+// ─────────────────────────────────────────────
+export default function WB_ReadChooseWrite_QA() {
+  const [selected,    setSelected]    = useState({});   // { 1: "c", ... }
+  const [written,     setWritten]     = useState({});   // { 1: "baby", ... }
+  const [showResults, setShowResults] = useState(false);
+  const [showAns,     setShowAns]     = useState(false);
 
-    // ✨ كلمات
-    if (draggableId.startsWith("season-")) {
-      const value = draggableId.replace("season-", "");
-      const index = Number(destination.droppableId);
+  const isLocked = showResults || showAns;
 
-      if (!isNaN(index)) {
-        const updated = [...answers];
-        updated[index] = value;
-        setAnswers(updated);
-      }
-    }
-
-    // 🔥 أرقام
-    if (draggableId.startsWith("num-")) {
-      const number = Number(draggableId.split("-")[1]);
-
-      if (destination.droppableId.startsWith("image-")) {
-        const index = Number(destination.droppableId.split("-")[1]);
-
-        const updated = [...imageNumbers];
-        updated[index] = number;
-        setImageNumbers(updated);
-      }
-    }
+  // ── Handlers ──
+  const handleSelect = (id, label) => {
+    if (isLocked) return;
+    setSelected((prev) => ({ ...prev, [id]: label }));
   };
 
-  // =========================
-  // SHOW ANSWERS
-  // =========================
-  const showAnswers = () => {
-    setAnswers(questions.map((q) => q.answer));
-
-    // 🔥 هاي الإضافة
-    setImageNumbers(questions.map((q) => q.correctImage));
-
-    setShowCorrect(true);
-    setWrongMarks([]);
+  const handleWrite = (id, value) => {
+    if (showAns) return;
+    const item = ITEMS.find((i) => i.id === id);
+    if (showResults && item && normalize(written[id] || "") === normalize(item.answer)) return;
+    setWritten((prev) => ({ ...prev, [id]: value }));
   };
 
-  // =========================
-  // RESET
-  // =========================
-  const resetAll = () => {
-    setAnswers(questions.map(() => ""));
-    setImageNumbers([null, null, null, null]);
-    setShowCorrect(false);
-    setWrongMarks([]);
-  };
-
-  // =========================
-  // CHECK ANSWERS
-  // =========================
-  const checkAnswers = () => {
-    if (showCorrect) return;
-
-    if (answers.includes("")) {
-      ValidationAlert.info();
+  const handleCheck = () => {
+    if (isLocked) return;
+    const allCircled = ITEMS.every((item) => selected[item.id]);
+    const allWritten = ITEMS.every((item) => written[item.id]?.trim());
+    if (!allCircled || !allWritten) {
+      ValidationAlert.info("Please choose and write an answer for each question.");
       return;
     }
-
     let score = 0;
-    let wrong = [];
-
-    questions.forEach((q, i) => {
-      const wordCorrect =
-        answers[i]?.trim().toLowerCase() === q.answer.toLowerCase();
-
-      const imageCorrect = imageNumbers[i] === q.correctImage;
-
-      if (!wordCorrect || !imageCorrect) {
-        wrong.push({
-          qIndex: i,
-          wordWrong: !wordCorrect,
-          imageWrong: !imageCorrect,
-        });
-      }
-
-      if (wordCorrect) score++;
-      if (imageCorrect) score++;
+    const total = ITEMS.length * 2;
+    ITEMS.forEach((item) => {
+      if (selected[item.id] === item.correct)                           score++;
+      if (normalize(written[item.id] || "") === normalize(item.answer)) score++;
     });
+    setShowResults(true);
+    if (score === total)   ValidationAlert.success(`Score: ${score} / ${total}`);
+    else if (score > 0)    ValidationAlert.warning(`Score: ${score} / ${total}`);
+    else                   ValidationAlert.error(`Score: ${score} / ${total}`);
+  };
 
-    setWrongMarks(wrong);
-    setShowCorrect(true);
+  const handleShowAnswer = () => {
+    const filledSel = {};
+    const filledWr  = {};
+    ITEMS.forEach((item) => {
+      filledSel[item.id] = item.correct;
+      filledWr[item.id]  = item.answer;
+    });
+    setSelected(filledSel);
+    setWritten(filledWr);
+    setShowResults(false);
+    setShowAns(true);
+  };
 
-    const total = questions.length * 2;
-    const color = score === total ? "green" : score === 0 ? "red" : "orange";
+  const handleReset = () => {
+    setSelected({});
+    setWritten({});
+    setShowResults(false);
+    setShowAns(false);
+  };
 
-    const msg = `
-      <div style="font-size:20px;text-align:center;">
-        <span style="color:${color};font-weight:bold">
-          Score: ${score} / ${total}
-        </span>
-      </div>
-    `;
+  // ── State helpers ──
+  const getCircleState = (item, label) => {
+    const sel = selected[item.id];
+    if (sel !== label) return "idle";
+    if (showAns)       return "correct";
+    if (showResults)   return label === item.correct ? "correct" : "wrong";
+    return "selected";
+  };
 
-    if (score === total) ValidationAlert.success(msg);
-    else if (score === 0) ValidationAlert.error(msg);
-    else ValidationAlert.warning(msg);
+  const isWriteWrong = (item) => {
+    if (!showResults || showAns) return false;
+    return normalize(written[item.id] || "") !== normalize(item.answer);
+  };
+
+  const isWriteDisabled = (item) => {
+    if (showAns) return true;
+    if (showResults && normalize(written[item.id] || "") === normalize(item.answer)) return true;
+    return false;
   };
 
   return (
-    <DragDropContext onDragEnd={onDragEnd}>
+    <div className="main-container-component">
+      <style>{`
+        .rcwa-list {
+          display: flex;
+          flex-direction: column;
+          gap: clamp(18px, 2.6vw, 34px);
+          width: 100%;
+        }
+
+        .rcwa-item {
+          display: flex;
+          flex-direction: column;
+          gap: clamp(8px, 1vw, 12px);
+        }
+
+        /* ── Sentence row ── */
+        .rcwa-sentence {
+          display: flex;
+          align-items: flex-end;
+          flex-wrap: wrap;
+          gap: clamp(4px, 0.5vw, 7px);
+        }
+
+        .rcwa-num {
+          font-size: clamp(14px, 1.7vw, 20px);
+          font-weight: 700;
+          color: ${NUMBER_COLOR};
+          flex-shrink: 0;
+          line-height: 1.5;
+        }
+
+        .rcwa-text {
+          font-size: clamp(13px, 1.6vw, 19px);
+          color: ${TEXT_COLOR};
+          line-height: 1.5;
+          white-space: nowrap;
+        }
+
+        /* Input wrap inline in sentence */
+        .rcwa-input-wrap {
+          position: relative;
+          flex: 0 1 clamp(80px, 10vw, 150px);
+          min-width: clamp(70px, 9vw, 130px);
+        }
+
+        .rcwa-input {
+          width: 100%;
+          background: transparent;
+          border: none;
+          border-bottom: 1px solid ${INPUT_UNDERLINE_DEFAULT};
+          outline: none;
+          font-size: clamp(13px, 1.6vw, 19px);
+          color: ${INPUT_TEXT_COLOR};
+          line-height: 1.5;
+          box-sizing: border-box;
+          transition: border-color 0.2s;
+          text-align: center;
+        }
+        .rcwa-input:disabled  { opacity: 1; cursor: default; }
+        .rcwa-input--wrong    { border-bottom-color: ${INPUT_UNDERLINE_WRONG}; }
+        .rcwa-input--answer   { color: ${INPUT_ANSWER_COLOR}; }
+
+        .rcwa-input-badge {
+          position: absolute;
+          top: -8px; right: 0;
+          width: clamp(16px, 1.8vw, 20px);
+          height: clamp(16px, 1.8vw, 20px);
+          border-radius: 50%;
+          background: ${WRONG_BADGE_BG};
+          color: ${WRONG_BADGE_TEXT};
+          display: flex; align-items: center; justify-content: center;
+          font-size: clamp(8px, 0.9vw, 11px);
+          font-weight: 700;
+          border: 2px solid #fff;
+          box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+          pointer-events: none;
+          z-index: 2;
+        }
+
+        /* ── Options row ── */
+        .rcwa-options {
+          display: flex;
+          flex-wrap: wrap;
+          gap: clamp(10px, 1.8vw, 24px);
+          padding-left: clamp(18px, 2.2vw, 28px);
+        }
+
+        .rcwa-option {
+          display: flex;
+          align-items: center;
+          gap: clamp(5px, 0.6vw, 8px);
+          cursor: pointer;
+          user-select: none;
+        }
+        .rcwa-option--locked { cursor: default; }
+
+        .rcwa-circle {
+          position: relative;
+          width: clamp(18px, 2.2vw, 26px);
+          height: clamp(18px, 2.2vw, 26px);
+          border-radius: 50%;
+          border: 2px solid ${CIRCLE_DEFAULT};
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex-shrink: 0;
+          transition: border-color 0.15s;
+        }
+        .rcwa-circle--selected { border-color: ${CIRCLE_SELECTED}; }
+        .rcwa-circle--correct  { border-color: ${CIRCLE_CORRECT}; }
+        .rcwa-circle--wrong    { border-color: ${CIRCLE_WRONG}; }
+
+        .rcwa-dot {
+          width: clamp(8px, 1vw, 12px);
+          height: clamp(8px, 1vw, 12px);
+          border-radius: 50%;
+          background: ${CIRCLE_SELECTED};
+        }
+        .rcwa-dot--correct { background: ${CIRCLE_CORRECT}; }
+        .rcwa-dot--wrong   { background: ${CIRCLE_WRONG}; }
+
+        .rcwa-circle-badge {
+          position: absolute;
+          top: -6px; right: -6px;
+          width: clamp(13px, 1.5vw, 16px);
+          height: clamp(13px, 1.5vw, 16px);
+          border-radius: 50%;
+          background: ${WRONG_BADGE_BG};
+          color: ${WRONG_BADGE_TEXT};
+          display: flex; align-items: center; justify-content: center;
+          font-size: clamp(6px, 0.7vw, 9px);
+          font-weight: 700;
+          border: 2px solid #fff;
+          box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+          pointer-events: none;
+          z-index: 2;
+        }
+
+        .rcwa-option-label {
+          font-size: clamp(12px, 1.4vw, 17px);
+          color: ${OPTION_LABEL_CLR};
+          font-weight: 600;
+          line-height: 1;
+        }
+
+        .rcwa-option-text {
+          font-size: clamp(13px, 1.6vw, 19px);
+          color: ${TEXT_COLOR};
+          line-height: 1;
+        }
+
+        .rcwa-buttons {
+          display: flex;
+          justify-content: center;
+          margin-top: clamp(8px, 1.6vw, 18px);
+        }
+      `}</style>
+
       <div
+        className="div-forall"
         style={{
           display: "flex",
           flexDirection: "column",
-          alignItems: "center",
-          padding: "30px",
+          gap: "clamp(14px, 2vw, 22px)",
+          maxWidth: "1100px",
+          margin: "0 auto",
         }}
       >
-        <div className="div-forall">
-          <h5 className="header-title-page8">
-            <span style={{ marginRight: "10px" }}>A</span> Read and write the
-            season. Number the pictures .
-          </h5>
-          <Droppable droppableId="mixed" direction="horizontal">
-            {(provided) => (
-              <div
-                ref={provided.innerRef}
-                {...provided.droppableProps}
-                style={{
-                  display: "flex",
-                  gap: "8px",
-                  padding: "8px",
-                  border: "2px dashed #ccc",
-                  borderRadius: "10px",
-                  marginTop: "15px",
-                  justifyContent: "center",
-                  flexWrap: "wrap",
-                }}
-              >
-                {/* 🔢 الأرقام */}
-                {[1, 2, 3, 4].map((num, index) => {
-                  const isUsed = imageNumbers.includes(num);
+        {/* ── Header ── */}
+        <h1
+          className="WB-header-title-page8"
+          style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
+        >
+          <span className="WB-ex-A-1">A</span>
+          Read, choose, and write.
+        </h1>
 
-                  return (
-                    <Draggable
-                      key={`num-${num}`}
-                      draggableId={`num-${num}`}
-                      index={index}
-                      isDragDisabled={isUsed} // 🔥 disable
-                    >
-                      {(provided) => (
-                        <div
-                          ref={provided.innerRef}
-                          {...provided.draggableProps}
-                          style={{
-                            width: "32px",
-                            height: "32px",
-                            border: "2px solid #1C398E",
-                            borderRadius: "8px",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            fontWeight: "bold",
-                            fontSize: "14px",
-                            opacity: isUsed ? 0.4 : 1, // 🔥 opacity
-                            cursor: isUsed ? "not-allowed" : "grab",
-                            ...provided.draggableProps.style,
-                          }}
-                        >
-                          <div
-                            {...provided.dragHandleProps}
-                            style={{
-                              width: "100%",
-                              height: "100%",
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "center",
-                            }}
-                          >
-                            {num}
-                          </div>
-                        </div>
-                      )}
-                    </Draggable>
-                  );
-                })}
+        {/* ── Items ── */}
+        <div className="rcwa-list">
+          {ITEMS.map((item) => {
+            const writeWrong    = isWriteWrong(item);
+            const writeDisabled = isWriteDisabled(item);
+            const writeValue    = written[item.id] || "";
+            const writeTColor   = showAns ? INPUT_ANSWER_COLOR : INPUT_TEXT_COLOR;
+            const writeUColor   = writeWrong ? INPUT_UNDERLINE_WRONG : INPUT_UNDERLINE_DEFAULT;
 
-                {/* 🌸 الكلمات */}
-                {wordBank.map((word, index) => {
-                  const isUsed = answers.includes(word);
+            return (
+              <div key={item.id} className="rcwa-item">
 
-                  return (
-                    <Draggable
-                      key={`season-${word}`}
-                      draggableId={`season-${word}`}
-                      index={index + 10}
-                      isDragDisabled={isUsed} // 🔥 disable
-                    >
-                      {(provided) => (
-                        <span
-                          ref={provided.innerRef}
-                          {...provided.draggableProps}
-                          style={{
-                            padding: "5px 10px",
-                            border: "2px solid #2c5287",
-                            borderRadius: "6px",
-                            background: "white",
-                            fontWeight: "bold",
-                            fontSize: "13px",
-                            opacity: isUsed ? 0.4 : 1, // 🔥 opacity
-                            cursor: isUsed ? "not-allowed" : "grab",
-                            ...provided.draggableProps.style,
-                          }}
-                        >
-                          <span
-                            {...provided.dragHandleProps}
-                            style={{
-                              display: "inline-block",
-                              cursor: isUsed ? "not-allowed" : "grab",
-                            }}
-                          >
-                            {word}
-                          </span>
-                        </span>
-                      )}
-                    </Draggable>
-                  );
-                })}
+                {/* ── Sentence + inline input ── */}
+                <div className="rcwa-sentence">
+                  <span className="rcwa-num">{item.id}</span>
+                  <span className="rcwa-text">{item.before}</span>
 
-                {provided.placeholder}
-              </div>
-            )}
-          </Droppable>
-          {/* الصور */}
-          <div style={{ marginTop: "20px" }}>
-            {questions.map((q, i) => {
-              const wrongItem = wrongMarks.find((w) => w.qIndex === i);
-
-              const isWordWrong = wrongItem?.wordWrong;
-              const isImageWrong = wrongItem?.imageWrong;
-
-              return (
-                <div
-                  key={i}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    marginBottom: "25px",
-                    gap: "20px",
-                  }}
-                >
-                  {/* 🟢 TEXT */}
-                  <div style={{ flex: 1 }}>
-                    <span style={{ fontWeight: "bold" }}>{i + 1}</span> {q.text}
-                    <br />
-                    It’s{" "}
-                    <Droppable droppableId={`${i}`}>
-                      {(provided) => (
-                        <span
-                          ref={provided.innerRef}
-                          {...provided.droppableProps}
-                          style={{
-                            borderBottom: `2px solid ${
-                              showCorrect
-                                ? isWordWrong
-                                  ? "red"
-                                  : "#1C398E"
-                                : "black"
-                            }`,
-                            display: "inline-block",
-                            padding: "0 4px",
-                            minWidth: answers[i] ? "auto" : "60px", // 🔥 الحل
-                            marginLeft: "8px",
-                            color: "#1C398E",
-                            fontWeight: "bold",
-                            position: "relative",
-                            textAlign: "center",
-                          }}
-                        >
-                          {answers[i]}
-                          {provided.placeholder}
-
-                          {/* ❌ للكلمة */}
-                          {showCorrect && isWordWrong && (
-                            <div
-                              style={{
-                                position: "absolute",
-                                top: "50%",
-                                right: "-30px",
-                                transform: "translateY(-50%)",
-                                width: "22px",
-                                height: "22px",
-                                background: "#ef4444",
-                                color: "white",
-                                borderRadius: "50%",
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "center",
-                                fontWeight: "bold",
-                                border: "2px solid white",
-                                boxShadow: "0 2px 6px rgba(0,0,0,0.2)",
-                                pointerEvents: "none",
-                              }}
-                            >
-                              <span
-                                style={{
-                                  fontSize: "13px",
-                                  lineHeight: "1",
-                                  transform: "translateY(-1px)",
-                                }}
-                              >
-                                ✕
-                              </span>
-                            </div>
-                          )}
-                        </span>
-                      )}
-                    </Droppable>
-                    .
+                  <div className="rcwa-input-wrap">
+                    <input
+                      type="text"
+                      className={[
+                        "rcwa-input",
+                        writeWrong ? "rcwa-input--wrong"  : "",
+                        showAns    ? "rcwa-input--answer" : "",
+                      ].filter(Boolean).join(" ")}
+                      value={writeValue}
+                      disabled={writeDisabled}
+                      onChange={(e) => handleWrite(item.id, e.target.value)}
+                      style={{ borderBottomColor: writeUColor, color: writeTColor }}
+                      spellCheck={false}
+                      autoComplete="off"
+                    />
+                    {writeWrong && <div className="rcwa-input-badge">✕</div>}
                   </div>
 
-                  {/* 🟠 IMAGE + NUMBER */}
-                  <Droppable droppableId={`image-${i}`}>
-                    {(provided) => (
-                      <div
-                        ref={provided.innerRef}
-                        {...provided.droppableProps}
-                        style={{
-                          position: "relative",
-                          border: "2px solid orange",
-                          borderRadius: "16px",
-                          padding: "6px",
-                          background: "#fff",
-                        }}
-                      >
-                        <img
-                          src={images[i]}
-                          style={{
-                            width: "170px",
-                            height: "100px",
-                            objectFit: "cover",
-                            borderRadius: "12px",
-                          }}
-                        />
-
-                        {/* 🔢 الرقم */}
-                        <div
-                          style={{
-                            position: "absolute",
-                            right: "-10px",
-                            bottom: "-10px",
-                            width: "40px",
-                            height: "40px",
-                            background: "white",
-                            border: "2px solid orange",
-                            borderRadius: "12px",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            fontWeight: "bold",
-                            fontSize: "18px",
-                            color:
-                              showCorrect && isImageWrong ? "red" : "black",
-                          }}
-                        >
-                          {imageNumbers[i]}
-
-                          {/* ❌ للرقم */}
-                          {showCorrect && isImageWrong && (
-                            <span
-                              style={{
-                                position: "absolute",
-                                top: "-1px",
-                                right: "-8px",
-                                transform: "translateY(-50%)",
-                                width: "22px",
-                                height: "22px",
-                                background: "#ef4444",
-                                color: "white",
-                                borderRadius: "50%",
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "center",
-                                fontWeight: "bold",
-                                border: "2px solid white",
-                                boxShadow: "0 2px 6px rgba(0,0,0,0.2)",
-                                pointerEvents: "none",
-                              }}
-                            >
-                              <span
-                                style={{
-                                  fontSize: "13px",
-                                  lineHeight: "1",
-                                  transform: "translateY(-1px)",
-                                }}
-                              >
-                                ✕
-                              </span>
-                            </span>
-                          )}
-                        </div>
-
-                        {provided.placeholder}
-                      </div>
-                    )}
-                  </Droppable>
+                  <span className="rcwa-text">{item.after}</span>
                 </div>
-              );
-            })}
-          </div>
+
+                {/* ── Options with circles ── */}
+                <div className="rcwa-options">
+                  {item.options.map((opt) => {
+                    const state   = getCircleState(item, opt.label);
+                    const isWrong = state === "wrong";
+
+                    return (
+                      <div
+                        key={opt.label}
+                        className={["rcwa-option", isLocked ? "rcwa-option--locked" : ""].filter(Boolean).join(" ")}
+                        onClick={() => handleSelect(item.id, opt.label)}
+                      >
+                        <div className={[
+                          "rcwa-circle",
+                          state === "selected" ? "rcwa-circle--selected" : "",
+                          state === "correct"  ? "rcwa-circle--correct"  : "",
+                          state === "wrong"    ? "rcwa-circle--wrong"    : "",
+                        ].filter(Boolean).join(" ")}>
+                          {state !== "idle" && (
+                            <div className={[
+                              "rcwa-dot",
+                              state === "correct" ? "rcwa-dot--correct" : "",
+                              state === "wrong"   ? "rcwa-dot--wrong"   : "",
+                            ].filter(Boolean).join(" ")} />
+                          )}
+                          {isWrong && <div className="rcwa-circle-badge">✕</div>}
+                        </div>
+                        <span className="rcwa-option-label">{opt.label}</span>
+                        <span className="rcwa-option-text">{opt.text}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+
+              </div>
+            );
+          })}
         </div>
 
-        {/* buttons */}
-        <div className="action-buttons-container">
-          <button onClick={resetAll} className="try-again-button">
-            Start Again ↻
-          </button>
-          <button onClick={showAnswers} className="show-answer-btn">
-            Show Answer
-          </button>
-          <button onClick={checkAnswers} className="check-button2">
-            Check Answer ✓
-          </button>
+        {/* ── Buttons ── */}
+        <div className="rcwa-buttons">
+          <Button
+            checkAnswers={handleCheck}
+            handleShowAnswer={handleShowAnswer}
+            handleStartAgain={handleReset}
+          />
         </div>
       </div>
-    </DragDropContext>
+    </div>
   );
-};
-
-export default Review4_Page1_Q1;
+}

@@ -1,273 +1,344 @@
 import React, { useState } from "react";
-import img1 from "../../../assets/imgs/pages/classbook/Right 3 Unit 4 My E-Friend Folder/Page 35/Ex C 1.svg";
+import Button from "../../Button";
 import ValidationAlert from "../../Popup/ValidationAlert";
-import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
-import "./Review3_Page2_Q1.css";
-const Review3_Page2_Q1 = () => {
-  const correctAnswers = ["sh", "ch", "ch", "sh", "ch", "sh"];
-  const [answers, setAnswers] = useState(["", "", "", "", "", ""]);
-  const [wrongInputs, setWrongInputs] = useState([]);
-  const [locked, setLocked] = useState(false);
 
-  /* ================= Drag Logic ================= */
-  const onDragEnd = (result) => {
-    const { destination, draggableId } = result;
-    if (!destination || locked) return;
+// ─────────────────────────────────────────────
+//  🎨  COLORS
+// ─────────────────────────────────────────────
+const TEXT_COLOR       = "#2b2b2b";
+const NUMBER_COLOR     = "#2b2b2b";
+const OPTION_LABEL_CLR = "#2b2b2b";
+const CIRCLE_DEFAULT   = "#9ca3af";
+const CIRCLE_SELECTED  = "#2096a6";
+const CIRCLE_WRONG     = "#ef4444";
+const CIRCLE_CORRECT   = "#2096a6";
+const ANSWER_COLOR     = "#c81e1e";
+const WRONG_BADGE_BG   = "#ef4444";
+const WRONG_BADGE_TEXT = "#ffffff";
 
-    if (destination.droppableId.startsWith("slot-")) {
-      const index = Number(destination.droppableId.split("-")[1]);
-      const word = draggableId.replace("word-", "");
+// ─────────────────────────────────────────────
+//  📝  EXERCISE DATA
+// ─────────────────────────────────────────────
+const ITEMS = [
+  {
+    id:      1,
+    before:  "Tim was very happy to have ___________ a new",
+    after:   "sister.",
+    correct: "c",
+    options: [
+      { label: "a", text: "picnic" },
+      { label: "b", text: "cousin" },
+      { label: "c", text: "baby" },
+    ],
+  },
+  {
+    id:      2,
+    before:  "The",
+    after:   "is very green and lush.",
+    correct: "c",
+    options: [
+      { label: "a", text: "cousin" },
+      { label: "b", text: "baby" },
+      { label: "c", text: "grass" },
+    ],
+  },
+  {
+    id:      3,
+    before:  "We are going on a",
+    after:   "the park.",
+    correct: "b",
+    options: [
+      { label: "a", text: "today" },
+      { label: "b", text: "picnic" },
+      { label: "c", text: "leave" },
+    ],
+  },
+  {
+    id:      4,
+    before:  "Jake will",
+    after:   "for Australia next month.",
+    correct: "a",
+    options: [
+      { label: "a", text: "leave" },
+      { label: "b", text: "over" },
+      { label: "c", text: "taller" },
+    ],
+  },
+];
 
-      setAnswers((prev) => {
-        const updated = [...prev];
+// ─────────────────────────────────────────────
+//  COMPONENT
+// ─────────────────────────────────────────────
+export default function WB_ReadChooseWrite_QA() {
+  const [selected,    setSelected]    = useState({});
+  const [showResults, setShowResults] = useState(false);
+  const [showAns,     setShowAns]     = useState(false);
 
-        updated[index] = word;
-        return updated;
-      });
+  const isLocked = showResults || showAns;
 
-      setWrongInputs([]);
-    }
+  const handleSelect = (id, label) => {
+    if (isLocked) return;
+    setSelected((prev) => ({ ...prev, [id]: label }));
   };
 
-  /* ================= Check Answers (كما هو) ================= */
-  const checkAnswers = () => {
-    if (locked) return;
-
-    if (answers.some((ans) => ans === "")) {
-      ValidationAlert.info("Please fill in all the blanks before checking!");
-      return;
-    }
-
-    let tempScore = 0;
-    let wrong = [];
-
-    answers.forEach((ans, i) => {
-      if (ans === correctAnswers[i]) tempScore++;
-      else wrong.push(i);
-    });
-
-    setWrongInputs(wrong);
-
-    const total = correctAnswers.length;
-    const color =
-      tempScore === total ? "green" : tempScore === 0 ? "red" : "orange";
-
-    ValidationAlert[
-      tempScore === total ? "success" : tempScore === 0 ? "error" : "warning"
-    ](`
-      <div style="font-size:20px;text-align:center;">
-        <span style="color:${color};font-weight:bold;">
-          Score: ${tempScore} / ${total}
-        </span>
-      </div>
-    `);
-
-    setLocked(true);
+  const handleCheck = () => {
+    if (isLocked) return;
+    const allAnswered = ITEMS.every((item) => selected[item.id]);
+    if (!allAnswered) { ValidationAlert.info("Please choose an answer for each question."); return; }
+    let score = 0;
+    ITEMS.forEach((item) => { if (selected[item.id] === item.correct) score++; });
+    setShowResults(true);
+    if (score === ITEMS.length)   ValidationAlert.success(`Score: ${score} / ${ITEMS.length}`);
+    else if (score > 0)           ValidationAlert.warning(`Score: ${score} / ${ITEMS.length}`);
+    else                          ValidationAlert.error(`Score: ${score} / ${ITEMS.length}`);
   };
 
-  const reset = () => {
-    setAnswers(["", "", "", "", "", ""]);
-    setWrongInputs([]);
-    setLocked(false);
+  const handleShowAnswer = () => {
+    const filled = {};
+    ITEMS.forEach((item) => { filled[item.id] = item.correct; });
+    setSelected(filled);
+    setShowResults(false);
+    setShowAns(true);
   };
 
-  const showAnswer = () => {
-    setAnswers([...correctAnswers]);
-    setWrongInputs([]);
-    setLocked(true);
+  const handleReset = () => {
+    setSelected({});
+    setShowResults(false);
+    setShowAns(false);
+  };
+
+  const getOptionState = (item, label) => {
+    const sel = selected[item.id];
+    if (sel !== label) return "idle";
+    if (showAns)       return "correct";
+    if (showResults)   return label === item.correct ? "correct" : "wrong";
+    return "selected";
   };
 
   return (
-    <DragDropContext onDragEnd={onDragEnd}>
+    <div className="main-container-component">
+      <style>{`
+        .rcwa-list {
+          display: flex;
+          flex-direction: column;
+          gap: clamp(16px, 2.4vw, 30px);
+          width: 100%;
+        }
+
+        /* Single item */
+        .rcwa-item {
+          display: flex;
+          flex-direction: column;
+          gap: clamp(6px, 0.8vw, 10px);
+        }
+
+        /* Sentence row */
+        .rcwa-sentence {
+          display: flex;
+          align-items: baseline;
+          flex-wrap: wrap;
+          gap: clamp(4px, 0.5vw, 7px);
+        }
+
+        .rcwa-num {
+          font-size: clamp(14px, 1.7vw, 20px);
+          font-weight: 700;
+          color: ${NUMBER_COLOR};
+          flex-shrink: 0;
+          line-height: 1.5;
+        }
+
+        .rcwa-text {
+          font-size: clamp(13px, 1.6vw, 19px);
+          color: ${TEXT_COLOR};
+          line-height: 1.5;
+          white-space: nowrap;
+        }
+
+        /* Answer word shown inline */
+        .rcwa-answer-word {
+          font-size: clamp(13px, 1.6vw, 19px);
+          font-weight: 700;
+          color: ${ANSWER_COLOR};
+          border-bottom: 1px solid ${ANSWER_COLOR};
+          padding-bottom: 1px;
+          line-height: 1.5;
+          white-space: nowrap;
+        }
+
+        /* Options row */
+        .rcwa-options {
+          display: flex;
+          flex-wrap: wrap;
+          gap: clamp(10px, 1.6vw, 20px);
+          padding-left: clamp(18px, 2.2vw, 28px);
+        }
+
+        /* Single option */
+        .rcwa-option {
+          display: flex;
+          align-items: center;
+          gap: clamp(5px, 0.6vw, 8px);
+          cursor: pointer;
+          user-select: none;
+        }
+        .rcwa-option--locked { cursor: default; }
+
+        /* Circle */
+        .rcwa-circle {
+          position: relative;
+          width: clamp(18px, 2.2vw, 26px);
+          height: clamp(18px, 2.2vw, 26px);
+          border-radius: 50%;
+          border: 2px solid ${CIRCLE_DEFAULT};
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex-shrink: 0;
+          transition: border-color 0.15s;
+        }
+        .rcwa-circle--selected { border-color: ${CIRCLE_SELECTED}; }
+        .rcwa-circle--correct  { border-color: ${CIRCLE_CORRECT}; }
+        .rcwa-circle--wrong    { border-color: ${CIRCLE_WRONG}; }
+
+        .rcwa-dot {
+          width: clamp(8px, 1vw, 12px);
+          height: clamp(8px, 1vw, 12px);
+          border-radius: 50%;
+          background: ${CIRCLE_SELECTED};
+        }
+        .rcwa-dot--correct { background: ${CIRCLE_CORRECT}; }
+        .rcwa-dot--wrong   { background: ${CIRCLE_WRONG}; }
+
+        /* ✕ badge */
+        .rcwa-badge {
+          position: absolute;
+          top: -6px; right: -6px;
+          width: clamp(13px, 1.5vw, 16px);
+          height: clamp(13px, 1.5vw, 16px);
+          border-radius: 50%;
+          background: ${WRONG_BADGE_BG};
+          color: ${WRONG_BADGE_TEXT};
+          display: flex; align-items: center; justify-content: center;
+          font-size: clamp(6px, 0.7vw, 9px);
+          font-weight: 700;
+          border: 2px solid #fff;
+          box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+          pointer-events: none;
+          z-index: 2;
+        }
+
+        .rcwa-option-label {
+          font-size: clamp(12px, 1.4vw, 17px);
+          color: ${OPTION_LABEL_CLR};
+          font-weight: 600;
+          line-height: 1;
+        }
+
+        .rcwa-option-text {
+          font-size: clamp(13px, 1.6vw, 19px);
+          color: ${TEXT_COLOR};
+          line-height: 1;
+        }
+
+        .rcwa-buttons {
+          display: flex;
+          justify-content: center;
+          margin-top: clamp(8px, 1.6vw, 18px);
+        }
+      `}</style>
+
       <div
-        className="question-wrapper-unit3-page6-q1"
+        className="div-forall"
         style={{
           display: "flex",
           flexDirection: "column",
-          justifyContent: "center",
-          alignItems: "center",
-          padding: "30px",
+          gap: "clamp(14px, 2vw, 22px)",
+          maxWidth: "1100px",
+          margin: "0 auto",
         }}
       >
-        <div
-          className="div-forall"
-          style={{
-            display: "flex",
-            flexDirection: "column",
-          }}
+        {/* ── Header ── */}
+        <h1
+          className="WB-header-title-page8"
+          style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
         >
-          <h5 className="header-title-page8">
-            <span style={{ marginRight: "10px" }}>C</span>Read and complete the
-            sentences. Write
-            <span style={{ color: "#2e3192" }}>sh</span>or{" "}
-            <span style={{ color: "#2e3192" }}>ch</span>
-          </h5>
-          {/* 🔤 Word Bank */}
-          <Droppable droppableId="bank" direction="horizontal" isDropDisabled>
-            {(provided) => (
-              <div
-                ref={provided.innerRef}
-                {...provided.droppableProps}
-                style={{
-                  display: "flex",
-                  gap: "10px",
-                  padding: "10px",
-                  border: "2px dashed #ccc",
-                  borderRadius: "10px",
-                  // margin: "10px 0",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                {["sh", "ch"].map((word, index) => (
-                  <Draggable
-                    key={word}
-                    draggableId={`word-${word}`}
-                    index={index}
-                    isDragDisabled={locked}
-                  >
-                    {(provided) => (
-                      <span
-                        ref={provided.innerRef}
-                        {...provided.draggableProps}
-                        {...provided.dragHandleProps}
-                        style={{
-                          padding: "7px 14px",
-                          border: "2px solid #2c5287",
-                          borderRadius: "8px",
-                          background: "white",
-                          fontWeight: "bold",
-                          cursor: "grab",
-                          ...provided.draggableProps.style,
-                        }}
-                      >
-                        {word}
-                      </span>
-                    )}
-                  </Draggable>
-                ))}
-                {provided.placeholder}
-              </div>
-            )}
-          </Droppable>
-          <div className="w-full flex gap-10 mt-6">
-            {/* 🔵 LEFT (QUESTIONS) */}
-            <div className="flex-1 space-y-6">
-              {[
-                "There was a big spla____ when Jan dived in the pool.",
-                "Mar____ is the third month of the year.",
-                "Mrs. Bell is the best tea____er in the school.",
-                "____ut the door when you leave.",
-                "We used a knife to ____op the peppers.",
-                "Aunt Jo went ____opping at the mall.",
-              ].map((text, i) => (
-                <div
-                  key={i}
-                  className="flex flex-col gap-2"
-                  style={{ position: "relative" }}
-                >
-                  <span className="text-lg font-medium">
-                    {i + 1}{" "}
-                    {text.split("____").map((part, j) => {
-                      const isWrong = wrongInputs.includes(i);
+          <span className="WB-ex-A-1">A</span>
+          Read, choose, and write.
+        </h1>
 
-                      return (
-                        <span key={j}>
-                          {part}
+        {/* ── Items ── */}
+        <div className="rcwa-list">
+          {ITEMS.map((item) => {
+            const sel         = selected[item.id];
+            const correctOpt  = item.options.find((o) => o.label === item.correct);
+            const selectedOpt = sel ? item.options.find((o) => o.label === sel) : null;
+            const showWord    = showAns ? correctOpt : (showResults && sel ? selectedOpt : null);
+            const wordColor   = showAns || (showResults && sel === item.correct) ? ANSWER_COLOR : CIRCLE_WRONG;
 
-                          {j === 0 && (
-                            <Droppable droppableId={`slot-${i}`}>
-                              {(provided) => (
-                                <span
-                                  ref={provided.innerRef}
-                                  {...provided.droppableProps}
-                                  className={`inline-block min-w-10 text-center font-bold relative ${
-                                    isWrong ? "border-red-500" : "border-black"
-                                  } border-b-2 mx-1`}
-                                >
-                                  <span style={{ color: "#1C398E" }}>
-                                    {answers[i]}
-                                  </span>
-                                  {provided.placeholder}
+            return (
+              <div key={item.id} className="rcwa-item">
 
-                                  {isWrong && (
-                                    <div
-                                      style={{
-                                        position: "absolute",
-                                        top: "0%",
-                                        left: "30px",
-                                        transform: "translateY(-50%)",
-                                        width: "22px",
-                                        height: "22px",
-                                        background: "#ef4444",
-                                        color: "white",
-                                        borderRadius: "50%",
-                                        display: "flex",
-                                        alignItems: "center",
-                                        justifyContent: "center",
-                                        fontWeight: "bold",
-                                        border: "2px solid white",
-                                        boxShadow: "0 2px 6px rgba(0,0,0,0.2)",
-                                        pointerEvents: "none",
-                                      }}
-                                    >
-                                      <span
-                                        style={{
-                                          fontSize: "13px",
-                                          lineHeight: "1",
-                                          transform: "translateY(-1px)",
-                                        }}
-                                      >
-                                        ✕
-                                      </span>
-                                    </div>
-                                  )}
-                                </span>
-                              )}
-                            </Droppable>
-                          )}
-                        </span>
-                      );
-                    })}
-                  </span>
+                {/* Sentence */}
+                <div className="rcwa-sentence">
+                  <span className="rcwa-num">{item.id}</span>
+                  <span className="rcwa-text">{item.before}</span>
+                  {showWord && (
+                    <span className="rcwa-answer-word" style={{ color: wordColor, borderBottomColor: wordColor }}>
+                      {showWord.text}
+                    </span>
+                  )}
+                  <span className="rcwa-text">{item.after}</span>
                 </div>
-              ))}
-            </div>
 
-            {/* 🟠 RIGHT (IMAGE) */}
-            <div>
-              <img
-                src={img1}
-                alt="exercise"
-                style={{
-                  width: "200px",
-                  height: "auto",
-                  display: "block",
-                }}
-              />
-            </div>
-          </div>
+                {/* Options */}
+                <div className="rcwa-options">
+                  {item.options.map((opt) => {
+                    const state = getOptionState(item, opt.label);
+                    const isWrong = state === "wrong";
+
+                    return (
+                      <div
+                        key={opt.label}
+                        className={["rcwa-option", isLocked ? "rcwa-option--locked" : ""].filter(Boolean).join(" ")}
+                        onClick={() => handleSelect(item.id, opt.label)}
+                      >
+                        <div className={[
+                          "rcwa-circle",
+                          state === "selected" ? "rcwa-circle--selected" : "",
+                          state === "correct"  ? "rcwa-circle--correct"  : "",
+                          state === "wrong"    ? "rcwa-circle--wrong"    : "",
+                        ].filter(Boolean).join(" ")}>
+                          {state !== "idle" && (
+                            <div className={[
+                              "rcwa-dot",
+                              state === "correct" ? "rcwa-dot--correct" : "",
+                              state === "wrong"   ? "rcwa-dot--wrong"   : "",
+                            ].filter(Boolean).join(" ")} />
+                          )}
+                          {isWrong && <div className="rcwa-badge">✕</div>}
+                        </div>
+                        <span className="rcwa-option-label">{opt.label}</span>
+                        <span className="rcwa-option-text">{opt.text}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+
+              </div>
+            );
+          })}
         </div>
 
-        <div className="action-buttons-container">
-          <button onClick={reset} className="try-again-button">
-            Start Again ↻
-          </button>
-
-          <button
-            onClick={showAnswer}
-            className="show-answer-btn swal-continue"
-          >
-            Show Answer
-          </button>
-
-          <button onClick={checkAnswers} className="check-button2">
-            Check Answer ✓
-          </button>
+        {/* ── Buttons ── */}
+        <div className="rcwa-buttons">
+          <Button
+            checkAnswers={handleCheck}
+            handleShowAnswer={handleShowAnswer}
+            handleStartAgain={handleReset}
+          />
         </div>
       </div>
-    </DragDropContext>
+    </div>
   );
-};
-
-export default Review3_Page2_Q1;
+}

@@ -1,298 +1,327 @@
 import React, { useState } from "react";
-import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
+import Button from "../../Button";
 import ValidationAlert from "../../Popup/ValidationAlert";
 
-const items = [
+// ─────────────────────────────────────────────
+//  🖼️  TABLE IMAGE (ثابتة — كاملة مع محتوياتها)
+// ─────────────────────────────────────────────
+import imgTable from "../../../assets/imgs/pages/Class Book/Right 4 Unit 4 Joy Makes a Friend Folder/Page 35/SVG/Asset 22.svg";;
+
+// ─────────────────────────────────────────────
+//  🎨  COLORS
+// ─────────────────────────────────────────────
+const INPUT_UNDERLINE_DEFAULT = "#3f3f3f";
+const INPUT_UNDERLINE_WRONG   = "#ef4444";
+const INPUT_TEXT_COLOR        = "#2b2b2b";
+const INPUT_ANSWER_COLOR      = "#c81e1e";
+const NUMBER_COLOR            = "#2b2b2b";
+const SCRAMBLED_COLOR         = "#2b2b2b";
+const WRONG_BADGE_BG          = "#ef4444";
+const WRONG_BADGE_TEXT        = "#ffffff";
+
+// ─────────────────────────────────────────────
+//  📝  EXERCISE DATA
+//  Each item: scrambled words → unscrambled question + short answer
+// ─────────────────────────────────────────────
+const ITEMS = [
   {
-    sentence: "rispng",
-    scrambled: ["rispng"],
-    correct: ["spring"],
+    id:        1,
+    scrambled: "have did motorcycle he ?",
+    correctQ:  ["Did he have a motorcycle?", "did he have a motorcycle"],
+    answerQ:   "Did he have a motorcycle?",
+    correctA:  ["Yes, he did.", "yes he did"],
+    answerA:   "Yes, he did.",
   },
   {
-    sentence: "mersum",
-    scrambled: ["mersum"],
-    correct: ["summer"],
+    id:        2,
+    scrambled: "ball he a did have ?",
+    correctQ:  ["Did he have a ball?", "did he have a ball"],
+    answerQ:   "Did he have a ball?",
+    correctA:  ["No, he didn't.", "no he didnt", "no he did not"],
+    answerA:   "No, he didn't.",
   },
   {
-    sentence: "ntauum",
-    scrambled: ["ntauum"],
-    correct: ["autumn"],
+    id:        3,
+    scrambled: "a did he hat have ?",
+    correctQ:  ["Did he have a hat?", "did he have a hat"],
+    answerQ:   "Did he have a hat?",
+    correctA:  ["No, he didn't.", "no he didnt", "no he did not"],
+    answerA:   "No, he didn't.",
   },
   {
-    sentence: "reniwt",
-    scrambled: ["reniwt"],
-    correct: ["winter"],
+    id:        4,
+    scrambled: "swimming pool a did have he ?",
+    correctQ:  ["Did he have a swimming pool?", "did he have a swimming pool"],
+    answerQ:   "Did he have a swimming pool?",
+    correctA:  ["Yes, he did.", "yes he did"],
+    answerA:   "Yes, he did.",
   },
 ];
 
-export default function Review4_Page1_Q2() {
-  // ✨ كل كلمة string بدل array
-  const [answers, setAnswers] = useState(
-    items.map((item) => Array(item.correct[0].length).fill("")),
-  );
+// ─────────────────────────────────────────────
+//  🔧  NORMALIZE
+// ─────────────────────────────────────────────
+const normalize = (str) =>
+  str.toLowerCase().replace(/[^a-z0-9'\s]/g, "").replace(/\s+/g, " ").trim();
 
-  const [locked, setLocked] = useState(false);
-  const [showResult, setShowResult] = useState(false);
+const isCorrect = (userVal, correctArr) =>
+  correctArr.some((c) => normalize(userVal) === normalize(c));
 
-  const onDragEnd = (result) => {
-    const { destination, draggableId, source } = result;
-    if (!destination || locked) return;
+// ─────────────────────────────────────────────
+//  COMPONENT
+// ─────────────────────────────────────────────
+export default function WB_LookUnscrambleWriteAnswer_QE() {
+  const [answers,     setAnswers]     = useState({});
+  const [showResults, setShowResults] = useState(false);
+  const [showAns,     setShowAns]     = useState(false);
 
-    const letterId = draggableId;
-    const letter = letterId.split("-")[0];
+  const keyQ = (id) => `${id}q`;
+  const keyA = (id) => `${id}a`;
 
-    // إذا سحب داخل نفس المكان → تجاهل
-    if (destination.droppableId === source.droppableId) return;
-
-    // إذا drop على slot
-    if (destination.droppableId.startsWith("slot")) {
-      const [, qIndex, letterIndex] = destination.droppableId.split("-");
-
-      const updated = [...answers];
-
-      // 🔁 إذا في حرف قديم → احذفه (عشان يرجع يتفعل بالبنك)
-      updated[qIndex][letterIndex] = {
-        char: letter,
-        id: letterId,
-      };
-
-      setAnswers(updated);
-    }
+  const handleChange = (key, value, correctArr) => {
+    if (showAns) return;
+    if (showResults && isCorrect(answers[key] || "", correctArr)) return;
+    setAnswers((prev) => ({ ...prev, [key]: value }));
   };
 
-  const resetAll = () => {
-    setAnswers(items.map((item) => Array(item.correct[0].length).fill("")));
-    setLocked(false);
-    setShowResult(false);
-  };
-
-  const showAnswers = () => {
-    setAnswers(
-      items.map((item) =>
-        item.correct[0].split("").map((char, index) => ({
-          char,
-          id: `answer-${index}`,
-        })),
-      ),
+  const handleCheck = () => {
+    if (showAns) return;
+    const allAnswered = ITEMS.every(
+      (item) => answers[keyQ(item.id)]?.trim() && answers[keyA(item.id)]?.trim()
     );
-    setLocked(true);
-    setShowResult(true);
+    if (!allAnswered) { ValidationAlert.info("Please complete all answers first."); return; }
+    let score = 0;
+    const total = ITEMS.length * 2;
+    ITEMS.forEach((item) => {
+      if (isCorrect(answers[keyQ(item.id)] || "", item.correctQ)) score++;
+      if (isCorrect(answers[keyA(item.id)] || "", item.correctA)) score++;
+    });
+    setShowResults(true);
+    if (score === total)   ValidationAlert.success(`Score: ${score} / ${total}`);
+    else if (score > 0)    ValidationAlert.warning(`Score: ${score} / ${total}`);
+    else                   ValidationAlert.error(`Score: ${score} / ${total}`);
   };
 
-  const checkAnswers = () => {
-    if (locked) return;
-
-    const empty = answers.some((row) => row.some((word) => word === ""));
-
-    if (empty) {
-      ValidationAlert.info("Please complete all answers.");
-      return;
-    }
-
-    let score = 0;
-
-    answers.forEach((row, i) => {
-      if (row.map((l) => l.char).join("") === items[i].correct[0]) {
-        score++;
-      }
+  const handleShowAnswer = () => {
+    const filled = {};
+    ITEMS.forEach((item) => {
+      filled[keyQ(item.id)] = item.answerQ;
+      filled[keyA(item.id)] = item.answerA;
     });
+    setAnswers(filled);
+    setShowResults(false);
+    setShowAns(true);
+  };
 
-    const total = items.length;
+  const handleReset = () => {
+    setAnswers({});
+    setShowResults(false);
+    setShowAns(false);
+  };
 
-    const message = `
-      <div style="font-size:20px;text-align:center;">
-        <span style="color:#2e7d32;font-weight:bold;">
-          Score: ${score} / ${total}
-        </span>
+  const isWrongKey = (key, correctArr) => {
+    if (!showResults || showAns) return false;
+    return !isCorrect(answers[key] || "", correctArr);
+  };
+
+  const isDisabledKey = (key, correctArr) => {
+    if (showAns) return true;
+    if (showResults && isCorrect(answers[key] || "", correctArr)) return true;
+    return false;
+  };
+
+  const renderInput = (key, correctArr, flex = "1") => {
+    const wrong    = isWrongKey(key, correctArr);
+    const value    = answers[key] || "";
+    const tColor   = showAns ? INPUT_ANSWER_COLOR : INPUT_TEXT_COLOR;
+    const uColor   = wrong ? INPUT_UNDERLINE_WRONG : INPUT_UNDERLINE_DEFAULT;
+    const disabled = isDisabledKey(key, correctArr);
+
+    return (
+      <div className="luwa-input-wrap" style={{ flex }}>
+        <input
+          type="text"
+          className={[
+            "luwa-input",
+            wrong   ? "luwa-input--wrong"  : "",
+            showAns ? "luwa-input--answer" : "",
+          ].filter(Boolean).join(" ")}
+          value={value}
+          disabled={disabled}
+          onChange={(e) => handleChange(key, e.target.value, correctArr)}
+          style={{ borderBottomColor: uColor, color: tColor }}
+          spellCheck={false}
+          autoComplete="off"
+        />
+        {wrong && <div className="luwa-badge">✕</div>}
       </div>
-    `;
-
-    if (score === total) ValidationAlert.success(message);
-    else if (score === 0) ValidationAlert.error(message);
-    else ValidationAlert.warning(message);
-
-    setShowResult(true);
-    setLocked(true);
+    );
   };
 
   return (
-    <DragDropContext onDragEnd={onDragEnd}>
-      <div className="flex justify-center p-8">
-        <div className="div-forall">
-          <h5 className="header-title-page8">
-            <span style={{ marginRight: "10px" }}>B</span>
-            Unscramble and write.
-          </h5>
+    <div className="main-container-component">
+      <style>{`
+        /* ── Table image ── */
+        .luwa-table-img {
+          width: 100%;
+          height: auto;
+          display: block;
+          border-radius: 8px;
+        }
 
-          <div className="grid grid-cols-1 gap-6 justify-center pb-15 mt-5">
-            {items.map((item, i) => {
-              const userWord = answers[i].map((l) => l?.char || "").join("");
+        /* ── Items list ── */
+        .luwa-list {
+          display: flex;
+          flex-direction: column;
+          gap: clamp(16px, 2.4vw, 30px);
+          width: 100%;
+        }
 
-              const isWordWrong =
-                showResult && userWord && userWord !== item.correct[0];
+        /* Single item */
+        .luwa-item {
+          display: flex;
+          flex-direction: column;
+          gap: clamp(4px, 0.6vw, 8px);
+        }
 
-              return (
-                <div key={i} className="flex items-center gap-4">
-                  {/* 🔵 المحتوى */}
-                  <div className="flex flex-col gap-2">
-                    {/* السطر الأول */}
-                    <div className="flex items-center gap-2">
-                      <span className="font-bold text-lg w-5">{i + 1}</span>
-                      <span className="text-lg">{item.sentence}</span>
-                    </div>
+        /* Scrambled row: num + scrambled */
+        .luwa-scrambled-row {
+          display: flex;
+          align-items: center;
+          gap: clamp(6px, 0.8vw, 10px);
+        }
 
-                    {/* السطر الثاني */}
-                    <div className="flex items-center gap-3 ml-7 relative">
-                      {/* 🔤 الحروف */}
-                      <Droppable
-                        droppableId={`bank-${i}`}
-                        direction="horizontal"
-                      >
-                        {(provided) => (
-                          <div
-                            ref={provided.innerRef}
-                            {...provided.droppableProps}
-                            className="flex gap-1"
-                          >
-                            {item.scrambled.map((word, wordIndex) => {
-                              const letters = word
-                                .split("")
-                                .map((letter, index) => ({
-                                  char: letter,
-                                  id: `${letter}-${i}-${wordIndex}-${index}`,
-                                }));
+        .luwa-num {
+          font-size: clamp(14px, 1.7vw, 20px);
+          font-weight: 700;
+          color: ${NUMBER_COLOR};
+          flex-shrink: 0;
+          line-height: 1;
+        }
 
-                              return (
-                                <div key={wordIndex} className="flex gap-1">
-                                  {letters.map((letterObj, letterIndex) => {
-                                    const isUsed = answers[i].some(
-                                      (l) => l?.id === letterObj.id,
-                                    );
+        .luwa-scrambled {
+          font-size: clamp(13px, 1.6vw, 19px);
+          color: ${SCRAMBLED_COLOR};
+          line-height: 1.4;
+        }
 
-                                    return (
-                                      <Draggable
-                                        key={letterObj.id}
-                                        draggableId={letterObj.id}
-                                        index={wordIndex * 10 + letterIndex}
-                                        isDragDisabled={locked || isUsed}
-                                      >
-                                        {(provided) => (
-                                          <span
-                                            ref={provided.innerRef}
-                                            {...provided.draggableProps}
-                                            {...provided.dragHandleProps}
-                                            className={`w-8 h-8 flex items-center justify-center rounded border font-bold
-          ${
-            isUsed
-              ? "bg-gray-300 opacity-40 cursor-not-allowed"
-              : "bg-yellow-200 cursor-grab"
-          }`}
-                                          >
-                                            {letterObj.char}
-                                          </span>
-                                        )}
-                                      </Draggable>
-                                    );
-                                  })}
-                                </div>
-                              );
-                            })}
-                            {provided.placeholder}
-                          </div>
-                        )}
-                      </Droppable>
-                      {isWordWrong && (
-                        <div
-                          style={{
-                            position: "absolute",
-                            right: "-30px",
-                            top: "50%",
-                            transform: "translateY(-50%)",
-                            width: "22px",
-                            height: "22px",
-                            background: "#ef4444",
-                            color: "white",
-                            borderRadius: "50%",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            fontWeight: "bold",
-                            border: "2px solid white",
-                            boxShadow: "0 2px 6px rgba(0,0,0,0.2)",
-                            pointerEvents: "none",
-                          }}
-                        >
-                          <span
-                            style={{
-                              fontSize: "13px",
-                              lineHeight: "1",
-                              transform: "translateY(-1px)",
-                            }}
-                          >
-                            ✕
-                          </span>
-                        </div>
-                      )}
-                      {/* 🔲 البوكسات */}
-                      <div className="flex gap-1 ml-4 relative">
-                        {item.correct[0].split("").map((_, letterIndex) => {
-                          const isCorrect =
-                            answers[i][letterIndex]?.char ===
-                            item.correct[0][letterIndex];
+        /* Answer row: question input + separator + short answer input */
+        .luwa-answer-row {
+          display: flex;
+          align-items: flex-end;
+          gap: clamp(8px, 1.2vw, 16px);
+          padding-left: clamp(18px, 2.2vw, 28px);
+        }
 
-                          const isWrong =
-                            showResult && answers[i][letterIndex] && !isCorrect;
+        .luwa-separator {
+          font-size: clamp(13px, 1.5vw, 18px);
+          color: #9ca3af;
+          flex-shrink: 0;
+          padding-bottom: 4px;
+          line-height: 1;
+        }
 
-                          return (
-                            <Droppable
-                              droppableId={`slot-${i}-${letterIndex}`}
-                              key={letterIndex}
-                            >
-                              {(provided) => (
-                                <div
-                                  ref={provided.innerRef}
-                                  {...provided.droppableProps}
-                                  className={`w-8 h-8 border-b-2 flex items-center justify-center font-bold relative
-                ${isWrong ? "border-red-500" : "border-black"}
-              `}
-                                >
-                                  <span
-                                    style={{
-                                      color: "#1C398E",
-                                    }}
-                                  >
-                                    {answers[i][letterIndex]?.char}
-                                  </span>
-                                  {provided.placeholder}
-                                </div>
-                              )}
-                            </Droppable>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+        /* Input wrap */
+        .luwa-input-wrap {
+          position: relative;
+          min-width: clamp(80px, 10vw, 160px);
+        }
 
-          {/* buttons */}
-          <div className="action-buttons-container">
-            <button className="try-again-button" onClick={resetAll}>
-              Start Again ↻
-            </button>
+        .luwa-input {
+          width: 100%;
+          background: transparent;
+          border: none;
+          border-bottom: 1px solid ${INPUT_UNDERLINE_DEFAULT};
+          outline: none;
+          font-size: clamp(13px, 1.6vw, 19px);
+          color: ${INPUT_TEXT_COLOR};
+          line-height: 1.5;
+          box-sizing: border-box;
+          font-family: inherit;
+          transition: border-color 0.2s;
+        }
+        .luwa-input:disabled  { opacity: 1; cursor: default; }
+        .luwa-input--wrong    { border-bottom-color: ${INPUT_UNDERLINE_WRONG}; }
+        .luwa-input--answer   { color: ${INPUT_ANSWER_COLOR}; }
 
-            <button onClick={showAnswers} className="show-answer-btn">
-              Show Answer
-            </button>
+        /* ✕ badge */
+        .luwa-badge {
+          position: absolute;
+          top: -8px; right: 0;
+          width: clamp(16px, 1.8vw, 20px);
+          height: clamp(16px, 1.8vw, 20px);
+          border-radius: 50%;
+          background: ${WRONG_BADGE_BG};
+          color: ${WRONG_BADGE_TEXT};
+          display: flex; align-items: center; justify-content: center;
+          font-size: clamp(8px, 0.9vw, 11px);
+          font-weight: 700;
+          border: 2px solid #fff;
+          box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+          pointer-events: none;
+          z-index: 2;
+        }
 
-            <button className="check-button2" onClick={checkAnswers}>
-              Check Answer ✓
-            </button>
-          </div>
+        .luwa-buttons {
+          display: flex;
+          justify-content: center;
+          margin-top: clamp(8px, 1.6vw, 18px);
+        }
+      `}</style>
+
+      <div
+        className="div-forall"
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: "clamp(14px, 2vw, 22px)",
+          maxWidth: "1100px",
+          margin: "0 auto",
+        }}
+      >
+        {/* ── Header ── */}
+        <h1
+          className="WB-header-title-page8"
+          style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
+        >
+          <span className="WB-ex-A-1">E</span>
+          Look, unscramble, write, and answer.
+        </h1>
+
+        {/* ── Table image (ثابتة) ── */}
+        <img src={imgTable} alt="table" className="luwa-table-img" />
+
+        {/* ── Items ── */}
+        <div className="luwa-list">
+          {ITEMS.map((item) => (
+            <div key={item.id} className="luwa-item">
+
+              {/* Scrambled words row */}
+              <div className="luwa-scrambled-row">
+                <span className="luwa-num">{item.id}</span>
+                <span className="luwa-scrambled">{item.scrambled}</span>
+              </div>
+
+              {/* Question input + short answer input */}
+              <div className="luwa-answer-row">
+                {renderInput(keyQ(item.id), item.correctQ, "2")}
+                <span className="luwa-separator">→</span>
+                {renderInput(keyA(item.id), item.correctA, "1")}
+              </div>
+
+            </div>
+          ))}
+        </div>
+
+        {/* ── Buttons ── */}
+        <div className="luwa-buttons">
+          <Button
+            checkAnswers={handleCheck}
+            handleShowAnswer={handleShowAnswer}
+            handleStartAgain={handleReset}
+          />
         </div>
       </div>
-    </DragDropContext>
+    </div>
   );
 }

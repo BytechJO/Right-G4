@@ -1,417 +1,337 @@
 import React, { useState } from "react";
 import Button from "../../Button";
 import ValidationAlert from "../../Popup/ValidationAlert";
-import img1 from "../../../assets/imgs/pages/classbook/Right 3 Unit 4 My E-Friend Folder/Page 32/Ex C 1.svg";
-import img2 from "../../../assets/imgs/pages/classbook/Right 3 Unit 4 My E-Friend Folder/Page 32/Ex C 2.svg";
+import { div } from "framer-motion/client";
 
-const Unit4_Page5_Q3 = () => {
-  const grid = [
-    [
-      "t",
-      "u",
-      "e",
-      "j",
-      "k",
-      "h",
-      "t",
-      "h",
-      "e",
-      "b",
-      "v",
-      "e",
-      "d",
-      "v",
-      "e",
-      "d",
-      "n",
-      "a",
-      "m",
-      "e",
-      "p",
-      "l",
-      "o",
-      "f",
-      "y",
-      "u",
+// ─────────────────────────────────────────────
+//  🎨  COLORS
+// ─────────────────────────────────────────────
+const CIRCLE_COLOR     = "#2096a6";
+const CIRCLE_WRONG     = "#ef4444";
+const ANSWER_COLOR     = "#c0392b";
+const TEXT_DEFAULT     = "#2b2b2b";
+const LINE_COLOR       = "#2b2b2b";
+const WRONG_COLOR      = "#ef4444";
+const RIGHT_COLOR      = "#2096a6";
+const WRONG_BADGE_BG   = "#ef4444";
+const WRONG_BADGE_TEXT = "#ffffff";
+
+// ─────────────────────────────────────────────
+//  📝  EXERCISE DATA
+// ─────────────────────────────────────────────
+const ITEMS = [
+  {
+    id: 1,
+    before: "I",
+    after: ".",
+    correct: "forgot",
+    options: [
+      { label: "a", text: "forgot" },
+      { label: "b", text: "guys doing" },
     ],
-    [
-      "j",
-      "u",
-      "l",
-      "i",
-      "a",
-      "s",
-      "q",
-      "w",
-      "a",
-      "c",
-      "v",
-      "x",
-      "z",
-      "c",
-      "v",
-      "o",
-      "o",
-      "s",
-      "c",
-      "h",
-      "o",
-      "o",
-      "l",
-      "k",
-      "i",
-      "s",
+  },
+  {
+    id: 2,
+    before: "It sure",
+    after: "!",
+    correct: "does",
+    options: [
+      { label: "a", text: "hey" },
+      { label: "b", text: "does" },
     ],
-    [
-      "f",
-      "r",
-      "t",
-      "h",
-      "e",
-      "s",
-      "x",
-      "z",
-      "l",
-      "o",
-      "n",
-      "d",
-      "o",
-      "n",
-      "e",
-      "h",
-      "g",
-      "m",
-      "c",
-      "o",
-      "u",
-      "r",
-      "t",
-      "j",
-      "r",
-      "e",
+  },
+  {
+    id: 3,
+    before: "What are you guys",
+    after: "?",
+    correct: "doing",
+    options: [
+      { label: "a", text: "you" },
+      { label: "b", text: "doing" },
     ],
-    ["w", "d", "c", "s", "c", "h", "o", "o", "l", "m", "b", "v"],
-  ];
+  },
+];
 
-  const letters = grid;
-  const wordsToFind = [
-    { id: "the", word: "the" },
-    { id: "name", word: "name" },
-    { id: "of", word: "of" },
-    { id: "julias", word: "julias" },
-    { id: "school1", word: "school" },
-    { id: "is", word: "is" },
-    { id: "london", word: "london" },
-    { id: "court", word: "court" },
-    { id: "school2", word: "school" },
-  ];
+// ─────────────────────────────────────────────
+//  COMPONENT
+// ─────────────────────────────────────────────
+export default function CB_ReadCircleWrite_QA() {
+  const [selected,    setSelected]    = useState({});  // { itemId: optionText }
+  const [showResults, setShowResults] = useState(false);
+  const [showAns,     setShowAns]     = useState(false);
 
-  const correctPositions = {
-    the: [6, 7, 8],
+  const isLocked = showResults || showAns;
 
-    name: [16, 17, 18, 19],
-
-    of: [22, 23],
-
-    julias: [100 + 0, 100 + 1, 100 + 2, 100 + 3, 100 + 4, 100 + 5],
-
-    school1: [100 + 17, 100 + 18, 100 + 19, 100 + 20, 100 + 21, 100 + 22],
-
-    is: [100 + 24, 100 + 25],
-
-    london: [200 + 8, 200 + 9, 200 + 10, 200 + 11, 200 + 12, 200 + 13],
-
-    court: [200 + 18, 200 + 19, 200 + 20, 200 + 21, 200 + 22],
-
-    school2: [300 + 3, 300 + 4, 300 + 5, 300 + 6, 300 + 7, 300 + 8],
-  };
-  const [locked, setLocked] = useState(false);
-  const [sentence, setSentence] = useState("");
-  const [selected, setSelected] = useState([]);
-  const [currentWord, setCurrentWord] = useState("");
-  const [foundWords, setFoundWords] = useState([]);
-  const [coloredCells, setColoredCells] = useState([]);
-  const [isDragging, setIsDragging] = useState(false);
-
-  const handleMouseDown = (index) => {
-    if (locked) return;
-
-    const row = Math.floor(index / 100);
-    const col = index % 100;
-
-    setIsDragging(true);
-    setSelected([index]);
-    setCurrentWord(letters[row][col]);
-  };
-  const handleMouseEnter = (index) => {
-    if (!isDragging || locked) return;
-
-    const lastIndex = selected[selected.length - 1];
-
-    if (index === lastIndex + 1 || index === lastIndex - 1) {
-      if (!selected.includes(index)) {
-        const row = Math.floor(index / 100);
-        const col = index % 100;
-
-        setSelected((prev) => [...prev, index]);
-        setCurrentWord((prev) => prev + letters[row][col]);
-      }
-    }
+  const handleSelect = (itemId, text) => {
+    if (isLocked) return;
+    setSelected((prev) => ({ ...prev, [itemId]: text }));
   };
 
-  const handleTouchMove = (e) => {
-    if (!isDragging || locked) return;
-    e.preventDefault(); // منع التمرير في الصفحة أثناء السحب
-
-    const touch = e.touches[0];
-    const element = document.elementFromPoint(touch.clientX, touch.clientY);
-    if (!element) return;
-
-    const index = element.getAttribute("data-index");
-    if (index !== null) {
-      handleMouseEnter(Number(index));
-    }
+  const handleCheck = () => {
+    if (isLocked) return;
+    const allAnswered = ITEMS.every((item) => selected[item.id]);
+    if (!allAnswered) { ValidationAlert.info("Please circle an answer for each sentence."); return; }
+    let score = 0;
+    ITEMS.forEach((item) => { if (selected[item.id] === item.correct) score++; });
+    setShowResults(true);
+    if (score === ITEMS.length)  ValidationAlert.success(`Score: ${score} / ${ITEMS.length}`);
+    else if (score > 0)          ValidationAlert.warning(`Score: ${score} / ${ITEMS.length}`);
+    else                         ValidationAlert.error(`Score: ${score} / ${ITEMS.length}`);
   };
 
-  const handleMouseUp = () => {
-    if (locked) return;
-    setIsDragging(false);
-
-    const reversedWord = currentWord.split("").reverse().join("");
-
-    const matchedWord = wordsToFind.find(
-      (item) =>
-        (item.word === currentWord || item.word === reversedWord) &&
-        !foundWords.includes(item.id),
-    );
-
-    if (matchedWord && !foundWords.includes(matchedWord.id)) {
-      setFoundWords((prev) => [...prev, matchedWord.id]);
-      setColoredCells((prev) => [...prev, ...selected]);
-      setSentence(
-        wordsToFind
-          .filter((item) => [...foundWords, matchedWord.id].includes(item.id))
-          .map((item) => item.word)
-          .join(" "),
-      );
-    }
-
-    setSelected([]);
-    setCurrentWord("");
+  const handleShowAnswer = () => {
+    const filled = {};
+    ITEMS.forEach((item) => { filled[item.id] = item.correct; });
+    setSelected(filled);
+    setShowResults(false);
+    setShowAns(true);
   };
 
-  const reset = () => {
-    setSelected([]);
-    setFoundWords([]);
-    setColoredCells([]);
-    setSentence("");
-    setLocked(false);
+  const handleReset = () => {
+    setSelected({});
+    setShowResults(false);
+    setShowAns(false);
   };
 
-  const showAnswers = () => {
-    let allCells = [];
-    wordsToFind.forEach((word) => {
-      if (correctPositions[word.id]) {
-        allCells.push(...correctPositions[word.id]);
-      }
-    });
-    setFoundWords(wordsToFind.map(w => w.id));
-    setColoredCells(allCells);
-    setSelected([]);
-    setSentence(wordsToFind.map(w => w.word).join(" "));
-    setLocked(true);
+  const getOptionState = (item, optText) => {
+    const isSel = selected[item.id] === optText;
+    if (!isSel) return "none";
+    if (showAns) return "correct";
+    if (showResults) return item.correct === optText ? "correct" : "wrong";
+    return "selected";
   };
 
-  const checkAnswers = () => {
-    if (locked) return;
-    const total = wordsToFind.length;
-    const score = foundWords.length;
+  const getInputValue = (item) => {
+    const sel = selected[item.id];
+    if (!sel) return "";
+    return sel;
+  };
 
-    if (score === 0) {
-      ValidationAlert.info();
-      return;
-    }
-
-    if (score < total) {
-      ValidationAlert.warning(`
-        <div style="font-size:20px;text-align:center;">
-          <b style="color:orange;">Score: ${score} / ${total}</b>
-        </div>
-      `);
-    } else {
-      ValidationAlert.success(`
-        <div style="font-size:20px;text-align:center;">
-          <b style="color:green;">Score: ${score} / ${total}</b>
-        </div>
-      `);
-    }
-    setLocked(true);
+  const getInputColor = (item) => {
+    if (!showResults && !showAns) return ANSWER_COLOR;
+    if (showAns) return ANSWER_COLOR;
+    return selected[item.id] === item.correct ? RIGHT_COLOR : WRONG_COLOR;
   };
 
   return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        padding: "30px",
-        width: "100%",
-        boxSizing: "border-box",
-      }}
-    >
-      <div className="div-forall">
-        <h5 className="header-title-page8 pb-2.5">
-          <span className="ex-A" style={{ marginRight: "10px" }}>
-            C
-          </span>
-          What’s the name of Julia’s school in Helen and Stella Get an e-Mail on
-          page 29?
-        </h5>
+    <div className="main-container-component">
+      <style>{`
+        /* ── كل صف ── */
+        .rcw-row {
+          display: flex;
+          align-items: baseline;
+          gap: clamp(24px, 4vw, 60px);
+          width: 100%;
+          flex-wrap: nowrap;
+          
+          }
+          
+          /* ── الجملة يسار ── */
+        .rcw-sentence {
+          display: flex;
+          align-items: baseline;
+          gap: 6px;
+          flex: 1;
+          min-width: 0;
+          flex-wrap: nowrap;
+        }
+        
+        .rcw-num {
+          font-size: clamp(14px, 1.6vw, 20px);
+          font-weight: 700;
+          color: ${TEXT_DEFAULT};
+          flex-shrink: 0;
+        }
+        
+        .rcw-text {
+          font-size: clamp(14px, 1.6vw, 20px);
+          color: ${TEXT_DEFAULT};
+          white-space: nowrap;
+          flex-shrink: 0;
+          }
+          
+          /* input الجملة */
+          .rcw-input-wrap {
+            display: inline-flex;
+            flex-direction: column;
+            align-items: flex-start;
+            min-width: clamp(80px, 10vw, 140px);
+            }
+            
+            .rcw-input {
+              width: 100%;
+              border: none;
+              border-bottom: 2px solid ${LINE_COLOR};
+              outline: none;
+              background: transparent;
+              font-size: clamp(15px, 1.8vw, 22px);
+              font-weight: 700;
+              padding: 0 4px 2px;
+              text-align: center;
+              caret-color: transparent;
+              cursor: default;
+              pointer-events: none;
+              }
+              
+        /* ── الخيارات يمين ── */
+        .rcw-options {
+          display: flex;
+          align-items: center;
+          gap: clamp(12px, 2vw, 28px);
+          flex-shrink: 0;
+          }
 
-        {/* Words List */}
-        <div className="flex flex-wrap justify-center gap-3 mb-5 border-2 border-dashed border-gray-300 rounded-[14px] p-3">
-          {wordsToFind.map((word) => (
-            <span
-              key={word.id}
-              className={`px-3 py-1.5 rounded-[10px] border-2 border-[#2c5287] font-semibold transition duration-200 ${
-                foundWords.includes(word.id)
-                  ? "bg-[#2c5287] text-white border-[#2c5287]"
-                  : "bg-white text-black"
-              }`}
-              style={{ fontSize: "clamp(12px, 2vw, 15px)" }}
-            >
-              {word.word}
-            </span>
-          ))}
-        </div>
+          .rcw-option {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            }
+            
+            .rcw-opt-label {
+              font-size: clamp(13px, 1.5vw, 18px);
+              font-weight: 700;
+              color: ${TEXT_DEFAULT};
+              flex-shrink: 0;
+              }
+              
+              /* الكلمة مع الدائرة */
+              .rcw-opt-word {
+                position: relative;
+          display: inline-block;
+          padding: clamp(3px, 0.4vw, 6px) clamp(12px, 1.6vw, 20px);
+          cursor: pointer;
+          user-select: none;
+          font-size: clamp(13px, 1.5vw, 18px);
+          color: ${TEXT_DEFAULT};
+          white-space: nowrap;
+          }
+          .rcw-opt-word--locked { cursor: default; }
+          
+          .rcw-oval {
+            position: absolute;
+            inset: 0;
+            border-radius: 999px;
+          border: 2.5px solid transparent;
+          pointer-events: none;
+          transition: border-color 0.15s;
+          }
 
-        <div
-          style={{ width: "100%", display: "flex", justifyContent: "center" }}
+          .rcw-opt-word--selected .rcw-oval { border-color: ${CIRCLE_COLOR}; }
+        .rcw-opt-word--correct  .rcw-oval { border-color: ${CIRCLE_COLOR}; }
+        .rcw-opt-word--wrong    .rcw-oval { border-color: ${CIRCLE_WRONG}; }
+        
+        /* ✕ badge */
+        .rcw-badge {
+          position: absolute;
+          top: -8px; right: -8px;
+          width: clamp(15px, 1.6vw, 19px);
+          height: clamp(15px, 1.6vw, 19px);
+          border-radius: 50%;
+          background: ${WRONG_BADGE_BG};
+          color: ${WRONG_BADGE_TEXT};
+          display: flex; align-items: center; justify-content: center;
+          font-size: clamp(8px, 0.8vw, 10px);
+          font-weight: 700;
+          border: 2px solid #fff;
+          box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+          pointer-events: none;
+          z-index: 2;
+          }
+          
+          .rcw-buttons {
+            display: flex;
+            justify-content: center;
+            margin-top: clamp(10px, 1.8vw, 20px);
+            }
+            `}</style>
+
+      <div
+        className="div-forall"
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: "clamp(20px, 2.8vw, 36px)",
+          maxWidth: "1100px",
+          margin: "0 auto",
+        }}
+      >
+        {/* Header */}
+        <h1
+          className="WB-header-title-page8"
+          style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
         >
-          {/* Grid Wrapper */}
-          <div
-            className="border-2 border-[#f28c63] px-4 pt-4 pb-5"
-            style={{ width: "fit-content", margin: "0 auto" }}
-          >
-            <div
-              className="bg-[#daf5ff] rounded-[15px] p-2 sm:p-[15px]"
-              style={{
-                userSelect: "none",
-                width: "max-content",
-                touchAction: "none", // 🔥 الحل السحري لمنع تحريك الصفحة أثناء السحب على الآيباد
-                WebkitOverflowScrolling: "touch",
-              }}
-            >
-              {letters.map((row, rowIndex) => (
-                <div
-                  key={rowIndex}
-                  style={{
-                    display: "flex",
-                    gap: "clamp(1px, 0.3vw, 4px)", // مسافة تتغير حسب الشاشة
-                    width: "fit-content",
-                  }}
-                >
-                  {row.map((letter, colIndex) => {
-                    const index = rowIndex * 100 + colIndex;
-                    const isSelected = selected.includes(index);
-                    const isFound = coloredCells.includes(index);
+          <span className="WB-ex-A">B</span>
+          Read, circle, and write.
+        </h1>
 
-                    return (
-                      <span
-                        key={index}
-                        data-index={index}
-                        onMouseDown={() => handleMouseDown(index)}
-                        onMouseEnter={() => handleMouseEnter(index)}
-                        onMouseUp={handleMouseUp}
-                        onDragStart={(e) => e.preventDefault()}
-                        onTouchStart={(e) => {
-                          e.preventDefault(); // 🔥 منع تحريك الصفحة عند بدء اللمس
-                          handleMouseDown(index);
-                        }}
-                        onTouchMove={handleTouchMove}
-                        onTouchEnd={handleMouseUp}
-                        className={`
-                          flex items-center justify-center
-                          cursor-pointer
-                          transition
-                          ${isSelected ? "bg-[#ffd54f] rounded-sm" : ""}
-                          ${isFound ? "bg-[#4caf50] text-white rounded-sm" : ""}
-                        `}
-                        style={{
-                          width: "clamp(16px, 2.5vw, 25px)", // 🔥 عرض ديناميكي
-                          height: "clamp(22px, 3.5vw, 35px)", // 🔥 طول ديناميكي
-                          fontSize: "clamp(12px, 1.8vw, 18px)", // 🔥 حجم خط ديناميكي
-                        }}
-                      >
-                        {letter}
-                      </span>
-                    );
-                  })}
-                </div>
-              ))}
-            </div>
+        {/* Rows */}
+        {ITEMS.map((item) => {
+          const inputVal   = getInputValue(item);
+          const inputColor = getInputColor(item);
 
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: "10px",
-                marginTop: "15px",
-              }}
-            >
-              <img
-                src={img1}
-                alt="start"
-                style={{
-                  width: "clamp(40px, 10vw, 100px)", // 🔥 حجم ديناميكي للصور
-                  height: "auto",
-                }}
-              />
+          return (
+            <div style={{marginTop : "5%  "}}>
+            
+            <div key={item.id} className="rcw-row">
 
-              <div
-                style={{
-                  flex: 1,
-                  borderBottom: "2px solid black",
-                  height: "30px",
-                  display: "flex",
-                  alignItems: "center",
-                }}
-              >
-                <input
-                  value={sentence}
-                  readOnly
-                  style={{
-                    width: "100%",
-                    border: "none",
-                    outline: "none",
-                    background: "transparent",
-                    fontSize: "clamp(14px, 2vw, 18px)", // 🔥 حجم خط ديناميكي للإجابة
-                  }}
-                />
+              {/* ── الجملة ── */}
+              <div className="rcw-sentence">
+                <span className="rcw-num">{item.id}</span>
+                <span className="rcw-text">{item.before}</span>
+
+                <span className="rcw-input-wrap">
+                  <input
+                    className="rcw-input"
+                    type="text"
+                    readOnly
+                    value={inputVal}
+                    style={{ color: inputColor, borderBottomColor: inputVal ? inputColor : LINE_COLOR }}
+                  />
+                </span>
+
+                <span className="rcw-text">{item.after}</span>
               </div>
 
-              <img
-                src={img2}
-                alt="end"
-                style={{
-                  width: "clamp(40px, 10vw, 100px)", // 🔥 حجم ديناميكي للصور
-                  height: "auto",
-                }}
-              />
-            </div>
-          </div>
-        </div>
+              {/* ── الخيارات ── */}
+              <div className="rcw-options">
+                {item.options.map((opt) => {
+                  const state = getOptionState(item, opt.text);
+                  return (
+                    <div key={opt.label} className="rcw-option">
+                      <span className="rcw-opt-label">{opt.label}</span>
+                      <span
+                        className={[
+                          "rcw-opt-word",
+                          isLocked          ? "rcw-opt-word--locked"   : "",
+                          state === "selected" ? "rcw-opt-word--selected" : "",
+                          state === "correct"  ? "rcw-opt-word--correct"  : "",
+                          state === "wrong"    ? "rcw-opt-word--wrong"    : "",
+                        ].filter(Boolean).join(" ")}
+                        onClick={() => handleSelect(item.id, opt.text)}
+                      >
+                        <div className="rcw-oval" />
+                        {opt.text}
+                        {state === "wrong" && <div className="rcw-badge">✕</div>}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
 
-        {/* BUTTONS */}
-        <Button
-          handleShowAnswer={showAnswers}
-          handleStartAgain={reset}
-          checkAnswers={checkAnswers}
-        />
+            </div>
+        </div>
+          );
+        })}
+
+        {/* Buttons */}
+        <div className="rcw-buttons">
+          <Button
+            checkAnswers={handleCheck}
+            handleShowAnswer={handleShowAnswer}
+            handleStartAgain={handleReset}
+            />
+        </div>
       </div>
     </div>
   );
-};
-
-export default Unit4_Page5_Q3;
+}

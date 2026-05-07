@@ -1,327 +1,250 @@
 import React, { useState } from "react";
-import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
+import Button from "../../Button";
 import ValidationAlert from "../../Popup/ValidationAlert";
-import img1 from "../../../assets/imgs/pages/classbook/Right 3 Unit 4 My E-Friend Folder/Page 35/Ex E 1.svg";
-import img2 from "../../../assets/imgs/pages/classbook/Right 3 Unit 4 My E-Friend Folder/Page 35/Ex E 2.svg";
-import img3 from "../../../assets/imgs/pages/classbook/Right 3 Unit 4 My E-Friend Folder/Page 35/Ex E 3.svg";
-import img4 from "../../../assets/imgs/pages/classbook/Right 3 Unit 4 My E-Friend Folder/Page 35/Ex E 4.svg";
-import img5 from "../../../assets/imgs/pages/classbook/Right 3 Unit 4 My E-Friend Folder/Page 35/Ex E 5.svg";
-import img6 from "../../../assets/imgs/pages/classbook/Right 3 Unit 4 My E-Friend Folder/Page 35/Ex E 6.svg";
-const items = [
+
+// ─────────────────────────────────────────────
+//  🎨  COLORS
+// ─────────────────────────────────────────────
+const INPUT_UNDERLINE_DEFAULT = "#3f3f3f";
+const INPUT_UNDERLINE_WRONG   = "#ef4444";
+const INPUT_TEXT_COLOR        = "#2b2b2b";
+const INPUT_ANSWER_COLOR      = "#c81e1e";
+const NUMBER_COLOR            = "#2b2b2b";
+const CUE_COLOR               = "#2b2b2b";
+const WRONG_BADGE_BG          = "#ef4444";
+const WRONG_BADGE_TEXT        = "#ffffff";
+
+// ─────────────────────────────────────────────
+//  📝  EXERCISE DATA
+// ─────────────────────────────────────────────
+const ITEMS = [
   {
-    sentence: "pcaeh",
-    scrambled: ["pcaeh"],
-    correct: ["peach"],
-    img: img1,
+    id:      1,
+    cue:     "Daniel / smarter / Sam",
+    correct: ["Daniel is smarter than Sam.", "daniel is smarter than sam"],
+    answer:  "Daniel is smarter than Sam.",
   },
   {
-    sentence: "hilci",
-    scrambled: ["hilci"],
-    correct: ["chili"],
-    img: img4,
+    id:      2,
+    cue:     "snake / longest",
+    correct: ["The snake is the longest of all the snakes.", "the snake is the longest of all the snakes"],
+    answer:  "The snake is the longest of all the snakes.",
   },
   {
-    sentence: "wcath",
-    scrambled: ["wcath"],
-    correct: ["watch"],
-    img: img2,
-  },
-  {
-    sentence: "bnech",
-    scrambled: ["bnech"],
-    correct: ["bench"],
-    img: img5,
-  },
-  {
-    sentence: "nechkit",
-    scrambled: ["nechkit"],
-    correct: ["kitchen"],
-    img: img3,
-  },
-  {
-    sentence: "tachc",
-    scrambled: ["tachc"],
-    correct: ["catch"],
-    img: img6,
+    id:      3,
+    cue:     "Meg / youngest",
+    correct: ["Meg is the youngest of the sisters.", "meg is the youngest of the sisters"],
+    answer:  "Meg is the youngest of the sisters.",
   },
 ];
 
-export default function Review3_Page2_Q3() {
-  // ✨ كل كلمة string بدل array
-  const [answers, setAnswers] = useState(
-    items.map((item) => Array(item.correct[0].length).fill("")),
-  );
+// ─────────────────────────────────────────────
+//  🔧  NORMALIZE
+// ─────────────────────────────────────────────
+const normalize = (str) =>
+  str.toLowerCase().replace(/[^a-z0-9'\s]/g, "").replace(/\s+/g, " ").trim();
 
-  const [locked, setLocked] = useState(false);
-  const [showResult, setShowResult] = useState(false);
+const isCorrect = (userVal, correctArr) =>
+  correctArr.some((c) => normalize(userVal) === normalize(c));
 
-  const onDragEnd = (result) => {
-    const { destination, draggableId, source } = result;
-    if (!destination || locked) return;
+// ─────────────────────────────────────────────
+//  COMPONENT
+// ─────────────────────────────────────────────
+export default function WB_ReadWriteSentences_QC() {
+  const [answers,     setAnswers]     = useState({});
+  const [showResults, setShowResults] = useState(false);
+  const [showAns,     setShowAns]     = useState(false);
 
-    const letterId = draggableId;
-    const letter = letterId.split("-")[0];
-
-    // إذا سحب داخل نفس المكان → تجاهل
-    if (destination.droppableId === source.droppableId) return;
-
-    // إذا drop على slot
-    if (destination.droppableId.startsWith("slot")) {
-      const [, qIndex, letterIndex] = destination.droppableId.split("-");
-
-      const updated = [...answers];
-
-      // 🔁 إذا في حرف قديم → احذفه (عشان يرجع يتفعل بالبنك)
-      updated[qIndex][letterIndex] = {
-        char: letter,
-        id: letterId,
-      };
-
-      setAnswers(updated);
-    }
+  const handleChange = (id, value) => {
+    if (showAns) return;
+    const item = ITEMS.find((i) => i.id === id);
+    if (showResults && item && isCorrect(answers[id] || "", item.correct)) return;
+    setAnswers((prev) => ({ ...prev, [id]: value }));
   };
 
-  const resetAll = () => {
-    setAnswers(items.map((item) => Array(item.correct[0].length).fill("")));
-    setLocked(false);
-    setShowResult(false);
-  };
-
-  const showAnswers = () => {
-    setAnswers(
-      items.map((item) =>
-        item.correct[0].split("").map((char, index) => ({
-          char,
-          id: `answer-${index}`,
-        })),
-      ),
-    );
-    setLocked(true);
-    setShowResult(true);
-  };
-
-  const checkAnswers = () => {
-    if (locked) return;
-
-    const empty = answers.some((row) => row.some((word) => word === ""));
-
-    if (empty) {
-      ValidationAlert.info("Please complete all answers.");
-      return;
-    }
-
+  const handleCheck = () => {
+    if (showAns) return;
+    const allAnswered = ITEMS.every((item) => answers[item.id]?.trim());
+    if (!allAnswered) { ValidationAlert.info("Please complete all answers first."); return; }
     let score = 0;
-
-    answers.forEach((row, i) => {
-      if (row.map((l) => l.char).join("") === items[i].correct[0]) {
-        score++;
-      }
-    });
-
-    const total = items.length;
-
-    const message = `
-      <div style="font-size:20px;text-align:center;">
-        <span style="color:#2e7d32;font-weight:bold;">
-          Score: ${score} / ${total}
-        </span>
-      </div>
-    `;
-
-    if (score === total) ValidationAlert.success(message);
-    else if (score === 0) ValidationAlert.error(message);
-    else ValidationAlert.warning(message);
-
-    setShowResult(true);
-    setLocked(true);
+    ITEMS.forEach((item) => { if (isCorrect(answers[item.id] || "", item.correct)) score++; });
+    setShowResults(true);
+    if (score === ITEMS.length)   ValidationAlert.success(`Score: ${score} / ${ITEMS.length}`);
+    else if (score > 0)           ValidationAlert.warning(`Score: ${score} / ${ITEMS.length}`);
+    else                          ValidationAlert.error(`Score: ${score} / ${ITEMS.length}`);
   };
+
+  const handleShowAnswer = () => {
+    const filled = {};
+    ITEMS.forEach((item) => { filled[item.id] = item.answer; });
+    setAnswers(filled);
+    setShowResults(false);
+    setShowAns(true);
+  };
+
+  const handleReset = () => {
+    setAnswers({});
+    setShowResults(false);
+    setShowAns(false);
+  };
+
+  const isWrong    = (item) => showResults && !showAns && !isCorrect(answers[item.id] || "", item.correct);
+  const isDisabled = (item) => showAns || (showResults && isCorrect(answers[item.id] || "", item.correct));
 
   return (
-    <DragDropContext onDragEnd={onDragEnd}>
-      <div className="flex justify-center p-8">
-        <div className="div-forall">
-          <h5 className="header-title-page8">
-            <span style={{ marginRight: "10px" }}>B</span>
-            Unscramble the letters to make words with a
-            <span style={{ color: "#2e3192" }}>ch</span> sound.
-          </h5>
+    <div className="main-container-component">
+      <style>{`
+        .rwsc-list {
+          display: flex;
+          flex-direction: column;
+          gap: clamp(14px, 2.2vw, 26px);
+          width: 100%;
+          margin: 8% 0;
+        }
 
-          <div className="grid grid-cols-1 gap-6 justify-center pb-15">
-            {items.map((item, i) => {
-              const userWord = answers[i].map((l) => l?.char || "").join("");
+        /* Single row: num + cue + input */
+        .rwsc-row {
+          display: grid;
+          grid-template-columns: auto clamp(120px, 16vw, 200px) 1fr;
+          align-items: flex-end;
+          gap: clamp(8px, 1.2vw, 16px);
+          min-width: 0;
+        }
 
-              const isWordWrong =
-                showResult && userWord && userWord !== item.correct[0];
+        .rwsc-num {
+          font-size: clamp(15px, 1.8vw, 22px);
+          font-weight: 700;
+          color: ${NUMBER_COLOR};
+          flex-shrink: 0;
+          padding-bottom: 4px;
+          line-height: 1;
+        }
 
-              return (
-                <div key={i} className="flex items-center gap-4">
-                  {/* 🟠 الصورة */}
-                  <img
-                    src={item.img}
-                    alt=""
-                    style={{ width: "70px", height: "70px" }}
+        .rwsc-cue {
+          font-size: clamp(13px, 1.6vw, 19px);
+          color: ${CUE_COLOR};
+          padding-bottom: 4px;
+          line-height: 1;
+          white-space: nowrap;
+        }
+
+        .rwsc-input-wrap {
+          position: relative;
+        }
+
+        .rwsc-input {
+          width: 100%;
+          background: transparent;
+          border: none;
+          border-bottom: 2px solid ${INPUT_UNDERLINE_DEFAULT};
+          outline: none;
+          font-size: clamp(14px, 1.7vw, 20px);
+          color: ${INPUT_TEXT_COLOR};
+          padding: 4px 6px 5px;
+          line-height: 1.5;
+          box-sizing: border-box;
+          font-family: inherit;
+          transition: border-color 0.2s;
+        }
+        .rwsc-input:disabled  { opacity: 1; cursor: default; }
+        .rwsc-input--wrong    { border-bottom-color: ${INPUT_UNDERLINE_WRONG}; }
+        .rwsc-input--answer   { color: ${INPUT_ANSWER_COLOR}; }
+
+        .rwsc-badge {
+          position: absolute;
+          top: -8px; right: 0;
+          width: clamp(17px, 1.9vw, 22px);
+          height: clamp(17px, 1.9vw, 22px);
+          border-radius: 50%;
+          background: ${WRONG_BADGE_BG};
+          color: ${WRONG_BADGE_TEXT};
+          display: flex; align-items: center; justify-content: center;
+          font-size: clamp(9px, 1vw, 12px);
+          font-weight: 700;
+          border: 2px solid #fff;
+          box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+          pointer-events: none;
+          z-index: 2;
+        }
+
+        .rwsc-buttons {
+          display: flex;
+          justify-content: center;
+          margin-top: clamp(8px, 1.6vw, 18px);
+        }
+
+        @media (max-width: 500px) {
+          .rwsc-row {
+            grid-template-columns: auto 1fr;
+            grid-template-rows: auto auto;
+          }
+          .rwsc-input-wrap { grid-column: 1 / -1; }
+        }
+      `}</style>
+
+      <div
+        className="div-forall"
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: "clamp(14px, 2vw, 22px)",
+          maxWidth: "1100px",
+          margin: "0 auto",
+        }}
+      >
+        {/* ── Header ── */}
+        <h1
+          className="WB-header-title-page8"
+          style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
+        >
+          <span className="WB-ex-A-1">C</span>
+          Read and write sentences. You will need to add words.
+        </h1>
+
+        {/* ── Items ── */}
+        <div className="rwsc-list">
+          {ITEMS.map((item) => {
+            const wrong    = isWrong(item);
+            const value    = answers[item.id] || "";
+            const tColor   = showAns ? INPUT_ANSWER_COLOR : INPUT_TEXT_COLOR;
+            const uColor   = wrong ? INPUT_UNDERLINE_WRONG : INPUT_UNDERLINE_DEFAULT;
+            const disabled = isDisabled(item);
+
+            return (
+              <div key={item.id} className="rwsc-row">
+                <span className="rwsc-num">{item.id}</span>
+                <span className="rwsc-cue">{item.cue}</span>
+                <div className="rwsc-input-wrap">
+                  <input
+                    type="text"
+                    className={[
+                      "rwsc-input",
+                      wrong   ? "rwsc-input--wrong"  : "",
+                      showAns ? "rwsc-input--answer" : "",
+                    ].filter(Boolean).join(" ")}
+                    value={value}
+                    disabled={disabled}
+                    onChange={(e) => handleChange(item.id, e.target.value)}
+                    style={{ borderBottomColor: uColor, color: tColor }}
+                    spellCheck={false}
+                    autoComplete="off"
                   />
-
-                  {/* 🔵 المحتوى */}
-                  <div className="flex flex-col gap-2">
-                    {/* السطر الأول */}
-                    <div className="flex items-center gap-2">
-                      <span className="font-bold text-lg w-5">{i + 1}</span>
-                      <span className="text-lg">{item.sentence}</span>
-                    </div>
-
-                    {/* السطر الثاني */}
-                    <div className="flex items-center gap-3 ml-7 relative">
-                      {/* 🔤 الحروف */}
-                      <Droppable
-                        droppableId={`bank-${i}`}
-                        direction="horizontal"
-                      >
-                        {(provided) => (
-                          <div
-                            ref={provided.innerRef}
-                            {...provided.droppableProps}
-                            className="flex gap-1"
-                          >
-                            {item.scrambled.map((word, wordIndex) => {
-                              const letters = word
-                                .split("")
-                                .map((letter, index) => ({
-                                  char: letter,
-                                  id: `${letter}-${i}-${wordIndex}-${index}`,
-                                }));
-
-                              return (
-                                <div key={wordIndex} className="flex gap-1">
-                                  {letters.map((letterObj, letterIndex) => {
-                                    const isUsed = answers[i].some(
-                                      (l) => l?.id === letterObj.id,
-                                    );
-
-                                    return (
-                                      <Draggable
-                                        key={letterObj.id}
-                                        draggableId={letterObj.id}
-                                        index={wordIndex * 10 + letterIndex}
-                                        isDragDisabled={locked || isUsed}
-                                      >
-                                        {(provided) => (
-                                          <span
-                                            ref={provided.innerRef}
-                                            {...provided.draggableProps}
-                                            {...provided.dragHandleProps}
-                                            className={`w-8 h-8 flex items-center justify-center rounded border font-bold
-          ${
-            isUsed
-              ? "bg-gray-300 opacity-40 cursor-not-allowed"
-              : "bg-yellow-200 cursor-grab"
-          }`}
-                                          >
-                                            {letterObj.char}
-                                          </span>
-                                        )}
-                                      </Draggable>
-                                    );
-                                  })}
-                                </div>
-                              );
-                            })}
-                            {provided.placeholder}
-                          </div>
-                        )}
-                      </Droppable>
-                      {isWordWrong && (
-                        <div
-                          style={{
-                            position: "absolute",
-                            right: "-30px",
-                            top: "50%",
-                            transform: "translateY(-50%)",
-                            width: "22px",
-                            height: "22px",
-                            background: "#ef4444",
-                            color: "white",
-                            borderRadius: "50%",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            fontWeight: "bold",
-                            border: "2px solid white",
-                            boxShadow: "0 2px 6px rgba(0,0,0,0.2)",
-                            pointerEvents: "none",
-                          }}
-                        >
-                          <span
-                            style={{
-                              fontSize: "13px",
-                              lineHeight: "1",
-                              transform: "translateY(-1px)",
-                            }}
-                          >
-                            ✕
-                          </span>
-                        </div>
-                      )}
-                      {/* 🔲 البوكسات */}
-                      <div className="flex gap-1 ml-4 relative">
-                        {item.correct[0].split("").map((_, letterIndex) => {
-                          const isCorrect =
-                            answers[i][letterIndex]?.char ===
-                            item.correct[0][letterIndex];
-
-                          const isWrong =
-                            showResult && answers[i][letterIndex] && !isCorrect;
-
-                          return (
-                            <Droppable
-                              droppableId={`slot-${i}-${letterIndex}`}
-                              key={letterIndex}
-                            >
-                              {(provided) => (
-                                <div
-                                  ref={provided.innerRef}
-                                  {...provided.droppableProps}
-                                  className={`w-8 h-8 border-b-2 flex items-center justify-center font-bold relative
-                ${isWrong ? "border-red-500" : "border-black"}
-              `}
-                                >
-                                  <span
-                                    style={{
-                                      color: "#1C398E",
-                                    }}
-                                  >
-                                    {answers[i][letterIndex]?.char}
-                                  </span>
-                                  {provided.placeholder}
-                                </div>
-                              )}
-                            </Droppable>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  </div>
+                  {wrong && <div className="rwsc-badge">✕</div>}
                 </div>
-              );
-            })}
-          </div>
+              </div>
+            );
+          })}
+        </div>
 
-          {/* buttons */}
-          <div className="action-buttons-container">
-            <button className="try-again-button" onClick={resetAll}>
-              Start Again ↻
-            </button>
-
-            <button onClick={showAnswers} className="show-answer-btn">
-              Show Answer
-            </button>
-
-            <button className="check-button2" onClick={checkAnswers}>
-              Check Answer ✓
-            </button>
-          </div>
+        {/* ── Buttons ── */}
+        <div className="rwsc-buttons">
+          <Button
+            checkAnswers={handleCheck}
+            handleShowAnswer={handleShowAnswer}
+            handleStartAgain={handleReset}
+          />
         </div>
       </div>
-    </DragDropContext>
+    </div>
   );
 }
