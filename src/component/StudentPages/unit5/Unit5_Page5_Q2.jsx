@@ -1,253 +1,242 @@
 import React, { useState } from "react";
-import "./Unit5_Page5_Q2.css";
-
+import Button from "../../Button";
 import ValidationAlert from "../../Popup/ValidationAlert";
-import blue from "../../../assets/audio/ClassBook/Unit 5/P 44/unit5-pg44-EXB.mp3";
-import QuestionAudioPlayer from "../../QuestionAudioPlayer";
 
-const Unit5_Page5_Q2 = () => {
-const captions = [
+// ─────────────────────────────────────────────
+//  🎨  COLORS
+// ─────────────────────────────────────────────
+const INPUT_UNDERLINE_DEFAULT = "#3f3f3f";
+const INPUT_UNDERLINE_WRONG   = "#ef4444";
+const INPUT_TEXT_COLOR        = "#2b2b2b";
+const INPUT_ANSWER_COLOR      = "#c81e1e";
+const NUMBER_COLOR            = "#2b2b2b";
+const SCRAMBLED_COLOR         = "#2b2b2b";
+const WRONG_BADGE_BG          = "#ef4444";
+const WRONG_BADGE_TEXT        = "#ffffff";
+
+// ─────────────────────────────────────────────
+//  📝  EXERCISE DATA
+// ─────────────────────────────────────────────
+const ITEMS = [
   {
-    start: 0.419,
-    end: 26.739,
-    text: "Page 44, write activities. Exercise B. Do both words have the same Y sound? Listen and write check or X. Fly. Try. Funny. Cry. Dry. Sly. My. Honey. Why. Buy. Runny. Candy"
-  }
+    id:        1,
+    scrambled: "wrong ? What's",
+    correct:   ["What's wrong?", "Whats wrong", "what's wrong?", "what's wrong"],
+    answer:    "What's wrong?",
+  },
+  {
+    id:        2,
+    scrambled: "the ? What's matter",
+    correct:   ["What's the matter?", "Whats the matter", "what's the matter?", "what's the matter"],
+    answer:    "What's the matter?",
+  },
 ];
 
-  const groups = [
-    { id: 1, word1: "fly", word2: "try", answer: "yes" },
-    { id: 2, word1: "funny", word2: "cry", answer: "no" },
-    { id: 3, word1: "dry", word2: "sly", answer: "yes" },
-    { id: 4, word1: "my", word2: "honey", answer: "no" },
-    { id: 5, word1: "why", word2: "buy", answer: "yes" },
-    { id: 6, word1: "runny", word2: "candy", answer: "yes" },
-  ];
+// ─────────────────────────────────────────────
+//  🔧  NORMALIZE
+// ─────────────────────────────────────────────
+const normalize = (str) =>
+  str.toLowerCase().replace(/[^a-z0-9'\s]/g, "").replace(/\s+/g, " ").trim();
 
-  const [selected, setSelected] = useState(Array(groups.length).fill(null));
-  const [showResult2, setShowResult2] = useState(false);
-  const [locked, setLocked] = useState(false);
+const isCorrect = (userVal, correctArr) =>
+  correctArr.some((c) => normalize(userVal) === normalize(c));
 
-  const handleSelect = (groupIndex, value) => {
-    if (locked || showResult2) return;
+// ─────────────────────────────────────────────
+//  COMPONENT
+// ─────────────────────────────────────────────
+export default function WB_UnscrambleWrite_QB() {
+  const [answers,     setAnswers]     = useState({});
+  const [showResults, setShowResults] = useState(false);
+  const [showAns,     setShowAns]     = useState(false);
 
-    const updated = [...selected];
-    updated[groupIndex] = value;
-    setSelected(updated);
+  const handleChange = (id, value) => {
+    if (showAns) return;
+    const item = ITEMS.find((i) => i.id === id);
+    if (showResults && item && isCorrect(answers[id] || "", item.correct)) return;
+    setAnswers((prev) => ({ ...prev, [id]: value }));
   };
 
-  const showAnswers = () => {
-    const correctSelections = groups.map((g) => g.answer);
-    setSelected(correctSelections);
-    setShowResult2(true);
-    setLocked(true);
+  const handleCheck = () => {
+    if (showAns) return;
+    const allAnswered = ITEMS.every((item) => answers[item.id]?.trim());
+    if (!allAnswered) { ValidationAlert.info("Please complete all answers first."); return; }
+    let score = 0;
+    ITEMS.forEach((item) => { if (isCorrect(answers[item.id] || "", item.correct)) score++; });
+    setShowResults(true);
+    if (score === ITEMS.length)   ValidationAlert.success(`Score: ${score} / ${ITEMS.length}`);
+    else if (score > 0)           ValidationAlert.warning(`Score: ${score} / ${ITEMS.length}`);
+    else                          ValidationAlert.error(`Score: ${score} / ${ITEMS.length}`);
   };
 
-  const checkAnswers = () => {
-    if (locked || showResult2) return;
-
-    if (selected.some((val) => val === null)) {
-      ValidationAlert.info("Please choose ✓ or ✗ for all items!");
-      return;
-    }
-
-    let correctCount = 0;
-
-    groups.forEach((group, index) => {
-      if (selected[index] === group.answer) {
-        correctCount++;
-      }
-    });
-
-    const total = groups.length;
-    const color =
-      correctCount === total ? "green" : correctCount === 0 ? "red" : "orange";
-
-    const scoreMessage = `
-      <div style="font-size: 20px; margin-top: 10px; text-align:center;">
-        <span style="color:${color}; font-weight:bold;">
-          Score: ${correctCount} / ${total}
-        </span>
-      </div>
-    `;
-
-    if (correctCount === total) {
-      ValidationAlert.success(scoreMessage);
-    } else if (correctCount === 0) {
-      ValidationAlert.error(scoreMessage);
-    } else {
-      ValidationAlert.warning(scoreMessage);
-    }
-
-    setShowResult2(true);
-    setLocked(true);
+  const handleShowAnswer = () => {
+    const filled = {};
+    ITEMS.forEach((item) => { filled[item.id] = item.answer; });
+    setAnswers(filled);
+    setShowResults(false);
+    setShowAns(true);
   };
 
-  const reset = () => {
-    setSelected(Array(groups.length).fill(null));
-    setShowResult2(false);
-    setLocked(false);
+  const handleReset = () => {
+    setAnswers({});
+    setShowResults(false);
+    setShowAns(false);
   };
 
-  const renderChoiceBox = (index, value, symbol) => {
-    const isSelected = selected[index] === value;
-    const isWrong =
-      showResult2 &&
-      selected[index] === value &&
-      groups[index].answer !== value;
-
-    return (
-      <div
-        onClick={() => handleSelect(index, value)}
-        style={{
-          width: "34px",
-          height: "34px",
-          border: "2px solid #F79530",
-          borderRadius: "9px",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          cursor: locked ? "default" : "pointer",
-          background: isSelected ? "#fff" : "#fff",
-          position: "relative",
-          fontSize: "22px",
-          fontWeight: "700",
-          color: isSelected ? "#2c5287" : "transparent",
-          lineHeight: 1,
-          userSelect: "none",
-        }}
-      >
-        {isSelected ? symbol : ""}
-
-        {isWrong && (
-          <span
-            style={{
-              position: "absolute",
-              right: "-14px",
-              top: "50%",
-              transform: "translateY(-50%)",
-              width: "20px",
-              height: "20px",
-              background: "#ef4444",
-              color: "white",
-              borderRadius: "50%",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: "12px",
-              fontWeight: "bold",
-              border: "2px solid white",
-              boxShadow: "0 2px 6px rgba(0,0,0,0.2)",
-              pointerEvents: "none",
-              zIndex: 3,
-            }}
-          >
-            ✕
-          </span>
-        )}
-      </div>
-    );
-  };
+  const isWrong    = (item) => showResults && !showAns && !isCorrect(answers[item.id] || "", item.correct);
+  const isDisabled = (item) => showAns || (showResults && isCorrect(answers[item.id] || "", item.correct));
 
   return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "center",
-        alignItems: "center",
-        padding: "30px",
-      }}
-    >
+    <div className="main-container-component">
+      <style>{`
+        /* ── 2-column grid ── */
+        .uswb-grid {
+          display: grid;
+          grid-template-columns: repeat(2, 1fr);
+          gap: clamp(20px, 3vw, 40px) clamp(24px, 3.5vw, 48px);
+          width: 100%;
+          margin: 15% 0;
+        }
+
+        .uswb-card {
+          display: flex;
+          flex-direction: column;
+          gap: clamp(10px, 1.4vw, 18px);
+        }
+
+        .uswb-scrambled-row {
+          display: flex;
+          align-items: center;
+          gap: clamp(6px, 0.8vw, 10px);
+        }
+
+        .uswb-num {
+          font-size: clamp(14px, 1.7vw, 20px);
+          font-weight: 700;
+          color: ${NUMBER_COLOR};
+          flex-shrink: 0;
+          line-height: 1;
+        }
+
+        .uswb-scrambled {
+          font-size: clamp(14px, 1.8vw, 20px);
+          color: ${SCRAMBLED_COLOR};
+          line-height: 1.5;
+        }
+
+        .uswb-input-wrap {
+          position: relative;
+          width: 100%;
+        }
+
+        .uswb-input {
+          width: 100%;
+          background: transparent;
+          border: none;
+          border-bottom: 1px solid ${INPUT_UNDERLINE_DEFAULT};
+          outline: none;
+          font-size: clamp(14px, 1.8vw, 20px);
+          color: ${INPUT_TEXT_COLOR};
+          line-height: 1.5;
+          box-sizing: border-box;
+          transition: border-color 0.2s;
+        }
+        .uswb-input:disabled  { opacity: 1; cursor: default; }
+        .uswb-input--wrong    { border-bottom-color: ${INPUT_UNDERLINE_WRONG}; }
+        .uswb-input--answer   { color: ${INPUT_ANSWER_COLOR}; =font-size: clamp(15px, 2vw, 20px); }
+
+        .uswb-badge {
+          position: absolute;
+          top: -8px; right: 0;
+          width: clamp(17px, 1.9vw, 22px);
+          height: clamp(17px, 1.9vw, 22px);
+          border-radius: 50%;
+          background: ${WRONG_BADGE_BG};
+          color: ${WRONG_BADGE_TEXT};
+          display: flex; align-items: center; justify-content: center;
+          font-size: clamp(9px, 1vw, 12px);
+          font-weight: 700;
+          border: 2px solid #fff;
+          box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+          pointer-events: none;
+          z-index: 2;
+        }
+
+        .uswb-buttons {
+          display: flex;
+          justify-content: center;
+          margin-top: clamp(8px, 1.6vw, 18px);
+        }
+
+        @media (max-width: 480px) {
+          .uswb-grid { grid-template-columns: 1fr; }
+        }
+      `}</style>
+
       <div
         className="div-forall"
         style={{
           display: "flex",
           flexDirection: "column",
-          gap: "30px",
-          width: "60%",
-          justifyContent: "flex-start",
+          gap: "clamp(14px, 2vw, 22px)",
+          maxWidth: "1100px",
+          margin: "0 auto",
         }}
       >
-        <h3 className="header-title-page8">
-          <span className="ex-A" style={{ marginRight: "10px" }}>
-            B
-          </span>{" "}
-          Do both words have the same{" "}
-          <span style={{ color: "#2e3192" }}>-y sound</span>? Listen and write{" "}
-          <span style={{ color: "#D52328" }}>✓</span> or{" "}
-          <span style={{ color: "#D52328" }}>✗</span>.
-        </h3>
-
-        <QuestionAudioPlayer src={blue} captions={captions} stopAtSecond={11.5} />
-
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(2, 1fr)",
-            columnGap: "70px",
-            rowGap: "34px",
-            marginTop: "10px",
-          }}
+        {/* ── Header ── */}
+        <h1
+          className="WB-header-title-page8"
+          style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
         >
-          {groups.map((group, index) => (
-            <div
-              key={group.id}
-              style={{
-                display: "grid",
-                gridTemplateColumns: "32px 1fr 1fr 40px 40px",
-                alignItems: "center",
-                columnGap: "14px",
-                minHeight: "52px",
-              }}
-            >
-              <span
-                style={{
-                  fontWeight: "700",
-                  fontSize: "18px",
-                  color: "#1f1f1f",
-                }}
-              >
-                {group.id}
-              </span>
+          <span className="WB-ex-A-1">B</span>
+          Unscramble and write.
+        </h1>
 
-              <span
-                style={{
-                  fontSize: "18px",
-                  color: "#2b2b2b",
-                }}
-              >
-                {group.word1}
-              </span>
+        {/* ── Grid ── */}
+        <div className="uswb-grid">
+          {ITEMS.map((item) => {
+            const wrong    = isWrong(item);
+            const value    = answers[item.id] || "";
+            const tColor   = showAns ? INPUT_ANSWER_COLOR : INPUT_TEXT_COLOR;
+            const uColor   = wrong ? INPUT_UNDERLINE_WRONG : INPUT_UNDERLINE_DEFAULT;
+            const disabled = isDisabled(item);
 
-              <span
-                style={{
-                  fontSize: "18px",
-                  color: "#2b2b2b",
-                }}
-              >
-                {group.word2}
-              </span>
-
-              {renderChoiceBox(index, "yes", "✓")}
-              {renderChoiceBox(index, "no", "✗")}
-            </div>
-          ))}
+            return (
+              <div key={item.id} className="uswb-card">
+                <div className="uswb-scrambled-row">
+                  <span className="uswb-num">{item.id}</span>
+                  <span className="uswb-scrambled">{item.scrambled}</span>
+                </div>
+                <div className="uswb-input-wrap">
+                  <input
+                    type="text"
+                    className={[
+                      "uswb-input",
+                      wrong   ? "uswb-input--wrong"  : "",
+                      showAns ? "uswb-input--answer" : "",
+                    ].filter(Boolean).join(" ")}
+                    value={value}
+                    disabled={disabled}
+                    onChange={(e) => handleChange(item.id, e.target.value)}
+                    style={{ borderBottomColor: uColor, color: tColor }}
+                    spellCheck={false}
+                    autoComplete="off"
+                  />
+                  {wrong && <div className="uswb-badge">✕</div>}
+                </div>
+              </div>
+            );
+          })}
         </div>
-      </div>
 
-      <div className="action-buttons-container">
-        <button onClick={reset} className="try-again-button">
-          Start Again ↻
-        </button>
-        <button onClick={showAnswers} className="show-answer-btn">
-          Show Answer
-        </button>
-        <button onClick={checkAnswers} className="check-button2">
-          Check Answer ✓
-        </button>
+        {/* ── Buttons ── */}
+        <div className="uswb-buttons">
+          <Button
+            checkAnswers={handleCheck}
+            handleShowAnswer={handleShowAnswer}
+            handleStartAgain={handleReset}
+          />
+        </div>
       </div>
     </div>
   );
-};
-
-export default Unit5_Page5_Q2;
+}

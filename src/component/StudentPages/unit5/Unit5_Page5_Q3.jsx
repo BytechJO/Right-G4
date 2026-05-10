@@ -1,406 +1,378 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useCallback } from "react";
 import Button from "../../Button";
 import ValidationAlert from "../../Popup/ValidationAlert";
-import img1 from "../../../assets/imgs/pages/classbook/Right 3 Unit 5 At Toms House! Folder/Page 44/Ex C 1.svg";
-import img2 from "../../../assets/imgs/pages/classbook/Right 3 Unit 5 At Toms House! Folder/Page 44/Ex C 2.svg";
 
-const Unit5_Page5_Q3 = () => {
-  const grid = [
-    [
-      "l",
-      "o",
-      "i",
-      "t",
-      "h",
-      "e",
-      "r",
-      "e",
-      "g",
-      "u",
-      "x",
-      "a",
-      "i",
-      "s",
-      "q",
-      "w",
-      "e",
-      "r",
-      "t",
-      "a",
-      "y",
-      "s",
-      "w",
-      "i",
-      "n",
-      "g",
-    ],
-    [
-      "r",
-      "t",
-      "a",
-      "f",
-      "o",
-      "a",
-      "n",
-      "d",
-      "a",
-      "n",
-      "z",
-      "l",
-      "i",
-      "p",
-      "e",
-      "w",
-      "s",
-      "l",
-      "i",
-      "d",
-      "e",
-      "b",
-      "x",
-      "z",
-      "i",
-    ],
-    [
-      "n",
-      "i",
-      "n",
-      "e",
-      "w",
-      "d",
-      "f",
-      "y",
-      "u",
-      "q",
-      "d",
-      "s",
-      "t",
-      "h",
-      "e",
-      "o",
-      "n",
-      "b",
-      "m",
-      "b",
-      "c",
-      "y",
-      "a",
-      "r",
-      "d",
-      "x",
-    ],
-  ];
+// ─────────────────────────────────────────────
+//  🖼️  IMAGE + 🔊 AUDIO
+// ─────────────────────────────────────────────
+import imgScene from "../../../assets/imgs/pages/Class Book/Right 4 Unit 5 Under the Weather Folder/Page 44/SVG/Asset 1.svg";
+import sound    from "../../../assets/audio/ClassBook/Grade 4/cd1pg20-story-adult-lady_Nf7yHD6t.mp3";
+import QuestionAudioPlayer from "../../QuestionAudioPlayer";
 
-  const letters = grid;
-  const wordsToFind = [
-    "there",
-    "is",
-    "a",
-    "swing",
-    "and",
-    "slide",
-    "in",
-    "the",
-    "yard",
-  ];
+// ─────────────────────────────────────────────
+//  🎨  COLORS
+// ─────────────────────────────────────────────
+const TEXT_COLOR       = "#2b2b2b";
+const CIRCLE_COLOR     = "#ef4444";
+const WRONG_BADGE_BG   = "#ef4444";
+const WRONG_BADGE_TEXT = "#ffffff";
+const BULLET_COLOR     = "#2b2b2b";
+const LIST_TEXT_COLOR  = "#2b2b2b";
+const DRAG_HIGHLIGHT   = "rgba(239,68,68,0.12)";
 
-  const correctPositions = {
-    there: [3, 4, 5, 6, 7],
-    is: [12, 13],
-    a: [19],
-    swing: [21, 22, 23, 24, 25],
-    and: [100 + 5, 100 + 6, 100 + 7],
-    slide: [100 + 16, 100 + 17, 100 + 18, 100 + 19, 100 + 20],
-    in: [200 + 1, 200 + 2],
-    the: [200 + 12, 200 + 13, 200 + 14],
-    yard: [200 + 21, 200 + 22, 200 + 23, 200 + 24],
-  };
+// ─────────────────────────────────────────────
+//  📝  AUDIO CAPTIONS
+// ─────────────────────────────────────────────
+const captions = [
+  { start: 0.0,  end: 5.0,  text: "Listen, read, and circle the prepositional phrases." },
+  { start: 5.0,  end: 10.0, text: "On Tuesday, I cleaned the house." },
+  { start: 10.0, end: 16.0, text: "I packed my old clothes and books into a box." },
+  { start: 16.0, end: 22.0, text: "I washed the floors until they shined." },
+  { start: 22.0, end: 28.0, text: "I dusted everything in the house." },
+  { start: 28.0, end: 34.0, text: "I organized the books in the bookcase." },
+  { start: 34.0, end: 42.0, text: "The windows were easy and only needed a little soap and water from a bucket." },
+  { start: 42.0, end: 46.0, text: "The house looks great now." },
+];
 
-  const [locked, setLocked] = useState(false);
-  const [sentence, setSentence] = useState("");
-  const [selected, setSelected] = useState([]);
-  const [currentWord, setCurrentWord] = useState("");
-  const [foundWords, setFoundWords] = useState([]);
-  const [coloredCells, setColoredCells] = useState([]);
-  const [isDragging, setIsDragging] = useState(false);
+// ─────────────────────────────────────────────
+//  📝  EXERCISE DATA
+// ─────────────────────────────────────────────
+const PARTS = [
+  { type: "text",   value: "On Tuesday, I cleaned the house. I packed my old clothes and books " },
+  { type: "phrase", id: 1, value: "into a box" },
+  { type: "text",   value: ". I washed the floors " },
+  { type: "phrase", id: 2, value: "until they shined" },
+  { type: "text",   value: ". I dusted everything " },
+  { type: "phrase", id: 3, value: "in the house" },
+  { type: "text",   value: ". I organized the books " },
+  { type: "phrase", id: 4, value: "in the bookcase" },
+  { type: "text",   value: ". The windows were easy and only needed a little soap and water " },
+  { type: "phrase", id: 5, value: "from a bucket" },
+  { type: "text",   value: ". The house looks great now." },
+];
 
-  const handleMouseDown = (index) => {
-    if (locked) return;
+const CORRECT_IDS = new Set([1, 2, 3, 4, 5]);
 
-    const row = Math.floor(index / 100);
-    const col = index % 100;
+const PHRASE_LIST = [
+  "until they shined",
+  "from a bucket",
+  "into a box",
+  "in the bookcase",
+  "in the house",
+];
 
-    setIsDragging(true);
-    setSelected([index]);
-    setCurrentWord(letters[row][col]);
-  };
-  const handleMouseEnter = (index) => {
-    if (!isDragging || locked) return;
+// ─────────────────────────────────────────────
+//  COMPONENT
+// ─────────────────────────────────────────────
+export default function WB_ListenReadCircle_QC() {
+  const [circled,     setCircled]     = useState(new Set());
+  const [showResults, setShowResults] = useState(false);
+  const [showAns,     setShowAns]     = useState(false);
+  const [dragging,    setDragging]    = useState(false);
+  const [hovered,     setHovered]     = useState(null);
 
-    const lastIndex = selected[selected.length - 1];
+  const isLocked = showResults || showAns;
 
-    if (index === lastIndex + 1 || index === lastIndex - 1) {
-      if (!selected.includes(index)) {
-        const row = Math.floor(index / 100);
-        const col = index % 100;
+  // ── Mouse drag ──
+  const handleMouseDown = useCallback((e) => {
+    if (isLocked) return;
+    e.preventDefault();
+    setDragging(true);
+  }, [isLocked]);
 
-        setSelected((prev) => [...prev, index]);
-        setCurrentWord((prev) => prev + letters[row][col]);
-      }
-    }
-  };
+  const handleMouseUp = useCallback(() => {
+    setDragging(false);
+    setHovered(null);
+  }, []);
 
-  const handleTouchMove = (e) => {
-    if (!isDragging || locked) return;
-    e.preventDefault(); // منع التمرير في الصفحة أثناء السحب
-
-    const touch = e.touches[0];
-    const element = document.elementFromPoint(touch.clientX, touch.clientY);
-    if (!element) return;
-
-    const index = element.getAttribute("data-index");
-    if (index !== null) {
-      handleMouseEnter(Number(index));
-    }
-  };
-
-  const handleMouseUp = () => {
-    if (locked) return;
-    setIsDragging(false);
-
-    const reversedWord = currentWord.split("").reverse().join("");
-
-    const matchedWord = wordsToFind.find(
-      (word) => word === currentWord || word === reversedWord,
-    );
-
-    if (matchedWord && !foundWords.includes(matchedWord)) {
-      setFoundWords((prev) => [...prev, matchedWord]);
-      setColoredCells((prev) => [...prev, ...selected]);
-      setSentence(
-        wordsToFind
-          .filter((word) => [...foundWords, matchedWord].includes(word))
-          .join(" "),
-      );
-    }
-
-    setSelected([]);
-    setCurrentWord("");
-  };
-
-  const reset = () => {
-    setSelected([]);
-    setCurrentWord("");
-    setFoundWords([]);
-    setColoredCells([]);
-    setSentence("");
-    setLocked(false);
-  };
-
-  const showAnswers = () => {
-    let allCells = [];
-    wordsToFind.forEach((word) => {
-      if (correctPositions[word]) {
-        allCells.push(...correctPositions[word]);
-      }
+  const handlePhraseEnter = useCallback((id) => {
+    if (!dragging || isLocked) return;
+    setHovered(id);
+    setCircled((prev) => {
+      if (prev.has(id)) return prev;
+      return new Set([...prev, id]);
     });
-    setFoundWords(wordsToFind);
-    setColoredCells(allCells);
-    setSelected([]);
-    setCurrentWord("");
-    setSentence(wordsToFind.join(" "));
-    setLocked(true);
+  }, [dragging, isLocked]);
+
+  // ── Touch drag ──
+  const handleTouchMove = useCallback((e) => {
+    if (!dragging || isLocked) return;
+    const touch = e.touches[0];
+    const el = document.elementFromPoint(touch.clientX, touch.clientY);
+    if (!el) return;
+    const id = parseInt(el.dataset.phraseId);
+    if (!id || isNaN(id)) return;
+    setHovered(id);
+    setCircled((prev) => {
+      if (prev.has(id)) return prev;
+      return new Set([...prev, id]);
+    });
+  }, [dragging, isLocked]);
+
+  // ── Click toggle (tap without drag) ──
+  const handlePhraseClick = useCallback((id) => {
+    if (isLocked || dragging) return;
+    setCircled((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }, [isLocked, dragging]);
+
+  // ── Button handlers ──
+  const handleCheck = () => {
+    if (isLocked) return;
+    if (circled.size === 0) { ValidationAlert.info("Please circle at least one phrase."); return; }
+    let score = 0;
+    CORRECT_IDS.forEach((id) => { if (circled.has(id)) score++; });
+    const total = CORRECT_IDS.size;
+    setShowResults(true);
+    if (score === total)   ValidationAlert.success(`Score: ${score} / ${total}`);
+    else if (score > 0)    ValidationAlert.warning(`Score: ${score} / ${total}`);
+    else                   ValidationAlert.error(`Score: ${score} / ${total}`);
   };
 
-  const checkAnswers = () => {
-    if (locked) return;
-    const total = wordsToFind.length;
-    const score = foundWords.length;
+  const handleShowAnswer = () => {
+    setCircled(new Set(CORRECT_IDS));
+    setShowResults(false);
+    setShowAns(true);
+  };
 
-    if (score === 0) {
-      ValidationAlert.info();
-      return;
+  const handleReset = () => {
+    setCircled(new Set());
+    setShowResults(false);
+    setShowAns(false);
+    setDragging(false);
+    setHovered(null);
+  };
+
+  // ── Phrase state ──
+  const getPhraseState = (id) => {
+    if (!circled.has(id)) return "idle";
+    if (showAns)           return "correct";
+    if (showResults)       return CORRECT_IDS.has(id) ? "correct" : "wrong";
+    return "selected";
+  };
+
+  const renderPart = (part, i) => {
+    if (part.type === "text") {
+      return <span key={i} className="lrc-text">{part.value}</span>;
     }
 
-    if (score < total) {
-      ValidationAlert.warning(`
-        <div style="font-size:20px;text-align:center;">
-          <b style="color:orange;">Score: ${score} / ${total}</b>
-        </div>
-      `);
-    } else {
-      ValidationAlert.success(`
-        <div style="font-size:20px;text-align:center;">
-          <b style="color:green;">Score: ${score} / ${total}</b>
-        </div>
-      `);
-    }
-    setLocked(true);
+    const state      = getPhraseState(part.id);
+    const isWrong    = state === "wrong";
+    const isDragOver = dragging && hovered === part.id && !circled.has(part.id);
+
+    return (
+      <span
+        key={part.id}
+        data-phrase-id={part.id}
+        className={[
+          "lrc-phrase",
+          state === "selected" ? "lrc-phrase--selected" : "",
+          state === "correct"  ? "lrc-phrase--correct"  : "",
+          state === "wrong"    ? "lrc-phrase--wrong"     : "",
+          isDragOver           ? "lrc-phrase--dragover"  : "",
+          isLocked             ? "lrc-phrase--locked"    : "",
+        ].filter(Boolean).join(" ")}
+        onMouseEnter={() => handlePhraseEnter(part.id)}
+        onClick={() => handlePhraseClick(part.id)}
+      >
+        {part.value}
+        {isWrong && <span className="lrc-badge">✕</span>}
+      </span>
+    );
   };
 
   return (
     <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        padding: "30px",
-        width: "100%",
-        boxSizing: "border-box",
-      }}
+      className="main-container-component"
+      onMouseDown={handleMouseDown}
+      onMouseUp={handleMouseUp}
+      onMouseLeave={handleMouseUp}
+      onTouchStart={handleMouseDown}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleMouseUp}
     >
-      <div className="div-forall">
-        <h5 className="header-title-page8 pb-2.5">
-          <span className="ex-A" style={{ marginRight: "10px" }}>
-            C
-          </span>
-          What things are in the yard in Tom Lives in a House on page 41? 
-        </h5>
+      <style>{`
+        .lrc-para {
+          font-size: clamp(14px, 1.7vw, 20px);
+          color: ${TEXT_COLOR};
+          line-height: 2.6;
+          display: flex;
+          flex-wrap: wrap;
+          align-items: baseline;
+          gap: 0;
+          cursor: crosshair;
+          user-select: none;
+          -webkit-user-select: none;
+        }
 
-        {/* Words List */}
-        <div className="flex flex-wrap justify-center gap-3 mb-5 border-2 border-dashed border-gray-300 rounded-[14px] p-3">
-          {wordsToFind.map((word) => (
-            <span
-              key={word}
-              className={`px-3 py-1.5 rounded-[10px] border-2 border-[#2c5287] font-semibold transition duration-200 ${
-                foundWords.includes(word)
-                  ? "bg-[#2c5287] text-white border-[#2c5287]"
-                  : "bg-white text-black"
-              }`}
-              style={{ fontSize: "clamp(12px, 2vw, 15px)" }}
-            >
-              {word}
-            </span>
-          ))}
-        </div>
+        .lrc-text {
+          font-size: clamp(14px, 1.7vw, 20px);
+          color: ${TEXT_COLOR};
+          line-height: 2.6;
+          white-space: pre-wrap;
+          pointer-events: none;
+        }
 
-        <div
-          style={{ width: "100%", display: "flex", justifyContent: "center" }}
+        /* ── Phrase oval ── */
+        .lrc-phrase {
+          position: relative;
+          display: inline-block;
+          font-size: clamp(14px, 1.7vw, 20px);
+          color: ${TEXT_COLOR};
+          cursor: crosshair;
+          user-select: none;
+          border: 2.5px solid transparent;
+          border-radius: 999px;
+          padding: 2px clamp(6px, 0.8vw, 10px);
+          line-height: 2.0;
+          transition: border-color 0.12s, background 0.12s;
+          white-space: nowrap;
+        }
+        .lrc-phrase--locked    { cursor: default; }
+        .lrc-phrase--dragover  { border-color: ${CIRCLE_COLOR}; background: ${DRAG_HIGHLIGHT}; }
+        .lrc-phrase--selected,
+        .lrc-phrase--correct   { border-color: ${CIRCLE_COLOR}; }
+        .lrc-phrase--wrong     { border-color: ${WRONG_BADGE_BG}; }
+
+        /* ✕ badge */
+        .lrc-badge {
+          position: absolute;
+          top: -7px; right: -7px;
+          width: clamp(14px, 1.6vw, 18px);
+          height: clamp(14px, 1.6vw, 18px);
+          border-radius: 50%;
+          background: ${WRONG_BADGE_BG};
+          color: ${WRONG_BADGE_TEXT};
+          display: flex; align-items: center; justify-content: center;
+          font-size: clamp(7px, 0.8vw, 10px);
+          font-weight: 700;
+          border: 2px solid #fff;
+          box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+          pointer-events: none;
+          z-index: 2;
+        }
+
+        /* ── Hint ── */
+        .lrc-hint {
+          font-size: clamp(11px, 1.3vw, 14px);
+          color: #6b7280;
+          font-style: italic;
+          margin-top: -6px;
+        }
+
+        /* ── Bottom ── */
+        .lrc-bottom {
+          display: grid;
+          grid-template-columns: 1fr auto;
+          gap: clamp(16px, 2.4vw, 32px);
+          align-items: start;
+          width: 100%;
+        }
+
+        .lrc-list {
+          display: flex;
+          flex-direction: column;
+          gap: clamp(8px, 1.1vw, 14px);
+        }
+
+        .lrc-list-item {
+          display: flex;
+          align-items: center;
+          gap: clamp(8px, 1vw, 12px);
+        }
+
+        .lrc-bullet {
+          width: clamp(8px, 1vw, 11px);
+          height: clamp(8px, 1vw, 11px);
+          border-radius: 50%;
+          background: ${BULLET_COLOR};
+          flex-shrink: 0;
+        }
+
+        .lrc-list-text {
+          font-size: clamp(13px, 1.6vw, 19px);
+          color: ${LIST_TEXT_COLOR};
+          line-height: 1.4;
+        }
+
+        .lrc-scene-img {
+          width: clamp(120px, 18vw, 240px);
+          height: auto;
+          display: block;
+          flex-shrink: 0;
+          pointer-events: none;
+        }
+
+        .lrc-buttons {
+          display: flex;
+          justify-content: center;
+          margin-top: clamp(8px, 1.6vw, 18px);
+        }
+
+        @media (max-width: 500px) {
+          .lrc-bottom { grid-template-columns: 1fr; }
+          .lrc-scene-img { width: clamp(100px, 40vw, 160px); margin: 0 auto; }
+        }
+      `}</style>
+
+      <div
+        className="div-forall"
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: "clamp(14px, 2vw, 22px)",
+          maxWidth: "1100px",
+          margin: "0 auto",
+        }}
+      >
+        {/* ── Header ── */}
+        <h1
+          className="WB-header-title-page8"
+          style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
         >
-          {/* Grid Wrapper */}
-          <div
-            className="border-2 border-[#f28c63] px-4 pt-4 pb-5"
-            style={{ width: "fit-content", margin: "0 auto" }}
-          >
-            <div
-              className="bg-[#daf5ff] rounded-[15px] p-2 sm:p-[15px]"
-              style={{
-                userSelect: "none",
-                width: "max-content",
-                touchAction: "none", // 🔥 الحل السحري لمنع تحريك الصفحة أثناء السحب على الآيباد
-                WebkitOverflowScrolling: "touch",
-              }}
-            >
-              {letters.map((row, rowIndex) => (
-                <div
-                  key={rowIndex}
-                  style={{
-                    display: "flex",
-                    gap: "clamp(1px, 0.3vw, 4px)", // مسافة تتغير حسب الشاشة
-                    width: "fit-content",
-                  }}
-                >
-                  {row.map((letter, colIndex) => {
-                    const index = rowIndex * 100 + colIndex;
-                    const isSelected = selected.includes(index);
-                    const isFound = coloredCells.includes(index);
+          <span className="WB-ex-A-1">C</span>
+          Listen, read, and circle the prepositional phrases.
+        </h1>
 
-                    return (
-                      <span
-                        key={index}
-                        data-index={index}
-                        onMouseDown={() => handleMouseDown(index)}
-                        onMouseEnter={() => handleMouseEnter(index)}
-                        onMouseUp={handleMouseUp}
-                        onDragStart={(e) => e.preventDefault()}
-                        onTouchStart={(e) => {
-                          e.preventDefault(); // 🔥 منع تحريك الصفحة عند بدء اللمس
-                          handleMouseDown(index);
-                        }}
-                        onTouchMove={handleTouchMove}
-                        onTouchEnd={handleMouseUp}
-                        className={`
-                          flex items-center justify-center
-                          cursor-pointer
-                          transition
-                          ${isSelected ? "bg-[#ffd54f] rounded-sm" : ""}
-                          ${isFound ? "bg-[#4caf50] text-white rounded-sm" : ""}
-                        `}
-                        style={{
-                          width: "clamp(16px, 2.5vw, 25px)", // 🔥 عرض ديناميكي
-                          height: "clamp(22px, 3.5vw, 35px)", // 🔥 طول ديناميكي
-                          fontSize: "clamp(12px, 1.8vw, 18px)", // 🔥 حجم خط ديناميكي
-                        }}
-                      >
-                        {letter}
-                      </span>
-                    );
-                  })}
-                </div>
-              ))}
-            </div>
-
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: "10px",
-                marginTop: "15px",
-              }}
-            >
-              <img
-                src={img1}
-                alt="start"
-                style={{
-                  width: "clamp(40px, 10vw, 100px)", // 🔥 حجم ديناميكي للصور
-                  height: "auto",
-                }}
-              />
-
-              <div
-                style={{
-                  flex: 1,
-                  borderBottom: "2px solid black",
-                  height: "30px",
-                  display: "flex",
-                  alignItems: "center",
-                }}
-              >
-                <input
-                  value={sentence}
-                  readOnly
-                  style={{
-                    width: "100%",
-                    border: "none",
-                    outline: "none",
-                    background: "transparent",
-                    fontSize: "clamp(14px, 2vw, 18px)", // 🔥 حجم خط ديناميكي للإجابة
-                  }}
-                />
-              </div>
-
-              <img
-                src={img2}
-                alt="end"
-                style={{
-                  width: "clamp(40px, 10vw, 100px)", // 🔥 حجم ديناميكي للصور
-                  height: "auto",
-                }}
-              />
-            </div>
-          </div>
+        {/* ── Audio ── */}
+        <div style={{ marginTop: "4px" }}>
+          <QuestionAudioPlayer src={sound} captions={captions} stopAtSecond={5} />
         </div>
 
-        {/* BUTTONS */}
-        <Button
-          handleShowAnswer={showAnswers}
-          handleStartAgain={reset}
-          checkAnswers={checkAnswers}
-        />
+        {/* ── Hint ── */}
+        <p className="lrc-hint">Drag or click on the phrases to circle them.</p>
+
+        {/* ── Paragraph ── */}
+        <div className="lrc-para">
+          {PARTS.map((part, i) => renderPart(part, i))}
+        </div>
+
+        {/* ── Bottom ── */}
+        <div className="lrc-bottom">
+          <div className="lrc-list">
+            {PHRASE_LIST.map((phrase) => (
+              <div key={phrase} className="lrc-list-item">
+                <div className="lrc-bullet" />
+                <span className="lrc-list-text">{phrase}</span>
+              </div>
+            ))}
+          </div>
+          <img src={imgScene} alt="scene" className="lrc-scene-img" />
+        </div>
+
+        {/* ── Buttons ── */}
+        <div className="lrc-buttons">
+          <Button
+            checkAnswers={handleCheck}
+            handleShowAnswer={handleShowAnswer}
+            handleStartAgain={handleReset}
+          />
+        </div>
       </div>
     </div>
   );
-};
-
-export default Unit5_Page5_Q3;
+}

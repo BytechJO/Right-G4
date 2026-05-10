@@ -1,461 +1,321 @@
 import React, { useState } from "react";
-import img1 from "../../../assets/imgs/pages/classbook/Right 3 Unit 5 At Toms House! Folder/Page 45/Ex E 1.svg";
-import ValidationAlert from "../../Popup/ValidationAlert";
-import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import Button from "../../Button";
+import ValidationAlert from "../../Popup/ValidationAlert";
 
-const questions = [
+// ─────────────────────────────────────────────
+//  🖼️  IMAGES — 6 صور
+// ─────────────────────────────────────────────
+import img1 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 5 Under the Weather Folder/Page 45/SVG/Asset 11.svg"; // under
+import img2 from  "../../../assets/imgs/pages/Class Book/Right 4 Unit 5 Under the Weather Folder/Page 45/SVG/Asset 12.svg"; // around
+import img3 from  "../../../assets/imgs/pages/Class Book/Right 4 Unit 5 Under the Weather Folder/Page 45/SVG/Asset 13.svg"; // through
+import img4 from  "../../../assets/imgs/pages/Class Book/Right 4 Unit 5 Under the Weather Folder/Page 45/SVG/Asset 9.svg"; // next to
+import img5 from  "../../../assets/imgs/pages/Class Book/Right 4 Unit 5 Under the Weather Folder/Page 45/SVG/Asset 15.svg"; // in front of
+import img6 from  "../../../assets/imgs/pages/Class Book/Right 4 Unit 5 Under the Weather Folder/Page 45/SVG/Asset 14.svg"; // over
+
+// ─────────────────────────────────────────────
+//  🎨  COLORS
+// ─────────────────────────────────────────────
+const INPUT_UNDERLINE_DEFAULT = "#3f3f3f";
+const INPUT_UNDERLINE_WRONG   = "#ef4444";
+const INPUT_TEXT_COLOR        = "#2b2b2b";
+const INPUT_ANSWER_COLOR      = "#c81e1e";
+const NUMBER_COLOR            = "#2b2b2b";
+const WRONG_BADGE_BG          = "#ef4444";
+const WRONG_BADGE_TEXT        = "#ffffff";
+
+// ─────────────────────────────────────────────
+//  📝  EXERCISE DATA
+// ─────────────────────────────────────────────
+const WORD_BANK = ["under", "around", "in front of", "next to", "through", "over"];
+
+const ITEMS = [
   {
-    id: "q0",
-    qWords: ["Where", "is", "the"],
-    qEnd: ["bike", "?"],
-
-    aWords: ["It's", "in", "the", "garage"],
-    aEnd: ["."],
+    id:      1,
+    src:     img1,
+    correct: ["under"],
+    answer:  "under",
   },
   {
-    id: "q1",
-    qWords: ["Where", "is", "the"],
-    qEnd: ["TV", "?"],
-
-    aWords: ["It's", "in", "the", "living", "room"],
-    aEnd: ["."],
+    id:      2,
+    src:     img2,
+    correct: ["around"],
+    answer:  "around",
   },
   {
-    id: "q2",
-    qWords: ["Where", "is", "the"],
-    qEnd: ["bed", "?"],
-
-    aWords: ["It's", "in", "the", "bedroom"],
-    aEnd: ["."],
+    id:      3,
+    src:     img3,
+    correct: ["through"],
+    answer:  "through",
   },
   {
-    id: "q3",
-    qWords: ["Where", "is", "the"],
-    qEnd: ["washing machine", "?"],
-
-    aWords: ["It's", "in", "the", "basement"],
-    aEnd: ["."],
+    id:      4,
+    src:     img4,
+    correct: ["next to"],
+    answer:  "next to",
+  },
+  {
+    id:      5,
+    src:     img5,
+    correct: ["in front of"],
+    answer:  "in front of",
+  },
+  {
+    id:      6,
+    src:     img6,
+    correct: ["over"],
+    answer:  "over",
   },
 ];
-const Unit5_Page6_Q2 = () => {
-  const [locked, setLocked] = useState(false);
-  const [showAnswer, setShowAnswer] = useState(false);
-  const [wrongInputs, setWrongInputs] = useState({});
-  const shuffleArray = (arr) => {
-    const copy = [...arr];
-    for (let i = copy.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [copy[i], copy[j]] = [copy[j], copy[i]];
-    }
-    return copy;
-  };
-  const [data, setData] = useState(() => {
-    const obj = {};
-    questions.forEach((q) => {
-      obj[q.id] = {
-        qBank: shuffleArray(q.qWords), // ✅ عشوائي
-        aBank: shuffleArray(q.aWords), // ✅ عشوائي
-        qLine: Array(q.qWords.length).fill(null),
-        aLine: Array(q.aWords.length).fill(null),
-      };
-    });
-    return obj;
-  });
 
-  const onDragEnd = (result) => {
-    if (!result.destination) return;
+// ─────────────────────────────────────────────
+//  🔧  NORMALIZE
+// ─────────────────────────────────────────────
+const normalize = (str) =>
+  str.toLowerCase().replace(/[^a-z0-9\s]/g, "").replace(/\s+/g, " ").trim();
 
-    const { source, destination } = result;
+const isCorrect = (userVal, correctArr) =>
+  correctArr.some((c) => normalize(userVal) === normalize(c));
 
-    const [qId, from] = source.droppableId.split("-");
-    const [, to, indexStr] = destination.droppableId.split("-");
+// ─────────────────────────────────────────────
+//  COMPONENT
+// ─────────────────────────────────────────────
+export default function WB_LookWrite_QE() {
+  const [answers,     setAnswers]     = useState({});
+  const [showResults, setShowResults] = useState(false);
+  const [showAns,     setShowAns]     = useState(false);
 
-    if (from === "qBank" || from === "aBank") {
-      const destArr = [...data[qId][to]];
-      const i = Number(indexStr);
-
-      const moved = result.draggableId.split("-")[2];
-
-      if (destArr[i]) {
-        destArr[i] = moved;
-      } else {
-        destArr[i] = moved;
-      }
-
-      setData({
-        ...data,
-        [qId]: {
-          ...data[qId],
-          [to]: destArr,
-        },
-      });
-    }
+  const handleChange = (id, value) => {
+    if (showAns) return;
+    const item = ITEMS.find((i) => i.id === id);
+    if (showResults && item && isCorrect(answers[id] || "", item.correct)) return;
+    setAnswers((prev) => ({ ...prev, [id]: value }));
   };
 
-  const reset = () => {
-    const newData = {};
-
-    questions.forEach((q) => {
-      newData[q.id] = {
-        qBank: [...q.qWords],
-        aBank: [...q.aWords],
-        qLine: Array(q.qWords.length).fill(null),
-        aLine: Array(q.aWords.length).fill(null),
-      };
-    });
-
-    setData(newData);
-    setLocked(false);
-    setShowAnswer(false);
-    setWrongInputs([]);
+  const handleCheck = () => {
+    if (showAns) return;
+    const allAnswered = ITEMS.every((item) => answers[item.id]?.trim());
+    if (!allAnswered) { ValidationAlert.info("Please complete all answers first."); return; }
+    let score = 0;
+    ITEMS.forEach((item) => { if (isCorrect(answers[item.id] || "", item.correct)) score++; });
+    setShowResults(true);
+    if (score === ITEMS.length)   ValidationAlert.success(`Score: ${score} / ${ITEMS.length}`);
+    else if (score > 0)           ValidationAlert.warning(`Score: ${score} / ${ITEMS.length}`);
+    else                          ValidationAlert.error(`Score: ${score} / ${ITEMS.length}`);
   };
 
-  const showAnswers = () => {
-    const newData = { ...data };
-
-    questions.forEach((q) => {
-      newData[q.id].qLine = [...q.qWords];
-      newData[q.id].aLine = [...q.aWords];
-    });
-
-    setData(newData);
-    setShowAnswer(true);
-    setLocked(true);
+  const handleShowAnswer = () => {
+    const filled = {};
+    ITEMS.forEach((item) => { filled[item.id] = item.answer; });
+    setAnswers(filled);
+    setShowResults(false);
+    setShowAns(true);
   };
-  const checkAnswers = () => {
-    if (locked) return;
 
-    let correct = 0;
-    let wrong = {};
-    let isIncomplete = false; // 🔥 جديد
-
-    questions.forEach((q) => {
-      const qLine = data[q.id].qLine;
-      const aLine = data[q.id].aLine;
-
-      // 🔴 تحقق من الفراغات
-      if (qLine.includes(null) || aLine.includes(null)) {
-        isIncomplete = true;
-      }
-
-      const userQ = qLine.join(" ");
-      const userA = aLine.join(" ");
-
-      const correctQ = q.qWords.join(" ");
-      const correctA = q.aWords.join(" ");
-
-      wrong[q.id] = {
-        q: false,
-        a: false,
-      };
-
-      if (userQ === correctQ) {
-        correct++;
-      } else {
-        wrong[q.id].q = true;
-      }
-
-      if (userA === correctA) {
-        correct++;
-      } else {
-        wrong[q.id].a = true;
-      }
-    });
-
-    // ❌ إذا في فراغات
-    if (isIncomplete) {
-      ValidationAlert.info();
-      return;
-    }
-
-    setWrongInputs(wrong);
-    setLocked(true);
-
-    const total = questions.length * 2;
-
-    if (correct === total) {
-      ValidationAlert.success(`Score: ${correct}/${total}`);
-    } else if (correct === 0) {
-      ValidationAlert.error(`Score: ${correct}/${total}`);
-    } else {
-      ValidationAlert.warning(`Score: ${correct}/${total}`);
-    }
+  const handleReset = () => {
+    setAnswers({});
+    setShowResults(false);
+    setShowAns(false);
   };
+
+  const isWrong    = (item) => showResults && !showAns && !isCorrect(answers[item.id] || "", item.correct);
+  const isDisabled = (item) => showAns || (showResults && isCorrect(answers[item.id] || "", item.correct));
 
   return (
-    <DragDropContext onDragEnd={onDragEnd}>
+    <div className="main-container-component">
+      <style>{`
+        /* ── Word bank ── */
+        .lwe-bank {
+
+              display: flex;
+    flex-wrap: nowrap;
+
+    justify-content: space-around;
+    width: 100%;
+
+        }
+
+        .lwe-pill {
+          background: #e8eff1;
+          border: 2px solid #e8eff1;
+          border-radius: 8px;
+          padding: clamp(5px, 0.6vw, 8px) clamp(14px, 1.8vw, 22px);
+          font-size: clamp(14px, 1.7vw, 20px);
+          color: #2b2b2b;
+          white-space: nowrap;
+          user-select: none;
+        }
+
+        /* ── 3×2 grid ── */
+        .lwe-grid {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: clamp(18px, 2.6vw, 36px) clamp(20px, 3vw, 40px);
+          width: 100%;
+        }
+
+        /* Single card: num + img + input */
+        .lwe-card {
+          display: flex;
+          flex-direction: column;
+          align-items: flex-start;
+          gap: clamp(8px, 1vw, 12px);
+        }
+
+        /* num + img row */
+        .lwe-img-row {
+          display: flex;
+          align-items: flex-start;
+          gap: clamp(4px, 0.5vw, 7px);
+          width: 80%;
+        }
+
+        .lwe-num {
+          font-size: clamp(14px, 1.7vw, 20px);
+          font-weight: 700;
+          color: ${NUMBER_COLOR};
+          flex-shrink: 0;
+          padding-top: 2px;
+          line-height: 1;
+        }
+
+        .lwe-img {
+          width: 100%;
+          height: auto;
+          object-fit: cover;
+          display: block;
+        }
+
+        /* Input wrap */
+        .lwe-input-wrap {
+          position: relative;
+          width: 78%;
+              align-self: center;
+left : -5px ;
+        }
+
+        .lwe-input {
+          width: 100%;
+          background: transparent;
+          border: none;
+          border-bottom: 1px solid ${INPUT_UNDERLINE_DEFAULT};
+          outline: none;
+          font-size: clamp(15px, 1.9vw, 23px);
+          color: ${INPUT_TEXT_COLOR};
+          line-height: 1.5;
+          box-sizing: border-box;
+          font-family: inherit;
+          transition: border-color 0.2s;
+        }
+        .lwe-input:disabled  { opacity: 1; cursor: default; }
+        .lwe-input--wrong    { border-bottom-color: ${INPUT_UNDERLINE_WRONG}; }
+        .lwe-input--answer   { color: ${INPUT_ANSWER_COLOR};  }
+
+        /* ✕ badge */
+        .lwe-badge {
+          position: absolute;
+          top: -8px; right: 0;
+          width: clamp(17px, 1.9vw, 22px);
+          height: clamp(17px, 1.9vw, 22px);
+          border-radius: 50%;
+          background: ${WRONG_BADGE_BG};
+          color: ${WRONG_BADGE_TEXT};
+          display: flex; align-items: center; justify-content: center;
+          font-size: clamp(9px, 1vw, 12px);
+          font-weight: 700;
+          border: 2px solid #fff;
+          box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+          pointer-events: none;
+          z-index: 2;
+        }
+
+        .lwe-buttons {
+          display: flex;
+          justify-content: center;
+          margin-top: clamp(8px, 1.6vw, 18px);
+        }
+
+        @media (max-width: 500px) {
+          .lwe-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+      `}</style>
+
       <div
+        className="div-forall"
         style={{
           display: "flex",
           flexDirection: "column",
-          alignItems: "center",
-          padding: "30px",
+          gap: "clamp(14px, 2vw, 22px)",
+          maxWidth: "1100px",
+          margin: "0 auto",
         }}
       >
-        <div className="div-forall">
-          <h5 className="header-title-page8">
-            <span
-              className="ex-A"
-              style={{ marginRight: "10px", marginBottom: "20px" }}
-            >
-              E
-            </span>
-            Look and answer.
-          </h5>
-          <div className="flex gap-10 items-start mb-7">
-            {/* 🔵 LEFT SIDE */}
-            <div className="flex flex-col gap-4">
-              
-              {/* 🔥 الأسئلة */}
-              {questions.map((q, index) => (
-                <div
-                  key={q.id}
-                  className="bg-white p-2 rounded-2xl shadow w-full max-w-2xl"
-                >
-                  <div className="text-lg font-bold mb-1">{index + 1}.</div>
-                  {/* 🔵 QUESTION WORDS */}
-                  <Droppable
-                    droppableId={`${q.id}-qBank`}
-                    direction="horizontal"
-                  >
-                    {(provided) => (
-                      <div
-                        ref={provided.innerRef}
-                        {...provided.droppableProps}
-                        className="flex gap-3 p-2 border-2 border-dashed rounded-lg w-full"
-                      >
-                        {data[q.id].qBank.map((word, index) => (
-                          <Draggable
-                            key={`${q.id}-q-${word}-${index}`}
-                            draggableId={`${q.id}-q-${word}-${index}`}
-                            index={index}
-                            isDragDisabled={data[q.id].qLine.includes(word)}
-                          >
-                            {(provided) => (
-                              <span
-                                ref={provided.innerRef}
-                                {...provided.draggableProps}
-                                {...provided.dragHandleProps}
-                                className={`px-3 py-1 border-2 border-blue-800 rounded font-bold text-sm ${
-                                  data[q.id].qLine.includes(word)
-                                    ? "opacity-40 cursor-not-allowed"
-                                    : "cursor-grab"
-                                }`}
-                              >
-                                {word}
-                              </span>
-                            )}
-                          </Draggable>
-                        ))}
-                        {provided.placeholder}
-                      </div>
-                    )}
-                  </Droppable>
+        {/* ── Header ── */}
+        <h1
+          className="WB-header-title-page8"
+          style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
+        >
+          <span className="WB-ex-A-1">E</span>
+          Look and write. Use the words below.
+        </h1>
 
-                  {/* 🔵 QUESTION LINE */}
-                  <div className="flex items-center gap-2 mt-2">
-                    {data[q.id].qLine.map((word, i) => (
-                      <Droppable droppableId={`${q.id}-qLine-${i}`} key={i}>
-                        {(provided) => (
-                          <div
-                            ref={provided.innerRef}
-                            {...provided.droppableProps}
-                            className={`w-16 h-10 border-b-4 flex items-center justify-center ${
-                              showAnswer || locked
-                                ? data[q.id].qLine[i] === q.qWords[i]
-                                  ? "border-black"
-                                  : "border-red-500"
-                                : "border-black"
-                            }`}
-                          >
-                            {word && (
-                              <Draggable
-                                draggableId={`${q.id}-ql-${i}`}
-                                index={0}
-                              >
-                                {(provided) => (
-                                  <span
-                                    ref={provided.innerRef}
-                                    {...provided.draggableProps}
-                                    {...provided.dragHandleProps}
-                                    className="font-bold text-blue-800"
-                                  >
-                                    {word}
-                                  </span>
-                                )}
-                              </Draggable>
-                            )}
-                            {provided.placeholder}
-                          </div>
-                        )}
-                      </Droppable>
-                    ))}
+        {/* ── Word bank ── */}
+        <div className="lwe-bank">
+          {WORD_BANK.map((w) => (
+            <div key={w} className="lwe-pill">{w}</div>
+          ))}
+        </div>
 
-                    {/* ثابت */}
-                    {q.qEnd.map((w, i) => (
-                      <span key={i} className="font-semibold">
-                        {w}
-                      </span>
-                    ))}
+        {/* ── 3×2 Grid ── */}
+        <div className="lwe-grid">
+          {ITEMS.map((item) => {
+            const wrong    = isWrong(item);
+            const value    = answers[item.id] || "";
+            const tColor   = showAns ? INPUT_ANSWER_COLOR : INPUT_TEXT_COLOR;
+            const uColor   = wrong ? INPUT_UNDERLINE_WRONG : INPUT_UNDERLINE_DEFAULT;
+            const disabled = isDisabled(item);
 
-                    {/* ❌ */}
-                    {wrongInputs[q.id]?.q && (
-                      <span
-                        style={{
-                          width: "20px",
-                          height: "20px",
-                          background: "#ef4444",
-                          color: "white",
-                          borderRadius: "50%",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          fontSize: "12px",
-                          fontWeight: "bold",
-                          border: "2px solid white",
-                          boxShadow: "0 2px 6px rgba(0,0,0,0.2)",
-                          pointerEvents: "none",
-                          zIndex: 3,
-                        }}
-                      >
-                        ✕
-                      </span>
-                    )}
-                  </div>
+            return (
+              <div key={item.id} className="lwe-card">
 
-                  {/* 🟢 ANSWER WORDS */}
-                  <Droppable
-                    droppableId={`${q.id}-aBank`}
-                    direction="horizontal"
-                  >
-                    {(provided) => (
-                      <div
-                        ref={provided.innerRef}
-                        {...provided.droppableProps}
-                        className="flex gap-3 p-2 border-2 border-dashed rounded-lg w-full mt-3"
-                      >
-                        {data[q.id].aBank.map((word, index) => (
-                          <Draggable
-                            key={`${q.id}-a-${word}-${index}`}
-                            draggableId={`${q.id}-a-${word}-${index}`}
-                            index={index}
-                            isDragDisabled={data[q.id].aLine.includes(word)}
-                          >
-                            {(provided) => (
-                              <span
-                                ref={provided.innerRef}
-                                {...provided.draggableProps}
-                                {...provided.dragHandleProps}
-                                className={`px-3 py-1 border-2 border-blue-800 rounded font-bold text-sm ${
-                                  data[q.id].aLine.includes(word)
-                                    ? "opacity-40 cursor-not-allowed"
-                                    : "cursor-grab"
-                                }`}
-                              >
-                                {word}
-                              </span>
-                            )}
-                          </Draggable>
-                        ))}
-                        {provided.placeholder}
-                      </div>
-                    )}
-                  </Droppable>
-
-                  {/* 🟢 ANSWER LINE */}
-                  <div className="flex items-center gap-2 mt-2">
-                    {data[q.id].aLine.map((word, i) => (
-                      <Droppable droppableId={`${q.id}-aLine-${i}`} key={i}>
-                        {(provided) => (
-                          <div
-                            ref={provided.innerRef}
-                            {...provided.droppableProps}
-                            className={`w-20 h-10 border-b-4 flex items-center justify-center ${
-                              showAnswer || locked
-                                ? data[q.id].aLine[i] === q.aWords[i]
-                                  ? "border-black"
-                                  : "border-red-500"
-                                : "border-black"
-                            }`}
-                          >
-                            {word && (
-                              <Draggable
-                                draggableId={`${q.id}-al-${i}`}
-                                index={0}
-                              >
-                                {(provided) => (
-                                  <span
-                                    ref={provided.innerRef}
-                                    {...provided.draggableProps}
-                                    {...provided.dragHandleProps}
-                                    className="font-bold text-blue-800"
-                                  >
-                                    {word}
-                                  </span>
-                                )}
-                              </Draggable>
-                            )}
-                            {provided.placeholder}
-                          </div>
-                        )}
-                      </Droppable>
-                    ))}
-
-                    {/* ثابت */}
-                    {q.aEnd.map((w, i) => (
-                      <span key={i} className="font-semibold">
-                        {w}
-                      </span>
-                    ))}
-
-                    {/* ❌ */}
-                    {wrongInputs[q.id]?.a && (
-                      <span
-                        style={{
-                          width: "20px",
-                          height: "20px",
-                          background: "#ef4444",
-                          color: "white",
-                          borderRadius: "50%",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          fontSize: "12px",
-                          fontWeight: "bold",
-                          border: "2px solid white",
-                          boxShadow: "0 2px 6px rgba(0,0,0,0.2)",
-                          pointerEvents: "none",
-                          zIndex: 3,
-                        }}
-                      >
-                        ✕
-                      </span>
-                    )}
-                  </div>
+                {/* Number + Image */}
+                <div className="lwe-img-row">
+                  <span className="lwe-num">{item.id}</span>
+                  <img src={item.src} alt={`img-${item.id}`} className="lwe-img" />
                 </div>
-              ))}
-            </div>
 
-            {/* 🟢 RIGHT SIDE (الصورة) */}
-            <div className="shrink-0">
-              <img
-                src={img1}
-                alt="house"
-                style={{ height: "auto", width: "600px", objectFit: "contain" }}
-              />
-            </div>
-          </div>
-          {/* Buttons */}
+                {/* Input */}
+                <div className="lwe-input-wrap">
+                  <input
+                    type="text"
+                    className={[
+                      "lwe-input",
+                      wrong   ? "lwe-input--wrong"  : "",
+                      showAns ? "lwe-input--answer" : "",
+                    ].filter(Boolean).join(" ")}
+                    value={value}
+                    disabled={disabled}
+                    onChange={(e) => handleChange(item.id, e.target.value)}
+                    style={{ borderBottomColor: uColor, color: tColor }}
+                    spellCheck={false}
+                    autoComplete="off"
+                  />
+                  {wrong && <div className="lwe-badge">✕</div>}
+                </div>
+
+              </div>
+            );
+          })}
+        </div>
+
+        {/* ── Buttons ── */}
+        <div className="lwe-buttons">
           <Button
-            handleShowAnswer={showAnswers}
-            handleStartAgain={reset}
-            checkAnswers={checkAnswers}
+            checkAnswers={handleCheck}
+            handleShowAnswer={handleShowAnswer}
+            handleStartAgain={handleReset}
           />
         </div>
       </div>
-    </DragDropContext>
+    </div>
   );
-};
-
-export default Unit5_Page6_Q2;
+}
