@@ -11,38 +11,34 @@ import img2a from "../../../assets/imgs/pages/Class Book/Right 4 Unit 1 Robots o
 import img2b from "../../../assets/imgs/pages/Class Book/Right 4 Unit 1 Robots of the Future Folder/Page9/SVG/Asset 21.svg";
 import img3a from "../../../assets/imgs/pages/Class Book/Right 4 Unit 1 Robots of the Future Folder/Page9/SVG/Asset 20.svg";
 import img3b from "../../../assets/imgs/pages/Class Book/Right 4 Unit 1 Robots of the Future Folder/Page9/SVG/Asset 19.svg";
-import img4a from"../../../assets/imgs/pages/Class Book/Right 4 Unit 1 Robots of the Future Folder/Page9/SVG/Asset 18.svg";
+import img4a from "../../../assets/imgs/pages/Class Book/Right 4 Unit 1 Robots of the Future Folder/Page9/SVG/Asset 18.svg";
 import img4b from "../../../assets/imgs/pages/Class Book/Right 4 Unit 1 Robots of the Future Folder/Page9/SVG/Asset 17.svg";
 
 // ─────────────────────────────────────────────
 //  🎨  COLORS
 // ─────────────────────────────────────────────
-const CHECK_COLOR    = "#e53935";
-const CROSS_COLOR    = "#e53935";
-const IMG_BORDER     = "#d0d0d0";
-const SENTENCE_COLOR = "#2b2b2b";
-const NUMBER_COLOR   = "#2b2b2b";
-const WRONG_BADGE_BG = "#ef4444";
+const CHECK_COLOR      = "#e53935";
+const CROSS_COLOR      = "#e53935";
+const IMG_BORDER       = "#d0d0d0";
+const SENTENCE_COLOR   = "#2b2b2b";
+const NUMBER_COLOR     = "#2b2b2b";
+const WRONG_BADGE_BG   = "#ef4444";
 const WRONG_BADGE_TEXT = "#ffffff";
 
 // ─────────────────────────────────────────────
 //  📝  EXERCISE DATA
-//  correctSide: "a"=left image gets ✓, "b"=right image gets ✓
-//  The other image gets ✕
 // ─────────────────────────────────────────────
 const ITEMS = [
-  { id: 1, sentence: "Sarah will go to the beach tomorrow.", imgA: img1a, imgB: img1b, correctSide: "a" },
-  { id: 2, sentence: "Stella will study for her test.",       imgA: img2a, imgB: img2b, correctSide: "b" },
-  { id: 3, sentence: "They will eat at a restaurant.",        imgA: img3a, imgB: img3b, correctSide: "a" },
-  { id: 4, sentence: "They will watch a movie at the cinema.", imgA: img4a, imgB: img4b, correctSide: "a" },
+  { id: 1, sentence: "Sarah will go to the beach tomorrow.",      imgA: img1a, imgB: img1b, correctSide: "a" },
+  { id: 2, sentence: "Stella will study for her test.",           imgA: img2a, imgB: img2b, correctSide: "b" },
+  { id: 3, sentence: "They will eat at a restaurant.",            imgA: img3a, imgB: img3b, correctSide: "a" },
+  { id: 4, sentence: "They will watch a movie at the cinema.",    imgA: img4a, imgB: img4b, correctSide: "a" },
 ];
 
 // ─────────────────────────────────────────────
 //  COMPONENT
 // ─────────────────────────────────────────────
 export default function WB_ReadLookWriteCheckCross_QD() {
-  // selected: { itemId: "a" | "b" | null }
-  // The student clicks one image to assign ✓ — the other automatically gets ✕
   const [selected,    setSelected]    = useState({});
   const [showResults, setShowResults] = useState(false);
   const [showAns,     setShowAns]     = useState(false);
@@ -83,38 +79,33 @@ export default function WB_ReadLookWriteCheckCross_QD() {
     setShowAns(false);
   };
 
-  // Get what symbol to show on each image
+  // ── التعديل 2: السيمبول يضل زي ما اختار الطالب دايماً ما يتغير ──
+  // الاستثناء الوحيد: showAns يعرض الإجابة الصحيحة
   const getSymbol = (item, side) => {
     const sel = selected[item.id];
-    if (!sel) return null; // nothing selected yet
+    if (!sel) return null;
 
     if (showAns) {
       return side === item.correctSide ? "✓" : "✕";
     }
-    if (showResults) {
-      if (side === sel) {
-        return sel === item.correctSide ? "✓" : "✕";
-      }
-      // the unselected side — show ✓ if it's the correct one after wrong selection
-      if (sel !== item.correctSide && side === item.correctSide) return null;
-      return null;
-    }
-    // before check: selected side gets ✓, other gets ✕
+
+    // قبل check أو بعده: يضل ✓ على اللي اختاره الطالب و✕ على الثاني بدون تغيير
     return side === sel ? "✓" : "✕";
   };
 
   const getSymbolColor = (item, side) => {
     const sym = getSymbol(item, side);
     if (!sym) return CHECK_COLOR;
-    if (showResults || showAns) {
+    if (showAns) {
       return side === item.correctSide ? CHECK_COLOR : CROSS_COLOR;
     }
     return sym === "✓" ? CHECK_COLOR : CROSS_COLOR;
   };
 
-  const isWrongSelected = (item, side) => {
+  // ── التعديل 1: البادج يظهر جنب الجملة مش على الصورة ──
+  const isWrongSelected = (item) => {
     if (!showResults || showAns) return false;
-    return selected[item.id] === side && side !== item.correctSide;
+    return selected[item.id] && selected[item.id] !== item.correctSide;
   };
 
   return (
@@ -156,11 +147,10 @@ export default function WB_ReadLookWriteCheckCross_QD() {
           width: 100%;
           object-fit: cover;
           display: block;
-                    height : auto
-
+          height: auto;
         }
 
-        /* Symbol box — bottom right corner, square */
+        /* Symbol box — bottom right corner */
         .rlcc-symbol {
           position: absolute;
           bottom: 0;
@@ -173,7 +163,6 @@ export default function WB_ReadLookWriteCheckCross_QD() {
           border-left: 2px solid #2195a6;
           border-right: 2px solid #2195a6;
           border-bottom: 2px solid #2195a6;
-
           display: flex;
           align-items: center;
           justify-content: center;
@@ -183,29 +172,28 @@ export default function WB_ReadLookWriteCheckCross_QD() {
           z-index: 2;
         }
 
-        /* ✕ wrong badge */
+        /* ── التعديل 1: البادج جنب الجملة ── */
         .rlcc-wrong-badge {
-          position: absolute;
-          top: -10px; right: 25px;
           width: clamp(15px, 1.7vw, 19px);
           height: clamp(15px, 1.7vw, 19px);
           border-radius: 50%;
           background: ${WRONG_BADGE_BG};
           color: ${WRONG_BADGE_TEXT};
-          display: flex; align-items: center; justify-content: center;
+          display: flex;
+          align-items: center;
+          justify-content: center;
           font-size: clamp(7px, 0.8vw, 10px);
           font-weight: 700;
           border: 2px solid #fff;
           box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-          pointer-events: none;
-          z-index: 3;
+          flex-shrink: 0;
         }
 
         /* Right: number + sentence */
         .rlcc-right {
           display: flex;
           align-items: center;
-          gap: clamp(6px, 0.8vw, 10px;
+          gap: clamp(6px, 0.8vw, 10px);
           min-width: 0;
         }
 
@@ -215,6 +203,7 @@ export default function WB_ReadLookWriteCheckCross_QD() {
           color: ${NUMBER_COLOR};
           flex-shrink: 0;
           line-height: 1.5;
+          margin-right: 5px;
         }
 
         .rlcc-sentence {
@@ -255,16 +244,15 @@ export default function WB_ReadLookWriteCheckCross_QD() {
         </h1>
 
         {/* ── Items ── */}
-        <div className="rlcc-list" style={{margin : "1% 0"}} >
+        <div className="rlcc-list" style={{ margin: "1% 0" }}>
           {ITEMS.map((item) => (
             <div key={item.id} className="rlcc-row">
 
-              {/* Two images */}
+              {/* Two images — السيمبول ما يتغير */}
               <div className="rlcc-imgs">
                 {["a", "b"].map((side) => {
                   const sym   = getSymbol(item, side);
                   const color = getSymbolColor(item, side);
-                  const wrong = isWrongSelected(item, side);
                   const src   = side === "a" ? item.imgA : item.imgB;
 
                   return (
@@ -276,21 +264,19 @@ export default function WB_ReadLookWriteCheckCross_QD() {
                       <img src={src} alt={`${item.id}${side}`} className="rlcc-img" />
                       <div className="rlcc-symbol" style={{ color: sym ? color : "transparent" }}>
                         {sym || ""}
-                        {wrong && <div className="rlcc-wrong-badge">✕</div>}
                       </div>
                     </div>
                   );
                 })}
               </div>
 
-              {/* Number + Sentence */}
+              {/* Number + Sentence + البادج جنب الجملة */}
               <div className="rlcc-right">
-                <span className="rlcc-num" style={{  fontSize: "clamp(15px, 1.8vw, 22px);",
-          fontWeight: "700",
-          color:` ${NUMBER_COLOR}`,
-          lineHeight:" 1.5", 
-          marginRight : "5px"}}>{item.id}</span>
+                <span className="rlcc-num">{item.id}</span>
                 <span className="rlcc-sentence">{item.sentence}</span>
+                {isWrongSelected(item) && (
+                  <div className="rlcc-wrong-badge">✕</div>
+                )}
               </div>
 
             </div>

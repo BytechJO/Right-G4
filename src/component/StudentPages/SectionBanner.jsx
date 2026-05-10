@@ -24,8 +24,7 @@ const SectionBanner = ({ title, fontSize = "1.2rem" }) => {
             position: "relative",
     top: "-3px"
       }}>
-        <span style={{
-          fontWeight: "900",
+        <span className="font-semibold" style={{
           fontSize: "1em",
           color: "#111",
           letterSpacing: "0.02em",

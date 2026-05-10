@@ -12,7 +12,7 @@ const GrammarSection_U1 = () => {
     <div className="flex flex-col items-center ">
       <div className="w-[60%] mx-auto">
         <div style={{ display: "flex", flexDirection: "row", gap: "10px", whiteSpace: "nowrap", marginLeft: "auto" }}>
-          <SectionBanner title="Grammer" />
+          <SectionBanner title="Writing" />
        
         </div>
 

@@ -1,6 +1,6 @@
 import WritingA from "./page7_WritingA";
 import WritingB from "./page7_WritingB";
-import img from "../../../assets/imgs/pages/Class Book/Right 4 Unit 2 Welcome to the Big Apple Folder/Page 13/SVG/Asset 8.svg";
+import img from "../../../assets/imgs/pages/Class Book/Right 4 Unit 2 Welcome to the Big Apple Folder/Page 13/SVG/Asset 9.svg";
 import SectionBanner from "../SectionBanner";
 
 const WritingSection_U1 = () => {

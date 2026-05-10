@@ -167,10 +167,10 @@ export default function WB_LookWriteSentences_QC() {
 
         /* ── Matching image ── */
         .lwsc-matching {
-          width: 100%;
-          height: auto;
-          display: block;
-          margin-top: clamp(8px, 1.2vw, 14px);
+          width: 70%;
+          display: flex;
+          height : auto ; 
+    align-self: center;
         }
 
         /* Buttons */

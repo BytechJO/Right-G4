@@ -43,14 +43,14 @@ const ITEMS = [
     id:       3,
     Qtype:    "fixed",
     question: "Did he have a ball?",
-    correctA: ["No, he didn't have a ball.", "no he didn't have a ball", "No, he didn't.", "no he didn't"],
+    correctA: ["No, he didn't have a ball.", "no he didnt have a ball", "no he didnot have a ball" , "no he did not have a ball",],
     answerA:  "No, he didn't have a ball.",
   },
   {
     id:       4,
     Qtype:    "fixed",
     question: "Did he have a bike in his room?",
-    correctA: ["No, he didn't have a bike.", "no he didn't have a bike", "No, he didn't.", "no he didn't"],
+    correctA: ["No, he didn't have a bike.", "no he didnt have a bike", "no he didnot have a bike", , "no he did not have a bike"],
     answerA:  "No, he didn't have a bike.",
   },
 ];
@@ -149,14 +149,13 @@ export default function WB_LookReadAnswer_QD() {
           gap: clamp(12px, 1.8vw, 22px);
           align-items: flex-start;
           width: 100%;
+          margin : 5% 0 ;
         }
 
         .lrad-img {
-          width: clamp(180px, 26vw, 340px);
-          height: auto;
-          display: block;
-          border-radius: 8px;
-          flex-shrink: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
         }
 
         /* Items list */
@@ -170,7 +169,7 @@ export default function WB_LookReadAnswer_QD() {
         .lrad-item {
           display: flex;
           flex-direction: column;
-          gap: clamp(4px, 0.5vw, 6px;
+          gap: clamp(4px, 0.5vw, 6px);
         }
 
         /* Q line */
@@ -220,12 +219,11 @@ export default function WB_LookReadAnswer_QD() {
           width: 100%;
           background: transparent;
           border: none;
-          border-bottom: 2px solid ${INPUT_UNDERLINE_DEFAULT};
+          border-bottom: 1px solid ${INPUT_UNDERLINE_DEFAULT};
           outline: none;
           font-size: clamp(13px, 1.6vw, 19px);
           color: ${INPUT_TEXT_COLOR};
-          padding: 4px 4px 5px;
-          line-height: 1;
+          line-height: 1.5;
           box-sizing: border-box;
           font-family: inherit;
           transition: border-color 0.2s;

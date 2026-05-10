@@ -97,7 +97,7 @@ export default function WB_UnscrambleWrite_QB_U3() {
   return (
     <div className="main-container-component">
       <style>{`
-        .usw3-list { display: flex; flex-direction: column; gap: clamp(30px, 1.8vw, 30px); width: 100%; margin-top : 10%  }
+        .usw3-list { display: flex; flex-direction: column; gap: clamp(55px, 1.8vw, 55px); width: 100%; margin-top : 10%  }
         .usw3-row  { display: flex; align-items: flex-end; gap: clamp(5px, 0.7vw, 9px); min-width: 0; }
         .usw3-num  { font-size: clamp(14px, 1.7vw, 20px); font-weight: 700; color: ${NUMBER_COLOR}; flex-shrink: 0; padding-bottom: 4px; line-height: 1; }
         .usw3-scrambled { font-size: clamp(13px, 1.6vw, 19px); color: #2b2b2b; white-space: nowrap; flex-shrink: 0; padding-bottom: 4px; line-height: 1; }

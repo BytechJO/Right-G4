@@ -188,6 +188,7 @@ const captions = [
                   display: "flex",
                   justifyContent: "center",
                   alignContent: "center",
+                
                 }}
               >
                 <AudioWithCaption

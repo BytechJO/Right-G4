@@ -115,13 +115,13 @@ export default function WB_ReadLookMatch_QJ() {
           gap: clamp(20px, 3vw, 40px);
           align-items: start;
           width: 100%;
+          margin : 5% 0 ;
         }
 
         .rlm-words {
           display: flex;
           flex-direction: column;
-          gap: inherit;
-        }
+gap: 1.5em;        }
 
         .rlm-word-row {
           display: flex;
@@ -182,7 +182,7 @@ export default function WB_ReadLookMatch_QJ() {
         }
 
         .rlm-word {
-          font-size: clamp(14px, 1.7vw, 20px);
+          font-size: clamp(14px, 1.7vw, 18px);
           font-weight: 400;
           color: ${WORD_COLOR};
           line-height: 1;
@@ -192,14 +192,15 @@ export default function WB_ReadLookMatch_QJ() {
         .rlm-images {
           display: grid;
           grid-template-columns: repeat(3, minmax(0, 1fr));
-          gap: clamp(8px, 1.2vw, 16px);
-          align-items: start;
+          gap:clamp(30px, 1.2vw, 30px) clamp(30px, 1.2vw, 30px) ;
+    align-self: center;
+          
         }
 
         .rlm-img-card {
           position: relative;
-            width: 100%;
-              height: 100%;
+            width: 112%;
+              height: 110%;
         }
 
         .rlm-img {
@@ -252,7 +253,7 @@ export default function WB_ReadLookMatch_QJ() {
           className="WB-header-title-page8"
           style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
         >
-          <span className="WB-ex-A-1">J</span>
+          <span className="WB-ex-A-1">A</span>
           Read, look, and match.
         </h1>
 

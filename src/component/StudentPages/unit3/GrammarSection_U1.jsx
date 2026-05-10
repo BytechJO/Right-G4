@@ -2,7 +2,7 @@ import GrammarA from "./GrammarA";
 import GrammarB from "./GrammarB";
 import GrammarC from "./GrammarC";
 import image1 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 3 Harley Eats All the Sweets Folder/Page 24/SVG/Asset 7.svg";
-import image  from "../../../assets/imgs/pages/Class Book/Right 4 Unit 3 Harley Eats All the Sweets Folder/Page 24/SVG/1.svg";
+import image  from "../../../assets/imgs/pages/Class Book/Right 4 Unit 3 Harley Eats All the Sweets Folder/Page 24/SVG/2.svg";
 
 import sound from "../../../assets/audio/ClassBook/Grade 4/cd17pg24-grammar-adult-lady_DyQEJqoO.mp3";
 import QuestionAudioPlayer from "../../QuestionAudioPlayer";
@@ -43,7 +43,7 @@ const stopAtSecond = 2.8;
           <SectionBanner title="Grammer" />
        
         </div>
-        <div style={{marginTop:"10px"}}>
+     <div style={{margin:"3em 0 2em"}} >
         <QuestionAudioPlayer
           src={sound}
           captions={captions}

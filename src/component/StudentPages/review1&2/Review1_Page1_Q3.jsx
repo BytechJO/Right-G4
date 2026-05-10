@@ -290,7 +290,7 @@ const captions = [
           <span className="WB-ex-A-1">C</span>
           Read, listen, and choose.
         </h1>
-     <div style={{marginTop:"10px"}}>
+     <div style={{margin:"3em 0 2em"}} >
         <QuestionAudioPlayer
           src={sound}
           captions={captions}

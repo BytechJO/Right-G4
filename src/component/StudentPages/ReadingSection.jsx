@@ -18,7 +18,7 @@ const ReadingSection = ({
             {mainTitle}
           </h2>
         </div>
-        <div style={{marginTop:"10px"}}>
+        <div style={{margin:"3em 0 2em"}}>
         <QuestionAudioPlayer
           src={sound}
           captions={captions}

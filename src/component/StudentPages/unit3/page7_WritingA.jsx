@@ -92,7 +92,7 @@ const ComprehensionA = () => {
           return (
             <div
               key={item.id}
-              className="flex items-center gap-3 cursor-pointer"
+              className="flex  gap-3 cursor-pointer"
               onClick={() => handleSelect(item.id)}
             >
               {/* Number */}
@@ -113,8 +113,8 @@ const ComprehensionA = () => {
                 {item.text}
               </span>
 
+              <div className="relative"  style={{ position : "relative" ,left : "-1.5em"}}>
               {/* Checkbox */}
-              <div className="relative" style={{ flexShrink: 0 }}>
                 <div
                   style={{
                     width: "28px",
@@ -122,9 +122,7 @@ const ComprehensionA = () => {
                     borderRadius: "6px",
                     border: "2px solid #2195a6",
                     background: "#fff",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
+                    
                   }}
                 >
                   {isSelected && (

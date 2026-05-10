@@ -48,7 +48,7 @@ const stopAtSecond =  2.20;
           <SectionBanner title="Grammer" />
        
         </div>
-        <div style={{marginTop:"10px"}}>
+          <div style={{margin:"3em 0 2em"}} >
         <QuestionAudioPlayer
           src={sound}
           captions={captions}

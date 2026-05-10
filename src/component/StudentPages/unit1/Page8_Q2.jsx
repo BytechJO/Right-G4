@@ -94,9 +94,8 @@ export default function WB_UnscrambleWrite_QB() {
         .usw-grid {
           display: grid;
           grid-template-columns: repeat(2, 1fr);
-          gap: clamp(10px, 1.6vw, 20px) clamp(20px, 3vw, 40px);
-          width: 100%;
-          margin : 12% 0 ; 
+    gap: 2.5em;          width: 100%;
+          margin : 10% 0 ; 
         }
 
         /* Single row: num + scrambled + input */
@@ -117,7 +116,7 @@ export default function WB_UnscrambleWrite_QB() {
         }
 
         .usw-scrambled {
-          font-size: clamp(13px, 1.6vw, 19px);
+          font-size: clamp(16px, 1.6vw, 22px);
           color: ${SCRAMBLED_COLOR};
           white-space: nowrap;
           flex-shrink: 0;
@@ -137,7 +136,7 @@ export default function WB_UnscrambleWrite_QB() {
           border: none;
           border-bottom: 1px solid ${INPUT_UNDERLINE_DEFAULT};
           outline: none;
-          font-size: clamp(13px, 1.6vw, 19px);
+          font-size: clamp(16px, 1.6vw, 22px);
           color: ${INPUT_TEXT_COLOR};
           line-height: 1.5;
           box-sizing: border-box;

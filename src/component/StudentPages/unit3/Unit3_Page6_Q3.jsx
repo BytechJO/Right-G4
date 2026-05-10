@@ -134,18 +134,18 @@ export default function WB_ReadWriteQA_QF() {
       <style>{`
         /* ── Items list ── */
         .rwqf-list {
-          display: flex;
-          flex-direction: column;
-          gap: clamp(14px, 2.2vw, 26px);
-          width: 100%;
-          margin-top :8%
+     display: flex;
+    flex-direction: column;
+    gap: clamp(44px, 1.2vw, 46px);
+    width: 100%;
+    margin-top: 6%;
         }
 
         /* Single item */
         .rwqf-item {
-          display: flex;
-          flex-direction: column;
-          gap: clamp(5px, 0.7vw, 8px);
+     display: flex;
+    flex-direction: column;
+    gap: clamp(20px, 0.7vw, 20px);
         }
 
         /* Q line */

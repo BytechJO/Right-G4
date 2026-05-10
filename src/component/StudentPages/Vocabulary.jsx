@@ -50,7 +50,8 @@ const Vocabulary = ({
       <h2 className="mb-5 pl-4 mt-4 font-bold">
         Listen and repeat. Find the words and expressions in the conversation above.
       </h2>
-
+<div style={{ margin : "3em 0 2em"}}>
+  
       {/* Audio */}
       <QuestionAudioPlayer
         ref={mainAudioRef}
@@ -59,6 +60,7 @@ const Vocabulary = ({
         stopAtSecond={stopAtSecond}
         onTimeUpdate={(t) => setCurrentTime(t)}
       />
+</div>
 
       {/* Grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-4">

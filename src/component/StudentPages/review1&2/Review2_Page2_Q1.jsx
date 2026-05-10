@@ -5,7 +5,7 @@ import ValidationAlert from "../../Popup/ValidationAlert";
 import img1 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 2 Welcome to the Big Apple Folder/Page 19/SVG/Asset 38.svg";
 import img2 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 2 Welcome to the Big Apple Folder/Page 19/SVG/Asset 39.svg";
 import img3 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 2 Welcome to the Big Apple Folder/Page 19/SVG/Asset 40.svg";
-import img4 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 2 Welcome to the Big Apple Folder/Page 19/SVG/Asset 41.svg";
+import img4 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 2 Welcome to the Big Apple Folder/Page 19/SVG/Asset 41-a.svg";
 import sound from "../../../assets/audio/ClassBook/Grade 4/cd13pg19-instruction-adult-lady_CJNDmPbC.mp3";
 import QuestionAudioPlayer from "../../QuestionAudioPlayer";
 
@@ -126,7 +126,8 @@ export default function WB_ReadListenWriteCheckCross_QD2() {
 
         .rlcc2-card {
           display: flex;
-          flex-direction: column;
+
+    flex-direction: row;
           gap: clamp(4px, 0.5vw, 6px);
         }
 
@@ -167,9 +168,11 @@ export default function WB_ReadListenWriteCheckCross_QD2() {
           pointer-events: none;
         }
 
+        
         .rlcc2-symbol--left {
-          left: 0;
-          border-radius: 0 8px 0 0;
+
+
+        border-radius: 0 8px 0 0;
         }
 
         .rlcc2-symbol--right {
