@@ -138,8 +138,8 @@ export default function WB_ListenReadWrite_QD() {
           display: flex;
           flex-wrap: wrap;
           gap: clamp(8px, 1.2vw, 14px);
-          justify-content: center;
-          width: 100%;
+          justify-content: space-between;
+          width: 80%;
         }
 
         .lrwd-pill {
@@ -191,7 +191,7 @@ export default function WB_ListenReadWrite_QD() {
 
         /* Image */
         .lrwd-img {
-          width: 80%;
+          width: 60%;
           height : auto ;
           object-fit: cover;
           display: block;
@@ -204,7 +204,7 @@ export default function WB_ListenReadWrite_QD() {
         }
 
         .lrwd-input {
-    width: 80%;
+    width: 60%;
           background: transparent;
           border: none;
           border-bottom: 1px solid ${INPUT_UNDERLINE_DEFAULT};
