@@ -1,351 +1,415 @@
-import React, { useState, useRef } from "react";
+import React, { useState } from "react";
+import Button from "../../Button";
 import ValidationAlert from "../../Popup/ValidationAlert";
-import "./Unit7_Page5_Q2.css";
 
-import img1 from "../../../assets/imgs/pages/classbook/Right 3 Unit 7 Thats My School Folder/Page 62/Ex A2-1.svg";
-import img2 from "../../../assets/imgs/pages/classbook/Right 3 Unit 7 Thats My School Folder/Page 62/Ex A2-2.svg";
-import img3 from "../../../assets/imgs/pages/classbook/Right 3 Unit 7 Thats My School Folder/Page 62/Ex A2-3.svg";
-import img4 from "../../../assets/imgs/pages/classbook/Right 3 Unit 7 Thats My School Folder/Page 62/Ex A2-4.svg";
-import img5 from "../../../assets/imgs/pages/classbook/Right 3 Unit 7 Thats My School Folder/Page 62/Ex A2-5.svg";
-import img6 from "../../../assets/imgs/pages/classbook/Right 3 Unit 7 Thats My School Folder/Page 62/Ex A2-6.svg";
-import QuestionAudioPlayer from "../../QuestionAudioPlayer";
-import blue from "../../../assets/audio/ClassBook/Unit 7/P 62/unit7-pg62-EXA2.mp3";
+// ─────────────────────────────────────────────
+//  🎨  COLORS
+// ─────────────────────────────────────────────
+const CELL_BORDER_COLOR   = "#2096a6";
+const CELL_BG_DEFAULT     = "#e8eff1";
+const CELL_BG_SELECTING   = "#b2dfdb";
+const CELL_TEXT_SELECTING = "#004d40";
+const CELL_BG_WRONG       = "#ffcdd2";
+const CELL_TEXT_WRONG     = "#b71c1c";
+const CELL_TEXT_DEFAULT   = "#263238";
+const CELL_TEXT_FOUND     = "#ffffff";
+const WORD_LIST_BORDER    = "#2096a6";
+const WORD_TEXT_COLOR     = "#37474f";
 
-const Unit7_Page5_Q2 = () => {
-  const [selectedImg, setSelectedImg] = useState(null);
-  const [matches, setMatches] = useState({});
-  const [showResult, setShowResult] = useState(false);
-  const [locked, setLocked] = useState(false);
-  const [selectedSentence, setSelectedSentence] = useState(null);
+const FOUND_COLORS = [
+  "#e53935","#e67e22","#43a047","#1e88e5","#8e24aa",
+  "#00897b","#d81b60","#f4511e","#039be5",
+];
 
-  const imageRefs = useRef([]);
-  const sentenceRefs = useRef([]);
-  const containerRef = useRef(null);
-  const captions = [
-    { start: 0.239, end: 4.0, text: "Page 62, write activities." },
-    { start: 4.0, end: 8.42, text: "Exercise A, number 2. Listen and match." },
+// ─────────────────────────────────────────────
+//  📝  EXERCISE DATA
+// ─────────────────────────────────────────────
 
-    { start: 8.42, end: 10.0, text: "One, pen." },
-    { start: 10.0, end: 12.0, text: "Two, mouse." },
-    { start: 12.0, end: 14.0, text: "Three, rabbit." },
-    { start: 14.0, end: 16.0, text: "Four, nurse." },
-    { start: 16.0, end: 19.379, text: "Five, zoo." },
+// Grid from the book image (8 cols × 8 rows)
+const GRID = [
+  ["y","g","g","l","s","s","c","g"],
+  ["s","u","u","r","r","t","s","e"],
+  ["d","e","l","d","y","u","t","s"],
+  ["t","s","l","l","s","m","r","c"],
+  ["s","s","a","r","r","b","a","a"],
+  ["r","e","e","n","o","l","n","r"],
+  ["a","r","c","s","c","e","g","y"],
+  ["p","o","n","d","k","d","e","a"],
+];
 
-    { start: 20.559, end: 22.459, text: "Six, umbrella." },
-  ];
-  const images = [
-    { id: 0, img: img1 },
-    { id: 1, img: img2 },
-    { id: 2, img: img3 },
-    { id: 3, img: img4 },
-    { id: 4, img: img5 },
-    { id: 5, img: img6 },
-  ];
+// Word paths verified against the grid image:
+// guess    → col 1, rows 0–4 (vertical down): g,u,e,s,s
+// stumbled → col 5, rows 0–7 (vertical down): s,t,u,m,b,l,e,d
+// strange  → col 6, rows 1–7 (vertical down): s,t,r,a,n,g,e
+// scary    → col 7, rows 2–6 (vertical down): s,c,a,r,y
+// pond     → row 7, cols 0–3 (horizontal):    p,o,n,d
+// rock     → diagonal down-right from [1,4]:  r[1,4],o[2,?]...
+//            best match: [4,3]→[5,2]→[6,1]→? or [1,4]r,[2,3]d no
+//            After careful check: r[5,0],o—not available.
+//            Using [4,4]=r,[5,3]=n — no. 
+//            r[6,1],[7,0] — no o.
+//            Visible in image: diagonal circle middle-area.
+//            [3,3]=l,[4,2]=a... 
+//            Best match found: [1,3]=r,[2,2]=l — no.
+//            rock: r[4,3],o[5,4],c[6,5]? [6,5]=e — no.
+//            r[4,4],o[5,5]? [5,5]=l — no.
+//            Diagonal up: r[6,1],o[5,0]=r — no.
+//            Checking [5,4]=o: up-left: [4,3]=r ✓, [5,4]=o ✓, [6,5]=e — no c.
+//            [5,4]=o, [6,3]=s — no.
+//            Only valid rock path: r[1,4],o—next diagonal...
+//            [1,4]=r,[2,5]=u no. [1,3]=r down: [2,3]=d no.
+//            Given grid, rock may be: [4,4]r,[3,3]l — reversed?
+//            Checking UP diagonal [7,3]=d going up-left — pond area.
+//            
+//            FINAL: From image the diagonal circle covers approx rows 4–7, cols 0–3 area
+//            but pond is there. The other diagonal covers col area 3-6.
+//            r[1,4],o[2,3]=d no. r[4,3],o[5,2]=e no. r[4,4],o[5,3]=n no.
+//            
+//            Conclusion: "rock" must go diagonally up-right or another direction.
+//            r[7,0]=p no. Checking all diagonals for r,o,c,k:
+//            [5,0]r→ down-right: [6,1]r,[7,2]n — no
+//            [6,1]r→ up-right: [5,2]e,[4,3]r,[3,4]s — no  
+//            [3,6]r→ down-left: [4,5]b — no; up-left: [2,5]u — no
+//            [1,3]r→ down-right: [2,4]y — no; down-left: [2,2]l — no
+//            [1,4]r→ down-left: [2,3]d — no; up-right→ out of bounds
+//            [4,3]r→ up-left: [3,2]l — no; up-right: [3,4]s — no
+//            [4,4]r→ up-left: [3,3]l — no; down-right: [5,5]l — no; down-left: [5,3]n — no; up-right: [3,5]m — no
+//            [5,7]r→ up-left: [4,6]a,[3,5]m — no; up-right→ out; down-left: [6,6]g — no
+//            
+//            There is NO valid path for "rock" in this grid.
+//            The word list and grid in the original code are WRONG/placeholder data.
+//            Using the image word list: strange, scary, rock, stumbled, guess, pond
+//            rock path needs to be confirmed with actual book answer key.
+//            Placeholder: using [4,3],[5,2],[6,1] reversed = r,e,r — wrong.
+//            
+//            Setting rock as best-effort diagonal [1,4],[2,3],[3,2],[4,1] = r,d,l,s — wrong.
+//            
+//            NOTE TO DEVELOPER: "rock" path cannot be verified from this grid.
+//            Please confirm with the answer key. Marked as TODO below.
 
-  const sentences = [
-    { id: 0, text: "r" },
-    { id: 1, text: "u" },
-    { id: 2, text: "p" },
-    { id: 3, text: "z" },
-    { id: 4, text: "m" },
-    { id: 5, text: "n" },
-  ];
+const WORD_DEFS = [
+  // guess: col 1, rows 0–4 ↓
+  { word: "guess",    cells: [[0,1],[1,1],[2,1],[3,1],[4,1]] },
+  // stumbled: col 5, rows 0–7 ↓
+  { word: "stumbled", cells: [[0,5],[1,5],[2,5],[3,5],[4,5],[5,5],[6,5],[7,5]] },
+  // strange: col 6, rows 1–7 ↓
+  { word: "strange",  cells: [[1,6],[2,6],[3,6],[4,6],[5,6],[6,6],[7,6]] },
+  // scary: col 7, rows 2–6 ↓
+  { word: "scary",    cells: [[2,7],[3,7],[4,7],[5,7],[6,7]] },
+  // pond: row 7, cols 0–3 →
+  { word: "pond",     cells: [[7,0],[7,1],[7,2],[7,3]] },
+  // rock: TODO — confirm with answer key.
+  // Best guess from image diagonal circle (middle area):
+  // Trying [0,2],[1,3],[2,4],[3,5] = g,r,y,m — no
+  // Trying [2,0],[3,1],[4,2],[5,3] = d,s,a,n — no
+  // Leaving as placeholder — update when answer key confirmed:
+  { word: "rock",     cells: [[4,4],[5,4],[6,4],[7,4]] },
+  // Note: [3,6]=r,[4,5]=b,[5,4]=o,[6,3]=s — still wrong.
+  // This entry MUST be updated with the correct answer key path.
+];
 
-  const correct = {
-    0: 2,
-    1: 4,
-    2: 0,
-    3: 5,
-    4: 3,
-    5: 1,
-  };
+const WORD_LIST = ["strange","scary","rock","stumbled","guess","pond"];
 
-  const selectImage = (id) => {
-    if (locked || showResult) return;
+// ─────────────────────────────────────────────
+//  🔧  HELPERS
+// ─────────────────────────────────────────────
+const cellKey = (r, c) => `${r}-${c}`;
 
-    // إذا اختار جملة → اربط
-    if (selectedSentence !== null) {
-      setMatches((prev) => {
-        const updated = { ...prev };
+const getCellsBetween = (a, b) => {
+  if (!a || !b) return [];
+  const dr  = b[0] - a[0];
+  const dc  = b[1] - a[1];
+  const len = Math.max(Math.abs(dr), Math.abs(dc));
+  if (len === 0) return [a];
+  if (Math.abs(dr) !== 0 && Math.abs(dc) !== 0 && Math.abs(dr) !== Math.abs(dc)) return [a];
+  const sr = dr === 0 ? 0 : dr / Math.abs(dr);
+  const sc = dc === 0 ? 0 : dc / Math.abs(dc);
+  const cells = [];
+  for (let i = 0; i <= len; i++) cells.push([a[0] + sr * i, a[1] + sc * i]);
+  return cells;
+};
 
-        Object.keys(updated).forEach((imgKey) => {
-          if (updated[imgKey] === selectedSentence) {
-            delete updated[imgKey];
-          }
-        });
+const checkSelection = (cells, foundNames) => {
+  if (cells.length === 0) return null;
+  const selectedSet = new Set(cells.map(([r, c]) => `${r}-${c}`));
+  for (const def of WORD_DEFS) {
+    if (foundNames.has(def.word)) continue;
+    if (cells.length !== def.cells.length) continue;
+    const defSet = new Set(def.cells.map(([r, c]) => `${r}-${c}`));
+    const isMatch = [...selectedSet].every((k) => defSet.has(k));
+    if (isMatch) return def;
+  }
+  return null;
+};
 
-        updated[id] = selectedSentence;
-        return updated;
-      });
+// ─────────────────────────────────────────────
+//  COMPONENT
+// ─────────────────────────────────────────────
+export default function WB_WordSearch_QK() {
+  const [selecting,   setSelecting]   = useState(false);
+  const [startCell,   setStartCell]   = useState(null);
+  const [hoveredCell, setHoveredCell] = useState(null);
+  const [foundWords,  setFoundWords]  = useState([]);
+  const [wrongFlash,  setWrongFlash]  = useState(false);
+  const [answerShown, setAnswerShown] = useState(false);
+  const foundNames = new Set(foundWords.map((f) => f.word));
 
-      setSelectedSentence(null);
-      return;
-    }
-
-    // السلوك القديم (اختيار صورة)
-    setSelectedImg(id);
-  };
-
-  const selectSentence = (id) => {
-    if (locked || showResult) return;
-
-    // إذا في صورة مختارة → اربط
-    if (selectedImg !== null) {
-      setMatches((prev) => {
-        const updated = { ...prev };
-
-        Object.keys(updated).forEach((imgKey) => {
-          if (updated[imgKey] === id) {
-            delete updated[imgKey];
-          }
-        });
-
-        updated[selectedImg] = id;
-        return updated;
-      });
-
-      setSelectedImg(null);
-      return;
-    }
-    setSelectedSentence(id);
-  };
-  const checkAnswers = () => {
-    if (locked || showResult) return;
-
-    if (Object.keys(matches).length !== images.length) {
-      ValidationAlert.info("Please match all.");
-      return;
-    }
-
-    let correctCount = 0;
-
-    Object.entries(matches).forEach(([imgId, sentId]) => {
-      if (correct[imgId] === sentId) correctCount++;
+  const foundCellMap = {};
+  foundWords.forEach(({ cells, color }) => {
+    cells.forEach(([r, c]) => {
+      const k = cellKey(r, c);
+      if (!foundCellMap[k]) foundCellMap[k] = [];
+      foundCellMap[k].push(color);
     });
+  });
 
-    const total = images.length;
+  const selectionCells = getCellsBetween(startCell, hoveredCell);
+  const selectionKeys  = new Set(selectionCells.map(([r, c]) => cellKey(r, c)));
 
-    const message = `
-        Score: ${correctCount} / ${total}
-  `;
+  const handleMouseDown = (r, c) => {
+    setSelecting(true);
+    setStartCell([r, c]);
+    setHoveredCell([r, c]);
+  };
 
-    if (correctCount === total) {
-      ValidationAlert.success(message);
-    } else if (correctCount === 0) {
-      ValidationAlert.error(message);
-    } else {
-      ValidationAlert.warning(message);
+  const handleMouseEnter = (r, c) => {
+    if (selecting) setHoveredCell([r, c]);
+  };
+
+  const handleMouseUp = () => {
+    if (!selecting) return;
+    setSelecting(false);
+    if (selectionCells.length > 1) {
+      const match = checkSelection(selectionCells, foundNames);
+      if (match) {
+        const color = FOUND_COLORS[foundWords.length % FOUND_COLORS.length];
+        setFoundWords((prev) => [...prev, { word: match.word, cells: match.cells, color }]);
+      } else {
+        setWrongFlash(true);
+        setTimeout(() => setWrongFlash(false), 400);
+      }
     }
-
-    setShowResult(true);
-    setLocked(true);
+    setStartCell(null);
+    setHoveredCell(null);
   };
 
-  const showAnswers = () => {
-    setMatches(correct);
-    setLocked(true);
-    setShowResult(true);
+  const handleReset = () => {
+    setAnswerShown(false);
+    setFoundWords([]);
+    setStartCell(null);
+    setHoveredCell(null);
+    setSelecting(false);
+    setWrongFlash(false);
   };
 
-  const reset = () => {
-    setSelectedSentence(null);
-    setSelectedImg(null);
-    setMatches({});
-    setShowResult(false);
-    setLocked(false);
+  const handleShowAnswer = () => {
+    setAnswerShown(true);
+    setFoundWords(
+      WORD_DEFS.map((def, i) => ({
+        word:  def.word,
+        cells: def.cells,
+        color: FOUND_COLORS[i % FOUND_COLORS.length],
+      }))
+    );
   };
+
+  const handleCheck = () => {
+    if (answerShown) return;
+    if (foundNames.size < WORD_DEFS.length) {
+      ValidationAlert.info("Please find all words first.");
+    } else {
+      ValidationAlert.success(`Score: ${WORD_DEFS.length} / ${WORD_DEFS.length}`);
+    }
+  };
+
+  const getCellStyle = (key, isSelecting, isWrong) => {
+    if (isWrong)     return { background: CELL_BG_WRONG };
+    if (isSelecting) return { background: CELL_BG_SELECTING };
+    const colors = foundCellMap[key];
+    if (!colors || colors.length === 0) return { background: CELL_BG_DEFAULT };
+    if (colors.length === 1) return { background: colors[0] };
+    const step = 100 / colors.length;
+    const stops = colors.flatMap((c, i) => [
+      `${c} ${(i * step).toFixed(1)}%`,
+      `${c} ${((i + 1) * step).toFixed(1)}%`,
+    ]);
+    return { background: `linear-gradient(135deg, ${stops.join(", ")})` };
+  };
+
+  // The grid is 8 columns wide
+  const COLS = GRID[0].length; // 8
 
   return (
     <div
-      ref={containerRef}
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        padding: "30px",
-        position: "relative",
-      }}
+      className="main-container-component"
+      onMouseUp={handleMouseUp}
+      onMouseLeave={() => { if (selecting) handleMouseUp(); }}
     >
+      <style>{`
+        .wsk-body {
+          display: flex;
+          gap: clamp(20px, 3vw, 48px);
+          align-items: flex-start;
+          flex-wrap: wrap;
+        }
+        .wsk-word-list {
+        margin : 2em 0;
+          border: 2px solid ${CELL_BORDER_COLOR};
+          border-radius: 14px;
+          padding: clamp(12px, 1.6vw, 20px) clamp(16px, 2vw, 26px);
+          display: flex;
+          flex-direction: column;
+          gap: 20px;
+          min-width: clamp(110px, 15vw, 160px);
+          flex-shrink: 0;
+                    background: ${CELL_BG_DEFAULT};
+
+        }
+        .wsk-word-item {
+          font-size: clamp(14px, 1.6vw, 18px);
+          font-weight: 700;
+          color: ${WORD_TEXT_COLOR};
+          line-height: 1.3;
+          transition: opacity 0.25s;
+          user-select: none;
+              align-self: center;
+
+        }
+        .wsk-word-item--found {
+          text-decoration: line-through;
+          opacity: 0.38;
+        }
+        .wsk-grid {
+          position: relative;
+          display: grid;
+          grid-template-columns: repeat(${COLS}, 1fr);
+          gap: 0;
+          cursor: crosshair;
+          user-select: none;
+          -webkit-user-select: none;
+          border: 2px solid ${CELL_BORDER_COLOR};
+          border-radius: 8px;
+          overflow: hidden;
+          flex-shrink: 0;
+        }
+        .wsk-cell {
+          width:  clamp(30px, 3.8vw, 46px);
+          height: clamp(30px, 3.8vw, 46px);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: clamp(13px, 1.5vw, 18px);
+          font-weight: 700;
+          color: ${CELL_TEXT_DEFAULT};
+          border-right: 1px solid ${CELL_BORDER_COLOR};
+          border-bottom: 1px solid ${CELL_BORDER_COLOR};
+          background: ${CELL_BG_DEFAULT};
+          transition: background 0.1s, color 0.1s;
+          position: relative;
+        }
+        .wsk-cell:nth-child(${COLS}n) { border-right: none; }
+        .wsk-cell:nth-child(n+${COLS * (GRID.length - 1) + 1}) { border-bottom: none; }
+        .wsk-cell--selecting { color: ${CELL_TEXT_SELECTING}; }
+        .wsk-cell--wrong     { color: ${CELL_TEXT_WRONG} !important; }
+        .wsk-cell--found     { color: ${CELL_TEXT_FOUND}; }
+        .wsk-buttons {
+          display: flex;
+          justify-content: center;
+          margin-top: clamp(8px, 1.6vw, 18px);
+        }
+        .wsk-congrats {
+          text-align: center;
+          font-size: clamp(15px, 1.8vw, 20px);
+          font-weight: 800;
+          color: #27ae60;
+          animation: wsk-pop 0.4s ease both;
+        }
+        @keyframes wsk-pop {
+          from { transform: scale(0.7); opacity: 0; }
+          to   { transform: scale(1);   opacity: 1; }
+        }
+        @media (max-width: 600px) {
+          .wsk-body { flex-direction: column; }
+        }
+      `}</style>
+
       <div
         className="div-forall"
         style={{
-          width: "100%",
-          maxWidth: "900px",
           display: "flex",
           flexDirection: "column",
-          gap: "30px",
+          gap: "clamp(14px, 2vw, 24px)",
+          maxWidth: "1100px",
+          margin: "0 auto",
         }}
       >
-        <h5 className="header-title-page8">
-          <span style={{ color: "#2e3192", marginRight: "10px" }}>2</span>
-          Listen and match.
-        </h5>
-        <QuestionAudioPlayer src={blue} captions={captions} stopAtSecond={8} />
+        {/* Header */}
+        <h1
+          className="WB-header-title-page8"
+          style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
+        >
+          <span className="WB-ex-A">B</span>
+          Find and circle the words.
+        </h1>
 
-        <div className="w-full flex flex-col items-center gap-16">
-          {/* 🔥 الصور فوق */}
-          <div className="grid grid-cols-6 gap-10 w-full justify-items-center">
-            {images.map((img, i) => (
-              <div
-                key={i}
-                onClick={() => selectImage(i)}
-                className="flex flex-col items-center gap-2 cursor-pointer transition"
+        {/* Body */}
+        <div className="wsk-body">
+
+          {/* Word list */}
+          <div className="wsk-word-list">
+            {WORD_LIST.map((w) => (
+              <span
+                key={w}
+                className={`wsk-word-item ${foundNames.has(w) ? "wsk-word-item--found" : ""}`}
               >
-                <img
-                  src={img.img}
-                  style={{
-                    width: "85px",
-                    height: "85px",
-                    objectFit: "contain",
-                    border:
-                      selectedImg === i
-                        ? "3px solid #f97316"
-                        : "3px solid transparent",
-                    borderRadius: "12px",
-                    padding: "4px",
-                    backgroundColor:
-                      selectedImg === i ? "#ffedd5" : "transparent",
-                  }}
-                />
-
-                <div
-                  ref={(el) => (imageRefs.current[i] = el)} // 🔥 الريف هون على الدوت
-                  className="w-3 h-3 rounded-full mt-2 transition"
-                  style={{
-                    backgroundColor: selectedImg === i ? "#f97316" : "#fb923c",
-                    transform: selectedImg === i ? "scale(1.4)" : "scale(1)",
-                    boxShadow:
-                      selectedImg === i
-                        ? "0 0 0 4px rgba(249,115,22,0.2)"
-                        : "none",
-                  }}
-                ></div>
-              </div>
+                {w}
+              </span>
             ))}
           </div>
 
-          {/* 🔥 الجمل تحت */}
-          <div className="grid grid-cols-6 gap-8 w-full justify-items-center mt-10">
-            {sentences.map((sent, i) => (
-              <div
-                key={i}
-                onClick={() => selectSentence(i)}
-                className="relative flex flex-col items-center cursor-pointer"
-              >
-                {/* 🔥 الدوت */}
-                <div
-                  ref={(el) => (sentenceRefs.current[i] = el)} // 🔥 هون كمان
-                  className="absolute -top-2 left-1/2 -translate-x-1/2 rounded-full z-10 transition"
-                  style={{
-                    width: "12px",
-                    height: "12px",
-                    backgroundColor: "#f97316",
-                    transform:
-                      selectedSentence === i ? "scale(1.4)" : "scale(1)",
-                    boxShadow:
-                      selectedSentence === i
-                        ? "0 0 0 4px rgba(249,115,22,0.2)"
-                        : "none",
-                  }}
-                ></div>
+          {/* Grid */}
+          <div className="wsk-grid">
+            {GRID.map((row, r) =>
+              row.map((letter, c) => {
+                const key         = cellKey(r, c);
+                const foundColors = foundCellMap[key];
+                const isFound     = foundColors && foundColors.length > 0;
+                const isSel       = selectionKeys.has(key) && !isFound;
+                const isWrong     = isSel && wrongFlash;
+                const isSelecting = isSel && !wrongFlash;
 
-                {/* 🔥 البوكس */}
-                <div
-                  className="relative px-4 py-2 rounded-2xl text-sm text-center transition"
-                  style={{
-                    backgroundColor:
-                      selectedSentence === i ? "#fed7aa" : "#ffedd5",
-                    border:
-                      selectedSentence === i
-                        ? "2px solid #f97316"
-                        : "2px solid transparent",
-                  }}
-                >
-                  {sent.text}
-                  {showResult &&
-                    Object.entries(matches).some(
-                      ([imgId, sentId]) =>
-                        sentId == i && correct[imgId] !== sentId,
-                    ) && (
-                      <span
-                        style={{
-                          position: "absolute",
-                          top: "-10px",
-                          right: "-10px",
-                          transform: "translateY(-50%)",
-                          width: "20px",
-                          height: "20px",
-                          background: "#ef4444",
-                          color: "white",
-                          borderRadius: "50%",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          fontSize: "12px",
-                          fontWeight: "bold",
-                          border: "2px solid white",
-                          boxShadow: "0 2px 6px rgba(0,0,0,0.2)",
-                          pointerEvents: "none",
-                          zIndex: 3,
-                        }}
-                      >
-                        ✕
-                      </span>
-                    )}
-                </div>
-              </div>
-            ))}
+                return (
+                  <div
+                    key={key}
+                    className={[
+                      "wsk-cell",
+                      isFound     ? "wsk-cell--found"     : "",
+                      isSelecting ? "wsk-cell--selecting" : "",
+                      isWrong     ? "wsk-cell--wrong"     : "",
+                    ].filter(Boolean).join(" ")}
+                    style={getCellStyle(key, isSelecting, isWrong)}
+                    onMouseDown={() => handleMouseDown(r, c)}
+                    onMouseEnter={() => handleMouseEnter(r, c)}
+                  >
+                    {letter}
+                  </div>
+                );
+              })
+            )}
           </div>
+
         </div>
-      </div>
 
-      <svg className="absolute top-0 left-0 w-full h-full pointer-events-none">
-        {Object.entries(matches).map(([imgId, sentId], i) => {
-          const imgDot = imageRefs.current[imgId];
-          const sentDot = sentenceRefs.current[sentId];
+        {/* Buttons */}
+        <div className="wsk-buttons">
+          <Button
+            checkAnswers={handleCheck}
+            handleShowAnswer={handleShowAnswer}
+            handleStartAgain={handleReset}
+          />
+        </div>
 
-          if (!imgDot || !sentDot || !containerRef.current) return null;
-
-          const imgRect = imgDot.getBoundingClientRect();
-          const sentRect = sentDot.getBoundingClientRect();
-          const containerRect = containerRef.current.getBoundingClientRect();
-
-          const x1 = sentRect.left + sentRect.width / 2 - containerRect.left;
-          const y1 = sentRect.top + sentRect.height / 2 - containerRect.top;
-
-          const x2 = imgRect.left + imgRect.width / 2 - containerRect.left;
-          const y2 = imgRect.top + imgRect.height / 2 - containerRect.top;
-          return (
-            <g key={i}>
-              <line
-                x1={x1}
-                y1={y1}
-                x2={x2}
-                y2={y2}
-                stroke="orange"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-              />
-            </g>
-          );
-        })}
-      </svg>
-
-      <div className="action-buttons-container">
-        <button className="try-again-button" onClick={reset}>
-          Start Again ↻
-        </button>
-
-        <button onClick={showAnswers} className="show-answer-btn">
-          Show Answer
-        </button>
-
-        <button className="check-button2" onClick={checkAnswers}>
-          Check Answer ✓
-        </button>
       </div>
     </div>
   );
-};
-
-export default Unit7_Page5_Q2;
+}

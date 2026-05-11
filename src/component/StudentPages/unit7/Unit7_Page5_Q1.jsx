@@ -1,357 +1,323 @@
-import { useState } from "react";
-import ValidationAlert from "../../Popup/ValidationAlert";
+import React, { useState, useRef } from "react";
 import Button from "../../Button";
-import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
-import img1 from "../../../assets/imgs/pages/classbook/Right 3 Unit 7 Thats My School Folder/Page 62/Ex A 1.svg";
-import img2 from "../../../assets/imgs/pages/classbook/Right 3 Unit 7 Thats My School Folder/Page 62/Ex A 2.svg";
-import img3 from "../../../assets/imgs/pages/classbook/Right 3 Unit 7 Thats My School Folder/Page 62/Ex A 3.svg";
-import img4 from "../../../assets/imgs/pages/classbook/Right 3 Unit 7 Thats My School Folder/Page 62/Ex A 4.svg";
-import img5 from "../../../assets/imgs/pages/classbook/Right 3 Unit 7 Thats My School Folder/Page 62/Ex A 5.svg";
-import img6 from "../../../assets/imgs/pages/classbook/Right 3 Unit 7 Thats My School Folder/Page 62/Ex A 6.svg";
-import img7 from "../../../assets/imgs/pages/classbook/Right 3 Unit 7 Thats My School Folder/Page 62/Ex A 7.svg";
-import img8 from "../../../assets/imgs/pages/classbook/Right 3 Unit 7 Thats My School Folder/Page 62/Ex A 8.svg";
-import img9 from "../../../assets/imgs/pages/classbook/Right 3 Unit 7 Thats My School Folder/Page 62/Ex A 9.svg";
-import img10 from "../../../assets/imgs/pages/classbook/Right 3 Unit 7 Thats My School Folder/Page 62/Ex A 10.svg";
+import ValidationAlert from "../../Popup/ValidationAlert";
 
-const Unit7_Page5_Q1 = () => {
-  const [userAnswers, setUserAnswers] = useState({
-    1: "",
-    2: "",
-    3: "",
-    4: "",
-    5: "",
-    6: "",
-    7: "",
-    8: "",
-    9: "",
-    10: "",
-  });
-  const [locked, setLocked] = useState(false);
+// ─────────────────────────────────────────────
+//  🖼️  IMAGES — 4 صور
+// ─────────────────────────────────────────────
+import imgA from "../../../assets/imgs/pages/Class Book/Right 4 Unit 7  The Alligator Scare Folder/Page 62/SVG/Asset 8.svg"; // frogs  → 4
+import imgB from "../../../assets/imgs/pages/Class Book/Right 4 Unit 7  The Alligator Scare Folder/Page 62/SVG/Asset 9.svg"; // alligator → 2
+import imgC from "../../../assets/imgs/pages/Class Book/Right 4 Unit 7  The Alligator Scare Folder/Page 62/SVG/Asset 10.svg"; // pond   → 3
+import imgD from "../../../assets/imgs/pages/Class Book/Right 4 Unit 7  The Alligator Scare Folder/Page 62/SVG/Asset 11.svg";; // rock   → 1
 
-  const [checked, setChecked] = useState(false);
+// ─────────────────────────────────────────────
+//  🎨  COLORS
+// ─────────────────────────────────────────────
+const BADGE_DEFAULT_BG   = "transparent";
+const BADGE_DEFAULT_CLR  = "#2b2b2b";
+const BADGE_CORRECT_BG   = "transparent"
+const BADGE_CORRECT_CLR  = "transparent"
+const BADGE_WRONG_BG     =  "transparent";
+const BADGE_WRONG_CLR    = "#ffffff";
+const WRONG_X_BG         = "#ef4444";
+const WRONG_X_CLR        = "#ffffff";
+const LABEL_NUM_CLR      = "#2b2b2b";
+const LABEL_TEXT_CLR     = "#2b2b2b";
+const LABEL_BG           = "#e8eff1";
+const LABEL_RADIUS       = "10px";
 
-  const words = ["j", "d", "h", "f", "b", "r", "c", "d", "v", "w"];
+// ─────────────────────────────────────────────
+//  📝  EXERCISE DATA
+// ─────────────────────────────────────────────
+// Word labels فوق — بترتيب من اليسار
+const LABELS = [
+  { num: 1, word: "rock"      },
+  { num: 2, word: "alligator" },
+  { num: 3, word: "pond"      },
+  { num: 4, word: "frogs"     },
+];
 
-  const correctAnswers = {
-    1: "f",
-    2: "b",
-    3: "j",
-    4: "c",
-    5: "d",
-    6: "r",
-    7: "d",
-    8: "h",
-    9: "v",
-    10: "w",
-  };
+// الصور — بنفس الترتيب في الكتاب
+// correct = الرقم الصحيح لكل صورة
+const IMAGES = [
+  { id: "A", src: imgA, correct: 4 }, // frogs
+  { id: "B", src: imgB, correct: 2 }, // alligator
+  { id: "C", src: imgC, correct: 3 }, // pond
+  { id: "D", src: imgD, correct: 1 }, // rock
+];
 
-  const questions = [
-    { id: 1, image: img1 },
-    { id: 2, image: img2 },
-    { id: 3, image: img3 },
-    { id: 4, image: img4 },
-    { id: 5, image: img5 },
-    { id: 6, image: img6 },
-    { id: 7, image: img7 },
-    { id: 8, image: img8 },
-    { id: 9, image: img9 },
-    { id: 10, image: img10 },
-  ];
+// ─────────────────────────────────────────────
+//  COMPONENT
+// ─────────────────────────────────────────────
+export default function WB_LookReadNumber_QA() {
+  const [answers,     setAnswers]     = useState({});
+  const [showResults, setShowResults] = useState(false);
+  const [showAns,     setShowAns]     = useState(false);
 
-  const onDragEnd = (result) => {
-    const { destination, draggableId } = result;
-    if (!destination) return;
+  const inputRefs = useRef({});
 
-    setUserAnswers((prev) => ({
-      ...prev,
-      [destination.droppableId]: draggableId.split("-")[0],
-    }));
-  };
-  const showAnswer = () => {
-    setUserAnswers(correctAnswers);
-    setLocked(true);
-  };
-  const checkAnswers = () => {
-    if (locked) return;
+  const handleChange = (id, value) => {
+    if (showAns) return;
+    const img = IMAGES.find((i) => i.id === id);
+    if (showResults && img && String(answers[id]) === String(img.correct)) return;
 
-    const empty = Object.values(userAnswers).some((v) => !v?.trim());
-    if (empty) {
-      ValidationAlert.info();
-      return;
-    }
+    const digit = value.replace(/[^0-9]/g, "").slice(-1);
+    setAnswers((prev) => ({ ...prev, [id]: digit }));
 
-    let score = 0;
-
-    Object.keys(correctAnswers).forEach((id) => {
-      if (
-        userAnswers[id]?.toLowerCase().trim() ===
-        correctAnswers[id].toLowerCase()
-      ) {
-        score++;
+    // auto-focus next
+    if (digit) {
+      const idx  = IMAGES.findIndex((i) => i.id === id);
+      const next = IMAGES[idx + 1];
+      if (next && inputRefs.current[next.id]) {
+        inputRefs.current[next.id].focus();
       }
-    });
-
-    const total = Object.keys(correctAnswers).length;
-
-    const color = score === total ? "green" : score === 0 ? "red" : "orange";
-
-    const msg = `
-    <div style="font-size:20px;text-align:center;">
-      <span style="color:${color}; font-weight:bold;">
-        Score: ${score} / ${total}
-      </span>
-    </div>
-  `;
-
-    setChecked(true);
-    setLocked(true);
-
-    if (score === total) ValidationAlert.success(msg);
-    else if (score === 0) ValidationAlert.error(msg);
-    else ValidationAlert.warning(msg);
+    }
   };
 
-  const handleStartAgain = () => {
-    setUserAnswers({
-      1: "",
-      2: "",
-      3: "",
-      4: "",
-      5: "",
-      6: "",
-      7: "",
-      8: "",
-      9: "",
-      10: "",
-    });
-    setChecked(false);
-    setLocked(false);
+  const handleCheck = () => {
+    if (showAns) return;
+    const allAnswered = IMAGES.every((img) => answers[img.id]?.trim());
+    if (!allAnswered) { ValidationAlert.info("Please number all pictures first."); return; }
+    let score = 0;
+    IMAGES.forEach((img) => { if (String(answers[img.id]) === String(img.correct)) score++; });
+    setShowResults(true);
+    if (score === IMAGES.length) ValidationAlert.success(`Score: ${score} / ${IMAGES.length}`);
+    else if (score > 0)          ValidationAlert.warning(`Score: ${score} / ${IMAGES.length}`);
+    else                         ValidationAlert.error(`Score: ${score} / ${IMAGES.length}`);
   };
+
+  const handleShowAnswer = () => {
+    const filled = {};
+    IMAGES.forEach((img) => { filled[img.id] = String(img.correct); });
+    setAnswers(filled);
+    setShowResults(false);
+    setShowAns(true);
+  };
+
+  const handleReset = () => {
+    setAnswers({});
+    setShowResults(false);
+    setShowAns(false);
+  };
+
+  // ── Badge state ──
+  const getBadgeState = (img) => {
+    const val = answers[img.id];
+    if (!val) return "empty";
+    if (showAns) return "correct";
+    if (showResults) return String(val) === String(img.correct) ? "correct" : "wrong";
+    return "filled";
+  };
+
+  const badgeBg  = (s) => s === "correct" ? BADGE_CORRECT_BG  : s === "wrong" ? BADGE_WRONG_BG  : BADGE_DEFAULT_BG;
+  const badgeClr = (s) => s === "correct" ? BADGE_CORRECT_CLR : s === "wrong" ? BADGE_WRONG_CLR : BADGE_DEFAULT_CLR;
 
   return (
-    <DragDropContext onDragEnd={onDragEnd}>
+    <div className="main-container-component">
+      <style>{`
+        /* ── Labels row ── */
+        .lrn-labels {
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          gap: clamp(8px, 1.2vw, 16px);
+          width: 100%;
+          margin :8% 0 0 ;
+        }
+
+        .lrn-label {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: clamp(4px, 0.5vw, 7px);
+          background: ${LABEL_BG};
+          border-radius: ${LABEL_RADIUS};
+          padding: clamp(6px, 0.8vw, 10px) clamp(10px, 1.4vw, 18px);
+          user-select: none;
+        }
+
+        .lrn-label-num {
+          font-size: clamp(14px, 1.7vw, 20px);
+          font-weight: 700;
+          color: ${LABEL_NUM_CLR};
+          flex-shrink: 0;
+        }
+
+        .lrn-label-word {
+          font-size: clamp(13px, 1.6vw, 19px);
+          color: ${LABEL_TEXT_CLR};
+          font-weight: 500;
+        }
+
+        /* ── 4-col image grid ── */
+        .lrn-grid {
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          gap: clamp(10px, 1.4vw, 18px);
+          width: 100%;
+        }
+
+        /* Image card */
+        .lrn-card {
+          position: relative;
+          overflow: visible;
+        }
+
+        .lrn-img {
+          width: 100%;
+          height: auto;
+          object-fit: cover;
+          display: block;
+        }
+
+        /* Badge — bottom-right corner */
+        .lrn-badge-wrap {
+          position: absolute;
+             bottom: 1px;
+    right: 1px;
+        }
+
+        .lrn-badge {
+          position: relative;
+          width: clamp(30px, 3.8vw, 46px);
+          height: clamp(30px, 3.8vw, 46px);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: background 0.15s;
+          cursor: pointer;
+        }
+
+        /* Transparent input over badge */
+        .lrn-input {
+          position: absolute;
+          inset: 0;
+          width: 100%;
+          height: 100%;
+          background: transparent;
+          border: none;
+          outline: none;
+          text-align: center;
+          font-size: clamp(14px, 1.7vw, 20px);
+          font-weight: 700;
+          color: #333;
+          caret-color: #333;
+          z-index: 2;
+          border-radius: 50%;
+        }
+        .lrn-input:disabled { cursor: default; }
+
+        .lrn-num-display {
+          font-size: clamp(14px, 1.7vw, 20px);
+          font-weight: 700;
+          line-height: 1;
+          pointer-events: none;
+          user-select: none;
+          z-index: 1;
+        }
+
+        /* ✕ mini badge */
+        .lrn-wrong-x {
+          position: absolute;
+          top: -6px; right: -6px;
+          width: clamp(13px, 1.5vw, 16px);
+          height: clamp(13px, 1.5vw, 16px);
+          border-radius: 50%;
+          background: ${WRONG_X_BG};
+          color: ${WRONG_X_CLR};
+          display: flex; align-items: center; justify-content: center;
+          font-size: clamp(6px, 0.7vw, 9px);
+          font-weight: 700;
+          border: 2px solid #fff;
+          box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+          pointer-events: none;
+          z-index: 3;
+        }
+
+        .lrn-buttons {
+          display: flex;
+          justify-content: center;
+          margin-top: clamp(16px, 2.4vw, 28px);
+        }
+
+        @media (max-width: 500px) {
+          .lrn-labels,
+          .lrn-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+      `}</style>
+
       <div
+        className="div-forall"
         style={{
           display: "flex",
           flexDirection: "column",
-          justifyContent: "center",
-          alignItems: "center",
-          padding: "30px",
+          gap: "clamp(14px, 2vw, 22px)",
+          maxWidth: "1100px",
+          margin: "0 auto",
         }}
       >
-        <div
-          className="div-forall"
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            position: "relative",
-            width: "60%",
-          }}
+        {/* ── Header ── */}
+        <h1
+          className="WB-header-title-page8"
+          style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
         >
-          <div>
-            <h5 className="header-title-page8">
-              <span className="ex-A" style={{ marginRight: "10px" }}>
-                A
-              </span>{" "}
-              <span style={{ color: "#2e3192" }}>1</span>
-              Look and write the{" "}
-              <span style={{ color: "#2e3192" }}>beginning sound</span> for each
-              word.
-            </h5>
-          </div>
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "center",
-              padding: "20px",
-            }}
-          >
-            <div
-              style={{
-                width: "100%",
-                maxWidth: "900px",
-                display: "flex",
-                flexDirection: "column",
-                gap: "20px",
-              }}
-            >
-              {/* الكلمات */}
-              <Droppable droppableId="words" direction="horizontal">
-                {(provided) => (
-                  <div
-                    ref={provided.innerRef}
-                    {...provided.droppableProps}
-                    style={{
-                      display: "flex",
-                      gap: "12px",
-                      padding: "10px",
-                      border: "2px dashed #ccc",
-                      borderRadius: "10px",
-                      marginTop: "20px",
-                      justifyContent: "center",
-                      width: "100%",
-                      marginBottom: "20px",
-                      // justifyContent: "center",
-                    }}
-                  >
-                    {words.map((word, index) => {
-                      const usedCount = Object.values(userAnswers).filter(
-                        (v) => v === word,
-                      ).length;
+          <span className="WB-ex-A-1">A</span>
+          Look, read, and number.
+        </h1>
 
-                      const totalCount = words.filter((w) => w === word).length;
-
-                      const isUsed = usedCount >= totalCount;
-                      return (
-                        <Draggable
-                          key={`${word}-${index}`}
-                          draggableId={`${word}-${index}`}
-                          index={index}
-                          isDragDisabled={checked || isUsed}
-                        >
-                          {(provided) => (
-                            <div
-                              ref={provided.innerRef}
-                              {...provided.draggableProps}
-                              {...provided.dragHandleProps}
-                              style={{
-                                padding: "7px 14px",
-                                border: "2px solid #2c5287",
-                                borderRadius: "8px",
-                                background: "white",
-                                fontWeight: "bold",
-                                cursor: isUsed ? "not-allowed" : "grab",
-                                fontSize: "16px",
-                                opacity: isUsed ? 0.4 : 1, // 🔥 تخفيف اللون
-                                ...provided.draggableProps.style,
-                              }}
-                            >
-                              {word}
-                            </div>
-                          )}
-                        </Draggable>
-                      );
-                    })}
-                    {provided.placeholder}
-                  </div>
-                )}
-              </Droppable>
-
-              {/* الأسئلة بالصور */}
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "repeat(5, 1fr)",
-                  gap: "12px",
-                }}
-              >
-                {questions.map((q) => (
-                  <div
-                    key={q.id}
-                    style={{
-                      padding: "6px",
-                      textAlign: "center",
-                      position: "relative",
-                    }}
-                  >
-                    <div
-                      style={{
-                        position: "absolute",
-                        top: "0px",
-                        left: "0px",
-                        color: "black",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        fontSize: "16px",
-                        fontWeight: "bold",
-                        zIndex: 2,
-                      }}
-                    >
-                      {q.id}
-                    </div>
-                    <img
-                      src={q.image}
-                      alt={`q${q.id}`}
-                      style={{
-                        width: "100%",
-                        height: "90px",
-                        objectFit: "contain",
-                      }}
-                    />
-
-                    <Droppable droppableId={String(q.id)}>
-                      {(provided) => (
-                        <div
-                          ref={provided.innerRef}
-                          {...provided.droppableProps}
-                          style={{
-                            position: "relative",
-                            marginTop: "6px",
-                            borderBottom: `2px solid ${
-                              checked &&
-                              userAnswers[q.id] !== correctAnswers[q.id]
-                                ? "red"
-                                : "#000"
-                            }`,
-                            minHeight: "28px",
-                            display: "flex",
-                            justifyContent: "center",
-                            alignItems: "center",
-                            fontSize: "20px",
-                            color: "#1C398E",
-                            fontWeight: "bold",
-                          }}
-                        >
-                          {userAnswers[q.id]}
-
-                          {checked &&
-                            userAnswers[q.id] !== correctAnswers[q.id] && (
-                              <span
-                                style={{
-                                  position: "absolute",
-                                  left: "25%",
-                                  top: "50%",
-                                  transform: "translateY(-50%)",
-                                  width: "20px",
-                                  height: "20px",
-                                  background: "#ef4444",
-                                  color: "white",
-                                  borderRadius: "50%",
-                                  display: "flex",
-                                  alignItems: "center",
-                                  justifyContent: "center",
-                                  fontSize: "12px",
-                                  fontWeight: "bold",
-                                  border: "2px solid white",
-                                  boxShadow: "0 2px 6px rgba(0,0,0,0.2)",
-                                  pointerEvents: "none",
-                                  zIndex: 3,
-                                }}
-                              >
-                                ✕
-                              </span>
-                            )}
-
-                          {provided.placeholder}
-                        </div>
-                      )}
-                    </Droppable>
-                  </div>
-                ))}
-              </div>
-
-              <Button
-                handleShowAnswer={showAnswer}
-                handleStartAgain={handleStartAgain}
-                checkAnswers={checkAnswers}
-              />
+        {/* ── Word labels ── */}
+        <div className="lrn-labels">
+          {LABELS.map((l) => (
+            <div key={l.num} className="lrn-label">
+              <span className="lrn-label-num">{l.num}</span>
+              <span className="lrn-label-word">{l.word}</span>
             </div>
-          </div>
+          ))}
+        </div>
+
+        {/* ── Images grid ── */}
+        <div className="lrn-grid">
+          {IMAGES.map((img) => {
+            const state    = getBadgeState(img);
+            const val      = answers[img.id] || "";
+            const bg       = badgeBg(state);
+            const clr      = badgeClr(state);
+            const isLocked = showAns || (showResults && state === "correct");
+            const isWrong  = state === "wrong";
+
+            return (
+              <div key={img.id} className="lrn-card">
+                <img src={img.src} alt={`img-${img.id}`} className="lrn-img" />
+
+                <div className="lrn-badge-wrap">
+                  <div className="lrn-badge" style={{ background: bg, color: clr }}>
+                    <span className="lrn-num-display">{val}</span>
+                    <input
+                      ref={(el) => { inputRefs.current[img.id] = el; }}
+                      className="lrn-input"
+                      type="text"
+                      inputMode="numeric"
+                      maxLength={1}
+                      value={val}
+                      disabled={isLocked}
+                      onChange={(e) => handleChange(img.id, e.target.value)}
+                    />
+                    {isWrong && <div className="lrn-wrong-x">✕</div>}
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* ── Buttons ── */}
+        <div className="lrn-buttons">
+          <Button
+            checkAnswers={handleCheck}
+            handleShowAnswer={handleShowAnswer}
+            handleStartAgain={handleReset}
+          />
         </div>
       </div>
-    </DragDropContext>
+    </div>
   );
-};
-
-export default Unit7_Page5_Q1;
+}

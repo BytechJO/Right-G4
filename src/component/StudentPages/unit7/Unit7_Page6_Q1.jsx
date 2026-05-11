@@ -1,299 +1,282 @@
-import { useState } from "react";
-
-import ValidationAlert from "../../Popup/ValidationAlert";
+import React, { useState } from "react";
 import Button from "../../Button";
-import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
+import ValidationAlert from "../../Popup/ValidationAlert";
 
-const Unit7_Page6_Q1 = () => {
-  const [userAnswers, setUserAnswers] = useState({
-    1: "",
-    2: "",
-    3: "",
-    4: "",
-    5: "",
-    6: "",
-  });
+// ─────────────────────────────────────────────
+//  🖼️  IMAGE + 🔊 AUDIO
+// ─────────────────────────────────────────────
+import imgScene from "../../../assets/imgs/pages/Class Book/Right 4 Unit 7  The Alligator Scare Folder/Page 63/SVG/Asset 3.svg";
+import sound    from "../../../assets/audio/ClassBook/Grade 4/cd1pg20-story-adult-lady_Nf7yHD6t.mp3";
+import QuestionAudioPlayer from "../../QuestionAudioPlayer";
 
-  const [checked, setChecked] = useState(false);
+// ─────────────────────────────────────────────
+//  🎨  COLORS
+// ─────────────────────────────────────────────
+const TEXT_COLOR       = "#2b2b2b";
+const NUMBER_COLOR     = "#2b2b2b";
+const PARA_COLOR       = "#2b2b2b";
+const BOX_BORDER       = "#2096a6";
+const BOX_RADIUS       = "8px";
+const CHECK_COLOR      = "#c81e1e";
+const CROSS_COLOR      = "#c81e1e";
+const WRONG_BADGE_BG   = "#ef4444";
+const WRONG_BADGE_TEXT = "#ffffff";
 
-  const words = ["them", "it", "you", "her", "us"];
+// ─────────────────────────────────────────────
+//  📝  AUDIO CAPTIONS
+// ─────────────────────────────────────────────
+const captions = [
+  { start: 0.0,  end: 5.0,  text: "Read, listen, and write ✓ or X." },
+  { start: 5.0,  end: 14.0, text: "My family and I went to a restaurant that had a buffet." },
+  { start: 14.0, end: 28.0, text: "There was so much food to choose from. There was spicy baked chicken with rice and spaghetti and meatballs." },
+  { start: 28.0, end: 40.0, text: "There were rolls and fried chicken. There were cookies and cupcakes to eat for dessert." },
+  { start: 40.0, end: 50.0, text: "There were apples, oranges, and even pistachio ice cream!" },
+];
 
-  const correctAnswers = {
-    1: "it",
-    2: "her",
-    3: "them",
-    4: "them",
-    5: "you",
-    6: "us",
+// ─────────────────────────────────────────────
+//  📝  EXERCISE DATA
+// ─────────────────────────────────────────────
+const ITEMS = [
+  { id: 1, text: "There was baked chicken.",           correct: "check" },
+  { id: 2, text: "There wasn't any rice.",             correct: "cross" },
+  { id: 3, text: "There weren't any rolls.",           correct: "cross" },
+  { id: 4, text: "There was fried chicken.",           correct: "check" },
+  { id: 5, text: "There were grapes and pears.",       correct: "cross" },
+  { id: 6, text: "There was spaghetti and meatballs.", correct: "check" },
+];
+
+// ─────────────────────────────────────────────
+//  COMPONENT
+// ─────────────────────────────────────────────
+export default function WB_ReadListenCheckCross_QE() {
+  const [selected,    setSelected]    = useState({});   // { id: "check" | "cross" | null }
+  const [showResults, setShowResults] = useState(false);
+  const [showAns,     setShowAns]     = useState(false);
+
+  const isLocked = showResults || showAns;
+
+  const handleSelect = (id, boxType) => {
+    if (isLocked) return;
+    // لو ضغط على نفس المربع يلغيه، غير ذلك يحدده
+    setSelected((prev) => ({ ...prev, [id]: prev[id] === boxType ? null : boxType }));
   };
 
-  const questions = [
-    {
-      parts: [
-        { type: "text", value: "1. Look! There's a car. Can you see " },
-        { type: "blank", id: "1" },
-        { type: "text", value: "?" },
-      ],
-    },
-    {
-      parts: [
-        { type: "text", value: "2. There's Mom. Can you see" },
-        { type: "blank", id: "2" },
-        { type: "text", value: "?" },
-      ],
-    },
-    {
-      parts: [
-        { type: "text", value: "3. There are crayons. Can you see" },
-        { type: "blank", id: "3" },
-        { type: "text", value: " ?" },
-      ],
-    },
-    {
-      parts: [
-        { type: "text", value: "4. There are two dogs. Can you see" },
-        { type: "blank", id: "4" },
-        { type: "text", value: "?" },
-      ],
-    },
-    {
-      parts: [
-        { type: "text", value: "5. There you are. i can see " },
-        { type: "blank", id: "5" },
-        { type: "text", value: "!" },
-      ],
-    },
-    {
-      parts: [
-        { type: "text", value: "6. Here we are. can you see ? " },
-        { type: "blank", id: "6" },
-        { type: "text", value: "?" },
-      ],
-    },
-  ];
-
-  const onDragEnd = (result) => {
-    const { destination, draggableId } = result;
-    if (!destination) return;
-
-    const inputId = destination.droppableId;
-
-    const word = draggableId.split("-")[0]; // 🔥 الحل
-
-    setUserAnswers((prev) => ({
-      ...prev,
-      [inputId]: word,
-    }));
-  };
-
-  const checkAnswers = () => {
-    if (checked) return;
-
-    const hasEmptyInputs = Object.keys(correctAnswers).some(
-      (id) => !userAnswers[id] || userAnswers[id].trim() === "",
-    );
-
-    if (hasEmptyInputs) {
-      ValidationAlert.info("Please complete all answers first.");
-      return;
-    }
-
-    let currentScore = 0;
-    const totalQuestions = Object.keys(correctAnswers).length;
-
-    Object.keys(correctAnswers).forEach((id) => {
-      const userAnswer = userAnswers[id]?.toLowerCase().trim();
-      const correctAnswer = correctAnswers[id].toLowerCase();
-
-      if (userAnswer === correctAnswer) currentScore++;
-    });
-
-    setChecked(true);
-
-     ValidationAlert[
-      currentScore === totalQuestions ? "success" : currentScore === 0 ? "error" : "warning"
-    ](`
-        Score: ${currentScore} / ${totalQuestions}
-  `);
+  const handleCheck = () => {
+    if (isLocked) return;
+    const allAnswered = ITEMS.every((item) => selected[item.id]);
+    if (!allAnswered) { ValidationAlert.info("Please answer all questions first."); return; }
+    let score = 0;
+    ITEMS.forEach((item) => { if (selected[item.id] === item.correct) score++; });
+    setShowResults(true);
+    if (score === ITEMS.length)   ValidationAlert.success(`Score: ${score} / ${ITEMS.length}`);
+    else if (score > 0)           ValidationAlert.warning(`Score: ${score} / ${ITEMS.length}`);
+    else                          ValidationAlert.error(`Score: ${score} / ${ITEMS.length}`);
   };
 
   const handleShowAnswer = () => {
-    setUserAnswers({ ...correctAnswers });
-    setChecked(true);
+    const filled = {};
+    ITEMS.forEach((item) => { filled[item.id] = item.correct; });
+    setSelected(filled);
+    setShowResults(false);
+    setShowAns(true);
   };
-  const handleStartAgain = () => {
-    setUserAnswers({
-      1: "",
-      2: "",
-      3: "",
-      4: "",
-      5: "",
-      6: "",
-    });
 
-    setChecked(false);
+  const handleReset = () => {
+    setSelected({});
+    setShowResults(false);
+    setShowAns(false);
+  };
+
+  // ── هل هذا المربع غلط؟ ──
+  // فقط المربع المحدد الغلط يأخذ badge — بدون أي تأثير آخر
+  const isBoxWrong = (id, boxType) => {
+    if (!showResults || showAns) return false;
+    const item = ITEMS.find((i) => i.id === id);
+    return selected[id] === boxType && boxType !== item.correct;
+  };
+
+  const renderBox = (id, boxType) => {
+    const sel      = selected[id];
+    const isChosen = sel === boxType;
+    const wrong    = isBoxWrong(id, boxType);
+    const symbol   = boxType === "check" ? "✓" : "✕";
+    const symColor = boxType === "check" ? CHECK_COLOR : CROSS_COLOR;
+
+    return (
+      <div
+        style={{
+          position: "relative",
+          width:  "clamp(40px, 3.8vw, 40px)",
+          height: "clamp(40px, 3.8vw, 40px)",
+          border: `2px solid ${BOX_BORDER}`,
+          borderRadius: BOX_RADIUS,
+          background: "#ffffff",
+          display: "flex", alignItems: "center", justifyContent: "center",
+          cursor: isLocked ? "default" : "pointer",
+          flexShrink: 0,
+          userSelect: "none",
+        }}
+        onClick={() => handleSelect(id, boxType)}
+      >
+        {/* رمز الصح أو الغلط — يظهر فقط لما يكون محدداً */}
+        {isChosen && (
+          <span style={{
+            fontSize: "clamp(16px, 2.2vw, 28px)",
+            fontWeight: 700,
+            color: symColor,
+            lineHeight: 1,
+          }}>
+            {symbol}
+          </span>
+        )}
+
+        {/* ✕ badge — فقط لما يكون غلط */}
+        {wrong && (
+          <div style={{
+            position: "absolute",
+            top: -7, right: -7,
+            width:  "clamp(14px, 1.6vw, 18px)",
+            height: "clamp(14px, 1.6vw, 18px)",
+            borderRadius: "50%",
+            background: WRONG_BADGE_BG,
+            color: WRONG_BADGE_TEXT,
+            display: "flex", alignItems: "center", justifyContent: "center",
+            fontSize: "clamp(7px, 0.8vw, 10px)",
+            fontWeight: 700,
+            border: "2px solid #fff",
+            boxShadow: "0 2px 6px rgba(0,0,0,0.2)",
+            pointerEvents: "none",
+            zIndex: 3,
+          }}>✕</div>
+        )}
+      </div>
+    );
   };
 
   return (
-    <DragDropContext onDragEnd={onDragEnd}>
+    <div className="main-container-component">
+      <style>{`
+        .rlcc-top {
+          display: grid;
+          grid-template-columns: 1fr auto;
+          gap: clamp(14px, 2vw, 26px);
+          align-items: flex-start;
+          width: 100%;
+        }
+        .rlcc-para {
+          font-size: clamp(13px, 1.6vw, 19px);
+          color: ${PARA_COLOR};
+          line-height: 1.8;
+        }
+        .rlcc-scene-img {
+          width: clamp(160px, 22vw, 290px);
+          height: auto;
+          border-radius: 10px;
+          display: block;
+          flex-shrink: 0;
+        }
+        .rlcc-grid {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: clamp(12px, 1.8vw, 22px) clamp(20px, 3vw, 40px);
+          width: 100%;
+        }
+        .rlcc-row {
+          display: flex;
+          align-items: center;
+          gap: clamp(6px, 0.8vw, 10px);
+        }
+        .rlcc-num {
+          font-size: clamp(13px, 1.6vw, 19px);
+          font-weight: 700;
+          color: ${NUMBER_COLOR};
+          flex-shrink: 0;
+          min-width: clamp(14px, 1.8vw, 20px);
+        }
+        .rlcc-sentence {
+          font-size: clamp(12px, 1.5vw, 18px);
+          color: ${TEXT_COLOR};
+          flex: 1;
+          line-height: 1.4;
+        }
+        /* مربعان جنب بعض */
+        .rlcc-boxes {
+          display: flex;
+          gap: clamp(5px, 0.7vw, 8px);
+          flex-shrink: 0;
+        }
+        .rlcc-buttons {
+          display: flex;
+          justify-content: center;
+          margin-top: clamp(8px, 1.6vw, 18px);
+        }
+        @media (max-width: 560px) {
+          .rlcc-top  { grid-template-columns: 1fr; }
+          .rlcc-grid { grid-template-columns: 1fr; }
+          .rlcc-scene-img { width: 100%; max-width: 260px; margin: 0 auto; }
+        }
+      `}</style>
+
       <div
+        className="div-forall"
         style={{
           display: "flex",
           flexDirection: "column",
-          justifyContent: "center",
-          alignItems: "center",
-          padding: "30px",
+          gap: "clamp(14px, 2vw, 22px)",
+          maxWidth: "1100px",
+          margin: "0 auto",
         }}
       >
-        <div className="div-forall">
-          <h5 className="header-title-page8 pb-2.5">
-            <span
-              className="ex-A"
-              style={{ marginRight: "10px", marginBottom: 7 }}
-            >
-              D
-            </span>
-            Read and complete.
-          </h5>
+        {/* ── Header ── */}
+        <h1
+          className="WB-header-title-page8"
+          style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
+        >
+          <span className="WB-ex-A-1">E</span>
+          Read, listen, and write ✓ or X.
+        </h1>
 
-          {/* الكلمات */}
-          <Droppable droppableId="words" direction="horizontal">
-            {(provided) => (
-              <div
-                ref={provided.innerRef}
-                {...provided.droppableProps}
-                style={{
-                  display: "flex",
-                  gap: "12px",
-                  padding: "10px",
-                  border: "2px dashed #ccc",
-                  borderRadius: "10px",
-                  marginTop: "20px",
-                  justifyContent: "center",
-                  width: "100%",
-                  marginBottom: "20px",
-                  // justifyContent: "center",
-                }}
-              >
-                {words.map((word, index) => {
-                  return (
-                    <Draggable
-                      key={`${word}-${index}`}
-                      draggableId={`${word}-${index}`}
-                      index={index}
-                      isDragDisabled={checked} // بس بعد التشيك
-                    >
-                      {(provided) => (
-                        <div
-                          ref={provided.innerRef}
-                          {...provided.draggableProps}
-                          {...provided.dragHandleProps}
-                          style={{
-                            padding: "7px 14px",
-                            border: "2px solid #2c5287",
-                            borderRadius: "8px",
-                            background: "white",
-                            fontWeight: "bold",
-                            cursor: checked ? "not-allowed" : "grab",
-                            fontSize: "16px",
+        {/* ── Audio ── */}
+        <div style={{ marginTop: "4px" }}>
+          <QuestionAudioPlayer src={sound} captions={captions} stopAtSecond={5} />
+        </div>
 
-                            opacity: provided.snapshot?.isDragging ? 0.6 : 1, // 🔥 بس وقت السحب
+        {/* ── Paragraph + image ── */}
+        <div className="rlcc-top">
+          <p className="rlcc-para">
+            My family and I went to a restaurant that had a buffet.
+            There was so much food to choose from. There was spicy
+            baked chicken with rice and spaghetti and meatballs.
+            There were rolls and fried chicken. There were cookies and
+            cupcakes to eat for dessert. There were apples, oranges,
+            and even pistachio ice cream!
+          </p>
+          <img src={imgScene} alt="buffet" className="rlcc-scene-img" />
+        </div>
 
-                            ...provided.draggableProps.style,
-                          }}
-                        >
-                          {word}
-                        </div>
-                      )}
-                    </Draggable>
-                  );
-                })}
-                {provided.placeholder}
+        {/* ── 2-col sentences ── */}
+        <div className="rlcc-grid">
+          {ITEMS.map((item) => (
+            <div key={item.id} className="rlcc-row">
+              <span className="rlcc-num">{item.id}</span>
+              <span className="rlcc-sentence">{item.text}</span>
+              <div className="rlcc-boxes">
+                {renderBox(item.id, "check")}
+                {renderBox(item.id, "cross")}
               </div>
-            )}
-          </Droppable>
+            </div>
+          ))}
+        </div>
 
-          {/* الأسئلة الديناميكية */}
-          <div className="flex-1 bg-white border-2 border-gray-300 rounded-2xl p-6 space-y-4 text-xl">
-            {questions.map((q, qIndex) => (
-              <div key={qIndex} className="flex items-center gap-2 flex-wrap">
-                {q.parts.map((part, i) => {
-                  if (part.type === "text") {
-                    return <span key={i}>{part.value}</span>;
-                  }
-
-                  return (
-                    <Droppable key={i} droppableId={part.id}>
-                      {(provided, snapshot) => (
-                        <div
-                          ref={provided.innerRef}
-                          {...provided.droppableProps}
-                          className={`relative border-b-2 w-30 text-center min-h-[30px] ${
-                            snapshot.isDraggingOver ? "bg-yellow-100" : ""
-                          } ${
-                            checked &&
-                            userAnswers[part.id] &&
-                            userAnswers[part.id].toLowerCase().trim() !==
-                              correctAnswers[part.id].toLowerCase()
-                              ? "border-red-500"
-                              : "border-black"
-                          }`}
-                        >
-                          {checked &&
-                            userAnswers[part.id] &&
-                            userAnswers[part.id].toLowerCase().trim() !==
-                              correctAnswers[part.id].toLowerCase() && (
-                              <span
-                                style={{
-                                  position: "absolute",
-                                  left: "120%",
-                                  top: "50%",
-                                  transform: "translateY(-50%)",
-                                  width: "20px",
-                                  height: "20px",
-                                  background: "#ef4444",
-                                  color: "white",
-                                  borderRadius: "50%",
-                                  display: "flex",
-                                  alignItems: "center",
-                                  justifyContent: "center",
-                                  fontSize: "12px",
-                                  fontWeight: "bold",
-                                  border: "2px solid white",
-                                  boxShadow: "0 2px 6px rgba(0,0,0,0.2)",
-                                  pointerEvents: "none",
-                                  zIndex: 3,
-                                }}
-                              >
-                                ✕
-                              </span>
-                            )}
-                          <span
-                            style={{ color: "#2c5287", fontWeight: "bold" }}
-                          >
-                            {" "}
-                            {userAnswers[part.id]}
-                          </span>
-
-                          {provided.placeholder}
-                        </div>
-                      )}
-                    </Droppable>
-                  );
-                })}
-              </div>
-            ))}
-          </div>
-
+        {/* ── Buttons ── */}
+        <div className="rlcc-buttons">
           <Button
+            checkAnswers={handleCheck}
             handleShowAnswer={handleShowAnswer}
-            handleStartAgain={handleStartAgain}
-            checkAnswers={checkAnswers}
+            handleStartAgain={handleReset}
           />
         </div>
       </div>
-    </DragDropContext>
+    </div>
   );
-};
-
-export default Unit7_Page6_Q1;
+}
