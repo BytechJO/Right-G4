@@ -1,48 +1,72 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import ValidationAlert from "../../Popup/ValidationAlert";
 import { FaCheck, FaRedo, FaEye } from "react-icons/fa";
 
+import img1 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 6 Ready for School Folder/Page 47/SVG/SVG/Asset 3.svg";
+import img2 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 6 Ready for School Folder/Page 47/SVG/SVG/Asset 4.svg";
+import img3 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 6 Ready for School Folder/Page 47/SVG/SVG/Asset 5.svg";
+import img4 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 6 Ready for School Folder/Page 47/SVG/SVG/Asset 6.svg";
+
 const ComprehensionA = () => {
-  const items = [
-    { id: 1, text: "sleep on a bed", correct: false },
-    { id: 2, text: "wear a special suit", correct: true },
-    { id: 3, text: "play football", correct: false },
-    { id: 4, text: "open the windows for fresh air", correct: false },
-    { id: 5, text: "eat food that floats", correct: true },
-    { id: 6, text: "live just like people do on Earth", correct: false },
-    { id: 7, text: "go for a float", correct: true },
-    { id: 8, text: "take air with you if you go outside the station", correct: true },
+  // الترتيب الصح: img1=2, img2=4, img3=1, img4=3
+  const images = [
+    { id: 1, src: img1, answer: "2" },
+    { id: 2, src: img2, answer: "4" },
+    { id: 3, src: img3, answer: "1" },
+    { id: 4, src: img4, answer: "3" },
   ];
 
-  const [selected, setSelected] = useState(
-    Object.fromEntries(items.map((item) => [item.id, false]))
-  );
+  const [values, setValues] = useState(["", "", "", ""]);
   const [errors, setErrors] = useState({});
   const [locked, setLocked] = useState(false);
   const [showed, setShowed] = useState(false);
+  const inputRefs = useRef([]);
 
-  const handleSelect = (id) => {
-    if (locked || errors[id] === false) return;
-    setSelected((prev) => ({ ...prev, [id]: !prev[id] }));
+  const handleChange = (index, value) => {
+    if (locked || errors[index] === false) return;
+    // قبول رقم واحد بس
+    if (value.length > 1) return;
+    if (value !== "" && !/^[1-4]$/.test(value)) return;
+
+    const updated = [...values];
+    updated[index] = value;
+    setValues(updated);
+
+    // انتقل تلقائي للتالي
+    if (value !== "" && index < images.length - 1) {
+      // ابحث عن أول فراغ فاضي بعده
+      const nextEmpty = updated.findIndex((v, i) => i > index && v === "" && errors[i] !== false);
+      if (nextEmpty !== -1) {
+        inputRefs.current[nextEmpty]?.focus();
+      } else {
+        // انتقل للتالي مباشرة
+        inputRefs.current[index + 1]?.focus();
+      }
+    }
   };
 
   const handleCheck = () => {
     if (locked) return;
+    const isEmpty = values.some((v) => v.trim() === "");
+    if (isEmpty) {
+      ValidationAlert.info("Please fill in all boxes.");
+      return;
+    }
 
     let correctCount = 0;
     const newErrors = {};
 
-    items.forEach((item) => {
-      if (selected[item.id] === item.correct) {
+    images.forEach((img, i) => {
+      if (values[i] === img.answer) {
         correctCount++;
-        newErrors[item.id] = false;
+        newErrors[i] = false;
       } else {
-        newErrors[item.id] = true;
+        newErrors[i] = true;
       }
     });
 
     setErrors(newErrors);
-    const total = items.length;
+    const total = images.length;
     const color =
       correctCount === total ? "green" : correctCount === 0 ? "red" : "orange";
 
@@ -65,117 +89,111 @@ const ComprehensionA = () => {
   };
 
   const handleShow = () => {
-    setSelected(Object.fromEntries(items.map((item) => [item.id, item.correct])));
+    setValues(images.map((img) => img.answer));
     setErrors({});
     setLocked(true);
     setShowed(true);
   };
 
   const handleReset = () => {
-    setSelected(Object.fromEntries(items.map((item) => [item.id, false])));
+    setValues(["", "", "", ""]);
     setErrors({});
     setLocked(false);
     setShowed(false);
-  };
-
-  // تقسيم العناصر لعمودين: فردي على اليسار، زوجي على اليمين
-  const leftItems = items.filter((_, i) => i % 2 === 0);
-  const rightItems = items.filter((_, i) => i % 2 !== 0);
-
-  const CheckBox = ({ item }) => {
-    const isSelected = selected[item.id];
-    const isWrong = errors[item.id] === true;
-
-    return (
-      <div
-        className="flex items-center gap-3 cursor-pointer"
-        onClick={() => handleSelect(item.id)}
-      >
-        {/* Number */}
-        <span
-          style={{
-            fontWeight: "400",
-            WebkitTextStroke: "1px black",
-            color: "#1a1a1a",
-            fontSize: "16px",
-            minWidth: "18px",
-          }}
-        >
-          {item.id}
-        </span>
-
-        {/* Text */}
-        <span style={{ fontSize: "15px", color: "#1a1a1a", flex: 1 }}>
-          {item.text}
-        </span>
-
-        {/* Checkbox */}
-        <div className="relative flex-shrink-0">
-          <div
-            style={{
-              width: "30px",
-              height: "30px",
-              borderRadius: "6px",
-              border: "2px solid #2195a6",
-              background: "#fff",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            {isSelected && (
-              <svg viewBox="0 0 24 24" width="16" height="16" fill="none">
-                <polyline
-                  points="4,12 9,18 20,6"
-                  stroke="#a62121ff"
-                  strokeWidth="3"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            )}
-          </div>
-
-          {/* ❌ Error Badge */}
-          {isWrong && (
-            <div
-              style={{
-                position: "absolute",
-                top: "-8px",
-                right: "-8px",
-                width: "18px",
-                height: "18px",
-                background: "#ef4444",
-                color: "white",
-                borderRadius: "50%",
-                fontSize: "10px",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                fontWeight: "bold",
-                border: "2px solid white",
-                boxShadow: "0 1px 6px rgba(0,0,0,0.2)",
-              }}
-            >
-              ✕
-            </div>
-          )}
-        </div>
-      </div>
-    );
+    inputRefs.current[0]?.focus();
   };
 
   return (
     <div className="mb-6 mx-auto">
       <h5 className="header-title-page8-read mb-8">
         <span className="ex-A-read mr-2">A</span>
-        Read and ✓ the things you might do on a space station.
+        Number the pictures to show the order for planting a vegetable garden.
       </h5>
 
-      <div className="grid grid-cols-2 gap-x-10 gap-y-5">
-        {items.map((item) => (
-          <CheckBox key={item.id} item={item} />
-        ))}
+      <div className="grid grid-cols-4 gap-4">
+        {images.map((img, i) => {
+          const isError = errors[i] === true;
+          const isCorrect = errors[i] === false;
+
+          return (
+            <div key={img.id} className="flex flex-col items-center gap-2">
+              {/* Image with input badge */}
+              <div style={{ position: "relative", display: "inline-block" }}>
+                <img
+                  src={img.src}
+                  alt=""
+                  style={{
+                    width: "100%",
+                    height : "auto"
+                  }}
+                />
+
+                {/* Number Input Badge */}
+                <div
+                  style={{
+                    position: "absolute",
+                    bottom: "8px",
+                    right: "8px",
+                    width: "36px",
+                    height: "36px",
+                    borderRadius: "50%",
+                    background:  "transparent",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <input
+                    ref={(el) => (inputRefs.current[i] = el)}
+                    type="text"
+                    value={values[i]}
+                    onChange={(e) => handleChange(i, e.target.value)}
+                    disabled={locked || isCorrect}
+                    autoComplete="off"
+                    maxLength={1}
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      background: "transparent",
+                      border: "none",
+                      outline: "none",
+                      textAlign: "center",
+                      fontSize: "18px",
+                      fontWeight: "bold",
+                      color: "black",
+                      cursor: locked || isCorrect ? "default" : "text",
+                    }}
+                  />
+                </div>
+
+                {/* ❌ Error Badge */}
+                {isError && (
+                  <div
+                    style={{
+                      position: "absolute",
+                      top: "-8px",
+                      right: "-8px",
+                      width: "20px",
+                      height: "20px",
+                      background: "#ef4444",
+                      color: "white",
+                      borderRadius: "50%",
+                      fontSize: "11px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      fontWeight: "bold",
+                      border: "2px solid white",
+                      boxShadow: "0 1px 6px rgba(0,0,0,0.2)",
+                    }}
+                  >
+                    ✕
+                  </div>
+                )}
+              </div>
+            </div>
+          );
+        })}
       </div>
 
       {/* Buttons */}

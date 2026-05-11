@@ -1,426 +1,304 @@
 import React, { useState } from "react";
 import Button from "../../Button";
 import ValidationAlert from "../../Popup/ValidationAlert";
-import img1 from "../../../assets/imgs/pages/classbook/Right 3 Unit 6 Lets Run! Folder/Page 50/Ex C 1.svg";
-import img2 from "../../../assets/imgs/pages/classbook/Right 3 Unit 6 Lets Run! Folder/Page 50/Ex C 2.svg";
 
-const Unit6_Page5_Q3 = () => {
-  const grid = [
-    [
-      "h",
-      "i",
-      "j",
-      "k",
-      "s",
-      "t",
-      "e",
-      "l",
-      "l",
-      "a",
-      "m",
-      "u",
-      "f",
-      "r",
-      "q",
-      "r",
-      "e",
-      "c",
-      "o",
-      "m",
-      "m",
-      "e",
-      "n",
-      "d",
-      "s",
-      "f",
-      "x",
-      "c",
-      "s",
-      "a",
-      "e",
-      "e",
-    ],
-    [
-      "e",
-      "v",
-      "e",
-      "r",
-      "y",
-      "o",
-      "n",
-      "e",
-      "k",
-      "i",
-      "u",
-      "j",
-      "k",
-      "k",
-      "i",
-      "j",
-      "u",
-      "t",
-      "g",
-      "f",
-      "v",
-      "t",
-      "o",
-      "m",
-      "l",
-      "o",
-      "k",
-      "s",
-      "t",
-      "a",
-      "r",
-      "t",
-    ],
-    [
-      "t",
-      "w",
-      "e",
-      "d",
-      "s",
-      "v",
-      "c",
-      "a",
-      "k",
-      "u",
-      "b",
-      "j",
-      "s",
-      "x",
-      "g",
-      "a",
-      "r",
-      "d",
-      "e",
-      "n",
-      "t",
-      "y",
-      "h",
-      "f",
-      "g",
-      "v",
-    ],
-  ];
-  const letters = grid;
-  const wordsToFind = [
-    "stella",
-    "recommends",
-    "everyone",
-    "to",
-    "start",
-    "a",
-    "garden",
-  ];
+// ─────────────────────────────────────────────
+//  🖼️  IMAGE
+// ─────────────────────────────────────────────
+import imgScene from "../../../assets/imgs/pages/Class Book/Right 4 Unit 6 Ready for School Folder/Page 50/SVG/Asset 2.svg";
 
-  const correctPositions = {
-    stella: [4, 5, 6, 7, 8, 9],
-    recommends: [15, 16, 17, 18, 19, 20, 21, 22, 23, 24],
-    everyone: [
-      100 + 0,
-      100 + 1,
-      100 + 2,
-      100 + 3,
-      100 + 4,
-      100 + 5,
-      100 + 6,
-      100 + 7,
-    ],
-    to: [100 + 21, 100 + 22],
-    start: [100 + 27, 100 + 28, 100 + 29, 100 + 30, 100 + 31],
-    a: [200 + 7],
-    garden: [200 + 14, 200 + 15, 200 + 16, 200 + 17, 200 + 18, 200 + 19],
+// ─────────────────────────────────────────────
+//  🎨  COLORS
+// ─────────────────────────────────────────────
+const INPUT_UNDERLINE_DEFAULT = "#3f3f3f";
+const INPUT_UNDERLINE_WRONG   = "#ef4444";
+const INPUT_TEXT_COLOR        = "#2b2b2b";
+const INPUT_ANSWER_COLOR      = "#c81e1e";
+const NUMBER_COLOR            = "#2b2b2b";
+const TEXT_COLOR              = "#2b2b2b";
+const WRONG_BADGE_BG          = "#ef4444";
+const WRONG_BADGE_TEXT        = "#ffffff";
+const KEYWORD_COLOR           = "#ff9900ff";  // should / shouldn't في الـ header
+
+// ─────────────────────────────────────────────
+//  📝  EXERCISE DATA
+//  before: text before input | after: text after input
+// ─────────────────────────────────────────────
+const ITEMS = [
+  {
+    id:      1,
+    before:  "You",
+    after:   "put trash in trash cans.",
+    correct: ["should"],
+    answer:  "should",
+  },
+  {
+    id:      2,
+    before:  "We",
+    after:   "always recycle paper and plastic.",
+    correct: ["should"],
+    answer:  "should",
+  },
+  {
+    id:      3,
+    before:  "Henry",
+    after:   "brush his teeth after a meal.",
+    correct: ["should"],
+    answer:  "should",
+  },
+  {
+    id:      4,
+    before:  "Sam",
+    after:   "slam the door loudly.",
+    correct: ["shouldn't", "shouldnt", "should not"],
+    answer:  "shouldn't",
+  },
+  {
+    id:      5,
+    before:  "I",
+    after:   "study for my test tomorrow.",
+    correct: ["should"],
+    answer:  "should",
+  },
+];
+
+// ─────────────────────────────────────────────
+//  🔧  NORMALIZE
+// ─────────────────────────────────────────────
+const normalize = (str) =>
+  str.toLowerCase().replace(/[^a-z0-9'\s]/g, "").replace(/\s+/g, " ").trim();
+
+const isCorrect = (userVal, correctArr) =>
+  correctArr.some((c) => normalize(userVal) === normalize(c));
+
+// ─────────────────────────────────────────────
+//  COMPONENT
+// ─────────────────────────────────────────────
+export default function WB_ReadWriteShouldShouldnt_QC() {
+  const [answers,     setAnswers]     = useState({});
+  const [showResults, setShowResults] = useState(false);
+  const [showAns,     setShowAns]     = useState(false);
+
+  const handleChange = (id, value) => {
+    if (showAns) return;
+    const item = ITEMS.find((i) => i.id === id);
+    if (showResults && item && isCorrect(answers[id] || "", item.correct)) return;
+    setAnswers((prev) => ({ ...prev, [id]: value }));
   };
 
-  const [locked, setLocked] = useState(false);
-  const [sentence, setSentence] = useState("");
-  const [selected, setSelected] = useState([]);
-  const [currentWord, setCurrentWord] = useState("");
-  const [foundWords, setFoundWords] = useState([]);
-  const [coloredCells, setColoredCells] = useState([]);
-  const [isDragging, setIsDragging] = useState(false);
-
-  const handleMouseDown = (index) => {
-    if (locked) return;
-
-    const row = Math.floor(index / 100);
-    const col = index % 100;
-
-    setIsDragging(true);
-    setSelected([index]);
-    setCurrentWord(letters[row][col]);
-  };
-  const handleMouseEnter = (index) => {
-    if (!isDragging || locked) return;
-
-    const lastIndex = selected[selected.length - 1];
-
-    if (index === lastIndex + 1 || index === lastIndex - 1) {
-      if (!selected.includes(index)) {
-        const row = Math.floor(index / 100);
-        const col = index % 100;
-
-        setSelected((prev) => [...prev, index]);
-        setCurrentWord((prev) => prev + letters[row][col]);
-      }
-    }
+  const handleCheck = () => {
+    if (showAns) return;
+    const allAnswered = ITEMS.every((item) => answers[item.id]?.trim());
+    if (!allAnswered) { ValidationAlert.info("Please complete all answers first."); return; }
+    let score = 0;
+    ITEMS.forEach((item) => { if (isCorrect(answers[item.id] || "", item.correct)) score++; });
+    setShowResults(true);
+    if (score === ITEMS.length)   ValidationAlert.success(`Score: ${score} / ${ITEMS.length}`);
+    else if (score > 0)           ValidationAlert.warning(`Score: ${score} / ${ITEMS.length}`);
+    else                          ValidationAlert.error(`Score: ${score} / ${ITEMS.length}`);
   };
 
-  const handleTouchMove = (e) => {
-    if (!isDragging || locked) return;
-    e.preventDefault(); // منع التمرير في الصفحة أثناء السحب
-
-    const touch = e.touches[0];
-    const element = document.elementFromPoint(touch.clientX, touch.clientY);
-    if (!element) return;
-
-    const index = element.getAttribute("data-index");
-    if (index !== null) {
-      handleMouseEnter(Number(index));
-    }
+  const handleShowAnswer = () => {
+    const filled = {};
+    ITEMS.forEach((item) => { filled[item.id] = item.answer; });
+    setAnswers(filled);
+    setShowResults(false);
+    setShowAns(true);
   };
 
-  const handleMouseUp = () => {
-    if (locked) return;
-    setIsDragging(false);
-
-    const reversedWord = currentWord.split("").reverse().join("");
-
-    const matchedWord = wordsToFind.find(
-      (word) => word === currentWord || word === reversedWord,
-    );
-
-    if (matchedWord && !foundWords.includes(matchedWord)) {
-      setFoundWords((prev) => [...prev, matchedWord]);
-      setColoredCells((prev) => [...prev, ...selected]);
-      setSentence(
-        wordsToFind
-          .filter((word) => [...foundWords, matchedWord].includes(word))
-          .join(" "),
-      );
-    }
-
-    setSelected([]);
-    setCurrentWord("");
+  const handleReset = () => {
+    setAnswers({});
+    setShowResults(false);
+    setShowAns(false);
   };
 
-  const reset = () => {
-    setSelected([]);
-    setCurrentWord("");
-    setFoundWords([]);
-    setColoredCells([]);
-    setSentence("");
-    setLocked(false);
-  };
-
-  const showAnswers = () => {
-    let allCells = [];
-    wordsToFind.forEach((word) => {
-      if (correctPositions[word]) {
-        allCells.push(...correctPositions[word]);
-      }
-    });
-    setFoundWords(wordsToFind);
-    setColoredCells(allCells);
-    setSelected([]);
-    setCurrentWord("");
-    setSentence(wordsToFind.join(" "));
-    setLocked(true);
-  };
-
-  const checkAnswers = () => {
-    if (locked) return;
-    const total = wordsToFind.length;
-    const score = foundWords.length;
-
-    if (score === 0) {
-      ValidationAlert.info();
-      return;
-    }
-
-    if (score < total) {
-      ValidationAlert.warning(`
-        <div style="font-size:20px;text-align:center;">
-          <b style="color:orange;">Score: ${score} / ${total}</b>
-        </div>
-      `);
-    } else {
-      ValidationAlert.success(`
-        <div style="font-size:20px;text-align:center;">
-          <b style="color:green;">Score: ${score} / ${total}</b>
-        </div>
-      `);
-    }
-    setLocked(true);
-  };
+  const isWrong    = (item) => showResults && !showAns && !isCorrect(answers[item.id] || "", item.correct);
+  const isDisabled = (item) => showAns || (showResults && isCorrect(answers[item.id] || "", item.correct));
 
   return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        padding: "30px",
+    <div className="main-container-component">
+      <style>{`
+        /* ── Body: items ysar | image yamin ── */
+        .rwss-body {
+          display: grid;
+          grid-template-columns: 1fr auto;
+          gap: clamp(16px, 2.4vw, 32px);
+          align-items: start;
+          width: 100%;
+          margin : 8% 0 ;
+        }
 
-        width: "100%",
-        boxSizing: "border-box",
-      }}
-    >
-      <div className="div-forall">
-        <h5
-          className="header-title-page8 pb-2.5"
+        /* ── Items list ── */
+        .rwss-list {
+          display: flex;
+          flex-direction: column;
+          gap: clamp(14px, 2vw, 26px);
+        }
+
+        /* Single row: num | before | input | after */
+        .rwss-row {
+          display: flex;
+          align-items: flex-end;
+          flex-wrap: wrap;
+          gap: clamp(4px, 0.5vw, 7px);
+        }
+
+        .rwss-num {
+          font-size: clamp(14px, 1.7vw, 20px);
+          font-weight: 700;
+          color: ${NUMBER_COLOR};
+          flex-shrink: 0;
+          line-height: 1.5;
+        }
+
+        .rwss-text {
+          font-size: clamp(13px, 1.6vw, 19px);
+          color: ${TEXT_COLOR};
+          white-space: nowrap;
+          flex-shrink: 0;
+          line-height: 1.5;
+        }
+
+        /* Input wrap */
+        .rwss-input-wrap {
+          position: relative;
+          flex: 0 1 clamp(90px, 11vw, 150px);
+          min-width: clamp(80px, 10vw, 130px);
+        }
+
+        .rwss-input {
+          width: 100%;
+          background: transparent;
+          border: none;
+          border-bottom: 1px solid ${INPUT_UNDERLINE_DEFAULT};
+          outline: none;
+          font-size: clamp(13px, 1.6vw, 19px);
+          color: ${INPUT_TEXT_COLOR};
+          line-height: 1.5;
+          box-sizing: border-box;
+          font-family: inherit;
+          transition: border-color 0.2s;
+          text-align: center;
+        }
+        .rwss-input:disabled  { opacity: 1; cursor: default; }
+        .rwss-input--wrong    { border-bottom-color: ${INPUT_UNDERLINE_WRONG}; }
+        .rwss-input--answer   { color: ${INPUT_ANSWER_COLOR} }
+
+        /* ✕ badge */
+        .rwss-badge {
+          position: absolute;
+          top: -8px; right: 0;
+          width: clamp(16px, 1.8vw, 20px);
+          height: clamp(16px, 1.8vw, 20px);
+          border-radius: 50%;
+          background: ${WRONG_BADGE_BG};
+          color: ${WRONG_BADGE_TEXT};
+          display: flex; align-items: center; justify-content: center;
+          font-size: clamp(8px, 0.9vw, 11px);
+          font-weight: 700;
+          border: 2px solid #fff;
+          box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+          pointer-events: none;
+          z-index: 2;
+        }
+
+        /* Scene image */
+        .rwss-scene-img {
+          width: 100% ; 
+          height: 100%;
+          flex-shrink: 0;
+        }
+
+        .rwss-buttons {
+          display: flex;
+          justify-content: center;
+          margin-top: clamp(8px, 1.6vw, 18px);
+        }
+
+        @media (max-width: 560px) {
+          .rwss-body { grid-template-columns: 1fr; }
+          .rwss-scene-img { width: 100%; max-width: 280px; margin: 0 auto; }
+          .rwss-text { white-space: normal; }
+        }
+      `}</style>
+
+      <div
+        className="div-forall"
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: "clamp(14px, 2vw, 22px)",
+          maxWidth: "1100px",
+          margin: "0 auto",
+        }}
+      >
+        {/* ── Header ── */}
+        <h1
+          className="WB-header-title-page8"
+          style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
         >
-          <span className="ex-A" style={{ marginRight: "10px" }}>
-            C
-          </span>
-          What does Stella recommend in I Love My Garden! on page 47?
-        </h5>
+          <span className="WB-ex-A-1">C</span>
+          Read and write{" "}
+          <em style={{ color: KEYWORD_COLOR, fontStyle: "normal", fontWeight: 700 }}>should</em>
+          {" "}or{" "}
+          <em style={{ color: KEYWORD_COLOR, fontStyle: "normal", fontWeight: 700 }}>shouldn't</em>.
+        </h1>
 
-        {/* Words List */}
-        <div className="flex flex-wrap justify-center gap-3 mb-5 border-2 border-dashed border-gray-300 rounded-[14px] p-3">
-          {wordsToFind.map((word) => (
-            <span
-              key={word}
-              className={`px-3 py-1.5 rounded-[10px] border-2 border-[#2c5287] font-semibold transition duration-200 ${
-                foundWords.includes(word)
-                  ? "bg-[#2c5287] text-white border-[#2c5287]"
-                  : "bg-white text-black"
-              }`}
-              style={{ fontSize: "clamp(12px, 2vw, 15px)" }}
-            >
-              {word}
-            </span>
-          ))}
-        </div>
+        {/* ── Body ── */}
+        <div className="rwss-body">
 
-        <div
-          style={{ width: "100%", display: "flex", justifyContent: "center" }}
-        >
-          {/* Grid Wrapper */}
-          <div
-            className="border-2 border-[#f28c63] px-4 pt-4 pb-5"
-            style={{ width: "fit-content", margin: "0 auto" }}
-          >
-            <div
-              className="bg-[#daf5ff] rounded-[15px] p-2 sm:p-[15px]"
-              style={{
-                userSelect: "none",
-                width: "max-content",
-                touchAction: "none", // 🔥 الحل السحري لمنع تحريك الصفحة أثناء السحب على الآيباد
-                WebkitOverflowScrolling: "touch",
-              }}
-            >
-              {letters.map((row, rowIndex) => (
-                <div
-                  key={rowIndex}
-                  style={{
-                    display: "flex",
-                    gap: "clamp(1px, 0.3vw, 4px)", // مسافة تتغير حسب الشاشة
-                    width: "fit-content",
-                  }}
-                >
-                  {row.map((letter, colIndex) => {
-                    const index = rowIndex * 100 + colIndex;
-                    const isSelected = selected.includes(index);
-                    const isFound = coloredCells.includes(index);
+          {/* Items */}
+          <div className="rwss-list">
+            {ITEMS.map((item) => {
+              const wrong    = isWrong(item);
+              const value    = answers[item.id] || "";
+              const tColor   = showAns ? INPUT_ANSWER_COLOR : INPUT_TEXT_COLOR;
+              const uColor   = wrong ? INPUT_UNDERLINE_WRONG : INPUT_UNDERLINE_DEFAULT;
+              const disabled = isDisabled(item);
 
-                    return (
-                      <span
-                        key={index}
-                        data-index={index}
-                        onMouseDown={() => handleMouseDown(index)}
-                        onMouseEnter={() => handleMouseEnter(index)}
-                        onMouseUp={handleMouseUp}
-                        onDragStart={(e) => e.preventDefault()}
-                        onTouchStart={(e) => {
-                          e.preventDefault(); // 🔥 منع تحريك الصفحة عند بدء اللمس
-                          handleMouseDown(index);
-                        }}
-                        onTouchMove={handleTouchMove}
-                        onTouchEnd={handleMouseUp}
-                        className={`
-                          flex items-center justify-center
-                          cursor-pointer
-                          transition
-                          ${isSelected ? "bg-[#ffd54f] rounded-sm" : ""}
-                          ${isFound ? "bg-[#4caf50] text-white rounded-sm" : ""}
-                        `}
-                        style={{
-                          width: "clamp(16px, 2.5vw, 25px)", // 🔥 عرض ديناميكي
-                          height: "clamp(22px, 3.5vw, 35px)", // 🔥 طول ديناميكي
-                          fontSize: "clamp(12px, 1.8vw, 18px)", // 🔥 حجم خط ديناميكي
-                        }}
-                      >
-                        {letter}
-                      </span>
-                    );
-                  })}
+              return (
+                <div key={item.id} className="rwss-row">
+                  <span className="rwss-num">{item.id}</span>
+                  <span className="rwss-text">{item.before}</span>
+
+                  <div className="rwss-input-wrap">
+                    <input
+                      type="text"
+                      className={[
+                        "rwss-input",
+                        wrong   ? "rwss-input--wrong"  : "",
+                        showAns ? "rwss-input--answer" : "",
+                      ].filter(Boolean).join(" ")}
+                      value={value}
+                      disabled={disabled}
+                      onChange={(e) => handleChange(item.id, e.target.value)}
+                      style={{ borderBottomColor: uColor, color: tColor }}
+                      spellCheck={false}
+                      autoComplete="off"
+                    />
+                    {wrong && <div className="rwss-badge">✕</div>}
+                  </div>
+
+                  <span className="rwss-text">{item.after}</span>
                 </div>
-              ))}
-            </div>
-
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: "10px",
-                marginTop: "15px",
-              }}
-            >
-              <img
-                src={img1}
-                alt="start"
-                style={{
-                  width: "clamp(40px, 10vw, 100px)", // 🔥 حجم ديناميكي للصور
-                  height: "auto",
-                }}
-              />
-
-              <div
-                style={{
-                  flex: 1,
-                  borderBottom: "2px solid black",
-                  height: "30px",
-                  display: "flex",
-                  alignItems: "center",
-                }}
-              >
-                <input
-                  value={sentence}
-                  readOnly
-                  style={{
-                    width: "100%",
-                    border: "none",
-                    outline: "none",
-                    background: "transparent",
-                    fontSize: "clamp(14px, 2vw, 18px)", // 🔥 حجم خط ديناميكي للإجابة
-                  }}
-                />
-              </div>
-
-              <img
-                src={img2}
-                alt="end"
-                style={{
-                  width: "clamp(40px, 10vw, 100px)", // 🔥 حجم ديناميكي للصور
-                  height: "auto",
-                }}
-              />
-            </div>
+              );
+            })}
           </div>
+
+          {/* Image */}
+          <img src={imgScene} alt="scene" className="rwss-scene-img" />
+
         </div>
 
-        {/* BUTTONS */}
-        <Button
-          handleShowAnswer={showAnswers}
-          handleStartAgain={reset}
-          checkAnswers={checkAnswers}
-        />
+        {/* ── Buttons ── */}
+        <div className="rwss-buttons">
+          <Button
+            checkAnswers={handleCheck}
+            handleShowAnswer={handleShowAnswer}
+            handleStartAgain={handleReset}
+          />
+        </div>
       </div>
     </div>
   );
-};
-
-export default Unit6_Page5_Q3;
+}

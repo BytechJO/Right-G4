@@ -1,129 +1,96 @@
 import { useState } from "react";
-import { FaRedo } from "react-icons/fa";
+import { FaRedo, FaEye } from "react-icons/fa";
 
 const WritingA = () => {
-  const [f1, setF1] = useState(""); // wake up at
-  const [f2, setF2] = useState(""); // get dressed and ___
-  const [f3, setF3] = useState(""); // After breakfast, I
-  const [f4, setF4] = useState(""); // Then, I go
-  const [f5, setF5] = useState(""); // At school, I
-  const [f6, setF6] = useState(""); // After school, I
-  const [f7, setF7] = useState(""); // At ___
-  const [f8, setF8] = useState(""); // last thing
-  const [f9, setF9] = useState(""); // last line
+  const [ans1, setAns1] = useState("");
+  const [ans2, setAns2] = useState("");
+  const [ans, setAns] = useState(false)
 
   const handleReset = () => {
-    setF1(""); setF2(""); setF3(""); setF4("");
-    setF5(""); setF6(""); setF7(""); setF8(""); setF9("");
+    setAns1("");
+    setAns2("");
+    setAns(false)
   };
 
-  const inp = (value, setter) => (
-    <input
-      type="text"
-      value={value}
-      onChange={(e) => setter(e.target.value)}
-      autoComplete="off"
-      style={{
-        borderBottom: "1px solid #333",
-        background: "transparent",
-        outline: "none",
-        fontSize: "16px",
-        color: "#1a1a1a",
-        flex: 1,
-        minWidth: "80px",
-      }}
-    />
-  );
+  const handleShow = () => {
+    setAns1("keep it in a small pot.");
+    setAns2("forget to water and care for my tree.");
+    setAns(true)
 
-  const txt = (t) => (
-    <span style={{ fontSize: "16px", color: "#1a1a1a", whiteSpace: "nowrap" }}>{t}</span>
-  );
+  };
 
-  const fullInp = (value, setter) => (
-    <input
-      type="text"
-      value={value}
-      onChange={(e) => setter(e.target.value)}
-      autoComplete="off"
-      style={{
-        borderBottom: "1px solid #333",
-        background: "transparent",
-        outline: "none",
-        fontSize: "16px",
-        color: "#1a1a1a",
-        padding: "2px 4px",
-        width: "100%",
-      }}
-    />
-  );
+  const inputStyle = {
+    flex: 1,
+    borderBottom: "1px solid #333",
+    background: "transparent",
+    outline: "none",
+    fontSize: "18px",
+    color: ans ?  "#ff0000ff": "#1a1a1a",
+  };
 
   return (
     <div className="mb-6 mx-auto">
       <h5 className="header-title-page8-read mb-8">
         <span className="ex-A-read mr-2">A</span>
-        Write about your day by finishing the sentences.
+        Write about how to help a bonsai tree grow.
       </h5>
 
-      <div className="flex flex-col gap-5" style={{ fontSize: "16px", color: "#1a1a1a" }}>
-
-        {/* Line 1: My usual day is busy but fun. I wake up at ___ I get dressed and */}
-        <div className="flex items-end gap-2 flex-wrap">
-          {txt("My usual day is busy but fun. I wake up at")}
-          {inp(f1, setF1)}
-          {txt("I get dressed and")}
-        </div>
-
-        {/* Line 2: ___ . After */}
+      <div className="flex flex-col gap-6">
+        {/* Line 1 */}
         <div className="flex items-end gap-2">
-          {fullInp(f2, setF2)}
-          {txt(". After")}
+          <span
+            style={{
+              fontWeight: "400",
+              WebkitTextStroke: "1px black",
+              color: "#1a1a1a",
+              minWidth: "18px",
+              fontSize: "18px",
+              flexShrink: 0,
+            }}
+          >
+            1
+          </span>
+          <span style={{ fontSize: "18px", color: "#1a1a1a", whiteSpace: "nowrap" }}>
+            I should
+          </span>
+          <input
+            type="text"
+            value={ans1}
+            onChange={(e) => setAns1(e.target.value)}
+            autoComplete="off"
+            style={inputStyle}
+          />
         </div>
 
-        {/* Line 3: breakfast, I ___ . */}
+        {/* Line 2 */}
         <div className="flex items-end gap-2">
-          {txt("breakfast, I")}
-          {inp(f3, setF3)}
-          {txt(".")}
+          <span
+            style={{
+              fontWeight: "400",
+              WebkitTextStroke: "1px black",
+              color: "#1a1a1a",
+              minWidth: "18px",
+              fontSize: "18px",
+              flexShrink: 0,
+            }}
+          >
+            2
+          </span>
+          <span style={{ fontSize: "18px", color: "#1a1a1a", whiteSpace: "nowrap" }}>
+            I shouldn't
+          </span>
+          <input
+            type="text"
+            value={ans2}
+            onChange={(e) => setAns2(e.target.value)}
+            autoComplete="off"
+            style={inputStyle}
+          />
         </div>
-
-        {/* Line 4: Then, I go ___ . */}
-        <div className="flex items-end gap-2">
-          {txt("Then, I go")}
-          {inp(f4, setF4)}
-          {txt(".")}
-        </div>
-
-        {/* Line 5: At school, I ___ . After school, I */}
-        <div className="flex items-end gap-2 flex-wrap">
-          {txt("At school, I")}
-          {inp(f5, setF5)}
-          {txt(". After school, I")}
-        </div>
-
-        {/* Line 6: ___ . */}
-        <div className="flex items-end gap-2">
-          {fullInp(f6, setF6)}
-          {txt(".")}
-        </div>
-
-        {/* Line 7: At ___ I eat dinner. The last thing I usually do is ___ */}
-        <div className="flex items-end gap-2 flex-wrap">
-          {txt("At")}
-          {inp(f7, setF7)}
-          {txt("I eat dinner. The last thing I usually do is")}
-          {inp(f8, setF8)}
-        </div>
-
-        {/* Line 8: ___ . That is my usual day! */}
-        <div className="flex items-end gap-2">
-          {fullInp(f9, setF9)}
-          {txt(". That is my usual day!")}
-        </div>
-
       </div>
 
-      {/* Reset Button */}
-      <div className="flex justify-center mt-8">
+      {/* Buttons */}
+      <div className="flex justify-center gap-6 mt-8">
         <div className="relative group">
           <div
             onClick={handleReset}
@@ -135,6 +102,20 @@ const WritingA = () => {
           </div>
           <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-black text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition">
             Reset
+          </span>
+        </div>
+
+        <div className="relative group">
+          <div
+            onClick={handleShow}
+            className="flex items-center justify-center w-14 h-14 rounded-xl bg-[#2c78b4] hover:bg-[#1a5a8a] cursor-pointer transition shadow-sm"
+          >
+            <div className="bg-white p-3 rounded-full shadow">
+              <FaEye size={14} />
+            </div>
+          </div>
+          <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-black text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition whitespace-nowrap">
+            Show Answer
           </span>
         </div>
       </div>

@@ -1,226 +1,119 @@
 import { useState } from "react";
-import ValidationAlert from "../../Popup/ValidationAlert";
-import { FaCheck, FaRedo, FaEye } from "react-icons/fa";
+import { FaRedo } from "react-icons/fa";
 
-import earthImg from "../../../assets/imgs/pages/Class Book/Right 4 Unit 4 Joy Makes a Friend Folder/Page 31/SVG/Asset 26.svg";
+import img from "../../../assets/imgs/pages/Class Book/Right 4 Unit 6 Ready for School Folder/Page 49/SVG/Asset 28.svg";
 
 const WritingB = () => {
-  const wordBank =["core", "mantle", "crust"];;
-
-  const questions = [
-    { id: 1, answer: "lower mantle" },
-    { id: 2, answer: "crust" },
-    { id: 3, answer: "inner core" },  ];
-
-  const [answers, setAnswers] = useState(
-    Object.fromEntries(questions.map((q) => [q.id, ""]))
-  );
-  const [errors, setErrors] = useState({});
-  const [locked, setLocked] = useState(false);
-  const [showed, setShowed] = useState(false);
-
-  const handleChange = (id, value) => {
-    if (locked || errors[id] === false) return;
-    setAnswers((prev) => ({ ...prev, [id]: value }));
-  };
-
-  const handleCheck = () => {
-    if (locked) return;
-    const isEmpty = questions.some((q) => answers[q.id].trim() === "");
-    if (isEmpty) {
-      ValidationAlert.info("Please fill in all blanks.");
-      return;
-    }
-    let correctCount = 0;
-    const newErrors = {};
-    questions.forEach((q) => {
-      if (answers[q.id].trim().toLowerCase() === q.answer.toLowerCase()) {
-        correctCount++;
-        newErrors[q.id] = false;
-      } else {
-        newErrors[q.id] = true;
-      }
-    });
-    setErrors(newErrors);
-    const total = questions.length;
-    const color =
-      correctCount === total ? "green" : correctCount === 0 ? "red" : "orange";
-    const msg = `
-      <div style="font-size:20px;text-align:center;">
-        <span style="color:${color}; font-weight:bold;">
-          Score: ${correctCount} / ${total}
-        </span>
-      </div>
-    `;
-    if (correctCount === total) {
-      setLocked(true);
-      ValidationAlert.success(msg);
-    } else if (correctCount === 0) {
-      ValidationAlert.error(msg);
-    } else {
-      ValidationAlert.warning(msg);
-    }
-  };
-
-  const handleShow = () => {
-    setAnswers(Object.fromEntries(questions.map((q) => [q.id, q.answer])));
-    setErrors({});
-    setLocked(true);
-    setShowed(true);
-  };
+  const [f1, setF1] = useState("");
+  const [f2, setF2] = useState("");
+  const [f3, setF3] = useState("");
+  const [f4, setF4] = useState("");
+  const [f5, setF5] = useState("");
+  const [f6, setF6] = useState("");
+  const [f7, setF7] = useState("");
 
   const handleReset = () => {
-    setAnswers(Object.fromEntries(questions.map((q) => [q.id, ""])));
-    setErrors({});
-    setLocked(false);
-    setShowed(false);
+    setF1(""); setF2(""); setF3("");
+    setF4(""); setF5(""); setF6(""); setF7("");
   };
 
-  // المواقع بالنسبة للصورة نفسها (%)
-  const inputPositions = {
-    1: { top: "10%", left: "3%",  width: "27%" },   // يسار فوق - mesosphere
-    2: { top: "23%", left: "43%", width: "27%" },   // يمين فوق - thermosphere
-    3: { top: "33%", left: "6%",  width: "27%" },   // يسار تحت - troposphere
-  };  
+  const inp = (value, setter, width = "flex-1") => (
+    <input
+      type="text"
+      value={value}
+      onChange={(e) => setter(e.target.value)}
+      autoComplete="off"
+      style={{
+        borderBottom: "1px solid #333",
+        background: "transparent",
+        outline: "none",
+        fontSize: "18px",
+        color: "#1a1a1a",
+        flex: width === "flex-1" ? 1 : undefined,
+        width: width !== "flex-1" ? width : undefined,
+        minWidth: "80px",
+      }}
+    />
+  );
+
+  const txt = (t) => (
+    <span style={{ fontSize: "18px", color: "#1a1a1a", whiteSpace: "nowrap" }}>
+      {t}
+    </span>
+  );
 
   return (
     <div className="mb-6 mx-auto">
-      <h5 className="header-title-page8-read mb-6">
+      <h5 className="header-title-page8-read mb-8">
         <span className="ex-A-read mr-2">B</span>
-        Label the layers of the Earth's atmosphere.
+        Pick a simple activity and tell someone else how to do it. You can use <br />
+        the paragraph above and the sentences below to help you.
       </h5>
 
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "row",
-          gap: "2rem",
-          alignItems: "flex-start",
-          width: "100%",
-          marginTop : "3em"
-        }}
-      >
-        {/* Word Bank */}
-        <div
-          style={{
-            flex: 1,
-            display: "flex",
-            flexDirection: "column",
-            gap: "12px",
-          }}
-        >
-          {wordBank.map((word) => (
-            <div
-              key={word}
-              style={{
-                border: "2px solid #e8eff1",
-                borderRadius: "8px",
-                padding: "4px 18px",
-                fontSize: "14px",
-                fontWeight: "500",
-                color: "#1a1a1a",
-                background: "#e8eff1",
-                width: "fit-content",
-              }}
-            >
-              {word}
-            </div>
-          ))}
+      <div className="flex gap-6">
+        {/* Text content */}
+        <div className="flex flex-col gap-5 flex-1">
+
+          {/* Line 1: Would you like to know how to ___ ? */}
+          <div className="flex items-end gap-2 flex-wrap">
+            {txt("Would you like to know how to")}
+            {inp(f1, setF1)}
+            {txt("?")}
+          </div>
+
+          {/* Line 2: With just a few simple steps you can ___ . */}
+          <div className="flex items-end gap-2 flex-wrap">
+            {txt("With just a few simple steps you can")}
+            {inp(f2, setF2)}
+            {txt(".")}
+          </div>
+
+          {/* Line 3: First, you should ___ . */}
+          <div className="flex items-end gap-2 flex-wrap">
+            {txt("First, you should")}
+            {inp(f3, setF3)}
+            {txt(".")}
+          </div>
+
+          {/* Line 4: This will get you started correctly. Next, carefully ___ */}
+          <div className="flex items-end gap-2 flex-wrap">
+            {txt("This will get you started correctly. Next, carefully")}
+            {inp(f4, setF4)}
+          </div>
+
+          {/* Line 5: continuation ___ . */}
+          <div className="flex items-end gap-2">
+            {inp(f5, setF5)}
+            {txt(".")}
+          </div>
+
+          {/* Line 6: Now you just need to ___ . */}
+          <div className="flex items-end gap-2 flex-wrap">
+            {txt("Now you just need to")}
+            {inp(f6, setF6)}
+            {txt(".")}
+          </div>
+
+          {/* Line 7: You have successfully ___ . I hope you enjoyed it! */}
+          <div className="flex items-end gap-2 flex-wrap">
+            {txt("You have successfully")}
+            {inp(f7, setF7)}
+            {txt(". I hope you enjoyed it!")}
+          </div>
         </div>
 
-        {/* ✅ Image + Inputs في نفس الـ div */}
-        <div
-          style={{
-            flex: 2,
-            position: "relative",
-  // ← الـ parent للـ inputs
-          }}
-        >
+        {/* Image */}
+        <div style={{ flexShrink: 0 }}>
           <img
-            src={earthImg}
-            alt="atmosphere"
-            style={{
-              width: "80%",
-              height: "auto",
-              display: "block",
-              top : ""
-            }}
+            src={img}
+            alt=""
+            style={{ width: "78%", height : "auto", objectFit: "cover" }}
           />
-
-          {/* ✅ الـ inputs جوا نفس الـ div */}
-          {questions.map((q) => {
-            const pos = inputPositions[q.id];
-            const isError = errors[q.id] === true;
-            const isCorrect = errors[q.id] === false;
-
-            return (
-              <div
-                key={q.id}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  position: "absolute",
-                  top: pos.top,
-                  left: pos.left,
-                  width: pos.width,
-                }}
-              >
-        
-
-                <div style={{ position: "relative", flex: 1 }}>
-                  <input
-                    type="text"
-                    value={answers[q.id]}
-                    onChange={(e) => handleChange(q.id, e.target.value)}
-                    disabled={locked || isCorrect}
-                    autoComplete="off"
-                    style={{
-                      width: "100%",
-                      fontSize: "18px",
-                      background: "transparent",
-                      border: "none",
-                      outline: "none",
-                      color: showed ? "#ef4444" :  "#1a1a1a",
-                      textAlign: "center",
-                      padding: "2px 4px",
-                    }}
-                  />
-
-                  {/* ❌ Error Badge */}
-                  {isError && (
-                    <div
-                      style={{
-                        position: "absolute",
-                        top: "-8px",
-                        right: "-8px",
-                        width: "18px",
-                        height: "18px",
-                        background: "#ef4444",
-                        color: "white",
-                        borderRadius: "50%",
-                        fontSize: "10px",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        fontWeight: "bold",
-                        border: "2px solid white",
-                        boxShadow: "0 1px 6px rgba(0,0,0,0.2)",
-                      }}
-                    >
-                      ✕
-                    </div>
-                  )}
-
-                  
-                </div>
-              </div>
-            );
-          })}
         </div>
       </div>
 
-      {/* Buttons */}
-      <div className="flex justify-center gap-6 mt-8 ">
+      {/* Reset Button */}
+      <div className="flex justify-center mt-8">
         <div className="relative group">
           <div
             onClick={handleReset}
@@ -232,34 +125,6 @@ const WritingB = () => {
           </div>
           <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-black text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition">
             Reset
-          </span>
-        </div>
-
-        <div className="relative group">
-          <div
-            onClick={handleShow}
-            className="flex items-center justify-center w-14 h-14 rounded-xl bg-[#2c78b4] hover:bg-[#1a5a8a] cursor-pointer transition shadow-sm"
-          >
-            <div className="bg-white p-3 rounded-full shadow">
-              <FaEye size={14} />
-            </div>
-          </div>
-          <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-black text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition whitespace-nowrap">
-            Show Answer
-          </span>
-        </div>
-
-        <div className="relative group">
-          <div
-            onClick={handleCheck}
-            className="flex items-center justify-center w-14 h-14 rounded-xl bg-[#55c271] hover:bg-[#449d5a] cursor-pointer transition shadow-sm"
-          >
-            <div className="bg-white p-3 rounded-full shadow">
-              <FaCheck size={14} />
-            </div>
-          </div>
-          <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-black text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition whitespace-nowrap">
-            Check Answer
           </span>
         </div>
       </div>

@@ -1,236 +1,350 @@
 import React, { useState } from "react";
-import "./Unit6_Page6_Q1.css";
-import img1 from "../../../assets/imgs/pages/classbook/Right 3 Unit 6 Lets Run! Folder/Page 51/Ex D 1.svg";
-import img2 from "../../../assets/imgs/pages/classbook/Right 3 Unit 6 Lets Run! Folder/Page 51/Ex D 2.svg";
-import img3 from "../../../assets/imgs/pages/classbook/Right 3 Unit 6 Lets Run! Folder/Page 51/Ex D 3.svg";
-import img4 from "../../../assets/imgs/pages/classbook/Right 3 Unit 6 Lets Run! Folder/Page 51/Ex D 4.svg";
 import Button from "../../Button";
 import ValidationAlert from "../../Popup/ValidationAlert";
 
-const Unit6_Page6_Q1 = () => {
-  const [locked, setLocked] = useState(false);
-  const [answers, setAnswers] = useState({});
+// ─────────────────────────────────────────────
+//  🖼️  IMAGE + 🔊 AUDIO
+// ─────────────────────────────────────────────
+import imgScene from "../../../assets/imgs/pages/Class Book/Right 4 Unit 6 Ready for School Folder/Page 51/SVG/Asset 1.svg";
+import sound    from "../../../assets/audio/ClassBook/Grade 4/cd1pg4-conversation-adult-lady-t_1cApuaJF.mp3";
+import QuestionAudioPlayer from "../../QuestionAudioPlayer";
 
-  const questions = [
-    {
-      id: 1,
-      subject: "She",
-      action: "study better",
-      img: img1,
-      correct: "must",
-    },
-    {
-      id: 2,
-      subject: "He",
-      action: "stand under the hot sun",
-      img: img2,
-      correct: "mustnt",
-    },
-    { id: 3, subject: "You", action: "be quiet", img: img3, correct: "must" },
-    {
-      id: 4,
-      subject: "She",
-      action: "brush her hair",
-      img: img4,
-      correct: "must",
-    },
-  ];
+// ─────────────────────────────────────────────
+//  🎨  COLORS
+// ─────────────────────────────────────────────
+const TEXT_COLOR              = "#2b2b2b";
+const INPUT_UNDERLINE_DEFAULT = "#3f3f3f";
+const INPUT_UNDERLINE_WRONG   = "#ef4444";
+const INPUT_TEXT_COLOR        = "#2b2b2b";
+const INPUT_ANSWER_COLOR      = "#c81e1e";
+const WRONG_BADGE_BG          = "#ef4444";
+const WRONG_BADGE_TEXT        = "#ffffff";
 
-  const handleAnswer = (id, value) => {
-    if (locked) return;
+// ─────────────────────────────────────────────
+//  📝  AUDIO CAPTIONS
+// ─────────────────────────────────────────────
+const captions = [
+  { start: 0.0,  end: 5.0,  text: "Listen, read, and complete the story." },
+  { start: 5.0,  end: 10.0, text: "Thomas is going on a camping trip tomorrow." },
+  { start: 10.0, end: 18.0, text: "He should take his sleeping bag and tent, so he'll be comfortable when he sleeps." },
+  { start: 18.0, end: 26.0, text: "He should also take his boots for hiking in the woods." },
+  { start: 26.0, end: 34.0, text: "Thomas should be careful when starting a campfire, and he shouldn't leave a fire unattended." },
+  { start: 34.0, end: 43.0, text: "He shouldn't leave food out as bears sometimes walk around in the woods looking for food." },
+  { start: 43.0, end: 52.0, text: "He shouldn't leave any trash or litter on the ground." },
+  { start: 52.0, end: 58.0, text: "It can get very dark at night, so he should be sure to bring a flashlight." },
+];
 
-    setAnswers((prev) => ({
-      ...prev,
-      [id]: value,
-    }));
+// ─────────────────────────────────────────────
+//  📝  LINES DATA
+//  كل سطر: مصفوفة من parts
+//  { t: "text", v: "..." } | { t: "input", id, correct, answer }
+// ─────────────────────────────────────────────
+const LINES = [
+  // سطر 1 — نص عادي بدون input
+  [{ t: "text", v: "Thomas is going on a camping trip tomorrow." }],
+
+  // سطر 2
+  [
+    { t: "text", v: "He " },
+    { t: "input", id: 1, correct: ["should"], answer: "should" },
+    { t: "text", v: " take his sleeping bag and" },
+  ],
+
+  // سطر 3
+  [{ t: "text", v: "tent, so he'll be comfortable when he sleeps. He" }],
+
+  // سطر 4
+  [
+    { t: "input", id: 2, correct: ["should"], answer: "should" },
+    { t: "text", v: " also take his boots for hiking in" },
+  ],
+
+  // سطر 5
+  [
+    { t: "text", v: "the woods. Thomas " },
+    { t: "input", id: 3, correct: ["should"], answer: "should" },
+    { t: "text", v: " be careful" },
+  ],
+
+  // سطر 6
+  [
+    { t: "text", v: "when starting a campfire, and he " },
+    { t: "input", id: 4, correct: ["shouldn't","shouldnt","should not"], answer: "shouldn't" },
+  ],
+
+  // سطر 7
+  [{ t: "text", v: "leave a fire unattended." }],
+
+  // سطر 8 (فراغ / مسافة)
+  [{ t: "text", v: "" }],
+
+  // سطر 9
+  [
+    { t: "text", v: "He" },
+    { t: "input", id: 5, correct: ["shouldn't","shouldnt","should not"], answer: "shouldn't" },
+    { t: "text", v: "leave food out as bears sometimes walk around in the woods looking for" },
+  ],
+
+  // سطر 10
+  [
+    { t: "text", v: "food. He" },
+    { t: "input", id: 6, correct: ["shouldn't","shouldnt","should not"], answer: "shouldn't" },
+    { t: "text", v: "leave any trash or litter on the ground. It can get very dark at night," },
+  ],
+
+  // سطر 11
+  [
+    { t: "text", v: "so he " },
+    { t: "input", id: 7, correct: ["should"], answer: "should" },
+    { t: "text", v: " be sure to bring a flashlight." },
+  ],
+];
+
+const ALL_INPUTS = LINES.flat().filter((p) => p.t === "input");
+
+// ─────────────────────────────────────────────
+//  🔧  NORMALIZE
+// ─────────────────────────────────────────────
+const normalize = (str) =>
+  str.toLowerCase().replace(/[^a-z0-9'\s]/g, "").replace(/\s+/g, " ").trim();
+
+const isCorrect = (userVal, correctArr) =>
+  correctArr.some((c) => normalize(userVal) === normalize(c));
+
+// ─────────────────────────────────────────────
+//  COMPONENT
+// ─────────────────────────────────────────────
+export default function WB_ListenReadCompleteStory_QD() {
+  const [answers,     setAnswers]     = useState({});
+  const [showResults, setShowResults] = useState(false);
+  const [showAns,     setShowAns]     = useState(false);
+
+  const handleChange = (id, value) => {
+    if (showAns) return;
+    const part = ALL_INPUTS.find((p) => p.id === id);
+    if (showResults && part && isCorrect(answers[id] || "", part.correct)) return;
+    setAnswers((prev) => ({ ...prev, [id]: value }));
   };
-  const reset = () => {
-    setLocked(false);
+
+  const handleCheck = () => {
+    if (showAns) return;
+    const allAnswered = ALL_INPUTS.every((p) => answers[p.id]?.trim());
+    if (!allAnswered) { ValidationAlert.info("Please complete all blanks first."); return; }
+    let score = 0;
+    ALL_INPUTS.forEach((p) => { if (isCorrect(answers[p.id] || "", p.correct)) score++; });
+    const total = ALL_INPUTS.length;
+    setShowResults(true);
+    if (score === total)   ValidationAlert.success(`Score: ${score} / ${total}`);
+    else if (score > 0)    ValidationAlert.warning(`Score: ${score} / ${total}`);
+    else                   ValidationAlert.error(`Score: ${score} / ${total}`);
+  };
+
+  const handleShowAnswer = () => {
+    const filled = {};
+    ALL_INPUTS.forEach((p) => { filled[p.id] = p.answer; });
+    setAnswers(filled);
+    setShowResults(false);
+    setShowAns(true);
+  };
+
+  const handleReset = () => {
     setAnswers({});
+    setShowResults(false);
+    setShowAns(false);
   };
-  const showAnswers = () => {
-    const correctAnswers = {};
-    questions.forEach((q) => {
-      correctAnswers[q.id] = q.correct;
-    });
 
-    setAnswers(correctAnswers);
-    setLocked(true);
-  };
-  const checkAnswers = () => {
-    if (locked) return;
+  const isWrongPart    = (p) => showResults && !showAns && !isCorrect(answers[p.id] || "", p.correct);
+  const isDisabledPart = (p) => showAns || (showResults && isCorrect(answers[p.id] || "", p.correct));
 
-    // تأكد إنو كل الأسئلة مجاوبة
-    const unanswered = questions.some((q) => !answers[q.id]);
-    if (unanswered) {
-      ValidationAlert.info();
-      return;
+  const renderPart = (part, i) => {
+    if (part.t === "text") {
+      return <span key={i} className="lrcs-text">{part.v}</span>;
     }
 
-    let score = 0;
+    const wrong    = isWrongPart(part);
+    const disabled = isDisabledPart(part);
+    const value    = answers[part.id] || "";
+    const tColor   = showAns ? INPUT_ANSWER_COLOR : INPUT_TEXT_COLOR;
+    const uColor   = wrong ? INPUT_UNDERLINE_WRONG : INPUT_UNDERLINE_DEFAULT;
 
-    questions.forEach((q) => {
-      if (answers[q.id] === q.correct) {
-        score++;
-      }
-    });
-
-    const total = questions.length;
-
-    const color = score === total ? "green" : score === 0 ? "red" : "orange";
-
-    const msg = `
-    <div style="font-size:20px;text-align:center;">
-      <span style="color:${color};font-weight:bold">
-        Score: ${score} / ${total}
+    return (
+      <span key={part.id} className="lrcs-input-wrap">
+        <input
+          type="text"
+          className={[
+            "lrcs-input",
+            wrong   ? "lrcs-input--wrong"  : "",
+            showAns ? "lrcs-input--answer" : "",
+          ].filter(Boolean).join(" ")}
+          value={value}
+          disabled={disabled}
+          onChange={(e) => handleChange(part.id, e.target.value)}
+          style={{ borderBottomColor: uColor, color: tColor }}
+          spellCheck={false}
+          autoComplete="off"
+        />
+        {wrong && <span className="lrcs-badge">✕</span>}
       </span>
-    </div>
-  `;
-
-    if (score === total) ValidationAlert.success(msg);
-    else if (score === 0) ValidationAlert.error(msg);
-    else ValidationAlert.warning(msg);
-
-    setLocked(true);
+    );
   };
+
   return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "center",
-        alignItems: "center",
-        padding: "30px",
-      }}
-    >
+    <div className="main-container-component">
+      <style>{`
+        /* ── Top: text lines col | image col ── */
+        .lrcs-top {
+          display: grid;
+          grid-template-columns: 1fr auto;
+          gap: clamp(16px, 2.4vw, 32px);
+          align-items: flex-start;
+          width: 100%;
+        }
+
+        /* ── Lines container ── */
+        .lrcs-lines {
+          display: flex;
+          flex-direction: column;
+          gap: 0;
+        }
+
+        /* Single line */
+        .lrcs-line {
+          display: flex;
+          align-items: baseline;
+          flex-wrap: nowrap;
+          min-height: clamp(28px, 3.6vw, 44px);
+        }
+
+        .lrcs-text {
+          font-size: clamp(14px, 1.7vw, 20px);
+          color: ${TEXT_COLOR};
+          line-height: 1.9;
+          white-space: pre-wrap;
+        }
+
+        /* Inline input wrap */
+        .lrcs-input-wrap {
+          position: relative;
+          display: inline-flex;
+          align-items: baseline;
+          flex: 0 0 clamp(80px, 9vw, 130px);
+          min-width: clamp(70px, 8vw, 115px);
+          margin: 0 2px;
+        }
+
+        .lrcs-input {
+          width: 100%;
+          background: transparent;
+          border: none;
+          border-bottom: 1px solid ${INPUT_UNDERLINE_DEFAULT};
+          outline: none;
+          font-size: clamp(14px, 1.7vw, 20px);
+          color: ${INPUT_TEXT_COLOR};
+          line-height: 1.5;
+          box-sizing: border-box;
+          font-family: inherit;
+          transition: border-color 0.2s;
+          text-align: center;
+        }
+        .lrcs-input:disabled  { opacity: 1; cursor: default; }
+        .lrcs-input--wrong    { border-bottom-color: ${INPUT_UNDERLINE_WRONG}; }
+        .lrcs-input--answer   {
+          color: ${INPUT_ANSWER_COLOR};
+        }
+
+        /* ✕ badge */
+        .lrcs-badge {
+          position: absolute;
+          top: -6px; right: -4px;
+          width: clamp(14px, 1.6vw, 18px);
+          height: clamp(14px, 1.6vw, 18px);
+          border-radius: 50%;
+          background: ${WRONG_BADGE_BG};
+          color: ${WRONG_BADGE_TEXT};
+          display: flex; align-items: center; justify-content: center;
+          font-size: clamp(7px, 0.8vw, 10px);
+          font-weight: 700;
+          border: 2px solid #fff;
+          box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+          pointer-events: none;
+          z-index: 2;
+        }
+
+        /* Scene image */
+        .lrcs-scene-img {
+          position: absolute;
+    width: 20%;
+    height: 100%;
+    display: block;
+    border-radius: 10px;
+    flex-shrink: 0;
+    right: 25em;
+top : 5em ; 
+        }
+
+        .lrcs-buttons {
+          display: flex;
+          justify-content: center;
+          margin-top: clamp(8px, 1.6vw, 18px);
+        }
+
+        @media (max-width: 560px) {
+          .lrcs-top { grid-template-columns: 1fr; }
+          .lrcs-scene-img { width: 100%; max-width: 280px; margin: 0 auto; }
+          .lrcs-line { flex-wrap: wrap; }
+        }
+      `}</style>
+
       <div
         className="div-forall"
         style={{
           display: "flex",
           flexDirection: "column",
-          // gap: "20px",
-          width: "60%",
-          justifyContent: "flex-start",
+          gap: "clamp(14px, 2vw, 22px)",
+          maxWidth: "1100px",
+          margin: "0 auto",
         }}
       >
-        <h5 className="header-title-page8">
-          <span style={{ marginRight: "15px" }} className="ex-A">
-            D
-          </span>
-          Look and write<span style={{ color: "#D1232A" }}>✓</span>or
-          <span style={{ color: "#D1232A" }}>✗</span>.Then write.
-        </h5>
-        <div style={{ padding: "20px" }}>
-          {questions.map((q, index) => (
-            <div
-              key={q.id}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "20px",
-                marginBottom: "25px",
-              }}
-            >
-              {/* الرقم */}
-              <span style={{ fontWeight: "bold" }}>{index + 1}</span>
+        {/* ── Header ── */}
+        <h1
+          className="WB-header-title-page8"
+          style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
+        >
+          <span className="WB-ex-A-1">D</span>
+          Listen, read, and complete the story.
+        </h1>
 
-              {/* الصورة */}
-              <div
-                style={{
-                  width: "200px",
-                  height: "150px",
-                  overflow: "hidden",
-                  border: "3px solid orange",
-                  borderRadius: "8px",
-                }}
-              >
-                <img
-                  src={q.img}
-                  alt=""
-                  style={{
-                    width: "100%",
-                    height: "100%",
-                    objectFit: "cover",
-                  }}
-                />
-              </div>
-              {/* بوكسات الصح والخطا */}
-              <div style={{ display: "flex", gap: "10px" }}>
-                <div
-                  onClick={() => handleAnswer(q.id, "must")}
-                  style={{
-                    width: "40px",
-                    height: "40px",
-                    border: "2px solid orange",
-                    borderRadius: "6px",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    cursor: "pointer",
-                    background: answers[q.id] === "must" ? "#2a4e7c" : "white",
-                    color: answers[q.id] === "must" ? "white" : "black",
-                  }}
-                >
-                  ✓
-                </div>
-
-                <div
-                  onClick={() => handleAnswer(q.id, "mustnt")}
-                  style={{
-                    width: "40px",
-                    height: "40px",
-                    border: "2px solid orange",
-                    borderRadius: "6px",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    cursor: "pointer",
-                    background:
-                      answers[q.id] === "mustnt" ? "#2a4e7c" : "white",
-                    color: answers[q.id] === "mustnt" ? "white" : "black",
-                  }}
-                >
-                  ✕
-                </div>
-              </div>
-
-              {/* الخط + الجملة */}
-              <div
-                style={{
-                  position: "relative",
-                  flex: 1,
-                  borderBottom: `2px solid ${
-                    locked && answers[q.id] !== q.correct ? "red" : "black"
-                  }`,
-                  paddingBottom: "5px",
-                  minHeight: "24px",
-                  color: "#2a4e7c",
-                  fontWeight: "500",
-                }}
-              >
-                {answers[q.id] && (
-                  <span>
-                    {q.subject} {answers[q.id] === "must" ? "must" : "mustn't"}{" "}
-                    {q.action}.{/* ❌ فقط عند الغلط */}
-                    {locked && answers[q.id] !== q.correct && (
-                      <span className="absolute -top-2 -right-1 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center text-xs font-bold border-2 border-white shadow-md">
-                        ✕
-                      </span>
-                    )}
-                  </span>
-                )}
-              </div>
-            </div>
-          ))}
+        {/* ── Audio ── */}
+        <div style={{ marginTop: "4px" }}>
+          <QuestionAudioPlayer src={sound} captions={captions} stopAtSecond={5} />
         </div>
-        <Button
-          handleShowAnswer={showAnswers}
-          handleStartAgain={reset}
-          checkAnswers={checkAnswers}
-        />
+
+        {/* ── Top: lines + image ── */}
+        <div className="lrcs-top">
+
+          {/* Text lines with inline inputs */}
+          <div className="lrcs-lines">
+            {LINES.map((line, li) => (
+              <div key={li} className="lrcs-line">
+                {line.map((part, pi) => renderPart(part, `${li}-${pi}`))}
+              </div>
+            ))}
+          </div>
+
+          {/* Image */}
+          <img src={imgScene} alt="camping scene" className="lrcs-scene-img" />
+
+        </div>
+
+        {/* ── Buttons ── */}
+        <div className="lrcs-buttons">
+          <Button
+            checkAnswers={handleCheck}
+            handleShowAnswer={handleShowAnswer}
+            handleStartAgain={handleReset}
+          />
+        </div>
       </div>
     </div>
   );
-};
-
-export default Unit6_Page6_Q1;
+}

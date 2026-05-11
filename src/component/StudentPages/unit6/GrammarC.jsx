@@ -2,39 +2,47 @@ import { useState } from "react";
 import ValidationAlert from "../../Popup/ValidationAlert";
 import { FaCheck, FaRedo, FaEye } from "react-icons/fa";
 
+import img1 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 6 Ready for School Folder/Page 48/SVG/Asset 16.svg";
+import img2 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 6 Ready for School Folder/Page 48/SVG/Asset 17.svg";
+import img3 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 6 Ready for School Folder/Page 48/SVG/Asset 18.svg";
+
 const GrammarC = () => {
   const questions = [
     {
-      scrambled: "baby the crib The in is",
-      answers: [
-        "The baby is in the crib.",
-        "The baby is in the crib",
-      ],
+      id: 1,
+      image: img1,
+      sentence: "You shouldn't eat much sugar.",
+      correct: 0,
     },
     {
-      scrambled: "inside is gift Her the box",
-      answers: [
-        "Her gift is inside the box.",
-        "Her gift is inside the box",
-      ],
+      id: 2,
+      image: img2,
+      sentence: "You should ride your skateboard.",
+      correct: 0,
+    },
+    {
+      id: 3,
+      image: img3,
+      sentence: "You should do your homework.",
+      correct: 1,
     },
   ];
 
-  const [answers, setAnswers] = useState(Array(questions.length).fill(""));
+  const [selected, setSelected] = useState(
+    Object.fromEntries(questions.map((q) => [q.id, null]))
+  );
   const [errors, setErrors] = useState({});
   const [locked, setLocked] = useState(false);
   const [showed, setShowed] = useState(false);
 
-  const handleChange = (index, value) => {
-    if (locked || errors[index] === false) return;
-    const updated = [...answers];
-    updated[index] = value;
-    setAnswers(updated);
+  const handleSelect = (qId, imgIndex) => {
+    if (locked || errors[qId] === false) return;
+    setSelected((prev) => ({ ...prev, [qId]: imgIndex }));
   };
 
   const handleCheck = () => {
     if (locked) return;
-    const isEmpty = answers.some((a) => a.trim() === "");
+    const isEmpty = questions.some((q) => selected[q.id] === null);
     if (isEmpty) {
       ValidationAlert.info("Please answer all questions.");
       return;
@@ -43,15 +51,12 @@ const GrammarC = () => {
     let correctCount = 0;
     const newErrors = {};
 
-    answers.forEach((ans, i) => {
-      const isCorrect = questions[i].answers.some(
-        (a) => a.toLowerCase() === ans.trim().toLowerCase()
-      );
-      if (isCorrect) {
+    questions.forEach((q) => {
+      if (selected[q.id] === q.correct) {
         correctCount++;
-        newErrors[i] = false;
+        newErrors[q.id] = false;
       } else {
-        newErrors[i] = true;
+        newErrors[q.id] = true;
       }
     });
 
@@ -79,93 +84,136 @@ const GrammarC = () => {
   };
 
   const handleShow = () => {
-    setAnswers(questions.map((q) => q.answers[0]));
+    setSelected(Object.fromEntries(questions.map((q) => [q.id, q.correct])));
     setErrors({});
     setLocked(true);
     setShowed(true);
   };
 
   const handleReset = () => {
-    setAnswers(Array(questions.length).fill(""));
+    setSelected(Object.fromEntries(questions.map((q) => [q.id, null])));
     setErrors({});
     setLocked(false);
     setShowed(false);
+  };
+
+  const HalfImage = ({ q, imgIndex }) => {
+    const isSelected = selected[q.id] === imgIndex;
+    const isWrong = errors[q.id] === true;
+    const isLeft = imgIndex === 0;
+
+    return (
+      <div
+        onClick={() => handleSelect(q.id, imgIndex)}
+        style={{
+          flex: 1,
+          overflow: "hidden",
+          position: "relative",
+          cursor: locked ? "default" : "pointer",
+  
+        }}
+      >
+        {/* Half image */}
+        <img
+          src={q.image}
+          alt=""
+          style={{
+            width: "100%",
+            height : "auto ", 
+            display: "block",
+          }}
+        />
+
+        {/* Checkmark circle */}
+        <div
+          style={{
+            position: "absolute",
+            bottom: "6px",
+            right: "6px",
+            width: "28px",
+            height: "28px",
+            borderRadius: "50%",
+            border: `2px solid ${isSelected ? (isWrong ? "#ef4444" : "#2195a6") : "#ccc"}`,
+            background: "#fff",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          {isSelected && (
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none">
+              <polyline
+                points="4,12 9,18 20,6"
+                stroke={isWrong ? "#ef4444" : "#2195a6"}
+                strokeWidth="3"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          )}
+        </div>
+
+        {/* ❌ Error Badge */}
+        {isWrong && isSelected && (
+          <div
+            style={{
+              position: "absolute",
+              top: "-8px",
+              right: "-8px",
+              width: "18px",
+              height: "18px",
+              background: "#ef4444",
+              color: "white",
+              borderRadius: "50%",
+              fontSize: "10px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontWeight: "bold",
+              border: "2px solid white",
+              boxShadow: "0 1px 6px rgba(0,0,0,0.2)",
+              zIndex: 3,
+            }}
+          >
+            ✕
+          </div>
+        )}
+      </div>
+    );
   };
 
   return (
     <div className="mb-6 mx-auto">
       <h5 className="header-title-page8-read mb-8">
         <span className="ex-A-read mr-2">C</span>
-        Unscramble and write.
+        Read and write ✓.
       </h5>
 
-      <div className="flex flex-col " style={{                margin :"2% 0"
-}}>
-        {questions.map((q, i) => (
-          <div key={i} className="flex items-center gap-4">
+      <div className="grid grid-cols-3 gap-6">
+        {questions.map((q) => (
+          <div key={q.id} className="flex flex-col gap-3">
             {/* Number */}
             <span
               style={{
                 fontWeight: "400",
                 WebkitTextStroke: "1px black",
                 color: "#1a1a1a",
-                minWidth: "18px",
                 fontSize: "18px",
-                flexShrink: 0,
               }}
             >
-              {i + 1}
+              {q.id}
             </span>
 
-            {/* Scrambled */}
-            <span style={{ fontSize: "18px", color: "#1a1a1a", flexShrink: 0 , margin : "2% 0"}}>
-              {q.scrambled}
-            </span>
-
-            {/* Input */}
-            <div className="relative flex items-center flex-1">
-              <input
-                type="text"
-                disabled={locked || errors[i] === false}
-                value={answers[i]}
-                onChange={(e) => handleChange(i, e.target.value)}
-                autoComplete="off"
-                style={{ fontSize: "18px" }}
-                className={`w-full border-b-1 bg-transparent outline-none transition disabled:pointer-events-none
-                  ${
-                    errors[i] === true
-                      ? "border-red-500 text-gray-800"
-                      : showed
-                      ? "border-[#333] text-red-500"
-                      : "border-[#333] text-gray-800"
-                  }
-                `}
-              />
-
-              {/* ❌ Error Badge */}
-              {errors[i] === true && (
-                <div
-                  style={{
-                    position: "absolute",
-                    right: "-28px",
-                    width: "22px",
-                    height: "22px",
-                    background: "#ef4444",
-                    color: "white",
-                    borderRadius: "50%",
-                    fontSize: "12px",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    fontWeight: "bold",
-                    border: "2px solid white",
-                    boxShadow: "0 1px 6px rgba(0,0,0,0.2)",
-                  }}
-                >
-                  ✕
-                </div>
-              )}
+            {/* Split image */}
+            <div style={{ display: "flex" }}>
+              <HalfImage q={q} imgIndex={0} />
+              <HalfImage q={q} imgIndex={1} />
             </div>
+
+            {/* Sentence */}
+            <p style={{ fontSize: "15px", color: "#1a1a1a", textAlign: "center" }}>
+              {q.sentence}
+            </p>
           </div>
         ))}
       </div>

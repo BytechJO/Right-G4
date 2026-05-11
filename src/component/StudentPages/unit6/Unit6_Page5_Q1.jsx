@@ -1,220 +1,281 @@
 import React, { useState } from "react";
+import Button from "../../Button";
 import ValidationAlert from "../../Popup/ValidationAlert";
-import "./Unit6_Page5_Q1.css";
 
-import img1 from "../../../assets/imgs/pages/classbook/Right 3 Unit 6 Lets Run! Folder/Page 50/Ex A 1.svg";
-import img2 from "../../../assets/imgs/pages/classbook/Right 3 Unit 6 Lets Run! Folder/Page 50/Ex A 2.svg";
-import img3 from "../../../assets/imgs/pages/classbook/Right 3 Unit 6 Lets Run! Folder/Page 50/Ex A 3.svg";
-import img4 from "../../../assets/imgs/pages/classbook/Right 3 Unit 6 Lets Run! Folder/Page 50/Ex A 4.svg";
-import img5 from "../../../assets/imgs/pages/classbook/Right 3 Unit 6 Lets Run! Folder/Page 50/Ex A 5.svg";
-import img6 from "../../../assets/imgs/pages/classbook/Right 3 Unit 6 Lets Run! Folder/Page 50/Ex A 6.svg";
+// ─────────────────────────────────────────────
+//  🎨  COLORS
+// ─────────────────────────────────────────────
+const TEXT_COLOR       = "#2b2b2b";
+const NUMBER_COLOR     = "#2b2b2b";
+const UNDERLINE_COLOR  = "#2b2b2b";
+const BOX_BORDER       = "#2096a6";
+const BOX_RADIUS       = "8px";
+const BOX_SIZE_MIN     = "32px";
 
-const Unit6_Page5_Q1 = () => {
-  const items = [
-    {
-      img: img1,
-      options: ["sl", "pl"],
-      correct: "sl",
-      word: "__eep",
-    },
-    {
-      img: img2,
-      options: ["pl", "fl"],
-      correct: "pl",
-      word: "air__ane",
-    },
-    {
-      img: img3,
-      options: ["cl", "sl"],
-      correct: "cl",
-      word: "__own",
-    },
-    {
-      img: img4,
-      options: ["pl", "fl"],
-      correct: "pl",
-      word: "__ate",
-    },
-    {
-      img: img5,
-      options: ["fl", "sl"],
-      correct: "sl",
-      word: "__ide",
-    },
-    {
-      img: img6,
-      options: ["pl", "fl"],
-      correct: "fl",
-      word: "__ag",
-    },
-  ];
+// Check box colors
+const CHECK_COLOR      = "#c81e1e";   // أحمر — نفس الكتاب
+const CROSS_COLOR      = "#c81e1e";
 
-  const [selected, setSelected] = useState(Array(items.length).fill(""));
-  const [answers, setAnswers] = useState(Array(items.length).fill(""));
-  const [locked, setLocked] = useState(false);
-  const [showResult, setShowResult] = useState(false);
-  const chooseOption = (i, value) => {
-    if (locked) return;
+// Selected (before check)
+const BOX_SELECTED_BG  = "transparent";
+const BOX_SELECTED_BD  = "#2096a6";
 
-    const newSelected = [...selected];
-    newSelected[i] = value;
-    setSelected(newSelected);
+// After check
+const BOX_CORRECT_BG   = "transparent";
+const BOX_CORRECT_BD   = "#2096a6";
+const BOX_WRONG_BG     = "transparent";
+const BOX_WRONG_BD     = "#2096a6";
 
-    const newAnswers = [...answers];
+const WRONG_BADGE_BG   = "#ef4444";
+const WRONG_BADGE_TEXT = "#ffffff";
 
-    newAnswers[i] = items[i].word.replace("__", value).replace("_", value);
-    setAnswers(newAnswers);
+// ─────────────────────────────────────────────
+//  📝  EXERCISE DATA
+//  correct: "check" | "cross"
+// ─────────────────────────────────────────────
+const ITEMS = [
+  { id: 1, text: "I",      underlined: "pack",    rest: "many books in my backpack.",    correct: "check" },
+  { id: 2, text: "Tom wears", underlined: "science", rest: "every day.",                 correct: "cross"  },
+  { id: 3, text: "Lewis doesn't like to", underlined: "keys", rest: "coats in the winter.", correct: "cross" },
+  { id: 4, text: "Megan is studying for her", underlined: "gym", rest: ".",              correct: "cross"  },
+  { id: 5, text: "The",   underlined: "keys",    rest: "are in the car.",                correct: "check" },
+  { id: 6, text: "We have a math", underlined: "test", rest: "today.",                   correct: "check" },
+  { id: 7, text: "Roy plays soccer in", underlined: "gym", rest: "class.",               correct: "check" },
+];
+
+// ─────────────────────────────────────────────
+//  COMPONENT
+// ─────────────────────────────────────────────
+export default function WB_ReadWriteCheckCross_QA() {
+  const [selected,    setSelected]    = useState({});   // { id: "check" | "cross" | null }
+  const [showResults, setShowResults] = useState(false);
+  const [showAns,     setShowAns]     = useState(false);
+
+  const isLocked = showResults || showAns;
+
+  const handleSelect = (id, value) => {
+    if (isLocked) return;
+    setSelected((prev) => ({ ...prev, [id]: prev[id] === value ? null : value }));
   };
 
-  const resetAll = () => {
-    setSelected(Array(items.length).fill(""));
-    setAnswers(Array(items.length).fill(""));
-    setLocked(false);
-    setShowResult(false);
-  };
-
-  const showAnswers = () => {
-    setSelected(items.map((i) => i.correct));
-
-    const newAnswers = items.map((i) => {
-      return i.word.replace("__", i.correct).replace("_", i.correct);
-    });
-
-    setAnswers(newAnswers);
-    setLocked(true);
-  };
-  const checkAnswers = () => {
-    if (locked) return;
-    if (selected.includes("")) {
-      ValidationAlert.info("Please complete all answers.");
-      return;
-    }
-
+  const handleCheck = () => {
+    if (isLocked) return;
+    const allAnswered = ITEMS.every((item) => selected[item.id]);
+    if (!allAnswered) { ValidationAlert.info("Please answer all questions first."); return; }
     let score = 0;
+    ITEMS.forEach((item) => { if (selected[item.id] === item.correct) score++; });
+    setShowResults(true);
+    if (score === ITEMS.length)   ValidationAlert.success(`Score: ${score} / ${ITEMS.length}`);
+    else if (score > 0)           ValidationAlert.warning(`Score: ${score} / ${ITEMS.length}`);
+    else                          ValidationAlert.error(`Score: ${score} / ${ITEMS.length}`);
+  };
 
-    items.forEach((item, i) => {
-      if (selected[i] === item.correct) {
-        score++;
-      }
-    });
+  const handleShowAnswer = () => {
+    const filled = {};
+    ITEMS.forEach((item) => { filled[item.id] = item.correct; });
+    setSelected(filled);
+    setShowResults(false);
+    setShowAns(true);
+  };
 
-    const total = items.length;
+  const handleReset = () => {
+    setSelected({});
+    setShowResults(false);
+    setShowAns(false);
+  };
 
-    const color = score === total ? "green" : score === 0 ? "red" : "orange";
+  // ── Box state ──
+  // returns: "idle" | "selected" | "correct" | "wrong"
+  const getBoxState = (item, boxType) => {
+    const sel = selected[item.id];
+    if (sel !== boxType) return "idle";
+    if (showAns)         return "correct";
+    if (showResults)     return boxType === item.correct ? "correct" : "wrong";
+    return "selected";
+  };
 
-    const msg = `
-      <div style="font-size:20px;text-align:center;">
-        <span style="color:${color};font-weight:bold">
-        Score: ${score} / ${total}
-        </span>
+  const renderBox = (item, boxType) => {
+    const state   = getBoxState(item, boxType);
+    const symbol  = boxType === "check" ? "✓" : "✕";
+    const isWrong = state === "wrong";
+    const show    = state !== "idle";
+
+    let bg = "#ffffff";
+    let bd = BOX_BORDER;
+    let symColor = boxType === "check" ? CHECK_COLOR : CROSS_COLOR;
+
+    if (state === "selected") { bg = BOX_SELECTED_BG; bd = BOX_SELECTED_BD; }
+    if (state === "correct")  { bg = BOX_CORRECT_BG;  bd = BOX_CORRECT_BD;  }
+    if (state === "wrong")    { bg = BOX_WRONG_BG;    bd = BOX_WRONG_BD;    }
+
+    return (
+      <div
+        key={boxType}
+        style={{
+          position: "relative",
+          width:  `clamp(40px, 3.8vw, 40px)`,
+          height: `clamp(40px, 3.8vw, 40px)`,
+          border: `2px solid ${bd}`,
+          borderRadius: BOX_RADIUS,
+          background: bg,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          cursor: isLocked ? "default" : "pointer",
+          transition: "border-color 0.15s, background 0.15s",
+          flexShrink: 0,
+          userSelect: "none",
+        }}
+        onClick={() => handleSelect(item.id, boxType)}
+      >
+        {show && (
+          <span style={{
+            fontSize: `clamp(16px, 2.2vw, 28px)`,
+            fontWeight: 700,
+            color: symColor,
+            lineHeight: 1,
+          }}>
+            {symbol}
+          </span>
+        )}
+        {isWrong && (
+          <div style={{
+            position: "absolute",
+            top: -7, right: -7,
+            width: "clamp(14px,1.6vw,18px)",
+            height: "clamp(14px,1.6vw,18px)",
+            borderRadius: "50%",
+            background: WRONG_BADGE_BG,
+            color: WRONG_BADGE_TEXT,
+            display: "flex", alignItems: "center", justifyContent: "center",
+            fontSize: "clamp(7px,0.8vw,10px)",
+            fontWeight: 700,
+            border: "2px solid #fff",
+            boxShadow: "0 2px 6px rgba(0,0,0,0.2)",
+            pointerEvents: "none",
+            zIndex: 3,
+          }}>✕</div>
+        )}
       </div>
-    `;
-
-    if (score === total) ValidationAlert.success(msg);
-    else if (score === 0) ValidationAlert.error(msg);
-    else ValidationAlert.warning(msg);
-
-    setLocked(true);
-    setShowResult(true);
+    );
   };
-  const isWrong = (index) => {
-    return showResult && selected[index] !== items[index].correct;
-  };
+
   return (
     <div className="main-container-component">
-      <div className="div-forall">
-        <h5 className="header-title-page8 mb-5">
-          <span className="ex-A mr-4">A</span>
-          Look, circle, and write.
-        </h5>
-        <div className="flex w-full">
-          <div className="grid grid-cols-3 gap-y-10 w-full gap-x-[60px] mt-10 justify-center">
-            {items.map((item, i) => (
-              <div key={i} className="flex flex-col justify-between h-40">
-                <div className="flex items-center gap-2.5">
-                  <span className="text-[20px] font-bold text-[#2a4e7c]">
-                    {i + 1}
-                  </span>
+      <style>{`
+        .rwcc-list {
+          display: flex;
+          flex-direction: column;
+          gap: clamp(12px, 1.8vw, 22px);
+          width: 100%;
+        }
 
-                  <img
-                    src={item.img}
-                    alt=""
-                    style={{
-                      width: "80px",
-                      height: "auto",
-                    }}
-                  />
+        /* Single row: num | sentence | boxes */
+        .rwcc-row {
+          display: grid;
+          grid-template-columns: auto 1fr auto;
+          align-items: center;
+          gap: clamp(8px, 1.2vw, 16px);
+          min-width: 0;
+        }
 
-                  {/* OPTIONS */}
-                  <div className="flex flex-col gap-1.5 text-[18px]">
-                    {item.options.map((opt, idx) => (
-                      <span
-                        key={idx}
-                        onClick={() => chooseOption(i, opt)}
-                        className={`cursor-pointer px-2 py-0.5 ${
-                          selected[i] === opt
-                            ? "border-2 border-[#1C398E] rounded-full"
-                            : "hover:bg-gray-100 rounded-full"
-                        }`}
-                      >
-                        {opt}
-                      </span>
-                    ))}
-                  </div>
-                </div>
+        .rwcc-num {
+          font-size: clamp(14px, 1.7vw, 20px);
+          font-weight: 700;
+          color: ${NUMBER_COLOR};
+          flex-shrink: 0;
+          line-height: 1.4;
+        }
 
-                <div className="relative w-40 mt-2">
-                  {/* ❌ */}
-                  {isWrong(i) && (
-                    <span className="absolute -top-2 -right-2 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center text-xs font-bold border-2 border-white shadow-md">
-                      ✕
-                    </span>
-                  )}
+        /* Sentence: normal + underlined + normal */
+        .rwcc-sentence {
+          font-size: clamp(13px, 1.6vw, 19px);
+          color: ${TEXT_COLOR};
+          line-height: 1.5;
+          flex-wrap: wrap;
+          display: flex;
+          align-items: baseline;
+          gap: 0;
+        }
 
-                  <div className="text-[22px] flex items-end gap-1">
-                    {(() => {
-                      const parts = item.word.split(/__|_/); // يقسم الكلمة
+        .rwcc-word {
+          white-space: pre-wrap;
+        }
 
-                      return (
-                        <>
-                          <span>{parts[0]}</span>
+        .rwcc-underlined {
+          text-decoration: underline;
+          text-underline-offset: 3px;
+          white-space: nowrap;
+        }
 
-                          {/* الحرف بالمكان الصحيح */}
-                          <span
-                            className={`px-1 min-w-6 text-center border-b-2 ${
-                              isWrong(i) ? "border-red-500" : "border-black"
-                            } text-[#1C398E]`}
-                          >
-                            {selected[i] || ""}
-                          </span>
+        /* Two boxes: ✓ then ✕ */
+        .rwcc-boxes {
+          display: flex;
+          align-items: center;
+          gap: clamp(6px, 0.8vw, 10px);
+          flex-shrink: 0;
+        }
 
-                          <span>{parts[1]}</span>
-                        </>
-                      );
-                    })()}
-                  </div>
-                </div>
+        .rwcc-buttons {
+          display: flex;
+          justify-content: center;
+          margin-top: clamp(8px, 1.6vw, 18px);
+        }
+      `}</style>
+
+      <div
+        className="div-forall"
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: "clamp(14px, 2vw, 22px)",
+          maxWidth: "1100px",
+          margin: "0 auto",
+        }}
+      >
+        {/* ── Header ── */}
+        <h1
+          className="WB-header-title-page8"
+          style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
+        >
+          <span className="WB-ex-A-1">A</span>
+          Read and write ✓ or ✕.
+        </h1>
+
+        {/* ── Items ── */}
+        <div className="rwcc-list">
+          {ITEMS.map((item) => (
+            <div key={item.id} className="rwcc-row">
+
+              {/* Number */}
+              <span className="rwcc-num">{item.id}</span>
+
+              {/* Sentence */}
+              <div className="rwcc-sentence">
+                {item.text && <span className="rwcc-word">{item.text}&nbsp;</span>}
+                <span className="rwcc-underlined">{item.underlined}</span>
+                {item.rest  && <span className="rwcc-word">&nbsp;{item.rest}</span>}
               </div>
-            ))}
-          </div>
+
+              {/* Two boxes: ✓ | ✕ */}
+              <div className="rwcc-boxes">
+                {renderBox(item, "check")}
+                {renderBox(item, "cross")}
+              </div>
+
+            </div>
+          ))}
         </div>
-      </div>
 
-      <div className="action-buttons-container">
-        <button onClick={resetAll} className="try-again-button">
-          Start Again ↻
-        </button>
-
-        <button onClick={showAnswers} className="show-answer-btn">
-          Show Answer
-        </button>
-
-        <button onClick={checkAnswers} className="check-button2">
-          Check Answer ✓
-        </button>
+        {/* ── Buttons ── */}
+        <div className="rwcc-buttons">
+          <Button
+            checkAnswers={handleCheck}
+            handleShowAnswer={handleShowAnswer}
+            handleStartAgain={handleReset}
+          />
+        </div>
       </div>
     </div>
   );
-};
-
-export default Unit6_Page5_Q1;
+}

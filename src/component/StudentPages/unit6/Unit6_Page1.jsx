@@ -27,6 +27,9 @@ const captions = [
   { start: 42.50, end: 48.5, text: "Of course. We won't have to do homework anymore. The robots will do it for us." },
   { start: 48.98, end: 52.8, text: "How will we learn? We must do our homework." },
   { start:52.8, end: 58.74, text: "Oh, I didn't think about that. You're right. Well, at least they will clean our rooms." },
+  { start:52.8, end: 58.74, text: "Oh, I didn't think about that. You're right. Well, at least they will clean our rooms." },
+  { start:52.8, end: 58.74, text: "Oh, I didn't think about that. You're right. Well, at least they will clean our rooms." },
+
 ];
  const wordTimingsVoc = [
     { start: 8.8, end: 11.1 },
@@ -52,103 +55,89 @@ const captions = [
 
   
   const clickableAreas = [
-   {
+  {
   x1: 9.37,
-  y1: 21.2,
-  x2: 40.07,
-  y2: 25,
-  slice: {
-    startFrom: captions[1].start,
-    stopAt: captions[1].end,
-  },
+  y1: 21.6,
+  x2: 39.07,
+  y2: 26.4,
+  slice: { startFrom: captions[1].start, stopAt: captions[1].end },
 },
-
 {
-  x1: 6.5,
-  y1: 38.2,
-  x2: 28.5,
-  y2: 44,
-  slice: {
-    startFrom: captions[2].start,
-    stopAt: captions[2].end,
-  },
+  x1: 23,
+  y1: 27.6,
+  x2: 48,
+  y2: 33.8,
+  slice: { startFrom: captions[2].start, stopAt: captions[2].end },
 },
-
 {
-  x1: 35.6,
-  y1: 41,
-  x2: 49.6,
-  y2: 45.3,
-  slice: {
-    startFrom: captions[3].start,
-    stopAt: captions[3].end,
-  },
+  x1: 14.6,
+  y1: 43.7,
+  x2: 48.6,
+  y2: 46.9,
+  slice: { startFrom: captions[3].start, stopAt: captions[3].end },
 },
-
 {
-  x1: 59.1,
-  y1: 21.5,
-  x2: 94.1,
-  y2: 25.7,
-  slice: {
-    startFrom: captions[4].start,
-    stopAt: captions[4].end,
-  },
+  x1: 55.1,
+  y1: 23.5,
+  x2: 72.1,
+  y2: 26.3,
+  slice: { startFrom: captions[4].start, stopAt: captions[4].end },
 },
-
 {
-  x1: 51.5,
-  y1: 42.6,
-  x2: 73.9,
-  y2: 46.8,
-  slice: {
-    startFrom: captions[5].start,
-    stopAt: captions[5].end,
-  },
+  x1: 66.5,
+  y1: 27,
+  x2: 92.1,
+  y2: 34.8,
+  slice: { startFrom: captions[5].start, stopAt: captions[5].end },
 },
-
 {
-  x1: 17.5,
-  y1: 47.8,
-  x2: 47.9,
-  y2: 52.4,
-  slice: {
-    startFrom: captions[6].start,
-    stopAt: captions[6].end,
-  },
+  x1: 9.5,
+  y1: 48.3,
+  x2: 42.9,
+  y2: 51.4,
+  slice: { startFrom: captions[6].start, stopAt: captions[6].end },
 },
-
 {
-  x1: 15.5,
-  y1: 69.7,
-  x2: 42.3,
-  y2: 73.9,
-  slice: {
-    startFrom: captions[7].start,
-    stopAt: captions[7].end,
-  },
+  x1: 32.5,
+  y1: 52,
+  x2: 45.6,
+  y2: 54.8,
+  slice: { startFrom: captions[7].start, stopAt: captions[7].end },
 },
-
 {
-  x1: 55.2,
-  y1: 48.5,
-  x2: 75.5,
-  y2: 55.9,
-  slice: {
-    startFrom: captions[8].start,
-    stopAt: captions[8].end,
-  },
+  x1: 6.1,
+  y1: 67.9,
+  x2: 28.4,
+  y2: 73.8,
+  slice: { startFrom: captions[8].start, stopAt: captions[8].end },
 },
-
 {
-  x1: 51.6,
-  y1: 68.8,
-  x2: 93,
+  x1: 28.6,
+  y1: 70.8,
+  x2: 48.6,
   y2: 73.6,
-  slice: {
-    startFrom: captions[9].start,
-    stopAt: captions[9].end,
-  },
+  slice: { startFrom: captions[9].start, stopAt: captions[9].end },
+},
+{
+  x1: 55.5,
+  y1: 48.5,
+  x2: 94.9,
+  y2: 52.7,
+  slice: { startFrom: captions[10].start, stopAt: captions[10].end },
+},
+{
+  x1: 61.5,
+  y1: 53.4,
+  x2: 95,
+  y2: 59.4,
+  slice: { startFrom: captions[11].start, stopAt: captions[11].end },
+},
+{
+  x1: 55.9,
+  y1: 70.99,
+  x2: 81.7,
+  y2: 73.79,
+  slice: { startFrom: captions[12].start, stopAt: captions[12].end },
 },
   ];
 

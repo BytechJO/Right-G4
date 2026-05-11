@@ -2,42 +2,29 @@ import { useState } from "react";
 import ValidationAlert from "../../Popup/ValidationAlert";
 import { FaCheck, FaRedo, FaEye } from "react-icons/fa";
 
-import img1 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 5 Under the Weather Folder/Page 42/SVG/Asset 1.svg";
-import img2 from"../../../assets/imgs/pages/Class Book/Right 4 Unit 5 Under the Weather Folder/Page 42/SVG/Asset 1.svg";
-import img3 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 5 Under the Weather Folder/Page 42/SVG/Asset 1.svg";
-import img4 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 5 Under the Weather Folder/Page 42/SVG/Asset 1.svg";
+import img1 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 6 Ready for School Folder/Page 48/SVG/Asset 14.svg";
+import img2 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 6 Ready for School Folder/Page 48/SVG/Asset 19.svg";
 
 const GrammarB = () => {
-  const wordBank = ["between", "in front of", "behind", "on"];
+  const wordBank = ["read a book", "be late for school"];
 
   const questions = [
     {
       id: 1,
       image: img1,
-      before: "Lolo is",
-      after: "the box.",
-      answers: ["on", "on the box", "on the box."],
+      phrase: "read a book",
+      answers: ["She should read a book.", "She should read a book"],
     },
     {
       id: 2,
       image: img2,
-      before: "Lolo is",
-      after: "the box.",
-      answers: ["in front of", "in front of the box", "in front of the box."],
-    },
-    {
-      id: 3,
-      image: img3,
-      before: "Lolo is",
-      after: "the box.",
-      answers: ["behind", "behind the box", "behind the box."],
-    },
-    {
-      id: 4,
-      image: img4,
-      before: "Lolo is",
-      after: "the boxes.",
-      answers: ["between", "between the boxes", "between the boxes."],
+      phrase: "be late for school",
+      answers: [
+        "She shouldn't be late for school.",
+        "She shouldnt be late for school",
+        "She shouldnot be late for school.",
+        "She should not be late for school",
+      ],
     },
   ];
 
@@ -57,7 +44,7 @@ const GrammarB = () => {
     if (locked) return;
     const isEmpty = answers.some((a) => a.trim() === "");
     if (isEmpty) {
-      ValidationAlert.info("Please fill in all blanks.");
+      ValidationAlert.info("Please answer all questions.");
       return;
     }
 
@@ -66,7 +53,7 @@ const GrammarB = () => {
 
     answers.forEach((ans, i) => {
       const isCorrect = questions[i].answers.some(
-        (a) => a.toLowerCase() === ans.trim().toLowerCase()
+        (a) => a.toLowerCase() === ans.trim().toLowerCase(),
       );
       if (isCorrect) {
         correctCount++;
@@ -117,11 +104,19 @@ const GrammarB = () => {
     <div className="mb-6 mx-auto">
       <h5 className="header-title-page8-read mb-6">
         <span className="ex-A-read mr-2">B</span>
-        Look and write. Use the words below. Where is Lolo?
+        Look, read, and write. Use{" "}
+        <span className="text-[#f89631] font-bold">should</span> and{" "}
+        <span className="text-[#f89631] font-bold">shouldn't</span> and the
+        phrases below.
       </h5>
 
       {/* Word Bank */}
-      <div className="flex gap-3 flex-wrap mb-8 justify-around">
+      <div
+        className="flex gap-4 flex-wrap mb-8 justify-start"
+        style={{ width: "100% ", gap: "35%" 
+          , marginLeft : "5%"
+         }}
+      >
         {wordBank.map((word) => (
           <div
             key={word}
@@ -129,7 +124,7 @@ const GrammarB = () => {
               border: "2px solid #e8eff1",
               borderRadius: "8px",
               padding: "4px 18px",
-              fontSize: "14px",
+              fontSize: "18px",
               fontWeight: "500",
               color: "#1a1a1a",
               background: "#e8eff1",
@@ -140,83 +135,77 @@ const GrammarB = () => {
         ))}
       </div>
 
-      {/* Grid 2x2 */}
+      {/* Questions Grid */}
       <div className="grid grid-cols-2 gap-8">
         {questions.map((q, i) => (
-          <div key={q.id} className="flex flex-col items-center gap-3">
+          <div key={q.id} className="flex flex-col items-center gap-4">
             {/* Number */}
-            <div className="w-full" style={{justifyContent : "center" , display : "flex"}}>
+            <div className="w-full" style={{ display: "flex", gap: "0.3em" }}>
               <span
                 style={{
                   fontWeight: "400",
                   WebkitTextStroke: "1px black",
                   color: "#1a1a1a",
-                  fontSize: "18px",
+                  fontSize: "22px",
                 }}
               >
                 {q.id}
               </span>
-            {/* Image */}
-            <img
-              src={q.image}
-              alt=""
-              style={{ width: "50%", height: "auto", display : "block"}}
-            />
+              {/* Image */}
+              <img
+                src={q.image}
+                alt=""
+                style={{
+                  width: "50%",
+                  height: "auto",
+                }}
+              />
             </div>
-            {/* Sentence with input */}
-            <div className="flex items-end gap-1 flex-wrap justify-center">
-              <span style={{ fontSize: "16px", color: "#1a1a1a" }}>
-                {q.before}
-              </span>
 
-              <div className="relative inline-flex items-center">
-                <input
-                  type="text"
-                  value={answers[i]}
-                  onChange={(e) => handleChange(i, e.target.value)}
-                  disabled={locked || errors[i] === false}
-                  autoComplete="off"
+            {/* Input */}
+            <div className="relative w-full">
+              <input
+                type="text"
+                value={answers[i]}
+                onChange={(e) => handleChange(i, e.target.value)}
+                disabled={locked || errors[i] === false}
+                autoComplete="off"
+                style={{ fontSize: "18px", marginLeft: "1em" }}
+                className={`w-[50%] border-b-1 bg-transparent outline-none transition disabled:pointer-events-none text-center
+                  ${
+                    errors[i] === true
+                      ? "border-red-500 text-gray-800"
+                      : showed
+                        ? "border-[#333] text-red-500"
+                        : "border-[#333] text-gray-800"
+                  }
+                `}
+              />
+
+              {/* ❌ Error Badge */}
+              {errors[i] === true && (
+                <div
                   style={{
-                    fontSize: "16px",
-                    width: "120px",
-                    borderBottom: "1px solid #333",
-                    background: "transparent",
-                    outline: "none",
-                    textAlign: "center",
-                    color: showed ? "#ef4444" : errors[i] === true ? "#1a1a1a" : "#1a1a1a",
+                    position: "absolute",
+                    right: "-24px",
+                    top: "0",
+                    width: "20px",
+                    height: "20px",
+                    background: "#ef4444",
+                    color: "white",
+                    borderRadius: "50%",
+                    fontSize: "11px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontWeight: "bold",
+                    border: "2px solid white",
+                    boxShadow: "0 1px 6px rgba(0,0,0,0.2)",
                   }}
-                />
-
-
-
-                {/* ❌ Error Badge */}
-                {errors[i] === true && (
-                  <div
-                    style={{
-                      position: "absolute",
-                      right: "-22px",
-                      width: "18px",
-                      height: "18px",
-                      background: "#ef4444",
-                      color: "white",
-                      borderRadius: "50%",
-                      fontSize: "10px",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      fontWeight: "bold",
-                      border: "2px solid white",
-                      boxShadow: "0 1px 6px rgba(0,0,0,0.2)",
-                    }}
-                  >
-                    ✕
-                  </div>
-                )}
-              </div>
-
-              <span style={{ fontSize: "16px", color: "#1a1a1a" }}>
-                {q.after}
-              </span>
+                >
+                  ✕
+                </div>
+              )}
             </div>
           </div>
         ))}

@@ -23,15 +23,14 @@ const GrammarA = () => {
           />
           <div>
             <p className="text-[18px]">
-              Lolo is{" "}
-              <span className="text-[#f89631]">under</span> the{" "}
-              <span className="text-[#f89631]">table</span>.
+              You should{" "}
+              <span className="text-[#f89631]">eat your vegetables</span>.
             </p>
 
             <div className="grid grid-cols-3 gap-10 mt-5 text-[17px]">
-              <span><b>1</b> on, couch</span>
-              <span><b>2</b> by, bed</span>
-              <span><b>3</b> over, roof</span>
+              <span><b>1</b> wash the dishes</span>
+              <span><b>2</b> clean your room</span>
+              <span><b>3</b> take out the trash</span>
             </div>
           </div>
         </div>
@@ -47,15 +46,14 @@ const GrammarA = () => {
           />
           <div>
             <p className="text-[18px]">
-              Is Lolo{" "}
-              <span className="text-[#f89631]">by</span> the{" "}
-              <span className="text-[#f89631]">desk</span>?
+              You shouldn't{" "}
+              <span className="text-[#f89631]">slam the door</span>.
             </p>
 
             <div className="grid grid-cols-3 gap-10 mt-5 text-[17px]">
-              <span><b>1</b> near, TV</span>
-              <span><b>2</b> beside, chair</span>
-              <span><b>3</b> next to, bike</span>
+              <span><b>1</b> play in the street</span>
+              <span><b>2</b> drive fast</span>
+              <span><b>3</b> watch TV</span>
             </div>
           </div>
         </div>
