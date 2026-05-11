@@ -1,364 +1,331 @@
-import React, { useState, useRef } from "react";
+import React, { useState } from "react";
+import Button from "../../Button";
 import ValidationAlert from "../../Popup/ValidationAlert";
-import "./Review6_Page2_Q2.css";
 
-const Review6_Page1_Q2 = () => {
-  const [lines, setLines] = useState([]);
-  const [startDot, setStartDot] = useState(null);
-  const [wrongTextIndexes, setWrongTextIndexes] = useState([]);
-  const imageDotRefs = useRef([]);
-  const textDotRefs = useRef([]);
-  const containerRef = useRef(null);
-  const [isChecked, setIsChecked] = useState(false);
-  const [showedAnswer, setShowedAnswer] = useState(false);
-  const items = [
-    { letter: "a", word: "3rd" },
-    { letter: "b", word: "4th" },
-    { letter: "c", word: "1st" },
-    { letter: "d", word: "2nd" },
-    { letter: "e", word: "8th" },
-    { letter: "f", word: "6th" },
-    { letter: "g", word: "9th" },
-    { letter: "h", word: "10th" },
-    { letter: "i", word: "7th" },
-    { letter: "j", word: "5th" },
-  ];
+// ─────────────────────────────────────────────
+//  🖼️  IMAGES
+// ─────────────────────────────────────────────
+import img1 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 6 Ready for School Folder/Page 54/SVG/Asset 46.svg";
+import img2 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 6 Ready for School Folder/Page 54/SVG/Asset 47.svg";
+import img3 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 6 Ready for School Folder/Page 54/SVG/Asset 48.svg";
+import img4 from"../../../assets/imgs/pages/Class Book/Right 4 Unit 6 Ready for School Folder/Page 54/SVG/Asset 45.svg";
 
-  const words = [
-    "first",
-    "second",
-    "third",
-    "fourth",
-    "fifth",
-    "sixth",
-    "seventh",
-    "eighth",
-    "ninth",
-    "tenth",
-  ];
+// ─────────────────────────────────────────────
+//  🎨  COLORS
+// ─────────────────────────────────────────────
+const CHECK_COLOR      = "#c81e1e";
+const BOX_BORDER       = "#2195a6";
+const BOX_BG           = "#ffffff";
+const WRONG_BADGE_BG   = "#ef4444";
+const WRONG_BADGE_TEXT = "#ffffff";
+const TEXT_COLOR       = "#2b2b2b";
+const NUMBER_COLOR     = "#2b2b2b";
 
-  const correctMatches = {
-    0: 2, // a → third
-    1: 3, // b → fourth
-    2: 0, // c → first
-    3: 1, // d → second
-    4: 7, // e → eighth
-    5: 5, // f → sixth
-    6: 8, // g → ninth
-    7: 9, // h → tenth
-    8: 6, // i → seventh
-    9: 4, // j → fifth
+// ─────────────────────────────────────────────
+//  📝  EXERCISE DATA
+//  correctRow: "top" | "bottom"
+// ─────────────────────────────────────────────
+const ITEMS = [
+  {
+    id:         1,
+    src:        img1,
+    emoji:      "😊",
+    topText:    "She should build a snowman.",
+    bottomText: "She shouldn't build a snowman.",
+    correctRow: "top",
+  },
+  {
+    id:         2,
+    src:        img2,
+    emoji:      "😢",
+    topText:    "He should swim in the sea.",
+    bottomText: "He shouldn't swim in the sea.",
+    correctRow: "top",
+  },
+  {
+    id:         3,
+    src:        img3,
+    emoji:      "😢",
+    topText:    "Hansel should eat ice cream now.",
+    bottomText: "Hansel shouldn't eat ice cream now.",
+    correctRow: "bottom",
+  },
+  {
+    id:         4,
+    src:        img4,
+    emoji:      "😊",
+    topText:    "She should take a picture.",
+    bottomText: "She shouldn't take a picture.",
+    correctRow: "bottom",
+  },
+];
+
+// ─────────────────────────────────────────────
+//  COMPONENT
+// ─────────────────────────────────────────────
+export default function WB_LookReadWriteCheck_QB() {
+  const [selected,    setSelected]    = useState({});   // { 1: "top" | "bottom", ... }
+  const [showResults, setShowResults] = useState(false);
+  const [showAns,     setShowAns]     = useState(false);
+
+  const isLocked = showResults || showAns;
+
+  const handleSelect = (id, row) => {
+    if (isLocked) return;
+    setSelected((prev) => ({
+      ...prev,
+      [id]: prev[id] === row ? null : row,
+    }));
   };
-  const handleDotClick = (index, type) => {
-    if (isChecked || showedAnswer) return;
-    if (!startDot) {
-      setStartDot({ index, type });
+
+  const handleCheck = () => {
+    if (isLocked) return;
+    const allAnswered = ITEMS.every((item) => selected[item.id]);
+    if (!allAnswered) {
+      ValidationAlert.info("Please choose an answer for each question.");
       return;
     }
-
-    if (startDot.type === type) {
-      setStartDot(null);
-      return;
-    }
-
-    const imageIndex = startDot.type === "image" ? startDot.index : index;
-
-    const textIndex = startDot.type === "text" ? startDot.index : index;
-
-    setLines((prevLines) => {
-      let updatedLines = [...prevLines];
-
-      updatedLines = updatedLines.filter((line) => {
-        const img =
-          line.from.type === "image" ? line.from.index : line.to.index;
-
-        return img !== imageIndex;
-      });
-
-      updatedLines = updatedLines.filter((line) => {
-        const txt = line.from.type === "text" ? line.from.index : line.to.index;
-
-        return txt !== textIndex;
-      });
-
-      updatedLines.push({
-        from: { index: imageIndex, type: "image" },
-        to: { index: textIndex, type: "text" },
-      });
-
-      return updatedLines;
+    let score = 0;
+    ITEMS.forEach((item) => {
+      if (selected[item.id] === item.correctRow) score++;
     });
-
-    setStartDot(null);
+    setShowResults(true);
+    if (score === ITEMS.length)   ValidationAlert.success(`Score: ${score} / ${ITEMS.length}`);
+    else if (score > 0)           ValidationAlert.warning(`Score: ${score} / ${ITEMS.length}`);
+    else                          ValidationAlert.error(`Score: ${score} / ${ITEMS.length}`);
   };
-  const formatOrdinal = (word) => {
-    const match = word.match(/(\d+)(st|nd|rd|th)/);
-    if (!match) return word;
+
+  const handleShowAnswer = () => {
+    const filled = {};
+    ITEMS.forEach((item) => { filled[item.id] = item.correctRow; });
+    setSelected(filled);
+    setShowResults(false);
+    setShowAns(true);
+  };
+
+  const handleReset = () => {
+    setSelected({});
+    setShowResults(false);
+    setShowAns(false);
+  };
+
+  const getBoxState = (item, row) => {
+    const sel = selected[item.id];
+    if (sel !== row)  return "empty";
+    if (showAns)      return "correct";
+    if (showResults)  return row === item.correctRow ? "correct" : "wrong";
+    return "checked";
+  };
+
+  const renderCheckbox = (item, row) => {
+    const state   = getBoxState(item, row);
+    const checked = state !== "empty";
+    const wrong   = state === "wrong";
 
     return (
-      <>
-        {match[1]}
-        <sup style={{ fontSize: "0.6em", marginLeft: "1px" }}>{match[2]}</sup>
-      </>
+      <div
+        className={[
+          "lrwc-box",
+          checked  ? "lrwc-box--checked" : "",
+          wrong    ? "lrwc-box--wrong"   : "",
+          isLocked ? "lrwc-box--locked"  : "",
+        ].filter(Boolean).join(" ")}
+        onClick={() => handleSelect(item.id, row)}
+      >
+        {checked && <span className="lrwc-checkmark">✓</span>}
+        {wrong   && <div className="lrwc-badge">✕</div>}
+      </div>
     );
-  };
-  const showAnswers = () => {
-    if (isChecked) return;
-
-    const answerLines = Object.keys(correctMatches).map((imgIndex) => ({
-      from: { index: parseInt(imgIndex), type: "image" },
-      to: { index: correctMatches[imgIndex], type: "text" },
-    }));
-
-    setLines(answerLines);
-    setShowedAnswer(true);
-  };
-  const resetAll = () => {
-    setLines([]);
-    setStartDot(null);
-    setIsChecked(false);
-    setShowedAnswer(false);
-    setWrongTextIndexes([]);
-  };
-
-  const checkAnswers = () => {
-    if (showedAnswer) return;
-
-    if (lines.length !== items.length) {
-      ValidationAlert.info(
-        "Oops!",
-        "Please complete all matches before checking.",
-      );
-      return;
-    }
-
-    let score = 0;
-    const wrongIndexes = [];
-
-    lines.forEach((line) => {
-      const imageIndex =
-        line.from.type === "image" ? line.from.index : line.to.index;
-
-      const textIndex =
-        line.from.type === "text" ? line.from.index : line.to.index;
-
-      if (correctMatches[imageIndex] === textIndex) {
-        score++;
-      } else {
-        wrongIndexes.push(textIndex);
-      }
-    });
-
-    setWrongTextIndexes(wrongIndexes);
-
-    const total = items.length;
-    const color = score === total ? "green" : score === 0 ? "red" : "orange";
-
-    const msg = `
-    <div style="font-size:20px;text-align:center;">
-      <span style="color:${color};font-weight:bold">
-        Score: ${score} / ${total}
-      </span>
-    </div>
-  `;
-
-    setIsChecked(true);
-    setShowedAnswer(true);
-
-    if (score === total) ValidationAlert.success(msg);
-    else if (score === 0) ValidationAlert.error(msg);
-    else ValidationAlert.warning(msg);
   };
 
   return (
-    <div
-      ref={containerRef}
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        padding: "30px",
-        position: "relative",
-      }}
-    >
-      <div className="div-forall" style={{ width: "60%" }}>
-        <h5 className="header-title-page8">
-          <span style={{ marginRight: "10px" }}>B</span>
-          Match.
-        </h5>
-        <div className="flex justify-center mt-7">
-          {/* 🟢 LEFT SIDE (words) */}
-          <div className="w-[35%] flex flex-col gap-4">
-            {words.map((word, i) => (
-              <div
-                key={i}
-                onClick={() => handleDotClick(i, "text")}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "8px",
-                  cursor: "pointer",
-                }}
-              >
-                <span
-                  style={{
-                    position: "relative",
-                    display: "flex",
-                    alignItems: "center",
-                    width: "30%", // 🔥 مهم
-                    justifyContent: "flex-start",
-                    padding: "2px 6px",
-                    borderRadius: "6px",
-                    background:
-                      startDot?.index === i && startDot?.type === "text"
-                        ? "#fde68a"
-                        : "transparent",
-                  }}
-                >
-                  {isChecked && wrongTextIndexes.includes(i) && (
-                    <span
-                      style={{
-                        position: "absolute",
-                        left: "-20px",
-                        top: "20%",
-                        width: "20px",
-                        height: "20px",
-                        background: "#ef4444",
-                        color: "white",
-                        borderRadius: "50%",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        fontSize: "12px",
-                        fontWeight: "bold",
-                        border: "2px solid white",
-                        boxShadow: "0 2px 6px rgba(0,0,0,0.2)",
-                        pointerEvents: "none",
-                      }}
-                    >
-                      ✕
-                    </span>
-                  )}
-                  <span style={{ fontWeight: "bold", marginRight: 4 }}>
-                    {i + 1}
-                  </span>
-                  {word}
-                </span>
+    <div className="main-container-component">
+      <style>{`
+        /* ── 2-column grid for items ── */
+        .lrwc-grid {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: clamp(20px, 3vw, 40px) clamp(24px, 4vw, 56px);
+          width: 100%;
+        }
 
-                <div
-                  ref={(el) => (textDotRefs.current[i] = el)}
-                  className="w-3 h-3 bg-[orange] rounded-full"
-                />
+        /* Single card */
+        .lrwc-card {
+          display: flex;
+          flex-direction: column;
+          gap: clamp(8px, 1vw, 12px);
+          width: 80%;
+
+        }
+
+        /* Image + emoji badge */
+        .lrwc-img-wrap {
+          position: relative;
+          width: 100%;
+        }
+
+        .lrwc-img {
+          width: 100%;
+          height:auto;
+          object-fit: cover;
+          display: block;
+        }
+
+        .lrwc-emoji {
+          position: absolute;
+          bottom: 6px;
+          right: 10px;
+          font-size: clamp(18px, 2.4vw, 30px);
+          line-height: 1;
+          filter: drop-shadow(0 1px 3px rgba(0,0,0,0.25));
+          pointer-events: none;
+          user-select: none;
+        }
+
+        /* Number label above image */
+        .lrwc-num {
+          font-size: clamp(14px, 1.7vw, 20px);
+          font-weight: 700;
+          color: ${NUMBER_COLOR};
+          line-height: 1;
+          margin-bottom: 2px;
+          margin-right: 2px;
+
+        }
+
+        /* Rows area */
+        .lrwc-rows {
+          display: flex;
+          flex-direction: column;
+          gap: clamp(8px, 1vw, 14px);
+        }
+
+        /* Single text row: text + checkbox */
+        .lrwc-row {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: clamp(6px, 0.8vw, 12px);
+        }
+
+        .lrwc-text {
+          font-size: clamp(12px, 1.45vw, 17px);
+          color: ${TEXT_COLOR};
+          line-height: 1.4;
+          flex: 1;
+        }
+
+        /* Checkbox */
+        .lrwc-box {
+          position: relative;
+          width: clamp(24px, 2.8vw, 34px);
+          height: clamp(24px, 2.8vw, 34px);
+          border: 2px solid ${BOX_BORDER};
+          border-radius: 7px;
+          background: ${BOX_BG};
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          flex-shrink: 0;
+          transition: border-color 0.15s;
+          user-select: none;
+        }
+        .lrwc-box--locked  { cursor: default; }
+
+        .lrwc-checkmark {
+          font-size: clamp(14px, 1.8vw, 22px);
+          font-weight: 700;
+          color: ${CHECK_COLOR};
+          line-height: 1;
+        }
+
+        /* ✕ badge */
+        .lrwc-badge {
+          position: absolute;
+          top: -7px; right: -7px;
+          width: clamp(14px, 1.6vw, 17px);
+          height: clamp(14px, 1.6vw, 17px);
+          border-radius: 50%;
+          background: ${WRONG_BADGE_BG};
+          color: ${WRONG_BADGE_TEXT};
+          display: flex; align-items: center; justify-content: center;
+          font-size: clamp(7px, 0.8vw, 10px);
+          font-weight: 700;
+          border: 2px solid #fff;
+          box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+          pointer-events: none;
+          z-index: 3;
+        }
+
+        .lrwc-buttons {
+          display: flex;
+          justify-content: center;
+          margin-top: clamp(8px, 1.6vw, 18px);
+        }
+
+        @media (max-width: 520px) {
+          .lrwc-grid { grid-template-columns: 1fr; }
+        }
+      `}</style>
+
+      <div
+        className="div-forall"
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: "clamp(14px, 2vw, 22px)",
+          maxWidth: "1100px",
+          margin: "0 auto",
+        }}
+      >
+        {/* ── Header ── */}
+        <h1
+          className="WB-header-title-page8"
+          style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
+        >
+          <span className="WB-ex-A-1">B</span>
+          Look, read, and write ✓.
+        </h1>
+
+        {/* ── 2×2 Grid ── */}
+        <div className="lrwc-grid">
+          {ITEMS.map((item) => (
+            <div key={item.id} className="lrwc-card">
+
+              {/* Number */}
+              <div className="lrwc-img-wrap"  style={{ display: "flex", flexDirection : "row", marginLeft : "-0.8em" }}>
+              <span  className="lrwc-num">{item.id}</span>
+
+              {/* Image + emoji */}
+                <img src={item.src} alt={`img-${item.id}`} className="lrwc-img" />
               </div>
-            ))}
-          </div>
 
-          {/* 🟠 RIGHT SIDE (letters + ordinals) */}
-          <div
-            className="flex flex-col gap-4 items-end"
-            style={{
-              width: "30%", // 🔥 صغّر العرض
-              alignItems: "flex-end",
-            }}
-          >
-            {items.map((item, i) => (
-              <div
-                key={i}
-                onClick={() => handleDotClick(i, "image")}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between", // 🔥
-                  width: "40%", // 🔥 مهم
-                  cursor: "pointer",
-                }}
-              >
-                <div
-                  ref={(el) => (imageDotRefs.current[i] = el)}
-                  className="w-3 h-3 bg-[orange] rounded-full"
-                />
-
-                <span
-                  style={{
-                    display: "inline-block",
-                    width: "80px",
-                    padding: "2px 6px",
-                    borderRadius: "6px",
-                    background:
-                      startDot?.index === i && startDot?.type === "image"
-                        ? "#fde68a"
-                        : "transparent",
-                  }}
-                >
-                  <span style={{ fontWeight: "bold", marginRight: 10 }}>
-                    {item.letter}
-                  </span>
-                  {formatOrdinal(item.word)}
-                </span>
+              {/* Two text rows with checkboxes */}
+              <div className="lrwc-rows">
+                <div className="lrwc-row">
+                  <span className="lrwc-text">{item.topText}</span>
+                  {renderCheckbox(item, "top")}
+                </div>
+                <div className="lrwc-row">
+                  <span className="lrwc-text">{item.bottomText}</span>
+                  {renderCheckbox(item, "bottom")}
+                </div>
               </div>
-            ))}
-          </div>
+
+            </div>
+          ))}
         </div>
 
-        {/* SVG */}
-        <svg className="absolute top-0 left-0 w-full h-full pointer-events-none">
-          {lines.map((line, i) => {
-            const imageIndex =
-              line.from.type === "image" ? line.from.index : line.to.index;
-
-            const textIndex =
-              line.from.type === "text" ? line.from.index : line.to.index;
-
-            const imgDot = imageDotRefs.current[imageIndex];
-            const txtDot = textDotRefs.current[textIndex];
-
-            if (!imgDot || !txtDot || !containerRef.current) return null;
-
-            const imgRect = imgDot.getBoundingClientRect();
-            const txtRect = txtDot.getBoundingClientRect();
-            const containerRect = containerRef.current.getBoundingClientRect();
-
-            const x1 = imgRect.left + imgRect.width / 2 - containerRect.left;
-            const y1 = imgRect.top + imgRect.height / 2 - containerRect.top;
-
-            const x2 = txtRect.left + txtRect.width / 2 - containerRect.left;
-            const y2 = txtRect.top + txtRect.height / 2 - containerRect.top;
-
-            return (
-              <path
-                key={i}
-                d={`
-                  M ${x1} ${y1}
-                  C ${(x1 + x2) / 2} ${y1},
-                    ${(x1 + x2) / 2} ${y2},
-                    ${x2} ${y2}
-                `}
-                stroke="orange"
-                strokeWidth="3"
-                fill="none"
-                strokeLinecap="round"
-                strokeDasharray="6,6" // 🔥 هذا اللي بخلي الخط منقط
-              />
-            );
-          })}
-        </svg>
-
-        <div className="action-buttons-container">
-          <button onClick={resetAll} className="try-again-button">
-            Start Again ↻
-          </button>
-
-          <button onClick={showAnswers} className="show-answer-btn">
-            Show Answer
-          </button>
-
-          <button onClick={checkAnswers} className="check-button2">
-            Check Answer ✓
-          </button>
+        {/* ── Buttons ── */}
+        <div className="lrwc-buttons">
+          <Button
+            checkAnswers={handleCheck}
+            handleShowAnswer={handleShowAnswer}
+            handleStartAgain={handleReset}
+          />
         </div>
       </div>
     </div>
   );
-};
-
-export default Review6_Page1_Q2;
+}

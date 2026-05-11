@@ -1,304 +1,281 @@
-import React, { useState, useRef } from "react";
+import React, { useState } from "react";
+import Button from "../../Button";
 import ValidationAlert from "../../Popup/ValidationAlert";
-import "./Review5_Page1_Q2.css";
 
-import behind from "../../../assets/imgs/pages/classbook/Right 3 Unit 6 Lets Run! Folder/Page 52/Ex B 1.svg";
-import under from "../../../assets/imgs/pages/classbook/Right 3 Unit 6 Lets Run! Folder/Page 52/Ex B 2.svg";
-import between from "../../../assets/imgs/pages/classbook/Right 3 Unit 6 Lets Run! Folder/Page 52/Ex B 3.svg";
-import inFrontOf from "../../../assets/imgs/pages/classbook/Right 3 Unit 6 Lets Run! Folder/Page 52/Ex B 4.svg";
-import on from "../../../assets/imgs/pages/classbook/Right 3 Unit 6 Lets Run! Folder/Page 52/Asset 10.svg";
-import nextTo from "../../../assets/imgs/pages/classbook/Right 3 Unit 6 Lets Run! Folder/Page 52/Asset 9.svg";
+// ─────────────────────────────────────────────
+//  🖼️  IMAGE
+// ─────────────────────────────────────────────
+import imgScene from "../../../assets/imgs/pages/Class Book/Right 4 Unit 6 Ready for School Folder/Page 52/SVG/Asset 31.svg";
 
-const Review5_Page1_Q2 = () => {
-  const leftRefs = useRef({});
-  const rightRefs = useRef({});
-  const items = [
-    { id: 1, text: "behind" },
-    { id: 2, text: "in front of" },
-    { id: 3, text: "next to" },
-    { id: 4, text: "between" },
-    { id: 5, text: "on" },
-    { id: 6, text: "under" },
-  ];
+// ─────────────────────────────────────────────
+//  🎨  COLORS
+// ─────────────────────────────────────────────
+const INPUT_UNDERLINE_DEFAULT = "#3f3f3f";
+const INPUT_UNDERLINE_WRONG   = "#ef4444";
+const INPUT_TEXT_COLOR        = "#2b2b2b";
+const INPUT_ANSWER_COLOR      = "#c81e1e";
+const TEXT_COLOR              = "#2b2b2b";
+const NUMBER_COLOR            = "#2b2b2b";
+const WRONG_BADGE_BG          = "#ef4444";
+const WRONG_BADGE_TEXT        = "#ffffff";
 
-  const images = [
-    { id: "a", src: behind },
-    { id: "b", src: under },
-    { id: "c", src: between },
-    { id: "d", src: inFrontOf },
-    { id: "e", src: on },
-    { id: "f", src: nextTo },
-  ];
-  const correctAnswers = {
-    1: "a",
-    2: "d",
-    3: "f",
-    4: "c",
-    5: "e",
-    6: "b",
-  };
-  const [locked, setLocked] = useState(false);
-  const [selected, setSelected] = useState(null);
-  const [connections, setConnections] = useState([]);
-  const [wrongMap, setWrongMap] = useState({});
-  const getRelativePos = (e) => {
-    const rect = e.target.getBoundingClientRect();
-    const parent = e.target.closest(".container").getBoundingClientRect();
+// ─────────────────────────────────────────────
+//  📝  EXERCISE DATA
+//  before: text before input | after: text after input
+// ─────────────────────────────────────────────
+const ITEMS = [
+  {
+    id:      1,
+    before:  "What's the",
+    after:   "?",
+    correct: ["matter"],
+    answer:  "matter",
+  },
+  {
+    id:      2,
+    before:  "",
+    after:   "wrong?",
+    correct: ["What's", "Whats"],
+    answer:  "What's",
+  },
+];
 
-    return {
-      x: rect.left - parent.left + rect.width / 2,
-      y: rect.top - parent.top + rect.height / 2,
-    };
-  };
+// ─────────────────────────────────────────────
+//  🔧  NORMALIZE
+// ─────────────────────────────────────────────
+const normalize = (str) =>
+  str.toLowerCase().replace(/[^a-z0-9'\s]/g, "").replace(/\s+/g, " ").trim();
 
-  const handleSelect = (id, e) => {
-    const pos = getRelativePos(e);
-    setSelected({ id, ...pos });
-  };
+const isCorrect = (userVal, correctArr) =>
+  correctArr.some((c) => normalize(userVal) === normalize(c));
 
-  const handleImage = (id, e) => {
-    if (!selected) return;
+// ─────────────────────────────────────────────
+//  COMPONENT
+// ─────────────────────────────────────────────
+export default function WB_ReadComplete_QB() {
+  const [answers,     setAnswers]     = useState({});
+  const [showResults, setShowResults] = useState(false);
+  const [showAns,     setShowAns]     = useState(false);
 
-    const pos = getRelativePos(e);
-
-    const newConnection = {
-      from: selected.id,
-      to: id,
-      x1: selected.x,
-      y1: selected.y,
-      x2: pos.x,
-      y2: pos.y,
-    };
-
-    // ✅ نحذف القديم ونضيف الجديد
-    const filtered = connections.filter(
-      (c) => c.from !== selected.id && c.to !== id,
-    );
-
-    setConnections([...filtered, newConnection]);
-
-    setSelected(null);
-  };
-  const resetAll = () => {
-    setConnections([]);
-    setSelected(null);
-    setLocked(false);
-    setWrongMap({});
+  const handleChange = (id, value) => {
+    if (showAns) return;
+    const item = ITEMS.find((i) => i.id === id);
+    if (showResults && item && isCorrect(answers[id] || "", item.correct)) return;
+    setAnswers((prev) => ({ ...prev, [id]: value }));
   };
 
-  const showAnswers = () => {
-    const parent = document.querySelector(".container").getBoundingClientRect();
-
-    const newConnections = items.map((item) => {
-      const to = correctAnswers[item.id];
-
-      const leftEl = leftRefs.current[item.id];
-      const rightEl = rightRefs.current[to];
-
-      const leftRect = leftEl.getBoundingClientRect();
-      const rightRect = rightEl.getBoundingClientRect();
-
-      return {
-        from: item.id,
-        to: to,
-        x1: leftRect.left - parent.left + leftRect.width / 2,
-        y1: leftRect.top - parent.top + leftRect.height / 2,
-        x2: rightRect.left - parent.left + rightRect.width / 2,
-        y2: rightRect.top - parent.top + rightRect.height / 2,
-      };
-    });
-
-    setConnections(newConnections);
-    setLocked(true);
-  };
-  const checkAnswers = () => {
-    if (locked) return;
-
-    if (connections.length !== items.length) {
-      ValidationAlert.info("Complete all matches first!");
-      return;
-    }
-
+  const handleCheck = () => {
+    if (showAns) return;
+    const allAnswered = ITEMS.every((item) => answers[item.id]?.trim());
+    if (!allAnswered) { ValidationAlert.info("Please complete all answers first."); return; }
     let score = 0;
-    const wrongs = {};
-
-    connections.forEach((c) => {
-      const isCorrect = correctAnswers[c.from] === c.to;
-
-      if (isCorrect) {
-        score++;
-      } else {
-        wrongs[c.from] = true; // 👈 نخزن الغلط حسب رقم السؤال
-      }
-    });
-
-    setWrongMap(wrongs);
-
-    const total = items.length;
-
-    const color = score === total ? "green" : score === 0 ? "red" : "orange";
-
-    const message = `
-<div style="font-size:20px;text-align:center;">
-<span style="color:${color};font-weight:bold;">
-Score: ${score} / ${total}
-</span>
-</div>
-`;
-
-    if (score === total) ValidationAlert.success(message);
-    else if (score === 0) ValidationAlert.error(message);
-    else ValidationAlert.warning(message);
-
-    setLocked(true);
+    ITEMS.forEach((item) => { if (isCorrect(answers[item.id] || "", item.correct)) score++; });
+    setShowResults(true);
+    if (score === ITEMS.length)   ValidationAlert.success(`Score: ${score} / ${ITEMS.length}`);
+    else if (score > 0)           ValidationAlert.warning(`Score: ${score} / ${ITEMS.length}`);
+    else                          ValidationAlert.error(`Score: ${score} / ${ITEMS.length}`);
   };
+
+  const handleShowAnswer = () => {
+    const filled = {};
+    ITEMS.forEach((item) => { filled[item.id] = item.answer; });
+    setAnswers(filled);
+    setShowResults(false);
+    setShowAns(true);
+  };
+
+  const handleReset = () => {
+    setAnswers({});
+    setShowResults(false);
+    setShowAns(false);
+  };
+
+  const isWrong    = (item) => showResults && !showAns && !isCorrect(answers[item.id] || "", item.correct);
+  const isDisabled = (item) => showAns || (showResults && isCorrect(answers[item.id] || "", item.correct));
 
   return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        padding: "30px",
-      }}
-    >
-      <div className="div-forall">
-        <h5 className="header-title-page8">
-          <span style={{ marginRight: "10px" }}>B</span>
-          Read, match, and write.
-        </h5>
+    <div className="main-container-component">
+      <style>{`
+        /* ── Body: items + image ── */
+        .rcb-body {
+          display: grid;
+          grid-template-columns: 1fr auto;
+          gap: clamp(16px, 2.4vw, 32px);
+          align-items: center;
+          width: 100%;
+          margin : 10% 0 ;
+        }
 
-        <div className="container relative w-full h-[600px]">
-          {/* الخطوط */}
-          <svg className="absolute w-full h-full pointer-events-none">
-            {connections.map((c, i) => (
-              <path
-                key={i}
-                d={`M ${c.x1} ${c.y1}
-                C ${(c.x1 + c.x2) / 2} ${c.y1},
-                  ${(c.x1 + c.x2) / 2} ${c.y2},
-                  ${c.x2} ${c.y2}`}
-                stroke="red"
-                strokeWidth="2"
-                fill="none"
-                strokeDasharray="5,5"
-              />
-            ))}
-          </svg>
+        /* ── Items list ── */
+        .rcb-list {
+          display: flex;
+          flex-direction: column;
+          gap: clamp(18px, 2.8vw, 36px);
+        }
 
-          {/* اليسار (كلمات + بوكس) */}
-          <div className="absolute top-10 left-10 w-full flex flex-col gap-6">
-            {items.map((item, index) => {
-              const img = images[index];
-              const isRight = index % 2 !== 0;
+        /* Single row: num | before | input | after */
+        .rcb-row {
+          display: flex;
+          align-items: flex-end;
+          flex-wrap: wrap;
+          gap: clamp(4px, 0.5vw, 7px);
+        }
+
+        .rcb-num {
+          font-size: clamp(14px, 1.7vw, 20px);
+          font-weight: 700;
+          color: ${NUMBER_COLOR};
+          flex-shrink: 0;
+          line-height: 1.5;
+        }
+
+        .rcb-text {
+          font-size: clamp(13px, 1.6vw, 19px);
+          color: ${TEXT_COLOR};
+          white-space: nowrap;
+          flex-shrink: 0;
+          line-height: 1.5;
+        }
+
+        /* Input wrap */
+        .rcb-input-wrap {
+          position: relative;
+          flex: 0 1 clamp(100px, 13vw, 190px);
+          min-width: clamp(90px, 12vw, 170px);
+        }
+
+        .rcb-input {
+          width: 100%;
+          background: transparent;
+          border: none;
+          border-bottom: 1px solid ${INPUT_UNDERLINE_DEFAULT};
+          outline: none;
+          font-size: clamp(13px, 1.6vw, 19px);
+          color: ${INPUT_TEXT_COLOR};
+          line-height: 1.5;
+          box-sizing: border-box;
+          font-family: inherit;
+          transition: border-color 0.2s;
+          text-align: center;
+        }
+        .rcb-input:disabled  { opacity: 1; cursor: default; }
+        .rcb-input--wrong    { border-bottom-color: ${INPUT_UNDERLINE_WRONG}; }
+        .rcb-input--answer   { color: ${INPUT_ANSWER_COLOR};  }
+
+        /* ✕ badge */
+        .rcb-badge {
+          position: absolute;
+          top: -8px; right: 0;
+          width: clamp(16px, 1.8vw, 20px);
+          height: clamp(16px, 1.8vw, 20px);
+          border-radius: 50%;
+          background: ${WRONG_BADGE_BG};
+          color: ${WRONG_BADGE_TEXT};
+          display: flex; align-items: center; justify-content: center;
+          font-size: clamp(8px, 0.9vw, 11px);
+          font-weight: 700;
+          border: 2px solid #fff;
+          box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+          pointer-events: none;
+          z-index: 2;
+        }
+
+        /* Scene image */
+        .rcb-scene-img {
+          width: clamp(180px, 26vw, 340px);
+          height: auto;
+          display: block;
+          border-radius: 10px;
+          flex-shrink: 0;
+        }
+
+        .rcb-buttons {
+          display: flex;
+          justify-content: center;
+          margin-top: clamp(8px, 1.6vw, 18px);
+        }
+
+        @media (max-width: 560px) {
+          .rcb-body { grid-template-columns: 1fr; }
+          .rcb-scene-img { width: 100%; max-width: 300px; margin: 0 auto; }
+        }
+      `}</style>
+
+      <div
+        className="div-forall"
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: "clamp(14px, 2vw, 22px)",
+          maxWidth: "1100px",
+          margin: "0 auto",
+        }}
+      >
+        {/* ── Header ── */}
+        <h1
+          className="WB-header-title-page8"
+          style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
+        >
+          <span className="WB-ex-A-1">B</span>
+          Read and complete.
+        </h1>
+
+        {/* ── Body ── */}
+        <div className="rcb-body">
+
+          {/* Items */}
+          <div className="rcb-list">
+            {ITEMS.map((item) => {
+              const wrong    = isWrong(item);
+              const value    = answers[item.id] || "";
+              const tColor   = showAns ? INPUT_ANSWER_COLOR : INPUT_TEXT_COLOR;
+              const uColor   = wrong ? INPUT_UNDERLINE_WRONG : INPUT_UNDERLINE_DEFAULT;
+              const disabled = isDisabled(item);
 
               return (
-                <div
-                  key={item.id}
-                  className="flex items-center justify-between w-[90%]"
-                >
-                  {/* 🔹 اليسار */}
-                  <div className="flex items-center gap-4">
-                    <div style={{ width: "150px" }}>
-                      <span style={{ fontWeight: "bold", marginRight: "10px" }}>
-                        {item.id}
-                      </span>
-                      {item.text}
-                      {wrongMap[item.id] && (
-                        <span
-                          style={{
-                            width: "20px",
-                            height: "20px",
-                            background: "#ef4444",
-                            color: "white",
-                            borderRadius: "50%",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            fontSize: "12px",
-                            fontWeight: "bold",
-                            border: "2px solid white",
-                            boxShadow: "0 2px 6px rgba(0,0,0,0.2)",
-                            pointerEvents: "none",
-                            zIndex: 3,
-                          }}
-                        >
-                          ✕
-                        </span>
-                      )}
-                    </div>
+                <div key={item.id} className="rcb-row">
+                  <span className="rcb-num">{item.id}</span>
 
-                    <div
-                      ref={(el) => (leftRefs.current[item.id] = el)}
-                      onClick={(e) => handleSelect(item.id, e)}
-                      className="w-10 h-10 flex items-center justify-center cursor-pointer"
-                      style={{
-                        border: "2px solid orange",
-                        borderRadius: "10px",
-                        backgroundColor:
-                          selected?.id === item.id ? "#fde68a" : "#fff",
-                      }}
-                    >
-                      {connections.find((c) => c.from === item.id)?.to}
-                    </div>
-                  </div>
+                  {item.before && <span className="rcb-text">{item.before}</span>}
 
-                  {/* 🔹 اليمين (الصورة + البوكس) */}
-                  <div
-                    onClick={(e) => handleImage(img.id, e)}
-                    className="flex items-center gap-3 cursor-pointer"
-                    style={{
-                      marginRight: isRight ? "40px" : "0px",
-                    }}
-                  >
-                    <div
-                      ref={(el) => (rightRefs.current[img.id] = el)}
-                      style={{
-                        width: "30px",
-                        height: "30px",
-                        border: "2px solid orange",
-                        borderRadius: "8px",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        backgroundColor:
-                          selected?.id &&
-                          connections.find((c) => c.to === img.id)
-                            ? "#fff"
-                            : "#fff",
-                      }}
-                    >
-                      {img.id}
-                    </div>
-
-                    <img
-                      src={img.src}
-                      alt=""
-                      style={{ width: "80px", height: "60px" }}
+                  <div className="rcb-input-wrap">
+                    <input
+                      type="text"
+                      className={[
+                        "rcb-input",
+                        wrong   ? "rcb-input--wrong"  : "",
+                        showAns ? "rcb-input--answer" : "",
+                      ].filter(Boolean).join(" ")}
+                      value={value}
+                      disabled={disabled}
+                      onChange={(e) => handleChange(item.id, e.target.value)}
+                      style={{ borderBottomColor: uColor, color: tColor }}
+                      spellCheck={false}
+                      autoComplete="off"
                     />
+                    {wrong && <div className="rcb-badge">✕</div>}
                   </div>
+
+                  {item.after && <span className="rcb-text">{item.after}</span>}
                 </div>
               );
             })}
           </div>
+
+          {/* Image */}
+          <img src={imgScene} alt="scene" className="rcb-scene-img" />
+
         </div>
-      </div>
 
-      <div className="action-buttons-container">
-        <button onClick={resetAll} className="try-again-button">
-          Start Again ↻
-        </button>
-
-        <button onClick={showAnswers} className="show-answer-btn">
-          Show Answer
-        </button>
-
-        <button onClick={checkAnswers} className="check-button2">
-          Check Answer ✓
-        </button>
+        {/* ── Buttons ── */}
+        <div className="rcb-buttons">
+          <Button
+            checkAnswers={handleCheck}
+            handleShowAnswer={handleShowAnswer}
+            handleStartAgain={handleReset}
+          />
+        </div>
       </div>
     </div>
   );
-};
-
-export default Review5_Page1_Q2;
+}

@@ -1,102 +1,233 @@
-import page24 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 6 Ready for School Folder/Page 56.png";
 import React, { useState, useRef } from "react";
-import "./Reading_Unit6_Page1.css";
-import sound1 from "../../../assets/audio/ClassBook/Unit 6/P 56/unit6-pg56-readingall.mp3";
-import sound2 from "../../../assets/audio/ClassBook/Unit 6/P 56/Pg56_1.1_Adult Lady.mp3";
-import sound3 from "../../../assets/audio/ClassBook/Unit 6/P 56/Pg56_1.2_Adult Lady.mp3";
-import sound4 from "../../../assets/audio/ClassBook/Unit 6/P 56/Pg56_1.3_Adult Lady.mp3";
-import sound5 from "../../../assets/audio/ClassBook/Unit 6/P 56/Pg56_1.4_Adult Lady.mp3";
 import AudioWithCaption from "../../AudioWithCaption";
 import audioBtn from "../../../assets/Page 01/Audio btn.svg";
 import pauseBtn from "../../../assets/Page 01/Right Video Button.svg";
-import video3 from "../../../assets/videos/reading/grade 3 unit 6 page 56-57. reading.mp4";
 
-const Reading_Unit6_Page1 = ({ openPopup }) => {
+// ======================================================
+// 🖼️ استبدل بمسار الصورة الصحيح
+import pageImage from"../../../assets/imgs/pages/Class Book/Right 4 Unit 6 Ready for School Folder/Page 56.png";
+// 🔊 صوت واحد بس - نفس الصوت للكل والمناطق
+import soundAll from "../../../assets/audio/ClassBook/Grade 4/cd1pg20-story-adult-lady_Nf7yHD6t.mp3";
+
+// 🎬 استبدل بمسار الفيديو الصحيح
+import videoFile from "../../../assets/videos/reading/grade 3 unit 8 page 74-75 reading.mp4";
+
+// 🎨 استبدل باسم ملف CSS الصحيح
+import "./Reading_Unit6_Page1.css";
+// ======================================================
+
+const Reading_NewPage = ({ openPopup }) => {
   const audioRef = useRef(null);
   const [hoveredAreaIndex, setHoveredAreaIndex] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [activeAreaIndex, setActiveAreaIndex] = useState(null);
-  const captionsExample = [
-    {
-      start: 0.079,
-      end: 3.379,
-      text: "Page 56, reading. Let's go to the beach.",
-    },
-    {
-      start: 4.42,
-      end: 24.359,
-      text: "It's a hot day. Harley is thinking about swimming to cool off. He asks his mom if they can go to the beach. That's a great idea. I'd like to go, too, adds Helen. Mom agrees. Mom, where are my swimming trunks? I can't find them, Harley asks, confused.",
-    },
-    {
-      start: 25.479,
-      end: 30.079,
-      text: "Where are my shoes? Mom, can you help me find them? Helen shouts.",
-    },
-    {
-      start: 31.719,
-      end: 45.36,
-      text: "I want to take my ball to the beach. Mom, do you know where it is? asks Hansel. Have you seen my sunglasses? Harley asks Hansel. They're next to the lamp in your bedroom, Hansel replies.",
-    },
-    {
-      start: 46.979,
-      end: 50.599,
-      text: "Have you seen my swimming trunks and goggles? Hansel asks.",
-    },
-    {
-      start: 52.02,
-      end: 72.339,
-      text: "Yeah, they're in the basement on the shelf above the washing machine, says Harley. Are you ready? Mom asks. We're ready, Mom! shout the three of them. Then let's go. Let's get the bags in the car, says Mom. Mom, let's take a picture of the boat, suggests Hansel.",
-    },
-    {
-      start: 73.579,
-      end: 89.86,
-      text: "Mom, can we take a ride on the boat? asks Harley. Sure, boys, answers Mom. Hansel looks scared. Mom is concerned. What's wrong, Hansel? she asks. Hansel replies, I'm afraid of the sea, Mom.",
-    },
-    {
-      start: 90.939,
-      end: 107.399,
-      text: "Don't worry, comforts Harley. The sea is wonderful. It just takes time to get to know it. Hansel is no longer afraid of the sea. Dad drives the boat through the water. It's a beautiful day to be out on the water in a boat. Everyone is very happy.",
-    },
-  ];
-  const clickableAreas = [
-    { x1: 15.11, y1: 34.57, x2: 51.31, y2: 48.61, sound: sound2 },
-    { x1: 55.62, y1: 35.07, x2: 92.03, y2: 48.61, sound: sound3 },
-    { x1: 15.11, y1: 84.49, x2: 51.52, y2: 95.15, sound: sound4 },
-    { x1: 55.62, y1: 80.09, x2: 92.67, y2: 95.66, sound: sound5 },
-  ];
+
+  // ======================================================
+  // 📝 Captions للصوت الكامل - عدّل النصوص والتوقيتات
+const captions = [
+  {
+    start: 0.30,
+    end: 2.52,
+    text: "Page 20. Amy's turn.",
+  },
+  {
+    start: 2.52,
+    end: 5.04,
+    text: "Amy plays on a baseball team.",
+  },
+  {
+    start: 5.04,
+    end: 7.94,
+    text: "On Saturday, her team will have a big game.",
+  },
+  {
+    start: 7.94,
+    end: 13.28,
+    text: "Amy can't wait. On Saturday, Amy's parents take her to the baseball field.",
+  },
+  {
+    start: 13.28,
+    end: 15.64,
+    text: "She's afraid she's going to be late.",
+  },
+  {
+    start: 15.64,
+    end: 19.30,
+    text: "She looks at the clock. It's only two o'clock.",
+  },
+  {
+    start: 19.30,
+    end: 23.08,
+    text: "She's on time, but everyone is already there.",
+  },
+  {
+    start: 23.08,
+    end: 25.56,
+    text: "They're stretching and playing catch.",
+  },
+  {
+    start: 25.56,
+    end: 29.80,
+    text: "Amy feels worried. It's a great day for baseball.",
+  },
+  {
+    start: 29.80,
+    end: 31.92,
+    text: "Many people come to watch the game.",
+  },
+  {
+    start: 31.92,
+    end: 39.50,
+    text: "\"There are many people watching,\" thinks Amy. \"I hope I'm going to do well.\" The game starts.",
+  },
+  {
+    start: 39.50,
+    end: 42.76,
+    text: "The first batter on the other team hits the ball to Amy.",
+  },
+  {
+    start: 42.76,
+    end: 48.96,
+    text: "She misses the ball. Amy is very worried now. \"Will I hit the ball?\" she thinks.",
+  },
+  {
+    start: 48.96,
+    end: 53.72,
+    text: "\"Hey, don't let it get you down,\" says her teammate, Jasmine.",
+  },
+  {
+    start: 53.72,
+    end: 58.62,
+    text: "\"You will get the next one. Cheer up.\" Now Amy's team is batting.",
+  },
+  {
+    start: 58.62,
+    end: 60.06,
+    text: "It's Amy's turn.",
+  },
+  {
+    start: 60.06,
+    end: 63.24,
+    text: "She swings hard and hits the ball into the air.",
+  },
+  {
+    start: 63.24,
+    end: 66.26,
+    text: "It soars into the sky like a rocket.",
+  },
+  {
+    start: 66.26,
+    end: 68.58,
+    text: "Amy races around the bases.",
+  },
+  {
+    start: 68.58,
+    end: 70.56,
+    text: "The other team can't catch the ball.",
+  },
+  {
+    start: 70.56,
+    end: 72.44,
+    text: "She touches third base.",
+  },
+  {
+    start: 72.44,
+    end: 74.74,
+    text: "She races all the way to the home plate.",
+  },
+  {
+    start: 74.74,
+    end: 79.90,
+    text: "It's a home run. \"Hooray! Hooray, Amy!\" everyone cries.",
+  },
+  {
+    start: 79.90,
+    end: 84.08,
+    text: "Amy just smiles. She isn't worried anymore.",
+  },
+  {
+    start: 84.08,
+    end: 85.54,
+    text: "She has done her best.",
+  },
+];
+  // 📍 مناطق النقر - كل منطقة عندها startFrom و stopAt من الصوت الأساسي
+const clickableAreas = [
+  {
+    x1: 15.11,
+    y1: 31.9,
+    x2: 54.11,
+    y2: 50.6,
+    slice: { startFrom: 0, stopAt: 0 },
+  },
+
+  {
+    x1: 55.62,
+    y1: 32.07,
+    x2: 94.03,
+    y2: 50.47,
+    slice: { startFrom: 0, stopAt: 0 },
+  },
+
+  {
+    x1: 15.11,
+    y1: 82,
+    x2: 53.52,
+    y2: 96.2,
+    slice: { startFrom: 0, stopAt: 0 },
+  },
+
+  {
+    x1: 55.62,
+    y1: 81.9,
+    x2: 93.91,
+    y2: 95.9,
+    slice: { startFrom: 0, stopAt: 0 },
+  },
+];
+  // ======================================================
+
   const handleImageClick = (e) => {
     const rect = e.target.getBoundingClientRect();
     const xPercent = ((e.clientX - rect.left) / rect.width) * 100;
     const yPercent = ((e.clientY - rect.top) / rect.height) * 100;
     console.log("X%:", xPercent.toFixed(2), "Y%:", yPercent.toFixed(2));
   };
-  const playSound = (soundPath) => {
-    if (audioRef.current) {
-      audioRef.current.src = soundPath;
-      audioRef.current.play();
-      setIsPlaying(true);
-      setHoveredAreaIndex(null); // إزالة الهايلايت عند بدء الصوت
 
-      audioRef.current.onended = () => {
+  // تشغيل slice من الصوت الأساسي
+  const playSlice = (slice) => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    audio.src = soundAll;
+    audio.currentTime = slice.startFrom;
+    audio.play();
+    setIsPlaying(true);
+
+    const checkStop = setInterval(() => {
+      if (audio.currentTime >= slice.stopAt) {
+        audio.pause();
+        clearInterval(checkStop);
         setIsPlaying(false);
+        setActiveAreaIndex(null);
         setHoveredAreaIndex(null);
-        setActiveAreaIndex(null); // مسح الهايلايت بعد انتهاء الصوت
-      };
-    }
+      }
+    }, 100);
+
+    audio.onended = () => {
+      clearInterval(checkStop);
+      setIsPlaying(false);
+      setActiveAreaIndex(null);
+      setHoveredAreaIndex(null);
+    };
   };
 
   return (
     <div
       className="page1-img-wrapper"
       onClick={handleImageClick}
-      style={{ backgroundImage: `url(${page24})` }}
+      style={{ backgroundImage: `url(${pageImage})` }}
     >
-      {/* <img
-        src={page24}
-        style={{ display: "block" }}
-        onClick={handleImageClick}
-      /> */}
-
       {clickableAreas.map((area, index) => (
         <div
           key={index}
@@ -112,9 +243,10 @@ const Reading_Unit6_Page1 = ({ openPopup }) => {
             width: `${area.x2 - area.x1}%`,
             height: `${area.y2 - area.y1}%`,
           }}
-          onClick={() => {
-            setActiveAreaIndex(index); // لتثبيت الهايلايت أثناء الصوت
-            playSound(area.sound);
+          onClick={(e) => {
+            e.stopPropagation();
+            setActiveAreaIndex(index);
+            playSlice(area.slice);
           }}
           onMouseEnter={() => {
             if (!isPlaying) setHoveredAreaIndex(index);
@@ -122,9 +254,10 @@ const Reading_Unit6_Page1 = ({ openPopup }) => {
           onMouseLeave={() => {
             if (!isPlaying) setHoveredAreaIndex(null);
           }}
-        ></div>
+        />
       ))}
 
+      {/* ⚙️ زر الصوت الكامل - عدّل اسم الـ CSS class */}
       <div
         className="headset-icon-CD-unit2-page11-1 hover:scale-110 transition"
         style={{ overflow: "visible" }}
@@ -133,33 +266,23 @@ const Reading_Unit6_Page1 = ({ openPopup }) => {
           width="22"
           height="22"
           viewBox="0 0 90 90"
-          onClick={() =>
+          onClick={(e) => {
+            e.stopPropagation();
             openPopup(
               "audio",
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "center",
-                  alignContent: "center",
-                }}
-              >
-                <AudioWithCaption src={sound1} captions={captionsExample} />
-              </div>,
-            )
-          }
+              <div style={{ display: "flex", justifyContent: "center", alignContent: "center" }}>
+                <AudioWithCaption src={soundAll} captions={captions}            stopAtSecond={2.6}
+/>
+              </div>
+            );
+          }}
           style={{ overflow: "visible" }}
         >
-          <image
-            className="svg-img"
-            href={audioBtn}
-            x="0"
-            y="0"
-            width="90"
-            height="90"
-          />
+          <image className="svg-img" href={audioBtn} x="0" y="0" width="90" height="90" />
         </svg>
       </div>
 
+      {/* ⚙️ زر الفيديو - عدّل اسم الـ CSS class */}
       <div
         className="pauseBtn-icon-CD-page21 hover:scale-110 transition"
         style={{ overflow: "visible" }}
@@ -168,49 +291,26 @@ const Reading_Unit6_Page1 = ({ openPopup }) => {
           width="22"
           height="22"
           viewBox="0 0 90 90"
-          onClick={() =>
+          onClick={(e) => {
+            e.stopPropagation();
             openPopup(
               "video",
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "center",
-                  alignContent: "center",
-                  alignItems: "center",
-                  height: "100%",
-                  width: "100%",
-                }}
-              >
-                <video
-                  autoPlay
-                  controls
-                  style={{
-                    width: "auto",
-                    height: "80%",
-                    objectFit: "fill",
-                    borderRadius: "20px",
-                  }}
-                >
-                  <source src={video3} type="video/mp4" />
+              <div style={{ display: "flex", justifyContent: "center", alignContent: "center", alignItems: "center", height: "100%", width: "100%" }}>
+                <video autoPlay controls style={{ width: "auto", height: "80%", objectFit: "fill", borderRadius: "20px" }}>
+                  <source src={videoFile} type="video/mp4" />
                 </video>
-              </div>,
-            )
-          }
+              </div>
+            );
+          }}
           style={{ overflow: "visible" }}
         >
-          <image
-            className="svg-img"
-            href={pauseBtn}
-            x="0"
-            y="0"
-            width="90"
-            height="90"
-          />
+          <image className="svg-img" href={pauseBtn} x="0" y="0" width="90" height="90" />
         </svg>
       </div>
+
       <audio ref={audioRef} style={{ display: "none" }} />
     </div>
   );
 };
 
-export default Reading_Unit6_Page1;
+export default Reading_NewPage;

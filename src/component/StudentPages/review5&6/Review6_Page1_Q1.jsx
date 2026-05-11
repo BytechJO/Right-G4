@@ -1,323 +1,447 @@
 import React, { useState } from "react";
+import Button from "../../Button";
 import ValidationAlert from "../../Popup/ValidationAlert";
-import "./Review6_Page1_Q1.css";
-import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
-import img1 from "../../../assets/imgs/pages/classbook/Right 3 Unit 6 Lets Run! Folder/Page 54/Ex A 1.svg";
 
-const Review6_Page1_Q1 = () => {
-  const items = [
-    { text: "The hen is", answer: "fourth" },
-    { text: "The rabbit is", answer: "second" },
-    { text: "The dog is", answer: "third" },
-    { text: "The horse is", answer: "first" },
-  ];
+// ─────────────────────────────────────────────
+//  🎨  COLORS
+// ─────────────────────────────────────────────
+const TEXT_COLOR              = "#2b2b2b";
+const NUMBER_COLOR            = "#2b2b2b";
+const OPTION_LABEL_CLR        = "#2b2b2b";
+const CIRCLE_DEFAULT          = "transparent";
+const CIRCLE_SELECTED         = "#2195a6";
+const CIRCLE_WRONG            = "#ef4444";
+const CIRCLE_CORRECT          = "#2195a6";
+const INPUT_UNDERLINE_DEFAULT = "#3f3f3f";
+const INPUT_UNDERLINE_WRONG   = "#ef4444";
+const INPUT_TEXT_COLOR        = "#2b2b2b";
+const INPUT_ANSWER_COLOR      = "#c81e1e";
+const WRONG_BADGE_BG          = "#ef4444";
+const WRONG_BADGE_TEXT        = "#ffffff";
 
-  const wordBank = ["fourth", "second", "third", "first"];
+// ─────────────────────────────────────────────
+//  📝  EXERCISE DATA
+// ─────────────────────────────────────────────
+const ITEMS = [
+  {
+    id:      1,
+    before:  "I wear",
+    after:   "to gym class.",
+    correct: "b",
+    answer:  "trainers",
+    options: [
+      { label: "a", text: "keys"     },
+      { label: "b", text: "trainers" },
+    ],
+  },
+  {
+    id:      2,
+    before:  "The science",
+    after:   "is on Thursday.",
+    correct: "a",
+    answer:  "test",
+    options: [
+      { label: "a", text: "test" },
+      { label: "b", text: "gym"  },
+    ],
+  },
+  {
+    id:      3,
+    before:  "I lost my",
+    after:   "!",
+    correct: "b",
+    answer:  "keys",
+    options: [
+      { label: "a", text: "school" },
+      { label: "b", text: "keys"   },
+    ],
+  },
+  {
+    id:      4,
+    before:  "Remember to",
+    after:   "your backpack.",
+    correct: "a",
+    answer:  "pack",
+    options: [
+      { label: "a", text: "pack" },
+      { label: "b", text: "wear" },
+    ],
+  },
+  {
+    id:      5,
+    before:  "They ran today in",
+    after:   "class.",
+    correct: "b",
+    answer:  "gym",
+    options: [
+      { label: "a", text: "test" },
+      { label: "b", text: "gym"  },
+    ],
+  },
+  {
+    id:      6,
+    before:  "If we don't hurry, we are going to be",
+    after:   ".",
+    correct: "b",
+    answer:  "late",
+    options: [
+      { label: "a", text: "trainers" },
+      { label: "b", text: "late"     },
+    ],
+  },
+];
 
-  const [answers, setAnswers] = useState(Array(items.length).fill(""));
-  const [showCorrect, setShowCorrect] = useState(false);
-  const [wrongMarks, setWrongMarks] = useState([]);
+// ─────────────────────────────────────────────
+//  🔧  NORMALIZE
+// ─────────────────────────────────────────────
+const normalize = (str) =>
+  str.toLowerCase().replace(/[^a-z0-9\s]/g, "").replace(/\s+/g, " ").trim();
 
-  // =========================
-  // DRAG END (🔥 FIXED)
-  // =========================
-  const onDragEnd = (result) => {
-    const { destination, draggableId } = result;
-    if (!destination) return;
+// ─────────────────────────────────────────────
+//  COMPONENT
+// ─────────────────────────────────────────────
+export default function WB_ReadChooseComplete_QA() {
+  const [selected,    setSelected]    = useState({});
+  const [written,     setWritten]     = useState({});
+  const [showResults, setShowResults] = useState(false);
+  const [showAns,     setShowAns]     = useState(false);
 
-    const value = draggableId.replace("season-", "");
-    const index = Number(destination.droppableId);
+  const isLocked = showResults || showAns;
 
-    const updated = [...answers];
-    updated[index] = value;
-    setAnswers(updated);
+  const handleSelect = (id, label) => {
+    if (isLocked) return;
+    setSelected((prev) => ({ ...prev, [id]: label }));
   };
 
-  // =========================
-  // SHOW ANSWERS (🔥 FIXED)
-  // =========================
-  const showAnswers = () => {
-    setAnswers(items.map((item) => item.answer));
-    setShowCorrect(true);
-    setWrongMarks([]);
+  const handleWrite = (id, value, answer) => {
+    if (showAns) return;
+    if (showResults && normalize(written[id] || "") === normalize(answer)) return;
+    setWritten((prev) => ({ ...prev, [id]: value }));
   };
 
-  // =========================
-  // RESET
-  // =========================
-  const resetAll = () => {
-    setAnswers(items.map(() => ""));
-    setShowCorrect(false);
-    setWrongMarks([]);
-  };
-
-  // =========================
-  // CHECK ANSWERS (🔥 FIXED)
-  // =========================
-  const checkAnswers = () => {
-    if (showCorrect) return;
-
-    // ❌ إذا في فراغ
-    if (answers.includes("")) {
-      ValidationAlert.info();
+  const handleCheck = () => {
+    if (isLocked) return;
+    const allCircled = ITEMS.every((item) => selected[item.id]);
+    const allWritten = ITEMS.every((item) => written[item.id]?.trim());
+    if (!allCircled || !allWritten) {
+      ValidationAlert.info("Please choose and write an answer for each question.");
       return;
     }
-
     let score = 0;
-    let total = items.length;
-    let wrong = [];
-
-    items.forEach((item, i) => {
-      if (answers[i]?.trim().toLowerCase() === item.answer.toLowerCase()) {
-        score++;
-      } else {
-        wrong.push({ qIndex: i });
-      }
+    const total = ITEMS.length * 2;
+    ITEMS.forEach((item) => {
+      if (selected[item.id] === item.correct)                              score++;
+      if (normalize(written[item.id] || "") === normalize(item.answer))    score++;
     });
-
-    setWrongMarks(wrong);
-    setShowCorrect(true);
-
-    const color = score === total ? "green" : score === 0 ? "red" : "orange";
-
-    const msg = `
-    <div style="font-size:20px;text-align:center;">
-      <span style="color:${color};font-weight:bold">
-        Score: ${score} / ${total}
-      </span>
-    </div>
-  `;
-
-    if (score === total) ValidationAlert.success(msg);
-    else if (score === 0) ValidationAlert.error(msg);
-    else ValidationAlert.warning(msg);
+    setShowResults(true);
+    if (score === total)   ValidationAlert.success(`Score: ${score} / ${total}`);
+    else if (score > 0)    ValidationAlert.warning(`Score: ${score} / ${total}`);
+    else                   ValidationAlert.error(`Score: ${score} / ${total}`);
   };
-  const usedWords = answers.filter(Boolean);
+
+  const handleShowAnswer = () => {
+    const filledSel = {};
+    const filledWr  = {};
+    ITEMS.forEach((item) => {
+      filledSel[item.id] = item.correct;
+      filledWr[item.id]  = item.answer;
+    });
+    setSelected(filledSel);
+    setWritten(filledWr);
+    setShowResults(false);
+    setShowAns(true);
+  };
+
+  const handleReset = () => {
+    setSelected({});
+    setWritten({});
+    setShowResults(false);
+    setShowAns(false);
+  };
+
+  const getOptionState = (item, label) => {
+    const sel = selected[item.id];
+    if (sel !== label) return "idle";
+    if (showAns)       return "correct";
+    if (showResults)   return label === item.correct ? "correct" : "wrong";
+    return "selected";
+  };
+
+  const isWriteWrong    = (item) =>
+    showResults && !showAns && normalize(written[item.id] || "") !== normalize(item.answer);
+  const isWriteDisabled = (item) =>
+    showAns || (showResults && normalize(written[item.id] || "") === normalize(item.answer));
 
   return (
-    <DragDropContext onDragEnd={onDragEnd}>
+    <div className="main-container-component">
+      <style>{`
+        /* ── Main layout: sentences left | options right ── */
+        .rcca-body {
+          display: grid;
+          grid-template-columns: 1fr auto;
+          gap: clamp(20px, 3vw, 40px);
+          align-items: start;
+          width: 100%;
+          margin :5% 0 ; 
+        }
+
+        /* ── Left: sentences list ── */
+        .rcca-list {
+          display: flex;
+          flex-direction: column;
+          gap: clamp(14px, 2vw, 26px);
+        }
+
+        .rcca-item {
+          display: flex;
+          flex-direction: column;
+          gap: clamp(2px, 0.3vw, 4px);
+        }
+
+        /* Sentence row: num + before + input + after */
+        .rcca-sentence {
+          display: flex;
+          align-items: flex-end;
+          flex-wrap: wrap;
+          gap: clamp(4px, 0.5vw, 7px);
+        }
+
+        .rcca-num {
+          font-size: clamp(14px, 1.7vw, 20px);
+          font-weight: 700;
+          color: ${NUMBER_COLOR};
+          flex-shrink: 0;
+          line-height: 1.5;
+        }
+
+        .rcca-text {
+          font-size: clamp(13px, 1.6vw, 19px);
+          color: ${TEXT_COLOR};
+          line-height: 1.5;
+          white-space: nowrap;
+        }
+
+        /* Input inline */
+        .rcca-input-wrap {
+          position: relative;
+          flex: 0 1 clamp(80px, 10vw, 150px);
+          min-width: clamp(70px, 9vw, 130px);
+        }
+
+        .rcca-input {
+          width: 100%;
+          background: transparent;
+          border: none;
+          border-bottom: 1px solid ${INPUT_UNDERLINE_DEFAULT};
+          outline: none;
+          font-size: clamp(13px, 1.6vw, 19px);
+          color: ${INPUT_TEXT_COLOR};
+          line-height: 1.5;
+          box-sizing: border-box;
+          transition: border-color 0.2s;
+          text-align: center;
+        }
+        .rcca-input:disabled  { opacity: 1; cursor: default; }
+        .rcca-input--wrong    { border-bottom-color: ${INPUT_UNDERLINE_WRONG}; }
+        .rcca-input--answer   { color: ${INPUT_ANSWER_COLOR};}
+
+        .rcca-input-badge {
+          position: absolute;
+          top: -8px; right: 0;
+          width: clamp(16px, 1.8vw, 20px);
+          height: clamp(16px, 1.8vw, 20px);
+          border-radius: 50%;
+          background: ${WRONG_BADGE_BG};
+          color: ${WRONG_BADGE_TEXT};
+          display: flex; align-items: center; justify-content: center;
+          font-size: clamp(8px, 0.9vw, 11px);
+          font-weight: 700;
+          border: 2px solid #fff;
+          box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+          pointer-events: none;
+          z-index: 2;
+        }
+
+        /* ── Right: options column ── */
+        .rcca-options-col {
+          display: flex;
+          flex-direction: column;
+          gap: clamp(14px, 2vw, 26px);
+          flex-shrink: 0;
+          align-self: start;
+        }
+
+        /* Options row per item */
+        .rcca-options {
+          display: flex;
+          align-items: center;
+          gap: clamp(8px, 1.2vw, 16px);
+          flex-wrap: nowrap;
+        }
+
+        /* Single option: oval border */
+        .rcca-option {
+          position: relative;
+          display: flex;
+          align-items: center;
+          gap: clamp(3px, 0.4vw, 5px);
+          cursor: pointer;
+          user-select: none;
+          border: 2px solid ${CIRCLE_DEFAULT};
+          border-radius: 999px;
+          padding: clamp(2px, 0.3vw, 5px) clamp(8px, 1vw, 14px);
+          transition: border-color 0.15s;
+          white-space: nowrap;
+        }
+        .rcca-option--locked   { cursor: default; }
+        .rcca-option--selected { border-color: ${CIRCLE_SELECTED}; }
+        .rcca-option--correct  { border-color: ${CIRCLE_CORRECT};  }
+        .rcca-option--wrong    { border-color: ${CIRCLE_WRONG};    }
+
+        .rcca-option-badge {
+          position: absolute;
+          top: -7px; right: -7px;
+          width: clamp(13px, 1.5vw, 16px);
+          height: clamp(13px, 1.5vw, 16px);
+          border-radius: 50%;
+          background: ${WRONG_BADGE_BG};
+          color: ${WRONG_BADGE_TEXT};
+          display: flex; align-items: center; justify-content: center;
+          font-size: clamp(6px, 0.7vw, 9px);
+          font-weight: 700;
+          border: 2px solid #fff;
+          box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+          pointer-events: none;
+          z-index: 2;
+        }
+
+        .rcca-option-label {
+          font-size: clamp(12px, 1.4vw, 17px);
+          color: ${OPTION_LABEL_CLR};
+          font-weight: 700;
+          line-height: 1;
+        }
+
+        .rcca-option-text {
+          font-size: clamp(13px, 1.6vw, 19px);
+          color: ${TEXT_COLOR};
+          line-height: 1;
+        }
+
+        .rcca-buttons {
+          display: flex;
+          justify-content: center;
+          margin-top: clamp(8px, 1.6vw, 18px);
+        }
+
+        @media (max-width: 580px) {
+          .rcca-body { grid-template-columns: 1fr; }
+          .rcca-options-col { flex-direction: row; flex-wrap: wrap; gap: 10px; }
+        }
+      `}</style>
+
       <div
+        className="div-forall"
         style={{
           display: "flex",
           flexDirection: "column",
-          justifyContent: "center",
-          alignItems: "center",
-          padding: "30px",
+          gap: "clamp(14px, 2vw, 22px)",
+          maxWidth: "1100px",
+          margin: "0 auto",
         }}
       >
-        <div
-          className="div-forall"
-          style={{ width: "60%", marginBottom: "40px" }}
+        {/* ── Header ── */}
+        <h1
+          className="WB-header-title-page8"
+          style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
         >
-          <h5 className="header-title-page8">
-            <span style={{ marginRight: "10px" }}>A</span>Read,
-            look, and write. Use the words below.
-          </h5>
-          {/* WORD BANK */}
-          <Droppable droppableId="bank" direction="horizontal">
-            {(provided) => (
-              <div
-                ref={provided.innerRef}
-                {...provided.droppableProps}
-                style={{
-                  display: "flex",
-                  gap: "12px",
-                  padding: "10px",
-                  border: "2px dashed #ccc",
-                  borderRadius: "10px",
-                  marginTop: "20px",
-                  justifyContent: "center",
-                  width: "100%",
-                  marginBottom: "20px",
-                }}
-              >
-                {wordBank.map((word, index) => {
-                  const isUsed = usedWords.includes(word);
+          <span className="WB-ex-A-1">A</span>
+          Read, choose, and complete the sentences.
+        </h1>
 
+        {/* ── Body ── */}
+        <div className="rcca-body">
+
+          {/* Left: sentences */}
+          <div className="rcca-list">
+            {ITEMS.map((item) => {
+              const writeWrong    = isWriteWrong(item);
+              const writeDisabled = isWriteDisabled(item);
+              const writeValue    = written[item.id] || "";
+              const writeTColor   = showAns ? INPUT_ANSWER_COLOR : INPUT_TEXT_COLOR;
+              const writeUColor   = writeWrong ? INPUT_UNDERLINE_WRONG : INPUT_UNDERLINE_DEFAULT;
+
+              return (
+                <div key={item.id} className="rcca-item">
+                  <div className="rcca-sentence">
+                    <span className="rcca-num">{item.id}</span>
+                    {item.before && <span className="rcca-text">{item.before}</span>}
+
+                    <div className="rcca-input-wrap">
+                      <input
+                        type="text"
+                        className={[
+                          "rcca-input",
+                          writeWrong ? "rcca-input--wrong"  : "",
+                          showAns    ? "rcca-input--answer" : "",
+                        ].filter(Boolean).join(" ")}
+                        value={writeValue}
+                        disabled={writeDisabled}
+                        onChange={(e) => handleWrite(item.id, e.target.value, item.answer)}
+                        style={{ borderBottomColor: writeUColor, color: writeTColor }}
+                        spellCheck={false}
+                        autoComplete="off"
+                      />
+                      {writeWrong && <div className="rcca-input-badge">✕</div>}
+                    </div>
+
+                    {item.after && <span className="rcca-text">{item.after}</span>}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Right: options column */}
+          <div className="rcca-options-col">
+            {ITEMS.map((item) => (
+              <div key={item.id} className="rcca-options">
+                {item.options.map((opt) => {
+                  const state   = getOptionState(item, opt.label);
+                  const isWrong = state === "wrong";
                   return (
-                    <Draggable
-                      key={word}
-                      draggableId={`season-${word}`}
-                      index={index}
-                      isDragDisabled={isUsed}
+                    <div
+                      key={opt.label}
+                      className={[
+                        "rcca-option",
+                        state === "selected" ? "rcca-option--selected" : "",
+                        state === "correct"  ? "rcca-option--correct"  : "",
+                        state === "wrong"    ? "rcca-option--wrong"    : "",
+                        isLocked             ? "rcca-option--locked"   : "",
+                      ].filter(Boolean).join(" ")}
+                      onClick={() => handleSelect(item.id, opt.label)}
                     >
-                      {(provided) => (
-                        <span
-                          ref={provided.innerRef}
-                          {...provided.draggableProps}
-                          {...provided.dragHandleProps}
-                          className="season-chip"
-                          style={{
-                            padding: "7px 14px",
-                            border: "2px solid #2c5287",
-                            borderRadius: "8px",
-                            background: "white",
-                            fontWeight: "bold",
-                            cursor: isUsed ? "not-allowed" : "grab",
-                            fontSize: "16px",
-                            opacity: isUsed ? 0.4 : 1,
-                            ...provided.draggableProps.style,
-                          }}
-                        >
-                          {word}
-                        </span>
-                      )}
-                    </Draggable>
+                      <span className="rcca-option-label">{opt.label}</span>
+                      <span className="rcca-option-text">{opt.text}</span>
+                      {isWrong && <div className="rcca-option-badge">✕</div>}
+                    </div>
                   );
                 })}
-                {provided.placeholder}
               </div>
-            )}
-          </Droppable>
-          {/* CONTENT */}
-          <div
-            style={{
-              display: "flex",
-              alignItems: "flex-start",
-              gap: "30px",
-            }}
-          >
-            {/* 🟠 IMAGE */}
-            <div
-              style={{
-                width: "300px",
-                height: "300px",
-                overflow: "hidden",
-                border: "2px solid orange",
-                borderRadius: 5,
-              }}
-            >
-              <img
-                src={img1}
-                alt="exercise"
-                style={{
-                  width: "100%",
-                  height: "100%",
-                  objectFit: "cover",
-                  objectPosition: "50% 85%",
-                  transform: "scale(1.05)",
-                }}
-              />
-            </div>
-
-            {/* 🔵 RIGHT SIDE (النص + الأسئلة) */}
-            <div style={{ display: "flex", flexDirection: "column" }}>
-              {/* ✨ الفقرة */}
-              <div
-                style={{
-                  marginBottom: "20px",
-                  lineHeight: "1.6",
-                  fontSize: "18px",
-                }}
-              >
-                <div>The animals are in a race!</div>
-                <div>Go, go, go!</div>
-                <div>Some are fast,</div>
-                <div>And some are slow.</div>
-              </div>
-
-              {/* ✨ الأسئلة */}
-              <div className="space-y-6">
-                {items.map((item, i) => (
-                  <div
-                    key={i}
-                    style={{
-                      display: "flex",
-                      flexDirection: "row",
-                      alignItems: "center",
-                      gap: "10px", // 🔥 أهم تغيير
-                      marginBottom: "15px",
-                    }}
-                  >
-                    {/* TEXT */}
-                    <span
-                      style={{
-                        fontSize: "18px",
-                        minWidth: "100px", // 🔥 مهم
-                        whiteSpace: "nowrap", // 🔥 يمنع النزول سطر ثاني
-                      }}
-                    >
-                      {item.text}
-                    </span>
-
-                    <Droppable droppableId={`${i}`}>
-                      {(provided) => {
-                        const isWrong = wrongMarks.some((w) => w.qIndex === i);
-
-                        return (
-                          <div
-                            ref={provided.innerRef}
-                            {...provided.droppableProps}
-                            style={{
-                              position: "relative",
-                              minWidth: "250px",
-                              width: "100%",
-                              maxWidth: "400px",
-                              fontWeight: "bold",
-                              color: answers[i] ? "#1C398E" : "black",
-
-                              borderBottom: `3px solid ${
-                                isWrong ? "red" : "black"
-                              }`,
-
-                              marginTop: "20px",
-                              paddingBottom: "6px",
-                            }}
-                          >
-                            {answers[i]}
-                            {provided.placeholder}
-
-                            {showCorrect && isWrong && (
-                              <div
-                                style={{
-                                  position: "absolute",
-                                  top: "50%",
-                                  right: "-28px",
-                                  transform: "translateY(-50%)",
-                                  width: "22px",
-                                  height: "22px",
-                                  background: "#ef4444",
-                                  color: "white",
-                                  borderRadius: "50%",
-                                  fontSize: "12px",
-                                  display: "flex",
-                                  alignItems: "center",
-                                  justifyContent: "center",
-                                  fontWeight: "bold",
-                                  border: "2px solid white",
-                                  boxShadow: "0 2px 6px rgba(0,0,0,0.2)",
-                                  pointerEvents: "none",
-                                }}
-                              >
-                                ✕
-                              </div>
-                            )}
-                          </div>
-                        );
-                      }}
-                    </Droppable>
-                  </div>
-                ))}
-              </div>
-            </div>
+            ))}
           </div>
+
         </div>
 
-        {/* BUTTONS */}
-        <div className="action-buttons-container">
-          <button onClick={resetAll} className="try-again-button">
-            Start Again ↻
-          </button>
-          <button onClick={showAnswers} className="show-answer-btn">
-            Show Answer
-          </button>
-          <button onClick={checkAnswers} className="check-button2">
-            Check Answer ✓
-          </button>
+        {/* ── Buttons ── */}
+        <div className="rcca-buttons">
+          <Button
+            checkAnswers={handleCheck}
+            handleShowAnswer={handleShowAnswer}
+            handleStartAgain={handleReset}
+          />
         </div>
       </div>
-    </DragDropContext>
+    </div>
   );
-};
-
-export default Review6_Page1_Q1;
+}
