@@ -159,13 +159,13 @@ const captions = [
   y1: 36,
   x2: 54,
   y2: 50.5,
-      slice: { startFrom: 2.52, stopAt: 9 }, // ⏱️ عدّل التوقيتات بالثواني
+      slice: { startFrom: 2.52, stopAt:9.55 }, // ⏱️ عدّل التوقيتات بالثواني
     },
     {
   x1: 56,
   y1: 36,
   x2: 94.8,
-  y2: 50.5,      slice: { startFrom: 9, stopAt: 27 }, // ⏱️ عدّل التوقيتات بالثواني
+  y2: 50.5,      slice: { startFrom: 9.55, stopAt: 28 }, // ⏱️ عدّل التوقيتات بالثواني
     },
 
         {
@@ -173,7 +173,7 @@ const captions = [
   y1: 65,
   x2: 94.8,
   y2: 85,
-      slice: { startFrom: 27, stopAt: 57 }, // ⏱️ عدّل التوقيتات بالثواني
+      slice: { startFrom: 28, stopAt: 57 }, // ⏱️ عدّل التوقيتات بالثواني
     },
   ];
   // ======================================================
@@ -262,7 +262,7 @@ const captions = [
             openPopup(
               "audio",
               <div style={{ display: "flex", justifyContent: "center", alignContent: "center" }}>
-                <AudioWithCaption src={soundAll} captions={captions}            stopAtSecond={2.6}
+                <AudioWithCaption src={soundAll} captions={captions}            stopAtSecond={2.8}
 />
               </div>
             );

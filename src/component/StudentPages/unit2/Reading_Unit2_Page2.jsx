@@ -159,13 +159,16 @@ const captions = [
   y1: 32.5,
   x2: 49,
   y2: 41,
-      slice: { startFrom: 2.52, stopAt: 9 }, // ⏱️ عدّل التوقيتات بالثواني
+      slice: { startFrom: 56, stopAt: 66
+       }, // ⏱️ عدّل التوقيتات بالثواني
     },
     {
    x1: 51,
   y1: 32.5,
   x2: 89.8,
-  y2: 40.5,     slice: { startFrom: 9, stopAt: 27 }, // ⏱️ عدّل التوقيتات بالثواني
+  y2: 40.5,     slice: { startFrom: 75, stopAt: 76.5
+
+   }, // ⏱️ عدّل التوقيتات بالثواني
     },
 
         {
@@ -173,7 +176,7 @@ const captions = [
   y1: 56,
   x2: 89.8,
   y2: 62,
-      slice: { startFrom: 27, stopAt: 57 }, // ⏱️ عدّل التوقيتات بالثواني
+      slice: { startFrom:  76.5, stopAt: 85.5 }, // ⏱️ عدّل التوقيتات بالثواني
     },
   ];
   // ======================================================
@@ -248,8 +251,10 @@ const captions = [
         />
       ))}
 
-    
+      {/* ⚙️ زر الصوت الكامل - عدّل اسم الـ CSS class */}
+   
 
+      <audio ref={audioRef} style={{ display: "none" }} />
     </div>
   );
 };

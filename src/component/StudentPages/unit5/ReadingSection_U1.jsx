@@ -60,7 +60,6 @@ be different from living on Earth? "
         title="Inventions of the Future"
         image={imgReading}
         image1= {img}
-        question="Do you think new inventions will be good or bad for Earth?"
         sound={readingAudio}
         captions={captions}
         stopAtSecond={2.5}

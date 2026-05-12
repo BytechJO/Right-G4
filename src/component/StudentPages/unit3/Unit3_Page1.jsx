@@ -1,6 +1,6 @@
 import React, { useRef, useState } from "react";
-import page_6 from"../../../assets/imgs/pages/Class Book/Right 4 Unit 3 Harley Eats All the Sweets Folder/Page 22.png";
-import mainSound from "../../../assets/audio/ClassBook/Grade 4/cd1pg4-conversation-adult-lady-t_1cApuaJF.mp3";
+import page_6 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 3 Harley Eats All the Sweets Folder/Page 22.png";
+import mainSound from "../../../assets/audio/ClassBook/Grade 4/cd14pg22-conversation-adult-lady-t_zVHgP3JT.mp3";
 import vocSound from "../../../assets/audio/ClassBook/Grade 4/cd1pg4-conversation-adult-lady-t_1cApuaJF.mp3";
 import AudioWithCaption from "../../AudioWithCaption";
 import audioBtn from "../../../assets/Page 01/Audio btn.svg";
@@ -16,20 +16,58 @@ const Page6 = ({ openPopup }) => {
   const [activeAreaIndex, setActiveAreaIndex] = useState(null);
 
 const captions = [
-  { start: 0, end: 6.60, text: "Page four conversation. Listen and read, then say." },
-  { start: 6.60, end: 10.5, text: "Look at my new robot, Sarah. His name is Botboy." },
-  { start: 10.5, end: 15.00, text: "Hello, Botboy. I like your robot, Hansel." },
-  { start: 15.00, end: 19, text: "Thanks, Sarah. Robots will do many things in the future." },
-  { start: 19, end: 19.74, text: "Like what?" },
-  { start: 20.82, end: 28, text: "Robots will build buildings. They will drive firetrucks. They will do lots of things. " },
-  { start: 28, end: 31.40, text: "The robots will have a lot of work to do." },
-  { start: 31.80, end: 38.8, text: "Yes, but they won't mind. Robots don't get tired. They're machines after all." },
-  { start: 39.02, end: 41.50, text: "Do you think robots will do our homework?" },
-  { start: 42.50, end: 48.5, text: "Of course. We won't have to do homework anymore. The robots will do it for us." },
-  { start: 48.98, end: 52.8, text: "How will we learn? We must do our homework." },
-  { start:52.8, end: 58.74, text: "Oh, I didn't think about that. You're right. Well, at least they will clean our rooms." },
+  {
+    start: 0.26,
+    end: 3.14,
+    text: "Page 22, Conversation.",
+  },
+  {
+    start: 3.14,
+    end: 6.34,
+    text: "Listen and read, then say.",
+  },
+  {
+    start: 6.34,
+    end: 9.90,
+    text: "Good morning, class. How are you doing today?",
+  },
+  {
+    start: 9.90,
+    end: 13.80,
+    text: "Good morning, Miss Rose. We are doing well, thanks.",
+  },
+  {
+    start: 13.80,
+    end: 18.82,
+    text: "How was your birthday yesterday, Helen and Harley? Was it nice?",
+  },
+  {
+    start: 18.82,
+    end: 28.18,
+    text: "It was great. I got many gifts for my birthday. I had all my friends with me. It's wonderful to spend a birthday with family and friends.",
+  },
+  {
+    start: 28.18,
+    end: 35.00,
+    text: "Yeah, it was a great party. Mom made a delicious cake. I ate so many sweets. That was the best part.",
+  },
+  {
+    start: 36.60,
+    end: 40.90,
+    text: "I bet you had a stomach ache after eating so many sweets.",
+  },
+  {
+    start: 40.90,
+    end: 44.84,
+    text: "Not at all. I wanted to eat more, but my mom stopped me.",
+  },
+  {
+    start: 46.24,
+    end: 50.98,
+    text: "And rightly so. I'm glad you had a good birthday party, Helen and Harley.",
+  },
 ];
- const wordTimingsVoc = [
+  const wordTimingsVoc = [
     { start: 8.8, end: 11.1 },
     { start: 11.2, end: 13.6 },
     { start: 13.94, end: 15.5 },
@@ -51,61 +89,72 @@ const captions = [
     { start: 49.52, end: 52.119 },
   ];
 
-  
   const clickableAreas = [
     {
-  x1: 9.37,
-  y1: 21,
-  x2: 36.37,
-  y2: 25.5,     slice: { startFrom:captions[1].start,  stopAt: captions[1].end 
-       },
+      x1: 9.37,
+      y1: 21,
+      x2: 36.37,
+      y2: 25.5,
+      slice: { startFrom: 6.34, stopAt: 9.8 },
     },
-        {
-  x1: 19.37,
-  y1: 26.8,
-  x2: 48.17,
-  y2: 30.8,     slice: { startFrom:captions[1].start,  stopAt: captions[1].end 
-       },
+    {
+      x1: 19.37,
+      y1: 26.8,
+      x2: 48.17,
+      y2: 30.8,
+      slice: { startFrom: 
+9.90, stopAt: 13.70},
     },
 
     {
-  x1: 66.1,
-  y1: 20.5,
-  x2: 92.1,
-  y2: 25.9,     slice: { startFrom:captions[8].start,  stopAt: captions[8].end  },
+      x1: 66.1,
+      y1: 20.5,
+      x2: 92.1,
+      y2: 25.9,
+      slice: { startFrom:13.80
+, stopAt: 18.72 },
     },
     {
-  x1: 51.5,
-  y1: 40.6,
-  x2: 93.9,
-  y2: 47.1,     slice: {startFrom:captions[9].start,  stopAt: captions[9].end },
+      x1: 51.5,
+      y1: 40.6,
+      x2: 93.9,
+      y2: 47.1,
+      slice: { startFrom: 
+18.82, stopAt: 28.08
+
+},
     },
     {
-  x1: 11.5,
-  y1: 48,
-  x2: 47.9,
-  y2: 53.87,    slice: { startFrom:captions[5].start,  stopAt: captions[5].end  },
+      x1: 11.5,
+      y1: 48,
+      x2: 47.9,
+      y2: 53.87,
+      slice: { startFrom: 28.18, stopAt:34.90 },
     },
     {
-  x1: 6.37,
-  y1: 68.8,
-  x2: 32.77,
-  y2: 73.17,      slice: { startFrom:captions[6].start,  stopAt: captions[6].end  },
+      x1: 6.37,
+      y1: 68.8,
+      x2: 32.77,
+      y2: 73.17,
+      slice: { startFrom: 36.60, stopAt: 40.80 },
     },
     {
-  x1: 65.6,
-  y1: 49.7,
-  x2: 94.1,
-  y2: 54.07,    slice: {startFrom:captions[7].start ,  stopAt: captions[7].end  },
+      x1: 65.6,
+      y1: 49.7,
+      x2: 94.1,
+      y2: 54.07,
+      slice: { startFrom: 40.90, stopAt: 44.74 },
     },
     {
-  x1: 55.3,
-  y1: 68.6,
-  x2: 90.5,
-  y2: 73.1,      slice: { startFrom:captions[10].start,  stopAt: captions[10].end  },
+      x1: 55.3,
+      y1: 68.6,
+      x2: 90.5,
+      y2: 73.1,
+      slice: { startFrom: 
+46.24, stopAt: 50.98
+ },
     },
   ];
-
 
   const handleImageClick = (e) => {
     const rect = e.target.getBoundingClientRect();
@@ -176,7 +225,6 @@ const captions = [
           }}
         />
       ))}
-
       {/* زر الصوت الرئيسي - بيشغل الصوت كامل مع popup */}
       <div
         className="headset-icon-CD-page4-1 hover:scale-110 transition"
@@ -197,11 +245,8 @@ const captions = [
                   alignContent: "center",
                 }}
               >
-                <AudioWithCaption
-                  src={mainSound}
-                  captions={captions}
-                />
-              </div>
+                <AudioWithCaption src={mainSound} captions={captions} />
+              </div>,
             );
           }}
           style={{ overflow: "visible" }}
@@ -217,97 +262,97 @@ const captions = [
           />
         </svg>
       </div>
-  <div
-          className="aaaa hover:scale-110 transition"
+      <div
+        className="aaaa hover:scale-110 transition"
+        style={{ overflow: "visible" }}
+      >
+        <svg
+          width="22"
+          height="22"
+          viewBox="0 0 90 90"
+          onClick={() =>
+            openPopup(
+              "html",
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "center",
+                  alignContent: "center",
+                }}
+              >
+                <Vocabulary
+                  title="VOCABULARY"
+                  subtitle="Listen and repeat. Find the words and expressions in the conversation above."
+                  sound={vocSound}
+                  captions={captions}
+                  stopAtSecond={8.5}
+                  wordTimings={wordTimingsVoc}
+                  words={[
+                    "alarm",
+                    "notebook",
+                    "pillow",
+                    "counting",
+                    "face",
+                    "figure",
+                    "reviewing",
+                    "pancakes",
+                    "starving",
+                    "actually",
+                    "mirror",
+                    "Uh-oh!",
+                    "fell asleep",
+                    "How did you know?",
+                    "right away",
+                    "on one side",
+                  ]}
+                />
+              </div>,
+            )
+          }
           style={{ overflow: "visible" }}
         >
-          <svg
-            width="22"
-            height="22"
-            viewBox="0 0 90 90"
-            onClick={() =>
-              openPopup(
-                "html",
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "center",
-                    alignContent: "center",
-                  }}
-                >
-                  <Vocabulary
-                    title="VOCABULARY"
-                    subtitle="Listen and repeat. Find the words and expressions in the conversation above."
-                    sound={vocSound}
-                    captions={captions}
-                    stopAtSecond={8.5}
-                                        wordTimings={wordTimingsVoc}
-
-                    words={[
-                      "alarm",
-                      "notebook",
-                      "pillow",
-                      "counting",
-                      "face",
-                      "figure",
-                      "reviewing",
-                      "pancakes",
-                      "starving",
-                      "actually",
-                      "mirror",
-                      "Uh-oh!",
-                      "fell asleep",
-                      "How did you know?",
-                      "right away",
-                      "on one side",
-                    ]}
-                  />
-                </div>,
-              )
-            }
-            style={{ overflow: "visible" }}
-          >
-            <image
-              className="svg-img"
-              href={audioBtn}
-              x="0"
-              y="0"
-              width="100%"
-              height="100%"
-              preserveAspectRatio="xMidYMid meet"
-            />
-          </svg>
-        </div> <div
-          className="headset-icon-CD-page4-3 hover:scale-110 transition"
+          <image
+            className="svg-img"
+            href={audioBtn}
+            x="0"
+            y="0"
+            width="100%"
+            height="100%"
+            preserveAspectRatio="xMidYMid meet"
+          />
+        </svg>
+      </div>{" "}
+      <div
+        className="headset-icon-CD-page4-3 hover:scale-110 transition"
+        style={{ overflow: "visible" }}
+      >
+        <svg
+          width="22"
+          height="22"
+          viewBox="0 0 90 90"
+          onClick={() =>
+            openPopup(
+              "html",
+              <CriticalThinking
+                title={
+                  "Why did Hansel’s mom say he could do an extra math problem?"
+                }
+              />,
+            )
+          }
           style={{ overflow: "visible" }}
         >
-          <svg
-            width="22"
-            height="22"
-            viewBox="0 0 90 90"
-            onClick={() =>
-              openPopup(
-                "html",
-                <CriticalThinking
-                  title={
-                    "Why did Hansel’s mom say he could do an extra math problem?"
-                  }
-                />,
-              )
-            }
-            style={{ overflow: "visible" }}
-          >
-            <image
-              className="svg-img"
-              href={arrowBtn}
-              x="0"
-              y="0"
-              width="100%"
-              height="100%"
-              preserveAspectRatio="xMidYMid meet"
-            />
-          </svg>
-        </div>
+          <image
+            className="svg-img"
+            href={arrowBtn}
+            x="0"
+            y="0"
+            width="100%"
+            height="100%"
+            preserveAspectRatio="xMidYMid meet"
+          />
+        </svg>
+      </div>
       <audio ref={audioRef} style={{ display: "none" }} />
     </div>
   );

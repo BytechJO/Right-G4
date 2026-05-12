@@ -57,7 +57,7 @@ const Unit3_Page6 = ({ openPopup }) => {
           />
         </svg>
       </div>    <div
-        className="click-icon-unit3-page6-2 hover:scale-110 transition"
+        className="click-icon-unit3-page6-3 hover:scale-110 transition"
         style={{ overflow: "visible" }}
       >
         <svg
@@ -70,7 +70,7 @@ const Unit3_Page6 = ({ openPopup }) => {
           <image
             className="svg-img"
             href={arrowBtn}
-            x="50"
+            x="0"
             y="0"
             width="90"
             height="90"

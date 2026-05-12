@@ -5,7 +5,6 @@ const SectionBanner = ({ title, fontSize = "1.2rem" }) => {
       flex: "row",
       fontSize: fontSize, // كل شي بيتحسب منه
       margin: "8px 0",
-      marginRight: "auto",
     }}>
       {/* الشريط الرمادي الأيسر */}
       <div style={{

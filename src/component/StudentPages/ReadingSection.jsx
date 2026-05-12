@@ -47,7 +47,6 @@ const ReadingSection = ({
         <div className="flex items-center gap-4">
           <SectionBanner title="Comprehension" />
           <h2 style={{ display: "flex", flexDirection: "row", gap: "10px", whiteSpace: "nowrap", marginLeft: "auto" }} className="font-bold text-[18px] text-black nowrap">
-            {mainTitle}
           </h2>
         </div>
       

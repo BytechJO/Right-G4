@@ -1,9 +1,9 @@
 .click-icon-review1-page1-2 {
-  position: absolute;
-  padding: 5px;
-  top: 63.5%;
-  left: 79%;
-  cursor: pointer;
+    position: absolute;
+    padding: 5px;
+    bottom: 50.3%;
+    left: 55%;
+    cursor: pointer;
 }
 .click-icon-review1-page1-1 {
   position: absolute;
@@ -13,15 +13,12 @@
   cursor: pointer;
 }
 .click-icon-review1-page1-3 {
-  position: absolute;
-  /* background-color: #6bcff6;
-  border-radius: 20px;
-  border: rgb(255, 255, 255) solid 3px; */
-  padding: 5px;
-  bottom: 53.5%;
-  left: 33%;
+    position: absolute;
+    padding: 5px;
+    bottom: 24.7%;
+    left: 41%;
+    cursor: pointer;
 
-  cursor: pointer;
 }
 .click-icon-review1-page1-4 {
   position: absolute;

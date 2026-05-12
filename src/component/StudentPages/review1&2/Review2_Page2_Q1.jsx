@@ -219,7 +219,13 @@ export default function WB_ReadListenWriteCheckCross_QD2() {
           <span className="WB-ex-A">D</span>
           Read, listen, and write ✓ and ✕.
         </h1>
-
+    <div style={{margin:"3em 0 2em"}} >
+        <QuestionAudioPlayer
+          src={sound}
+          captions={captions}
+          stopAtSecond={4}
+        />
+      </div>
         <p className="rlcc2-para">{PARAGRAPH}</p>
 
         <div className="rlcc2-grid">

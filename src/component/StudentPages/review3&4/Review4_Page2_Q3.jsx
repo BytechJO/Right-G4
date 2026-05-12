@@ -199,7 +199,6 @@ export default function WB_ReadWrite_QF() {
         .rwf-input:focus    { border-bottom-color: #9ca3af; }
         .rwf-input:disabled { opacity: 1; cursor: default; border-bottom-color: transparent; }
         .rwf-input--wrong   { border-bottom-color: ${INPUT_UL_WRONG}; }
-        .rwf-input--answer  { color: ${INPUT_ANSWER_COLOR}; font-size: clamp(14px, 1.7vw, 22px); font-weight: 700; }
 
         /* ✕ badge */
         .rwf-badge {

@@ -286,7 +286,7 @@ const captions = [
                 "html",
                 <CriticalThinking
                   title={
-                    "Why did Hansel’s mom say he could do an extra math problem?"
+                    "Why won’t robots mind doning so mush work ?"
                   }
                 />,
               )

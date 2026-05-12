@@ -7,25 +7,32 @@
 }
 
 .click-icon-unit5-page6-1 {
-  position: absolute;
-  padding: 5px;
-  top: 3.5%;
-  left: 42.5%;
-  cursor: pointer;
+    position: absolute;
+    padding: 5px;
+    top: 3%;
+    left: 38.5%;
+    cursor: pointer;
 }
-.click-icon-unit5-page6-2 {
+.click-icon-unit5-page6-3{
   position: absolute;
-  padding: 5px;
-  top: 51.2%;
-  left: 34.2%;
-  cursor: pointer;
+    padding: 5px;
+    top: 79%;
+    left: 53.2%;
+    cursor: pointer;
+}.click-icon-unit5-page6-2 {
+    position: absolute;
+    padding: 5px;
+    top: 36.4%;
+    left: 53.8%;
+    cursor: pointer;
 }
+
 .headset-icon-CD-unit5-page6-2 {
-  position: absolute;
-  padding: 5px;
-  bottom: 29%;
-  left: 24%;
-  cursor: pointer;
+    position: absolute;
+    padding: 5px;
+    top: 79%;
+    left: 54.2%;
+    cursor: pointer;
 }
 
 @media screen and (max-width: 1024px) and (max-height: 600px) {
