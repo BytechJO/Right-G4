@@ -5,8 +5,8 @@ import ValidationAlert from "../../Popup/ValidationAlert";
 // ─────────────────────────────────────────────
 //  🖼️  IMAGES
 // ────────────────────────────────────────────
-import img1 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 4 Joy Makes a Friend Folder/Page 32/SVG/Asset 12.svg";
-import img2 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 4 Joy Makes a Friend Folder/Page 32/SVG/Asset 12.svg";
+import img1 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 4 Joy Makes a Friend Folder/Page 32/SVG/Asset 9.svg";
+import img2 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 4 Joy Makes a Friend Folder/Page 32/SVG/Asset 10.svg";
 import img3 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 4 Joy Makes a Friend Folder/Page 32/SVG/Asset 12.svg";
 
 // ─────────────────────────────────────────────
@@ -87,7 +87,7 @@ export default function WB_LookReadCircle_QA() {
           grid-template-columns: repeat(3, 1fr);
           gap: clamp(28px, 2vw, 28px);
           width: 100%;
-          margin : 5%  0;
+          margin : 10%  0;
         }
 
         /* ── الكارد الكامل: رقم+صورة في الأعلى، كلمات في الأسفل ── */
@@ -138,6 +138,8 @@ export default function WB_LookReadCircle_QA() {
           margin-top: 8px;
           width: 100%;
           box-sizing: border-box;
+          margin-left: -25px;
+
         }
 
         /* كلمة واحدة */

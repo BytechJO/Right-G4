@@ -161,7 +161,7 @@ export default function CB_ReadCircleWrite_QA() {
             .rcw-input {
               width: 100%;
               border: none;
-              border-bottom: 2px solid ${LINE_COLOR};
+              border-bottom: 1px solid ${LINE_COLOR};
               outline: none;
               background: transparent;
               font-size: clamp(15px, 1.8vw, 22px);
@@ -260,7 +260,7 @@ export default function CB_ReadCircleWrite_QA() {
           className="WB-header-title-page8"
           style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
         >
-          <span className="WB-ex-A">B</span>
+          <span className="WB-ex-A">C</span>
           Read, circle, and write.
         </h1>
 

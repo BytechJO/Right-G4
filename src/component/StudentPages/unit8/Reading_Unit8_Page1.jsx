@@ -47,12 +47,43 @@ const Reading_Unit8_Page1 = ({ openPopup }) => {
       text: "Harley found it in the grass. He took some pictures, then he gave it to me to hold. Here you are. We didn't know this was your camera, Sarah replied happily. Thank you. I'm so happy my camera is not lost, said Hansel.",
     },
   ];
-  const clickableAreas = [
-    { x1: 15.32, y1: 36.26, x2: 53.03, y2: 49.97, sound: sound2 },
-    { x1: 55.4, y1: 31.86, x2: 93.32, y2: 49.97, sound: sound3 },
-    { x1: 15.11, y1: 81.1, x2: 52.6, y2: 94.98, sound: sound4 },
-    { x1: 55.62, y1: 81.1, x2: 93.54, y2: 95.32, sound: sound5 },
-  ];
+const clickableAreas1 = [
+  // 1
+  {
+    x1: 15.1,
+    y1: 36.26,
+    x2: 54.1,
+    y2: 50.26,
+    slice: { startFrom: 0, stopAt: 0 },
+  },
+
+  // 2
+  {
+    x1: 55.4,
+    y1: 30.86,
+    x2: 94.32,
+    y2: 50.66,
+    slice: { startFrom: 0, stopAt: 0 },
+  },
+
+  // 3
+  {
+    x1: 15.11,
+    y1: 79.5,
+    x2: 53.6,
+    y2: 96,
+    slice: { startFrom: 0, stopAt: 0 },
+  },
+
+  // 4
+  {
+    x1: 55.62,
+    y1: 79.5,
+    x2: 94.54,
+    y2: 96.3,
+    slice: { startFrom: 0, stopAt: 0 },
+  },
+];
   const handleImageClick = (e) => {
     const rect = e.target.getBoundingClientRect();
     const xPercent = ((e.clientX - rect.left) / rect.width) * 100;

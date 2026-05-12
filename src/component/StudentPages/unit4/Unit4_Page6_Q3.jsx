@@ -237,7 +237,7 @@ export default function CB_ListenReadCircle_QG() {
         </h1>
 
         {/* ── Audio ── */}
-        <div style={{ marginTop: "10px" }}>
+        <div style={{ marginTop: "5em" }}>
           <QuestionAudioPlayer
             src={sound}
             captions={captions}

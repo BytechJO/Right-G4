@@ -121,6 +121,7 @@ export default function WB_ReadWrite_QA() {
           gap: clamp(8px, 1.2vw, 14px);
           justify-content: center;
           width: 100%;
+          margin-top : 7%  ;
         }
 
         .rwa-pill {

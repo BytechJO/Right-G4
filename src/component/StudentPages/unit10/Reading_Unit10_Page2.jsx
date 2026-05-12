@@ -11,12 +11,11 @@ const Reading_Unit10_Page2 = () => {
   const [hoveredAreaIndex, setHoveredAreaIndex] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [activeAreaIndex, setActiveAreaIndex] = useState(null);
-  const clickableAreas = [
-    { x1: 8.27, y1: 38.8, x2: 45.76, y2: 49.97, sound: sound1 },
-    { x1: 48.35, y1:  38.29, x2: 86.70, y2: 50.64, sound: sound2 },
-    { x1: 8.06, y1: 83.13, x2: 45.33, y2: 96.33, sound: sound3 },
-    { x1: 48.35, y1: 79.58, x2: 85.84, y2: 96.84, sound: sound4 },
-  ];
+const clickableAreas4 = [  // 1
+  {    x1: 8.27,    y1: 28.8,    x2: 46.76,    y2: 39.8,    slice: { startFrom: 0, stopAt: 0 },  },  
+   {    x1: 51.35,    y1: 31.5,    x2: 89.7,    y2: 39.85,    slice: { startFrom: 0, stopAt: 0 },  },  
+    {    x1: 8.06,    y1: 65.5,    x2: 46.46,    y2: 73.8,    slice: { startFrom: 0, stopAt: 0 },  },  
+      {    x1: 51.06,    y1: 52.5,    x2: 89.46,    y2: 63.8,    slice: { startFrom: 0, stopAt: 0 },  },];
   const handleImageClick = (e) => {
     const rect = e.target.getBoundingClientRect();
     const xPercent = ((e.clientX - rect.left) / rect.width) * 100;

@@ -131,7 +131,7 @@ const WritingA = () => {
                 style={{
                   width: "100%",
                   fontSize: "18px",
-                  borderBottom: `2px solid ${errors[q.id] === true ? "#ef4444" : "#333"}`,
+                  borderBottom: `1px solid ${errors[q.id] === true ? "#ef4444" : "#333"}`,
                   background: "transparent",
                   outline: "none",
                   color: showed ? "#ef4444" : "#1a1a1a",

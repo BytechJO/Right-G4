@@ -247,7 +247,7 @@ const GrammarB = () => {
                   style={{
                     fontSize: "18px",
                     width: "100%",
-                    borderBottom: `2px solid ${inputErrors[q.id] === true ? "#ef4444" : "#333"}`,
+                    borderBottom: `1px solid ${inputErrors[q.id] === true ? "#ef4444" : "#333"}`,
                     background: "transparent",
                     outline: "none",
                     color: showed ? "#ef4444" : "#1a1a1a",

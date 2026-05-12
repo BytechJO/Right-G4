@@ -38,12 +38,44 @@ const Reading_Unit10_Page1 = ({ openPopup }) => {
       text: "It's good that you had your friend to help you, said Grandma. We learned to help each other, said Lana. I learned to take better care of my cat, added Helen.",
     },
   ];
-  const clickableAreas = [
-    { x1: 15.11, y1: 38.8, x2: 53.03, y2: 49.46, sound: sound2 },
-    { x1: 55.62, y1: 39.13, x2: 92.46, y2: 49.29, sound: sound3 },
-    { x1: 15.32, y1: 79.24, x2: 52.17, y2: 96, sound: sound4 },
-    { x1: 55.62, y1: 84.32, x2: 93.11, y2: 96.9, sound: sound5 },
-  ];
+const clickableAreas3 = [
+  // 1
+  {
+    x1: 15.11,
+    y1: 35.5,
+    x2: 54.03,
+    y2: 50.16,
+    slice: { startFrom: 0, stopAt: 0 },
+  },
+
+  // 2
+  {
+    x1: 55.62,
+    y1: 35.7,
+    x2: 94.46,
+    y2: 50.5,
+    slice: { startFrom: 0, stopAt: 0 },
+  },
+
+  // 3
+  {
+    x1: 15.32,
+    y1: 64.24,
+    x2: 54.17,
+    y2: 84,
+    slice: { startFrom: 0, stopAt: 0 },
+  },
+
+  // 4
+  {
+    x1: 55.62,
+    y1: 78,
+    x2: 94.22,
+    y2: 96.2,
+    slice: { startFrom: 0, stopAt: 0 },
+  },
+];
+
   const handleImageClick = (e) => {
     const rect = e.target.getBoundingClientRect();
     const xPercent = ((e.clientX - rect.left) / rect.width) * 100;

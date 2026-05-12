@@ -2,9 +2,8 @@ import GrammarA from "./GrammarA";
 import GrammarB from "./GrammarB";
 import GrammarC from "./GrammarC";
 
-import image1 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 6 Ready for School Folder/Page 48/SVG/Asset 22.svg";
-import image  from "../../../assets/imgs/pages/Class Book/Right 4 Unit 6 Ready for School Folder/Page 48/SVG/Asset 7.svg";
-
+import image  from "../../../assets/imgs/pages/Class Book/Right 4 Unit 8 I Lived in the Library Folder/Page 65/SVG/Asset 3.svg"
+import image1 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 8 I Lived in the Library Folder/Page 65/SVG/Asset 4.svg"
 import sound from "../../../assets/audio/ClassBook/Grade 4/cd17pg24-grammar-adult-lady_DyQEJqoO.mp3";
 import QuestionAudioPlayer from "../../QuestionAudioPlayer";
 import SectionBanner from "../SectionBanner";

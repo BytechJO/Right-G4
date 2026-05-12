@@ -55,7 +55,8 @@ const captions = [
     <div className="flex flex-col items-center">
         <div className="w-[60%]">
       <ReadingSection
-        mainTitle="What would you like to see invented in the future? Do you have an idea for a future invention?"
+        mainTitle="Would you like to live in space? Would living in space 
+be different from living on Earth? "
         title="Inventions of the Future"
         image={imgReading}
         image1= {img}

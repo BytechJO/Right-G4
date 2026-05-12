@@ -18,9 +18,9 @@ import QuestionAudioPlayer from "../../QuestionAudioPlayer";
 //  🎨  COLORS
 // ─────────────────────────────────────────────
 const CHECK_COLOR      = "#c81e1e";
-const BOX_BORDER       = "#9ca3af";
+const BOX_BORDER       = "#2195a6";
 const BOX_BG           = "#ffffff";
-const WRONG_BADGE_BG   = "#ef4444";
+const WRONG_BADGE_BG   = "#ff0000ff";
 const WRONG_BADGE_TEXT = "#ffffff";
 const TEXT_COLOR       = "#2b2b2b";
 const NUMBER_COLOR     = "#2b2b2b";
@@ -219,8 +219,6 @@ export default function WB_ListenReadWriteCheckCross_QC() {
           justify-self: center;
         }
         .lrcc-box--locked  { cursor: default; }
-        .lrcc-box--checked { border-color: ${CHECK_COLOR}; }
-        .lrcc-box--wrong   { border-color: ${WRONG_BADGE_BG}; }
 
         .lrcc-checkmark {
           font-size: clamp(14px, 1.8vw, 22px);

@@ -99,7 +99,7 @@ export default function WB_ReadWriteSentences_QC() {
           flex-direction: column;
           gap: clamp(14px, 2.2vw, 26px);
           width: 100%;
-          margin: 8% 0;
+          margin: 13% 0;
         }
 
         /* Single row: num + cue + input */

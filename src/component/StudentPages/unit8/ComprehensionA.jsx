@@ -1,63 +1,55 @@
-import { useState, useRef } from "react";
+import { useState } from "react";
 import ValidationAlert from "../../Popup/ValidationAlert";
 import { FaCheck, FaRedo, FaEye } from "react-icons/fa";
 
-import img1 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 6 Ready for School Folder/Page 47/SVG/SVG/Asset 3.svg";
-import img2 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 6 Ready for School Folder/Page 47/SVG/SVG/Asset 4.svg";
-import img3 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 6 Ready for School Folder/Page 47/SVG/SVG/Asset 5.svg";
-import img4 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 6 Ready for School Folder/Page 47/SVG/SVG/Asset 6.svg";
-
 const ComprehensionA = () => {
-  // الترتيب الصح: img1=2, img2=4, img3=1, img4=3
-  const images = [
-    { id: 1, src: img1, answer: "2" },
-    { id: 2, src: img2, answer: "4" },
-    { id: 3, src: img3, answer: "1" },
-    { id: 4, src: img4, answer: "3" },
+  const questions = [
+    {
+      id: 1,
+      after: "learned 12 languages by the time he was seven.",
+      answers: ["Asad Ullah Qayyam", "Asad Ullah Qayyam."],
+    },
+    {
+      id: 2,
+      after: "started playing the piano when he was four years old.",
+      answers: ["Wolfgang Mozart", "Wolfgang Mozart."],
+    },
+    {
+      id: 3,
+      before: "The person who graduated at the youngest age in the U.S. was",
+      after: ".",
+      answers: ["Jay Luo", "Jay Luo."],
+    },
   ];
 
-  const [values, setValues] = useState(["", "", "", ""]);
+  const [answers, setAnswers] = useState(Array(questions.length).fill(""));
   const [errors, setErrors] = useState({});
   const [locked, setLocked] = useState(false);
   const [showed, setShowed] = useState(false);
-  const inputRefs = useRef([]);
 
   const handleChange = (index, value) => {
     if (locked || errors[index] === false) return;
-    // قبول رقم واحد بس
-    if (value.length > 1) return;
-    if (value !== "" && !/^[1-4]$/.test(value)) return;
-
-    const updated = [...values];
+    const updated = [...answers];
     updated[index] = value;
-    setValues(updated);
-
-    // انتقل تلقائي للتالي
-    if (value !== "" && index < images.length - 1) {
-      // ابحث عن أول فراغ فاضي بعده
-      const nextEmpty = updated.findIndex((v, i) => i > index && v === "" && errors[i] !== false);
-      if (nextEmpty !== -1) {
-        inputRefs.current[nextEmpty]?.focus();
-      } else {
-        // انتقل للتالي مباشرة
-        inputRefs.current[index + 1]?.focus();
-      }
-    }
+    setAnswers(updated);
   };
 
   const handleCheck = () => {
     if (locked) return;
-    const isEmpty = values.some((v) => v.trim() === "");
+    const isEmpty = answers.some((a) => a.trim() === "");
     if (isEmpty) {
-      ValidationAlert.info("Please fill in all boxes.");
+      ValidationAlert.info("Please answer all questions.");
       return;
     }
 
     let correctCount = 0;
     const newErrors = {};
 
-    images.forEach((img, i) => {
-      if (values[i] === img.answer) {
+    answers.forEach((ans, i) => {
+      const isCorrect = questions[i].answers.some(
+        (a) => a.toLowerCase() === ans.trim().toLowerCase()
+      );
+      if (isCorrect) {
         correctCount++;
         newErrors[i] = false;
       } else {
@@ -66,7 +58,7 @@ const ComprehensionA = () => {
     });
 
     setErrors(newErrors);
-    const total = images.length;
+    const total = questions.length;
     const color =
       correctCount === total ? "green" : correctCount === 0 ? "red" : "orange";
 
@@ -89,111 +81,95 @@ const ComprehensionA = () => {
   };
 
   const handleShow = () => {
-    setValues(images.map((img) => img.answer));
+    setAnswers(questions.map((q) => q.answers[0]));
     setErrors({});
     setLocked(true);
     setShowed(true);
   };
 
   const handleReset = () => {
-    setValues(["", "", "", ""]);
+    setAnswers(Array(questions.length).fill(""));
     setErrors({});
     setLocked(false);
     setShowed(false);
-    inputRefs.current[0]?.focus();
+  };
+
+  const InputField = ({ index }) => {
+    const isError = errors[index] === true;
+    const isCorrect = errors[index] === false;
+    return (
+      <div className="relative inline-flex items-center">
+        <input
+          type="text"
+          value={answers[index]}
+          onChange={(e) => handleChange(index, e.target.value)}
+          disabled={locked || isCorrect}
+          autoComplete="off"
+          style={{
+            fontSize: "16px",
+            minWidth: "160px",
+            borderBottom: `2px solid ${isError ? "#ef4444" : "#333"}`,
+            background: "transparent",
+            outline: "none",
+            color: showed ? "#ef4444" : "#1a1a1a",
+            padding: "2px 4px",
+          }}
+        />
+        {isError && (
+          <div
+            style={{
+              position: "absolute",
+              right: "-24px",
+              width: "18px",
+              height: "18px",
+              background: "#ef4444",
+              color: "white",
+              borderRadius: "50%",
+              fontSize: "10px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontWeight: "bold",
+              border: "2px solid white",
+              boxShadow: "0 1px 6px rgba(0,0,0,0.2)",
+            }}
+          >
+            ✕
+          </div>
+        )}
+      </div>
+    );
   };
 
   return (
     <div className="mb-6 mx-auto">
       <h5 className="header-title-page8-read mb-8">
         <span className="ex-A-read mr-2">A</span>
-        Number the pictures to show the order for planting a vegetable garden.
+        about the famous people.
       </h5>
 
-      <div className="grid grid-cols-4 gap-4">
-        {images.map((img, i) => {
-          const isError = errors[i] === true;
-          const isCorrect = errors[i] === false;
+      <div className="flex flex-col gap-5">
+        {/* Q1 */}
+        <div className="flex items-end gap-2 flex-wrap">
+          <span style={{ fontWeight: "400", WebkitTextStroke: "1px black", color: "#1a1a1a", fontSize: "16px", minWidth: "18px" }}>1</span>
+          <InputField index={0} />
+          <span style={{ fontSize: "16px", color: "#1a1a1a" }}>{questions[0].after}</span>
+        </div>
 
-          return (
-            <div key={img.id} className="flex flex-col items-center gap-2">
-              {/* Image with input badge */}
-              <div style={{ position: "relative", display: "inline-block" }}>
-                <img
-                  src={img.src}
-                  alt=""
-                  style={{
-                    width: "100%",
-                    height : "auto"
-                  }}
-                />
+        {/* Q2 */}
+        <div className="flex items-end gap-2 flex-wrap">
+          <span style={{ fontWeight: "400", WebkitTextStroke: "1px black", color: "#1a1a1a", fontSize: "16px", minWidth: "18px" }}>2</span>
+          <InputField index={1} />
+          <span style={{ fontSize: "16px", color: "#1a1a1a" }}>{questions[1].after}</span>
+        </div>
 
-                {/* Number Input Badge */}
-                <div
-                  style={{
-                    position: "absolute",
-                    bottom: "8px",
-                    right: "8px",
-                    width: "36px",
-                    height: "36px",
-                    borderRadius: "50%",
-                    background:  "transparent",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  <input
-                    ref={(el) => (inputRefs.current[i] = el)}
-                    type="text"
-                    value={values[i]}
-                    onChange={(e) => handleChange(i, e.target.value)}
-                    disabled={locked || isCorrect}
-                    autoComplete="off"
-                    maxLength={1}
-                    style={{
-                      width: "100%",
-                      height: "100%",
-                      background: "transparent",
-                      border: "none",
-                      outline: "none",
-                      textAlign: "center",
-                      fontSize: "18px",
-                      fontWeight: "bold",
-                      color: "black",
-                      cursor: locked || isCorrect ? "default" : "text",
-                    }}
-                  />
-                </div>
-
-                {/* ❌ Error Badge */}
-                {isError && (
-                  <div
-                    style={{
-                      position: "absolute",
-                      top: "-8px",
-                      right: "-8px",
-                      width: "20px",
-                      height: "20px",
-                      background: "#ef4444",
-                      color: "white",
-                      borderRadius: "50%",
-                      fontSize: "11px",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      fontWeight: "bold",
-                      border: "2px solid white",
-                      boxShadow: "0 1px 6px rgba(0,0,0,0.2)",
-                    }}
-                  >
-                    ✕
-                  </div>
-                )}
-              </div>
-            </div>
-          );
-        })}
+        {/* Q3 */}
+        <div className="flex items-end gap-2 flex-wrap">
+          <span style={{ fontWeight: "400", WebkitTextStroke: "1px black", color: "#1a1a1a", fontSize: "16px", minWidth: "18px" }}>3</span>
+          <span style={{ fontSize: "16px", color: "#1a1a1a" }}>{questions[2].before}</span>
+          <InputField index={2} />
+          <span style={{ fontSize: "16px", color: "#1a1a1a" }}>.</span>
+        </div>
       </div>
 
       {/* Buttons */}

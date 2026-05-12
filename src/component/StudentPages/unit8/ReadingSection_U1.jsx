@@ -1,11 +1,11 @@
 import ComprehensionA from "./ComprehensionA";
 import ComprehensionB from "./ComprehensionB";
 
-import imgReading from "../../../assets/imgs/pages/Class Book/Right 4 Unit 6 Ready for School Folder/Page 47/SVG/SVG/Asset 2.svg";
+import imgReading from "../../../assets/imgs/pages/Class Book//Right 4 Unit 8 I Lived in the Library Folder/Page 65/SVG/Asset 1.svg";
+import img from"../../../assets/imgs/pages/Class Book/Right 4 Unit 8 I Lived in the Library Folder/Page 65/SVG/Asset 2.svg"
 import readingAudio from "../../../assets/audio/ClassBook/Grade 4/cd16pg23-reading-adult-lady_Feoi9jgI.mp3";
 import ReadingSection from "../ReadingSection";
 
-import img from"../../../assets/imgs/pages/Class Book/Right 4 Unit 5 Under the Weather Folder/Page 41/SVG/Asset 2.svg"
 
 const ReadingSection_U1 = () => {
   const paragraphs = [

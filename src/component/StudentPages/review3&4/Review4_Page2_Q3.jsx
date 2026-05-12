@@ -10,29 +10,27 @@ import imgScene from "../../../assets/imgs/pages/Class Book/Right 4 Unit 4 Joy M
 // ─────────────────────────────────────────────
 //  🎨  COLORS
 // ─────────────────────────────────────────────
-const TABLE_BORDER            = "#2195a6";
-const CELL_BG_DEFAULT         = "#ffffff";
-const CELL_TEXT_GIVEN         = "transparent";   // خلايا معطاة — أسود
-const INPUT_ANSWER_COLOR      = "#c81e1e";   // إجابة صح / show answer — أحمر
-const INPUT_TEXT_COLOR        = "#2b2b2b";   // نص أثناء الكتابة
-const INPUT_UNDERLINE_DEFAULT = "transparent";
-const INPUT_UNDERLINE_WRONG   = "#ef4444";
-const WRONG_BADGE_BG          = "#ef4444";
-const WRONG_BADGE_TEXT        = "#ffffff";
-const HEADER_BG               = "#transparent";
+const TABLE_BORDER        = "#2195a6";
+const TEXT_GIVEN          = "#2b2b2b";
+const INPUT_ANSWER_COLOR  = "#c81e1e";
+const INPUT_TEXT_COLOR    = "#2b2b2b";
+const INPUT_UL_DEFAULT    = "transparent";
+const INPUT_UL_WRONG      = "#ef4444";
+const WRONG_BADGE_BG      = "#ef4444";
+const WRONG_BADGE_TEXT    = "#ffffff";
+const HEADER_BG           = "#f3f4f6";
 
 // ─────────────────────────────────────────────
 //  📝  EXERCISE DATA
-//  type: "given" → خلية معطاة (عرضها فقط)
+//  type: "given" → خلية معطاة
 //        "input" → خلية فيها input
 // ─────────────────────────────────────────────
-// كل صف: [col0_base, col1_comparative, col2_superlative]
 const ROWS = [
   {
     id: 1,
     cells: [
       { type: "given", text: "important"       },
-      { type: "input", correct: ["more important"],      answer: "more important"      },
+      { type: "input", correct: ["more important"],  answer: "more important"  },
       { type: "given", text: "most important"  },
     ],
   },
@@ -40,24 +38,24 @@ const ROWS = [
     id: 2,
     cells: [
       { type: "given", text: "careful"         },
-      { type: "input", correct: ["more careful"],        answer: "more careful"        },
-      { type: "input", correct: ["most careful"],        answer: "most careful"        },
+      { type: "input", correct: ["more careful"],    answer: "more careful"    },
+      { type: "input", correct: ["most careful"],    answer: "most careful"    },
     ],
   },
   {
     id: 3,
     cells: [
-      { type: "input", correct: ["dangerous"],           answer: "dangerous"           },
+      { type: "input", correct: ["dangerous"],       answer: "dangerous"       },
       { type: "given", text: "more dangerous"  },
-      { type: "input", correct: ["most dangerous"],      answer: "most dangerous"      },
+      { type: "input", correct: ["most dangerous"],  answer: "most dangerous"  },
     ],
   },
   {
     id: 4,
     cells: [
       { type: "given", text: "valuable"        },
-      { type: "input", correct: ["more valuable"],       answer: "more valuable"       },
-      { type: "input", correct: ["most valuable"],       answer: "most valuable"       },
+      { type: "input", correct: ["more valuable"],   answer: "more valuable"   },
+      { type: "input", correct: ["most valuable"],   answer: "most valuable"   },
     ],
   },
 ];
@@ -122,9 +120,8 @@ export default function WB_ReadWrite_QF() {
     setShowAns(false);
   };
 
-  const isWrongCell = (key, correct) =>
+  const isWrongCell    = (key, correct) =>
     showResults && !showAns && !isCorrect(answers[key] || "", correct);
-
   const isDisabledCell = (key, correct) =>
     showAns || (showResults && isCorrect(answers[key] || "", correct));
 
@@ -138,10 +135,11 @@ export default function WB_ReadWrite_QF() {
           gap: clamp(16px, 2.4vw, 32px);
           align-items: center;
           width: 100%;
+          margin : 10% 0 ;
         }
 
         .rwf-scene-img {
-          width: clamp(120px, 18vw, 240px);
+          width: clamp(130px, 18vw, 240px);
           height: auto;
           display: block;
           flex-shrink: 0;
@@ -162,20 +160,18 @@ export default function WB_ReadWrite_QF() {
           vertical-align: middle;
         }
 
-        /* header row — بدون header معطى بس بنحتاج padding */
         .rwf-table th {
           background: ${HEADER_BG};
           font-size: clamp(12px, 1.4vw, 17px);
           font-weight: 700;
           color: #6b7280;
-          white-space: nowrap;
         }
 
         /* given cell */
         .rwf-given {
           font-size: clamp(13px, 1.55vw, 19px);
           font-weight: 500;
-          color: ${CELL_TEXT_GIVEN};
+          color: ${TEXT_GIVEN};
           line-height: 1.4;
         }
 
@@ -189,7 +185,7 @@ export default function WB_ReadWrite_QF() {
           width: 100%;
           background: transparent;
           border: none;
-          border-bottom: 1px solid ${INPUT_UNDERLINE_DEFAULT};
+          border-bottom: 1px solid ${INPUT_UL_DEFAULT};
           outline: none;
           font-size: clamp(13px, 1.55vw, 19px);
           font-weight: 500;
@@ -200,10 +196,10 @@ export default function WB_ReadWrite_QF() {
           font-family: inherit;
           transition: border-color 0.2s, color 0.2s;
         }
-        .rwf-input:focus        { border-bottom-color: #9ca3af; }
-        .rwf-input:disabled     { opacity: 1; cursor: default; border-bottom-color: transparent; }
-        .rwf-input--wrong       { border-bottom-color: ${INPUT_UNDERLINE_WRONG}; }
-        .rwf-input--answer      { color: ${INPUT_ANSWER_COLOR}; font-size: clamp(14px, 1.7vw, 22px); font-weight: 700; }
+        .rwf-input:focus    { border-bottom-color: #9ca3af; }
+        .rwf-input:disabled { opacity: 1; cursor: default; border-bottom-color: transparent; }
+        .rwf-input--wrong   { border-bottom-color: ${INPUT_UL_WRONG}; }
+        .rwf-input--answer  { color: ${INPUT_ANSWER_COLOR}; font-size: clamp(14px, 1.7vw, 22px); font-weight: 700; }
 
         /* ✕ badge */
         .rwf-badge {
@@ -223,7 +219,6 @@ export default function WB_ReadWrite_QF() {
           z-index: 2;
         }
 
-        /* Buttons */
         .rwf-buttons {
           display: flex;
           justify-content: center;
@@ -263,13 +258,7 @@ export default function WB_ReadWrite_QF() {
 
           {/* الجدول */}
           <table className="rwf-table">
-            <thead>
-              <tr>
-                <th>Base</th>
-                <th>Comparative</th>
-                <th>Superlative</th>
-              </tr>
-            </thead>
+
             <tbody>
               {ROWS.map((row) => (
                 <tr key={row.id}>
@@ -284,12 +273,11 @@ export default function WB_ReadWrite_QF() {
                       );
                     }
 
-                    // input cell
                     const wrong    = isWrongCell(key, cell.correct);
                     const disabled = isDisabledCell(key, cell.correct);
                     const value    = answers[key] || "";
                     const tColor   = showAns ? INPUT_ANSWER_COLOR : INPUT_TEXT_COLOR;
-                    const uColor   = wrong ? INPUT_UNDERLINE_WRONG : INPUT_UNDERLINE_DEFAULT;
+                    const uColor   = wrong ? INPUT_UL_WRONG : INPUT_UL_DEFAULT;
 
                     return (
                       <td key={ci}>
