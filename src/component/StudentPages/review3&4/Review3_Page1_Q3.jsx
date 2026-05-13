@@ -11,7 +11,7 @@ import img3 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 4 Joy Makes
 import img4 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 4 Joy Makes a Friend Folder/Page 34/SVG/Asset 4.svg";
 
 // 🔊 AUDIO
-import sound from "../../../assets/audio/ClassBook/Grade 4/cd5pg8-instruction1-adult-lady_YJxh5Hg5.mp3";
+import sound from "../../../assets/audio/ClassBook/Grade 4/cd25pg34-instruction1-adult-lady_E7S8IYrE.mp3";
 import QuestionAudioPlayer from "../../QuestionAudioPlayer";
 
 // ─────────────────────────────────────────────
@@ -29,13 +29,32 @@ const NUMBER_COLOR     = "#2b2b2b";
 //  📝  EXERCISE DATA
 // ─────────────────────────────────────────────
 const captions = [
-  { start: 0.0,  end: 5.0,  text: "Listen, read, and write check and X." },
-  { start: 5.0,  end: 9.0,  text: "They had a large house." },
-  { start: 9.0,  end: 13.0, text: "She had a white rabbit." },
-  { start: 13.0, end: 17.0, text: "We had a nice breakfast." },
-  { start: 17.0, end: 21.0, text: "He had a colorful scooter." },
+  {
+    start: 0.48,
+    end: 8.70,
+    text: "Page 34, review three, exercise C. Listen, read, and write check and X.",
+  },
+  {
+    start: 8.70,
+    end: 11.08,
+    text: "They had a large house.",
+  },
+  {
+    start: 12.22,
+    end: 14.22,
+    text: "She had a white rabbit.",
+  },
+  {
+    start: 15.40,
+    end: 17.38,
+    text: "We had a nice breakfast.",
+  },
+  {
+    start: 18.48,
+    end: 20.38,
+    text: "He had a colorful scooter.",
+  },
 ];
-
 const ITEMS = [
   {
     id:          1,

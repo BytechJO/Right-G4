@@ -2,7 +2,7 @@ import ComprehensionA from "./ComprehensionA";
 import ComprehensionB from "./ComprehensionB";
 
 import imgReading from "../../../assets/imgs/pages/Class Book/Right 4 Unit 7  The Alligator Scare Folder/Page 59/SVG/000.svg";
-import readingAudio from "../../../assets/audio/ClassBook/Grade 4/cd16pg23-reading-adult-lady_Feoi9jgI.mp3";
+import readingAudio from "../../../assets/audio/ClassBook/Grade 4/cd38pg59-reading-adult-lady_Iy6h4zxg.mp3";
 import ReadingSection from "../ReadingSection";
 
 import img from"../../../assets/imgs/pages/Class Book/Right 4 Unit 5 Under the Weather Folder/Page 41/SVG/Asset 2.svg"
@@ -15,39 +15,64 @@ const ReadingSection_U1 = () => {
 
 const captions = [
   {
-    start: 0.52,
-    end: 2.14,
-    text: "Page 23, Reading.",
+    start: 0.76,
+    end: 10.98,
+    text: "Page 59 reading. Would you like to live in a world that is always covered in ice? What kind of things would you need to live on icy land?",
   },
   {
-    start: 3.82,
-    end: 16.84,
-    text: "Do you have your own room? What does your room look like? Has your room changed? Has your room ever changed? Is it the same as when you were a baby? Is it different? It probably has changed.",
+    start: 10.98,
+    end: 12.86,
+    text: "Is ice nice?",
   },
   {
-    start: 16.84,
-    end: 24.00,
-    text: "When you were small, you had a crib. Your toys were probably different too. You probably have different ones now.",
+    start: 12.86,
+    end: 23.22,
+    text: "From studying rocks, bones, and the Earth's weather, scientists think that there were several times when ice covered lands that are now warmer.",
   },
   {
-    start: 25.02,
-    end: 34.76,
-    text: "Did you have soft toys when you were a baby? Maybe you had a rattle or a mobile. These kinds of toys are fun for babies. What kinds of things do you play with now?",
+    start: 24.24,
+    end: 26.42,
+    text: "They call these times an ice age.",
   },
   {
-    start: 35.86,
-    end: 42.32,
-    text: "Now, you can choose your toys, but when you were little, your parents got your toys. They were probably safe for you.",
+    start: 26.42,
+    end: 32.34,
+    text: "What would it be like to live at a time when the Earth was much colder than it is today?",
   },
   {
-    start: 43.64,
-    end: 52.66,
-    text: "Did you have different colors in your room when you were a baby? Are any of those colors in your room now? Do you share a room or do you have your own room?",
+    start: 33.68,
+    end: 35.92,
+    text: "There would be some interesting animals to see.",
   },
   {
-    start: 53.96,
-    end: 67.20,
-    text: "There are probably many ways your room has changed. Ask your parents or look at old pictures of your room. Find out what you had in your room when you were a baby. Do you remember any of the things?",
+    start: 35.92,
+    end: 48.70,
+    text: "During the most recent ice age, scientists believe there weren't any dinosaurs, but there were probably animals like mammoth elephants, giant sloths, and saber-toothed cats.",
+  },
+  {
+    start: 48.70,
+    end: 52.68,
+    text: "The weather would be colder and different kinds of food would grow.",
+  },
+  {
+    start: 53.78,
+    end: 59.58,
+    text: "People and animals had to be strong to make the changes they needed for the cold weather.",
+  },
+  {
+    start: 59.58,
+    end: 64.74,
+    text: "There were fewer animals because not all of them could stay alive in the cold.",
+  },
+  {
+    start: 64.74,
+    end: 69.82,
+    text: "There was a lot less land because the ice covered so much of it.",
+  },
+  {
+    start: 69.82,
+    end: 74.10,
+    text: "The ice age would have been an unusual time to live in.",
   },
 ];
   return (
@@ -55,11 +80,11 @@ const captions = [
     <div className="flex flex-col items-center">
         <div className="w-[60%]">
       <ReadingSection
-        mainTitle="What would you like to see invented in the future? Do you have an idea for a future invention?"
-        title="Inventions of the Future"
+        mainTitle="Would you like to live in a world that is always  
+covered in ice? What kind of things would you need to 
+live on icy land?"
         image={imgReading}
         image1= {img}
-        question="Do you think new inventions will be good or bad for Earth?"
         sound={readingAudio}
         captions={captions}
         stopAtSecond={2.5}

@@ -2,29 +2,26 @@ import { useState } from "react";
 import ValidationAlert from "../../Popup/ValidationAlert";
 import { FaCheck, FaRedo, FaEye } from "react-icons/fa";
 
-import img1 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 6 Ready for School Folder/Page 48/SVG/Asset 14.svg";
-import img2 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 6 Ready for School Folder/Page 48/SVG/Asset 19.svg";
-
+import img1 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 8 I Lived in the Library Folder/Page 66/SVG/Asset 5.svg";
+import img2 from  "../../../assets/imgs/pages/Class Book/Right 4 Unit 8 I Lived in the Library Folder/Page 66/SVG/Asset 6.svg";
 const GrammarB = () => {
-  const wordBank = ["read a book", "be late for school"];
-
   const questions = [
     {
       id: 1,
       image: img1,
-      phrase: "read a book",
-      answers: ["She should read a book.", "She should read a book"],
+      before: "She brushed",
+      after: "her teeth.",
+      answers: ["her teeth", "her teeth."],
+      // الفراغ بين "brushed" و "her teeth"
+      showInput: "middle",
     },
     {
       id: 2,
       image: img2,
-      phrase: "be late for school",
-      answers: [
-        "She shouldn't be late for school.",
-        "She shouldnt be late for school",
-        "She shouldnot be late for school.",
-        "She should not be late for school",
-      ],
+      before: "It climbed",
+      after: "a tree.",
+      answers: ["a tree", "a tree."],
+      showInput: "middle",
     },
   ];
 
@@ -53,7 +50,7 @@ const GrammarB = () => {
 
     answers.forEach((ans, i) => {
       const isCorrect = questions[i].answers.some(
-        (a) => a.toLowerCase() === ans.trim().toLowerCase(),
+        (a) => a.toLowerCase() === ans.trim().toLowerCase()
       );
       if (isCorrect) {
         correctCount++;
@@ -102,110 +99,91 @@ const GrammarB = () => {
 
   return (
     <div className="mb-6 mx-auto">
-      <h5 className="header-title-page8-read mb-6">
+      <h5 className="header-title-page8-read mb-8">
         <span className="ex-A-read mr-2">B</span>
-        Look, read, and write. Use{" "}
-        <span className="text-[#f89631] font-bold">should</span> and{" "}
-        <span className="text-[#f89631] font-bold">shouldn't</span> and the
-        phrases below.
+        Look and complete.
       </h5>
 
-      {/* Word Bank */}
-      <div
-        className="flex gap-4 flex-wrap mb-8 justify-start"
-        style={{ width: "100% ", gap: "35%" 
-          , marginLeft : "5%"
-         }}
-      >
-        {wordBank.map((word) => (
-          <div
-            key={word}
-            style={{
-              border: "2px solid #e8eff1",
-              borderRadius: "8px",
-              padding: "4px 18px",
-              fontSize: "18px",
-              fontWeight: "500",
-              color: "#1a1a1a",
-              background: "#e8eff1",
-            }}
-          >
-            {word}
-          </div>
-        ))}
-      </div>
-
-      {/* Questions Grid */}
       <div className="grid grid-cols-2 gap-8">
         {questions.map((q, i) => (
-          <div key={q.id} className="flex flex-col items-center gap-4">
+          <div key={q.id} className="flex flex-col gap-4">
             {/* Number */}
-            <div className="w-full" style={{ display: "flex", gap: "0.3em" }}>
-              <span
-                style={{
-                  fontWeight: "400",
-                  WebkitTextStroke: "1px black",
-                  color: "#1a1a1a",
-                  fontSize: "22px",
-                }}
-              >
-                {q.id}
+            <span
+              style={{
+                fontWeight: "400",
+                WebkitTextStroke: "1px black",
+                color: "#1a1a1a",
+                fontSize: "18px",
+              }}
+            >
+              {q.id}
+            </span>
+
+            {/* Image */}
+            <img
+              src={q.image}
+              alt=""
+              style={{
+                width: "50%",
+                height : "auto",
+                objectFit: "cover",
+                marginBottom : "1em"
+              }}
+            />
+
+            {/* Sentence with input */}
+            <div className="flex items-end gap-1 flex-wrap">
+              <span style={{ fontSize: "18px", color: "#1a1a1a" }}>
+                {q.before}
               </span>
-              {/* Image */}
-              <img
-                src={q.image}
-                alt=""
-                style={{
-                  width: "50%",
-                  height: "auto",
-                }}
-              />
-            </div>
 
-            {/* Input */}
-            <div className="relative w-full">
-              <input
-                type="text"
-                value={answers[i]}
-                onChange={(e) => handleChange(i, e.target.value)}
-                disabled={locked || errors[i] === false}
-                autoComplete="off"
-                style={{ fontSize: "18px", marginLeft: "1em" }}
-                className={`w-[50%] border-b-1 bg-transparent outline-none transition disabled:pointer-events-none text-center
-                  ${
-                    errors[i] === true
-                      ? "border-red-500 text-gray-800"
-                      : showed
-                        ? "border-[#333] text-red-500"
-                        : "border-[#333] text-gray-800"
-                  }
-                `}
-              />
-
-              {/* ❌ Error Badge */}
-              {errors[i] === true && (
-                <div
+              <div className="relative inline-flex items-center">
+                <input
+                  type="text"
+                  value={answers[i]}
+                  onChange={(e) => handleChange(i, e.target.value)}
+                  disabled={locked || errors[i] === false}
+                  autoComplete="off"
                   style={{
-                    position: "absolute",
-                    right: "-24px",
-                    top: "0",
-                    width: "20px",
-                    height: "20px",
-                    background: "#ef4444",
-                    color: "white",
-                    borderRadius: "50%",
-                    fontSize: "11px",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    fontWeight: "bold",
-                    border: "2px solid white",
-                    boxShadow: "0 1px 6px rgba(0,0,0,0.2)",
+                    fontSize: "18px",
+                    width: "120px",
+                    borderBottom: `1px solid ${errors[i] === true ? "#ef4444" : "#333"}`,
+                    background: "transparent",
+                    outline: "none",
+                    color: showed ? "#ef4444" : "#1a1a1a",
+                    padding: "2px 4px",
+                    textAlign: "center",
                   }}
-                >
-                  ✕
-                </div>
-              )}
+                />
+
+                {/* ❌ Error Badge */}
+                {errors[i] === true && (
+                  <div
+                    style={{
+                      position: "absolute",
+                      right: "-22px",
+                      width: "18px",
+                      height: "18px",
+                      background: "#ef4444",
+                      color: "white",
+                      borderRadius: "50%",
+                      fontSize: "10px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      fontWeight: "bold",
+                      border: "2px solid white",
+                      boxShadow: "0 1px 6px rgba(0,0,0,0.2)",
+                    }}
+                  >
+                    ✕
+                  </div>
+                )}
+              </div>
+
+              <span style={{ fontSize: "18px", color: "#1a1a1a" }}>
+                {q.after}
+              </span>
             </div>
           </div>
         ))}

@@ -6,7 +6,7 @@ import ValidationAlert from "../../Popup/ValidationAlert";
 //  🖼️  IMAGE + 🔊 AUDIO
 // ─────────────────────────────────────────────
 import imgScene from "../../../assets/imgs/pages/Class Book/Right 4 Unit 6 Ready for School Folder/Page 51/SVG/Asset 1.svg";
-import sound    from "../../../assets/audio/ClassBook/Grade 4/cd1pg4-conversation-adult-lady-t_1cApuaJF.mp3";
+import sound    from "../../../assets/audio/ClassBook/Grade 4/cd35pg51-instruction1-adult-lady_kVi5vPgK.mp3";
 import QuestionAudioPlayer from "../../QuestionAudioPlayer";
 
 // ─────────────────────────────────────────────
@@ -24,16 +24,42 @@ const WRONG_BADGE_TEXT        = "#ffffff";
 //  📝  AUDIO CAPTIONS
 // ─────────────────────────────────────────────
 const captions = [
-  { start: 0.0,  end: 5.0,  text: "Listen, read, and complete the story." },
-  { start: 5.0,  end: 10.0, text: "Thomas is going on a camping trip tomorrow." },
-  { start: 10.0, end: 18.0, text: "He should take his sleeping bag and tent, so he'll be comfortable when he sleeps." },
-  { start: 18.0, end: 26.0, text: "He should also take his boots for hiking in the woods." },
-  { start: 26.0, end: 34.0, text: "Thomas should be careful when starting a campfire, and he shouldn't leave a fire unattended." },
-  { start: 34.0, end: 43.0, text: "He shouldn't leave food out as bears sometimes walk around in the woods looking for food." },
-  { start: 43.0, end: 52.0, text: "He shouldn't leave any trash or litter on the ground." },
-  { start: 52.0, end: 58.0, text: "It can get very dark at night, so he should be sure to bring a flashlight." },
+  {
+    start: 0.08,
+    end: 6.88,
+    text: "Page 51, Write Activities, Exercise D. Listen, read, and complete the story.",
+  },
+  {
+    start: 6.88,
+    end: 9.78,
+    text: "Thomas is going on a camping trip tomorrow.",
+  },
+  {
+    start: 9.78,
+    end: 15.20,
+    text: "He will take his sleeping bag and tent, so he'll be comfortable when he sleeps.",
+  },
+  {
+    start: 16.30,
+    end: 19.20,
+    text: "He will also take his boots for hiking in the woods.",
+  },
+  {
+    start: 19.20,
+    end: 24.88,
+    text: "Thomas will be careful when starting a campfire, and he won't leave a fire unattended.",
+  },
+  {
+    start: 25.94,
+    end: 34.60,
+    text: "He won't leave food out, as bears sometimes walk around in the woods looking for food. He won't leave any trash or litter on the ground.",
+  },
+  {
+    start: 34.60,
+    end: 39.38,
+    text: "It can get very dark at night, so he will be sure to bring a flashlight.",
+  },
 ];
-
 // ─────────────────────────────────────────────
 //  📝  LINES DATA
 //  كل سطر: مصفوفة من parts
@@ -316,7 +342,7 @@ top : 5em ;
 
         {/* ── Audio ── */}
         <div style={{ marginTop: "4px" }}>
-          <QuestionAudioPlayer src={sound} captions={captions} stopAtSecond={5} />
+          <QuestionAudioPlayer src={sound} captions={captions} stopAtSecond={6.88} />
         </div>
 
         {/* ── Top: lines + image ── */}

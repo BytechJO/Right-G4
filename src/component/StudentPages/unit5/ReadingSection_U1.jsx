@@ -2,7 +2,7 @@ import ComprehensionA from "./ComprehensionA";
 import ComprehensionB from "./ComprehensionB";
 
 import imgReading from "../../../assets/imgs/pages/Class Book/Right 4 Unit 5 Under the Weather Folder/Page 41/SVG/Asset 1.svg";
-import readingAudio from "../../../assets/audio/ClassBook/Grade 4/cd16pg23-reading-adult-lady_Feoi9jgI.mp3";
+import readingAudio from "../../../assets/audio/ClassBook/Grade 4/cd28pg41-reading-adult-lady_j9OdSKOC.mp3";
 import ReadingSection from "../ReadingSection";
 
 import img from"../../../assets/imgs/pages/Class Book/Right 4 Unit 5 Under the Weather Folder/Page 41/SVG/Asset 2.svg"
@@ -15,39 +15,69 @@ const ReadingSection_U1 = () => {
 
 const captions = [
   {
-    start: 0.52,
-    end: 2.14,
-    text: "Page 23, Reading.",
+    start: 0.34,
+    end: 8.28,
+    text: "Page 42, Reading. Would you like to live in space? Would living in space be different from living on Earth?",
   },
   {
-    start: 3.82,
-    end: 16.84,
-    text: "Do you have your own room? What does your room look like? Has your room changed? Has your room ever changed? Is it the same as when you were a baby? Is it different? It probably has changed.",
+    start: 8.28,
+    end: 10.60,
+    text: "This station isn't for TV.",
   },
   {
-    start: 16.84,
-    end: 24.00,
-    text: "When you were small, you had a crib. Your toys were probably different too. You probably have different ones now.",
+    start: 12.18,
+    end: 14.44,
+    text: "Did you know that some people live in space?",
   },
   {
-    start: 25.02,
-    end: 34.76,
-    text: "Did you have soft toys when you were a baby? Maybe you had a rattle or a mobile. These kinds of toys are fun for babies. What kinds of things do you play with now?",
+    start: 14.44,
+    end: 22.66,
+    text: "Scientists want to study people living in space, so they ask astronauts to stay at space stations for a year or longer.",
   },
   {
-    start: 35.86,
-    end: 42.32,
-    text: "Now, you can choose your toys, but when you were little, your parents got your toys. They were probably safe for you.",
+    start: 22.66,
+    end: 27.10,
+    text: "The astronauts study about space and about the planets.",
   },
   {
-    start: 43.64,
-    end: 52.66,
-    text: "Did you have different colors in your room when you were a baby? Are any of those colors in your room now? Do you share a room or do you have your own room?",
+    start: 27.10,
+    end: 33.90,
+    text: "They must learn how to eat without a plate and sleep without a bed because everything floats in space.",
   },
   {
-    start: 53.96,
-    end: 67.20,
-    text: "There are probably many ways your room has changed. Ask your parents or look at old pictures of your room. Find out what you had in your room when you were a baby. Do you remember any of the things?",
+    start: 33.90,
+    end: 41.40,
+    text: "Sometimes they can go for a walk outside the space station, but they are actually going for a float.",
+  },
+  {
+    start: 41.40,
+    end: 44.82,
+    text: "They must wear special suits and carry their own air.",
+  },
+  {
+    start: 44.82,
+    end: 48.44,
+    text: "Life in space is very different from life on Earth.",
+  },
+  {
+    start: 48.44,
+    end: 55.50,
+    text: "There is an International Space Station that has had people in it for many years.",
+  },
+  {
+    start: 55.50,
+    end: 62.50,
+    text: "Astronauts from the USA, Russia, Europe, and Japan have lived on this space station.",
+  },
+  {
+    start: 64.44,
+    end: 71.76,
+    text: "It is about the same size as an American football field, and it has had over two hundred people visit it.",
+  },
+  {
+    start: 71.76,
+    end: 75.80,
+    text: "There is even a travel agency that offers trips to a space station.",
   },
 ];
   return (
@@ -62,7 +92,7 @@ be different from living on Earth? "
         image1= {img}
         sound={readingAudio}
         captions={captions}
-        stopAtSecond={2.5}
+        stopAtSecond={8.28}
       />
 
  </div>

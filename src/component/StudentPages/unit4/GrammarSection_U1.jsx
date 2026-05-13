@@ -5,38 +5,43 @@ import GrammarC from "./GrammarC";
 import image1 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 4 Joy Makes a Friend Folder/Page 30/SVG/Asset 6.svg";
 import image  from "../../../assets/imgs/pages/Class Book/Right 4 Unit 4 Joy Makes a Friend Folder/Page 30/SVG/Asset 5.svg";
 
-import sound from "../../../assets/audio/ClassBook/Grade 4/cd17pg24-grammar-adult-lady_DyQEJqoO.mp3";
+import sound from "../../../assets/audio/ClassBook/Grade 4/cd17pg30-grammar-adult-lady_uUfxR03M.mp3";
 import QuestionAudioPlayer from "../../QuestionAudioPlayer";
 import SectionBanner from "../SectionBanner";
 const GrammarSection_U1 = () => {
 const captions = [
   {
-    start: 0.80,
-    end: 2.78,
-    text: "Page 24. Grammar.",
+    start: 0.16,
+    end: 1.84,
+    text: "Page 30. Grammar.",
   },
   {
-    start: 2.78,
-    end: 4.96,
-    text: "Past of have.",
+    start: 1.84,
+    end: 8.84,
+    text: "Comparatives and superlative with one syllable and some two-syllable adjectives.",
   },
   {
-    start: 4.96,
-    end: 8.72,
-    text: "She had a bike. Did she have a kitten?",
+    start: 8.84,
+    end: 12.68,
+    text: "Angela is shorter than Tony. Molly is the tallest.",
   },
   {
-    start: 8.72,
-    end: 13.42,
-    text: "She did not have a kitten. Why did she have a kitten?",
+    start: 12.68,
+    end: 17.60,
+    text: "Comparatives and superlatives with multi-syllable adjectives.",
   },
   {
-    start: 13.42,
-    end: 18.06,
-    text: "I did not have books. What did she have?",
+    start: 17.60,
+    end: 20.50,
+    text: "Angela is more careful than Tony.",
+  },
+  {
+    start: 20.50,
+    end: 22.80,
+    text: "Molly is the most careful.",
   },
 ];
-const stopAtSecond = 2.8;
+const stopAtSecond = 1.9;
  return (
     <div className="flex flex-col items-center ">
       <div className="w-[60%] mx-auto">

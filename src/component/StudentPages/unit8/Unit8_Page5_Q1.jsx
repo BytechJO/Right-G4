@@ -1,229 +1,391 @@
-/* eslint-disable no-unused-vars */
-import React, { useState, useRef, useEffect } from "react";
-import "./Unit8_Page5_Q1.css";
+import React, { useState } from "react";
+import Button from "../../Button";
 import ValidationAlert from "../../Popup/ValidationAlert";
-import img1 from "../../../assets/imgs/pages/classbook/Right 3 Unit 8 At Our Grandparents Farm Folder/Page 68/Ex A 1.svg";
-import img2 from "../../../assets/imgs/pages/classbook/Right 3 Unit 8 At Our Grandparents Farm Folder/Page 68/Ex A 2.svg";
-import img3 from "../../../assets/imgs/pages/classbook/Right 3 Unit 8 At Our Grandparents Farm Folder/Page 68/Ex A 3.svg";
-import img4 from "../../../assets/imgs/pages/classbook/Right 3 Unit 8 At Our Grandparents Farm Folder/Page 68/Ex A 4.svg";
-import img5 from "../../../assets/imgs/pages/classbook/Right 3 Unit 8 At Our Grandparents Farm Folder/Page 68/Ex A 5.svg";
-import img6 from "../../../assets/imgs/pages/classbook/Right 3 Unit 8 At Our Grandparents Farm Folder/Page 68/Ex A 6.svg";
-import img7 from "../../../assets/imgs/pages/classbook/Right 3 Unit 8 At Our Grandparents Farm Folder/Page 68/Ex A 7.svg";
-import img8 from "../../../assets/imgs/pages/classbook/Right 3 Unit 8 At Our Grandparents Farm Folder/Page 68/Ex A 8.svg";
 
-const Unit8_Page5_Q1 = () => {
-  const [locked, setLocked] = useState(false);
+// ─────────────────────────────────────────────
+//  🎨  COLORS
+// ─────────────────────────────────────────────
+const TEXT_COLOR              = "#2b2b2b";
+const NUMBER_COLOR            = "#2b2b2b";
+const OPTION_LABEL_CLR        = "#2b2b2b";
+const CIRCLE_SELECTED         = "#2195a6";
+const CIRCLE_WRONG            = "#ef4444";
+const CIRCLE_CORRECT          = "#2195a6";
+const INPUT_UNDERLINE_DEFAULT = "#3f3f3f";
+const INPUT_UNDERLINE_WRONG   = "#ef4444";
+const INPUT_TEXT_COLOR        = "#2b2b2b";
+const INPUT_ANSWER_COLOR      = "#c81e1e";
+const WRONG_BADGE_BG          = "#ef4444";
+const WRONG_BADGE_TEXT        = "#ffffff";
 
-  const questions = [
-    {
-      id: 1,
-      image1: img1,
-      image2: img2,
-      correct: "✓",
-    },
-    { id: 2, image1: img3, image2: img4, correct: "✓" },
-    {
-      id: 3,
-      image1: img5,
-      image2: img6,
-      correct: "✗",
-    },
-    { id: 4, image1: img7, image2: img8, correct: "✗" },
-  ];
+// ─────────────────────────────────────────────
+//  📝  EXERCISE DATA
+// ─────────────────────────────────────────────
+const ITEMS = [
+  {
+    id:      1,
+    before:  "They are playing",
+    after:   "at the beach.",
+    correct: "b",
+    answer:  "volleyball",
+    options: [
+      { label: "a", text: "garden"     },
+      { label: "b", text: "volleyball" },
+      { label: "c", text: "library"    },
+    ],
+  },
+  {
+    id:      2,
+    before:  "He has many plants in his",
+    after:   ".",
+    correct: "a",
+    answer:  "garden",
+    options: [
+      { label: "a", text: "garden"   },
+      { label: "b", text: "baseball" },
+      { label: "c", text: "library"  },
+    ],
+  },
+  {
+    id:      3,
+    before:  "The cars were very fast in the",
+    after:   ".",
+    correct: "c",
+    answer:  "car race",
+    options: [
+      { label: "a", text: "baseball" },
+      { label: "b", text: "museum"   },
+      { label: "c", text: "car race" },
+    ],
+  },
+  // ── أضف المزيد هون لو في أسئلة إضافية ──
+];
 
-  const [answers, setAnswers] = useState({});
-  const [showResult, setShowResult] = useState([]);
+// ─────────────────────────────────────────────
+//  🔧  NORMALIZE
+// ─────────────────────────────────────────────
+const normalize = (str) =>
+  str.toLowerCase().replace(/[^a-z0-9\s]/g, "").replace(/\s+/g, " ").trim();
 
-  const selectAnswer = (id, value) => {
-    if (locked) return;
-    setAnswers({ ...answers, [id]: value });
-    setShowResult(false);
+// ─────────────────────────────────────────────
+//  COMPONENT
+// ─────────────────────────────────────────────
+export default function WB_ReadChooseWrite_QA() {
+  const [selected,    setSelected]    = useState({});
+  const [written,     setWritten]     = useState({});
+  const [showResults, setShowResults] = useState(false);
+  const [showAns,     setShowAns]     = useState(false);
+
+  const isLocked = showResults || showAns;
+
+  const handleSelect = (id, label) => {
+    if (isLocked) return;
+    setSelected((prev) => ({ ...prev, [id]: label }));
   };
 
-  const showAnswers = () => {
-    const corrects = {};
-    questions.forEach((q) => {
-      corrects[q.id] = q.correct;
-    });
-    setAnswers(corrects);
-    setShowResult([]);
-    setLocked(true);
+  const handleWrite = (id, value, answer) => {
+    if (showAns) return;
+    if (showResults && normalize(written[id] || "") === normalize(answer)) return;
+    setWritten((prev) => ({ ...prev, [id]: value }));
   };
 
-  const checkAnswers = () => {
-    if (locked) return;
-    const isEmpty = questions.some((q) => !answers[q.id]);
-    if (isEmpty) {
-      ValidationAlert.info("Please choose ✓ or ✗ for all questions!");
+  const handleCheck = () => {
+    if (isLocked) return;
+    const allCircled = ITEMS.every((item) => selected[item.id]);
+    const allWritten = ITEMS.every((item) => written[item.id]?.trim());
+    if (!allCircled || !allWritten) {
+      ValidationAlert.info("Please choose and write an answer for each question.");
       return;
     }
-
-    const results = questions.map((q) =>
-      answers[q.id] === q.correct ? "correct" : "wrong",
-    );
-    setShowResult(results);
-    setLocked(true);
-
-    const correctCount = results.filter((r) => r === "correct").length;
-    const total = questions.length;
-    const scoreMsg = `${correctCount} / ${total}`;
-
-    let color =
-      correctCount === total ? "green" : correctCount === 0 ? "red" : "orange";
-
-    const resultHTML = `
-      <div style="font-size: 20px; text-align:center; margin-top: 8px;">
-        <span style="color:${color}; font-weight:bold;">
-          Score: ${scoreMsg}
-        </span>
-      </div>
-    `;
-
-    if (correctCount === total) ValidationAlert.success(resultHTML);
-    else if (correctCount === 0) ValidationAlert.error(resultHTML);
-    else ValidationAlert.warning(resultHTML);
+    let score = 0;
+    const total = ITEMS.length * 2;
+    ITEMS.forEach((item) => {
+      if (selected[item.id] === item.correct)                           score++;
+      if (normalize(written[item.id] || "") === normalize(item.answer)) score++;
+    });
+    setShowResults(true);
+    if (score === total)   ValidationAlert.success(`Score: ${score} / ${total}`);
+    else if (score > 0)    ValidationAlert.warning(`Score: ${score} / ${total}`);
+    else                   ValidationAlert.error(`Score: ${score} / ${total}`);
   };
 
-  const resetAnswers = () => {
-    setAnswers({});
-    setShowResult([]);
-    setLocked(false);
+  const handleShowAnswer = () => {
+    const filledSel = {};
+    const filledWr  = {};
+    ITEMS.forEach((item) => {
+      filledSel[item.id] = item.correct;
+      filledWr[item.id]  = item.answer;
+    });
+    setSelected(filledSel);
+    setWritten(filledWr);
+    setShowResults(false);
+    setShowAns(true);
   };
+
+  const handleReset = () => {
+    setSelected({});
+    setWritten({});
+    setShowResults(false);
+    setShowAns(false);
+  };
+
+  const getOptionState = (item, label) => {
+    const sel = selected[item.id];
+    if (sel !== label) return "idle";
+    if (showAns)       return "correct";
+    if (showResults)   return label === item.correct ? "correct" : "wrong";
+    return "selected";
+  };
+
+  const isWriteWrong    = (item) =>
+    showResults && !showAns && normalize(written[item.id] || "") !== normalize(item.answer);
+  const isWriteDisabled = (item) =>
+    showAns || (showResults && normalize(written[item.id] || "") === normalize(item.answer));
 
   return (
-    <>
+    <div className="main-container-component">
+      <style>{`
+        .rcwa-list {
+          display: flex;
+          flex-direction: column;
+          gap: clamp(16px, 2.4vw, 30px);
+          width: 100%;
+                    margin : 10% 0 ;
+
+        }
+
+        .rcwa-item {
+          display: flex;
+          flex-direction: column;
+          gap: clamp(4px, 0.5vw, 7px);
+        }
+
+        /* Sentence row */
+        .rcwa-sentence {
+          display: flex;
+          align-items: flex-end;
+          flex-wrap: wrap;
+          gap: clamp(4px, 0.5vw, 7px);
+        }
+
+        .rcwa-num {
+          font-size: clamp(14px, 1.7vw, 20px);
+          font-weight: 700;
+          color: ${NUMBER_COLOR};
+          flex-shrink: 0;
+          line-height: 1.5;
+        }
+
+        .rcwa-text {
+          font-size: clamp(13px, 1.6vw, 19px);
+          color: ${TEXT_COLOR};
+          line-height: 1.5;
+          white-space: nowrap;
+        }
+
+        /* Input inline */
+        .rcwa-input-wrap {
+          position: relative;
+          flex: 0 1 clamp(90px, 11vw, 170px);
+          min-width: clamp(80px, 10vw, 150px);
+        }
+
+        .rcwa-input {
+          width: 100%;
+          background: transparent;
+          border: none;
+          border-bottom: 1px solid ${INPUT_UNDERLINE_DEFAULT};
+          outline: none;
+          font-size: clamp(13px, 1.6vw, 19px);
+          color: ${INPUT_TEXT_COLOR};
+          line-height: 1.5;
+          box-sizing: border-box;
+          font-family: inherit;
+          transition: border-color 0.2s;
+          text-align: center;
+        }
+        .rcwa-input:disabled  { opacity: 1; cursor: default; }
+        .rcwa-input--wrong    { border-bottom-color: ${INPUT_UNDERLINE_WRONG}; }
+        .rcwa-input--answer   { color: ${INPUT_ANSWER_COLOR}; font-weight: 700; }
+
+        .rcwa-input-badge {
+          position: absolute;
+          top: -8px; right: 0;
+          width: clamp(16px, 1.8vw, 20px);
+          height: clamp(16px, 1.8vw, 20px);
+          border-radius: 50%;
+          background: ${WRONG_BADGE_BG};
+          color: ${WRONG_BADGE_TEXT};
+          display: flex; align-items: center; justify-content: center;
+          font-size: clamp(8px, 0.9vw, 11px);
+          font-weight: 700;
+          border: 2px solid #fff;
+          box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+          pointer-events: none;
+          z-index: 2;
+        }
+
+        /* Options row — 3 options */
+        .rcwa-options {
+          display: flex;
+          align-items: center;
+          flex-wrap: wrap;
+          gap: clamp(10px, 1.6vw, 22px);
+          padding-left: clamp(20px, 2.6vw, 32px);
+        }
+
+        /* Single option: oval border */
+        .rcwa-option {
+          position: relative;
+          display: flex;
+          align-items: center;
+          gap: clamp(3px, 0.4vw, 5px);
+          cursor: pointer;
+          user-select: none;
+          border: 2px solid transparent;
+          border-radius: 999px;
+          padding: clamp(2px, 0.3vw, 5px) clamp(10px, 1.2vw, 16px);
+          transition: border-color 0.15s;
+          white-space: nowrap;
+        }
+        .rcwa-option--locked   { cursor: default; }
+        .rcwa-option--selected { border-color: ${CIRCLE_SELECTED}; }
+        .rcwa-option--correct  { border-color: ${CIRCLE_CORRECT};  }
+        .rcwa-option--wrong    { border-color: ${CIRCLE_WRONG};    }
+
+        .rcwa-option-badge {
+          position: absolute;
+          top: -7px; right: -7px;
+          width: clamp(13px, 1.5vw, 16px);
+          height: clamp(13px, 1.5vw, 16px);
+          border-radius: 50%;
+          background: ${WRONG_BADGE_BG};
+          color: ${WRONG_BADGE_TEXT};
+          display: flex; align-items: center; justify-content: center;
+          font-size: clamp(6px, 0.7vw, 9px);
+          font-weight: 700;
+          border: 2px solid #fff;
+          box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+          pointer-events: none;
+          z-index: 2;
+        }
+
+        .rcwa-option-label {
+          font-size: clamp(12px, 1.4vw, 17px);
+          color: ${OPTION_LABEL_CLR};
+          font-weight: 700;
+          line-height: 1;
+        }
+
+        .rcwa-option-text {
+          font-size: clamp(13px, 1.6vw, 19px);
+          color: ${TEXT_COLOR};
+          line-height: 1;
+        }
+
+        .rcwa-buttons {
+          display: flex;
+          justify-content: center;
+          margin-top: clamp(8px, 1.6vw, 18px);
+        }
+      `}</style>
+
       <div
-        className="u8p5-wrapper"
+        className="div-forall"
         style={{
           display: "flex",
           flexDirection: "column",
-          justifyContent: "center",
-          alignItems: "center",
-          padding: "30px",
+          gap: "clamp(14px, 2vw, 22px)",
+          maxWidth: "1100px",
+          margin: "0 auto",
         }}
       >
-        <div
-          className="div-forall"
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            gap: "30px",
-            width: "60%",
-            justifyContent: "flex-start",
-          }}
+        {/* ── Header ── */}
+        <h1
+          className="WB-header-title-page8"
+          style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
         >
-          <h5 className="header-title-page8">
-            <span className="ex-A" style={{ marginRight: "10px" }}>
-              A
-            </span>{" "}
-            <span style={{ color: "#2e3192" }}>1</span> Do they both have the
-            same <span style={{ color: "#2e3192" }}>consonant blend</span>?
-            Write <span style={{ color: "#D52328" }}>✓</span> or{" "}
-            <span style={{ color: "#D52328" }}>✗</span>.
-          </h5>
+          <span className="WB-ex-A-1">A</span>
+          Read, choose, and write.
+        </h1>
 
-          <div className="grid grid-cols-4 gap-[30px] mt-5 u8p5-grid">
-            {questions.map((q, index) => (
-              <div
-                key={q.id}
-                className="u8p5-card p-4 bg-white flex flex-col items-center gap-3 relative"
-              >
-                {/* رقم السؤال */}
-                <p className="w-full text-left text-[20px] u8p5-card-num">
-                  <span className="text-[darkblue] font-bold">{q.id}.</span>
-                </p>
+        {/* ── Items ── */}
+        <div className="rcwa-list">
+          {ITEMS.map((item) => {
+            const writeWrong    = isWriteWrong(item);
+            const writeDisabled = isWriteDisabled(item);
+            const writeValue    = written[item.id] || "";
+            const writeTColor   = showAns ? INPUT_ANSWER_COLOR : INPUT_TEXT_COLOR;
+            const writeUColor   = writeWrong ? INPUT_UNDERLINE_WRONG : INPUT_UNDERLINE_DEFAULT;
 
-                <div className="flex flex-col items-center gap-3.5">
-                  {/* الصور */}
-                  <div className="u8p5-images-box border-2 border-[#ff6b57] rounded-xl p-4 w-[200px]">
-                    <div className="flex">
-                      {/* الديف الأول */}
-                      <div className="u8p5-img-cell w-1/2 border-r-2 border-[#ff6b57] flex items-center justify-center h-[150px]">
-                        <img
-                          src={q.image1}
-                          alt=""
-                          style={{ height: "120px", objectFit: "contain" }}
-                        />
-                      </div>
+            return (
+              <div key={item.id} className="rcwa-item">
 
-                      {/* الديف الثاني */}
-                      <div className="u8p5-img-cell w-1/2 flex items-center justify-center h-[150px]">
-                        <img
-                          src={q.image2}
-                          alt=""
-                          style={{ height: "120px", objectFit: "contain" }}
-                        />
-                      </div>
-                    </div>
+                {/* Sentence + inline input */}
+                <div className="rcwa-sentence">
+                  <span className="rcwa-num">{item.id}</span>
+                  {item.before && <span className="rcwa-text">{item.before}</span>}
+
+                  <div className="rcwa-input-wrap">
+                    <input
+                      type="text"
+                      className={[
+                        "rcwa-input",
+                        writeWrong ? "rcwa-input--wrong"  : "",
+                        showAns    ? "rcwa-input--answer" : "",
+                      ].filter(Boolean).join(" ")}
+                      value={writeValue}
+                      disabled={writeDisabled}
+                      onChange={(e) => handleWrite(item.id, e.target.value, item.answer)}
+                      style={{ borderBottomColor: writeUColor, color: writeTColor }}
+                      spellCheck={false}
+                      autoComplete="off"
+                    />
+                    {writeWrong && <div className="rcwa-input-badge">✕</div>}
                   </div>
 
-                  {/* الخيارات */}
-                  <div className="u8p5-opts-row flex gap-5">
-                    {/* ✓ */}
-                    <div className="relative">
-                      <div
-                        className={`u8p5-opt-btn w-[45px] h-[45px] border-2 border-[#ff6b57] rounded-md flex items-center justify-center cursor-pointer text-[22px] font-bold transition-all duration-150 hover:bg-[#ffe3df] ${
-                          answers[q.id] === "✓"
-                            ? "bg-[#2c5287] text-white"
-                            : "bg-white"
-                        }`}
-                        onClick={() => selectAnswer(q.id, "✓")}
-                      >
-                        ✓
-                      </div>
-
-                      {showResult[index] === "wrong" &&
-                        answers[q.id] === "✓" && (
-                          <div className="u8p5-wrong-badge absolute -top-2.5 -right-2.5 w-[22px] h-[22px] rounded-full bg-red-500 text-white flex items-center justify-center text-[14px] font-bold border-2 border-white z-3">
-                            ✕
-                          </div>
-                        )}
-                    </div>
-
-                    {/* ✗ */}
-                    <div className="relative">
-                      <div
-                        className={`u8p5-opt-btn w-[45px] h-[45px] border-2 border-[#ff6b57] rounded-md flex items-center justify-center cursor-pointer text-[22px] font-bold transition-all duration-150 ${
-                          answers[q.id] === "✗"
-                            ? "bg-[#2c5287] text-white"
-                            : "bg-white hover:bg-[#ffe3df]"
-                        }`}
-                        onClick={() => selectAnswer(q.id, "✗")}
-                      >
-                        ✗
-                      </div>
-
-                      {showResult[index] === "wrong" &&
-                        answers[q.id] === "✗" && (
-                          <div className="u8p5-wrong-badge absolute -top-2.5 -right-2.5 w-[22px] h-[22px] rounded-full bg-red-500 text-white flex items-center justify-center text-[14px] font-bold border-2 border-white z-3">
-                            ✕
-                          </div>
-                        )}
-                    </div>
-                  </div>
+                  {item.after && <span className="rcwa-text">{item.after}</span>}
                 </div>
-              </div>
-            ))}
-          </div>
 
-          <div className="action-buttons-container">
-            <button onClick={resetAnswers} className="try-again-button">
-              Start Again ↻
-            </button>
-            <button
-              onClick={showAnswers}
-              className="show-answer-btn swal-continue"
-            >
-              Show Answer
-            </button>
-            <button onClick={checkAnswers} className="check-button2">
-              Check Answer ✓
-            </button>
-          </div>
+                {/* 3 options */}
+                <div className="rcwa-options">
+                  {item.options.map((opt) => {
+                    const state   = getOptionState(item, opt.label);
+                    const isWrong = state === "wrong";
+                    return (
+                      <div
+                        key={opt.label}
+                        className={[
+                          "rcwa-option",
+                          state === "selected" ? "rcwa-option--selected" : "",
+                          state === "correct"  ? "rcwa-option--correct"  : "",
+                          state === "wrong"    ? "rcwa-option--wrong"    : "",
+                          isLocked             ? "rcwa-option--locked"   : "",
+                        ].filter(Boolean).join(" ")}
+                        onClick={() => handleSelect(item.id, opt.label)}
+                      >
+                        <span className="rcwa-option-label">{opt.label}</span>
+                        <span className="rcwa-option-text">{opt.text}</span>
+                        {isWrong && <div className="rcwa-option-badge">✕</div>}
+                      </div>
+                    );
+                  })}
+                </div>
+
+              </div>
+            );
+          })}
+        </div>
+
+        {/* ── Buttons ── */}
+        <div className="rcwa-buttons">
+          <Button
+            checkAnswers={handleCheck}
+            handleShowAnswer={handleShowAnswer}
+            handleStartAgain={handleReset}
+          />
         </div>
       </div>
-    </>
+    </div>
   );
-};
-
-export default Unit8_Page5_Q1;
+}

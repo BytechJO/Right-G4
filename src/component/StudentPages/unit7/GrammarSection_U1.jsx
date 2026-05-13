@@ -5,38 +5,58 @@ import GrammarC from "./GrammarC";
 import image1 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 6 Ready for School Folder/Page 48/SVG/Asset 22.svg";
 import image  from "../../../assets/imgs/pages/Class Book/Right 4 Unit 7  The Alligator Scare Folder/Page 60/SVG/Asset 7.svg";
 
-import sound from "../../../assets/audio/ClassBook/Grade 4/cd17pg24-grammar-adult-lady_DyQEJqoO.mp3";
+import sound from "../../../assets/audio/ClassBook/Grade 4/cd39pg60-grammar-adult-lady_yKkL6wML.mp3";
 import QuestionAudioPlayer from "../../QuestionAudioPlayer";
 import SectionBanner from "../SectionBanner";
 const GrammarSection_U1 = () => {
 const captions = [
   {
-    start: 0.80,
-    end: 2.78,
-    text: "Page 24. Grammar.",
+    start: 0.28,
+    end: 2.14,
+    text: "Page 60. Grammar.",
   },
   {
-    start: 2.78,
-    end: 4.96,
-    text: "Past of have.",
+    start: 2.14,
+    end: 5.68,
+    text: "There was and there were.",
   },
   {
-    start: 4.96,
-    end: 8.72,
-    text: "She had a bike. Did she have a kitten?",
+    start: 6.90,
+    end: 12.36,
+    text: "There was bread. There was cheese. There wasn't meat.",
   },
   {
-    start: 8.72,
-    end: 13.42,
-    text: "She did not have a kitten. Why did she have a kitten?",
+    start: 12.36,
+    end: 18.94,
+    text: "There were nuts. There were cakes. There weren't bananas.",
   },
   {
-    start: 13.42,
-    end: 18.06,
-    text: "I did not have books. What did she have?",
+    start: 18.94,
+    end: 23.46,
+    text: "There was and there were. In questions.",
+  },
+  {
+    start: 23.46,
+    end: 25.28,
+    text: "Was there any milk?",
+  },
+  {
+    start: 25.28,
+    end: 27.84,
+    text: "Was there any cheese?",
+  },
+  {
+    start: 27.84,
+    end: 30.06,
+    text: "Were there any cookies?",
+  },
+  {
+    start: 31.16,
+    end: 33.06,
+    text: "Were there any bananas?",
   },
 ];
-const stopAtSecond = 2.8;
+const stopAtSecond = 2.14;
  return (
     <div className="flex flex-col items-center ">
       <div className="w-[60%] mx-auto">

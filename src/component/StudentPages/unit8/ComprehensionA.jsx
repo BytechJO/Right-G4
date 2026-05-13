@@ -106,9 +106,9 @@ const ComprehensionA = () => {
           disabled={locked || isCorrect}
           autoComplete="off"
           style={{
-            fontSize: "16px",
+            fontSize: "18px",
             minWidth: "160px",
-            borderBottom: `2px solid ${isError ? "#ef4444" : "#333"}`,
+            borderBottom: `1px solid ${isError ? "#ef4444" : "#333"}`,
             background: "transparent",
             outline: "none",
             color: showed ? "#ef4444" : "#1a1a1a",
@@ -153,22 +153,22 @@ const ComprehensionA = () => {
         <div className="flex items-end gap-2 flex-wrap">
           <span style={{ fontWeight: "400", WebkitTextStroke: "1px black", color: "#1a1a1a", fontSize: "16px", minWidth: "18px" }}>1</span>
           <InputField index={0} />
-          <span style={{ fontSize: "16px", color: "#1a1a1a" }}>{questions[0].after}</span>
+          <span style={{ fontSize: "18px", color: "#1a1a1a" }}>{questions[0].after}</span>
         </div>
 
         {/* Q2 */}
         <div className="flex items-end gap-2 flex-wrap">
           <span style={{ fontWeight: "400", WebkitTextStroke: "1px black", color: "#1a1a1a", fontSize: "16px", minWidth: "18px" }}>2</span>
           <InputField index={1} />
-          <span style={{ fontSize: "16px", color: "#1a1a1a" }}>{questions[1].after}</span>
+          <span style={{ fontSize: "18px", color: "#1a1a1a" }}>{questions[1].after}</span>
         </div>
 
         {/* Q3 */}
         <div className="flex items-end gap-2 flex-wrap">
           <span style={{ fontWeight: "400", WebkitTextStroke: "1px black", color: "#1a1a1a", fontSize: "16px", minWidth: "18px" }}>3</span>
-          <span style={{ fontSize: "16px", color: "#1a1a1a" }}>{questions[2].before}</span>
+          <span style={{ fontSize: "18px", color: "#1a1a1a" }}>{questions[2].before}</span>
           <InputField index={2} />
-          <span style={{ fontSize: "16px", color: "#1a1a1a" }}>.</span>
+          <span style={{ fontSize: "18px", color: "#1a1a1a" }}>.</span>
         </div>
       </div>
 

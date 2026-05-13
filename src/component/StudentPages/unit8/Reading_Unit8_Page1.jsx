@@ -47,7 +47,7 @@ const Reading_Unit8_Page1 = ({ openPopup }) => {
       text: "Harley found it in the grass. He took some pictures, then he gave it to me to hold. Here you are. We didn't know this was your camera, Sarah replied happily. Thank you. I'm so happy my camera is not lost, said Hansel.",
     },
   ];
-const clickableAreas1 = [
+const clickableAreas = [
   // 1
   {
     x1: 15.1,

@@ -9,7 +9,7 @@ import pauseBtn from "../../../assets/Page 01/Right Video Button.svg";
 // 🖼️ استبدل بمسار الصورة الصحيح
 import pageImage from "../../../assets/imgs/pages/Class Book/Right 4 Unit 6 Ready for School Folder/Page 57.png";
 // 🔊 صوت واحد بس - نفس الصوت للكل والمناطق
-import soundAll from "../../../assets/audio/ClassBook/Grade 4/cd1pg20-story-adult-lady_Nf7yHD6t.mp3";
+import soundAll from "../../../assets/audio/ClassBook/Grade 4/cd3pg56-story-adult-lady_q6L04ON2.mp3";
 
 // 🎬 استبدل بمسار الفيديو الصحيح
 import videoFile from "../../../assets/videos/reading/grade 3 unit 8 page 74-75 reading.mp4";
@@ -26,136 +26,156 @@ const Reading_NewPage = ({ openPopup }) => {
 
   // ======================================================
   // 📝 Captions للصوت الكامل - عدّل النصوص والتوقيتات
-const captions = [
-  {
-    start: 0.30,
-    end: 2.52,
-    text: "Page 20. Amy's turn.",
-  },
-  {
-    start: 2.52,
-    end: 5.04,
-    text: "Amy plays on a baseball team.",
-  },
-  {
-    start: 5.04,
-    end: 7.94,
-    text: "On Saturday, her team will have a big game.",
-  },
-  {
-    start: 7.94,
-    end: 13.28,
-    text: "Amy can't wait. On Saturday, Amy's parents take her to the baseball field.",
-  },
-  {
-    start: 13.28,
-    end: 15.64,
-    text: "She's afraid she's going to be late.",
-  },
-  {
-    start: 15.64,
-    end: 19.30,
-    text: "She looks at the clock. It's only two o'clock.",
-  },
-  {
-    start: 19.30,
-    end: 23.08,
-    text: "She's on time, but everyone is already there.",
-  },
-  {
-    start: 23.08,
-    end: 25.56,
-    text: "They're stretching and playing catch.",
-  },
-  {
-    start: 25.56,
-    end: 29.80,
-    text: "Amy feels worried. It's a great day for baseball.",
-  },
-  {
-    start: 29.80,
-    end: 31.92,
-    text: "Many people come to watch the game.",
-  },
-  {
-    start: 31.92,
-    end: 39.50,
-    text: "\"There are many people watching,\" thinks Amy. \"I hope I'm going to do well.\" The game starts.",
-  },
-  {
-    start: 39.50,
-    end: 42.76,
-    text: "The first batter on the other team hits the ball to Amy.",
-  },
-  {
-    start: 42.76,
-    end: 48.96,
-    text: "She misses the ball. Amy is very worried now. \"Will I hit the ball?\" she thinks.",
-  },
-  {
-    start: 48.96,
-    end: 53.72,
-    text: "\"Hey, don't let it get you down,\" says her teammate, Jasmine.",
-  },
-  {
-    start: 53.72,
-    end: 58.62,
-    text: "\"You will get the next one. Cheer up.\" Now Amy's team is batting.",
-  },
-  {
-    start: 58.62,
-    end: 60.06,
-    text: "It's Amy's turn.",
-  },
-  {
-    start: 60.06,
-    end: 63.24,
-    text: "She swings hard and hits the ball into the air.",
-  },
-  {
-    start: 63.24,
-    end: 66.26,
-    text: "It soars into the sky like a rocket.",
-  },
-  {
-    start: 66.26,
-    end: 68.58,
-    text: "Amy races around the bases.",
-  },
-  {
-    start: 68.58,
-    end: 70.56,
-    text: "The other team can't catch the ball.",
-  },
-  {
-    start: 70.56,
-    end: 72.44,
-    text: "She touches third base.",
-  },
-  {
-    start: 72.44,
-    end: 74.74,
-    text: "She races all the way to the home plate.",
-  },
-  {
-    start: 74.74,
-    end: 79.90,
-    text: "It's a home run. \"Hooray! Hooray, Amy!\" everyone cries.",
-  },
-  {
-    start: 79.90,
-    end: 84.08,
-    text: "Amy just smiles. She isn't worried anymore.",
-  },
-  {
-    start: 84.08,
-    end: 85.54,
-    text: "She has done her best.",
-  },
-];
+  const captions = [
+    {
+      start: 0.3,
+      end: 2.52,
+      text: "Page 20. Amy's turn.",
+    },
+    {
+      start: 2.52,
+      end: 5.04,
+      text: "Amy plays on a baseball team.",
+    },
+    {
+      start: 5.04,
+      end: 7.94,
+      text: "On Saturday, her team will have a big game.",
+    },
+    {
+      start: 7.94,
+      end: 13.28,
+      text: "Amy can't wait. On Saturday, Amy's parents take her to the baseball field.",
+    },
+    {
+      start: 13.28,
+      end: 15.64,
+      text: "She's afraid she's going to be late.",
+    },
+    {
+      start: 15.64,
+      end: 19.3,
+      text: "She looks at the clock. It's only two o'clock.",
+    },
+    {
+      start: 19.3,
+      end: 23.08,
+      text: "She's on time, but everyone is already there.",
+    },
+    {
+      start: 23.08,
+      end: 25.56,
+      text: "They're stretching and playing catch.",
+    },
+    {
+      start: 25.56,
+      end: 29.8,
+      text: "Amy feels worried. It's a great day for baseball.",
+    },
+    {
+      start: 29.8,
+      end: 31.92,
+      text: "Many people come to watch the game.",
+    },
+    {
+      start: 31.92,
+      end: 39.5,
+      text: '"There are many people watching," thinks Amy. "I hope I\'m going to do well." The game starts.',
+    },
+    {
+      start: 39.5,
+      end: 42.76,
+      text: "The first batter on the other team hits the ball to Amy.",
+    },
+    {
+      start: 42.76,
+      end: 48.96,
+      text: 'She misses the ball. Amy is very worried now. "Will I hit the ball?" she thinks.',
+    },
+    {
+      start: 48.96,
+      end: 53.72,
+      text: '"Hey, don\'t let it get you down," says her teammate, Jasmine.',
+    },
+    {
+      start: 53.72,
+      end: 58.62,
+      text: '"You will get the next one. Cheer up." Now Amy\'s team is batting.',
+    },
+    {
+      start: 58.62,
+      end: 60.06,
+      text: "It's Amy's turn.",
+    },
+    {
+      start: 60.06,
+      end: 63.24,
+      text: "She swings hard and hits the ball into the air.",
+    },
+    {
+      start: 63.24,
+      end: 66.26,
+      text: "It soars into the sky like a rocket.",
+    },
+    {
+      start: 66.26,
+      end: 68.58,
+      text: "Amy races around the bases.",
+    },
+    {
+      start: 68.58,
+      end: 70.56,
+      text: "The other team can't catch the ball.",
+    },
+    {
+      start: 70.56,
+      end: 72.44,
+      text: "She touches third base.",
+    },
+    {
+      start: 72.44,
+      end: 74.74,
+      text: "She races all the way to the home plate.",
+    },
+    {
+      start: 74.74,
+      end: 79.9,
+      text: 'It\'s a home run. "Hooray! Hooray, Amy!" everyone cries.',
+    },
+    {
+      start: 79.9,
+      end: 84.08,
+      text: "Amy just smiles. She isn't worried anymore.",
+    },
+    {
+      start: 84.08,
+      end: 85.54,
+      text: "She has done her best.",
+    },
+  ];
   // 📍 مناطق النقر - كل منطقة عندها startFrom و stopAt من الصوت الأساسي
   const clickableAreas = [
-{  x1: 8.06,  y1: 30.9,  x2: 46.76,  y2: 45.55,  slice: { startFrom: 0, stopAt: 0 },},{  x1: 52.35,  y1: 30.9,  x2: 91.07,  y2: 45.3,  slice: { startFrom: 0, stopAt: 0 },},{  x1: 52.6,  y1: 55.58,  x2: 90.8,  y2: 65.96,  slice: { startFrom: 0, stopAt: 0 },},
+    {
+      x1: 8.06,
+      y1: 30.9,
+      x2: 46.76,
+      y2: 45.55,
+      slice: { startFrom: 100.34, stopAt: 117.80 },
+    },
+    {
+      x1: 52.35,
+      y1: 30.9,
+      x2: 91.07,
+      y2: 45.3,
+      slice: { startFrom: 117.80, stopAt: 133.34 },
+    },
+    {
+      x1: 52.6,
+      y1: 55.58,
+      x2: 90.8,
+      y2: 65.96,
+      slice: { startFrom: 134.64, stopAt: 140.94 },
+    },
   ];
   // ======================================================
 
@@ -242,15 +262,31 @@ const captions = [
             e.stopPropagation();
             openPopup(
               "audio",
-              <div style={{ display: "flex", justifyContent: "center", alignContent: "center" }}>
-                <AudioWithCaption src={soundAll} captions={captions}            stopAtSecond={2.6}
-/>
-              </div>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "center",
+                  alignContent: "center",
+                }}
+              >
+                <AudioWithCaption
+                  src={soundAll}
+                  captions={captions}
+                  stopAtSecond={2.6}
+                />
+              </div>,
             );
           }}
           style={{ overflow: "visible" }}
         >
-          <image className="svg-img" href={audioBtn} x="0" y="0" width="90" height="90" />
+          <image
+            className="svg-img"
+            href={audioBtn}
+            x="0"
+            y="0"
+            width="90"
+            height="90"
+          />
         </svg>
       </div>
 
@@ -267,16 +303,41 @@ const captions = [
             e.stopPropagation();
             openPopup(
               "video",
-              <div style={{ display: "flex", justifyContent: "center", alignContent: "center", alignItems: "center", height: "100%", width: "100%" }}>
-                <video autoPlay controls style={{ width: "auto", height: "80%", objectFit: "fill", borderRadius: "20px" }}>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "center",
+                  alignContent: "center",
+                  alignItems: "center",
+                  height: "100%",
+                  width: "100%",
+                }}
+              >
+                <video
+                  autoPlay
+                  controls
+                  style={{
+                    width: "auto",
+                    height: "80%",
+                    objectFit: "fill",
+                    borderRadius: "20px",
+                  }}
+                >
                   <source src={videoFile} type="video/mp4" />
                 </video>
-              </div>
+              </div>,
             );
           }}
           style={{ overflow: "visible" }}
         >
-          <image className="svg-img" href={pauseBtn} x="0" y="0" width="90" height="90" />
+          <image
+            className="svg-img"
+            href={pauseBtn}
+            x="0"
+            y="0"
+            width="90"
+            height="90"
+          />
         </svg>
       </div>
 

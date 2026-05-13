@@ -1,321 +1,282 @@
 import React, { useState } from "react";
+import Button from "../../Button";
 import ValidationAlert from "../../Popup/ValidationAlert";
-import "./Unit8_Page6_Q1.css";
-import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
-import bigImage from "../../../assets/imgs/pages/classbook/Right 3 Unit 8 At Our Grandparents Farm Folder/Page 69/Asset 11.svg";
-import img1 from "../../../assets/imgs/pages/classbook/Right 3 Unit 8 At Our Grandparents Farm Folder/Page 69/Asset 12.svg";
-import img2 from "../../../assets/imgs/pages/classbook/Right 3 Unit 8 At Our Grandparents Farm Folder/Page 69/Ex E 2.svg";
-import img3 from "../../../assets/imgs/pages/classbook/Right 3 Unit 8 At Our Grandparents Farm Folder/Page 69/Ex E 3.svg";
-import img4 from "../../../assets/imgs/pages/classbook/Right 3 Unit 8 At Our Grandparents Farm Folder/Page 69/Ex E 4.svg";
 
-const Unit8_Page6_Q2 = () => {
-  const items = [
-    {
-      text: "(clean)",
-      answer: "Did Stella clean her shoes?",
-      img: img1,
-      sentenc: "No, she didn’t.",
-    },
-    {
-      text: "(help)",
-      answer: "Did Tom help his mom?",
-      img: img2,
-      sentenc: "Yes, he did.",
-    },
-    {
-      text: "(play)",
-      answer: "Did Jack play soccer?",
-      img: img3,
-      sentenc: "No, he didn’t",
-    },
-    {
-      text: "(watch)",
-      answer: "Did John watch TV?",
-      img: img4,
-      sentenc: "Yes, he did.",
-    },
-  ];
+// ─────────────────────────────────────────────
+//  🖼️  IMAGES
+// ─────────────────────────────────────────────
+import img1 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 8 I Lived in the Library Folder/Page 69/SVG/Asset 20.svg"; // rowing boat
+import img2 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 8 I Lived in the Library Folder/Page 69/SVG/Asset 21.svg"; // rowing boat
+import img3 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 8 I Lived in the Library Folder/Page 69/SVG/Asset 22.svg"; // rowing boat
+import img4 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 8 I Lived in the Library Folder/Page 69/SVG/Asset 24.svg"; // rowing boat
 
-  const wordBank = [
-    "Did Jack play soccer?",
-    "Did John watch TV?",
-    "Did Tom help his mom?",
-    "Did Stella clean her shoes?",
-  ];
+// ─────────────────────────────────────────────
+//  🎨  COLORS
+// ─────────────────────────────────────────────
+const TEXT_COLOR       = "#2b2b2b";
+const NUMBER_COLOR     = "#2b2b2b";
+const CHECK_COLOR      = "#c81e1e";
+const BOX_BORDER_DEF   = "#9ca3af";
+const BOX_BORDER_SEL   = "#2096a6";
+const BOX_BORDER_CORR  = "#2096a6";
+const BOX_BORDER_WRONG = "#ef4444";
+const BOX_BG_SEL       = "#f0f9ff";
+const BOX_BG_WRONG     = "#fff0f0";
+const WRONG_BADGE_BG   = "#ef4444";
+const WRONG_BADGE_TEXT = "#ffffff";
 
-  const [answers, setAnswers] = useState(Array(items.length).fill(""));
-  const [showCorrect, setShowCorrect] = useState(false);
-  const [wrongMarks, setWrongMarks] = useState([]);
+// ─────────────────────────────────────────────
+//  📝  EXERCISE DATA
+//  correct: "a" | "b"
+// ─────────────────────────────────────────────
+const ITEMS = [
+  {
+    id:      1,
+    src:     img1,
+    textA:   "He fixed the fence.",
+    textB:   "He rowed the boat.",
+    correct: "b",
+  },
+  {
+    id:      2,
+    src:     img2,
+    textA:   "She washed the car.",
+    textB:   "She cooked dinner.",
+    correct: "b",
+  },
+  {
+    id:      3,
+    src:     img3,
+    textA:   "She cleaned the floor.",
+    textB:   "She painted a picture.",
+    correct: "b",
+  },
+  {
+    id:      4,
+    src:     img4,
+    textA:   "She played with her doll.",
+    textB:   "She fixed her toy.",
+    correct: "a",
+  },
+];
 
-  // =========================
-  // DRAG END (🔥 FIXED)
-  // =========================
-  const onDragEnd = (result) => {
-    const { destination, draggableId } = result;
-    if (!destination) return;
+// ─────────────────────────────────────────────
+//  COMPONENT
+// ─────────────────────────────────────────────
+export default function WB_ReadLookWriteCheck_QF() {
+  const [selected,    setSelected]    = useState({});
+  const [showResults, setShowResults] = useState(false);
+  const [showAns,     setShowAns]     = useState(false);
 
-    const value = draggableId.replace("season-", "");
-    const index = Number(destination.droppableId);
+  const isLocked = showResults || showAns;
 
-    const updated = [...answers];
-    updated[index] = value;
-    setAnswers(updated);
+  const handleSelect = (id, side) => {
+    if (isLocked) return;
+    setSelected((prev) => ({ ...prev, [id]: side }));
   };
 
-  // =========================
-  // SHOW ANSWERS (🔥 FIXED)
-  // =========================
-  const showAnswers = () => {
-    setAnswers(items.map((item) => item.answer));
-    setShowCorrect(true);
-    setWrongMarks([]);
-  };
-
-  // =========================
-  // RESET
-  // =========================
-  const resetAll = () => {
-    setAnswers(items.map(() => ""));
-    setShowCorrect(false);
-    setWrongMarks([]);
-  };
-
-  // =========================
-  // CHECK ANSWERS (🔥 FIXED)
-  // =========================
-  const checkAnswers = () => {
-    if (showCorrect) return;
-
-    // ❌ إذا في فراغ
-    if (answers.includes("")) {
-      ValidationAlert.info();
-      return;
-    }
-
+  const handleCheck = () => {
+    if (isLocked) return;
+    const allAnswered = ITEMS.every((item) => selected[item.id]);
+    if (!allAnswered) { ValidationAlert.info("Please select a sentence for each picture."); return; }
     let score = 0;
-    let total = items.length;
-    let wrong = [];
-
-    items.forEach((item, i) => {
-      if (answers[i]?.trim().toLowerCase() === item.answer.toLowerCase()) {
-        score++;
-      } else {
-        wrong.push({ qIndex: i });
-      }
-    });
-
-    setWrongMarks(wrong);
-    setShowCorrect(true);
-
-    const color = score === total ? "green" : score === 0 ? "red" : "orange";
-
-    const msg = `
-    <div style="font-size:20px;text-align:center;">
-      <span style="color:${color};font-weight:bold">
-        Score: ${score} / ${total}
-      </span>
-    </div>
-  `;
-
-    if (score === total) ValidationAlert.success(msg);
-    else if (score === 0) ValidationAlert.error(msg);
-    else ValidationAlert.warning(msg);
+    ITEMS.forEach((item) => { if (selected[item.id] === item.correct) score++; });
+    setShowResults(true);
+    if (score === ITEMS.length) ValidationAlert.success(`Score: ${score} / ${ITEMS.length}`);
+    else if (score > 0)         ValidationAlert.warning(`Score: ${score} / ${ITEMS.length}`);
+    else                        ValidationAlert.error(`Score: ${score} / ${ITEMS.length}`);
   };
-  return (
-    <DragDropContext onDragEnd={onDragEnd}>
+
+  const handleShowAnswer = () => {
+    const filled = {};
+    ITEMS.forEach((item) => { filled[item.id] = item.correct; });
+    setSelected(filled); setShowResults(false); setShowAns(true);
+  };
+
+  const handleReset = () => {
+    setSelected({}); setShowResults(false); setShowAns(false);
+  };
+
+  // ── Box state ──
+  const getBoxState = (item, side) => {
+    const sel = selected[item.id];
+    if (sel !== side) return "idle";
+    if (showAns)      return "correct";
+    if (showResults)  return side === item.correct ? "correct" : "wrong";
+    return "selected";
+  };
+
+  const renderSentenceRow = (item, side) => {
+    const text  = side === "a" ? item.textA : item.textB;
+    const state = getBoxState(item, side);
+    const showChk = state === "selected" || state === "correct";
+    const isWrong = state === "wrong";
+
+    let boxBg  = "#ffffff";
+    let boxBd  = BOX_BORDER_DEF;
+    if (state === "selected") { boxBg = BOX_BG_SEL;   boxBd = BOX_BORDER_SEL;   }
+    if (state === "correct")  { boxBg = "#ffffff";     boxBd = BOX_BORDER_CORR;  }
+    if (state === "wrong")    { boxBg = BOX_BG_WRONG;  boxBd = BOX_BORDER_WRONG; }
+
+    return (
       <div
+        key={side}
+        className={["rlwf-sent-row", isLocked ? "rlwf-sent-row--locked" : ""].filter(Boolean).join(" ")}
+        onClick={() => handleSelect(item.id, side)}
+      >
+        <span className="rlwf-sent-text">{text}</span>
+
+        {/* Circular checkbox */}
+        <div style={{
+          position: "relative",
+          width:  "clamp(28px,3.4vw,42px)",
+          height: "clamp(28px,3.4vw,42px)",
+          borderRadius: "50%",
+          border: `2px solid ${boxBd}`,
+          background: boxBg,
+          display: "flex", alignItems: "center", justifyContent: "center",
+          flexShrink: 0,
+          transition: "border-color 0.15s, background 0.15s",
+        }}>
+          {showChk && (
+            <span style={{ color: CHECK_COLOR, fontSize: "clamp(14px,2vw,24px)", fontWeight: 900, lineHeight: 1 }}>✓</span>
+          )}
+          {isWrong && (
+            <div style={{
+              position: "absolute", top: -7, right: -7,
+              width: "clamp(13px,1.5vw,16px)", height: "clamp(13px,1.5vw,16px)",
+              borderRadius: "50%", background: WRONG_BADGE_BG, color: WRONG_BADGE_TEXT,
+              display: "flex", alignItems: "center", justifyContent: "center",
+              fontSize: "clamp(6px,0.7vw,9px)", fontWeight: 700,
+              border: "2px solid #fff", boxShadow: "0 2px 6px rgba(0,0,0,0.2)",
+              pointerEvents: "none", zIndex: 3,
+            }}>✕</div>
+          )}
+        </div>
+      </div>
+    );
+  };
+
+  return (
+    <div className="main-container-component">
+      <style>{`
+        /* ── 2×2 grid ── */
+        .rlwf-grid {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: clamp(20px, 3vw, 40px) clamp(24px, 3.5vw, 48px);
+          width: 100%;
+        }
+
+        /* Single item */
+        .rlwf-item {
+          display: flex;
+          flex-direction: column;
+          gap: clamp(6px, 0.8vw, 10px);
+        }
+
+        /* Num + image */
+        .rlwf-img-row {
+          display: flex;
+          align-items: flex-start;
+          gap: clamp(5px, 0.6vw, 8px);
+        }
+
+        .rlwf-num {
+          font-size: clamp(14px, 1.7vw, 20px);
+          font-weight: 700;
+          color: ${NUMBER_COLOR};
+          flex-shrink: 0;
+          padding-top: 2px;
+          line-height: 1;
+        }
+
+        .rlwf-img {
+          width: 100%;
+          height: clamp(100px, 14vw, 190px);
+          object-fit: cover;
+          border-radius: 10px;
+          display: block;
+          border: 2px solid #e5e7eb;
+        }
+
+        /* Sentence row: text + checkbox */
+        .rlwf-sent-row {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: clamp(8px, 1vw, 14px);
+          cursor: pointer;
+          user-select: none;
+          padding: clamp(3px, 0.4vw, 6px) 0;
+        }
+        .rlwf-sent-row--locked { cursor: default; }
+
+        .rlwf-sent-text {
+          font-size: clamp(12px, 1.5vw, 18px);
+          color: ${TEXT_COLOR};
+          line-height: 1.4;
+          flex: 1;
+        }
+
+        .rlwf-buttons {
+          display: flex;
+          justify-content: center;
+          margin-top: clamp(8px, 1.6vw, 18px);
+        }
+
+        @media (max-width: 520px) {
+          .rlwf-grid { grid-template-columns: 1fr; }
+        }
+      `}</style>
+
+      <div
+        className="div-forall"
         style={{
           display: "flex",
           flexDirection: "column",
-          justifyContent: "center",
-          alignItems: "center",
-          padding: "30px",
+          gap: "clamp(14px, 2vw, 22px)",
+          maxWidth: "1100px",
+          margin: "0 auto",
         }}
       >
-        <div
-          className="div-forall"
-          style={{ width: "60%", marginBottom: "40px" }}
+        {/* ── Header ── */}
+        <h1
+          className="WB-header-title-page8"
+          style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
         >
-          <h5 className="header-title-page8">
-            <span className="ex-A" style={{ marginRight: "10px" }}>
-              E
-            </span>
-            Look, read, and write the questions. Use the pictures from Ex. D.
-          </h5>
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "center",
-              gap: "25px",
-              marginTop: "20px",
-              flexWrap: "wrap",
-            }}
-          >
-            <img
-              src={bigImage}
-              style={{ width: "auto", height: "auto", objectFit: "cover" }}
-            />
-          </div>
-          {/* WORD BANK */}
-          <Droppable droppableId="bank" direction="horizontal">
-            {(provided) => (
-              <div
-                ref={provided.innerRef}
-                {...provided.droppableProps}
-                style={{
-                  display: "flex",
-                  gap: "12px",
-                  padding: "10px",
-                  border: "2px dashed #ccc",
-                  borderRadius: "10px",
-                  marginTop: "20px",
-                  justifyContent: "center",
-                  width: "100%",
-                  marginBottom: "20px",
-                  // justifyContent: "center",
-                }}
-              >
-                {wordBank.map((word, index) => (
-                  <Draggable
-                    key={word}
-                    draggableId={`season-${word}`}
-                    index={index}
-                    isDragDisabled={answers.includes(word)}
-                  >
-                    {(provided) => (
-                      <span
-                        ref={provided.innerRef}
-                        {...provided.draggableProps}
-                        {...provided.dragHandleProps}
-                        className="season-chip"
-                        style={{
-                          padding: "7px 14px",
-                          border: "2px solid #2c5287",
-                          borderRadius: "8px",
-                          background: "white",
-                          fontWeight: "bold",
-                          cursor: answers.includes(word)
-                            ? "not-allowed"
-                            : "grab",
-                          opacity: answers.includes(word) ? 0.4 : 1,
-                          fontSize: "16px",
-                          ...provided.draggableProps.style,
-                        }}
-                      >
-                        {word}
-                      </span>
-                    )}
-                  </Draggable>
-                ))}
-                {provided.placeholder}
+          <span className="WB-ex-A-1">F</span>
+          Read, look, and write ✓.
+        </h1>
+
+        {/* ── 2×2 Grid ── */}
+        <div className="rlwf-grid">
+          {ITEMS.map((item) => (
+            <div key={item.id} className="rlwf-item">
+
+              {/* Num + Image */}
+              <div className="rlwf-img-row">
+                <span className="rlwf-num">{item.id}</span>
+                <img src={item.src} alt={`img-${item.id}`} className="rlwf-img" />
               </div>
-            )}
-          </Droppable>
-          {/* CONTENT */}
 
-          <div className="space-y-6">
-            {items.map((item, i) => (
-              <div key={i} className="flex items-center gap-7">
-                {/* TEXT */}
-                <span className="text-2xl md:text-xl lg:text-1xl">
-                  {i + 1}. {item.text}
-                </span>
+              {/* Two sentences */}
+              {renderSentenceRow(item, "a")}
+              {renderSentenceRow(item, "b")}
 
-                {/* INLINE DROP */}
-                <Droppable droppableId={`${i}`}>
-                  {(provided) => {
-                    const isWrong = wrongMarks.some((w) => w.qIndex === i);
-
-                    return (
-                      <div
-                        ref={provided.innerRef}
-                        {...provided.droppableProps}
-                        style={{
-                          position: "relative",
-                          flex: 1, // 🔥 هذا السر
-                          textAlign: "center",
-                          fontWeight: "bold",
-                          color: answers[i] ? "#1C398E" : "black",
-                          borderBottom: `2px solid ${
-                            showCorrect
-                              ? isWrong
-                                ? "red"
-                                : "#1C398E"
-                              : "black"
-                          }`,
-                          paddingBottom: "4px",
-                        }}
-                      >
-                        {answers[i]}
-                        {provided.placeholder}
-
-                        {showCorrect && isWrong && (
-                          <div
-                            style={{
-                              position: "absolute",
-                              top: "50%",
-                              right: "-28px",
-                              transform: "translateY(-50%)",
-                              width: "22px",
-                              height: "22px",
-                              background: "#ef4444",
-                              color: "white",
-                              borderRadius: "50%",
-                              fontSize: "12px",
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "center",
-                              fontWeight: "bold",
-                              border: "2px solid white",
-                              boxShadow: "0 2px 6px rgba(0,0,0,0.2)",
-                              pointerEvents: "none",
-                            }}
-                          >
-                            ✕
-                          </div>
-                        )}
-                      </div>
-                    );
-                  }}
-                </Droppable>
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center", // 🔥 نفس المستوى
-                    gap: "10px", // مسافة بينهم
-                  }}
-                >
-                  <img
-                    src={item.img}
-                    style={{
-                      width: "auto",
-                      height: "70px",
-                      objectFit: "cover",
-                    }}
-                  />
-
-                  <span style={{ fontSize: 18 }}>{item.sentenc}</span>
-                </div>
-              </div>
-            ))}
-          </div>
+            </div>
+          ))}
         </div>
 
-        {/* BUTTONS */}
-        <div className="action-buttons-container">
-          <button onClick={resetAll} className="try-again-button">
-            Start Again ↻
-          </button>
-          <button onClick={showAnswers} className="show-answer-btn">
-            Show Answer
-          </button>
-          <button onClick={checkAnswers} className="check-button2">
-            Check Answer ✓
-          </button>
+        {/* ── Buttons ── */}
+        <div className="rlwf-buttons">
+          <Button
+            checkAnswers={handleCheck}
+            handleShowAnswer={handleShowAnswer}
+            handleStartAgain={handleReset}
+          />
         </div>
       </div>
-    </DragDropContext>
+    </div>
   );
-};
-
-export default Unit8_Page6_Q2;
+}

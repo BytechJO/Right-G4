@@ -5,38 +5,38 @@ import GrammarC from "./GrammarC";
 import image1 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 6 Ready for School Folder/Page 48/SVG/Asset 22.svg";
 import image  from "../../../assets/imgs/pages/Class Book/Right 4 Unit 6 Ready for School Folder/Page 48/SVG/Asset 7.svg";
 
-import sound from "../../../assets/audio/ClassBook/Grade 4/cd17pg24-grammar-adult-lady_DyQEJqoO.mp3";
+import sound from "../../../assets/audio/ClassBook/Grade 4/cd34pg48-grammar-adult-lady_p5lnjFuL.mp3";
 import QuestionAudioPlayer from "../../QuestionAudioPlayer";
 import SectionBanner from "../SectionBanner";
 const GrammarSection_U1 = () => {
 const captions = [
   {
-    start: 0.80,
-    end: 2.78,
-    text: "Page 24. Grammar.",
+    start: 0.16,
+    end: 2.24,
+    text: "Page 48, grammar.",
   },
   {
-    start: 2.78,
-    end: 4.96,
-    text: "Past of have.",
+    start: 2.24,
+    end: 4.24,
+    text: "Should and shouldn't.",
   },
   {
-    start: 4.96,
-    end: 8.72,
-    text: "She had a bike. Did she have a kitten?",
+    start: 4.24,
+    end: 10.64,
+    text: "You should close the door. You shouldn't eat much sugar. You shouldn't eat many sweets.",
   },
   {
-    start: 8.72,
-    end: 13.42,
-    text: "She did not have a kitten. Why did she have a kitten?",
+    start: 10.64,
+    end: 13.80,
+    text: "Should and shouldn't in questions.",
   },
   {
-    start: 13.42,
-    end: 18.06,
-    text: "I did not have books. What did she have?",
+    start: 13.80,
+    end: 17.60,
+    text: "Should you eat apples? Shouldn't you brush your teeth?",
   },
 ];
-const stopAtSecond = 2.8;
+const stopAtSecond = 2.1;
  return (
     <div className="flex flex-col items-center ">
       <div className="w-[60%] mx-auto">

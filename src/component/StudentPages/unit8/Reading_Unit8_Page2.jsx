@@ -11,35 +11,6 @@ const Reading_Unit8_Page2 = () => {
   const [hoveredAreaIndex, setHoveredAreaIndex] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [activeAreaIndex, setActiveAreaIndex] = useState(null);
-const clickableAreas2 = [
-  // 1
-  {
-    x1: 10.06,
-    y1: 27.9,
-    x2: 48.76,
-    y2: 45.7,
-    slice: { startFrom: 0, stopAt: 0 },
-  },
-
-  // 2
-  {
-    x1: 51,
-    y1: 27.8,
-    x2: 89.7,
-    y2: 45.4,
-    slice: { startFrom: 0, stopAt: 0 },
-  },
-
-  // 3
-  {
-    x1: 51.27,
-    y1: 54.07,
-    x2: 89.51,
-    y2: 67,
-    slice: { startFrom: 0, stopAt: 0 },
-  },
-];
-
 const clickableAreas = [
   // 1
   {
@@ -68,6 +39,8 @@ const clickableAreas = [
     slice: { startFrom: 0, stopAt: 0 },
   },
 ];
+
+
 
   const handleImageClick = (e) => {
     const rect = e.target.getBoundingClientRect();

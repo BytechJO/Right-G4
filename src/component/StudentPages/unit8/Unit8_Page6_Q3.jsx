@@ -1,297 +1,238 @@
 import React, { useState } from "react";
-import img1 from "../../../assets/imgs/pages/classbook/Right 3 Unit 8 At Our Grandparents Farm Folder/Page 69/Ex F 1.svg";
-import img2 from "../../../assets/imgs/pages/classbook/Right 3 Unit 8 At Our Grandparents Farm Folder/Page 69/Ex F 2.svg";
-import img3 from "../../../assets/imgs/pages/classbook/Right 3 Unit 8 At Our Grandparents Farm Folder/Page 69/Ex F 3.svg";
-import img4 from "../../../assets/imgs/pages/classbook/Right 3 Unit 8 At Our Grandparents Farm Folder/Page 69/Ex F 4.svg";
-import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
-
-import ValidationAlert from "../../Popup/ValidationAlert";
 import Button from "../../Button";
+import ValidationAlert from "../../Popup/ValidationAlert";
 
-const Unit8_Page6_Q3 = () => {
-  const questions = [
-    { id: 1, text: "First, she washed the dishes", answer: 2 },
-    { id: 2, text: "Next, she shopped in the supermarket.", answer: 4 },
-    { id: 3, text: "She carried home a grocery bag.", answer: 1 },
-    { id: 4, text: "Then, she played with her sister Sarah.", answer: 3 },
-  ];
-  const images = [img1, img2, img3, img4];
-  const [answers, setAnswers] = useState({});
-  const [locked, setLocked] = useState(false); // ⭐ NEW — قفل التعديل
-  const [showResult, setShowResult] = useState(false);
+// ─────────────────────────────────────────────
+//  🎨  COLORS
+// ─────────────────────────────────────────────
+const INPUT_UNDERLINE_DEFAULT = "#3f3f3f";
+const INPUT_UNDERLINE_WRONG   = "#ef4444";
+const INPUT_TEXT_COLOR        = "#2b2b2b";
+const INPUT_ANSWER_COLOR      = "#c81e1e";
+const NUMBER_COLOR            = "#2b2b2b";
+const CUE_COLOR               = "#2b2b2b";
+const WRONG_BADGE_BG          = "#ef4444";
+const WRONG_BADGE_TEXT        = "#ffffff";
 
-  const wordBank = ["1", "2", "3", "4"];
-  const onDragEnd = (result) => {
-    if (locked) return;
+// ─────────────────────────────────────────────
+//  📝  EXERCISE DATA
+// ─────────────────────────────────────────────
+const ITEMS = [
+  {
+    id:      1,
+    cue:     "she / play / toys",
+    correct: ["She didn't play with her toys.", "she didn't play with her toys", "she did not play with her toys"],
+    answer:  "She didn't play with her toys.",
+  },
+  {
+    id:      2,
+    cue:     "he / rake / the leaves",
+    correct: ["He didn't rake the leaves.", "he didn't rake the leaves", "he did not rake the leaves"],
+    answer:  "He didn't rake the leaves.",
+  },
+  {
+    id:      3,
+    cue:     "they / sail / on the ship",
+    correct: ["They didn't sail on the ship.", "they didn't sail on the ship", "they did not sail on the ship"],
+    answer:  "They didn't sail on the ship.",
+  },
+];
 
-    const { destination, draggableId } = result;
+// ─────────────────────────────────────────────
+//  🔧  NORMALIZE
+// ─────────────────────────────────────────────
+const normalize = (str) =>
+  str.toLowerCase().replace(/[^a-z0-9'\s]/g, "").replace(/\s+/g, " ").trim();
 
-    if (!destination) return;
+const isCorrect = (userVal, correctArr) =>
+  correctArr.some((c) => normalize(userVal) === normalize(c));
 
-    const value = Number(draggableId.replace("season-", ""));
+// ─────────────────────────────────────────────
+//  COMPONENT
+// ─────────────────────────────────────────────
+export default function WB_ReadWriteNegative_QG() {
+  const [answers,     setAnswers]     = useState({});
+  const [showResults, setShowResults] = useState(false);
+  const [showAns,     setShowAns]     = useState(false);
 
-    // ✅ إذا رجع للبنك
-    if (destination.droppableId === "bank") {
-      setAnswers((prev) => {
-        const newAnswers = { ...prev };
-
-        Object.keys(newAnswers).forEach((key) => {
-          if (newAnswers[key] === value) {
-            delete newAnswers[key];
-          }
-        });
-
-        return newAnswers;
-      });
-
-      return;
-    }
-
-    // ✅ إذا راح على صورة
-    const imageIndex = Number(destination.droppableId.split("-")[1]);
-
-    setAnswers((prev) => ({
-      ...prev,
-      [imageIndex]: value,
-    }));
+  const handleChange = (id, value) => {
+    if (showAns) return;
+    const item = ITEMS.find((i) => i.id === id);
+    if (showResults && item && isCorrect(answers[id] || "", item.correct)) return;
+    setAnswers((prev) => ({ ...prev, [id]: value }));
   };
 
-  const checkAnswers = () => {
-    if (locked) return;
-
-    if (Object.keys(answers).length < images.length) {
-      ValidationAlert.info();
-      return;
-    }
-
-    setShowResult(true); // 🔥 مهم
-
-    let correct = 0;
-
-    questions.forEach((q, index) => {
-      if (answers[index] === q.answer) {
-        correct++;
-      }
-    });
-
-    const total = questions.length;
-
-    const color =
-      correct === total ? "green" : correct === 0 ? "red" : "orange";
-
-    const msg = `
-    <div style="font-size:20px;text-align:center;">
-      <b style="color:${color};">Score: ${correct} / ${total}</b>
-    </div>
-  `;
-
-    if (correct === total) ValidationAlert.success(msg);
-    else if (correct === 0) ValidationAlert.error(msg);
-    else ValidationAlert.warning(msg);
-
-    setLocked(true);
+  const handleCheck = () => {
+    if (showAns) return;
+    const allAnswered = ITEMS.every((item) => answers[item.id]?.trim());
+    if (!allAnswered) { ValidationAlert.info("Please complete all answers first."); return; }
+    let score = 0;
+    ITEMS.forEach((item) => { if (isCorrect(answers[item.id] || "", item.correct)) score++; });
+    setShowResults(true);
+    if (score === ITEMS.length)   ValidationAlert.success(`Score: ${score} / ${ITEMS.length}`);
+    else if (score > 0)           ValidationAlert.warning(`Score: ${score} / ${ITEMS.length}`);
+    else                          ValidationAlert.error(`Score: ${score} / ${ITEMS.length}`);
   };
 
-  const reset = () => {
-    setAnswers({});
-    setLocked(false); // ⭐ NEW — إعادة التعديل
-    setShowResult(false);
+  const handleShowAnswer = () => {
+    const filled = {};
+    ITEMS.forEach((item) => { filled[item.id] = item.answer; });
+    setAnswers(filled); setShowResults(false); setShowAns(true);
   };
 
-  // ⭐⭐⭐ NEW — showAnswer
-  const showAnswer = () => {
-    const correct = {};
-
-    questions.forEach((q, index) => {
-      correct[index] = q.answer;
-    });
-
-    setAnswers(correct);
-    setLocked(true);
+  const handleReset = () => {
+    setAnswers({}); setShowResults(false); setShowAns(false);
   };
-  const usedWords = Object.values(answers).filter(Boolean);
+
+  const isWrong    = (item) => showResults && !showAns && !isCorrect(answers[item.id] || "", item.correct);
+  const isDisabled = (item) => showAns || (showResults && isCorrect(answers[item.id] || "", item.correct));
+
   return (
-    <DragDropContext onDragEnd={onDragEnd}>
+    <div className="main-container-component">
+      <style>{`
+        .rwng-list {
+          display: flex;
+          flex-direction: column;
+          gap: clamp(16px, 2.4vw, 30px);
+          width: 100%;
+        }
+
+        /* num | cue | input */
+        .rwng-row {
+          display: flex;
+          align-items: flex-end;
+          gap: clamp(6px, 0.8vw, 10px);
+          min-width: 0;
+        }
+
+        .rwng-num {
+          font-size: clamp(14px, 1.7vw, 20px);
+          font-weight: 700;
+          color: ${NUMBER_COLOR};
+          flex-shrink: 0;
+          line-height: 1.5;
+        }
+
+        .rwng-cue {
+          font-size: clamp(13px, 1.6vw, 19px);
+          color: ${CUE_COLOR};
+          white-space: nowrap;
+          flex-shrink: 0;
+          line-height: 1.5;
+        }
+
+        /* Input — grows to fill */
+        .rwng-input-wrap {
+          position: relative;
+          flex: 1;
+          min-width: clamp(160px, 22vw, 320px);
+        }
+
+        .rwng-input {
+          width: 100%;
+          background: transparent;
+          border: none;
+          border-bottom: 1px solid ${INPUT_UNDERLINE_DEFAULT};
+          outline: none;
+          font-size: clamp(13px, 1.6vw, 19px);
+          color: ${INPUT_TEXT_COLOR};
+          line-height: 1.5;
+          box-sizing: border-box;
+          font-family: inherit;
+          transition: border-color 0.2s;
+        }
+        .rwng-input:disabled  { opacity: 1; cursor: default; }
+        .rwng-input--wrong    { border-bottom-color: ${INPUT_UNDERLINE_WRONG}; }
+        .rwng-input--answer   { color: ${INPUT_ANSWER_COLOR}; font-weight: 700; }
+
+        /* ✕ badge */
+        .rwng-badge {
+          position: absolute;
+          top: -8px; right: 0;
+          width: clamp(16px, 1.8vw, 20px);
+          height: clamp(16px, 1.8vw, 20px);
+          border-radius: 50%;
+          background: ${WRONG_BADGE_BG};
+          color: ${WRONG_BADGE_TEXT};
+          display: flex; align-items: center; justify-content: center;
+          font-size: clamp(8px, 0.9vw, 11px);
+          font-weight: 700;
+          border: 2px solid #fff;
+          box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+          pointer-events: none;
+          z-index: 2;
+        }
+
+        .rwng-buttons {
+          display: flex;
+          justify-content: center;
+          margin-top: clamp(8px, 1.6vw, 18px);
+        }
+      `}</style>
+
       <div
+        className="div-forall"
         style={{
           display: "flex",
           flexDirection: "column",
-          alignItems: "center",
-          padding: "30px",
+          gap: "clamp(14px, 2vw, 22px)",
+          maxWidth: "1100px",
+          margin: "0 auto",
         }}
       >
-        <div className="div-forall">
-          <h5 className="header-title-page8 pb-2.5">
-            <span className="ex-A" style={{ marginRight: "10px" }}>
-              F
-            </span>
-            Read and number the pictures.{" "}
-          </h5>
-          <Droppable droppableId="bank" direction="horizontal">
-            {(provided) => (
-              <div
-                ref={provided.innerRef}
-                {...provided.droppableProps}
-                style={{
-                  display: "flex",
-                  gap: "12px",
-                  padding: "10px",
-                  border: "2px dashed #ccc",
-                  borderRadius: "10px",
-                  marginTop: "20px",
-                  justifyContent: "center",
-                  width: "100%",
-                }}
-              >
-                {wordBank.map((word, index) => {
-                  const isUsed = usedWords.includes(Number(word));
+        {/* ── Header ── */}
+        <h1
+          className="WB-header-title-page8"
+          style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
+        >
+          <span className="WB-ex-A-1">G</span>
+          Read and write negative sentences. You will need to add words.
+        </h1>
 
-                  return (
-                    <Draggable
-                      key={word}
-                      draggableId={`season-${word}`}
-                      index={index}
-                      isDragDisabled={locked || isUsed}
-                    >
-                      {(provided) => (
-                        <span
-                          ref={provided.innerRef}
-                          {...provided.draggableProps}
-                          {...provided.dragHandleProps}
-                          className="season-chip"
-                          style={{
-                            padding: "7px 14px",
-                            border: "2px solid #2c5287",
-                            borderRadius: "8px",
-                            background: "white",
-                            fontWeight: "bold",
-                            cursor: isUsed ? "not-allowed" : "grab",
-                            fontSize: "16px",
-                            opacity: isUsed ? 0.4 : 1,
-                            ...provided.draggableProps.style,
-                          }}
-                        >
-                          {word}
-                        </span>
-                      )}
-                    </Draggable>
-                  );
-                })}
-                {provided.placeholder}
-              </div>
-            )}
-          </Droppable>
-          <div className="mt-6 flex flex-col gap-10 mb-7">
-            {/* الصور أول */}
-            <div className="flex gap-4 justify-center flex-wrap">
-              {images.map((img, i) => (
-                <div
-                  key={i}
-                  className="border-2 border-orange-400 rounded-xl relative "
-                >
-                  <img
-                    src={img}
-                    alt=""
-                    style={{
-                      width: "200px",
-                      height: "100%",
-                      objectFit: "cover",
-                    }}
+        {/* ── Items ── */}
+        <div className="rwng-list">
+          {ITEMS.map((item) => {
+            const wrong    = isWrong(item);
+            const value    = answers[item.id] || "";
+            const tColor   = showAns ? INPUT_ANSWER_COLOR : INPUT_TEXT_COLOR;
+            const uColor   = wrong ? INPUT_UNDERLINE_WRONG : INPUT_UNDERLINE_DEFAULT;
+            const disabled = isDisabled(item);
+
+            return (
+              <div key={item.id} className="rwng-row">
+                <span className="rwng-num">{item.id}</span>
+                <span className="rwng-cue">{item.cue}</span>
+                <div className="rwng-input-wrap">
+                  <input
+                    type="text"
+                    className={[
+                      "rwng-input",
+                      wrong   ? "rwng-input--wrong"  : "",
+                      showAns ? "rwng-input--answer" : "",
+                    ].filter(Boolean).join(" ")}
+                    value={value}
+                    disabled={disabled}
+                    onChange={(e) => handleChange(item.id, e.target.value)}
+                    style={{ borderBottomColor: uColor, color: tColor }}
+                    spellCheck={false}
+                    autoComplete="off"
                   />
-
-                  {/* نفس الكود تبعك بدون تغيير 👇 */}
-                  {showResult && answers[i] && (
-                    <div
-                      style={{
-                        position: "absolute",
-                        top: "-6px",
-                        left: "-6px",
-                        right: "-6px",
-                        bottom: "-6px",
-                        borderRadius: "16px",
-                        pointerEvents: "none",
-                      }}
-                    />
-                  )}
-
-                  {showResult &&
-                    answers[i] &&
-                    Number(answers[i]) !== Number(questions[i].answer) && (
-                      <div
-                        style={{
-                          position: "absolute",
-                          top: "5%",
-                          left: "-6px",
-                          transform: "translateY(-50%)",
-                          width: "22px",
-                          height: "22px",
-                          background: "#ef4444",
-                          color: "white",
-                          borderRadius: "50%",
-                          fontSize: "12px",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          fontWeight: "bold",
-                          border: "2px solid white",
-                          boxShadow: "0 2px 6px rgba(0,0,0,0.2)",
-                          pointerEvents: "none",
-                          zIndex: 999,
-                        }}
-                      >
-                        ✕
-                      </div>
-                    )}
-
-                  <Droppable droppableId={`image-${i}`}>
-                    {(provided) => (
-                      <div
-                        ref={provided.innerRef}
-                        {...provided.droppableProps}
-                        className="
-                          absolute top-0 left-0
-                          w-10 h-10
-                          border border-orange-400
-                          bg-white
-                          flex items-center justify-center
-                          rounded-xl rounded-bl-none
-                          font-bold
-                        "
-                      >
-                        <span style={{ color: "#2c5287" }}>
-                          {answers[i] && answers[i]}
-                        </span>
-
-                        {provided.placeholder}
-                      </div>
-                    )}
-                  </Droppable>
+                  {wrong && <div className="rwng-badge">✕</div>}
                 </div>
-              ))}
-            </div>
+              </div>
+            );
+          })}
+        </div>
 
-            {/* الجمل تحت */}
-            <div className="flex flex-col gap-6 text-left">
-              <p>Yesterday, Stella did many things.</p>
-
-              {questions.map((q) => (
-                <p key={q.id}>
-                  <span className="font-bold mr-2">{q.id}</span>
-                  {q.text}
-                </p>
-              ))}
-            </div>
-          </div>
-          {/* BUTTONS */}
+        {/* ── Buttons ── */}
+        <div className="rwng-buttons">
           <Button
-            handleShowAnswer={showAnswer}
-            handleStartAgain={reset}
-            checkAnswers={checkAnswers}
+            checkAnswers={handleCheck}
+            handleShowAnswer={handleShowAnswer}
+            handleStartAgain={handleReset}
           />
         </div>
       </div>
-    </DragDropContext>
+    </div>
   );
-};
-
-export default Unit8_Page6_Q3;
+}

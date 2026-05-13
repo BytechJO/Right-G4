@@ -1,7 +1,7 @@
 import { useState, useRef } from "react";
 import page_6 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 4 Joy Makes a Friend Folder/Page 28.png";
 import mainSound from "../../../assets/audio/ClassBook/Grade 4/cd1pg4-conversation-adult-lady-t_1cApuaJF.mp3";
-import vocSound from "../../../assets/audio/ClassBook/Grade 4/cd1pg4-conversation-adult-lady-t_1cApuaJF.mp3";
+import vocSound from "../../../assets/audio/ClassBook/Grade 4/cd20pg28-instruction-adult-lady_OHdtIIDe.mp3";
 import AudioWithCaption from "../../AudioWithCaption";
 import audioBtn from "../../../assets/Page 01/Audio btn.svg";
 import arrowBtn from "../../../assets/Page 01/Arrow.svg";
@@ -15,41 +15,119 @@ const Page6 = ({ openPopup }) => {
   const [activeAreaIndex, setActiveAreaIndex] = useState(null);
 
 const captions = [
-  { start: 0, end: 6.60, text: "Page four conversation. Listen and read, then say." },
-  { start: 6.60, end: 10.5, text: "Look at my new robot, Sarah. His name is Botboy." },
-  { start: 10.5, end: 15.00, text: "Hello, Botboy. I like your robot, Hansel." },
-  { start: 15.00, end: 19, text: "Thanks, Sarah. Robots will do many things in the future." },
-  { start: 19, end: 19.74, text: "Like what?" },
-  { start: 20.82, end: 28, text: "Robots will build buildings. They will drive firetrucks. They will do lots of things. " },
-  { start: 28, end: 31.40, text: "The robots will have a lot of work to do." },
-  { start: 31.80, end: 38.8, text: "Yes, but they won't mind. Robots don't get tired. They're machines after all." },
-  { start: 39.02, end: 41.50, text: "Do you think robots will do our homework?" },
-  { start: 42.50, end: 48.5, text: "Of course. We won't have to do homework anymore. The robots will do it for us." },
-  { start: 48.98, end: 52.8, text: "How will we learn? We must do our homework." },
-  { start:52.8, end: 58.74, text: "Oh, I didn't think about that. You're right. Well, at least they will clean our rooms." },
+  {
+    start: 0.20,
+    end: 4.76,
+    text: "Page 28, unit four vocabulary. Listen and repeat.",
+  },
+  {
+    start: 4.76,
+    end: 8.52,
+    text: "Find the words and expressions in the conversation above.",
+  },
+  {
+    start: 8.52,
+    end: 9.68,
+    text: "Picnic.",
+  },
+  {
+    start: 9.68,
+    end: 10.96,
+    text: "Cousin.",
+  },
+  {
+    start: 10.96,
+    end: 12.36,
+    text: "Grass.",
+  },
+  {
+    start: 12.36,
+    end: 13.60,
+    text: "Baby.",
+  },
+  {
+    start: 13.60,
+    end: 14.96,
+    text: "Glad.",
+  },
+  {
+    start: 14.96,
+    end: 16.38,
+    text: "Taller.",
+  },
+  {
+    start: 16.38,
+    end: 17.68,
+    text: "Shorter.",
+  },
+  {
+    start: 17.68,
+    end: 19.36,
+    text: "Youngest.",
+  },
+  {
+    start: 19.36,
+    end: 20.64,
+    text: "Leave.",
+  },
+  {
+    start: 20.64,
+    end: 21.96,
+    text: "Today.",
+  },
+  {
+    start: 21.96,
+    end: 23.32,
+    text: "Over.",
+  },
+  {
+    start: 24.36,
+    end: 25.08,
+    text: "I forgot.",
+  },
+  {
+    start: 25.08,
+    end: 26.32,
+    text: "Hey.",
+  },
+  {
+    start: 26.32,
+    end: 27.72,
+    text: "What are you doing?",
+  },
+  {
+    start: 27.72,
+    end: 29.48,
+    text: "A blast.",
+  },
+  {
+    start: 29.48,
+    end: 31.42,
+    text: "It sure does!",
+  },
 ];
- const wordTimingsVoc = [
-    { start: 8.8, end: 11.1 },
-    { start: 11.2, end: 13.6 },
-    { start: 13.94, end: 15.5 },
-    { start: 16.4, end: 17.6 },
+const wordTimingsVoc = [
+  { start: 8.52, end: 9.68 },   // Picnic
+  { start: 9.68, end: 10.96 },  // Cousin
+  { start: 10.96, end: 12.36 }, // Grass
+  { start: 12.36, end: 13.60 }, // Baby
 
-    { start: 19.04, end: 20.26 },
-    { start: 21.6, end: 22.94 },
-    { start: 24.2, end: 25.38 },
-    { start: 26.8, end: 28.64 },
+  { start: 13.60, end: 14.96 }, // Glad
+  { start: 14.96, end: 16.38 }, // Taller
+  { start: 16.38, end: 17.68 }, // Shorter
+  { start: 17.68, end: 19.36 }, // Youngest
 
-    { start: 29.719, end: 31.5 },
-    { start: 32.32, end: 34.18 },
-    { start: 35.06, end: 37.06 },
-    { start: 37.719, end: 39.579 },
-    { start: 40.36, end: 42.499 },
-    { start: 43.279, end: 45.459 },
+  { start: 19.36, end: 20.64 }, // Leave
+  { start: 20.64, end: 21.96 }, // Today
+  { start: 21.96, end: 23.32 }, // Over
+  { start: 24.36, end: 25.08 }, // I forgot
 
-    { start: 46.259, end: 48.459 },
-    { start: 49.52, end: 52.119 },
-  ];
+  { start: 25.08, end: 26.32 }, // Hey
+  { start: 26.32, end: 27.72 }, // What are you doing?
+  { start: 27.72, end: 29.48 }, // A blast
 
+  { start: 29.48, end: 31.42 }, // It sure does!
+];
   
   const clickableAreas = [
     {
@@ -246,27 +324,27 @@ const captions = [
                     subtitle="Listen and repeat. Find the words and expressions in the conversation above."
                     sound={vocSound}
                     captions={captions}
-                    stopAtSecond={8.5}
+                    stopAtSecond={2.8}
                                         wordTimings={wordTimingsVoc}
 
-                    words={[
-                      "alarm",
-                      "notebook",
-                      "pillow",
-                      "counting",
-                      "face",
-                      "figure",
-                      "reviewing",
-                      "pancakes",
-                      "starving",
-                      "actually",
-                      "mirror",
-                      "Uh-oh!",
-                      "fell asleep",
-                      "How did you know?",
-                      "right away",
-                      "on one side",
-                    ]}
+                words={[
+  "Picnic",
+  "Cousin",
+  "Grass",
+  "Baby",
+  "Glad",
+  "Taller",
+  "Shorter",
+  "Youngest",
+  "Leave",
+  "Today",
+  "Over",
+  "I forgot",
+  "Hey",
+  "What are you doing?",
+  "A blast",
+  "It sure does!",
+]}
                   />
                 </div>,
               )
@@ -296,7 +374,7 @@ const captions = [
                 "html",
                 <CriticalThinking
                   title={
-                    "Why did Hansel’s mom say he could do an extra math problem?"
+                    "What did Tom decide to do before leaving?"
                   }
                 />,
               )

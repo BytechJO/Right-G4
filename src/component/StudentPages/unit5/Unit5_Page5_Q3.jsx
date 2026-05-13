@@ -6,7 +6,7 @@ import ValidationAlert from "../../Popup/ValidationAlert";
 //  🖼️  IMAGE + 🔊 AUDIO
 // ─────────────────────────────────────────────
 import imgScene from "../../../assets/imgs/pages/Class Book/Right 4 Unit 5 Under the Weather Folder/Page 44/SVG/Asset 1.svg";
-import sound    from "../../../assets/audio/ClassBook/Grade 4/cd1pg20-story-adult-lady_Nf7yHD6t.mp3";
+import sound    from "../../../assets/audio/ClassBook/Grade 4/cd30pg44-instruction1-adult-lady_aY69WP8I.mp3";
 import QuestionAudioPlayer from "../../QuestionAudioPlayer";
 
 // ─────────────────────────────────────────────
@@ -19,21 +19,48 @@ const CIRCLE_WRONG     = "#ef4444";          // غلط — نفس اللون، �
 const DRAG_HIGHLIGHT   = "rgba(239,68,68,0.13)";
 const WRONG_BADGE_BG   = "#ef4444";
 const WRONG_BADGE_TEXT = "#ffffff";
-const BULLET_COLOR     = "#2b2b2b";
+const BULLET_COLOR     = "#ff9500ff";
 const LIST_TEXT_COLOR  = "#2b2b2b";
 
 // ─────────────────────────────────────────────
 //  📝  AUDIO CAPTIONS
 // ─────────────────────────────────────────────
 const captions = [
-  { start: 0.0,  end: 5.0,  text: "Listen, read, and circle the prepositional phrases." },
-  { start: 5.0,  end: 10.0, text: "On Tuesday, I cleaned the house." },
-  { start: 10.0, end: 16.0, text: "I packed my old clothes and books into a box." },
-  { start: 16.0, end: 22.0, text: "I washed the floors until they shined." },
-  { start: 22.0, end: 28.0, text: "I dusted everything in the house." },
-  { start: 28.0, end: 34.0, text: "I organized the books in the bookcase." },
-  { start: 34.0, end: 42.0, text: "The windows were easy and only needed a little soap and water from a bucket." },
-  { start: 42.0, end: 46.0, text: "The house looks great now." },
+  {
+    start: 0.10,
+    end: 9.54,
+    text: "Page 44, Write Activities Exercise C. Listen, read, and circle the prepositional phrases.",
+  },
+  {
+    start: 9.54,
+    end: 11.48,
+    text: "On Tuesday, I cleaned the house.",
+  },
+  {
+    start: 11.48,
+    end: 15.50,
+    text: "I packed my old clothes and books into a box.",
+  },
+  {
+    start: 15.50,
+    end: 19.42,
+    text: "I washed the floors until they shined.",
+  },
+  {
+    start: 19.42,
+    end: 24.96,
+    text: "I dusted everything in the house. I organized the books in the bookcase.",
+  },
+  {
+    start: 24.96,
+    end: 29.56,
+    text: "The windows were easy and only needed a little soap and water from a bucket.",
+  },
+  {
+    start: 29.56,
+    end: 31.46,
+    text: "The house looks great now.",
+  },
 ];
 
 // ─────────────────────────────────────────────
@@ -364,7 +391,6 @@ export default function WB_ListenReadCircle_QC() {
           position: relative;
           font-size: clamp(14px, 1.7vw, 20px);
           color: ${TEXT_COLOR};
-          line-height: 2.6;
           cursor: crosshair;
           white-space: nowrap;
           padding: 1px 2px;
@@ -380,7 +406,6 @@ export default function WB_ListenReadCircle_QC() {
           position: relative;
           display: inline-flex;
           align-items: baseline;
-          border: 2.5px solid transparent;
           padding: 1px clamp(5px, 0.7vw, 9px);
           transition: border-color 0.12s, background 0.12s;
           cursor: crosshair;
@@ -511,11 +536,10 @@ export default function WB_ListenReadCircle_QC() {
 
         {/* ── Audio ── */}
         <div style={{ marginTop: "4px" }}>
-          <QuestionAudioPlayer src={sound} captions={captions} stopAtSecond={5} />
+          <QuestionAudioPlayer src={sound} captions={captions} stopAtSecond={9.54} />
         </div>
 
         {/* ── Hint ── */}
-        <p className="lrc-hint">Drag over the words to circle the phrases.</p>
 
         {/* ── Paragraph ── */}
         <div className="lrc-para">

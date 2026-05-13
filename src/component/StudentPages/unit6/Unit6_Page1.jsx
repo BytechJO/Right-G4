@@ -1,7 +1,7 @@
 import { useState, useRef } from "react";
 import page_6 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 6 Ready for School Folder/Page 46.png";
-import mainSound from "../../../assets/audio/ClassBook/Grade 4/cd1pg4-conversation-adult-lady-t_1cApuaJF.mp3";
-import vocSound from "../../../assets/audio/ClassBook/Grade 4/cd1pg4-conversation-adult-lady-t_1cApuaJF.mp3";
+import mainSound from "../../../assets/audio/ClassBook/Grade 4/cd31pg46-conversation-adult-lady_r9sdpxTK.mp3";
+import vocSound from "../../../assets/audio/ClassBook/Grade 4/cd32pg46-instruction-adult-lady_BoKMGHKF.mp3";
 import AudioWithCaption from "../../AudioWithCaption";
 import audioBtn from "../../../assets/Page 01/Audio btn.svg";
 import arrowBtn from "../../../assets/Page 01/Arrow.svg";
@@ -15,43 +15,160 @@ const Page6 = ({ openPopup }) => {
   const [activeAreaIndex, setActiveAreaIndex] = useState(null);
 
 const captions = [
-  { start: 0, end: 6.60, text: "Page four conversation. Listen and read, then say." },
-  { start: 6.60, end: 10.5, text: "Look at my new robot, Sarah. His name is Botboy." },
-  { start: 10.5, end: 15.00, text: "Hello, Botboy. I like your robot, Hansel." },
-  { start: 15.00, end: 19, text: "Thanks, Sarah. Robots will do many things in the future." },
-  { start: 19, end: 19.74, text: "Like what?" },
-  { start: 20.82, end: 28, text: "Robots will build buildings. They will drive firetrucks. They will do lots of things. " },
-  { start: 28, end: 31.40, text: "The robots will have a lot of work to do." },
-  { start: 31.80, end: 38.8, text: "Yes, but they won't mind. Robots don't get tired. They're machines after all." },
-  { start: 39.02, end: 41.50, text: "Do you think robots will do our homework?" },
-  { start: 42.50, end: 48.5, text: "Of course. We won't have to do homework anymore. The robots will do it for us." },
-  { start: 48.98, end: 52.8, text: "How will we learn? We must do our homework." },
-  { start:52.8, end: 58.74, text: "Oh, I didn't think about that. You're right. Well, at least they will clean our rooms." },
-  { start:52.8, end: 58.74, text: "Oh, I didn't think about that. You're right. Well, at least they will clean our rooms." },
-  { start:52.8, end: 58.74, text: "Oh, I didn't think about that. You're right. Well, at least they will clean our rooms." },
+  {
+    start: 0.26,
+    end: 5.58,
+    text: "Page 46, Conversation. Listen and read, then say.",
+  },
+  {
+    start: 5.78,
+    end: 10.80,
+    text: "All set for school, John? You don't want to be late for the bus.",
+  },
+  {
+    start: 11.00,
+    end: 15.76,
+    text: "Yes, Mom, I'm almost ready. I just have to put this book in my backpack.",
+  },
+  {
+    start: 15.96,
+    end: 20.46,
+    text: "Okay, dear. You should wake up earlier. What's this, John?",
+  },
+  {
+    start: 20.66,
+    end: 28.00,
+    text: "Oh, yeah. That's my science homework. We have a test today. I'll pack that in my backpack. Thanks.",
+  },
+  {
+    start: 28.16,
+    end: 30.66,
+    text: "Aren't you forgetting something else?",
+  },
+  {
+    start: 30.86,
+    end: 32.00,
+    text: "What, Mom?",
+  },
+  {
+    start: 32.18,
+    end: 36.40,
+    text: "You're forgetting your trainers. You should wear your trainers for gym.",
+  },
+  {
+    start: 36.60,
+    end: 38.78,
+    text: "Yes, I'll take those too.",
+  },
+  {
+    start: 38.98,
+    end: 44.00,
+    text: "What about these, John? You need your keys to get into the house when you come home.",
+  },
+  {
+    start: 44.20,
+    end: 51.18,
+    text: "Oh, yeah, that's right. I can't believe I forgot. Thanks, Mom. I have everything now, and I'm ready for school.",
+  },
+  {
+    start: 51.38,
+    end: 52.44,
+    text: "Have a good day at school.",
+  },
+];
+const captionsV = [
+  {
+    start: 0.26,
+    end: 3.54,
+    text: "Page 46, Unit 6, Vocabulary.",
+  },
+  {
+    start: 3.54,
+    end: 9.46,
+    text: "Listen and repeat. Find the words and expressions in the conversation above.",
+  },
+  {
+    start: 9.46,
+    end: 10.62,
+    text: "Science.",
+  },
+  {
+    start: 10.62,
+    end: 11.86,
+    text: "Test.",
+  },
+  {
+    start: 11.86,
+    end: 13.28,
+    text: "Trainers.",
+  },
+  {
+    start: 13.28,
+    end: 14.46,
+    text: "Gym.",
+  },
+  {
+    start: 14.46,
+    end: 16.04,
+    text: "Keys.",
+  },
+  {
+    start: 16.04,
+    end: 17.32,
+    text: "Late.",
+  },
+  {
+    start: 17.32,
+    end: 18.62,
+    text: "Pack.",
+  },
+  {
+    start: 18.62,
+    end: 19.92,
+    text: "Where?",
+  },
+  {
+    start: 19.92,
+    end: 21.52,
+    text: "All set for school?",
+  },
+  {
+    start: 22.56,
+    end: 23.74,
+    text: "I'm almost ready.",
+  },
+  {
+    start: 25.06,
+    end: 26.02,
+    text: "Okay, dear",
+  },
+   {
+    start: 26.02
+,
+    end: 28.14,
+    text: " What about these?",
+  },
+];
+
+const wordTimingsVoc = [
+  { start: 9.46, end: 10.62 },  // Science
+  { start: 10.62, end: 11.86 }, // Test
+  { start: 11.86, end: 13.28 }, // Trainers
+  { start: 13.28, end: 14.46 }, // Gym
+  { start: 14.46, end: 16.04 }, // Keys
+  { start: 16.04, end: 17.32 }, // Late
+  { start: 17.32, end: 18.62 }, // Pack
+  { start: 18.62, end: 19.92 }, // Where?
+  { start: 19.92, end: 21.52 }, // All set for school?
+  { start: 22.56, end: 23.74 }, // I'm almost ready.
+  { start: 25.06, end:26.02
+ },
+  { start: 26.02
+, end: 28.14 },
+
 
 ];
- const wordTimingsVoc = [
-    { start: 8.8, end: 11.1 },
-    { start: 11.2, end: 13.6 },
-    { start: 13.94, end: 15.5 },
-    { start: 16.4, end: 17.6 },
 
-    { start: 19.04, end: 20.26 },
-    { start: 21.6, end: 22.94 },
-    { start: 24.2, end: 25.38 },
-    { start: 26.8, end: 28.64 },
-
-    { start: 29.719, end: 31.5 },
-    { start: 32.32, end: 34.18 },
-    { start: 35.06, end: 37.06 },
-    { start: 37.719, end: 39.579 },
-    { start: 40.36, end: 42.499 },
-    { start: 43.279, end: 45.459 },
-
-    { start: 46.259, end: 48.459 },
-    { start: 49.52, end: 52.119 },
-  ];
 
   
   const clickableAreas = [
@@ -132,13 +249,7 @@ const captions = [
   y2: 59.4,
   slice: { startFrom: captions[11].start, stopAt: captions[11].end },
 },
-{
-  x1: 55.9,
-  y1: 70.99,
-  x2: 81.7,
-  y2: 73.79,
-  slice: { startFrom: captions[12].start, stopAt: captions[12].end },
-},
+
   ];
 
 
@@ -274,28 +385,24 @@ const captions = [
                     title="VOCABULARY"
                     subtitle="Listen and repeat. Find the words and expressions in the conversation above."
                     sound={vocSound}
-                    captions={captions}
-                    stopAtSecond={8.5}
+                    captions={captionsV}
+                    stopAtSecond={9.5}
                                         wordTimings={wordTimingsVoc}
 
-                    words={[
-                      "alarm",
-                      "notebook",
-                      "pillow",
-                      "counting",
-                      "face",
-                      "figure",
-                      "reviewing",
-                      "pancakes",
-                      "starving",
-                      "actually",
-                      "mirror",
-                      "Uh-oh!",
-                      "fell asleep",
-                      "How did you know?",
-                      "right away",
-                      "on one side",
-                    ]}
+                  words={[
+  "Science",
+  "Test",
+  "Trainers",
+  "Gym",
+  "Keys",
+  "Late",
+  "Pack",
+  "Where?",
+  "All set for school?",
+  "I'm almost ready.",
+  "Okay, dear. ",
+ " What about these?",
+]}
                   />
                 </div>,
               )
@@ -325,7 +432,7 @@ const captions = [
                 "html",
                 <CriticalThinking
                   title={
-                    "Why did Hansel’s mom say he could do an extra math problem?"
+                    "Why does Jhon need his trainers?"
                   }
                 />,
               )

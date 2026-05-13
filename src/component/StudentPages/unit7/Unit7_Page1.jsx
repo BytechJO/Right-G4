@@ -1,7 +1,7 @@
 import { useState, useRef } from "react";
 import page_6 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 7  The Alligator Scare Folder/Page 58.png";
-import mainSound from "../../../assets/audio/ClassBook/Grade 4/cd1pg4-conversation-adult-lady-t_1cApuaJF.mp3";
-import vocSound from "../../../assets/audio/ClassBook/Grade 4/cd1pg4-conversation-adult-lady-t_1cApuaJF.mp3";
+import mainSound from "../../../assets/audio/ClassBook/Grade 4/cd36pg58-conversation-adult-lady_dViJPDTz.mp3";
+import vocSound from "../../../assets/audio/ClassBook/Grade 4/cd37pg58-instruction-adult-lady_vkT2GRbp.mp3";
 import AudioWithCaption from "../../AudioWithCaption";
 import audioBtn from "../../../assets/Page 01/Audio btn.svg";
 import arrowBtn from "../../../assets/Page 01/Arrow.svg";
@@ -13,90 +13,231 @@ const Page6 = ({ openPopup }) => {
   const [hoveredAreaIndex, setHoveredAreaIndex] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [activeAreaIndex, setActiveAreaIndex] = useState(null);
-
 const captions = [
-  { start: 0, end: 6.60, text: "Page four conversation. Listen and read, then say." },
-  { start: 6.60, end: 10.5, text: "Look at my new robot, Sarah. His name is Botboy." },
-  { start: 10.5, end: 15.00, text: "Hello, Botboy. I like your robot, Hansel." },
-  { start: 15.00, end: 19, text: "Thanks, Sarah. Robots will do many things in the future." },
-  { start: 19, end: 19.74, text: "Like what?" },
-  { start: 20.82, end: 28, text: "Robots will build buildings. They will drive firetrucks. They will do lots of things. " },
-  { start: 28, end: 31.40, text: "The robots will have a lot of work to do." },
-  { start: 31.80, end: 38.8, text: "Yes, but they won't mind. Robots don't get tired. They're machines after all." },
-  { start: 39.02, end: 41.50, text: "Do you think robots will do our homework?" },
-  { start: 42.50, end: 48.5, text: "Of course. We won't have to do homework anymore. The robots will do it for us." },
-  { start: 48.98, end: 52.8, text: "How will we learn? We must do our homework." },
-  { start:52.8, end: 58.74, text: "Oh, I didn't think about that. You're right. Well, at least they will clean our rooms." },
-  { start:52.8, end: 58.74, text: "Oh, I didn't think about that. You're right. Well, at least they will clean our rooms." },
-  { start:52.8, end: 58.74, text: "Oh, I didn't think about that. You're right. Well, at least they will clean our rooms." },
-
+  {
+    start: 0.28,
+    end: 6.00,
+    text: "Page 58, Conversation. Listen and read, then say.",
+  },
+  {
+    start: 7.24,
+    end: 12.38,
+    text: "What's the matter, Hansel? You look like something is bothering you.",
+  },
+  {
+    start: 12.58,
+    end: 16.02,
+    text: "I had an awful, strange dream yesterday.",
+  },
+  {
+    start: 16.22,
+    end: 19.22,
+    text: "I have scary dreams, too. I don't like them.",
+  },
+  {
+    start: 20.46,
+    end: 22.30,
+    text: "What happened in the dream?",
+  },
+  {
+    start: 22.50,
+    end: 26.10,
+    text: "There was a big alligator chasing me in the middle of nowhere.",
+  },
+  {
+    start: 27.40,
+    end: 30.44,
+    text: "Wow, that is scary. What happened next?",
+  },
+  {
+    start: 31.66,
+    end: 38.32,
+    text: "I was running as fast as I could, but I stumbled over a rock and fell into a pond.",
+  },
+  {
+    start: 38.52,
+    end: 41.78,
+    text: "Oh, my. I hope you were okay.",
+  },
+  {
+    start: 41.98,
+    end: 45.82,
+    text: "I was mostly, but guess what happened next.",
+  },
+  {
+    start: 46.02,
+    end: 47.00,
+    text: "What?",
+  },
+  {
+    start: 47.14,
+    end: 51.86,
+    text: "There were two frogs sitting on a rock, singing a song.",
+  },
+  {
+    start: 52.06,
+    end: 54.10,
+    text: "What a scary, funny dream.",
+  },
 ];
- const wordTimingsVoc = [
-    { start: 8.8, end: 11.1 },
-    { start: 11.2, end: 13.6 },
-    { start: 13.94, end: 15.5 },
-    { start: 16.4, end: 17.6 },
+const captionsV = [
+  {
+    start: 0.30,
+    end: 3.46,
+    text: "Page 58, Unit 7, Vocabulary.",
+  },
+  {
+    start: 5.08,
+    end: 10.46,
+    text: "Listen and repeat. Find the words and expressions in the conversation above.",
+  },
+  {
+    start: 12.36,
+    end: 13.60,
+    text: "Dream.",
+  },
+  {
+    start: 13.60,
+    end: 14.26,
+    text: "Alligator.",
+  },
+  {
+    start: 14.26,
+    end: 15.36,
+    text: "Rock.",
+  },
+  {
+    start: 15.36,
+    end: 16.72,
+    text: "Pond.",
+  },
+  {
+    start: 16.72,
+    end: 18.26,
+    text: "Frogs.",
+  },
+  {
+    start: 18.26,
+    end: 19.62,
+    text: "Song.",
+  },
+  {
+    start: 19.62,
+    end: 21.20,
+    text: "Strange.",
+  },
+  {
+    start: 21.20,
+    end: 23.68,
+    text: "Scary.",
+  },
+  {
+    start: 23.68,
+    end: 25.16,
+    text: "Chasing.",
+  },
+  {
+    start: 25.16,
+    end: 25.90,
+    text: "Stumbled.",
+  },
+  {
+    start: 25.90,
+    end: 27.16,
+    text: "Guess.",
+  },
+  {
+    start: 28.22,
+    end: 29.28,
+    text: "I don't like them.",
+  },
+  {
+    start: 29.28,
+    end: 31.56,
+    text: "In the middle of nowhere.",
+  },
+  {
+    start: 32.92,
+    end: 34.26,
+    text: "What happened next?",
+  },
+  {
+    start: 35.46,
+    end: 36.72,
+    text: "Oh my!",
+  },
+  {
+    start: 38.02,
+    end: 39.04,
+    text: "I was mostly.",
+  },
+];
 
-    { start: 19.04, end: 20.26 },
-    { start: 21.6, end: 22.94 },
-    { start: 24.2, end: 25.38 },
-    { start: 26.8, end: 28.64 },
+const wordTimingsVoc = [
+  { start: 12.36, end: 13.60 }, // Dream
+  { start: 13.60, end: 14.26 }, // Alligator
+  { start: 14.26, end: 15.36 }, // Rock
+  { start: 15.36, end: 16.72 }, // Pond
+  { start: 16.72, end: 18.26 }, // Frogs
+  { start: 18.26, end: 19.62 }, // Song
+  { start: 19.62, end: 21.20 }, // Strange
+  { start: 21.20, end: 23.68 }, // Scary
+  { start: 23.68, end: 25.16 }, // Chasing
+  { start: 25.16, end: 25.90 }, // Stumbled
+  { start: 25.90, end: 27.16 }, // Guess
+  { start: 28.22, end: 29.28 }, // I don't like them
+  { start: 29.28, end: 31.56 }, // In the middle of nowhere
+  { start: 32.92, end: 34.26 }, // What happened next?
+  { start: 35.46, end: 36.72 }, // Oh my!
+  { start: 38.02, end: 39.04 }, // I was mostly
+];
 
-    { start: 29.719, end: 31.5 },
-    { start: 32.32, end: 34.18 },
-    { start: 35.06, end: 37.06 },
-    { start: 37.719, end: 39.579 },
-    { start: 40.36, end: 42.499 },
-    { start: 43.279, end: 45.459 },
 
-    { start: 46.259, end: 48.459 },
-    { start: 49.52, end: 52.119 },
-  ];
 
   // UNIT 7
 const clickableAreas = [
   // 1
-  { x1: 14, y1: 22.1, x2: 46.3, y2: 26.7, slice: { startFrom: 0, stopAt: 0 } },
+  { x1: 14, y1: 22.1, x2: 46.3, y2: 26.7, slice: { startFrom: 7.24, stopAt: 12.58 } },
 
   // 2
-  { x1: 6.1, y1: 40.6, x2: 21.1, y2: 46.8, slice: { startFrom: 0, stopAt: 0 } },
+  { x1: 6.1, y1: 40.6, x2: 21.1, y2: 46.8, slice: { startFrom: 12.58, stopAt: 16.22 } },
 
   // 3
-  { x1: 21.1, y1: 38.9, x2: 33.6, y2: 45.5, slice: { startFrom: 0, stopAt: 0 } },
+  { x1: 21.1, y1: 38.9, x2: 33.6, y2: 45.5, slice: { startFrom: 16.22, stopAt: 19.42 } },
 
   // 4
-  { x1: 34.1, y1: 42.3, x2: 49.1, y2: 46.6, slice: { startFrom: 0, stopAt: 0 } },
+  { x1: 34.1, y1: 42.3, x2: 49.1, y2: 46.6, slice: { startFrom: 20.46, stopAt: 22.50 } },
 
   // 5
-  { x1: 50.1, y1: 40.8, x2: 72.3, y2: 47.1, slice: { startFrom: 0, stopAt: 0 } },
+  { x1: 50.1, y1: 40.8, x2: 72.3, y2: 47.1, slice: { startFrom: 22.50, stopAt: 26.30 } },
 
   // 6
-  { x1: 73.1, y1: 43.4, x2: 94.2, y2: 47.7, slice: { startFrom: 0, stopAt: 0 } },
+  { x1: 73.1, y1: 43.4, x2: 94.2, y2: 47.7, slice: { startFrom: 27.40, stopAt: 30.64 } },
 
   // 7
-  { x1: 9.4, y1: 47.4, x2: 47.4, y2: 51.7, slice: { startFrom: 0, stopAt: 0 } },
+  { x1: 9.4, y1: 47.4, x2: 47.4, y2: 51.7, slice: { startFrom: 31.66, stopAt: 38.52 } },
 
   // 8
-{
-  x1: 55.5,
-  y1: 48.7,
-  x2: 78.9,
-  y2: 53.1,
-  slice: { startFrom: 0, stopAt: 0 },
-},
+  {
+    x1: 55.5,
+    y1: 48.7,
+    x2: 78.9,
+    y2: 53.1,
+    slice: { startFrom: 38.52, stopAt: 41.98 },
+  },
+
   // 9
-  { x1: 78.5, y1: 52.4, x2: 87.4, y2: 55.1, slice: { startFrom: 0, stopAt: 0 } },
+  { x1: 78.5, y1: 52.4, x2: 87.4, y2: 55.1, slice: { startFrom: 41.98, stopAt: 46.02 } },
 
   // 10
-  { x1: 78.5, y1: 52.4, x2: 87.4, y2: 55.1, slice: { startFrom: 0, stopAt: 0 } },
+  { x1: 78.5, y1: 52.4, x2: 87.4, y2: 55.1, slice: { startFrom: 46.02, stopAt: 47.14 } },
 
   // 11
-  { x1: 51.5, y1: 66.8, x2: 70.7, y2: 73, slice: { startFrom: 0, stopAt: 0 } },
+  { x1: 51.5, y1: 66.8, x2: 70.7, y2: 73, slice: { startFrom: 47.14, stopAt: 52.06 } },
 
   // 12
-  { x1: 78.1, y1: 68.6, x2: 91.5, y2: 72.8, slice: { startFrom: 0, stopAt: 0 } },
+  { x1: 78.1, y1: 68.6, x2: 91.5, y2: 72.8, slice: { startFrom: 52.06, stopAt: 54.30 } },
 ];
-
 
   const handleImageClick = (e) => {
     const rect = e.target.getBoundingClientRect();
@@ -230,28 +371,27 @@ const clickableAreas = [
                     title="VOCABULARY"
                     subtitle="Listen and repeat. Find the words and expressions in the conversation above."
                     sound={vocSound}
-                    captions={captions}
-                    stopAtSecond={8.5}
+                    captions={captionsV}
+                    stopAtSecond={3.46}
                                         wordTimings={wordTimingsVoc}
-
-                    words={[
-                      "alarm",
-                      "notebook",
-                      "pillow",
-                      "counting",
-                      "face",
-                      "figure",
-                      "reviewing",
-                      "pancakes",
-                      "starving",
-                      "actually",
-                      "mirror",
-                      "Uh-oh!",
-                      "fell asleep",
-                      "How did you know?",
-                      "right away",
-                      "on one side",
-                    ]}
+words={[
+  "Dream",
+  "Alligator",
+  "Rock",
+  "Pond",
+  "Frogs",
+  "Song",
+  "Strange",
+  "Scary",
+  "Chasing",
+  "Stumbled",
+  "Guess",
+  "I don't like them",
+  "In the middle of nowhere",
+  "What happened next?",
+  "Oh my!",
+  "I was mostly",
+]}
                   />
                 </div>,
               )
@@ -281,7 +421,7 @@ const clickableAreas = [
                 "html",
                 <CriticalThinking
                   title={
-                    "Why did Hansel’s mom say he could do an extra math problem?"
+                    "Why was Hansel's dream funny and scary at the same time?"
                   }
                 />,
               )

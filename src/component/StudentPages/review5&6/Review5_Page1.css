@@ -1,8 +1,8 @@
 .click-icon-review5-page1-2 {
-    position: absolute;
+position: absolute;
     padding: 5px;
-    top: 54.5%;
-    left: 83%;
+    top: 38.5%;
+    left: 35%;
     cursor: pointer;
 }
 .click-icon-review5-page1-1 {
@@ -12,15 +12,12 @@
     left: 55%;
     cursor: pointer;
 }
-.click-icon-review5-page1-4 {
-  position: absolute;
-  /* background-color: #6bcff6;
-  border-radius: 20px;
-  border: rgb(255, 255, 255) solid 3px; */
-  padding: 5px;
-  bottom: 21%;
-  left: 38.5%;
-  cursor: pointer;
+.click-icon-review5-page1-3 {
+    position: absolute;
+    padding: 5px;
+    top: 54.5%;
+    left: 83%;
+    cursor: pointer;
 }
 @media screen and (max-width: 1024px) and (max-height: 600px) {
   .click-icon-review5-page1-1 {

@@ -7,7 +7,7 @@ import pauseBtn from "../../../assets/Page 01/Right Video Button.svg";
 // 🖼️ استبدل بمسار الصورة الصحيح
 import pageImage from"../../../assets/imgs/pages/Class Book/Right 4 Unit 6 Ready for School Folder/Page 56.png";
 // 🔊 صوت واحد بس - نفس الصوت للكل والمناطق
-import soundAll from "../../../assets/audio/ClassBook/Grade 4/cd1pg20-story-adult-lady_Nf7yHD6t.mp3";
+import soundAll from "../../../assets/audio/ClassBook/Grade 4/cd3pg56-story-adult-lady_q6L04ON2.mp3";
 
 // 🎬 استبدل بمسار الفيديو الصحيح
 import videoFile from "../../../assets/videos/reading/grade 3 unit 8 page 74-75 reading.mp4";
@@ -26,129 +26,144 @@ const Reading_NewPage = ({ openPopup }) => {
   // 📝 Captions للصوت الكامل - عدّل النصوص والتوقيتات
 const captions = [
   {
-    start: 0.30,
-    end: 2.52,
-    text: "Page 20. Amy's turn.",
+    start: 0.18,
+    end: 2.84,
+    text: "Page 56. Tricky Rabbit.",
   },
   {
-    start: 2.52,
-    end: 5.04,
-    text: "Amy plays on a baseball team.",
+    start: 2.84,
+    end: 5.94,
+    text: "Rabbit is one of the trickiest animals.",
   },
   {
-    start: 5.04,
-    end: 7.94,
-    text: "On Saturday, her team will have a big game.",
+    start: 5.94,
+    end: 8.78,
+    text: "Rabbit lived on an island in the ocean.",
   },
   {
-    start: 7.94,
-    end: 13.28,
-    text: "Amy can't wait. On Saturday, Amy's parents take her to the baseball field.",
+    start: 8.78,
+    end: 12.88,
+    text: "One day, Rabbit was sitting on the side of a mountain.",
   },
   {
-    start: 13.28,
-    end: 15.64,
-    text: "She's afraid she's going to be late.",
+    start: 12.88,
+    end: 14.54,
+    text: "He was making a rope.",
   },
   {
-    start: 15.64,
-    end: 19.30,
-    text: "She looks at the clock. It's only two o'clock.",
+    start: 14.54,
+    end: 17.06,
+    text: "Elephant stopped to say hello.",
   },
   {
-    start: 19.30,
-    end: 23.08,
-    text: "She's on time, but everyone is already there.",
+    start: 17.06,
+    end: 28.58,
+    text: "\"Hello, Rabbit,\" said Elephant. \"Let's go on a picnic together.\" \"Not now, Elephant,\" said Rabbit. \"I'm going to catch a whale for dinner.\"",
   },
   {
-    start: 23.08,
-    end: 25.56,
-    text: "They're stretching and playing catch.",
+    start: 29.67,
+    end: 32.04,
+    text: "\"A whale?\" asked Elephant.",
   },
   {
-    start: 25.56,
-    end: 29.80,
-    text: "Amy feels worried. It's a great day for baseball.",
+    start: 32.04,
+    end: 36.56,
+    text: "\"You're too small to catch a whale.\" \"Will you help me?",
   },
   {
-    start: 29.80,
-    end: 31.92,
-    text: "Many people come to watch the game.",
+    start: 36.56,
+    end: 43.17,
+    text: "Maybe we can catch him together,\" said Rabbit. Elephant smiled and let Rabbit tie a rope around him.",
   },
   {
-    start: 31.92,
-    end: 39.50,
-    text: "\"There are many people watching,\" thinks Amy. \"I hope I'm going to do well.\" The game starts.",
+    start: 43.17,
+    end: 54.46,
+    text: "\"Wait here until I come back. You shouldn't move,\" said Rabbit. \"I will put the rest of this rope around Whale.\" Rabbit took the other end of the rope and ran to the beach.",
   },
   {
-    start: 39.50,
-    end: 42.76,
-    text: "The first batter on the other team hits the ball to Amy.",
+    start: 55.67,
+    end: 63.98,
+    text: "\"Hello, Whale. I need your help,\" shouted Rabbit. \"What do you need from me?\" asked Whale.",
   },
   {
-    start: 42.76,
-    end: 48.96,
-    text: "She misses the ball. Amy is very worried now. \"Will I hit the ball?\" she thinks.",
+    start: 63.98,
+    end: 69.80,
+    text: "\"There is a large rock over the door of my home, and I can't move it,\" explained Rabbit.",
   },
   {
-    start: 48.96,
-    end: 53.72,
-    text: "\"Hey, don't let it get you down,\" says her teammate, Jasmine.",
+    start: 69.80,
+    end: 76.07,
+    text: "\"I can't come onto land, so how can I help?\" asked Whale.",
   },
   {
-    start: 53.72,
-    end: 58.62,
-    text: "\"You will get the next one. Cheer up.\" Now Amy's team is batting.",
+    start: 76.07,
+    end: 81.25,
+    text: "Rabbit told Whale to tie the end of the rope around his huge body.",
   },
   {
-    start: 58.62,
-    end: 60.06,
-    text: "It's Amy's turn.",
+    start: 81.25,
+    end: 86.56,
+    text: "\"When I yell, you should pull as hard as you can,\" said Rabbit.",
   },
   {
-    start: 60.06,
-    end: 63.24,
-    text: "She swings hard and hits the ball into the air.",
+    start: 86.56,
+    end: 96.30,
+    text: "Rabbit ran back to Elephant and shouted excitedly, \"I have him. Okay,\" shouted Rabbit to Whale and Elephant.",
   },
   {
-    start: 63.24,
-    end: 66.26,
-    text: "It soars into the sky like a rocket.",
+    start: 96.30,
+    end: 99.04,
+    text: "\"You can pull now. Pull.\"",
   },
   {
-    start: 66.26,
-    end: 68.58,
-    text: "Amy races around the bases.",
+    start: 100.34,
+    end: 102.28,
+    text: "Elephant pulled as hard as he could.",
   },
   {
-    start: 68.58,
-    end: 70.56,
-    text: "The other team can't catch the ball.",
+    start: 102.28,
+    end: 105.94,
+    text: "He pulled and pulled, but the rope wouldn't move.",
   },
   {
-    start: 70.56,
-    end: 72.44,
-    text: "She touches third base.",
+    start: 105.94,
+    end: 112.50,
+    text: "Whale pulled as hard as he could. He pulled and pulled, but the rope wouldn't move.",
   },
   {
-    start: 72.44,
-    end: 74.74,
-    text: "She races all the way to the home plate.",
+    start: 113.53,
+    end: 117.80,
+    text: "\"Keep pulling, Elephant,\" shouted Rabbit. \"Keep pulling, Whale.\"",
   },
   {
-    start: 74.74,
-    end: 79.90,
-    text: "It's a home run. \"Hooray! Hooray, Amy!\" everyone cries.",
+    start: 117.80,
+    end: 120.32,
+    text: "Elephant gave one last pull.",
   },
   {
-    start: 79.90,
-    end: 84.08,
-    text: "Amy just smiles. She isn't worried anymore.",
+    start: 120.32,
+    end: 125.00,
+    text: "Whale gave one last pull. Suddenly, the rope broke.",
   },
   {
-    start: 84.08,
-    end: 85.54,
-    text: "She has done her best.",
+    start: 125.00,
+    end: 128.38,
+    text: "Elephant rolled up one side of the mountain.",
+  },
+  {
+    start: 128.38,
+    end: 133.34,
+    text: "Whale shot halfway across the ocean. What did Rabbit do?",
+  },
+  {
+    start: 134.64,
+    end: 136.72,
+    text: "Rabbit laughed and laughed.",
+  },
+  {
+    start: 136.72,
+    end: 140.94,
+    text: "He had tricked two of the largest animals in the world.",
   },
 ];
   // 📍 مناطق النقر - كل منطقة عندها startFrom و stopAt من الصوت الأساسي
@@ -158,7 +173,9 @@ const clickableAreas = [
     y1: 31.9,
     x2: 54.11,
     y2: 50.6,
-    slice: { startFrom: 0, stopAt: 0 },
+    slice: { startFrom: 
+
+2.84, stopAt: 28.58 },
   },
 
   {
@@ -166,7 +183,8 @@ const clickableAreas = [
     y1: 32.07,
     x2: 94.03,
     y2: 50.47,
-    slice: { startFrom: 0, stopAt: 0 },
+    slice: { startFrom: 29.67
+, stopAt: 54.46 },
   },
 
   {
@@ -174,7 +192,8 @@ const clickableAreas = [
     y1: 82,
     x2: 53.52,
     y2: 96.2,
-    slice: { startFrom: 0, stopAt: 0 },
+    slice: { startFrom: 55.67
+, stopAt: 76.07 },
   },
 
   {
@@ -182,7 +201,7 @@ const clickableAreas = [
     y1: 81.9,
     x2: 93.91,
     y2: 95.9,
-    slice: { startFrom: 0, stopAt: 0 },
+    slice: { startFrom: 76.07, stopAt:  99.04 },
   },
 ];
   // ======================================================
@@ -271,7 +290,7 @@ const clickableAreas = [
             openPopup(
               "audio",
               <div style={{ display: "flex", justifyContent: "center", alignContent: "center" }}>
-                <AudioWithCaption src={soundAll} captions={captions}            stopAtSecond={2.6}
+                <AudioWithCaption src={soundAll} captions={captions}            stopAtSecond={2.84}
 />
               </div>
             );

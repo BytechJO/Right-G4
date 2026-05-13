@@ -8,7 +8,7 @@ import pauseBtn from "../../../assets/Page 01/Right Video Button.svg";
 import pageImage from"../../../assets/imgs/pages/Class Book/Right 4 Unit 4 Joy Makes a Friend Folder/Page 39.png";
 
 // 🔊 صوت واحد بس - نفس الصوت للكل والمناطق
-import soundAll from "../../../assets/audio/ClassBook/Grade 4/cd1pg20-story-adult-lady_Nf7yHD6t.mp3";
+import soundAll from "../../../assets/audio/ClassBook/Grade 4/cd26pg38-story-adult-lady_ASefxHsk.mp3";
 
 // 🎬 استبدل بمسار الفيديو الصحيح
 import videoFile from "../../../assets/videos/reading/grade 3 unit 8 page 74-75 reading.mp4";
@@ -159,13 +159,13 @@ const captions = [
   y1: 31,
   x2: 51,
   y2: 45.7,
-      slice: { startFrom: 2.52, stopAt: 9 }, // ⏱️ عدّل التوقيتات بالثواني
+      slice: { startFrom: 34.18, stopAt: 50.5}, // ⏱️ عدّل التوقيتات بالثواني
     },
     {
 x1: 52,
 y1: 31,
 x2: 90.8,
-y2: 45.5,  slice: { startFrom: 9, stopAt: 27 }, // ⏱️ عدّل التوقيتات بالثواني
+y2: 45.5,  slice: { startFrom: 51.52, stopAt: 66.26 }, // ⏱️ عدّل التوقيتات بالثواني
     },
 
         {
@@ -173,7 +173,7 @@ y2: 45.5,  slice: { startFrom: 9, stopAt: 27 }, // ⏱️ عدّل التوقي�
   y1: 54,
   x2: 90.8,
   y2: 68.5,
-      slice: { startFrom: 27, stopAt: 57 }, // ⏱️ عدّل التوقيتات بالثواني
+      slice: { startFrom: 66.26, stopAt: 85.54 }, // ⏱️ عدّل التوقيتات بالثواني
     }, 
   ];
   // ======================================================

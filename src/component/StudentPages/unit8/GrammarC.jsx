@@ -1,67 +1,155 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import ValidationAlert from "../../Popup/ValidationAlert";
 import { FaCheck, FaRedo, FaEye } from "react-icons/fa";
 
-import img1 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 6 Ready for School Folder/Page 48/SVG/Asset 16.svg";
-import img2 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 6 Ready for School Folder/Page 48/SVG/Asset 17.svg";
-import img3 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 6 Ready for School Folder/Page 48/SVG/Asset 18.svg";
+import img1 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 8 I Lived in the Library Folder/Page 66/SVG/Asset 10.svg"; // He fixed the car
+import img2 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 8 I Lived in the Library Folder/Page 66/SVG/Asset 10.svg"; // She cooked soup
+import img3 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 8 I Lived in the Library Folder/Page 66/SVG/Asset 10.svg"; // I painted a picture
+import img4 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 8 I Lived in the Library Folder/Page 66/SVG/Asset 10.svg"; // They played soccer
+
+/**
+ * Layout matches the book page exactly:
+ *
+ *   Sentences (left)          Images (right, 2×2 grid)
+ *   ─────────────────         ──────────────────────────
+ *   1  They played soccer. ●  ● [img1: car]   ● [img2: soup]
+ *   2  He fixed the car.   ●  ● [img3: paint] ● [img4: soccer]
+ *   3  I painted a picture.●
+ *   4  She cooked soup.    ●
+ *
+ * Correct answers:
+ *   1 → img4  (soccer)
+ *   2 → img1  (car)
+ *   3 → img3  (painting)
+ *   4 → img2  (soup)
+ *
+ * Error feedback: ONLY the sentence dot turns red. No badge, no animation.
+ */
 
 const GrammarC = () => {
-  const questions = [
-    {
-      id: 1,
-      image: img1,
-      sentence: "You shouldn't eat much sugar.",
-      correct: 0,
-    },
-    {
-      id: 2,
-      image: img2,
-      sentence: "You should ride your skateboard.",
-      correct: 0,
-    },
-    {
-      id: 3,
-      image: img3,
-      sentence: "You should do your homework.",
-      correct: 1,
-    },
+  const sentences = [
+    { id: 1, text: "They played soccer.",   correctImg: "img4" },
+    { id: 2, text: "He fixed the car.",     correctImg: "img1" },
+    { id: 3, text: "I painted a picture.",  correctImg: "img3" },
+    { id: 4, text: "She cooked soup.",      correctImg: "img2" },
   ];
 
-  const [selected, setSelected] = useState(
-    Object.fromEntries(questions.map((q) => [q.id, null]))
-  );
-  const [errors, setErrors] = useState({});
-  const [locked, setLocked] = useState(false);
-  const [showed, setShowed] = useState(false);
+  // Images in the order they appear in the 2×2 grid (row-major, left-to-right, top-to-bottom)
+  // Row 1: img1 (car)  | img2 (soup)
+  // Row 2: img3 (paint)| img4 (soccer)
+  const images = [
+    { id: "img1", src: img1 },
+    { id: "img2", src: img2 },
+    { id: "img3", src: img3 },
+    { id: "img4", src: img4 },
+  ];
 
-  const handleSelect = (qId, imgIndex) => {
-    if (locked || errors[qId] === false) return;
-    setSelected((prev) => ({ ...prev, [qId]: imgIndex }));
+  const [connections, setConnections]   = useState({});
+  const [draggingFrom, setDraggingFrom] = useState(null);
+  const [mousePos, setMousePos]         = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging]     = useState(false);
+  const [errors, setErrors]             = useState({});   // { sentId: true|false }
+  const [locked, setLocked]             = useState(false);
+  const [showed, setShowed]             = useState(false);
+  const [dotPositions, setDotPositions] = useState({});
+
+  const containerRef  = useRef(null);
+  const sentDotRefs   = useRef({});
+  const imgDotRefs    = useRef({});
+
+  // ─── Position helpers ────────────────────────────────────────────────────────
+
+  const updatePositions = () => {
+    const container = containerRef.current;
+    if (!container) return;
+    const rect      = container.getBoundingClientRect();
+    const positions = {};
+
+    Object.entries(sentDotRefs.current).forEach(([id, el]) => {
+      if (el) {
+        const r = el.getBoundingClientRect();
+        positions[`sent_${id}`] = {
+          x: r.left - rect.left + r.width  / 2,
+          y: r.top  - rect.top  + r.height / 2,
+        };
+      }
+    });
+
+    Object.entries(imgDotRefs.current).forEach(([id, el]) => {
+      if (el) {
+        const r = el.getBoundingClientRect();
+        positions[`img_${id}`] = {
+          x: r.left - rect.left + r.width  / 2,
+          y: r.top  - rect.top  + r.height / 2,
+        };
+      }
+    });
+
+    setDotPositions(positions);
   };
+
+  useEffect(() => {
+    updatePositions();
+    window.addEventListener("resize", updatePositions);
+    return () => window.removeEventListener("resize", updatePositions);
+  }, []);
+
+  // ─── Drag handlers ───────────────────────────────────────────────────────────
+
+  const handleSentDotMouseDown = (e, sentId) => {
+    if (locked) return;
+    e.preventDefault();
+    updatePositions();
+    setDraggingFrom({ type: "sent", id: sentId });
+    setIsDragging(true);
+    const rect = containerRef.current.getBoundingClientRect();
+    setMousePos({ x: e.clientX - rect.left, y: e.clientY - rect.top });
+  };
+
+  const handleImgDotMouseUp = (imgId) => {
+    if (!isDragging || !draggingFrom) return;
+    if (draggingFrom.type === "sent") {
+      setConnections((prev) => ({ ...prev, [draggingFrom.id]: imgId }));
+    }
+    setIsDragging(false);
+    setDraggingFrom(null);
+  };
+
+  const handleMouseMove = (e) => {
+    if (!isDragging) return;
+    const rect = containerRef.current.getBoundingClientRect();
+    setMousePos({ x: e.clientX - rect.left, y: e.clientY - rect.top });
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+    setDraggingFrom(null);
+  };
+
+  // ─── Button handlers ─────────────────────────────────────────────────────────
 
   const handleCheck = () => {
     if (locked) return;
-    const isEmpty = questions.some((q) => selected[q.id] === null);
-    if (isEmpty) {
-      ValidationAlert.info("Please answer all questions.");
+    if (Object.keys(connections).length < sentences.length) {
+      ValidationAlert.info("Please match all sentences.");
       return;
     }
 
     let correctCount = 0;
-    const newErrors = {};
+    const newErrors  = {};
 
-    questions.forEach((q) => {
-      if (selected[q.id] === q.correct) {
+    sentences.forEach((s) => {
+      if (connections[s.id] === s.correctImg) {
         correctCount++;
-        newErrors[q.id] = false;
+        newErrors[s.id] = false;
       } else {
-        newErrors[q.id] = true;
+        newErrors[s.id] = true;
       }
     });
 
     setErrors(newErrors);
-    const total = questions.length;
+
+    const total = sentences.length;
     const color =
       correctCount === total ? "green" : correctCount === 0 ? "red" : "orange";
 
@@ -84,142 +172,183 @@ const GrammarC = () => {
   };
 
   const handleShow = () => {
-    setSelected(Object.fromEntries(questions.map((q) => [q.id, q.correct])));
+    const correct = {};
+    sentences.forEach((s) => { correct[s.id] = s.correctImg; });
+    setConnections(correct);
     setErrors({});
     setLocked(true);
     setShowed(true);
+    setTimeout(updatePositions, 50);
   };
 
   const handleReset = () => {
-    setSelected(Object.fromEntries(questions.map((q) => [q.id, null])));
+    setConnections({});
     setErrors({});
     setLocked(false);
     setShowed(false);
+    setIsDragging(false);
+    setDraggingFrom(null);
   };
 
-  const HalfImage = ({ q, imgIndex }) => {
-    const isSelected = selected[q.id] === imgIndex;
-    const isWrong = errors[q.id] === true;
-    const isLeft = imgIndex === 0;
+  // ─── Line color ──────────────────────────────────────────────────────────────
 
-    return (
-      <div
-        onClick={() => handleSelect(q.id, imgIndex)}
-        style={{
-          flex: 1,
-          overflow: "hidden",
-          position: "relative",
-          cursor: locked ? "default" : "pointer",
-  
-        }}
-      >
-        {/* Half image */}
-        <img
-          src={q.image}
-          alt=""
-          style={{
-            width: "100%",
-            height : "auto ", 
-            display: "block",
-          }}
-        />
-
-        {/* Checkmark circle */}
-        <div
-          style={{
-            position: "absolute",
-            bottom: "6px",
-            right: "6px",
-            width: "28px",
-            height: "28px",
-            borderRadius: "50%",
-            border: `2px solid ${isSelected ? (isWrong ? "#ef4444" : "#2195a6") : "#ccc"}`,
-            background: "#fff",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          {isSelected && (
-            <svg viewBox="0 0 24 24" width="14" height="14" fill="none">
-              <polyline
-                points="4,12 9,18 20,6"
-                stroke={isWrong ? "#ef4444" : "#2195a6"}
-                strokeWidth="3"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          )}
-        </div>
-
-        {/* ❌ Error Badge */}
-        {isWrong && isSelected && (
-          <div
-            style={{
-              position: "absolute",
-              top: "-8px",
-              right: "-8px",
-              width: "18px",
-              height: "18px",
-              background: "#ef4444",
-              color: "white",
-              borderRadius: "50%",
-              fontSize: "10px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontWeight: "bold",
-              border: "2px solid white",
-              boxShadow: "0 1px 6px rgba(0,0,0,0.2)",
-              zIndex: 3,
-            }}
-          >
-            ✕
-          </div>
-        )}
-      </div>
-    );
+  const getLineColor = (sentId) => {
+    if (showed)                     return "#2195a6";
+    if (errors[sentId] === false)   return "#2195a6";
+    if (errors[sentId] === true)    return "#ef4444";
+    return "#2195a6";
   };
+
+  // ─── Dot color for sentence dots ─────────────────────────────────────────────
+  // Only change: red when wrong, orange otherwise (no animation, no badge)
+
+  const getSentDotColor = (sentId) => {
+    if (errors[sentId] === true) return "#ef4444";
+    return "#f89631";
+  };
+
+  // ─── Render ──────────────────────────────────────────────────────────────────
 
   return (
     <div className="mb-6 mx-auto">
       <h5 className="header-title-page8-read mb-8">
         <span className="ex-A-read mr-2">C</span>
-        Read and write ✓.
+        Look and match.
       </h5>
 
-      <div className="grid grid-cols-3 gap-6">
-        {questions.map((q) => (
-          <div key={q.id} className="flex flex-col gap-3">
-            {/* Number */}
-            <span
-              style={{
-                fontWeight: "400",
-                WebkitTextStroke: "1px black",
-                color: "#1a1a1a",
-                fontSize: "18px",
-              }}
-            >
-              {q.id}
-            </span>
+      <div
+        ref={containerRef}
+        style={{ position: "relative", userSelect: "none" }}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+      >
+        {/* ── SVG Lines ─────────────────────────────────────────────────────── */}
+        <svg
+          style={{
+            position: "absolute", top: 0, left: 0,
+            width: "100%", height: "100%",
+            pointerEvents: "none", zIndex: 10,
+          }}
+        >
+          {/* Connected lines */}
+          {sentences.map((s) => {
+            const from = dotPositions[`sent_${s.id}`];
+            const to   = connections[s.id]
+              ? dotPositions[`img_${connections[s.id]}`]
+              : null;
+            if (!from || !to) return null;
+            return (
+              <line
+                key={s.id}
+                x1={from.x} y1={from.y}
+                x2={to.x}   y2={to.y}
+                stroke={getLineColor(s.id)}
+                strokeWidth="2.5"
+                strokeLinecap="round"
+              />
+            );
+          })}
 
-            {/* Split image */}
-            <div style={{ display: "flex" }}>
-              <HalfImage q={q} imgIndex={0} />
-              <HalfImage q={q} imgIndex={1} />
-            </div>
+          {/* Live drag line */}
+          {isDragging && draggingFrom && (
+            <line
+              x1={dotPositions[`sent_${draggingFrom.id}`]?.x || 0}
+              y1={dotPositions[`sent_${draggingFrom.id}`]?.y || 0}
+              x2={mousePos.x} y2={mousePos.y}
+              stroke="#2195a6"
+              strokeWidth="2.5"
+              strokeDasharray="6,3"
+              strokeLinecap="round"
+            />
+          )}
+        </svg>
 
-            {/* Sentence */}
-            <p style={{ fontSize: "15px", color: "#1a1a1a", textAlign: "center" }}>
-              {q.sentence}
-            </p>
+        {/* ── Main layout ───────────────────────────────────────────────────── */}
+        <div className="flex gap-8 items-center">
+
+          {/* Sentences column */}
+          <div
+            className="flex flex-col gap-6"
+            style={{ minWidth: "220px" }}
+          >
+            {sentences.map((s) => (
+              <div key={s.id} className="flex items-center gap-3">
+                <span
+                  style={{
+                    fontWeight: "400",
+                    WebkitTextStroke: "1px black",
+                    color: "#1a1a1a",
+                    fontSize: "16px",
+                    minWidth: "16px",
+                  }}
+                >
+                  {s.id}
+                </span>
+
+                <span style={{ fontSize: "16px", color: "#1a1a1a" }}>
+                  {s.text}
+                </span>
+
+                {/* Sentence dot — only turns red on wrong, no other effect */}
+                <div
+                  ref={(el) => (sentDotRefs.current[s.id] = el)}
+                  onMouseDown={(e) => handleSentDotMouseDown(e, s.id)}
+                  style={{
+                    width: "14px",
+                    height: "14px",
+                    borderRadius: "50%",
+                    background: getSentDotColor(s.id),
+                    cursor: locked ? "default" : "crosshair",
+                    flexShrink: 0,
+                    zIndex: 20,
+                    position: "relative",
+                  }}
+                />
+              </div>
+            ))}
           </div>
-        ))}
+
+          {/* Images — 2×2 grid, row-major order matching the book page */}
+          <div className="grid grid-cols-2 gap-4 flex-1">
+            {images.map((img) => (
+              <div key={img.id} className="flex items-center gap-2">
+
+                {/* Left dot on each image */}
+                <div
+                  ref={(el) => (imgDotRefs.current[img.id] = el)}
+                  onMouseUp={() => handleImgDotMouseUp(img.id)}
+                  style={{
+                    width: "14px",
+                    height: "14px",
+                    borderRadius: "50%",
+                    background: "#f89631",
+                    cursor: "pointer",
+                    flexShrink: 0,
+                    zIndex: 20,
+                    position: "relative",
+                  }}
+                />
+
+                <img
+                  src={img.src}
+                  alt=""
+                  style={{
+                    width: "130px",
+                    height: "110px",
+                    objectFit: "cover",
+                    borderRadius: "10px",
+                  }}
+                />
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
 
-      {/* Buttons */}
+      {/* ── Buttons ───────────────────────────────────────────────────────────── */}
       <div className="flex justify-center gap-6 mt-8">
+
+        {/* Reset */}
         <div className="relative group">
           <div
             onClick={handleReset}
@@ -234,6 +363,7 @@ const GrammarC = () => {
           </span>
         </div>
 
+        {/* Show Answer */}
         <div className="relative group">
           <div
             onClick={handleShow}
@@ -248,6 +378,7 @@ const GrammarC = () => {
           </span>
         </div>
 
+        {/* Check Answer */}
         <div className="relative group">
           <div
             onClick={handleCheck}

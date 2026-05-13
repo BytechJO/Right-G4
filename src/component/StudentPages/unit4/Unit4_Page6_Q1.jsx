@@ -3,7 +3,7 @@ import Button from "../../Button";
 import ValidationAlert from "../../Popup/ValidationAlert";
 import QuestionAudioPlayer from "../../QuestionAudioPlayer";
 
-import sound from "../../../assets/audio/ClassBook/Grade 4/cd5pg8-instruction1-adult-lady_YJxh5Hg5.mp3";
+import sound from "../../../assets/audio/ClassBook/Grade 4/cd23pg33-instruction1-adult-lady_LmHqO0J8.mp3";
 import imgScene from "../../../assets/imgs/pages/Class Book/Right 4 Unit 4 Joy Makes a Friend Folder/Page 33/SVG/Asset 1.svg";
 
 // ─────────────────────────────────────────────
@@ -22,13 +22,46 @@ const WRONG_BADGE_TEXT   = "#ffffff";
 //  🔊  CAPTIONS
 // ─────────────────────────────────────────────
 const captions = [
-  { start: 0.26,  end: 5.84,  text: "Page eight, write activities, exercise C. Listen, read, and number." },
-  { start: 7.36,  end: 10.48, text: "Tim will visit the new Museum of Inventions tomorrow." },
-  { start: 10.48, end: 13.52, text: "He will take his little brother and friend with him." },
-  { start: 13.52, end: 18.56, text: "They will take a bus at eight o'clock and arrive at the museum at nine o'clock." },
-  { start: 18.56, end: 21.92, text: "Tim will pack a lunch in case they get hungry." },
-  { start: 21.92, end: 28.00, text: "He will have to remember to take his camera with him so he can take pictures in the museum." },
-  { start: 28.00, end: 32.68, text: "Tim is certain they will have a lot of fun at the museum tomorrow." },
+  {
+    start: 0.26,
+    end: 9.32,
+    text: "Page 33, write activities. Exercise E. Listen, read, and write check or X.",
+  },
+  {
+    start: 9.32,
+    end: 15.32,
+    text: "My mom is taller than my dad. Dad is younger than my Uncle George.",
+  },
+  {
+    start: 15.32,
+    end: 18.58,
+    text: "George is shorter than his friend Eric.",
+  },
+  {
+    start: 18.58,
+    end: 21.26,
+    text: "My sister is younger than me.",
+  },
+  {
+    start: 21.26,
+    end: 24.02,
+    text: "I'm older than my brother Joe.",
+  },
+  {
+    start: 24.02,
+    end: 29.14,
+    text: "My cousin Ed is stronger than me, but I'm taller than him.",
+  },
+  {
+    start: 29.14,
+    end: 32.84,
+    text: "My cousin Davey is the tallest of us three.",
+  },
+  {
+    start: 32.84,
+    end: 41.10,
+    text: "Smallest, healthier, kindest, fatter, thinnest, braver.",
+  },
 ];
 
 // ─────────────────────────────────────────────

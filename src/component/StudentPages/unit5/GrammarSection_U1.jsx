@@ -5,38 +5,33 @@ import GrammarC from "./GrammarC";
 import image1 from"../../../assets/imgs/pages/Class Book/Right 4 Unit 5 Under the Weather Folder/Page 42/SVG/Asset 5.svg";
 import image  from "../../../assets/imgs/pages/Class Book/Right 4 Unit 5 Under the Weather Folder/Page 42/SVG/Asset 3.svg";
 
-import sound from "../../../assets/audio/ClassBook/Grade 4/cd17pg24-grammar-adult-lady_DyQEJqoO.mp3";
+import sound from "../../../assets/audio/ClassBook/Grade 4/cd29pg42-grammar-adult-lady_8GvPpPN5.mp3";
 import QuestionAudioPlayer from "../../QuestionAudioPlayer";
 import SectionBanner from "../SectionBanner";
 const GrammarSection_U1 = () => {
 const captions = [
   {
-    start: 0.80,
-    end: 2.78,
-    text: "Page 24. Grammar.",
+    start: 0.24,
+    end: 2.14,
+    text: "Page 42. Grammar.",
   },
   {
-    start: 2.78,
-    end: 4.96,
-    text: "Past of have.",
+    start: 2.14,
+    end: 3.98,
+    text: "Prepositional phrases.",
   },
   {
-    start: 4.96,
-    end: 8.72,
-    text: "She had a bike. Did she have a kitten?",
+    start: 3.98,
+    end: 5.88,
+    text: "Lolo is under the bed.",
   },
   {
-    start: 8.72,
-    end: 13.42,
-    text: "She did not have a kitten. Why did she have a kitten?",
-  },
-  {
-    start: 13.42,
-    end: 18.06,
-    text: "I did not have books. What did she have?",
+    start: 5.88,
+    end: 7.98,
+    text: "Is Lolo under the table?",
   },
 ];
-const stopAtSecond = 2.8;
+const stopAtSecond = 2.14;
  return (
     <div className="flex flex-col items-center ">
       <div className="w-[60%] mx-auto">
