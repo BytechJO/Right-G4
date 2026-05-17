@@ -11,7 +11,7 @@ import pageImage from "../../../assets/imgs/pages/Class Book/Right 4 Unit 8 I Li
 import soundAll from "../../../assets/audio/ClassBook/Grade 4/cd4pg74-story-adult-lady_gTfYuwuf.mp3";
 
 // 🎬 استبدل بمسار الفيديو الصحيح
-import videoFile from "../../../assets/right grade 4/reading/new/grade 4 unit 8 page 74-75 reading.mp4";
+import videoFile from "../../../assets/right grade 4/reading/grade 4 unit 8 page 74-75 reading.mp4";
 
 // 🎨 استبدل باسم ملف CSS الصحيح
 import "./Reading_Unit8_Page1.css";

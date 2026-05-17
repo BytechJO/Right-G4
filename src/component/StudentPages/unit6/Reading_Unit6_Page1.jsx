@@ -1,5 +1,5 @@
 import React, { useState, useRef } from "react";
-import AudioWithCaption from "../../../component/AudioWithCaption";
+import AudioWithCaption from "../../AudioWithCaption";
 import audioBtn from "../../../assets/Page 01/Audio btn.svg";
 import pauseBtn from "../../../assets/Page 01/Right Video Button.svg";
 import { useAudio } from "../../../context/AudioContext";
