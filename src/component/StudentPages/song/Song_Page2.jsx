@@ -1,5 +1,5 @@
 import React from "react";
-import page_1 from "../../../assets/imgs/pages/classbook/Right 3 Unit 10 What Shall We Do on the Weekend Folder/Page 95.png";
+import page_1 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 10 Stella Goes Shopping Folder/Page 95.png";
 const Song_Page2 = () => {
   return (
     <div

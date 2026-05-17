@@ -238,8 +238,8 @@ export default function WB_ReadWriteCheckCross_QA() {
           className="WB-header-title-page8"
           style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
         >
-          <span className="WB-ex-A-1">A</span>
-          Read and write ✓ or ✕.
+          <span className="WB-ex-A">A</span>
+          Read and write <span style={{color :"red"}} >✓ </span> or <span style={{color :"red"}} >✕</span> .
         </h1>
 
         {/* ── Items ── */}

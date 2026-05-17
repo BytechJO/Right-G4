@@ -1,80 +1,215 @@
-import page24 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 10 Stella Goes Shopping Folder/Page 92.png";
-import React, { useState, useRef } from "react";
-import "./Reading_Unit10_Page2.css";
-import sound1 from "../../../assets/audio/ClassBook/Unit 10/P 92/unit10-pg92-reading.mp3";
-import sound2 from "../../../assets/audio/ClassBook/Unit 10/P 92/Pg92_1.1_Adult Lady.mp3";
-import sound3 from "../../../assets/audio/ClassBook/Unit 10/P 92/Pg92_1.2_Adult Lady.mp3";
-import sound4 from "../../../assets/audio/ClassBook/Unit 10/P 92/Pg92_1.3_Adult Lady.mp3";
-import sound5 from "../../../assets/audio/ClassBook/Unit 10/P 92/Pg92_1.4_Adult Lady.mp3";
+import React, { useRef, useState } from "react";
+
 import AudioWithCaption from "../../AudioWithCaption";
 import audioBtn from "../../../assets/Page 01/Audio btn.svg";
 import pauseBtn from "../../../assets/Page 01/Right Video Button.svg";
-import video3 from "../../../assets/videos/reading/grade 3 unit 10 page 94-95 reading.mp4";
 
-const Reading_Unit10_Page1 = ({ openPopup }) => {
+// ======================================================
+// 🖼️ استبدل بمسار الصورة الصحيح
+import pageImage from "../../../assets/imgs/pages/Class Book/Right 4 Unit 10 Stella Goes Shopping Folder/Page 92.png"
+// 🔊 صوت واحد بس - نفس الصوت للكل والمناطق
+import soundAll from "../../../assets/audio/ClassBook/Grade 4/cd5pg92-story-adult-lady_ZnWsUclb.mp3";
+
+// 🎬 استبدل بمسار الفيديو الصحيح
+import videoFile from "../../../assets/right grade 4/reading/grade 4 unit 8 page 74-75 reading.mp4";
+
+// 🎨 استبدل باسم ملف CSS الصحيح
+// ======================================================
+
+const Reading_NewPage = ({ openPopup }) => {
   const audioRef = useRef(null);
   const [hoveredAreaIndex, setHoveredAreaIndex] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [activeAreaIndex, setActiveAreaIndex] = useState(null);
-  const captionsExample = [
-    {
-      start: 0.2,
-      end: 82.98,
-      text: "Page 92 reading. Helen learns a lesson. It was winter. Everyone was outside. Stella and the boys had a snowball fight. Helen and her friend made a snowman. While Helen and her friend were making a snowman, Helen's cat, Mimi, walked into the woods. Helen couldn't find her cat anywhere. Helen was feeling sad. There was a man walking near the bridge. He called to Helen. Are you looking for something? Yes, I'm looking for my brown cat. Have you seen it? No, I haven't, the man answered. Helen saw her classmate, Lana. Hi, Helen. How are you? asked Lana. I'm okay, but I've lost my cat, Mimi. I've been looking everywhere for her. I'm sorry. I haven't seen your cat, but I'll help you look for her, said Lana. Helen and Lana saw cat tracks. They went up the hill. The snow was deep. They walked on and on. Hey, that's my grandma's house, shouted Helen excitedly. That's great, replied Lana. I can't wait to see my grandma, said Helen happily. Grandma said, Hello, Helen and Lana. It's good to see you both. Come inside. It's very cold outside.",
-    },
-    {
-      start: 84.1,
-      end: 101.7,
-      text: "Grandma, it's good to see you, too. I've lost Mimi. What should I do? I have some good news. Mimi is right here with me. Come and see her, said Grandma. Helen said, Thanks so much, Grandma. I'm so happy to see Mimi.",
-    },
-    {
-      start: 102.77,
-      end: 112.399,
-      text: "How was your day? Grandma asked. It was fun, Grandma. We played in the snow and made a snowman. Then we lost Mimi, said Helen.",
-    },
-    {
-      start: 113.94,
-      end: 125.22,
-      text: "It's good that you had your friend to help you, said Grandma. We learned to help each other, said Lana. I learned to take better care of my cat, added Helen.",
-    },
-  ];
-const clickableAreas3 = [
+
+  // ======================================================
+  // 📝 Captions للصوت الكامل - عدّل النصوص والتوقيتات
+const captions = [
+  {
+    start: 0.42,
+    end: 1.56,
+    text: "Page 92.",
+  },
+  {
+    start: 1.56,
+    end: 5.52,
+    text: "Ma Liang and the Jade Paintbrush.",
+  },
+  {
+    start: 5.52,
+    end: 10.18,
+    text: "A long time ago in China, there was a boy named Ma Liang.",
+  },
+  {
+    start: 10.18,
+    end: 13.14,
+    text: "Ma Liang's father was a painter.",
+  },
+  {
+    start: 13.14,
+    end: 19.92,
+    text: "His father would spread a sheet of paper across the ground and make beautiful pictures.",
+  },
+  {
+    start: 19.92,
+    end: 25.54,
+    text: "Ma Liang loved to paint pictures of dragons, birds, and other animals.",
+  },
+  {
+    start: 26.64,
+    end: 30.58,
+    text: "Ma Liang hoped one day to be the best painter in China.",
+  },
+  {
+    start: 30.58,
+    end: 35.54,
+    text: "He painted on big walls and on tiny grains of rice.",
+  },
+  {
+    start: 35.54,
+    end: 39.98,
+    text: "He painted everywhere he could because he hoped to be famous in the future.",
+  },
+  {
+    start: 39.98,
+    end: 45.26,
+    text: "One day, an old man came to visit Ma Liang.",
+  },
+  {
+    start: 45.26,
+    end: 51.66,
+    text: "He gave him a special paintbrush. It was made from a beautiful green stone called jade.",
+  },
+  {
+    start: 51.66,
+    end: 58.18,
+    text: "Ma Liang started to use the new paintbrush. He painted a picture of a goat.",
+  },
+  {
+    start: 58.18,
+    end: 60.62,
+    text: "All of a sudden, the goat became real.",
+  },
+  {
+    start: 60.62,
+    end: 66.34,
+    text: "He painted a donkey. Suddenly, there was a donkey in his room.",
+  },
+  {
+    start: 66.34,
+    end: 69.40,
+    text: "Ma Liang did a dance around his room.",
+  },
+  {
+    start: 69.40,
+    end: 72.10,
+    text: "This was a very special paintbrush.",
+  },
+  {
+    start: 72.10,
+    end: 81.88,
+    text: "Ma Liang painted food, clothes, and shelter for all the poor people in his village. Everything he painted became real!",
+  },
+  {
+    start: 83.26,
+    end: 87.24,
+    text: "Soon, the king heard about Ma Liang and his jade paintbrush.",
+  },
+  {
+    start: 87.24,
+    end: 91.60,
+    text: "The king sent a man to bring Ma Liang to the palace where he lived.",
+  },
+  {
+    start: 91.60,
+    end: 97.86,
+    text: "\"Do you have the jade paintbrush? Give it to me,\" commanded the king.",
+  },
+  {
+    start: 97.86,
+    end: 101.38,
+    text: "Ma Liang gave the king the paintbrush.",
+  },
+  {
+    start: 101.38,
+    end: 106.50,
+    text: "The king tried to paint gold coins, but the coins turned to grains of sand.",
+  },
+  {
+    start: 106.50,
+    end: 109.08,
+    text: "The paintbrush would only work for Ma Liang.",
+  },
+  {
+    start: 109.08,
+    end: 116.50,
+    text: "\"Paint me a picture,\" ordered the king. Ma Liang started to paint a picture of an ocean.",
+  },
+  {
+    start: 116.50,
+    end: 123.80,
+    text: "As Ma Liang painted, the king could hear the sound of crashing ocean waves. The ocean was becoming real!",
+  },
+  {
+    start: 123.80,
+    end: 132.18,
+    text: "\"Paint me a boat to sail in,\" commanded the king. Ma Liang painted a boat. The king jumped into the boat.",
+  },
+  {
+    start: 132.18,
+    end: 144.10,
+    text: "Then Ma Liang painted a big storm. It blew the king's boat out into the ocean. No one saw the evil king again.",
+  },
+  {
+    start: 144.10,
+    end: 148.12,
+    text: "Ma Liang kept painting with the jade paintbrush.",
+  },
+  {
+    start: 148.12,
+    end: 151.78,
+    text: "He helped the poor people who needed food and shelter.",
+  },
+  {
+    start: 152.98,
+    end: 161.22,
+    text: "He did all of these things because he cared for others. Ma Liang was the greatest painter in China.",
+  },
+];
+  // 📍 مناطق النقر - كل منطقة عندها startFrom و stopAt من الصوت الأساسي
+const clickableAreas = [
   // 1
   {
     x1: 15.11,
     y1: 35.5,
     x2: 54.03,
     y2: 50.16,
-    slice: { startFrom: 0, stopAt: 0 },
+    slice: { startFrom: 5.56, stopAt: 25.54 },
   },
-
-  // 2
   {
     x1: 55.62,
     y1: 35.7,
     x2: 94.46,
     y2: 50.5,
-    slice: { startFrom: 0, stopAt: 0 },
+    slice: { startFrom: 26.64, stopAt: 51.66 },
   },
-
-  // 3
   {
     x1: 15.32,
     y1: 64.24,
     x2: 54.17,
     y2: 84,
-    slice: { startFrom: 0, stopAt: 0 },
+    slice: { startFrom: 51.66, stopAt: 81.88 },
   },
-
-  // 4
   {
     x1: 55.62,
     y1: 78,
     x2: 94.22,
     y2: 96.2,
-    slice: { startFrom: 0, stopAt: 0 },
+    slice: { startFrom: 83.26, stopAt: 109.08 },
   },
 ];
+
+  // ======================================================
 
   const handleImageClick = (e) => {
     const rect = e.target.getBoundingClientRect();
@@ -82,33 +217,41 @@ const clickableAreas3 = [
     const yPercent = ((e.clientY - rect.top) / rect.height) * 100;
     console.log("X%:", xPercent.toFixed(2), "Y%:", yPercent.toFixed(2));
   };
-  const playSound = (soundPath) => {
-    if (audioRef.current) {
-      audioRef.current.src = soundPath;
-      audioRef.current.play();
-      setIsPlaying(true);
-      setHoveredAreaIndex(null); // إزالة الهايلايت عند بدء الصوت
 
-      audioRef.current.onended = () => {
+  // تشغيل slice من الصوت الأساسي
+  const playSlice = (slice) => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    audio.src = soundAll;
+    audio.currentTime = slice.startFrom;
+    audio.play();
+    setIsPlaying(true);
+
+    const checkStop = setInterval(() => {
+      if (audio.currentTime >= slice.stopAt) {
+        audio.pause();
+        clearInterval(checkStop);
         setIsPlaying(false);
+        setActiveAreaIndex(null);
         setHoveredAreaIndex(null);
-        setActiveAreaIndex(null); // مسح الهايلايت بعد انتهاء الصوت
-      };
-    }
+      }
+    }, 100);
+
+    audio.onended = () => {
+      clearInterval(checkStop);
+      setIsPlaying(false);
+      setActiveAreaIndex(null);
+      setHoveredAreaIndex(null);
+    };
   };
 
-  return (
+   return (
     <div
       className="page1-img-wrapper"
       onClick={handleImageClick}
-      style={{ backgroundImage: `url(${page24})` }}
+      style={{ backgroundImage: `url(${pageImage})` }}
     >
-      {/* <img
-        src={page24}
-        style={{ display: "block" }}
-        onClick={handleImageClick}
-      /> */}
-
       {clickableAreas.map((area, index) => (
         <div
           key={index}
@@ -124,9 +267,10 @@ const clickableAreas3 = [
             width: `${area.x2 - area.x1}%`,
             height: `${area.y2 - area.y1}%`,
           }}
-          onClick={() => {
-            setActiveAreaIndex(index); // لتثبيت الهايلايت أثناء الصوت
-            playSound(area.sound);
+          onClick={(e) => {
+            e.stopPropagation();
+            setActiveAreaIndex(index);
+            playSlice(area.slice);
           }}
           onMouseEnter={() => {
             if (!isPlaying) setHoveredAreaIndex(index);
@@ -134,9 +278,10 @@ const clickableAreas3 = [
           onMouseLeave={() => {
             if (!isPlaying) setHoveredAreaIndex(null);
           }}
-        ></div>
+        />
       ))}
 
+      {/* ⚙️ زر الصوت الكامل - عدّل اسم الـ CSS class */}
       <div
         className="headset-icon-CD-unit2-page11-1 hover:scale-110 transition"
         style={{ overflow: "visible" }}
@@ -145,33 +290,23 @@ const clickableAreas3 = [
           width="22"
           height="22"
           viewBox="0 0 90 90"
-          onClick={() =>
+          onClick={(e) => {
+            e.stopPropagation();
             openPopup(
               "audio",
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "center",
-                  alignContent: "center",
-                }}
-              >
-                <AudioWithCaption src={sound1} captions={captionsExample} />
-              </div>,
-            )
-          }
+              <div style={{ display: "flex", justifyContent: "center", alignContent: "center" }}>
+                <AudioWithCaption src={soundAll} captions={captions}            stopAtSecond={2.84}
+/>
+              </div>
+            );
+          }}
           style={{ overflow: "visible" }}
         >
-          <image
-            className="svg-img"
-            href={audioBtn}
-            x="0"
-            y="0"
-            width="90"
-            height="90"
-          />
+          <image className="svg-img" href={audioBtn} x="0" y="0" width="90" height="90" />
         </svg>
       </div>
 
+      {/* ⚙️ زر الفيديو - عدّل اسم الـ CSS class */}
       <div
         className="pauseBtn-icon-CD-page21 hover:scale-110 transition"
         style={{ overflow: "visible" }}
@@ -180,49 +315,26 @@ const clickableAreas3 = [
           width="22"
           height="22"
           viewBox="0 0 90 90"
-          onClick={() =>
+          onClick={(e) => {
+            e.stopPropagation();
             openPopup(
               "video",
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "center",
-                  alignContent: "center",
-                  alignItems: "center",
-                  height: "100%",
-                  width: "100%",
-                }}
-              >
-                <video
-                  autoPlay
-                  controls
-                  style={{
-                    width: "auto",
-                    height: "80%",
-                    objectFit: "fill",
-                    borderRadius: "20px",
-                  }}
-                >
-                  <source src={video3} type="video/mp4" />
+              <div style={{ display: "flex", justifyContent: "center", alignContent: "center", alignItems: "center", height: "100%", width: "100%" }}>
+                <video autoPlay controls style={{ width: "auto", height: "80%", objectFit: "fill", borderRadius: "20px" }}>
+                  <source src={videoFile} type="video/mp4" />
                 </video>
-              </div>,
-            )
-          }
+              </div>
+            );
+          }}
           style={{ overflow: "visible" }}
         >
-          <image
-            className="svg-img"
-            href={pauseBtn}
-            x="0"
-            y="0"
-            width="90"
-            height="90"
-          />
+          <image className="svg-img" href={pauseBtn} x="0" y="0" width="90" height="90" />
         </svg>
       </div>
+
       <audio ref={audioRef} style={{ display: "none" }} />
     </div>
   );
 };
 
-export default Reading_Unit10_Page1;
+export default Reading_NewPage;

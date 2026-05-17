@@ -5,8 +5,7 @@ import img3 from "../../../assets/imgs/pages/classbook/Right 3 Unit 10 What Shal
 import img4 from "../../../assets/imgs/pages/classbook/Right 3 Unit 10 What Shall We Do on the Weekend Folder/Page 87/Ex D 4.svg";
 import Button from "../../Button";
 import ValidationAlert from "../../Popup/ValidationAlert";
-import WrongMark from "../../WrongMark";
-
+import "../../AudioWithCaption.css";
 const exerciseQuestions = [
   {
     id: "g1",

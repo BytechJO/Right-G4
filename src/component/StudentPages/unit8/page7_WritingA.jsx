@@ -22,12 +22,11 @@ const WritingA = () => {
 
   const lineStyle = {
     flex: 1,
-    borderBottom: "2px solid #333",
+    borderBottom: "1px solid #333",
     background: "transparent",
     outline: "none",
     fontSize: "16px",
     color: "#1a1a1a",
-    padding: "2px 4px",
   };
 
   const labelStyle = {

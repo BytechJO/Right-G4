@@ -20,9 +20,9 @@ import imgH from "../../../assets/imgs/pages/Class Book/Right 4 Unit 6 Ready for
 const NUMBER_CLR_DEFAULT  = "#2b2b2b";
 const NUMBER_CLR_CORRECT  = "#ffffff";
 const NUMBER_CLR_WRONG    = "#ffffff";
-const BADGE_DEFAULT_BG    = "#ffffffff";
-const BADGE_CORRECT_BG    = "#ffffffff";
-const BADGE_WRONG_BG      = "#ffffffff";
+const BADGE_DEFAULT_BG    = "transparent"
+const BADGE_CORRECT_BG    = "transparent"
+const BADGE_WRONG_BG      = "transparent"
 const WRONG_BADGE_BG      = "#ef4444";
 const WRONG_BADGE_TEXT    = "#ffffff";
 const SENTENCE_COLOR      = "#2b2b2b";
@@ -232,7 +232,7 @@ export default function WB_ReadLookNumber_QD() {
           outline: none;
           text-align: center;
           font-size: clamp(12px, 1.5vw, 18px);
-          caret-color: transparent;
+          caret-color: #333;
           z-index: 2;
         }
         .rln-input:disabled { cursor: default; }

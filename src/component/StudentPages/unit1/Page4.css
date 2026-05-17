@@ -57,14 +57,15 @@
 .headset-icon-CD-page4-2,
 .aaaa,
 .headset-icon-CD-page4-3,
+.pauseBtn-icon-CD-page4,
 .click-icon-page4 {
   position: absolute;
   cursor: pointer;
   padding: 5px;
 }
 .headset-icon-CD-page4-1 {
-       top: 15.5%;
-    left: 26.5%;
+        top: 16%;
+    left: 63.8%;
 
 }
 .aaaa {
@@ -76,6 +77,9 @@
     top: 84.7%;
     left: 16%;
 }
+.pauseBtn-icon-CD-page4{
+     top: 16%;
+    left: 68.8%;}
 #num-4-page4 {
   top: 25%;
   left: 85%;
@@ -92,7 +96,7 @@
 }
 
 
-.headset-icon-CD-page4-2 {
+.headset-icon-CD-page4 {
   position: absolute;
   top: 52.5%;
   left: 26.5%;

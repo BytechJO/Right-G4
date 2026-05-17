@@ -1,350 +1,385 @@
-/* eslint-disable react-refresh/only-export-components */
 import React, { useState } from "react";
-import {
-  DndContext,
-  useSensor,
-  useSensors,
-  PointerSensor,
-  MouseSensor,
-  TouchSensor,
-  DragOverlay,
-} from "@dnd-kit/core";
-import { SortableContext, useSortable } from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
-import ValidationAlert from "../../Popup/ValidationAlert";
 import Button from "../../Button";
-import WrongMark from "../../WrongMark";
-import sound from "../../../assets/audio/ClassBook/Unit 8/P 73/unit8-pg73-EXC.mp3";
-import img1 from "../../../assets/imgs/pages/classbook/Right 3 Unit 8 At Our Grandparents Farm Folder/Page 73/Ex C 1.svg";
-import img2 from "../../../assets/imgs/pages/classbook/Right 3 Unit 8 At Our Grandparents Farm Folder/Page 73/Ex C 2.svg";
-import img3 from "../../../assets/imgs/pages/classbook/Right 3 Unit 8 At Our Grandparents Farm Folder/Page 73/Ex C 3.svg";
-import img4 from "../../../assets/imgs/pages/classbook/Right 3 Unit 8 At Our Grandparents Farm Folder/Page 73/Ex C 4.svg";
-import img5 from "../../../assets/imgs/pages/classbook/Right 3 Unit 8 At Our Grandparents Farm Folder/Page 73/Ex C 5.svg";
-import img6 from "../../../assets/imgs/pages/classbook/Right 3 Unit 8 At Our Grandparents Farm Folder/Page 73/Ex C 6.svg";
-import img7 from "../../../assets/imgs/pages/classbook/Right 3 Unit 8 At Our Grandparents Farm Folder/Page 73/Ex C 7.svg";
-import img8 from "../../../assets/imgs/pages/classbook/Right 3 Unit 8 At Our Grandparents Farm Folder/Page 73/Ex C 8.svg";
-import img9 from "../../../assets/imgs/pages/classbook/Right 3 Unit 8 At Our Grandparents Farm Folder/Page 73/Ex C 9.svg";
-import img10 from "../../../assets/imgs/pages/classbook/Right 3 Unit 8 At Our Grandparents Farm Folder/Page 73/Ex C 10.svg";
-import img11 from "../../../assets/imgs/pages/classbook/Right 3 Unit 8 At Our Grandparents Farm Folder/Page 73/Ex C 11.svg";
-import img12 from "../../../assets/imgs/pages/classbook/Right 3 Unit 8 At Our Grandparents Farm Folder/Page 73/Ex C 12.svg";
-import img13 from "../../../assets/imgs/pages/classbook/Right 3 Unit 8 At Our Grandparents Farm Folder/Page 73/Ex C 13.svg";
-import img14 from "../../../assets/imgs/pages/classbook/Right 3 Unit 8 At Our Grandparents Farm Folder/Page 73/Ex C 14.svg";
-import img15 from "../../../assets/imgs/pages/classbook/Right 3 Unit 8 At Our Grandparents Farm Folder/Page 73/Ex C 15.svg";
-import img16 from "../../../assets/imgs/pages/classbook/Right 3 Unit 8 At Our Grandparents Farm Folder/Page 73/Ex C 16.svg";
-import img17 from "../../../assets/imgs/pages/classbook/Right 3 Unit 8 At Our Grandparents Farm Folder/Page 73/Ex C 17.svg";
-import img18 from "../../../assets/imgs/pages/classbook/Right 3 Unit 8 At Our Grandparents Farm Folder/Page 73/Ex C 18.svg";
-import img19 from "../../../assets/imgs/pages/classbook/Right 3 Unit 8 At Our Grandparents Farm Folder/Page 73/Ex C 19.svg";
-import img20 from "../../../assets/imgs/pages/classbook/Right 3 Unit 8 At Our Grandparents Farm Folder/Page 73/Ex C 20.svg";
-import QuestionAudioPlayer from "../../QuestionAudioPlayer";
+import ValidationAlert from "../../Popup/ValidationAlert";
 
-/* ===== البيانات ===== */
+// ─────────────────────────────────────────────
+//  🖼️  IMAGES — وهمية، عدّلها لاحقاً
+// ─────────────────────────────────────────────
+import img1 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 8 I Lived in the Library Folder/Page 73/SVG/Asset 1.svg";
+import img2 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 8 I Lived in the Library Folder/Page 73/SVG/Asset 2.svg";
+import img3 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 8 I Lived in the Library Folder/Page 73/SVG/Asset 3.svg";
 
-const LETTERS = [
-  "j",
-  "v",
-  "w",
-  "c",
-  "y",
-  "n",
-  "k",
-  "b",
-  "m",
-  "f",
-  "x",
-  "e",
-  "s",
-  "z",
-  "t",
-  "h",
-  "a",
-  "d",
-];
+// ─────────────────────────────────────────────
+//  🎨  COLORS
+// ─────────────────────────────────────────────
+const INPUT_UNDERLINE_DEFAULT = "#3f3f3f";
+const INPUT_UNDERLINE_WRONG   = "#ef4444";
+const INPUT_TEXT_COLOR        = "#2b2b2b";
+const INPUT_ANSWER_COLOR      = "#c81e1e";
+const NUMBER_COLOR            = "#2b2b2b";
+const TEXT_COLOR              = "#2b2b2b";
+const GIVEN_TEXT_COLOR        = "#2b2b2b";
+const ANSWER_GIVEN_COLOR      = "#c81e1e";
+const WRONG_BADGE_BG          = "#ef4444";
+const WRONG_BADGE_TEXT        = "#ffffff";
+
+// ─────────────────────────────────────────────
+//  📝  EXERCISE DATA
+//
+//  كل item فيه:
+//  - id, src: الصورة
+//  - questionParts: أجزاء سطر السؤال
+//  - answerParts:   أجزاء سطر الجواب
+//
+//  كل جزء إما:
+//  { t: "text",  v: "..." }              → نص ثابت أسود
+//  { t: "given", v: "..." }              → نص معطى أحمر (جواب مثال)
+//  { t: "input", id, correct, answer }  → input يكتبه الطالب
+// ─────────────────────────────────────────────
 const ITEMS = [
-  { id: "q1", word: "January", img: img1, correct: "j" },
-  { id: "q2", word: "van", img: img2, correct: "v" },
-  { id: "q3", word: "wagon", img: img3, correct: "w" },
-  { id: "q4", word: "cat", img: img4, correct: "c" },
-  { id: "q5", word: "yo-yo", img: img5, correct: "y" },
-
-  { id: "q6", word: "jeep", img: img6, correct: "j" },
-  { id: "q7", word: "nine", img: img7, correct: "n" },
-  { id: "q8", word: "kite", img: img8, correct: "k" },
-  { id: "q9", word: "bubbles", img: img9, correct: "b" },
-  { id: "q10", word: "moon", img: img10, correct: "m" },
-
-  { id: "q11", word: "food", img: img11, correct: "f" },
-  { id: "q12", word: "book", img: img12, correct: "b" },
-  { id: "q13", word: "x-ray", img: img13, correct: "x" },
-  { id: "q14", word: "elephant", img: img14, correct: "e" },
-  { id: "q15", word: "snail", img: img15, correct: "s" },
-
-  { id: "q16", word: "zebra", img: img16, correct: "z" },
-  { id: "q17", word: "tomato", img: img17, correct: "t" },
-  { id: "q18", word: "house", img: img18, correct: "h" },
-  { id: "q19", word: "apple", img: img19, correct: "a" },
-  { id: "q20", word: "dog", img: img20, correct: "d" },
-];
-const captions = [
   {
-    start: 0.099,
-    end: 24.739,
-    text: "Page 73, review eight, exercise C. Listen and write the beginning sound for each word. Calendar, van, wagon, cat, yo-yo, jeep, nine, kite, bubbles, moon, fries, book,",
+    id:  1,
+    src: img1,
+    // السؤال معطى كله، الجواب معطى
+    questionParts: [
+      { t: "given", v: "Did he clean his shoes?" },
+    ],
+    answerParts: [
+      { t: "given", v: "Yes, he did.", isAnswer: true },
+    ],
   },
   {
-    start: 25.899,
-    end: 36.22,
-    text: "X-ray, elephant, snail, zebra, tomatoes, house, apple, dog",
+    id:  2,
+    src: img2,
+    // السؤال: "Did they play ___ baseball?"
+    questionParts: [
+      { t: "given", v: "Did they play" },
+      { t: "input", id: "2q", correct: [""], answer: "" },   // الفراغ في المنتصف
+      { t: "text",  v: "baseball?" },
+    ],
+    answerParts: [
+      { t: "given", v: "No, they didn't.", isAnswer: true },
+    ],
+  },
+  {
+    id:  3,
+    src: img3,
+    // السؤال: "Did they play ___ jump rope?"
+    questionParts: [
+      { t: "given", v: "Did they play" },
+      { t: "input", id: "3q", correct: [""], answer: "" },
+      { t: "text",  v: "jump rope?" },
+    ],
+    answerParts: [
+      { t: "given", v: "No, they didn't.", isAnswer: true },
+    ],
   },
 ];
-/* ===== draggable ===== */
 
-function DraggableLetter({ item, locked }) {
-  const { attributes, listeners, setNodeRef, transform, transition } =
-    useSortable({ id: item, disabled: locked });
+// ─────────────────────────────────────────────
+//  📝  NOTE FOR DEVELOPER
+//
+//  بناءً على الصورة:
+//  - السؤال 1: كله معطى (أسود + أحمر) — لا input
+//  - السؤال 2 و 3: فراغ في المنتصف في سطر السؤال
+//
+//  لو بدك تغير: حط correct: ["الكلمة"] و answer: "الكلمة"
+//  لو الفراغ فاضي بالكامل بدون تحقق، خلي correct: [""] و answer: ""
+// ─────────────────────────────────────────────
 
-  return (
-    <div
-      ref={setNodeRef}
-      {...attributes}
-      {...listeners}
-      style={{
-        transform: CSS.Transform.toString(transform),
-        transition,
-        display: "inline-flex",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: "6px 10px",
-        border: "2px solid #e5e7eb",
-        borderRadius: "8px",
-        background: "white",
-        fontWeight: "bold",
-        fontSize: "18px",
-        cursor: "grab",
-        minWidth: "35px",
-        touchAction: "none", // مهم جدا
-        userSelect: "none",
-        WebkitUserSelect: "none",
-      }}
-    >
-      {item}
-    </div>
-  );
-}
+// collect all input parts that need checking
+const ALL_INPUTS = ITEMS.flatMap((item) => [
+  ...item.questionParts.filter((p) => p.t === "input"),
+  ...item.answerParts.filter((p) => p.t === "input"),
+]);
 
-/* ===== drop slot ===== */
+// ─────────────────────────────────────────────
+//  🔧  NORMALIZE
+// ─────────────────────────────────────────────
+const normalize = (str) =>
+  str.toLowerCase().replace(/[^a-z0-9'\s]/g, "").replace(/\s+/g, " ").trim();
 
-function DropSlot({ id, content }) {
-  const { setNodeRef } = useSortable({ id });
+const isCorrect = (userVal, correctArr) => {
+  if (!correctArr || correctArr.length === 0) return true;
+  if (correctArr[0] === "") return true; // no-check field
+  return correctArr.some((c) => normalize(userVal) === normalize(c));
+};
 
-  return (
-    <div
-      ref={setNodeRef}
-      style={{
-        position: "relative",
-        width: "30px",
-        height: "30px",
-        border: "2px solid #F79530", // 🔥 نفس اللون
-        borderRadius: "6px",
-        background: "white",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        fontWeight: "bold",
-        fontSize: "16px",
-      }}
-    >
-      {content && (
-        <span
-          style={{
-            color: content ? "#1C398E" : "#000",
-          }}
-        >
-          {content}
-        </span>
-      )}
-    </div>
-  );
-}
-/* ===== main ===== */
-
-const Review8_Page2_Q1 = () => {
-  const [answers, setAnswers] = useState(
-    Object.fromEntries(ITEMS.map((i) => [i.id, null])),
-  );
-  const [activeId, setActiveId] = useState(null);
+// ─────────────────────────────────────────────
+//  COMPONENT
+// ─────────────────────────────────────────────
+export default function WB_LookWriteQuestions_QC() {
+  const [answers,     setAnswers]     = useState({});
   const [showResults, setShowResults] = useState(false);
-  const [locked, setLocked] = useState(false);
+  const [showAns,     setShowAns]     = useState(false);
 
-  const sensors = useSensors(
-    useSensor(MouseSensor),
-    useSensor(TouchSensor),
-    useSensor(PointerSensor),
-  );
+  const handleChange = (id, value, correctArr) => {
+    if (showAns) return;
+    if (showResults && isCorrect(answers[id] || "", correctArr)) return;
+    setAnswers((prev) => ({ ...prev, [id]: value }));
+  };
 
-  const checkAnswers = () => {
-    if (locked) return;
-
-    if (Object.values(answers).includes(null)) {
-      ValidationAlert.info();
-      return;
-    }
-
+  const handleCheck = () => {
+    if (showAns) return;
+    const checkable = ALL_INPUTS.filter((p) => p.correct && p.correct[0] !== "");
+    const allAnswered = checkable.every((p) => answers[p.id]?.trim());
+    if (!allAnswered) { ValidationAlert.info("Please complete all answers first."); return; }
     let score = 0;
-
-    ITEMS.forEach((item) => {
-      if (answers[item.id] === item.correct) score++;
-    });
-
-    const total = ITEMS.length;
-
-    if (score === total) ValidationAlert.success(`Score: ${score} / ${total}`);
-    else if (score > 0) ValidationAlert.warning(`Score: ${score} / ${total}`);
-    else ValidationAlert.error(`Score: ${score} / ${total}`);
-
+    checkable.forEach((p) => { if (isCorrect(answers[p.id] || "", p.correct)) score++; });
+    const total = checkable.length;
     setShowResults(true);
-    setLocked(true);
+    if (score === total)   ValidationAlert.success(`Score: ${score} / ${total}`);
+    else if (score > 0)    ValidationAlert.warning(`Score: ${score} / ${total}`);
+    else                   ValidationAlert.error(`Score: ${score} / ${total}`);
+  };
+
+  const handleShowAnswer = () => {
+    const filled = {};
+    ALL_INPUTS.forEach((p) => { filled[p.id] = p.answer; });
+    setAnswers(filled); setShowResults(false); setShowAns(true);
   };
 
   const handleReset = () => {
-    setAnswers(Object.fromEntries(ITEMS.map((i) => [i.id, null])));
-    setShowResults(false);
-    setLocked(false);
+    setAnswers({}); setShowResults(false); setShowAns(false);
+  };
+
+  const isWrongPart    = (p) => showResults && !showAns && p.correct[0] !== "" && !isCorrect(answers[p.id] || "", p.correct);
+  const isDisabledPart = (p) => showAns || (showResults && isCorrect(answers[p.id] || "", p.correct));
+
+  // ── Render a single part ──
+  const renderPart = (part, i) => {
+    // نص ثابت أسود
+    if (part.t === "text") {
+      return (
+        <span key={i} className="lwq-text" style={{ color: TEXT_COLOR }}>
+          {part.v}
+        </span>
+      );
+    }
+
+    // نص معطى أحمر (أجوبة مثال أو أسئلة معطاة)
+    if (part.t === "given") {
+      return (
+        <span
+          key={i}
+          className="lwq-given"
+          style={{ color: part.isAnswer ? ANSWER_GIVEN_COLOR : GIVEN_TEXT_COLOR }}
+        >
+          {part.v}
+        </span>
+      );
+    }
+
+    // input
+    const wrong    = isWrongPart(part);
+    const disabled = isDisabledPart(part);
+    const value    = answers[part.id] || "";
+    const tColor   = showAns ? INPUT_ANSWER_COLOR : INPUT_TEXT_COLOR;
+    const uColor   = wrong ? INPUT_UNDERLINE_WRONG : INPUT_UNDERLINE_DEFAULT;
+
+    return (
+      <span key={part.id} className="lwq-input-wrap">
+        <input
+          type="text"
+          className={[
+            "lwq-input",
+            wrong   ? "lwq-input--wrong"  : "",
+            showAns ? "lwq-input--answer" : "",
+          ].filter(Boolean).join(" ")}
+          value={value}
+          disabled={disabled}
+          onChange={(e) => handleChange(part.id, e.target.value, part.correct)}
+          style={{ borderBottomColor: uColor, color: tColor }}
+          spellCheck={false}
+          autoComplete="off"
+        />
+        {wrong && <span className="lwq-badge">✕</span>}
+      </span>
+    );
   };
 
   return (
-    <DndContext
-      sensors={sensors}
-      onDragStart={(e) => setActiveId(e.active.id)}
-      onDragEnd={(e) => {
-        if (locked) return;
-        if (e.over) {
-          setAnswers((prev) => ({
-            ...prev,
-            [e.over.id]: e.active.id,
-          }));
+    <div className="main-container-component">
+      <style>{`
+        /* ── List ── */
+        .lwq-list {
+          display: flex;
+          flex-direction: column;
+          gap: clamp(22px, 3.2vw, 42px);
+          width: 100%;
         }
-        setActiveId(null);
-      }}
-    >
+
+        /* Single item */
+        .lwq-item {
+          display: flex;
+          align-items: flex-start;
+          gap: clamp(10px, 1.4vw, 18px);
+        }
+
+        /* Number */
+        .lwq-num {
+          font-size: clamp(14px, 1.7vw, 20px);
+          font-weight: 700;
+          color: ${NUMBER_COLOR};
+          flex-shrink: 0;
+          line-height: 1;
+          padding-top: clamp(18px, 2.5vw, 30px);
+          min-width: clamp(16px, 2vw, 24px);
+        }
+
+        /* Image */
+        .lwq-img {
+          width: clamp(100px, 14vw, 180px);
+          height: clamp(70px, 10vw, 130px);
+          object-fit: cover;
+          border-radius: 10px;
+          flex-shrink: 0;
+          display: block;
+        }
+
+        /* Lines block (Q + A) */
+        .lwq-lines {
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+          gap: clamp(8px, 1.2vw, 16px);
+          justify-content: center;
+          min-height: clamp(70px, 10vw, 130px);
+        }
+
+        /* Single line (question or answer) */
+        .lwq-line {
+          display: flex;
+          align-items: flex-end;
+          flex-wrap: wrap;
+          gap: clamp(4px, 0.5vw, 7px);
+          border-bottom: 1.5px solid ${INPUT_UNDERLINE_DEFAULT};
+          padding-bottom: 2px;
+          width: 100%;
+        }
+
+        /* Given text (أحمر أو أسود) */
+        .lwq-given {
+          font-size: clamp(13px, 1.6vw, 19px);
+          line-height: 1.5;
+          flex-shrink: 0;
+          white-space: nowrap;
+        }
+
+        /* Static black text */
+        .lwq-text {
+          font-size: clamp(13px, 1.6vw, 19px);
+          line-height: 1.5;
+          flex-shrink: 0;
+          white-space: nowrap;
+        }
+
+        /* Input wrap */
+        .lwq-input-wrap {
+          position: relative;
+          display: inline-flex;
+          align-items: center;
+          flex: 1;
+          min-width: clamp(80px, 10vw, 160px);
+        }
+
+        .lwq-input {
+          width: 100%;
+          background: transparent;
+          border: none;
+          border-bottom: 1px solid ${INPUT_UNDERLINE_DEFAULT};
+          outline: none;
+          font-size: clamp(13px, 1.6vw, 19px);
+          color: ${INPUT_TEXT_COLOR};
+          line-height: 1.5;
+          box-sizing: border-box;
+          font-family: inherit;
+          transition: border-color 0.2s;
+        }
+        .lwq-input:disabled  { opacity: 1; cursor: default; }
+        .lwq-input--wrong    { border-bottom-color: ${INPUT_UNDERLINE_WRONG}; }
+        .lwq-input--answer   { color: ${INPUT_ANSWER_COLOR}; font-weight: 700; }
+
+        /* ✕ badge */
+        .lwq-badge {
+          position: absolute;
+          top: -8px; right: -4px;
+          width: clamp(14px, 1.6vw, 18px);
+          height: clamp(14px, 1.6vw, 18px);
+          border-radius: 50%;
+          background: ${WRONG_BADGE_BG};
+          color: ${WRONG_BADGE_TEXT};
+          display: flex; align-items: center; justify-content: center;
+          font-size: clamp(7px, 0.8vw, 10px);
+          font-weight: 700;
+          border: 2px solid #fff;
+          box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+          pointer-events: none;
+          z-index: 2;
+        }
+
+        .lwq-buttons {
+          display: flex;
+          justify-content: center;
+          margin-top: clamp(8px, 1.6vw, 18px);
+        }
+      `}</style>
+
       <div
+        className="div-forall"
         style={{
           display: "flex",
           flexDirection: "column",
-          alignItems: "center",
-          padding: "30px",
+          gap: "clamp(14px, 2vw, 22px)",
+          maxWidth: "1100px",
+          margin: "0 auto",
         }}
       >
-        <div className="div-forall">
-          <h5 className="header-title-page8">
-            <span style={{ marginRight: "20px" }}>C</span>
-            Listen and write the{" "}
-            <span style={{ color: "#2e3192" }}> beginning sound</span> for each
-            word.
-          </h5>
-          <QuestionAudioPlayer
-            src={sound}
-            captions={captions}
-            stopAtSecond={8}
-          />
+        {/* ── Header ── */}
+        <h1
+          className="WB-header-title-page8"
+          style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
+        >
+          <span className="WB-ex-A-1">C</span>
+          Look and write questions. Then answer.
+        </h1>
 
-          <div
-            style={{
-              marginBottom: "30px",
-            }}
-          >
-            {/* 🔤 البنك */}
-            <div className="bg-blue-50 p-3 rounded-2xl border-2 border-blue-100 mb-6">
-              <div className="flex flex-wrap justify-center gap-3">
-                <SortableContext items={LETTERS}>
-                  {LETTERS.map((l) => (
-                    <DraggableLetter key={l} item={l} locked={locked} />
-                  ))}
-                </SortableContext>
-              </div>
-            </div>
+        {/* ── Items ── */}
+        <div className="lwq-list">
+          {ITEMS.map((item) => (
+            <div key={item.id} className="lwq-item">
 
-            {/* 🧩 الصور */}
-            <div className="grid grid-cols-5 gap-x-3 gap-y-3">
-              {ITEMS.map((item) => (
-                <div key={item.id} style={{ textAlign: "center" }}>
-                  {/* 🔥 wrapper للصورة فقط */}
-                  <div
-                    style={{
-                      position: "relative",
-                      display: "inline-block",
-                    }}
-                  >
-                    {/* 📦 البوكس مربوط بالصورة */}
-                    <div
-                      style={{
-                        position: "absolute",
-                        bottom: "0px",
-                        right: "0px",
-                        zIndex: 2,
-                      }}
-                    >
-                      <DropSlot
-                        id={item.id}
-                        content={answers[item.id]}
-                        correct={item.correct}
-                        isSubmitted={showResults}
-                      />
-                    </div>
+              {/* Number */}
+              <span className="lwq-num">{item.id}</span>
 
-                    {/* 🖼️ الصورة */}
-                    <img
-                      src={item.img}
-                      style={{
-                        width: "150px",
-                        height: "120px",
-                        border: "2px solid #F79530",
-                        borderRadius: "10px",
-                      }}
-                    />
-                    {showResults &&
-                      answers[item.id] &&
-                      answers[item.id] !== item.correct && (
-                        <div
-                          style={{
-                            position: "absolute",
-                            bottom: "25px",
-                            right: "45px", // 🔥 زي المثال اللي بدك
-                            zIndex: 10,
-                          }}
-                        >
-                          <WrongMark />
-                        </div>
-                      )}
-                  </div>
+              {/* Image */}
+              <img src={item.src} alt={`img-${item.id}`} className="lwq-img" />
+
+              {/* Q + A lines */}
+              <div className="lwq-lines">
+                {/* Question line */}
+                <div className="lwq-line">
+                  {item.questionParts.map((p, i) => renderPart(p, i))}
                 </div>
-              ))}
-            </div>
-          </div>
+                {/* Answer line */}
+                <div className="lwq-line">
+                  {item.answerParts.map((p, i) => renderPart(p, i))}
+                </div>
+              </div>
 
-          {/* 🔴 نفس البوتون */}
+            </div>
+          ))}
+        </div>
+
+        {/* ── Buttons ── */}
+        <div className="lwq-buttons">
           <Button
-            handleShowAnswer={() => {
-              setAnswers(
-                Object.fromEntries(ITEMS.map((i) => [i.id, i.correct])),
-              );
-              setShowResults(true);
-              setLocked(true);
-            }}
+            checkAnswers={handleCheck}
+            handleShowAnswer={handleShowAnswer}
             handleStartAgain={handleReset}
-            checkAnswers={checkAnswers}
           />
         </div>
       </div>
-
-      <DragOverlay>
-        {activeId ? (
-          <div className="p-3 bg-white border-2 rounded-xl shadow text-xs">
-            {activeId}
-          </div>
-        ) : null}
-      </DragOverlay>
-    </DndContext>
+    </div>
   );
-};
-
-export default Review8_Page2_Q1;
+}

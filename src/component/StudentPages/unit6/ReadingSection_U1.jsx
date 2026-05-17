@@ -5,7 +5,7 @@ import imgReading from "../../../assets/imgs/pages/Class Book/Right 4 Unit 6 Rea
 import readingAudio from "../../../assets/audio/ClassBook/Grade 4/cd33pg47-reading-adult-lady_5Efd1RGA.mp3";
 import ReadingSection from "../ReadingSection";
 
-import img from"../../../assets/imgs/pages/Class Book/Right 4 Unit 5 Under the Weather Folder/Page 41/SVG/Asset 2.svg"
+import img from"../../../assets/imgs/pages/Class Book/Right 4 Unit 6 Ready for School Folder/Page 47/SVG/SVG/Asset 21.svg"
 
 const ReadingSection_U1 = () => {
   const paragraphs = [

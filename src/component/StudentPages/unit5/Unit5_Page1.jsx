@@ -7,6 +7,10 @@ import audioBtn from "../../../assets/Page 01/Audio btn.svg";
 import arrowBtn from "../../../assets/Page 01/Arrow.svg";
 import Vocabulary from "../Vocabulary";
 import CriticalThinking from "../CriticalThinking";
+import pauseBtn from "../../../assets/Page 01/Right Video Button.svg";
+import videoFile from "../../../assets/right grade 4/grade 4 unit 5 page 40.mp4";
+
+
 
 const Page6 = ({ openPopup }) => {
   const audioRef = useRef(null);
@@ -183,106 +187,106 @@ const wordTimingsVoc = [
 
 
   
-  const clickableAreas = [
-   {
-  x1: 9.37,
-  y1: 21.2,
-  x2: 40.07,
-  y2: 25,
-  slice: {
-    startFrom: captions[1].start,
-    stopAt: captions[1].end,
+const clickableAreas = [
+  {
+    x1: 9.37,
+    y1: 21.2,
+    x2: 40.07,
+    y2: 25,
+    slice: {
+      startFrom: 5.28,
+      stopAt: 10.6,
+    },
   },
-},
 
-{
-  x1: 6.5,
-  y1: 38.2,
-  x2: 28.5,
-  y2: 44,
-  slice: {
-    startFrom: captions[2].start,
-    stopAt: captions[2].end,
+  {
+    x1: 6.5,
+    y1: 38.2,
+    x2: 28.5,
+    y2: 44,
+    slice: {
+      startFrom: 10.9,
+      stopAt: 15.18,
+    },
   },
-},
 
-{
-  x1: 35.6,
-  y1: 41,
-  x2: 49.6,
-  y2: 45.3,
-  slice: {
-    startFrom: captions[3].start,
-    stopAt: captions[3].end,
+  {
+    x1: 35.6,
+    y1: 41,
+    x2: 49.6,
+    y2: 45.3,
+    slice: {
+      startFrom: 15.48,
+      stopAt: 17.66,
+    },
   },
-},
 
-{
-  x1: 59.1,
-  y1: 21.5,
-  x2: 94.1,
-  y2: 25.7,
-  slice: {
-    startFrom: captions[4].start,
-    stopAt: captions[4].end,
+  {
+    x1: 59.1,
+    y1: 21.5,
+    x2: 94.1,
+    y2: 25.7,
+    slice: {
+      startFrom: 17.96,
+      stopAt: 23.0,
+    },
   },
-},
 
-{
-  x1: 51.5,
-  y1: 42.6,
-  x2: 73.9,
-  y2: 46.8,
-  slice: {
-    startFrom: captions[5].start,
-    stopAt: captions[5].end,
+  {
+    x1: 51.5,
+    y1: 42.6,
+    x2: 73.9,
+    y2: 46.8,
+    slice: {
+      startFrom: 23.3,
+      stopAt: 26,
+    },
   },
-},
 
-{
-  x1: 17.5,
-  y1: 47.8,
-  x2: 47.9,
-  y2: 52.4,
-  slice: {
-    startFrom: captions[6].start,
-    stopAt: captions[6].end,
+  {
+    x1: 17.5,
+    y1: 47.8,
+    x2: 47.9,
+    y2: 52.4,
+    slice: {
+      startFrom: 27.52,
+      stopAt: 32.4,
+    },
   },
-},
 
-{
-  x1: 15.5,
-  y1: 69.7,
-  x2: 42.3,
-  y2: 73.9,
-  slice: {
-    startFrom: captions[7].start,
-    stopAt: captions[7].end,
+  {
+    x1: 15.5,
+    y1: 69.7,
+    x2: 42.3,
+    y2: 73.9,
+    slice: {
+      startFrom: 32.7,
+      stopAt: 36.52,
+    },
   },
-},
 
-{
-  x1: 55.2,
-  y1: 48.5,
-  x2: 75.5,
-  y2: 55.9,
-  slice: {
-    startFrom: captions[8].start,
-    stopAt: captions[8].end,
+  {
+    x1: 55.2,
+    y1: 48.5,
+    x2: 75.5,
+    y2: 55.9,
+    slice: {
+      startFrom: 36.82,
+      stopAt: 40.8,
+    },
   },
-},
 
-{
-  x1: 51.6,
-  y1: 68.8,
-  x2: 93,
-  y2: 73.6,
-  slice: {
-    startFrom: captions[9].start,
-    stopAt: captions[9].end,
+  {
+    x1: 51.7,
+    y1: 68.5,
+    x2: 93.2,
+    y2: 73.5,
+    slice: {
+      startFrom: 42.56,
+      stopAt: 48.68,
+    },
   },
-},
-  ];
+];
 
 
   const handleImageClick = (e) => {
@@ -486,6 +490,31 @@ const wordTimingsVoc = [
             />
           </svg>
         </div>
+              <div
+                className="pauseBtn-icon-CD-page4 hover:scale-110 transition"
+                style={{ overflow: "visible" }}
+              >
+                <svg
+                  width="22"
+                  height="22"
+                  viewBox="0 0 90 90"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    openPopup(
+                      "video",
+                      <div style={{ display: "flex", justifyContent: "center", alignContent: "center", alignItems: "center", height: "100%", width: "100%" }}>
+                        <video autoPlay controls style={{ width: "auto", height: "80%", objectFit: "fill", borderRadius: "20px" }}>
+                          <source src={videoFile} type="video/mp4" />
+                        </video>
+                      </div>
+                    );
+                  }}
+                  style={{ overflow: "visible" }}
+                >
+                  <image className="svg-img" href={pauseBtn} x="0" y="0" width="90" height="90" />
+                </svg>
+              </div>
+        
       <audio ref={audioRef} style={{ display: "none" }} />
     </div>
   );

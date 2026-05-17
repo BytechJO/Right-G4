@@ -109,11 +109,10 @@ const captions = [
     <div className="flex flex-col items-center">
         <div className="w-[60%]">
       <ReadingSection
-        mainTitle="What would you like to see invented in the future? Do you have an idea for a future invention?"
-        title="Inventions of the Future"
+        mainTitle="What kinds of sports do you like? What kinds of sports 
+do you play during gym class?"
         image={imgReading}
         image1= {img}
-        question="Do you think new inventions will be good or bad for Earth?"
         sound={readingAudio}
         captions={captions}
         stopAtSecond={9}

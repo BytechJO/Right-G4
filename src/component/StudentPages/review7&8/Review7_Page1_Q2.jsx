@@ -102,6 +102,7 @@ export default function WB_UnscrambleWrite_QB() {
           grid-template-columns: repeat(2, 1fr);
           gap: clamp(20px, 3vw, 40px) clamp(24px, 3.5vw, 48px);
           width: 100%;
+              margin: 10% 0;
         }
 
         /* Single card */

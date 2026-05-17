@@ -287,7 +287,7 @@ export default function WB_LookReadWrite_QD() {
           className="WB-header-title-page8"
           style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
         >
-          <span className="WB-ex-A-1">D</span>
+          <span className="WB-ex-A">D</span>
           Look, read, and write.
         </h1>
 

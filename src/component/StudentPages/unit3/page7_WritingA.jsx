@@ -81,7 +81,7 @@ const ComprehensionA = () => {
     <div className="mb-6 mx-auto">
       <h5 className="header-title-page8-read mb-8">
         <span className="ex-A-read mr-2">A</span>
-        Read and write ✓ for things people had in the 1920s.
+        Read and write <span style={{color : "red"}} >✓ </span> for things people had in the 1920s.
       </h5>
 
       <div className="grid grid-cols-3 gap-x-10 gap-y-5">
@@ -101,7 +101,7 @@ const ComprehensionA = () => {
                   fontWeight: "400",
                   WebkitTextStroke: "1px black",
                   color: "#1a1a1a",
-                  fontSize: "16px",
+                  fontSize: "18px",
                   minWidth: "16px",
                 }}
               >
@@ -109,7 +109,7 @@ const ComprehensionA = () => {
               </span>
 
               {/* Label */}
-              <span style={{ fontSize: "15px", color: "#1a1a1a", flex: 1 }}>
+              <span style={{ fontSize: "18px", color: "#1a1a1a", flex: 1 }}>
                 {item.text}
               </span>
 

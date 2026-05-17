@@ -1,20 +1,21 @@
 import React, { useRef, useState } from "react";
 import page_6 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 2 Welcome to the Big Apple Folder/Page 10.png";
 import mainSound from "../../../assets/audio/ClassBook/Grade 4/cd1pg4-conversation-adult-lady-t_1cApuaJF.mp3";
-import vocSound from "../../../assets/audio/ClassBook/Grade 4/cd1pg4-conversation-adult-lady-t_1cApuaJF.mp3";
+import vocSound from "../../../assets/audio/ClassBook/Grade 4/cd7pg10-instruction-adult-lady_y7K6Hghf.mp3";
 import AudioWithCaption from "../../AudioWithCaption";
 import audioBtn from "../../../assets/Page 01/Audio btn.svg";
 import arrowBtn from "../../../assets/Page 01/Arrow.svg";
 import Vocabulary from "../Vocabulary";
 import "./Unit2_Page1.css";
 import CriticalThinking from "../CriticalThinking";
+import pauseBtn from "../../../assets/Page 01/Right Video Button.svg";
+import videoFile from "../../../assets/right grade 4/grade 4 unit 2 page 10.mp4";
 
 const Page6 = ({ openPopup }) => {
   const audioRef = useRef(null);
   const [hoveredAreaIndex, setHoveredAreaIndex] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [activeAreaIndex, setActiveAreaIndex] = useState(null);
-
 const captions = [
   { start: 0, end: 6.60, text: "Page four conversation. Listen and read, then say." },
   { start: 6.60, end: 10.5, text: "Look at my new robot, Sarah. His name is Botboy." },
@@ -29,29 +30,122 @@ const captions = [
   { start: 48.98, end: 52.8, text: "How will we learn? We must do our homework." },
   { start:52.8, end: 58.74, text: "Oh, I didn't think about that. You're right. Well, at least they will clean our rooms." },
 ];
- const wordTimingsVoc = [
-    { start: 8.8, end: 11.1 },
-    { start: 11.2, end: 13.6 },
-    { start: 13.94, end: 15.5 },
-    { start: 16.4, end: 17.6 },
+const captionsC = [
+  {
+    start: 0.74,
+    end: 3.82,
+    text: "Page 10, Unit 2, Vocabulary.",
+  },
+  {
+    start: 3.82,
+    end: 10.46,
+    text: "Listen and repeat. Find the words and expressions in the conversation above.",
+  },
+  {
+    start: 10.46,
+    end: 12.22,
+    text: "Statue of Liberty.",
+  },
+  {
+    start: 12.22,
+    end: 14.12,
+    text: "New York City.",
+  },
+  {
+    start: 14.12,
+    end: 15.40,
+    text: "Picture.",
+  },
+  {
+    start: 15.40,
+    end: 16.62,
+    text: "Summer.",
+  },
+  {
+    start: 16.62,
+    end: 18.12,
+    text: "Japan.",
+  },
+  {
+    start: 18.12,
+    end: 19.64,
+    text: "Visit.",
+  },
+  {
+    start: 19.64,
+    end: 21.00,
+    text: "Week.",
+  },
+  {
+    start: 21.00,
+    end: 22.88,
+    text: "Australia.",
+  },
+  {
+    start: 22.88,
+    end: 24.68,
+    text: "Kangaroos.",
+  },
+  {
+    start: 24.68,
+    end: 26.22,
+    text: "Believe.",
+  },
+  {
+    start: 27.54,
+    end: 28.08,
+    text: "I know.",
+  },
+  {
+    start: 28.08,
+    end: 29.92,
+    text: "I sure am.",
+  },
+  {
+    start: 29.92,
+    end: 31.92,
+    text: "Say cheese!.",
+  },
+  {
+    start: 31.92,
+    end: 33.96,
+    text: "Really enjoying.",
+  },
+  {
+    start: 33.96,
+    end: 35.78,
+    text: "How about you?",
+  },
+  {
+    start: 36.86,
+    end: 38.18,
+    text: "I can't believe it!",
+  },
+];
 
-    { start: 19.04, end: 20.26 },
-    { start: 21.6, end: 22.94 },
-    { start: 24.2, end: 25.38 },
-    { start: 26.8, end: 28.64 },
+const wordTimingsVoc = [
+  { start: 10.46, end: 12.22 }, // Statue of Liberty
+  { start: 12.22, end: 14.12 }, // New York City
+  { start: 14.12, end: 15.40 }, // Picture
+  { start: 15.40, end: 16.62 }, // Summer
 
-    { start: 29.719, end: 31.5 },
-    { start: 32.32, end: 34.18 },
-    { start: 35.06, end: 37.06 },
-    { start: 37.719, end: 39.579 },
-    { start: 40.36, end: 42.499 },
-    { start: 43.279, end: 45.459 },
+  { start: 16.62, end: 18.12 }, // Japan
+  { start: 18.12, end: 19.64 }, // Visit
+  { start: 19.64, end: 21.00 }, // Week
+  { start: 21.00, end: 22.88 }, // Australia
 
-    { start: 46.259, end: 48.459 },
-    { start: 49.52, end: 52.119 },
-  ];
+  { start: 22.88, end: 24.68 }, // Kangaroos
+  { start: 24.68, end: 26.22 }, // Believe
+  { start: 27.54, end: 28.08 }, // I know
+  { start: 28.08, end: 29.92 }, // I sure am
 
-  
+  { start: 29.92, end: 31.92 }, // Say cheese!
+  { start: 31.92, end: 33.96 }, // Really enjoying
+  { start: 33.96, end: 35.78 }, // How about you?
+  { start: 36.86, end: 38.18 }, // I can't believe it!
+];
+
+
   const clickableAreas = [
     {
   x1: 7.37,
@@ -244,28 +338,27 @@ const captions = [
                     title="VOCABULARY"
                     subtitle="Listen and repeat. Find the words and expressions in the conversation above."
                     sound={vocSound}
-                    captions={captions}
-                    stopAtSecond={8.5}
+                    captions={captionsC}
+                    stopAtSecond={3.9}
                                         wordTimings={wordTimingsVoc}
-
-                    words={[
-                      "alarm",
-                      "notebook",
-                      "pillow",
-                      "counting",
-                      "face",
-                      "figure",
-                      "reviewing",
-                      "pancakes",
-                      "starving",
-                      "actually",
-                      "mirror",
-                      "Uh-oh!",
-                      "fell asleep",
-                      "How did you know?",
-                      "right away",
-                      "on one side",
-                    ]}
+words={[
+  "Statue of Liberty",
+  "New York City",
+  "Picture",
+  "Summer",
+  "Japan",
+  "Visit",
+  "Week",
+  "Australia",
+  "Kangaroos",
+  "Believe",
+  "I know",
+  "I sure am",
+  "Say cheese!",
+  "Really enjoying",
+  "How about you?",
+  "I can't believe it!",
+]}
                   />
                 </div>,
               )
@@ -313,6 +406,31 @@ const captions = [
             />
           </svg>
         </div>
+              <div
+        className="pauseBtn-icon-CD-page4 hover:scale-110 transition"
+        style={{ overflow: "visible" }}
+      >
+        <svg
+          width="22"
+          height="22"
+          viewBox="0 0 90 90"
+          onClick={(e) => {
+            e.stopPropagation();
+            openPopup(
+              "video",
+              <div style={{ display: "flex", justifyContent: "center", alignContent: "center", alignItems: "center", height: "100%", width: "100%" }}>
+                <video autoPlay controls style={{ width: "auto", height: "80%", objectFit: "fill", borderRadius: "20px" }}>
+                  <source src={videoFile} type="video/mp4" />
+                </video>
+              </div>
+            );
+          }}
+          style={{ overflow: "visible" }}
+        >
+          <image className="svg-img" href={pauseBtn} x="0" y="0" width="90" height="90" />
+        </svg>
+      </div>
+
       <audio ref={audioRef} style={{ display: "none" }} />
     </div>
   );

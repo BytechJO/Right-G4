@@ -4,38 +4,33 @@ import GrammarC from "./GrammarC";
 
 import image  from "../../../assets/imgs/pages/Class Book/Right 4 Unit 8 I Lived in the Library Folder/Page 65/SVG/Asset 3.svg"
 import image1 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 8 I Lived in the Library Folder/Page 65/SVG/Asset 4.svg"
-import sound from "../../../assets/audio/ClassBook/Grade 4/cd17pg24-grammar-adult-lady_DyQEJqoO.mp3";
+import sound from "../../../assets/audio/ClassBook/Grade 4/cd44pg66-grammar-adult-lady_zIIrpZjr.mp3";
 import QuestionAudioPlayer from "../../QuestionAudioPlayer";
 import SectionBanner from "../SectionBanner";
 const GrammarSection_U1 = () => {
 const captions = [
   {
-    start: 0.80,
-    end: 2.78,
-    text: "Page 24. Grammar.",
+    start: 0.44,
+    end: 2.46,
+    text: "Page 66, grammar.",
   },
   {
-    start: 2.78,
-    end: 4.96,
-    text: "Past of have.",
+    start: 2.46,
+    end: 4.12,
+    text: "Past tense.",
   },
   {
-    start: 4.96,
-    end: 8.72,
-    text: "She had a bike. Did she have a kitten?",
+    start: 4.12,
+    end: 8.10,
+    text: "He played the piano. Did he play the piano?",
   },
   {
-    start: 8.72,
-    end: 13.42,
-    text: "She did not have a kitten. Why did she have a kitten?",
-  },
-  {
-    start: 13.42,
-    end: 18.06,
-    text: "I did not have books. What did she have?",
+    start: 8.10,
+    end: 12.16,
+    text: "They didn't play the piano. When did they play the piano?",
   },
 ];
-const stopAtSecond = 2.8;
+const stopAtSecond = 2.46;
  return (
     <div className="flex flex-col items-center ">
       <div className="w-[60%] mx-auto">

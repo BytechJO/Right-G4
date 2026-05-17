@@ -3,6 +3,7 @@ import page_6 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 10 Stella
 // import song from "../../../assets/img_unit5/sounds-unit5/Pg15.Sing_Adult Lady.mp3";
 import "./Unit10_Page6.css";
 import arrowBtn from "../../../assets/Page 01/Arrow.svg";
+import "../../FourImagesWithAudio.css";
 
 const Unit10_Page6 = ({ openPopup }) => {
 

@@ -1,407 +1,287 @@
 import React, { useState } from "react";
 import Button from "../../Button";
 import ValidationAlert from "../../Popup/ValidationAlert";
-import img1 from "../../../assets/imgs/pages/classbook/Right 3 Unit 9 Where Dad Folder/Page 80/Ex C 1.svg";
-import img2 from "../../../assets/imgs/pages/classbook/Right 3 Unit 9 Where Dad Folder/Page 80/Ex C 2.svg";
 
-const Unit9_Page5_Q3 = () => {
-  const grid = [
-    [
-      "u",
-      "t",
-      "y",
-      "k",
-      "t",
-      "h",
-      "e",
-      "r",
-      "e",
-      "o",
-      "o",
-      "l",
-      "k",
-      "i",
-      "u",
-      "w",
-      "a",
-      "s",
-      "d",
-      "x",
-      "s",
-      "a",
-      "b",
-      "i",
-      "c",
+// ─────────────────────────────────────────────
+//  🔊 AUDIO
+// ─────────────────────────────────────────────
+import sound from "../../../assets/audio/ClassBook/Grade 4/cd50pg80-instruction-adult-lady_AZOJpQPx.mp3";
+import QuestionAudioPlayer from "../../QuestionAudioPlayer";
+
+// ─────────────────────────────────────────────
+//  🎨  COLORS
+// ─────────────────────────────────────────────
+const TEXT_COLOR       = "#2b2b2b";
+const NUMBER_COLOR     = "#2b2b2b";
+const OPTION_LABEL_CLR = "#2b2b2b";
+const CIRCLE_SELECTED  = "#2195a6";
+const CIRCLE_CORRECT   = "#2195a6";
+const CIRCLE_WRONG     = "#ef4444";
+const WRONG_BADGE_BG   = "#ef4444";
+const WRONG_BADGE_TEXT = "#ffffff";
+
+// ─────────────────────────────────────────────
+//  📝  AUDIO CAPTIONS
+// ─────────────────────────────────────────────
+const captions = [
+  {
+    start: 0.38,
+    end: 2.90,
+    text: "Page 80. Write activities.",
+  },
+  {
+    start: 2.90,
+    end: 7.10,
+    text: "Exercise C. Listen, read, and circle.",
+  },
+  {
+    start: 7.10,
+    end: 12.14,
+    text: "My brother doesn't like haunted houses because he's afraid of ghosts.",
+  },
+  {
+    start: 12.14,
+    end: 15.54,
+    text: "Sandra plays the piano because she likes music.",
+  },
+  {
+    start: 15.54,
+    end: 19.70,
+    text: "William doesn't eat burgers because he doesn't like meat.",
+  },
+];
+
+// ─────────────────────────────────────────────
+//  📝  EXERCISE DATA
+// ─────────────────────────────────────────────
+const ITEMS = [
+  {
+    id:      1,
+    stem:    "My brother doesn't like haunted houses because ...",
+    correct: "a",
+    options: [
+      { label: "a", text: "he's afraid of ghosts."  },
+      { label: "b", text: "he's afraid of cobwebs." },
     ],
-    [
-      "v",
-      "r",
-      "e",
-      "b",
-      "i",
-      "g",
-      "k",
-      "l",
-      "o",
-      "o",
-      "p",
-      "f",
-      "a",
-      "t",
-      "q",
-      "e",
-      "r",
-      "w",
-      "s",
-      "f",
-      "g",
-      "r",
-      "o",
-      "f",
-      "h",
-      "g",
+  },
+  {
+    id:      2,
+    stem:    "Sandra plays the piano because ...",
+    correct: "b",
+    options: [
+      { label: "a", text: "she likes pianos." },
+      { label: "b", text: "she likes music."  },
     ],
-    [
-      "l",
-      "k",
-      "c",
-      "a",
-      "t",
-      "o",
-      "m",
-      "n",
-      "b",
-      "q",
-      "a",
-      "i",
-      "n",
-      "c",
-      "x",
-      "f",
-      "d",
-      "e",
-      "r",
-      "t",
-      "h",
-      "e",
-      "i",
-      "y",
-      "b",
+  },
+  {
+    id:      3,
+    stem:    "William doesn't eat burgers because ...",
+    correct: "a",
+    options: [
+      { label: "a", text: "he doesn't like meat."  },
+      { label: "b", text: "he doesn't like bread." },
     ],
-    ["v", "u", "h", "j", "p", "a", "r", "k", "s", "w", "g", "h", "f", "r", "e"],
-  ];
+  },
+];
 
-  const letters = grid;
-  const wordsToFind = [
-    "there",
-    "was",
-    "a",
-    "big",
-    "fat",
-    "cat",
-    "in",
-    "the",
-    "park",
-  ];
+// ─────────────────────────────────────────────
+//  COMPONENT
+// ─────────────────────────────────────────────
+export default function WB_ListenReadCircle_QC() {
+  const [selected,    setSelected]    = useState({});
+  const [showResults, setShowResults] = useState(false);
+  const [showAns,     setShowAns]     = useState(false);
 
-  const correctPositions = {
-    there: [4, 5, 6, 7, 8],
-    was: [15, 16, 17],
-    a: [21],
-    big: [100 + 3, 100 + 4, 100 + 5],
-    fat: [100 + 11, 100 + 12, 100 + 13],
-    cat: [200 + 2, 200 + 3, 200 + 4],
-    in: [200 + 11, 200 + 12], 
-    the: [200 + 19, 200 + 20, 200 + 21], 
+  const isLocked = showResults || showAns;
 
-    park: [300 + 4, 300 + 5, 300 + 6, 300 + 7],
-  };
-  const [locked, setLocked] = useState(false);
-  const [sentence, setSentence] = useState("");
-  const [selected, setSelected] = useState([]);
-  const [foundWords, setFoundWords] = useState([]);
-  const [coloredCells, setColoredCells] = useState([]);
-  const [isDragging, setIsDragging] = useState(false);
-
-  const handleMouseDown = (index) => {
-    if (locked) return;
-    setIsDragging(true);
-    setSelected([index]);
-  };
-  const handleMouseEnter = (index) => {
-    if (!isDragging || locked) return;
-
-    const lastIndex = selected[selected.length - 1];
-
-    if (index === lastIndex + 1 || index === lastIndex - 1) {
-      if (!selected.includes(index)) {
-        setSelected((prev) => [...prev, index]);
-      }
-    }
+  const handleSelect = (id, label) => {
+    if (isLocked) return;
+    setSelected((prev) => ({ ...prev, [id]: label }));
   };
 
-  const handleTouchMove = (e) => {
-    if (!isDragging || locked) return;
-    e.preventDefault(); // منع التمرير في الصفحة أثناء السحب
-
-    const touch = e.touches[0];
-    const element = document.elementFromPoint(touch.clientX, touch.clientY);
-    if (!element) return;
-
-    const index = element.getAttribute("data-index");
-    if (index !== null) {
-      handleMouseEnter(Number(index));
-    }
+  const handleCheck = () => {
+    if (isLocked) return;
+    const allAnswered = ITEMS.every((item) => selected[item.id]);
+    if (!allAnswered) { ValidationAlert.info("Please answer all questions first."); return; }
+    let score = 0;
+    ITEMS.forEach((item) => { if (selected[item.id] === item.correct) score++; });
+    setShowResults(true);
+    if (score === ITEMS.length)   ValidationAlert.success(`Score: ${score} / ${ITEMS.length}`);
+    else if (score > 0)           ValidationAlert.warning(`Score: ${score} / ${ITEMS.length}`);
+    else                          ValidationAlert.error(`Score: ${score} / ${ITEMS.length}`);
   };
 
-  const handleMouseUp = () => {
-    if (locked) return;
-    setIsDragging(false);
-
-    const matchedWord = wordsToFind.find((word) => {
-      const positions = correctPositions[word];
-      if (!positions) return false;
-
-      // تحقق نفس الترتيب
-      const isSame =
-        positions.length === selected.length &&
-        positions.every((pos, i) => pos === selected[i]);
-
-      // تحقق بالعكس (reverse)
-      const isReverse =
-        positions.length === selected.length &&
-        positions
-          .slice()
-          .reverse()
-          .every((pos, i) => pos === selected[i]);
-
-      return isSame || isReverse;
-    });
-    if (matchedWord && !foundWords.includes(matchedWord)) {
-      setFoundWords((prev) => [...prev, matchedWord]);
-      setColoredCells((prev) => [...prev, ...selected]);
-      setSentence(
-        wordsToFind
-          .filter((word) => [...foundWords, matchedWord].includes(word))
-          .join(" "),
-      );
-    }
-
-    setSelected([]);
+  const handleShowAnswer = () => {
+    const filled = {};
+    ITEMS.forEach((item) => { filled[item.id] = item.correct; });
+    setSelected(filled); setShowResults(false); setShowAns(true);
   };
 
-  const reset = () => {
-    setSelected([]);
-    setFoundWords([]);
-    setColoredCells([]);
-    setSentence("");
-    setLocked(false);
+  const handleReset = () => {
+    setSelected({}); setShowResults(false); setShowAns(false);
   };
 
-  const showAnswers = () => {
-    let allCells = [];
-    wordsToFind.forEach((word) => {
-      if (correctPositions[word]) {
-        allCells.push(...correctPositions[word]);
-      }
-    });
-    setFoundWords(wordsToFind);
-    setColoredCells(allCells);
-    setSelected([]);
-    setSentence(wordsToFind.join(" "));
-    setLocked(true);
+  const getState = (item, label) => {
+    const sel = selected[item.id];
+    if (sel !== label) return "idle";
+    if (showAns)       return "correct";
+    if (showResults)   return label === item.correct ? "correct" : "wrong";
+    return "selected";
   };
 
-  const checkAnswers = () => {
-    if (locked) return;
-    const total = wordsToFind.length;
-    const score = foundWords.length;
+  const renderOption = (item, opt) => {
+    const state   = getState(item, opt.label);
+    const isWrong = state === "wrong";
+    let bd = "transparent";
+    if (state === "selected") bd = CIRCLE_SELECTED;
+    if (state === "correct")  bd = CIRCLE_CORRECT;
+    if (state === "wrong")    bd = CIRCLE_WRONG;
 
-    if (score === 0) {
-      ValidationAlert.info();
-      return;
-    }
-
-    if (score < total) {
-      ValidationAlert.warning(`
-        <div style="font-size:20px;text-align:center;">
-          <b style="color:orange;">Score: ${score} / ${total}</b>
-        </div>
-      `);
-    } else {
-      ValidationAlert.success(`
-        <div style="font-size:20px;text-align:center;">
-          <b style="color:green;">Score: ${score} / ${total}</b>
-        </div>
-      `);
-    }
-    setLocked(true);
+    return (
+      <div
+        key={opt.label}
+        style={{
+          position: "relative",
+          display: "flex",
+          alignItems: "center",
+          gap: "clamp(4px,0.5vw,7px)",
+          border: `2px solid ${bd}`,
+          borderRadius: "999px",
+          padding: "clamp(3px,0.4vw,6px) clamp(12px,1.5vw,20px)",
+          cursor: isLocked ? "default" : "pointer",
+          userSelect: "none",
+          transition: "border-color 0.15s",
+          whiteSpace: "nowrap",
+        }}
+        onClick={() => handleSelect(item.id, opt.label)}
+      >
+        <span style={{ fontSize: "clamp(13px,1.5vw,18px)", fontWeight: 700, color: OPTION_LABEL_CLR, lineHeight: 1 }}>
+          {opt.label}
+        </span>
+        <span style={{ fontSize: "clamp(13px,1.5vw,18px)", color: TEXT_COLOR, lineHeight: 1 }}>
+          {opt.text}
+        </span>
+        {isWrong && (
+          <div style={{
+            position: "absolute", top: -7, right: -7,
+            width: "clamp(14px,1.6vw,18px)", height: "clamp(14px,1.6vw,18px)",
+            borderRadius: "50%", background: WRONG_BADGE_BG, color: WRONG_BADGE_TEXT,
+            display: "flex", alignItems: "center", justifyContent: "center",
+            fontSize: "clamp(7px,0.8vw,10px)", fontWeight: 700,
+            border: "2px solid #fff", boxShadow: "0 2px 6px rgba(0,0,0,0.2)",
+            pointerEvents: "none", zIndex: 3,
+          }}>✕</div>
+        )}
+      </div>
+    );
   };
 
   return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        padding: "30px",
-        width: "100%",
-        boxSizing: "border-box",
-      }}
-    >
-      <div className="div-forall">
-        <h5 className="header-title-page8 pb-2.5">
-          <span className="ex-A" style={{ marginRight: "10px" }}>
-            C
-          </span>
-          What kind of animal was in the park in the <br /> afternoon in A Brave
-          Mouse on page 77?
-        </h5>
+    <div className="main-container-component">
+      <style>{`
+        .lrcc-list {
+          display: flex;
+          flex-direction: column;
+          gap: clamp(20px, 3vw, 38px);
+          width: 100%;
+        }
 
-        {/* Words List */}
-        <div className="flex flex-wrap justify-center gap-3 mb-5 border-2 border-dashed border-gray-300 rounded-[14px] p-3">
-          {wordsToFind.map((word) => (
-            <span
-              key={word}
-              className={`px-3 py-1.5 rounded-[10px] border-2 border-[#2c5287] font-semibold transition duration-200 ${
-                foundWords.includes(word)
-                  ? "bg-[#2c5287] text-white border-[#2c5287]"
-                  : "bg-white text-black"
-              }`}
-              style={{ fontSize: "clamp(12px, 2vw, 15px)" }}
-            >
-              {word}
-            </span>
+        .lrcc-item {
+          display: flex;
+          flex-direction: column;
+          gap: clamp(10px, 1.4vw, 18px);
+        }
+
+        /* Stem row */
+        .lrcc-stem-row {
+          display: flex;
+          align-items: baseline;
+          gap: clamp(6px, 0.8vw, 10px);
+        }
+
+        .lrcc-num {
+          font-size: clamp(14px, 1.7vw, 20px);
+          font-weight: 700;
+          color: ${NUMBER_COLOR};
+          flex-shrink: 0;
+          line-height: 1.5;
+        }
+
+        .lrcc-stem {
+          font-size: clamp(13px, 1.6vw, 19px);
+          color: ${TEXT_COLOR};
+          line-height: 1.5;
+        }
+
+        /* Options row: a | b */
+        .lrcc-options {
+          display: flex;
+          align-items: center;
+          flex-wrap: wrap;
+          gap: clamp(16px, 2.4vw, 32px);
+          padding-left: clamp(22px, 3vw, 36px);
+        }
+
+        .lrcc-buttons {
+          display: flex;
+          justify-content: center;
+          margin-top: clamp(8px, 1.6vw, 18px);
+        }
+      `}</style>
+
+      <div
+        className="div-forall"
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: "clamp(14px, 2vw, 22px)",
+          maxWidth: "1100px",
+          margin: "0 auto",
+        }}
+      >
+        {/* ── Header ── */}
+        <h1
+          className="WB-header-title-page8"
+          style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
+        >
+          <span className="WB-ex-A">C</span>
+          Listen, read, and circle.
+        </h1>
+
+        {/* ── Audio ── */}
+        <div style={{ marginTop: "4px" }}>
+          <QuestionAudioPlayer src={sound} captions={captions} stopAtSecond={5} />
+        </div>
+
+        {/* ── Items ── */}
+        <div className="lrcc-list">
+          {ITEMS.map((item) => (
+            <div key={item.id} className="lrcc-item">
+
+              {/* Stem */}
+              <div className="lrcc-stem-row">
+                <span className="lrcc-num">{item.id}</span>
+                <span className="lrcc-stem">{item.stem}</span>
+              </div>
+
+              {/* Options */}
+              <div className="lrcc-options">
+                {item.options.map((opt) => renderOption(item, opt))}
+              </div>
+
+            </div>
           ))}
         </div>
 
-        <div
-          style={{ width: "100%", display: "flex", justifyContent: "center" }}
-        >
-          {/* Grid Wrapper */}
-          <div
-            className="border-2 border-[#f28c63] px-4 pt-4 pb-5"
-            style={{ width: "fit-content", margin: "0 auto" }}
-          >
-            <div
-              className="bg-[#daf5ff] rounded-[15px] p-2 sm:p-[15px]"
-              style={{
-                userSelect: "none",
-                width: "max-content",
-                touchAction: "none", // 🔥 الحل السحري لمنع تحريك الصفحة أثناء السحب على الآيباد
-                WebkitOverflowScrolling: "touch",
-              }}
-            >
-              {letters.map((row, rowIndex) => (
-                <div
-                  key={rowIndex}
-                  style={{
-                    display: "flex",
-                    gap: "clamp(1px, 0.3vw, 4px)", // مسافة تتغير حسب الشاشة
-                    width: "fit-content",
-                  }}
-                >
-                  {row.map((letter, colIndex) => {
-                    const index = rowIndex * 100 + colIndex;
-                    const isSelected = selected.includes(index);
-                    const isFound = coloredCells.includes(index);
-
-                    return (
-                      <span
-                        key={index}
-                        data-index={index}
-                        onMouseDown={() => handleMouseDown(index)}
-                        onMouseEnter={() => handleMouseEnter(index)}
-                        onMouseUp={handleMouseUp}
-                        onDragStart={(e) => e.preventDefault()}
-                        onTouchStart={(e) => {
-                          e.preventDefault(); // 🔥 منع تحريك الصفحة عند بدء اللمس
-                          handleMouseDown(index);
-                        }}
-                        onTouchMove={handleTouchMove}
-                        onTouchEnd={handleMouseUp}
-                        className={`
-                          flex items-center justify-center
-                          cursor-pointer
-                          transition
-                          ${isSelected ? "bg-[#ffd54f] rounded-sm" : ""}
-                          ${isFound ? "bg-[#4caf50] text-white rounded-sm" : ""}
-                        `}
-                        style={{
-                          width: "clamp(16px, 2.5vw, 25px)", // 🔥 عرض ديناميكي
-                          height: "clamp(22px, 3.5vw, 35px)", // 🔥 طول ديناميكي
-                          fontSize: "clamp(12px, 1.8vw, 18px)", // 🔥 حجم خط ديناميكي
-                        }}
-                      >
-                        {letter}
-                      </span>
-                    );
-                  })}
-                </div>
-              ))}
-            </div>
-
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: "10px",
-                marginTop: "15px",
-              }}
-            >
-              <img
-                src={img1}
-                alt="start"
-                style={{
-                  width: "clamp(40px, 10vw, 100px)", // 🔥 حجم ديناميكي للصور
-                  height: "auto",
-                }}
-              />
-
-              <div
-                style={{
-                  flex: 1,
-                  borderBottom: "2px solid black",
-                  height: "30px",
-                  display: "flex",
-                  alignItems: "center",
-                }}
-              >
-                <input
-                  value={sentence}
-                  readOnly
-                  style={{
-                    width: "100%",
-                    border: "none",
-                    outline: "none",
-                    background: "transparent",
-                    fontSize: "clamp(14px, 2vw, 18px)", // 🔥 حجم خط ديناميكي للإجابة
-                  }}
-                />
-              </div>
-
-              <img
-                src={img2}
-                alt="end"
-                style={{
-                  width: "clamp(40px, 10vw, 100px)", // 🔥 حجم ديناميكي للصور
-                  height: "auto",
-                }}
-              />
-            </div>
-          </div>
+        {/* ── Buttons ── */}
+        <div className="lrcc-buttons">
+          <Button
+            checkAnswers={handleCheck}
+            handleShowAnswer={handleShowAnswer}
+            handleStartAgain={handleReset}
+          />
         </div>
-
-        {/* BUTTONS */}
-        <Button
-          handleShowAnswer={showAnswers}
-          handleStartAgain={reset}
-          checkAnswers={checkAnswers}
-        />
       </div>
     </div>
   );
-};
-
-export default Unit9_Page5_Q3;
+}

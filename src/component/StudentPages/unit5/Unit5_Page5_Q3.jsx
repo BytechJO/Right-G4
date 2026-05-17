@@ -530,7 +530,7 @@ export default function WB_ListenReadCircle_QC() {
           className="WB-header-title-page8"
           style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
         >
-          <span className="WB-ex-A-1">C</span>
+          <span className="WB-ex-A">C</span>
           Listen, read, and circle the prepositional phrases.
         </h1>
 

@@ -94,10 +94,9 @@ const ComprehensionA = () => {
       <div className="flex flex-col gap-3">
         {questions.map((q, i) => (
           <div key={i} className="flex gap-2 items-center justify-between gap-4">
-            <span className="text-[14px]">
+            <span className="text-[18px]">
                   <span
               style={{
-                fontWeight: "400",
                 WebkitTextStroke: "1px black",
                 color: "#1a1a1a",
                 minWidth: "18px",

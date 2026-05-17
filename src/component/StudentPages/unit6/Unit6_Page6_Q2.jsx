@@ -56,14 +56,14 @@ const LEFT_ITEMS = [
 //
 // Adjust correctLeftId to match your actual images!
 const LEFT_IMGS = [
-  { name: "img2", src: img2, correctLeftId: 2 },  // radio — يسار فوق
-  { name: "img4", src: img4, correctLeftId: 4 },  // kite  — يسار وسط
+  { name: "img2", src: img2, correctLeftId: 1 },  // radio — يسار فوق
+  { name: "img4", src: img4, correctLeftId: 5 },  // kite  — يسار وسط
 ];
 
 const RIGHT_IMGS = [
-  { name: "img1", src: img1, correctLeftId: 1 },  // paint   — يمين فوق (offset)
-  { name: "img3", src: img3, correctLeftId: 3 },  // flowers — يمين وسط
-  { name: "img5", src: img5, correctLeftId: 5 },  // phone   — يمين تحت
+  { name: "img1", src: img1, correctLeftId: 3 },  // paint   — يمين فوق (offset)
+  { name: "img3", src: img3, correctLeftId: 4 },  // flowers — يمين وسط
+  { name: "img5", src: img5, correctLeftId: 2 },  // phone   — يمين تحت
 ];
 
 const ALL_IMGS = [...LEFT_IMGS, ...RIGHT_IMGS];
@@ -221,7 +221,6 @@ export default function WB_ReadLookMatch_QE() {
             style={{ background: rightDotColor(item.name) }}
             onClick={() => handleRightClick(item.name)}
           />
-          {isRightWrong(item.name) && <div className="rlm-badge">✕</div>}
         </div>
         <div
           className={["rlm-img-card", isLocked ? "rlm-img-card--locked" : ""].filter(Boolean).join(" ")}
@@ -419,7 +418,7 @@ export default function WB_ReadLookMatch_QE() {
           className="WB-header-title-page8"
           style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
         >
-          <span className="WB-ex-A-1">E</span>
+          <span className="WB-ex-A">E</span>
           Read, look, and match.
         </h1>
 

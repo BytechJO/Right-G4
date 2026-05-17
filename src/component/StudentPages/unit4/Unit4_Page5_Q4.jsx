@@ -90,7 +90,7 @@ export default function CB_ReadAndComplete_QA() {
           gap: clamp(16px, 2.4vw, 30px);
           width: 100%;
           max-width: 900px;
-          margin: 8% 0;
+          margin: 10% 0;
         }
 
         .rc-row {

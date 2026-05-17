@@ -224,7 +224,7 @@ export default function WB_ReadWriteYesNo_QC() {
           style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
         >
           <span className="WB-ex-A-1">C</span>
-          Read and write <em>Yes, we should.</em> or <em>No, we shouldn't.</em>
+          Read and write <em style={{color : "orange"}}>Yes, we should.</em> or <em style={{color : "orange"}}>No, we shouldn't.</em>
         </h1>
 
         {/* ── 2×3 Grid ── */}

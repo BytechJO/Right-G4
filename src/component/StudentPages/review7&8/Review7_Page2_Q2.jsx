@@ -34,20 +34,20 @@ const WRONG_BADGE_TEXT    = "#ffffff";
 //  📝  EXERCISE DATA
 // ─────────────────────────────────────────────
 const LEFT_ITEMS = [
-  { id: 1, sentence: "Tilly is under the chair."          },
-  { id: 2, sentence: "Tom is in front of the tree."       },
-  { id: 3, sentence: "Lolo is next to the armchair."      },
-  { id: 4, sentence: "Sarah is under the beach umbrella." },
+  { id: 1, sentence: "Was there any tea?"          },
+  { id: 2, sentence: "Were there any nuts?"       },
+  { id: 3, sentence: "Was there any candy?"      },
+  { id: 4, sentence: "Were there any watermelons?" },
 ];
 
 const LEFT_IMGS = [
-  { name: "img1", src: img1, correctLeftId: 2 },
-  { name: "img3", src: img3, correctLeftId: 4 },
+  { name: "img1", src: img1, correctLeftId: 1 },
+  { name: "img3", src: img3, correctLeftId: 3 },
 ];
 
 const RIGHT_IMGS = [
-  { name: "img2", src: img2, correctLeftId: 3 },
-  { name: "img4", src: img4, correctLeftId: 1 },
+  { name: "img2", src: img2, correctLeftId: 4 },
+  { name: "img4", src: img4, correctLeftId: 2 },
 ];
 
 const ALL_IMGS = [...LEFT_IMGS, ...RIGHT_IMGS];

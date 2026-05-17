@@ -3,7 +3,7 @@ import ComprehensionB from "./ComprehensionB";
 
 import imgReading from "../../../assets/imgs/pages/Class Book//Right 4 Unit 8 I Lived in the Library Folder/Page 65/SVG/Asset 1.svg";
 import img from"../../../assets/imgs/pages/Class Book/Right 4 Unit 8 I Lived in the Library Folder/Page 65/SVG/Asset 2.svg"
-import readingAudio from "../../../assets/audio/ClassBook/Grade 4/cd16pg23-reading-adult-lady_Feoi9jgI.mp3";
+import readingAudio from "../../../assets/audio/ClassBook/Grade 4/cd43pg65-reading-adult-lady_odl1Yvbd.mp3";
 import ReadingSection from "../ReadingSection";
 
 
@@ -15,39 +15,104 @@ const ReadingSection_U1 = () => {
 
 const captions = [
   {
-    start: 0.52,
-    end: 2.14,
-    text: "Page 23, Reading.",
+    start: 0.76,
+    end: 2.42,
+    text: "Page 65, Reading.",
   },
   {
-    start: 3.82,
-    end: 16.84,
-    text: "Do you have your own room? What does your room look like? Has your room changed? Has your room ever changed? Is it the same as when you were a baby? Is it different? It probably has changed.",
+    start: 2.42,
+    end: 14.36,
+    text: "How old were you when you walked for the first time? How old were you when you first went to school? Was there anything special that you did before your classmates?",
   },
   {
-    start: 16.84,
-    end: 24.00,
-    text: "When you were small, you had a crib. Your toys were probably different too. You probably have different ones now.",
+    start: 15.48,
+    end: 17.28,
+    text: "How smart is smart?",
   },
   {
-    start: 25.02,
-    end: 34.76,
-    text: "Did you have soft toys when you were a baby? Maybe you had a rattle or a mobile. These kinds of toys are fun for babies. What kinds of things do you play with now?",
+    start: 18.42,
+    end: 22.36,
+    text: "You might be a smart student, but are you like other children in history?",
   },
   {
-    start: 35.86,
-    end: 42.32,
-    text: "Now, you can choose your toys, but when you were little, your parents got your toys. They were probably safe for you.",
+    start: 22.36,
+    end: 26.62,
+    text: "Most of us grow up doing the same things at the same times.",
   },
   {
-    start: 43.64,
-    end: 52.66,
-    text: "Did you have different colors in your room when you were a baby? Are any of those colors in your room now? Do you share a room or do you have your own room?",
+    start: 26.62,
+    end: 29.72,
+    text: "We walked when we were about one year old.",
   },
   {
-    start: 53.96,
-    end: 67.20,
-    text: "There are probably many ways your room has changed. Ask your parents or look at old pictures of your room. Find out what you had in your room when you were a baby. Do you remember any of the things?",
+    start: 29.72,
+    end: 31.88,
+    text: "We talked when we were two.",
+  },
+  {
+    start: 31.88,
+    end: 37.28,
+    text: "We started school when we were five, and we will complete high school when we are eighteen.",
+  },
+  {
+    start: 38.84,
+    end: 41.64,
+    text: "Some children started doing things much earlier, though.",
+  },
+  {
+    start: 41.64,
+    end: 44.80,
+    text: "These people are called child prodigies.",
+  },
+  {
+    start: 44.80,
+    end: 48.78,
+    text: "Here are some examples of smart children throughout history.",
+  },
+  {
+    start: 49.84,
+    end: 54.72,
+    text: "Wolfgang Mozart was born in Austria in 1756.",
+  },
+  {
+    start: 54.72,
+    end: 57.28,
+    text: "He loved music when he was very young.",
+  },
+  {
+    start: 57.28,
+    end: 61.06,
+    text: "He started playing the piano when he was four years old.",
+  },
+  {
+    start: 61.06,
+    end: 65.18,
+    text: "He started writing his own songs when he was five years old.",
+  },
+  {
+    start: 67.40,
+    end: 71.42,
+    text: "Jay Luo was born in America in 1970.",
+  },
+  {
+    start: 71.42,
+    end: 76.64,
+    text: "He graduated from Boise State University with honors when he was twelve years old.",
+  },
+  {
+    start: 76.64,
+    end: 80.16,
+    text: "He was the youngest university graduate in U.S. history.",
+  },
+  {
+    start: 81.46,
+    end: 89.88,
+    text: "Asad Ullah Qayyum was born in Pakistan in 1998. He speaks in many different languages.",
+  },
+  {
+    start: 89.88,
+    end: 95.10,
+    text: "When he was just seven years old, he gave speeches in twelve languages.",
   },
 ];
   return (
@@ -55,14 +120,15 @@ const captions = [
     <div className="flex flex-col items-center">
         <div className="w-[60%]">
       <ReadingSection
-        mainTitle="What would you like to see invented in the future? Do you have an idea for a future invention?"
-        title="Inventions of the Future"
+        mainTitle="How old were you when you walked for the first time? 
+How old were you when you first went to school? Was 
+there anything special that you did before your classmates?"
         image={imgReading}
         image1= {img}
         question="Do you think new inventions will be good or bad for Earth?"
         sound={readingAudio}
         captions={captions}
-        stopAtSecond={2.5}
+        stopAtSecond={2.42}
       />
 
  </div>

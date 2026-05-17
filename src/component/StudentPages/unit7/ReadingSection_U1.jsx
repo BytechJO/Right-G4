@@ -5,7 +5,7 @@ import imgReading from "../../../assets/imgs/pages/Class Book/Right 4 Unit 7  Th
 import readingAudio from "../../../assets/audio/ClassBook/Grade 4/cd38pg59-reading-adult-lady_Iy6h4zxg.mp3";
 import ReadingSection from "../ReadingSection";
 
-import img from"../../../assets/imgs/pages/Class Book/Right 4 Unit 5 Under the Weather Folder/Page 41/SVG/Asset 2.svg"
+import img from"../../../assets/imgs/pages/Class Book/Right 4 Unit 7  The Alligator Scare Folder/Page 59/SVG/Asset 20.svg"
 
 const ReadingSection_U1 = () => {
   const paragraphs = [

@@ -198,7 +198,7 @@ export default function WB_UnscrambleWrite_QG() {
           className="WB-header-title-page8"
           style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
         >
-          <span className="WB-ex-A-1">G</span>
+          <span className="WB-ex-A">G</span>
           Unscramble and write.
         </h1>
 

@@ -1,63 +1,66 @@
-import { useState, useRef } from "react";
+import { useState } from "react";
 import ValidationAlert from "../../Popup/ValidationAlert";
 import { FaCheck, FaRedo, FaEye } from "react-icons/fa";
 
-import img1 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 6 Ready for School Folder/Page 47/SVG/SVG/Asset 3.svg";
-import img2 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 6 Ready for School Folder/Page 47/SVG/SVG/Asset 4.svg";
-import img3 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 6 Ready for School Folder/Page 47/SVG/SVG/Asset 5.svg";
-import img4 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 6 Ready for School Folder/Page 47/SVG/SVG/Asset 6.svg";
-
 const ComprehensionA = () => {
-  // الترتيب الصح: img1=2, img2=4, img3=1, img4=3
-  const images = [
-    { id: 1, src: img1, answer: "2" },
-    { id: 2, src: img2, answer: "4" },
-    { id: 3, src: img3, answer: "1" },
-    { id: 4, src: img4, answer: "3" },
+  const questions = [
+    {
+      id: 1,
+      type: "Q", // الفراغ في السؤال
+      fixed: "A: Because they are large and do amazing things.",
+      answers: [
+        "Why are emperor penguins given such a name?",
+        "Why are emperor penguins given such a name",
+      ],
+    },
+    {
+      id: 2,
+      type: "A", // الفراغ في الجواب
+      fixed: "Q: Why do the emperor penguins walk for more than 100 kilometers each year?",
+      answers: [
+        "Because the female penguins need to lay their eggs.",
+        "Because the female penguins need to lay their eggs",
+      ],
+    },
+    {
+      id: 3,
+      type: "A", // الفراغ في الجواب
+      fixed: "Q: Why do the fathers sit on the eggs?",
+      answers: [
+        "Because the mother must walk back to the sea to find food for her babies.",
+        "Because the mother must walk back to the sea to find food for her babies",
+      ],
+    },
   ];
 
-  const [values, setValues] = useState(["", "", "", ""]);
+  const [answers, setAnswers] = useState(Array(questions.length).fill(""));
   const [errors, setErrors] = useState({});
   const [locked, setLocked] = useState(false);
   const [showed, setShowed] = useState(false);
-  const inputRefs = useRef([]);
 
   const handleChange = (index, value) => {
     if (locked || errors[index] === false) return;
-    // قبول رقم واحد بس
-    if (value.length > 1) return;
-    if (value !== "" && !/^[1-4]$/.test(value)) return;
-
-    const updated = [...values];
+    const updated = [...answers];
     updated[index] = value;
-    setValues(updated);
-
-    // انتقل تلقائي للتالي
-    if (value !== "" && index < images.length - 1) {
-      // ابحث عن أول فراغ فاضي بعده
-      const nextEmpty = updated.findIndex((v, i) => i > index && v === "" && errors[i] !== false);
-      if (nextEmpty !== -1) {
-        inputRefs.current[nextEmpty]?.focus();
-      } else {
-        // انتقل للتالي مباشرة
-        inputRefs.current[index + 1]?.focus();
-      }
-    }
+    setAnswers(updated);
   };
 
   const handleCheck = () => {
     if (locked) return;
-    const isEmpty = values.some((v) => v.trim() === "");
+    const isEmpty = answers.some((a) => a.trim() === "");
     if (isEmpty) {
-      ValidationAlert.info("Please fill in all boxes.");
+      ValidationAlert.info("Please answer all questions.");
       return;
     }
 
     let correctCount = 0;
     const newErrors = {};
 
-    images.forEach((img, i) => {
-      if (values[i] === img.answer) {
+    answers.forEach((ans, i) => {
+      const isCorrect = questions[i].answers.some(
+        (a) => a.toLowerCase() === ans.trim().toLowerCase()
+      );
+      if (isCorrect) {
         correctCount++;
         newErrors[i] = false;
       } else {
@@ -66,7 +69,7 @@ const ComprehensionA = () => {
     });
 
     setErrors(newErrors);
-    const total = images.length;
+    const total = questions.length;
     const color =
       correctCount === total ? "green" : correctCount === 0 ? "red" : "orange";
 
@@ -89,101 +92,72 @@ const ComprehensionA = () => {
   };
 
   const handleShow = () => {
-    setValues(images.map((img) => img.answer));
+    setAnswers(questions.map((q) => q.answers[0]));
     setErrors({});
     setLocked(true);
     setShowed(true);
   };
 
   const handleReset = () => {
-    setValues(["", "", "", ""]);
+    setAnswers(Array(questions.length).fill(""));
     setErrors({});
     setLocked(false);
     setShowed(false);
-    inputRefs.current[0]?.focus();
   };
 
   return (
     <div className="mb-6 mx-auto">
       <h5 className="header-title-page8-read mb-8">
         <span className="ex-A-read mr-2">A</span>
-        Number the pictures to show the order for planting a vegetable garden.
+        Write the question or answer. The questions start with{" "}
+        <span className="text-[#f89631] font-bold">why</span>, and the answers
+        start with{" "}
+        <span className="text-[#f89631] font-bold">because</span>.
       </h5>
 
-      <div className="grid grid-cols-4 gap-4">
-        {images.map((img, i) => {
+      <div className="flex flex-col gap-6">
+        {questions.map((q, i) => {
           const isError = errors[i] === true;
           const isCorrect = errors[i] === false;
 
-          return (
-            <div key={img.id} className="flex flex-col items-center gap-2">
-              {/* Image with input badge */}
-              <div style={{ position: "relative", display: "inline-block" }}>
-                <img
-                  src={img.src}
-                  alt=""
+          const inputRow = (
+            <div className="flex items-end gap-2 ml-6">
+              <span style={{ fontSize: "16px", color: "#1a1a1a", flexShrink: 0 }}>
+                {q.type === "Q" ? "Q:" : "A:"}
+              </span>
+              <div className="relative flex-1">
+                <input
+                  type="text"
+                  value={answers[i]}
+                  onChange={(e) => handleChange(i, e.target.value)}
+                  disabled={locked || isCorrect}
+                  autoComplete="off"
                   style={{
                     width: "100%",
-                    height : "auto"
+                    fontSize: "18px",
+                    borderBottom: `1px solid ${isError ? "#ef4444" : "#333"}`,
+                    background: "transparent",
+                    outline: "none",
+                    color: showed ? "#ef4444" : "#1a1a1a",
                   }}
                 />
-
-                {/* Number Input Badge */}
-                <div
-                  style={{
-                    position: "absolute",
-                    bottom: "8px",
-                    right: "8px",
-                    width: "36px",
-                    height: "36px",
-                    borderRadius: "50%",
-                    background:  "transparent",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  <input
-                    ref={(el) => (inputRefs.current[i] = el)}
-                    type="text"
-                    value={values[i]}
-                    onChange={(e) => handleChange(i, e.target.value)}
-                    disabled={locked || isCorrect}
-                    autoComplete="off"
-                    maxLength={1}
-                    style={{
-                      width: "100%",
-                      height: "100%",
-                      background: "transparent",
-                      border: "none",
-                      outline: "none",
-                      textAlign: "center",
-                      fontSize: "18px",
-                      fontWeight: "bold",
-                      color: "black",
-                      cursor: locked || isCorrect ? "default" : "text",
-                    }}
-                  />
-                </div>
-
-                {/* ❌ Error Badge */}
                 {isError && (
                   <div
                     style={{
                       position: "absolute",
-                      top: "-8px",
-                      right: "-8px",
-                      width: "20px",
-                      height: "20px",
+                      right: "-24px",
+                      top: "0",
+                      width: "18px",
+                      height: "18px",
                       background: "#ef4444",
                       color: "white",
                       borderRadius: "50%",
-                      fontSize: "11px",
+                      fontSize: "10px",
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
                       fontWeight: "bold",
-                      border: "2px solid white",
+                      border: "1px solid white",
                       boxShadow: "0 1px 6px rgba(0,0,0,0.2)",
                     }}
                   >
@@ -191,6 +165,43 @@ const ComprehensionA = () => {
                   </div>
                 )}
               </div>
+            </div>
+          );
+
+          const fixedRow = (
+            <div className="ml-6">
+              <span style={{ fontSize: "18px", color: "#1a1a1a" }}>
+                {q.fixed}
+              </span>
+            </div>
+          );
+
+          return (
+            <div key={q.id} className="flex flex-col gap-2">
+              {/* Number */}
+              <span
+                style={{
+                  fontWeight: "400",
+                  WebkitTextStroke: "1px black",
+                  color: "#1a1a1a",
+                  fontSize: "18px",
+                }}
+              >
+                {q.id}
+              </span>
+
+              {/* Q first or A first */}
+              {q.type === "Q" ? (
+                <>
+                  {inputRow}
+                  {fixedRow}
+                </>
+              ) : (
+                <>
+                  {fixedRow}
+                  {inputRow}
+                </>
+              )}
             </div>
           );
         })}

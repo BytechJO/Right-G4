@@ -113,6 +113,7 @@ export default function WB_ReadWrite_QA() {
           flex-wrap: wrap;
           gap: clamp(8px, 1.2vw, 14px);
           width: 100%;
+          margin-top : 2% ;
         }
 
         .rwa-pill {

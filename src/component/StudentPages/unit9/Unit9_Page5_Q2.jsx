@@ -1,216 +1,213 @@
 import React, { useState } from "react";
+import Button from "../../Button";
 import ValidationAlert from "../../Popup/ValidationAlert";
-import "./Unit9_Page5_Q2.css";
 
-import img1 from "../../../assets/imgs/pages/classbook/Right 3 Unit 9 Where Dad Folder/Page 80/Asset 51.svg";
-import img2 from "../../../assets/imgs/pages/classbook/Right 3 Unit 9 Where Dad Folder/Page 80/Asset 52.svg";
-import img3 from "../../../assets/imgs/pages/classbook/Right 3 Unit 9 Where Dad Folder/Page 80/Asset 53.svg";
-import img4 from "../../../assets/imgs/pages/classbook/Right 3 Unit 9 Where Dad Folder/Page 80/Asset 54.svg";
-import sound1 from "../../../assets/audio/ClassBook/Unit 9/P 80/unit9-pg80-EXB.mp3";
+// ─────────────────────────────────────────────
+//  🎨  COLORS
+// ─────────────────────────────────────────────
+const TEXT_COLOR       = "#2b2b2b";
+const NUMBER_COLOR     = "#2b2b2b";
+const CIRCLE_SELECTED  = "#2195a6";
+const CIRCLE_WRONG     = "#ef4444";
+const CIRCLE_CORRECT   = "#2195a6";
+const WRONG_BADGE_BG   = "#ef4444";
+const WRONG_BADGE_TEXT = "#ffffff";
 
-import QuestionAudioPlayer from "../../QuestionAudioPlayer";
-const Unit9_Page5_Q2 = () => {
-  const items = [
-    {
-      img: img1,
-      options: ["dogs", "rocks", "bumps"],
-      correct: ["rocks"],
-    },
-    {
-      img: img2,
-      options: ["frogs", "racks", "books"],
-      correct: ["racks", "books"],
-    },
-    {
-      img: img3,
-      options: ["shoulders", "bats", "tacos"],
-      correct: ["shoulders"],
-    },
-    {
-      img: img4,
-      options: ["sacks", "maps", "chairs"],
-      correct: ["maps"],
-    },
-  ];
+// ─────────────────────────────────────────────
+//  📝  EXERCISE DATA
+//  correct: "right" | "wrong"
+// ─────────────────────────────────────────────
+const ITEMS = [
+  { id: 1, text: "No up.",                    correct: "wrong" },
+  { id: 2, text: "Oh, well.",                 correct: "right" },
+  { id: 3, text: "What's really?",            correct: "wrong" },
+  { id: 4, text: "Thanks anyway.",            correct: "right" },
+  { id: 5, text: "Can you come to my sorry?", correct: "wrong" },
+];
 
-  const [selected, setSelected] = useState(Array(items.length).fill([]));
-  const [locked, setLocked] = useState(false);
-  const [showResult, setShowResult] = useState(false);
-   const captions = [
-    {
-      start: 0.119,
-      end: 11.699,
-      text: "Page 80. Write activities. Exercise B. Listen and circle the words with the same final S sound. One, socks,",
-    },
-    { start: 12.859, end: 17.739, text: "dogs, rocks, bumps. Two, spoons," },
-    { start: 18.979, end: 24.6, text: "frogs, racks, books. Three, folders," },
-    { start: 25.76, end: 31.679, text: "shoulders, bats, tacos. Four, caps," },
-    { start: 32.919, end: 35.399, text: "sacks, maps, chairs" },
-  ];
-  const chooseOption = (i, value) => {
-    if (locked) return;
+// ─────────────────────────────────────────────
+//  COMPONENT
+// ─────────────────────────────────────────────
+export default function WB_ReadCircleRightWrong_QB() {
+  const [selected,    setSelected]    = useState({});
+  const [showResults, setShowResults] = useState(false);
+  const [showAns,     setShowAns]     = useState(false);
 
-    const newSelected = [...selected];
-    const current = newSelected[i];
+  const isLocked = showResults || showAns;
 
-    if (current.includes(value)) {
-      // remove
-      newSelected[i] = current.filter((v) => v !== value);
-    } else {
-      // add
-      newSelected[i] = [...current, value];
-    }
-
-    setSelected(newSelected);
+  const handleSelect = (id, value) => {
+    if (isLocked) return;
+    setSelected((prev) => ({ ...prev, [id]: value }));
   };
-  const resetAll = () => {
-    setSelected(Array(items.length).fill(""));
-    setLocked(false);
-    setShowResult(false);
-  };
-  const showAnswers = () => {
-    setSelected(items.map((i) => i.correct));
-    setLocked(true);
-  };
-  const checkAnswers = () => {
-    if (locked) return;
 
-    if (selected.includes("")) {
-      ValidationAlert.info();
-      return;
-    }
+  const handleCheck = () => {
+    if (isLocked) return;
+    const allAnswered = ITEMS.every((item) => selected[item.id]);
+    if (!allAnswered) { ValidationAlert.info("Please answer all questions first."); return; }
     let score = 0;
-    let total = 0;
-
-    items.forEach((item, i) => {
-      total += item.correct.length;
-
-      // ✅ الصح
-      item.correct.forEach((correctAns) => {
-        if (selected[i]?.includes(correctAns)) {
-          score++;
-        }
-      });
-
-      // ❌ الغلط
-      selected[i]?.forEach((ans) => {
-        if (!item.correct.includes(ans)) {
-          score--;
-        }
-      });
-    });
-
-    // ❗ ما نخليه ينزل تحت الصفر
-    if (score < 0) score = 0;
-
-    const color = score === total ? "green" : score === 0 ? "red" : "orange";
-
-    const msg = `
-      <div style="font-size:20px;text-align:center;">
-        <span style="color:${color};font-weight:bold">
-        Score: ${score} / ${total}
-        </span>
-      </div>
-    `;
-
-    if (score === total) ValidationAlert.success(msg);
-    else if (score === 0) ValidationAlert.error(msg);
-    else ValidationAlert.warning(msg);
-
-    setLocked(true);
-    setShowResult(true);
+    ITEMS.forEach((item) => { if (selected[item.id] === item.correct) score++; });
+    setShowResults(true);
+    if (score === ITEMS.length)   ValidationAlert.success(`Score: ${score} / ${ITEMS.length}`);
+    else if (score > 0)           ValidationAlert.warning(`Score: ${score} / ${ITEMS.length}`);
+    else                          ValidationAlert.error(`Score: ${score} / ${ITEMS.length}`);
   };
-  return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        padding: "30px",
-      }}
-    >
-      <div className="div-forall">
-        <h5 className="header-title-page8 mb-5">
-          <span className="ex-A mr-3">B</span>
-          Listen and circle the words with the same final
-          <span style={{ color: "#2e3192" }}>-s sound </span>?
-        </h5>
-        <QuestionAudioPlayer
-          src={sound1}
-          captions={captions}
-          stopAtSecond={9.5}
-        />
-        <div className="flex w-full">
-          <div className="flex justify-center w-full">
-            <div className="grid grid-cols-2 gap-y-10 gap-x-64 mt-1 mb-12">
-              {items.map((item, i) => (
-                <div key={i} className="flex flex-col justify-center h-50">
-                  <div className="flex flex-col items-center gap-3">
-                    <span className="text-[20px] font-bold text-[#2a4e7c]">
-                      {i + 1}
-                    </span>
 
-                    <img
-                      src={item.img}
-                      alt=""
-                      style={{
-                        width: "150px",
-                        height: "auto",
-                      }}
-                    />
+  const handleShowAnswer = () => {
+    const filled = {};
+    ITEMS.forEach((item) => { filled[item.id] = item.correct; });
+    setSelected(filled); setShowResults(false); setShowAns(true);
+  };
 
-                    {/* OPTIONS تحت الصورة وبالعرض */}
-                    <div className="flex gap-3 text-[18px] mt-2">
-                      {item.options.map((opt, idx) => (
-                        <span
-                          key={idx}
-                          onClick={() => chooseOption(i, opt)}
-                          className={`relative cursor-pointer px-3 py-1 rounded-full border-2 ${
-                            selected[i]?.includes(opt)
-                              ? showResult
-                                ? items[i].correct.includes(opt)
-                                  ? "border-[#1C398E] bg-blue-50"
-                                  : "border-red-500"
-                                : "border-[#1C398E] bg-blue-50"
-                              : "border-transparent hover:bg-gray-100"
-                          }`}
-                        >
-                          {opt}
+  const handleReset = () => {
+    setSelected({}); setShowResults(false); setShowAns(false);
+  };
 
-                          {/* ❌ على الخيار الغلط */}
-                          {showResult &&
-                            selected[i]?.includes(opt) &&
-                            !items[i].correct.includes(opt) && (
-                              <span className="absolute -top-2 -right-2 w-4 h-4 bg-red-500 text-white rounded-full flex items-center justify-center text-[10px] font-bold shadow">
-                                ✕
-                              </span>
-                            )}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
+  // ── Option state ──
+  const getState = (item, value) => {
+    const sel = selected[item.id];
+    if (sel !== value) return "idle";
+    if (showAns)       return "correct";
+    if (showResults)   return value === item.correct ? "correct" : "wrong";
+    return "selected";
+  };
+
+  const renderOption = (item, value) => {
+    const state   = getState(item, value);
+    const isWrong = state === "wrong";
+
+    let bd = "transparent";
+    if (state === "selected") bd = CIRCLE_SELECTED;
+    if (state === "correct")  bd = CIRCLE_CORRECT;
+    if (state === "wrong")    bd = CIRCLE_WRONG;
+
+    return (
+      <div
+        key={value}
+        style={{
+          position: "relative",
+          display: "inline-flex",
+          alignItems: "center",
+          justifyContent: "center",
+          border: `2px solid ${bd}`,
+          borderRadius: "999px",
+          padding: "clamp(2px,0.3vw,5px) clamp(14px,1.8vw,24px)",
+          cursor: isLocked ? "default" : "pointer",
+          userSelect: "none",
+          transition: "border-color 0.15s",
+          minWidth: "clamp(50px,7vw,90px)",
+        }}
+        onClick={() => handleSelect(item.id, value)}
+      >
+        <span style={{
+          fontSize: "clamp(13px,1.6vw,19px)",
+          color: TEXT_COLOR,
+          fontWeight: state !== "idle" ? 600 : 400,
+          lineHeight: 1.5,
+        }}>
+          {value}
+        </span>
+        {isWrong && (
+          <div style={{
+            position: "absolute", top: -7, right: -7,
+            width: "clamp(14px,1.6vw,18px)", height: "clamp(14px,1.6vw,18px)",
+            borderRadius: "50%", background: WRONG_BADGE_BG, color: WRONG_BADGE_TEXT,
+            display: "flex", alignItems: "center", justifyContent: "center",
+            fontSize: "clamp(7px,0.8vw,10px)", fontWeight: 700,
+            border: "2px solid #fff", boxShadow: "0 2px 6px rgba(0,0,0,0.2)",
+            pointerEvents: "none", zIndex: 3,
+          }}>✕</div>
+        )}
       </div>
+    );
+  };
 
-      <div className="action-buttons-container">
-        <button onClick={resetAll} className="try-again-button">
-          Start Again ↻
-        </button>
+  return (
+    <div className="main-container-component">
+      <style>{`
+        .rcrw-list {
+          display: flex;
+          flex-direction: column;
+          gap: clamp(12px, 1.8vw, 22px);
+          width: 100%;
+          margin : 7% 0 ;
+        }
 
-        <button onClick={showAnswers} className="show-answer-btn">
-          Show Answer
-        </button>
+        /* num | sentence | right | wrong */
+        .rcrw-row {
+          display: grid;
+          grid-template-columns: auto 1fr auto auto;
+          align-items: center;
+          gap: clamp(8px, 1.2vw, 18px);
+        }
 
-        <button onClick={checkAnswers} className="check-button2">
-          Check Answer ✓
-        </button>
+        .rcrw-num {
+          font-size: clamp(14px, 1.7vw, 20px);
+          font-weight: 700;
+          color: ${NUMBER_COLOR};
+          flex-shrink: 0;
+          line-height: 1.5;
+        }
+
+        .rcrw-text {
+          font-size: clamp(13px, 1.6vw, 19px);
+          color: ${TEXT_COLOR};
+          line-height: 1.5;
+        }
+
+        .rcrw-buttons {
+          display: flex;
+          justify-content: center;
+          margin-top: clamp(8px, 1.6vw, 18px);
+        }
+
+        @media (max-width: 480px) {
+          .rcrw-row { grid-template-columns: auto 1fr; }
+        }
+      `}</style>
+
+      <div
+        className="div-forall"
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: "clamp(14px, 2vw, 22px)",
+          maxWidth: "1100px",
+          margin: "0 auto",
+        }}
+      >
+        {/* ── Header ── */}
+        <h1
+          className="WB-header-title-page8"
+          style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
+        >
+          <span className="WB-ex-A">B</span>
+          Read and circle{" "}
+          <span style={{ color: "#ff8c00ff", fontWeight: 700 }}>right</span>
+          {" "}or{" "}
+          <span style={{ color: "#ff8c00ff", fontWeight: 700 }}>wrong</span>.
+        </h1>
+
+        {/* ── Items ── */}
+        <div className="rcrw-list">
+          {ITEMS.map((item) => (
+            <div key={item.id} className="rcrw-row">
+              <span className="rcrw-num">{item.id}</span>
+              <span className="rcrw-text">{item.text}</span>
+              {renderOption(item, "right")}
+              {renderOption(item, "wrong")}
+            </div>
+          ))}
+        </div>
+
+        {/* ── Buttons ── */}
+        <div className="rcrw-buttons">
+          <Button
+            checkAnswers={handleCheck}
+            handleShowAnswer={handleShowAnswer}
+            handleStartAgain={handleReset}
+          />
+        </div>
       </div>
     </div>
   );
-};
-
-export default Unit9_Page5_Q2;
+}

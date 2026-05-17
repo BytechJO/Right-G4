@@ -1,262 +1,246 @@
 import React, { useState } from "react";
-import "./Review8_Page2_Q2.css";
+import Button from "../../Button";
 import ValidationAlert from "../../Popup/ValidationAlert";
-import img1 from "../../../assets/imgs/pages/classbook/Right 3 Unit 8 At Our Grandparents Farm Folder/Page 73/Ex D 1.svg";
-import img2 from "../../../assets/imgs/pages/classbook/Right 3 Unit 8 At Our Grandparents Farm Folder/Page 73/Ex D 2.svg";
-import img3 from "../../../assets/imgs/pages/classbook/Right 3 Unit 8 At Our Grandparents Farm Folder/Page 73/Ex D 3.svg";
 
-import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
-import WrongMark from "../../WrongMark";
+// ─────────────────────────────────────────────
+//  🎨  COLORS
+// ─────────────────────────────────────────────
+const INPUT_UNDERLINE_DEFAULT = "#3f3f3f";
+const INPUT_UNDERLINE_WRONG   = "#ef4444";
+const INPUT_TEXT_COLOR        = "#2b2b2b";
+const INPUT_ANSWER_COLOR      = "#c81e1e";
+const NUMBER_COLOR            = "#2b2b2b";
+const SCRAMBLED_COLOR         = "#2b2b2b";
+const WRONG_BADGE_BG          = "#ef4444";
+const WRONG_BADGE_TEXT        = "#ffffff";
 
-const data = [
-  { img: img1, pattern: "an", answer: "f" },
-  { img: img2, pattern: "ug", answer: "r" },
-  { img: img3, pattern: "ig", answer: "d" },
+// ─────────────────────────────────────────────
+//  📝  EXERCISE DATA
+// ─────────────────────────────────────────────
+const ITEMS = [
+  {
+    id:        1,
+    scrambled: "washed  Nick  car  the  Sam  and",
+    correct:   ["Nick and Sam washed the car.", "Nick and Sam washed the car"],
+    answer:    "Nick and Sam washed the car.",
+  },
+  {
+    id:        2,
+    scrambled: "baseball  team  field  the  practiced  the  on",
+    correct:   ["The baseball team practiced on the field.", "The baseball team practiced on the field"],
+    answer:    "The baseball team practiced on the field.",
+  },
+  {
+    id:        3,
+    scrambled: "cleaned  her  she  today  bedroom",
+    correct:   ["She cleaned her bedroom today.", "She cleaned her bedroom today"],
+    answer:    "She cleaned her bedroom today.",
+  },
 ];
-const Review8_Page2_Q2 = () => {
-  const [inputs, setInputs] = useState(Array(data.length).fill(""));
-  const [wrongInputs, setWrongInputs] = useState(
-    Array(data.length).fill(false),
-  );
-  const [showAnswer, setShowAnswer] = useState(false); // ⭐ NEW
-  const lettersBank = [
-    { id: "l1", value: "d" },
-    { id: "l2", value: "f" },
-    { id: "l3", value: "r" },
-  ];
 
-  const onDragEnd = (result) => {
-    if (!result.destination || showAnswer) return;
+// ─────────────────────────────────────────────
+//  🔧  NORMALIZE
+// ─────────────────────────────────────────────
+const normalize = (str) =>
+  str.toLowerCase().replace(/[^a-z0-9'\s]/g, "").replace(/\s+/g, " ").trim();
 
-    const letter = lettersBank.find((l) => l.id === result.draggableId)?.value;
-    const targetIndex = Number(result.destination.droppableId);
+const isCorrect = (userVal, correctArr) =>
+  correctArr.some((c) => normalize(userVal) === normalize(c));
 
-    setInputs((prev) => {
-      const copy = [...prev];
-      copy[targetIndex] = letter; // ✔ نفس الحرف مسموح يتكرر
-      return copy;
-    });
+// ─────────────────────────────────────────────
+//  COMPONENT
+// ─────────────────────────────────────────────
+export default function WB_UnscrambleWrite_QD() {
+  const [answers,     setAnswers]     = useState({});
+  const [showResults, setShowResults] = useState(false);
+  const [showAns,     setShowAns]     = useState(false);
 
-    setWrongInputs(Array(data.length).fill(false));
+  const handleChange = (id, value) => {
+    if (showAns) return;
+    const item = ITEMS.find((i) => i.id === id);
+    if (showResults && item && isCorrect(answers[id] || "", item.correct)) return;
+    setAnswers((prev) => ({ ...prev, [id]: value }));
   };
 
-  const checkAnswers = () => {
-    if (showAnswer) return; // ❌ ممنوع التعديل بعد Show Answer
-
-    if (inputs.some((val) => val.trim() === "")) {
-      ValidationAlert.info(
-        "Oops!",
-        "Please fill in all the answers before checking.",
-      );
-      return;
-    }
-
-    let correctCount = 0;
-    const wrongFlags = [];
-
-    data.forEach((item, index) => {
-      if (inputs[index].toLowerCase() === item.answer) {
-        correctCount++;
-        wrongFlags[index] = false;
-      } else {
-        wrongFlags[index] = true;
-      }
-    });
-
-    setWrongInputs(wrongFlags);
-    setShowAnswer(true);
-    const total = data.length;
-    const color =
-      correctCount === total ? "green" : correctCount === 0 ? "red" : "orange";
-
-    const scoreMessage = `
-      <div style="font-size: 20px; text-align:center;">
-        <span style="color:${color}; font-weight:bold;">
-          Score: ${correctCount} / ${total}
-        </span>
-      </div>
-    `;
-
-    if (correctCount === total) ValidationAlert.success(scoreMessage);
-    else if (correctCount === 0) ValidationAlert.error(scoreMessage);
-    else ValidationAlert.warning(scoreMessage);
+  const handleCheck = () => {
+    if (showAns) return;
+    const allAnswered = ITEMS.every((item) => answers[item.id]?.trim());
+    if (!allAnswered) { ValidationAlert.info("Please complete all answers first."); return; }
+    let score = 0;
+    ITEMS.forEach((item) => { if (isCorrect(answers[item.id] || "", item.correct)) score++; });
+    setShowResults(true);
+    if (score === ITEMS.length)   ValidationAlert.success(`Score: ${score} / ${ITEMS.length}`);
+    else if (score > 0)           ValidationAlert.warning(`Score: ${score} / ${ITEMS.length}`);
+    else                          ValidationAlert.error(`Score: ${score} / ${ITEMS.length}`);
   };
 
   const handleShowAnswer = () => {
-    const correct = data.map((item) => item.answer);
-    setInputs(correct); // ⭐ تعبئة الإجابة الصحيحة
-    setWrongInputs(Array(data.length).fill(false));
-    setShowAnswer(true);
+    const filled = {};
+    ITEMS.forEach((item) => { filled[item.id] = item.answer; });
+    setAnswers(filled); setShowResults(false); setShowAns(true);
   };
 
-  const reset = () => {
-    setInputs(Array(data.length).fill(""));
-    setWrongInputs(Array(data.length).fill(false));
-    setShowAnswer(false);
+  const handleReset = () => {
+    setAnswers({}); setShowResults(false); setShowAns(false);
   };
+
+  const isWrong    = (item) => showResults && !showAns && !isCorrect(answers[item.id] || "", item.correct);
+  const isDisabled = (item) => showAns || (showResults && isCorrect(answers[item.id] || "", item.correct));
 
   return (
-    <DragDropContext onDragEnd={onDragEnd}>
+    <div className="main-container-component">
+      <style>{`
+        .uswqd-list {
+          display: flex;
+          flex-direction: column;
+          gap: clamp(22px, 3.2vw, 42px);
+          width: 100%;
+        }
+
+        /* Single card */
+        .uswqd-card {
+          display: flex;
+          flex-direction: column;
+          gap: clamp(8px, 1vw, 12px);
+        }
+
+        /* Scrambled row: num + words */
+        .uswqd-scrambled-row {
+          display: flex;
+          align-items: baseline;
+          gap: clamp(6px, 0.8vw, 10px);
+        }
+
+        .uswqd-num {
+          font-size: clamp(14px, 1.7vw, 20px);
+          font-weight: 700;
+          color: ${NUMBER_COLOR};
+          flex-shrink: 0;
+          line-height: 1;
+        }
+
+        .uswqd-scrambled {
+          font-size: clamp(13px, 1.6vw, 19px);
+          color: ${SCRAMBLED_COLOR};
+          line-height: 1.5;
+        }
+
+        /* Input wrap */
+        .uswqd-input-wrap {
+          position: relative;
+          width: 100%;
+        }
+
+        .uswqd-input {
+          width: 100%;
+          background: transparent;
+          border: none;
+          border-bottom: 1px solid ${INPUT_UNDERLINE_DEFAULT};
+          outline: none;
+          font-size: clamp(14px, 1.8vw, 22px);
+          color: ${INPUT_TEXT_COLOR};
+          line-height: 1.5;
+          box-sizing: border-box;
+          font-family: inherit;
+          transition: border-color 0.2s;
+        }
+        .uswqd-input:disabled  { opacity: 1; cursor: default; }
+        .uswqd-input--wrong    { border-bottom-color: ${INPUT_UNDERLINE_WRONG}; }
+        .uswqd-input--answer   { color: ${INPUT_ANSWER_COLOR}; font-weight: 700; font-size: clamp(15px, 2vw, 24px); }
+
+        /* ✕ badge */
+        .uswqd-badge {
+          position: absolute;
+          top: -8px; right: 0;
+          width: clamp(16px, 1.8vw, 20px);
+          height: clamp(16px, 1.8vw, 20px);
+          border-radius: 50%;
+          background: ${WRONG_BADGE_BG};
+          color: ${WRONG_BADGE_TEXT};
+          display: flex; align-items: center; justify-content: center;
+          font-size: clamp(8px, 0.9vw, 11px);
+          font-weight: 700;
+          border: 2px solid #fff;
+          box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+          pointer-events: none;
+          z-index: 2;
+        }
+
+        .uswqd-buttons {
+          display: flex;
+          justify-content: center;
+          margin-top: clamp(8px, 1.6vw, 18px);
+        }
+      `}</style>
+
       <div
+        className="div-forall"
         style={{
           display: "flex",
           flexDirection: "column",
-          justifyContent: "center",
-          alignItems: "center",
-          padding: "30px",
+          gap: "clamp(14px, 2vw, 22px)",
+          maxWidth: "1100px",
+          margin: "0 auto",
         }}
       >
-        <div
-          className="div-forall"
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            gap: "30px",
-            width: "60%",
-            justifyContent: "flex-start",
-          }}
+        {/* ── Header ── */}
+        <h1
+          className="WB-header-title-page8"
+          style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
         >
-          <div className="unscramble-container">
-            <h5 className="header-title-page8 pb-2.5">
-              <span style={{ marginRight: "10px" }}>D</span>
-              Look and write<span style={{ color: "#2e3192" }}>d</span>,
-              <span style={{ color: "#2e3192" }}>f</span>or
-              <span style={{ color: "#2e3192" }}>r</span> for each picture.
-            </h5>
+          <span className="WB-ex-A-1">D</span>
+          Unscramble and write.
+        </h1>
 
-            <Droppable droppableId="letters" direction="horizontal">
-              {(provided) => (
-                <div
-                  ref={provided.innerRef}
-                  {...provided.droppableProps}
-                  style={{
-                    display: "flex",
-                    gap: "12px",
-                    padding: "10px",
-                    border: "2px dashed #ccc",
-                    borderRadius: "10px",
-                    marginTop: "20px",
-                    justifyContent: "center",
-                    width: "100%",
-                    // justifyContent: "center",
-                  }}
-                >
-                  {lettersBank.map((l, i) => (
-                    <Draggable
-                      key={l.id}
-                      draggableId={l.id}
-                      index={i}
-                      isDragDisabled={showAnswer}
-                    >
-                      {(provided) => (
-                        <div
-                          ref={provided.innerRef}
-                          {...provided.draggableProps}
-                          {...provided.dragHandleProps}
-                          style={{
-                            padding: "7px 14px",
-                            border: "2px solid #2c5287",
-                            borderRadius: "8px",
-                            background: "white",
-                            fontWeight: "bold",
-                            cursor: "grab",
-                            fontSize: "22px",
-                            ...provided.draggableProps.style,
-                          }}
-                        >
-                          {l.value}
-                        </div>
-                      )}
-                    </Draggable>
-                  ))}
-                  {provided.placeholder}
+        {/* ── Items ── */}
+        <div className="uswqd-list">
+          {ITEMS.map((item) => {
+            const wrong    = isWrong(item);
+            const value    = answers[item.id] || "";
+            const tColor   = showAns ? INPUT_ANSWER_COLOR : INPUT_TEXT_COLOR;
+            const uColor   = wrong ? INPUT_UNDERLINE_WRONG : INPUT_UNDERLINE_DEFAULT;
+            const disabled = isDisabled(item);
+
+            return (
+              <div key={item.id} className="uswqd-card">
+                {/* Scrambled */}
+                <div className="uswqd-scrambled-row">
+                  <span className="uswqd-num">{item.id}</span>
+                  <span className="uswqd-scrambled">{item.scrambled}</span>
                 </div>
-              )}
-            </Droppable>
 
-            <div className="flex flex-wrap justify-center gap-20 mt-7">
-              {data.map((item, index) => (
-                <div
-                  key={index}
-                  className="flex flex-col items-center gap-10 relative p-3"
-                >
-                  {/* الرقم */}
-                  <span className="absolute -top-2 -left-2 text-lg font-bold">
-                    {index + 1}
-                  </span>
-
-                  {/* الصورة */}
-                  <div className="w-[200px] h-24 flex items-center justify-center">
-                    <img
-                      src={item.img}
-                      alt=""
-                      className="max-w-full max-h-full"
-                    />
-                  </div>
-
-                  {/* الكلمة */}
-                  <div className="flex items-center gap-1 text-xl">
-                    {/* drop */}
-                    <Droppable
-                      droppableId={String(index)}
-                      isDropDisabled={showAnswer}
-                    >
-                      {(provided) => (
-                        <div
-                          ref={provided.innerRef}
-                          {...provided.droppableProps}
-                          className={`min-w-[30px] text-center font-bold border-b-4 transition-all ${
-                            wrongInputs[index]
-                              ? "border-red-500"
-                              : "border-black"
-                          } ${
-                            inputs[index]
-                              ? "text-blue-800 bg-blue-50 rounded px-1"
-                              : "text-black"
-                          }`}
-                        >
-                          {inputs[index]}
-                          {provided.placeholder}
-                        </div>
-                      )}
-                    </Droppable>
-
-                    {/* pattern */}
-                    <span>{item.pattern}</span>
-                  </div>
-
-                  {/* Wrong mark */}
-                  {wrongInputs[index] && (
-                    <div className="absolute right-0 top-1/2 -translate-y-1/2">
-                      <WrongMark />
-                    </div>
-                  )}
+                {/* Input */}
+                <div className="uswqd-input-wrap">
+                  <input
+                    type="text"
+                    className={[
+                      "uswqd-input",
+                      wrong   ? "uswqd-input--wrong"  : "",
+                      showAns ? "uswqd-input--answer" : "",
+                    ].filter(Boolean).join(" ")}
+                    value={value}
+                    disabled={disabled}
+                    onChange={(e) => handleChange(item.id, e.target.value)}
+                    style={{ borderBottomColor: uColor, color: tColor }}
+                    spellCheck={false}
+                    autoComplete="off"
+                  />
+                  {wrong && <div className="uswqd-badge">✕</div>}
                 </div>
-              ))}
-            </div>
-          </div>
+              </div>
+            );
+          })}
         </div>
 
-        {/* ⭐ BUTTONS */}
-        <div className="action-buttons-container">
-          <button onClick={reset} className="try-again-button">
-            Start Again ↻
-          </button>
-
-          <button
-            onClick={handleShowAnswer}
-            className="show-answer-btn swal-continue"
-          >
-            Show Answer
-          </button>
-
-          <button onClick={checkAnswers} className="check-button2">
-            Check Answer ✓
-          </button>
+        {/* ── Buttons ── */}
+        <div className="uswqd-buttons">
+          <Button
+            checkAnswers={handleCheck}
+            handleShowAnswer={handleShowAnswer}
+            handleStartAgain={handleReset}
+          />
         </div>
       </div>
-    </DragDropContext>
+    </div>
   );
-};
-
-export default Review8_Page2_Q2;
+}

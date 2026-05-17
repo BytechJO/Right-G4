@@ -305,7 +305,7 @@ export default function WB_ReadChooseWrite_QA() {
           className="WB-header-title-page8"
           style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
         >
-          <span className="WB-ex-A-1">A</span>
+          <span className="WB-ex-A">A</span>
           Read, choose, and write.
         </h1>
 

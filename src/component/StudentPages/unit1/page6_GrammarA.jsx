@@ -35,6 +35,12 @@ const GrammarA = () => {
               <span>
                 <b>1</b> beach
               </span>
+                       <span>
+                <b>2</b> museum
+              </span>
+              <span>
+                <b>3</b> library
+              </span>
               </div>
           </div>
         </div>

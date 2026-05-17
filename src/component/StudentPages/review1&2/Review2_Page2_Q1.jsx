@@ -217,7 +217,7 @@ export default function WB_ReadListenWriteCheckCross_QD2() {
           style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
         >
           <span className="WB-ex-A">D</span>
-          Read, listen, and write ✓ and ✕.
+          Read, listen, and write <span style={{color : "#ff0000ff"}}>✓</span>  and<span style={{color : "#ff0000ff"}}>✕</span> .
         </h1>
     <div style={{margin:"3em 0 2em"}} >
         <QuestionAudioPlayer

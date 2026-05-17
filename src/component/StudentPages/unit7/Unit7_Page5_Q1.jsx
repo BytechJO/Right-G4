@@ -260,8 +260,8 @@ export default function WB_LookReadNumber_QA() {
           className="WB-header-title-page8"
           style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
         >
-          <span className="WB-ex-A-1">A</span>
-          Look, read, and number.
+          <span className="WB-ex-A">A</span>
+          Look, read, and number.wevcwefwefwef
         </h1>
 
         {/* ── Word labels ── */}

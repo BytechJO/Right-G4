@@ -118,7 +118,7 @@ const ComprehensionB = () => {
 
       <div className="flex flex-col gap-4">
         {questions.map((q, i) => (
-          <div key={i} className="flex items-end gap-2 flex-wrap" style={{ fontSize: "16px", color: "#1a1a1a" }}>
+          <div key={i} className="flex items-end gap-2 flex-wrap" style={{ fontSize: "18px", color: "#1a1a1a" }}>
             {/* Number */}
             <span
               style={{
@@ -126,7 +126,7 @@ const ComprehensionB = () => {
                 WebkitTextStroke: "1px black",
                 color: "#1a1a1a",
                 minWidth: "18px",
-                fontSize: "16px",
+                fontSize: "20px",
               }}
             >
               {i + 1}
@@ -143,7 +143,7 @@ const ComprehensionB = () => {
                 onChange={(e) => handleChange(i, e.target.value)}
                 disabled={locked || errors[i] === false}
                 autoComplete="off"
-                style={{ fontSize: "16px", minWidth: "180px" }}
+                style={{ fontSize: "18px", minWidth: "180px" }}
                 className={`border-b-1 bg-transparent outline-none px-1 transition disabled:pointer-events-none
                   ${
                     errors[i] === true

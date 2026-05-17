@@ -2,29 +2,35 @@ import { useState } from "react";
 import ValidationAlert from "../../Popup/ValidationAlert";
 import { FaCheck, FaRedo, FaEye } from "react-icons/fa";
 
-import img1 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 6 Ready for School Folder/Page 48/SVG/Asset 16.svg";
-import img2 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 6 Ready for School Folder/Page 48/SVG/Asset 17.svg";
-import img3 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 6 Ready for School Folder/Page 48/SVG/Asset 18.svg";
+import img1a from "../../../assets/imgs/pages/Class Book/Right 4 Unit 6 Ready for School Folder/Page 48/2.svg";
+import img1b from "../../../assets/imgs/pages/Class Book/Right 4 Unit 6 Ready for School Folder/Page 48/Asset 20.svg";
+import img2a from "../../../assets/imgs/pages/Class Book/Right 4 Unit 6 Ready for School Folder/Page 48/1.svg";
+import img2b from "../../../assets/imgs/pages/Class Book/Right 4 Unit 6 Ready for School Folder/Page 48/3.svg";
+import img3a from "../../../assets/imgs/pages/Class Book/Right 4 Unit 6 Ready for School Folder/Page 48/Asset 21.svg";
+import img3b from "../../../assets/imgs/pages/Class Book/Right 4 Unit 6 Ready for School Folder/Page 48/5.svg";
 
 const GrammarC = () => {
   const questions = [
     {
       id: 1,
-      image: img1,
+      imgLeft: img1a,
+      imgRight: img1b,
       sentence: "You shouldn't eat much sugar.",
-      correct: 0,
+      correct: 0, // اليسار صح
     },
     {
       id: 2,
-      image: img2,
+      imgLeft: img2a,
+      imgRight: img2b,
       sentence: "You should ride your skateboard.",
-      correct: 0,
+      correct: 0, // اليسار صح
     },
     {
       id: 3,
-      image: img3,
+      imgLeft: img3a,
+      imgRight: img3b,
       sentence: "You should do your homework.",
-      correct: 1,
+      correct: 1, // اليمين صح
     },
   ];
 
@@ -35,9 +41,9 @@ const GrammarC = () => {
   const [locked, setLocked] = useState(false);
   const [showed, setShowed] = useState(false);
 
-  const handleSelect = (qId, imgIndex) => {
+  const handleSelect = (qId, side) => {
     if (locked || errors[qId] === false) return;
-    setSelected((prev) => ({ ...prev, [qId]: imgIndex }));
+    setSelected((prev) => ({ ...prev, [qId]: side }));
   };
 
   const handleCheck = () => {
@@ -97,31 +103,26 @@ const GrammarC = () => {
     setShowed(false);
   };
 
-  const HalfImage = ({ q, imgIndex }) => {
-    const isSelected = selected[q.id] === imgIndex;
-    const isWrong = errors[q.id] === true;
-    const isLeft = imgIndex === 0;
+  const ImgHalf = ({ q, side }) => {
+    const isSelected = selected[q.id] === side;
+    const isWrong = errors[q.id] === true && isSelected;
+    const src = side === 0 ? q.imgLeft : q.imgRight;
+    const color = isWrong ? "#ef4444" : "#ef4444";
 
     return (
       <div
-        onClick={() => handleSelect(q.id, imgIndex)}
+        onClick={() => handleSelect(q.id, side)}
         style={{
           flex: 1,
-          overflow: "hidden",
           position: "relative",
           cursor: locked ? "default" : "pointer",
-  
+          overflow: "hidden",
         }}
       >
-        {/* Half image */}
         <img
-          src={q.image}
+          src={src}
           alt=""
-          style={{
-            width: "100%",
-            height : "auto ", 
-            display: "block",
-          }}
+          style={{ width: "100%", display: "block", height: "auto" }}
         />
 
         {/* Checkmark circle */}
@@ -133,7 +134,6 @@ const GrammarC = () => {
             width: "28px",
             height: "28px",
             borderRadius: "50%",
-            border: `2px solid ${isSelected ? (isWrong ? "#ef4444" : "#2195a6") : "#ccc"}`,
             background: "#fff",
             display: "flex",
             alignItems: "center",
@@ -141,10 +141,10 @@ const GrammarC = () => {
           }}
         >
           {isSelected && (
-            <svg viewBox="0 0 24 24" width="14" height="14" fill="none">
+            <svg viewBox="0 0 24 24" width="28" height="28" fill="none">
               <polyline
                 points="4,12 9,18 20,6"
-                stroke={isWrong ? "#ef4444" : "#2195a6"}
+                stroke={color}
                 strokeWidth="3"
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -154,12 +154,12 @@ const GrammarC = () => {
         </div>
 
         {/* ❌ Error Badge */}
-        {isWrong && isSelected && (
+        {isWrong && (
           <div
             style={{
               position: "absolute",
-              top: "-8px",
-              right: "-8px",
+              top: "8px",
+              right: "8px",
               width: "18px",
               height: "18px",
               background: "#ef4444",
@@ -204,10 +204,10 @@ const GrammarC = () => {
               {q.id}
             </span>
 
-            {/* Split image */}
+            {/* Two images side by side */}
             <div style={{ display: "flex" }}>
-              <HalfImage q={q} imgIndex={0} />
-              <HalfImage q={q} imgIndex={1} />
+              <ImgHalf q={q} side={0} />
+              <ImgHalf q={q} side={1} />
             </div>
 
             {/* Sentence */}

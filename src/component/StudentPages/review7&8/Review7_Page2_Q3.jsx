@@ -1,339 +1,330 @@
-import React, { useState, useRef } from "react";
+import React, { useState } from "react";
+import Button from "../../Button";
 import ValidationAlert from "../../Popup/ValidationAlert";
-import "./Review7_Page2_Q3.css";
 
-import img1 from "../../../assets/imgs/pages/classbook/Right 3 Unit 8 At Our Grandparents Farm Folder/Page 71/Ex D 7.svg";
-import img2 from "../../../assets/imgs/pages/classbook/Right 3 Unit 8 At Our Grandparents Farm Folder/Page 71/Ex D 8.svg";
-import img3 from "../../../assets/imgs/pages/classbook/Right 3 Unit 8 At Our Grandparents Farm Folder/Page 71/Ex D 9.svg";
-import img4 from "../../../assets/imgs/pages/classbook/Right 3 Unit 8 At Our Grandparents Farm Folder/Page 71/Ex D 10.svg";
+// ─────────────────────────────────────────────
+//  🖼️  IMAGES
+// ─────────────────────────────────────────────
+import img1 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 8 I Lived in the Library Folder/Page 71/SVG/Asset 9.svg";
+import img2 from  "../../../assets/imgs/pages/Class Book/Right 4 Unit 8 I Lived in the Library Folder/Page 71/SVG/Asset 10.svg";
 
-const Review7_Page2_Q3 = () => {
-  const [selectedImg, setSelectedImg] = useState(null);
-  const [matches, setMatches] = useState({});
-  const [showResult, setShowResult] = useState(false);
-  const [locked, setLocked] = useState(false);
-  const [selectedSentence, setSelectedSentence] = useState(null);
+// ─────────────────────────────────────────────
+//  🎨  COLORS
+// ─────────────────────────────────────────────
+const INPUT_UNDERLINE_DEFAULT = "#3f3f3f";
+const INPUT_UNDERLINE_WRONG   = "#ef4444";
+const INPUT_TEXT_COLOR        = "#2b2b2b";
+const INPUT_ANSWER_COLOR      = "#c81e1e";
+const NUMBER_COLOR            = "#2b2b2b";
+const TEXT_COLOR              = "#2b2b2b";
+const WRONG_BADGE_BG          = "#ef4444";
+const WRONG_BADGE_TEXT        = "#ffffff";
 
-  const imageRefs = useRef([]);
-  const sentenceRefs = useRef([]);
-  const containerRef = useRef(null);
+// ─────────────────────────────────────────────
+//  📝  EXERCISE DATA
+//  type "given" → سطر معطى (مثال)
+//  type "input" → فيه input
+//  questionParts: مصفوفة أجزاء الجملة { t: "text" | "input", ... }
+// ─────────────────────────────────────────────
+const ITEMS = [
+  {
+    id:           1,
+    src:          img1,
+    type:         "given",
+    questionText: "Was there any honey?",
+    answerText:   "Yes, there was some.",
+  },
+  {
+    id:   2,
+    src:  img2,
+    type: "input",
+    // السؤال: "Were there any ___ figs?"
+    questionParts: [
+      { t: "text",  v: "Were there any"                                    },
+      { t: "input", id: "2q", correct: ["figs"], answer: "figs"           },
+      { t: "text",  v: "?"                                                  },
+    ],
+    // الجواب: "Yes, there were some."
+    answerParts: [
+      { t: "input", id: "2a", correct: ["Yes, there were some.", "Yes, there were some"], answer: "Yes, there were some." },
+    ],
+  },
+];
 
-  const images = [
-    { id: 0, img: img1 },
-    { id: 1, img: img2 },
-    { id: 2, img: img3 },
-    { id: 3, img: img4 },
-  ];
+// ─────────────────────────────────────────────
+//  🔧  NORMALIZE
+// ─────────────────────────────────────────────
+const normalize = (str) =>
+  str.toLowerCase().replace(/[^a-z0-9'\s]/g, "").replace(/\s+/g, " ").trim();
 
-  const sentences = [
-    { id: 0, text: "r" },
-    { id: 1, text: "a" },
-    { id: 2, text: "c" },
-    { id: 3, text: "t" },
-  ];
+const isCorrect = (userVal, correctArr) =>
+  correctArr.some((c) => normalize(userVal) === normalize(c));
 
-  const correct = {
-    0: 2,
-    1: 3,
-    2: 0,
-    3: 1,
+// collect all input parts
+const ALL_INPUTS = ITEMS.flatMap((item) =>
+  item.type === "input"
+    ? [
+        ...item.questionParts.filter((p) => p.t === "input"),
+        ...item.answerParts.filter((p) => p.t === "input"),
+      ]
+    : []
+);
+
+// ─────────────────────────────────────────────
+//  COMPONENT
+// ─────────────────────────────────────────────
+export default function WB_LookWriteQA_QF() {
+  const [answers,     setAnswers]     = useState({});
+  const [showResults, setShowResults] = useState(false);
+  const [showAns,     setShowAns]     = useState(false);
+
+  const handleChange = (id, value, correctArr) => {
+    if (showAns) return;
+    if (showResults && isCorrect(answers[id] || "", correctArr)) return;
+    setAnswers((prev) => ({ ...prev, [id]: value }));
   };
 
-  const selectImage = (id) => {
-    if (locked || showResult) return;
+  const handleCheck = () => {
+    if (showAns) return;
+    const allAnswered = ALL_INPUTS.every((p) => answers[p.id]?.trim());
+    if (!allAnswered) { ValidationAlert.info("Please complete all answers first."); return; }
+    let score = 0;
+    ALL_INPUTS.forEach((p) => { if (isCorrect(answers[p.id] || "", p.correct)) score++; });
+    const total = ALL_INPUTS.length;
+    setShowResults(true);
+    if (score === total)   ValidationAlert.success(`Score: ${score} / ${total}`);
+    else if (score > 0)    ValidationAlert.warning(`Score: ${score} / ${total}`);
+    else                   ValidationAlert.error(`Score: ${score} / ${total}`);
+  };
 
-    // إذا اختار جملة → اربط
-    if (selectedSentence !== null) {
-      setMatches((prev) => {
-        const updated = { ...prev };
+  const handleShowAnswer = () => {
+    const filled = {};
+    ALL_INPUTS.forEach((p) => { filled[p.id] = p.answer; });
+    setAnswers(filled); setShowResults(false); setShowAns(true);
+  };
 
-        Object.keys(updated).forEach((imgKey) => {
-          if (updated[imgKey] === selectedSentence) {
-            delete updated[imgKey];
-          }
-        });
+  const handleReset = () => {
+    setAnswers({}); setShowResults(false); setShowAns(false);
+  };
 
-        updated[id] = selectedSentence;
-        return updated;
-      });
+  const isWrongPart    = (p) => showResults && !showAns && !isCorrect(answers[p.id] || "", p.correct);
+  const isDisabledPart = (p) => showAns || (showResults && isCorrect(answers[p.id] || "", p.correct));
 
-      setSelectedSentence(null);
-      return;
+  const renderPart = (part, i) => {
+    if (part.t === "text") {
+      return <span key={i} className="lwqa-text">{part.v}</span>;
     }
 
-    // السلوك القديم (اختيار صورة)
-    setSelectedImg(id);
-  };
+    const wrong    = isWrongPart(part);
+    const disabled = isDisabledPart(part);
+    const value    = answers[part.id] || "";
+    const tColor   = showAns ? INPUT_ANSWER_COLOR : INPUT_TEXT_COLOR;
+    const uColor   = wrong ? INPUT_UNDERLINE_WRONG : INPUT_UNDERLINE_DEFAULT;
 
-  const selectSentence = (id) => {
-    if (locked || showResult) return;
-
-    // إذا في صورة مختارة → اربط
-    if (selectedImg !== null) {
-      setMatches((prev) => {
-        const updated = { ...prev };
-
-        Object.keys(updated).forEach((imgKey) => {
-          if (updated[imgKey] === id) {
-            delete updated[imgKey];
-          }
-        });
-
-        updated[selectedImg] = id;
-        return updated;
-      });
-
-      setSelectedImg(null);
-      return;
-    }
-    setSelectedSentence(id);
-  };
-  const checkAnswers = () => {
-    if (locked || showResult) return;
-
-    if (Object.keys(matches).length !== images.length) {
-      ValidationAlert.info("Please match all.");
-      return;
-    }
-
-    let correctCount = 0;
-
-    Object.entries(matches).forEach(([imgId, sentId]) => {
-      if (correct[imgId] === sentId) correctCount++;
-    });
-
-    const total = images.length;
-
-    const message = `
-        Score: ${correctCount} / ${total}
-  `;
-
-    if (correctCount === total) {
-      ValidationAlert.success(message);
-    } else if (correctCount === 0) {
-      ValidationAlert.error(message);
-    } else {
-      ValidationAlert.warning(message);
-    }
-
-    setShowResult(true);
-    setLocked(true);
-  };
-
-  const showAnswers = () => {
-    setMatches(correct);
-    setLocked(true);
-    setShowResult(true);
-  };
-
-  const reset = () => {
-    setSelectedSentence(null);
-    setSelectedImg(null);
-    setMatches({});
-    setShowResult(false);
-    setLocked(false);
+    return (
+      <span key={part.id} className="lwqa-input-wrap">
+        <input
+          type="text"
+          className={[
+            "lwqa-input",
+            wrong   ? "lwqa-input--wrong"  : "",
+            showAns ? "lwqa-input--answer" : "",
+          ].filter(Boolean).join(" ")}
+          value={value}
+          disabled={disabled}
+          onChange={(e) => handleChange(part.id, e.target.value, part.correct)}
+          style={{ borderBottomColor: uColor, color: tColor }}
+          spellCheck={false}
+          autoComplete="off"
+        />
+        {wrong && <span className="lwqa-badge">✕</span>}
+      </span>
+    );
   };
 
   return (
-    <div
-      ref={containerRef}
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        padding: "30px",
-        position: "relative",
-      }}
-    >
+    <div className="main-container-component">
+      <style>{`
+        .lwqa-list {
+          display: flex;
+          flex-direction: column;
+          gap: clamp(24px, 3.5vw, 44px);
+          width: 100%;
+        }
+
+        /* Single item */
+        .lwqa-item {
+          display: flex;
+          flex-direction: column;
+          gap: clamp(8px, 1.1vw, 14px);
+        }
+
+        /* num + img row */
+        .lwqa-img-row {
+          display: flex;
+          align-items: flex-start;
+          gap: clamp(6px, 0.8vw, 10px);
+        }
+
+        .lwqa-num {
+          font-size: clamp(14px, 1.7vw, 20px);
+          font-weight: 700;
+          color: ${NUMBER_COLOR};
+          flex-shrink: 0;
+          line-height: 1;
+          padding-top: 2px;
+        }
+
+        .lwqa-img {
+          width: 15%;
+          height: 15%;
+          object-fit: contain;
+          display: block;
+        }
+
+        /* Sentence row */
+        .lwqa-sentence-row {
+          display: flex;
+          align-items: flex-end;
+          flex-wrap: wrap;
+          gap: clamp(4px, 0.5vw, 7px);
+          width: 100%;
+        }
+
+        .lwqa-text {
+          font-size: clamp(13px, 1.6vw, 19px);
+          color: ${TEXT_COLOR};
+          white-space: nowrap;
+          flex-shrink: 0;
+          line-height: 1.5;
+        }
+
+        /* Given lines (item 1) */
+        .lwqa-given {
+          font-size: clamp(13px, 1.6vw, 19px);
+          color: ${TEXT_COLOR};
+          line-height: 1.5;
+          border-bottom: 1px solid ${INPUT_UNDERLINE_DEFAULT};
+          width: 100%;
+          padding-bottom: 2px;
+        }
+
+        /* Input wrap */
+        .lwqa-input-wrap {
+          position: relative;
+          display: inline-flex;
+          align-items: center;
+          flex: 1;
+          min-width: clamp(80px, 10vw, 160px);
+        }
+
+        .lwqa-input {
+          width: 100%;
+          background: transparent;
+          border: none;
+          border-bottom: 1px solid ${INPUT_UNDERLINE_DEFAULT};
+          outline: none;
+          font-size: clamp(13px, 1.6vw, 19px);
+          color: ${INPUT_TEXT_COLOR};
+          line-height: 1.5;
+          box-sizing: border-box;
+          font-family: inherit;
+          transition: border-color 0.2s;
+        }
+        .lwqa-input:disabled  { opacity: 1; cursor: default; }
+        .lwqa-input--wrong    { border-bottom-color: ${INPUT_UNDERLINE_WRONG}; }
+        .lwqa-input--answer   { color: ${INPUT_ANSWER_COLOR}; font-weight: 700; }
+
+        /* ✕ badge */
+        .lwqa-badge {
+          position: absolute;
+          top: -8px; right: -4px;
+          width: clamp(14px, 1.6vw, 18px);
+          height: clamp(14px, 1.6vw, 18px);
+          border-radius: 50%;
+          background: ${WRONG_BADGE_BG};
+          color: ${WRONG_BADGE_TEXT};
+          display: flex; align-items: center; justify-content: center;
+          font-size: clamp(7px, 0.8vw, 10px);
+          font-weight: 700;
+          border: 2px solid #fff;
+          box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+          pointer-events: none;
+          z-index: 2;
+        }
+
+        .lwqa-buttons {
+          display: flex;
+          justify-content: center;
+          margin-top: clamp(8px, 1.6vw, 18px);
+        }
+      `}</style>
+
       <div
         className="div-forall"
         style={{
           display: "flex",
           flexDirection: "column",
-          gap: "30px",
+          gap: "clamp(14px, 2vw, 22px)",
+          maxWidth: "1100px",
+          margin: "0 auto",
         }}
       >
-        <h5 className="header-title-page8">
-          <span style={{ marginRight: "10px" }}>E</span>
-          Look and match. 
-        </h5>
+        {/* ── Header ── */}
+        <h1
+          className="WB-header-title-page8"
+          style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
+        >
+          <span className="WB-ex-A-1">F</span>
+          Look and write the question and answer.
+        </h1>
 
-        <div className="w-full flex flex-col items-center gap-16">
-          {/* 🔥 الصور فوق */}
-          <div className="grid grid-cols-4 md:grid-cols-4 lg:grid-cols-4 gap-10 w-full">
-            {images.map((img, i) => (
-              <div
-                key={i}
-                onClick={() => selectImage(i)}
-                className="flex flex-col items-center gap-2 cursor-pointer transition relative"
-              >
-                {/* 🔥 الرقم */}
-                <span
-                  style={{
-                    position: "absolute",
-                    top: "-10px",
-                    left: "-10px",
-                    fontWeight: "bold",
-                    fontSize: "16px",
-                  }}
-                >
-                  {i + 1}
-                </span>
-                <img
-                  src={img.img}
-                  style={{
-                    width: "85px",
-                    height: "85px",
-                    objectFit: "contain",
-                    border:
-                      selectedImg === i
-                        ? "3px solid #f97316"
-                        : "3px solid transparent",
-                    borderRadius: "12px",
-                    padding: "4px",
-                    backgroundColor:
-                      selectedImg === i ? "#ffedd5" : "transparent",
-                  }}
-                />
+        {/* ── Items ── */}
+        <div className="lwqa-list">
+          {ITEMS.map((item) => (
+            <div key={item.id} className="lwqa-item">
 
-                <div
-                  ref={(el) => (imageRefs.current[i] = el)} // 🔥 الريف هون على الدوت
-                  className="w-3 h-3 rounded-full mt-2 transition"
-                  style={{
-                    backgroundColor: selectedImg === i ? "#f97316" : "#fb923c",
-                    transform: selectedImg === i ? "scale(1.4)" : "scale(1)",
-                    boxShadow:
-                      selectedImg === i
-                        ? "0 0 0 4px rgba(249,115,22,0.2)"
-                        : "none",
-                  }}
-                ></div>
+              {/* Num + Image */}
+              <div className="lwqa-img-row">
+                <span className="lwqa-num">{item.id}</span>
+                <img src={item.src} alt={`img-${item.id}`} className="lwqa-img" />
               </div>
-            ))}
-          </div>
 
-          {/* 🔥 الجمل تحت */}
-          <div className="grid grid-cols-4 gap-10 w-full place-items-center mt-10">
-            {sentences.map((sent, i) => (
-              <div
-                key={i}
-                onClick={() => selectSentence(i)}
-                className="relative flex flex-col items-center cursor-pointer"
-              >
-                {/* 🔥 الدوت */}
-                <div
-                  ref={(el) => (sentenceRefs.current[i] = el)} // 🔥 هون كمان
-                  className="absolute -top-2 left-1/2 -translate-x-1/2 rounded-full z-10 transition"
-                  style={{
-                    width: "12px",
-                    height: "12px",
-                    backgroundColor: "#f97316",
-                    transform:
-                      selectedSentence === i ? "scale(1.4)" : "scale(1)",
-                    boxShadow:
-                      selectedSentence === i
-                        ? "0 0 0 4px rgba(249,115,22,0.2)"
-                        : "none",
-                  }}
-                ></div>
+              {item.type === "given" ? (
+                <>
+                  <div className="lwqa-sentence-row">
+                    <span className="lwqa-given">{item.questionText}</span>
+                  </div>
+                  <div className="lwqa-sentence-row">
+                    <span className="lwqa-given">{item.answerText}</span>
+                  </div>
+                </>
+              ) : (
+                <>
+                  {/* Question row */}
+                  <div className="lwqa-sentence-row">
+                    {item.questionParts.map((p, i) => renderPart(p, i))}
+                  </div>
+                  {/* Answer row */}
+                  <div className="lwqa-sentence-row">
+                    {item.answerParts.map((p, i) => renderPart(p, i))}
+                  </div>
+                </>
+              )}
 
-                {/* 🔥 البوكس */}
-                <div
-                  className="relative px-4 py-2 rounded-2xl text-sm text-center transition"
-                  style={{
-                    backgroundColor:
-                      selectedSentence === i ? "#fed7aa" : "#ffedd5",
-                    border:
-                      selectedSentence === i
-                        ? "2px solid #f97316"
-                        : "2px solid transparent",
-                  }}
-                >
-                  {sent.text}
-                  {showResult &&
-                    Object.entries(matches).some(
-                      ([imgId, sentId]) =>
-                        sentId == i && correct[imgId] !== sentId,
-                    ) && (
-                      <span
-                        style={{
-                          position: "absolute",
-                          top: "-10px",
-                          right: "-10px",
-                          transform: "translateY(-50%)",
-                          width: "20px",
-                          height: "20px",
-                          background: "#ef4444",
-                          color: "white",
-                          borderRadius: "50%",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          fontSize: "12px",
-                          fontWeight: "bold",
-                          border: "2px solid white",
-                          boxShadow: "0 2px 6px rgba(0,0,0,0.2)",
-                          pointerEvents: "none",
-                          zIndex: 3,
-                        }}
-                      >
-                        ✕
-                      </span>
-                    )}
-                </div>
-              </div>
-            ))}
-          </div>
+            </div>
+          ))}
         </div>
-      </div>
 
-      <svg className="absolute top-0 left-0 w-full h-full pointer-events-none">
-        {Object.entries(matches).map(([imgId, sentId], i) => {
-          const imgDot = imageRefs.current[imgId];
-          const sentDot = sentenceRefs.current[sentId];
-
-          if (!imgDot || !sentDot || !containerRef.current) return null;
-
-          const imgRect = imgDot.getBoundingClientRect();
-          const sentRect = sentDot.getBoundingClientRect();
-          const containerRect = containerRef.current.getBoundingClientRect();
-
-          const x1 = sentRect.left + sentRect.width / 2 - containerRect.left;
-          const y1 = sentRect.top + sentRect.height / 2 - containerRect.top;
-
-          const x2 = imgRect.left + imgRect.width / 2 - containerRect.left;
-          const y2 = imgRect.top + imgRect.height / 2 - containerRect.top;
-          return (
-            <g key={i}>
-              <line
-                x1={x1}
-                y1={y1}
-                x2={x2}
-                y2={y2}
-                stroke="orange"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-              />
-            </g>
-          );
-        })}
-      </svg>
-
-      <div className="action-buttons-container">
-        <button className="try-again-button" onClick={reset}>
-          Start Again ↻
-        </button>
-
-        <button onClick={showAnswers} className="show-answer-btn">
-          Show Answer
-        </button>
-
-        <button className="check-button2" onClick={checkAnswers}>
-          Check Answer ✓
-        </button>
+        {/* ── Buttons ── */}
+        <div className="lwqa-buttons">
+          <Button
+            checkAnswers={handleCheck}
+            handleShowAnswer={handleShowAnswer}
+            handleStartAgain={handleReset}
+          />
+        </div>
       </div>
     </div>
   );
-};
-
-export default Review7_Page2_Q3;
+}

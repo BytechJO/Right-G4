@@ -19,7 +19,7 @@ const Page9 = ({ openPopup }) => {
           width="22"
           height="22"
           viewBox="0 0 90 90"
-          onClick={() => openPopup("exercise", { startIndex: 4 })}
+          onClick={() => openPopup("exercise", { startIndex: 3 })}
           style={{ overflow: "visible" }}
         >
           <image className="svg-img"
@@ -40,7 +40,7 @@ const Page9 = ({ openPopup }) => {
           width="22"
           height="22"
           viewBox="0 0 90 90"
-          onClick={() => openPopup("exercise", { startIndex: 5 })}
+          onClick={() => openPopup("exercise", { startIndex: 4 })}
           style={{ overflow: "visible" }}
         >
           <image className="svg-img"

@@ -222,7 +222,7 @@ export default function WB_ReadComplete_QC() {
           className="WB-header-title-page8"
           style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
         >
-          <span className="WB-ex-A-1">C</span>
+          <span className="WB-ex-A">C</span>
           Read and complete.
         </h1>
 

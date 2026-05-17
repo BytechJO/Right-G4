@@ -169,7 +169,7 @@ const ComprehensionA = () => {
     <div className="mb-6 mx-auto">
       <h5 className="header-title-page8-read mb-8">
         <span className="ex-A-read mr-2">A</span>
-        Read and ✓ the things you might do on a space station.
+        Read and <span style={{color : "red"}}>✓</span>the things you might do on a space station.
       </h5>
 
       <div className="grid grid-cols-2 gap-x-10 gap-y-5">

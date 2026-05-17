@@ -1,60 +1,151 @@
-import page24 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 8 I Lived in the Library Folder/Page 74.png";
-import React, { useState, useRef } from "react";
-import "./Reading_Unit8_Page1.css";
-import sound1 from "../../../assets/audio/ClassBook/Unit 8/P 74/unit8-pg74-readingall.mp3";
-import sound2 from "../../../assets/audio/ClassBook/Unit 8/P 74/Pg74_1.1_Adult Lady.mp3";
-import sound3 from "../../../assets/audio/ClassBook/Unit 8/P 74/Pg74_1.2_Adult Lady.mp3";
-import sound4 from "../../../assets/audio/ClassBook/Unit 8/P 74/Pg74_1.3_Adult Lady.mp3";
-import sound5 from "../../../assets/audio/ClassBook/Unit 8/P 74/Pg74_1.4_Adult Lady.mp3";
+import React, { useRef, useState } from "react";
+import page25 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 6 Ready for School Folder/Page 57.png";
 import AudioWithCaption from "../../AudioWithCaption";
 import audioBtn from "../../../assets/Page 01/Audio btn.svg";
 import pauseBtn from "../../../assets/Page 01/Right Video Button.svg";
-import video3 from "../../../assets/videos/reading/grade 3 unit 8 page 74-75 reading.mp4";
 
-const Reading_Unit8_Page1 = ({ openPopup }) => {
+// ======================================================
+// 🖼️ استبدل بمسار الصورة الصحيح
+import pageImage from "../../../assets/imgs/pages/Class Book/Right 4 Unit 8 I Lived in the Library Folder/Page 74.png";
+// 🔊 صوت واحد بس - نفس الصوت للكل والمناطق
+import soundAll from "../../../assets/audio/ClassBook/Grade 4/cd4pg74-story-adult-lady_gTfYuwuf.mp3";
+
+// 🎬 استبدل بمسار الفيديو الصحيح
+import videoFile from "../../../assets/right grade 4/reading/grade 4 unit 8 page 74-75 reading.mp4";
+
+// 🎨 استبدل باسم ملف CSS الصحيح
+import "./Reading_Unit8_Page1.css";
+// ======================================================
+
+const Reading_NewPage = ({ openPopup }) => {
   const audioRef = useRef(null);
   const [hoveredAreaIndex, setHoveredAreaIndex] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [activeAreaIndex, setActiveAreaIndex] = useState(null);
-  const captionsExample = [
-    {
-      start: 0.26,
-      end: 63.66,
-      text: "Page 74, Reading. Where's Hansel's camera? Last week, Hansel was at his friend's birthday party. There were many children at the party for Philip's birthday. Hansel wanted to take a picture with his camera. Oh, no! cried Hansel. What's wrong? asked Philip. I want to take some pictures, but I can't find my camera anywhere. I forgot where I put it, complained Hansel. Philip said, I'll help you look for your camera. What does it look like? It's white, and it has a long band, replied Hansel. Can you help us, Mom? asked Philip. We are looking for Hansel's camera. Philip's mom said, Sure, boys. I saw Stella taking a picture of her friends with a camera. That might be Hansel's camera. Thanks, Mom, said Philip. Stella was looking at some pictures she had taken with her camera. She said happily, Look, Hansel, I took some nice pictures. Do you want to look at them?",
-    },
 
-    {
-      start: 64.67,
-      end: 78.12,
-      text: "No, Stella, not right now. I'm looking for my camera. Have you seen it? asked Hansel. Did you find your camera yet, Hansel? Philip asked. No, I didn't, answered Hansel. I guess it's lost.",
-    },
-
-    {
-      start: 79.37,
-      end: 93.98,
-      text: "Have you found your camera, Hansel? asked Philip's mom. No, Mrs. Dewey. I believe I saw Harley taking a picture of Sarah with a camera, said Mrs. Dewey. I'll go find them. Thanks, Mrs. Dewey, replied Hansel.",
-    },
-
-    {
-      start: 95.1,
-      end: 99.74,
-      text: "Sarah, that's my camera. How did you get it? asked Hansel, relieved.",
-    },
-
-    {
-      start: 100.8,
-      end: 122.74,
-      text: "Harley found it in the grass. He took some pictures, then he gave it to me to hold. Here you are. We didn't know this was your camera, Sarah replied happily. Thank you. I'm so happy my camera is not lost, said Hansel.",
-    },
-  ];
-const clickableAreas = [
+  // ======================================================
+  // 📝 Captions للصوت الكامل - عدّل النصوص والتوقيتات
+  const captions = [
+  {
+    start: 0.26,
+    end: 4.00,
+    text: "Page 74. Stories in our dreams.",
+  },
+  {
+    start: 4.00,
+    end: 12.00,
+    text: "Do you like to make up stories? Are you good at seeing pictures in your mind? Every night when you dream, you do these things.",
+  },
+  {
+    start: 12.00,
+    end: 19.96,
+    text: "What do the pictures mean? Can they help you? Here are some stories about dreamers and their dreams.",
+  },
+  {
+    start: 19.96,
+    end: 26.60,
+    text: "Amanda had a dream. In the dream, there was a rooster crowing loudly outside.",
+  },
+  {
+    start: 26.60,
+    end: 33.86,
+    text: "Amanda and her family were in the kitchen. The sun was shining brightly, and the kitchen was the same as it always was.",
+  },
+  {
+    start: 33.86,
+    end: 43.66,
+    text: "There was one new thing. There were four large cats in the kitchen. Every person in her family was a cat.",
+  },
+  {
+    start: 43.66,
+    end: 49.94,
+    text: "What a wonderful dream. Amanda decided to use her dream as an idea to help her write a story.",
+  },
+  {
+    start: 49.94,
+    end: 59.70,
+    text: "Many writers are like Amanda. They get their ideas from their dreams. Jack Prelutsky is a poet. He writes for children.",
+  },
+  {
+    start: 59.70,
+    end: 66.26,
+    text: "He gets many ideas from memories. He also says that many of his poems started as dreams.",
+  },
+  {
+    start: 66.26,
+    end: 76.08,
+    text: "One day, he was trying to think of something to write. He sat looking out at his garden. Then he fell asleep.",
+  },
+  {
+    start: 76.08,
+    end: 82.37,
+    text: "He began to dream. In the dream, all the flowers and trees in the garden changed.",
+  },
+  {
+    start: 82.37,
+    end: 88.08,
+    text: "They turned into musical instruments. Prelutsky woke up and started writing.",
+  },
+  {
+    start: 88.08,
+    end: 95.79,
+    text: "He wrote a poem called I Am Growing a Glorious Garden. Can you guess what was growing in that garden?",
+  },
+  {
+    start: 95.79,
+    end: 107.12,
+    text: "Sometimes people have scary dreams. Mona dreamed there was a monster under her bed. She dreamed about the monster every night.",
+  },
+  {
+    start: 107.12,
+    end: 114.18,
+    text: "Mona wrote a story about the monster. In the story, she talked to the monster, and it talked to her.",
+  },
+  {
+    start: 114.18,
+    end: 125.26,
+    text: "The monster said it didn't want to frighten her. It was afraid of the dark. After writing her story, Mona's dreams about monsters stopped.",
+  },
+  {
+    start: 125.26,
+    end: 128.60,
+    text: "Some people draw pictures of their favorite dreams.",
+  },
+  {
+    start: 128.60,
+    end: 137.34,
+    text: "Some people write about them in dream journals. You can do that, too. Keep a notebook and a pencil next to your bed.",
+  },
+  {
+    start: 137.34,
+    end: 141.20,
+    text: "When you remember a dream, write it down as soon as you can.",
+  },
+  {
+    start: 142.58,
+    end: 146.90,
+    text: "We all have lots of dreams, but we don't remember many of them.",
+  },
+  {
+    start: 146.90,
+    end: 150.34,
+    text: "Sometimes we just remember a small part of a dream.",
+  },
+  {
+    start: 150.34,
+    end: 156.31,
+    text: "It doesn't matter in the end. Even a small piece of a dream can give you a lot to think about.",
+  },
+];
+  // 📍 مناطق النقر - كل منطقة عندها startFrom و stopAt من الصوت الأساسي
+  const clickableAreas = [
   // 1
   {
     x1: 15.1,
     y1: 36.26,
     x2: 54.1,
     y2: 50.26,
-    slice: { startFrom: 0, stopAt: 0 },
+    slice: { startFrom: 4.00, stopAt: 19.96 },
   },
 
   // 2
@@ -63,7 +154,7 @@ const clickableAreas = [
     y1: 30.86,
     x2: 94.32,
     y2: 50.66,
-    slice: { startFrom: 0, stopAt: 0 },
+    slice: { startFrom: 19.96, stopAt: 49.94 },
   },
 
   // 3
@@ -72,7 +163,7 @@ const clickableAreas = [
     y1: 79.5,
     x2: 53.6,
     y2: 96,
-    slice: { startFrom: 0, stopAt: 0 },
+    slice: { startFrom: 49.94, stopAt: 76.08 },
   },
 
   // 4
@@ -81,42 +172,53 @@ const clickableAreas = [
     y1: 79.5,
     x2: 94.54,
     y2: 96.3,
-    slice: { startFrom: 0, stopAt: 0 },
+    slice: { startFrom: 76.08, stopAt: 95.79 },
   },
 ];
+
+  // ======================================================
+
   const handleImageClick = (e) => {
     const rect = e.target.getBoundingClientRect();
     const xPercent = ((e.clientX - rect.left) / rect.width) * 100;
     const yPercent = ((e.clientY - rect.top) / rect.height) * 100;
     console.log("X%:", xPercent.toFixed(2), "Y%:", yPercent.toFixed(2));
   };
-  const playSound = (soundPath) => {
-    if (audioRef.current) {
-      audioRef.current.src = soundPath;
-      audioRef.current.play();
-      setIsPlaying(true);
-      setHoveredAreaIndex(null); // إزالة الهايلايت عند بدء الصوت
 
-      audioRef.current.onended = () => {
+  // تشغيل slice من الصوت الأساسي
+  const playSlice = (slice) => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    audio.src = soundAll;
+    audio.currentTime = slice.startFrom;
+    audio.play();
+    setIsPlaying(true);
+
+    const checkStop = setInterval(() => {
+      if (audio.currentTime >= slice.stopAt) {
+        audio.pause();
+        clearInterval(checkStop);
         setIsPlaying(false);
+        setActiveAreaIndex(null);
         setHoveredAreaIndex(null);
-        setActiveAreaIndex(null); // مسح الهايلايت بعد انتهاء الصوت
-      };
-    }
+      }
+    }, 100);
+
+    audio.onended = () => {
+      clearInterval(checkStop);
+      setIsPlaying(false);
+      setActiveAreaIndex(null);
+      setHoveredAreaIndex(null);
+    };
   };
 
-  return (
+   return (
     <div
       className="page1-img-wrapper"
       onClick={handleImageClick}
-      style={{ backgroundImage: `url(${page24})` }}
+      style={{ backgroundImage: `url(${pageImage})` }}
     >
-      {/* <img
-        src={page24}
-        style={{ display: "block" }}
-        onClick={handleImageClick}
-      /> */}
-
       {clickableAreas.map((area, index) => (
         <div
           key={index}
@@ -132,9 +234,10 @@ const clickableAreas = [
             width: `${area.x2 - area.x1}%`,
             height: `${area.y2 - area.y1}%`,
           }}
-          onClick={() => {
-            setActiveAreaIndex(index); // لتثبيت الهايلايت أثناء الصوت
-            playSound(area.sound);
+          onClick={(e) => {
+            e.stopPropagation();
+            setActiveAreaIndex(index);
+            playSlice(area.slice);
           }}
           onMouseEnter={() => {
             if (!isPlaying) setHoveredAreaIndex(index);
@@ -142,9 +245,10 @@ const clickableAreas = [
           onMouseLeave={() => {
             if (!isPlaying) setHoveredAreaIndex(null);
           }}
-        ></div>
+        />
       ))}
 
+      {/* ⚙️ زر الصوت الكامل - عدّل اسم الـ CSS class */}
       <div
         className="headset-icon-CD-unit2-page11-1 hover:scale-110 transition"
         style={{ overflow: "visible" }}
@@ -153,33 +257,23 @@ const clickableAreas = [
           width="22"
           height="22"
           viewBox="0 0 90 90"
-          onClick={() =>
+          onClick={(e) => {
+            e.stopPropagation();
             openPopup(
               "audio",
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "center",
-                  alignContent: "center",
-                }}
-              >
-                <AudioWithCaption src={sound1} captions={captionsExample} />
-              </div>,
-            )
-          }
+              <div style={{ display: "flex", justifyContent: "center", alignContent: "center" }}>
+                <AudioWithCaption src={soundAll} captions={captions}            stopAtSecond={2.84}
+/>
+              </div>
+            );
+          }}
           style={{ overflow: "visible" }}
         >
-          <image
-            className="svg-img"
-            href={audioBtn}
-            x="0"
-            y="0"
-            width="90"
-            height="90"
-          />
+          <image className="svg-img" href={audioBtn} x="0" y="0" width="90" height="90" />
         </svg>
       </div>
 
+      {/* ⚙️ زر الفيديو - عدّل اسم الـ CSS class */}
       <div
         className="pauseBtn-icon-CD-page21 hover:scale-110 transition"
         style={{ overflow: "visible" }}
@@ -188,49 +282,26 @@ const clickableAreas = [
           width="22"
           height="22"
           viewBox="0 0 90 90"
-          onClick={() =>
+          onClick={(e) => {
+            e.stopPropagation();
             openPopup(
               "video",
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "center",
-                  alignContent: "center",
-                  alignItems: "center",
-                  height: "100%",
-                  width: "100%",
-                }}
-              >
-                <video
-                  autoPlay
-                  controls
-                  style={{
-                    width: "auto",
-                    height: "80%",
-                    objectFit: "fill",
-                    borderRadius: "20px",
-                  }}
-                >
-                  <source src={video3} type="video/mp4" />
+              <div style={{ display: "flex", justifyContent: "center", alignContent: "center", alignItems: "center", height: "100%", width: "100%" }}>
+                <video autoPlay controls style={{ width: "auto", height: "80%", objectFit: "fill", borderRadius: "20px" }}>
+                  <source src={videoFile} type="video/mp4" />
                 </video>
-              </div>,
-            )
-          }
+              </div>
+            );
+          }}
           style={{ overflow: "visible" }}
         >
-          <image
-            className="svg-img"
-            href={pauseBtn}
-            x="0"
-            y="0"
-            width="90"
-            height="90"
-          />
+          <image className="svg-img" href={pauseBtn} x="0" y="0" width="90" height="90" />
         </svg>
       </div>
+
       <audio ref={audioRef} style={{ display: "none" }} />
     </div>
   );
 };
 
-export default Reading_Unit8_Page1;
+export default Reading_NewPage;

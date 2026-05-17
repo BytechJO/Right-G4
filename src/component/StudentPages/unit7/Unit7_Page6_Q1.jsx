@@ -6,7 +6,7 @@ import ValidationAlert from "../../Popup/ValidationAlert";
 //  🖼️  IMAGE + 🔊 AUDIO
 // ─────────────────────────────────────────────
 import imgScene from "../../../assets/imgs/pages/Class Book/Right 4 Unit 7  The Alligator Scare Folder/Page 63/SVG/Asset 3.svg";
-import sound    from "../../../assets/audio/ClassBook/Grade 4/cd1pg20-story-adult-lady_Nf7yHD6t.mp3";
+import sound    from "../../../assets/audio/ClassBook/Grade 4/cd40pg63-instruction1-adult-lady_aZ46Zvr3.mp3";
 import QuestionAudioPlayer from "../../QuestionAudioPlayer";
 
 // ─────────────────────────────────────────────
@@ -26,11 +26,41 @@ const WRONG_BADGE_TEXT = "#ffffff";
 //  📝  AUDIO CAPTIONS
 // ─────────────────────────────────────────────
 const captions = [
-  { start: 0.0,  end: 5.0,  text: "Read, listen, and write ✓ or X." },
-  { start: 5.0,  end: 14.0, text: "My family and I went to a restaurant that had a buffet." },
-  { start: 14.0, end: 28.0, text: "There was so much food to choose from. There was spicy baked chicken with rice and spaghetti and meatballs." },
-  { start: 28.0, end: 40.0, text: "There were rolls and fried chicken. There were cookies and cupcakes to eat for dessert." },
-  { start: 40.0, end: 50.0, text: "There were apples, oranges, and even pistachio ice cream!" },
+  {
+    start: 0.32,
+    end: 9.36,
+    text: "Page 63, Write Activities, Exercise E. Read, listen, and write check or X.",
+  },
+  {
+    start: 9.36,
+    end: 13.62,
+    text: "My family and I went to a restaurant that had a buffet.",
+  },
+  {
+    start: 13.62,
+    end: 16.74,
+    text: "There was so much food to choose from.",
+  },
+  {
+    start: 16.74,
+    end: 21.60,
+    text: "There was spicy baked chicken with rice and spaghetti and meatballs.",
+  },
+  {
+    start: 21.60,
+    end: 24.14,
+    text: "There were rolls and fried chicken.",
+  },
+  {
+    start: 24.14,
+    end: 27.68,
+    text: "There were cookies and cupcakes to eat for dessert.",
+  },
+  {
+    start: 27.68,
+    end: 32.34,
+    text: "There were apples, oranges, and even pistachio ice cream.",
+  },
 ];
 
 // ─────────────────────────────────────────────
@@ -232,13 +262,13 @@ export default function WB_ReadListenCheckCross_QE() {
           className="WB-header-title-page8"
           style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
         >
-          <span className="WB-ex-A-1">E</span>
-          Read, listen, and write ✓ or X.
+          <span className="WB-ex-A">E</span>
+          Read, listen, and write <span style={{color : "red"}} >✓  </span> or<span style={{color : "red"}} >X </span> .
         </h1>
 
         {/* ── Audio ── */}
         <div style={{ marginTop: "4px" }}>
-          <QuestionAudioPlayer src={sound} captions={captions} stopAtSecond={5} />
+          <QuestionAudioPlayer src={sound} captions={captions} stopAtSecond={ 9.36} />
         </div>
 
         {/* ── Paragraph + image ── */}

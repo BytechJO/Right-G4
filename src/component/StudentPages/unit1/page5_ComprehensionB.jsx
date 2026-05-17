@@ -115,8 +115,7 @@ const ComprehensionB = () => {
               border: "2px solid #e8eff1",
               borderRadius: "8px",
               padding: "4px 22px",
-              fontSize: "14px",
-              fontWeight: "500",
+              fontSize: "18px",
               color: "#1a1a1a",
               background: "#e8eff1",
               letterSpacing: "0.01em",
@@ -130,20 +129,20 @@ const ComprehensionB = () => {
       {/* Questions */}
       <div className="flex flex-col gap-4">
         {questions.map((q, i) => (
-          <div key={i} className="flex items-center gap-2 flex-wrap text-[14px]">
+          <div key={i} className="flex items-center gap-2 flex text-[18px]">
             {/* Number bold with black stroke */}
             <span
               style={{
-                fontWeight: "400",
                 WebkitTextStroke: "1px black",
                 color: "#1a1a1a",
                 minWidth: "18px",
+                whiteSpace : "nowrap"
               }}
             >
               {i + 1}
             </span>
 
-            <span>{q.before}</span>
+            <span style={ {whiteSpace : "nowrap"}}>{q.before}</span>
 
             {/* Input Blank */}
             <div className="relative inline-flex items-center">
@@ -153,7 +152,7 @@ const ComprehensionB = () => {
                 onChange={(e) => handleChange(i, e.target.value)}
                 disabled={locked || errors[i] === false}
                 autoComplete="off"
-                className={`min-w-[120px] h-[28px] border-b-1 bg-transparent text-sm  text-center outline-none transition  disabled:pointer-events-none
+                className={`min-w-[120px] h-[28px] border-b-1 bg-transparent text-[18px]  text-center outline-none transition  disabled:pointer-events-none
                   ${
                     errors[i] === true
                       ? "border-red-500 "
@@ -188,7 +187,7 @@ const ComprehensionB = () => {
               )}
             </div>
 
-            <span>{q.after}</span>
+            <span style={ {whiteSpace : "nowrap"}}>{q.after}</span>
           </div>
         ))}
       </div>

@@ -31,7 +31,7 @@ const WritingB = () => {
               autoComplete="off"
               style={{
                 flex: 1,
-                borderBottom: "2px solid #333",
+                borderBottom: "1px solid #333",
                 background: "transparent",
                 outline: "none",
                 fontSize: "16px",

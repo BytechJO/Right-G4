@@ -1,226 +1,256 @@
-/* eslint-disable no-unused-vars */
-import React, { useState, useRef, useEffect } from "react";
-import "./Unit9_Page5_Q1.css";
+import React, { useState } from "react";
+import Button from "../../Button";
 import ValidationAlert from "../../Popup/ValidationAlert";
-import img1 from "../../../assets/imgs/pages/classbook/Right 3 Unit 9 Where Dad Folder/Page 80/Ex A 1.svg";
-import img2 from "../../../assets/imgs/pages/classbook/Right 3 Unit 9 Where Dad Folder/Page 80/Ex A 2.svg";
-import img3 from "../../../assets/imgs/pages/classbook/Right 3 Unit 9 Where Dad Folder/Page 80/Ex A 3.svg";
-import img4 from "../../../assets/imgs/pages/classbook/Right 3 Unit 9 Where Dad Folder/Page 80/Ex A 4.svg";
-import img5 from "../../../assets/imgs/pages/classbook/Right 3 Unit 9 Where Dad Folder/Page 80/Ex A 5.svg";
-import img6 from "../../../assets/imgs/pages/classbook/Right 3 Unit 9 Where Dad Folder/Page 80/Ex A 6.svg";
 
-const Unit9_Page5_Q1 = () => {
-  const [locked, setLocked] = useState(false);
+// ─────────────────────────────────────────────
+//  🎨  COLORS
+// ─────────────────────────────────────────────
+const INPUT_UNDERLINE_DEFAULT = "#3f3f3f";
+const INPUT_UNDERLINE_WRONG   = "#ef4444";
+const INPUT_TEXT_COLOR        = "#2b2b2b";
+const INPUT_ANSWER_COLOR      = "#c81e1e";
+const TEXT_COLOR              = "#2b2b2b";
+const NUMBER_COLOR            = "#2b2b2b";
+const WRONG_BADGE_BG          = "#ef4444";
+const WRONG_BADGE_TEXT        = "#ffffff";
 
-  const questions = [
-    {
-      id: 1,
-      image1: img1,
-      image2: img2,
-      label1: "ducks",
-      label2: "girls",
-      correct: "✗",
-    },
-    {
-      id: 2,
-      image1: img3,
-      image2: img4,
-      label1: "cats",
-      label2: "cups",
-      correct: "✓",
-    },
-    {
-      id: 3,
-      image1: img5,
-      image2: img6,
-      label1: "trees",
-      label2: "bees",
-      correct: "✓",
-    },
-  ];
-  const [answers, setAnswers] = useState({});
-  const [showResult, setShowResult] = useState([]);
+// ─────────────────────────────────────────────
+//  📝  EXERCISE DATA
+// ─────────────────────────────────────────────
+const WORD_BANK = ["bored", "together", "chores", "hour", "finished", "video games"];
 
-  const selectAnswer = (id, value) => {
-    if (locked) return;
-    setAnswers({ ...answers, [id]: value });
-    setShowResult(false);
+const ITEMS = [
+  {
+    id:      1,
+    before:  "Tom has many",
+    after:   ", including sweeping the floor.",
+    correct: ["chores"],
+    answer:  "chores",
+  },
+  {
+    id:      2,
+    before:  "He didn't have anything to do, so he was",
+    after:   ".",
+    correct: ["bored"],
+    answer:  "bored",
+  },
+  {
+    id:      3,
+    before:  "My brother likes to play",
+    after:   "all day.",
+    correct: ["video games"],
+    answer:  "video games",
+  },
+  {
+    id:      4,
+    before:  "We studied for our test",
+    after:   ".",
+    correct: ["together"],
+    answer:  "together",
+  },
+  {
+    id:      5,
+    before:  "He",
+    after:   "all the cookies that were in the jar.",
+    correct: ["finished"],
+    answer:  "finished",
+  },
+  {
+    id:      6,
+    before:  "The dough will be ready in an",
+    after:   ".",
+    correct: ["hour"],
+    answer:  "hour",
+  },
+];
+
+// ─────────────────────────────────────────────
+//  🔧  NORMALIZE
+// ─────────────────────────────────────────────
+const normalize = (str) =>
+  str.toLowerCase().replace(/[^a-z0-9\s]/g, "").replace(/\s+/g, " ").trim();
+
+const isCorrect = (userVal, correctArr) =>
+  correctArr.some((c) => normalize(userVal) === normalize(c));
+
+// ─────────────────────────────────────────────
+//  COMPONENT
+// ─────────────────────────────────────────────
+export default function WB_ReadWrite_QA() {
+  const [answers,     setAnswers]     = useState({});
+  const [showResults, setShowResults] = useState(false);
+  const [showAns,     setShowAns]     = useState(false);
+
+  const handleChange = (id, value) => {
+    if (showAns) return;
+    const item = ITEMS.find((i) => i.id === id);
+    if (showResults && item && isCorrect(answers[id] || "", item.correct)) return;
+    setAnswers((prev) => ({ ...prev, [id]: value }));
   };
 
-  const showAnswers = () => {
-    const corrects = {};
-    questions.forEach((q) => {
-      corrects[q.id] = q.correct;
-    });
-    setAnswers(corrects);
-    setShowResult([]);
-    setLocked(true);
+  const handleCheck = () => {
+    if (showAns) return;
+    const allAnswered = ITEMS.every((item) => answers[item.id]?.trim());
+    if (!allAnswered) { ValidationAlert.info("Please complete all answers first."); return; }
+    let score = 0;
+    ITEMS.forEach((item) => { if (isCorrect(answers[item.id] || "", item.correct)) score++; });
+    setShowResults(true);
+    if (score === ITEMS.length)   ValidationAlert.success(`Score: ${score} / ${ITEMS.length}`);
+    else if (score > 0)           ValidationAlert.warning(`Score: ${score} / ${ITEMS.length}`);
+    else                          ValidationAlert.error(`Score: ${score} / ${ITEMS.length}`);
   };
 
-  const checkAnswers = () => {
-    if (locked) return;
-    const isEmpty = questions.some((q) => !answers[q.id]);
-    if (isEmpty) {
-      ValidationAlert.info("Please choose ✓ or ✗ for all questions!");
-      return;
-    }
-
-    const results = questions.map((q) =>
-      answers[q.id] === q.correct ? "correct" : "wrong",
-    );
-    setShowResult(results);
-    setLocked(true);
-
-    const correctCount = results.filter((r) => r === "correct").length;
-    const total = questions.length;
-    const scoreMsg = `${correctCount} / ${total}`;
-
-    let color =
-      correctCount === total ? "green" : correctCount === 0 ? "red" : "orange";
-
-    const resultHTML = `
-      <div style="font-size: 20px; text-align:center; margin-top: 8px;">
-        <span style="color:${color}; font-weight:bold;">
-          Score: ${scoreMsg}
-        </span>
-      </div>
-    `;
-
-    if (correctCount === total) ValidationAlert.success(resultHTML);
-    else if (correctCount === 0) ValidationAlert.error(resultHTML);
-    else ValidationAlert.warning(resultHTML);
+  const handleShowAnswer = () => {
+    const filled = {};
+    ITEMS.forEach((item) => { filled[item.id] = item.answer; });
+    setAnswers(filled); setShowResults(false); setShowAns(true);
   };
 
-  const resetAnswers = () => {
-    setAnswers({});
-    setShowResult([]);
-    setLocked(false);
+  const handleReset = () => {
+    setAnswers({}); setShowResults(false); setShowAns(false);
   };
+
+  const isWrong    = (item) => showResults && !showAns && !isCorrect(answers[item.id] || "", item.correct);
+  const isDisabled = (item) => showAns || (showResults && isCorrect(answers[item.id] || "", item.correct));
 
   return (
-    <>
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          padding: "30px",
-        }}
-      >
-        <div className="div-forall">
-          <h5 className="header-title-page8">
-            <span className="ex-A mr-3">A</span>
-            Do they both have the same final{" "}
-            <span style={{ color: "#2e3192" }}>-s sound </span>? Write
-            <span style={{ color: "#D52328" }}>✓</span> or{" "}
-            <span style={{ color: "#D52328" }}>✗</span>.
-          </h5>
+    <div className="main-container-component">
+      <style>{`
+        .rwa-bank {
+          display: flex;
+          flex-wrap: wrap;
+          gap: clamp(8px, 1.2vw, 14px);
+          width: 100%;
+          margin-top : 1em ; 
+        }
+        .rwa-pill {
+          background: #e8eff1;
+          border-radius: 8px;
+          padding: clamp(5px, 0.6vw, 8px) clamp(14px, 1.8vw, 22px);
+          font-size: clamp(14px, 1.7vw, 20px);
+          color: #2b2b2b;
+          white-space: nowrap;
+          user-select: none;
+        }
+        .rwa-list {
+          display: flex;
+          flex-direction: column;
+          gap: clamp(14px, 2vw, 26px);
+          width: 100%;
+        }
+        .rwa-row {
+          display: flex;
+          align-items: flex-end;
+          flex-wrap: wrap;
+          gap: clamp(4px, 0.5vw, 7px);
+        }
+        .rwa-num {
+          font-size: clamp(14px, 1.7vw, 20px);
+          font-weight: 700;
+          color: ${NUMBER_COLOR};
+          flex-shrink: 0;
+          line-height: 1.5;
+        }
+        .rwa-text {
+          font-size: clamp(13px, 1.6vw, 19px);
+          color: ${TEXT_COLOR};
+          white-space: nowrap;
+          flex-shrink: 0;
+          line-height: 1.5;
+        }
+        .rwa-input-wrap {
+          position: relative;
+          flex: 0 1 clamp(100px, 13vw, 190px);
+          min-width: clamp(90px, 12vw, 170px);
+        }
+        .rwa-input {
+          width: 100%;
+          background: transparent;
+          border: none;
+          border-bottom: 1px solid ${INPUT_UNDERLINE_DEFAULT};
+          outline: none;
+          font-size: clamp(13px, 1.6vw, 19px);
+          color: ${INPUT_TEXT_COLOR};
+          line-height: 1.5;
+          box-sizing: border-box;
+          font-family: inherit;
+          transition: border-color 0.2s;
+          text-align: center;
+        }
+        .rwa-input:disabled  { opacity: 1; cursor: default; }
+        .rwa-input--wrong    { border-bottom-color: ${INPUT_UNDERLINE_WRONG}; }
+        .rwa-input--answer   { color: ${INPUT_ANSWER_COLOR}; font-weight: 700; }
+        .rwa-badge {
+          position: absolute;
+          top: -8px; right: 0;
+          width: clamp(16px, 1.8vw, 20px);
+          height: clamp(16px, 1.8vw, 20px);
+          border-radius: 50%;
+          background: ${WRONG_BADGE_BG};
+          color: ${WRONG_BADGE_TEXT};
+          display: flex; align-items: center; justify-content: center;
+          font-size: clamp(8px, 0.9vw, 11px);
+          font-weight: 700;
+          border: 2px solid #fff;
+          box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+          pointer-events: none;
+          z-index: 2;
+        }
+        .rwa-buttons {
+          display: flex;
+          justify-content: center;
+          margin-top: clamp(8px, 1.6vw, 18px);
+        }
+      `}</style>
 
-          <div className="grid grid-cols-3 gap-[30px] u8p5-grid">
-            {questions.map((q, index) => (
-              <div
-                key={q.id}
-                className="u8p5-card p-4 bg-white flex flex-col items-center gap-3 relative"
-              >
-                {/* رقم السؤال */}
-                <p className="w-full text-left text-[20px] u8p5-card-num">
-                  <span className="text-[darkblue] font-bold">{q.id}.</span>
-                </p>
+      <div className="div-forall" style={{ display:"flex", flexDirection:"column", gap:"clamp(14px,2vw,22px)", maxWidth:"1100px", margin:"0 auto" }}>
 
-                <div className="flex flex-col items-center gap-3.5">
-                  {/* الصور */}
-                  <div className="u8p5-images-box border-2 border-[#ff6b57] rounded-xl p-4 w-[250px]">
-                    <div className="flex">
-                      {/* الديف الأول */}
-                      <div className="u8p5-img-cell w-1/2 border-r-2 border-[#ff6b57] flex items-center justify-center h-[150px]">
-                        <img
-                          src={q.image1}
-                          alt=""
-                          style={{ height: "120px", objectFit: "contain" }}
-                        />
-                      </div>
+        <h1 className="WB-header-title-page8" style={{ margin:0, display:"flex", alignItems:"center", gap:"12px", flexWrap:"wrap" }}>
+          <span className="WB-ex-A">A</span>
+          Read and write. Use the words below.
+        </h1>
 
-                      {/* الديف الثاني */}
-                      <div className="u8p5-img-cell w-1/2 flex items-center justify-center h-[150px]">
-                        <img
-                          src={q.image2}
-                          alt=""
-                          style={{ height: "120px", objectFit: "contain" }}
-                        />
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex w-full justify-between mt-2 px-4 text-[16px]">
-                    <span>{q.label1}</span>
-                    <span>{q.label2}</span>
-                  </div>
-                  {/* الخيارات */}
-                  <div className="u8p5-opts-row flex gap-5">
-                    {/* ✓ */}
-                    <div className="relative">
-                      <div
-                        className={`u8p5-opt-btn w-[45px] h-[45px] border-2 border-[#ff6b57] rounded-md flex items-center justify-center cursor-pointer text-[22px] font-bold transition-all duration-150 hover:bg-[#ffe3df] ${
-                          answers[q.id] === "✓"
-                            ? "bg-[#2c5287] text-white"
-                            : "bg-white"
-                        }`}
-                        onClick={() => selectAnswer(q.id, "✓")}
-                      >
-                        ✓
-                      </div>
+        {/* Word bank */}
+        <div className="rwa-bank">
+          {WORD_BANK.map((w) => <div key={w} className="rwa-pill">{w}</div>)}
+        </div>
 
-                      {showResult[index] === "wrong" &&
-                        answers[q.id] === "✓" && (
-                          <div className="u8p5-wrong-badge absolute -top-2.5 -right-2.5 w-[22px] h-[22px] rounded-full bg-red-500 text-white flex items-center justify-center text-[14px] font-bold border-2 border-white z-3">
-                            ✕
-                          </div>
-                        )}
-                    </div>
+        {/* Items */}
+        <div className="rwa-list">
+          {ITEMS.map((item) => {
+            const wrong    = isWrong(item);
+            const value    = answers[item.id] || "";
+            const tColor   = showAns ? INPUT_ANSWER_COLOR : INPUT_TEXT_COLOR;
+            const uColor   = wrong ? INPUT_UNDERLINE_WRONG : INPUT_UNDERLINE_DEFAULT;
+            const disabled = isDisabled(item);
 
-                    {/* ✗ */}
-                    <div className="relative">
-                      <div
-                        className={`u8p5-opt-btn w-[45px] h-[45px] border-2 border-[#ff6b57] rounded-md flex items-center justify-center cursor-pointer text-[22px] font-bold transition-all duration-150 ${
-                          answers[q.id] === "✗"
-                            ? "bg-[#2c5287] text-white"
-                            : "bg-white hover:bg-[#ffe3df]"
-                        }`}
-                        onClick={() => selectAnswer(q.id, "✗")}
-                      >
-                        ✗
-                      </div>
-
-                      {showResult[index] === "wrong" &&
-                        answers[q.id] === "✗" && (
-                          <div className="u8p5-wrong-badge absolute -top-2.5 -right-2.5 w-[22px] h-[22px] rounded-full bg-red-500 text-white flex items-center justify-center text-[14px] font-bold border-2 border-white z-3">
-                            ✕
-                          </div>
-                        )}
-                    </div>
-                  </div>
+            return (
+              <div key={item.id} className="rwa-row">
+                <span className="rwa-num">{item.id}</span>
+                {item.before && <span className="rwa-text">{item.before}</span>}
+                <div className="rwa-input-wrap">
+                  <input
+                    type="text"
+                    className={["rwa-input", wrong?"rwa-input--wrong":"", showAns?"rwa-input--answer":""].filter(Boolean).join(" ")}
+                    value={value}
+                    disabled={disabled}
+                    onChange={(e) => handleChange(item.id, e.target.value)}
+                    style={{ borderBottomColor: uColor, color: tColor }}
+                    spellCheck={false}
+                    autoComplete="off"
+                  />
+                  {wrong && <div className="rwa-badge">✕</div>}
                 </div>
+                {item.after && <span className="rwa-text">{item.after}</span>}
               </div>
-            ))}
-          </div>
+            );
+          })}
+        </div>
 
-          <div className="action-buttons-container">
-            <button onClick={resetAnswers} className="try-again-button">
-              Start Again ↻
-            </button>
-            <button
-              onClick={showAnswers}
-              className="show-answer-btn swal-continue"
-            >
-              Show Answer
-            </button>
-            <button onClick={checkAnswers} className="check-button2">
-              Check Answer ✓
-            </button>
-          </div>
+        <div className="rwa-buttons">
+          <Button checkAnswers={handleCheck} handleShowAnswer={handleShowAnswer} handleStartAgain={handleReset} />
         </div>
       </div>
-    </>
+    </div>
   );
-};
-
-export default Unit9_Page5_Q1;
+}

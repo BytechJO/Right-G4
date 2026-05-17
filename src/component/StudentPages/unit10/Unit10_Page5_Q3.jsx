@@ -1,401 +1,417 @@
-import { useState } from "react";
-import ValidationAlert from "../../Popup/ValidationAlert";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import Button from "../../Button";
-import img1 from "../../../assets/imgs/pages/classbook/Right 3 Unit 10 What Shall We Do on the Weekend Folder/Page 86/Asset 64.svg";
-import img3 from "../../../assets/imgs/pages/classbook/Right 3 Unit 10 What Shall We Do on the Weekend Folder/Page 86/Asset 66.svg";
-import img2 from "../../../assets/imgs/pages/classbook/Right 3 Unit 10 What Shall We Do on the Weekend Folder/Page 86/Asset 65.svg";
-import img4 from "../../../assets/imgs/pages/classbook/Right 3 Unit 10 What Shall We Do on the Weekend Folder/Page 86/Asset 67.svg";
+import ValidationAlert from "../../Popup/ValidationAlert";
 
-const Unit10_Page5_Q3 = () => {
-  const [userAnswers, setUserAnswers] = useState({});
-  const [locked, setLocked] = useState(false);
+// ─────────────────────────────────────────────
+//  🖼️  CHART IMAGE
+// ─────────────────────────────────────────────
+import imgChartTable from "../../../assets/imgs/pages/Class Book/Right 4 Unit 4 Joy Makes a Friend Folder/Page 37/SVG/Asset 23.svg";
 
-  const [checked, setChecked] = useState(false);
+// ─────────────────────────────────────────────
+//  🎨  COLORS
+// ─────────────────────────────────────────────
+const TEXT_COLOR               = "#2b2b2b";
+const NUMBER_COLOR             = "#2b2b2b";
+const NAME_COLOR               = "#2b2b2b";
+const DOT_DEFAULT              = "#e07b00";   // أورنج
+const DOT_SELECTED             = "#2096a6";
+const LINE_DEFAULT             = "#e07b00";   // أورنج دايماً
+const LINE_SHOW_ANS            = "#c81e1e";
+const SENTENCE_SELECTED_BG     = "#e0f7fa";
+const SENTENCE_SELECTED_BORDER = "#2096a6";
+const WRONG_BADGE_BG           = "#ef4444";
+const WRONG_BADGE_TEXT         = "#ffffff";
 
-  const actions = [
-    "watch a movie",
-    "read a book",
-    "ride a bike",
-    "plant flowers",
-  ];
+// ─────────────────────────────────────────────
+//  📝  EXERCISE DATA
+// ─────────────────────────────────────────────
+const LEFT_ITEMS = [
+  { id: 1, sentence: "Naomi is shorter than" },
+  { id: 2, sentence: "Ned is stronger than"  },
+  { id: 3, sentence: "Alex is taller than"   },
+  { id: 4, sentence: "Susan is slower than"  },
+];
 
-  const questions = [
-    {
-      id: 1,
-      image: img1,
-      word1: actions,
-      word2: ["will", "won’t"],
-    },
-    {
-      id: 2,
-      image: img2,
-      word1: actions,
-      word2: ["will", "won’t"],
-    },
-    {
-      id: 3,
-      image: img3,
-      word1: actions,
-      word2: ["will", "won’t"],
-    },
-    {
-      id: 4,
-      image: img4,
-      word1: actions,
-      word2: ["will", "won’t"],
-    },
-  ];
-  const correctAnswers = {
-    1: { word1: "watch a movie", word2: "will" },
-    2: { word1: "read a book", word2: "won’t" },
-    3: { word1: "ride a bike", word2: "won’t" },
-    4: { word1: "plant flowers", word2: "will" },
+const RIGHT_ITEMS = [
+  { name: "Tanya",  correctLeftId: 4 },
+  { name: "Rachel", correctLeftId: 1 },
+  { name: "Trevor", correctLeftId: 2 },
+  { name: "Andy",   correctLeftId: 3 },
+];
+
+// ─────────────────────────────────────────────
+//  COMPONENT
+// ─────────────────────────────────────────────
+export default function WB_ReadChartMatch_QE() {
+  const [connections,  setConnections]  = useState({});
+  const [selectedLeft, setSelectedLeft] = useState(null);
+  const [showResults,  setShowResults]  = useState(false);
+  const [showAns,      setShowAns]      = useState(false);
+
+  const containerRef = useRef(null);
+  const leftRefs     = useRef({});
+  const rightRefs    = useRef({});
+  const [, forceUpdate] = useState(0);
+
+  useEffect(() => {
+    const ro = new ResizeObserver(() => forceUpdate((n) => n + 1));
+    if (containerRef.current) ro.observe(containerRef.current);
+    return () => ro.disconnect();
+  }, []);
+
+  const getDotCenter = useCallback((el) => {
+    if (!el || !containerRef.current) return null;
+    const cRect = containerRef.current.getBoundingClientRect();
+    const eRect = el.getBoundingClientRect();
+    return {
+      x: eRect.left - cRect.left + eRect.width  / 2,
+      y: eRect.top  - cRect.top  + eRect.height / 2,
+    };
+  }, []);
+
+  const isCorrect      = (leftId, rightName) => {
+    const correct = RIGHT_ITEMS.find((r) => r.correctLeftId === Number(leftId));
+    return correct && correct.name === rightName;
   };
-  const isWordUsedInAnotherQuestion = (currentQuestionId, word) => {
-    return Object.entries(userAnswers).some(
-      ([id, answer]) =>
-        Number(id) !== currentQuestionId && answer?.word1 === word,
-    );
-  };
-  const handleChange = (id, field, value) => {
-    if (locked) return;
+  const connectedRight = (n)  => Object.values(connections).includes(n);
+  const connectedLeft  = (id) => Object.prototype.hasOwnProperty.call(connections, id);
 
-    setUserAnswers((prev) => ({
-      ...prev,
-      [id]: {
-        ...prev[id],
-        [field]: value,
-      },
-    }));
-  };
-  const showAnswer = () => {
-    setUserAnswers(correctAnswers);
-    setLocked(true);
-    setChecked(true);
-  };
-  const checkAnswers = () => {
-    if (locked) return;
+  // خط أورنج دايماً — يتغير فقط لـ Show Answer
+  const lineColor = useCallback(() => {
+    if (showAns) return LINE_SHOW_ANS;
+    return LINE_DEFAULT;
+  }, [showAns]);
 
-    // ✅ التحقق إذا في فراغ
-    const empty = questions.some(
-      (q) => !userAnswers[q.id]?.word1 || !userAnswers[q.id]?.word2,
-    );
+  // ── Handlers ──
+  const handleLeftClick = (leftId) => {
+    if (showAns) return;
+    if (showResults && connectedLeft(leftId) && isCorrect(leftId, connections[leftId])) return;
+    setSelectedLeft((prev) => (prev === leftId ? null : leftId));
+  };
 
-    if (empty) {
-      ValidationAlert.info();
-      return;
+  const handleRightClick = (rightName) => {
+    if (showAns || selectedLeft === null) return;
+    if (showResults && connectedLeft(selectedLeft) && isCorrect(selectedLeft, connections[selectedLeft])) {
+      setSelectedLeft(null); return;
     }
+    setConnections((prev) => {
+      const next = { ...prev };
+      Object.keys(next).forEach((k) => { if (next[k] === rightName) delete next[k]; });
+      if (next[selectedLeft] && !(showResults && isCorrect(selectedLeft, next[selectedLeft]))) delete next[selectedLeft];
+      next[selectedLeft] = rightName;
+      return next;
+    });
+    setSelectedLeft(null);
+    if (showResults) setShowResults(false);
+  };
 
+  const handleCheck = () => {
+    if (showAns) return;
+    if (Object.keys(connections).length < LEFT_ITEMS.length) {
+      ValidationAlert.info("Please connect all items first."); return;
+    }
     let score = 0;
+    Object.entries(connections).forEach(([lid, rn]) => { if (isCorrect(lid, rn)) score++; });
+    setShowResults(true);
+    if (score === LEFT_ITEMS.length) ValidationAlert.success(`Score: ${score} / ${LEFT_ITEMS.length}`);
+    else if (score > 0)              ValidationAlert.warning(`Score: ${score} / ${LEFT_ITEMS.length}`);
+    else                             ValidationAlert.error(`Score: ${score} / ${LEFT_ITEMS.length}`);
+  };
 
-    Object.keys(correctAnswers).forEach((id) => {
-      // ✅ أول select
-      if (userAnswers[id]?.word2 === correctAnswers[id].word2) {
-        score += 1;
-      }
+  const handleShowAnswer = () => {
+    const ans = {};
+    RIGHT_ITEMS.forEach((r) => { ans[r.correctLeftId] = r.name; });
+    setConnections(ans); setShowResults(false); setShowAns(true); setSelectedLeft(null);
+  };
 
-      // ✅ ثاني select
-      if (userAnswers[id]?.word1 === correctAnswers[id].word1) {
-        score += 1;
-      }
+  const handleReset = () => {
+    setConnections({}); setShowResults(false); setShowAns(false); setSelectedLeft(null);
+  };
+
+  // ── SVG lines ──
+  const renderLines = () =>
+    Object.entries(connections).map(([leftId, rightName]) => {
+      const p1 = getDotCenter(leftRefs.current[leftId]);
+      const p2 = getDotCenter(rightRefs.current[rightName]);
+      if (!p1 || !p2) return null;
+      return (
+        <line key={`${leftId}-${rightName}`}
+          x1={p1.x} y1={p1.y} x2={p2.x} y2={p2.y}
+          stroke={lineColor()}
+          strokeWidth="2.5" strokeLinecap="round"
+        />
+      );
     });
 
-    const total = Object.keys(correctAnswers).length * 2; // = 8
-
-    const color = score === total ? "green" : score === 0 ? "red" : "orange";
-
-    const msg = `
-    <div style="font-size:20px;text-align:center;">
-      <span style="color:${color}; font-weight:bold;">
-        Score: ${score} / ${total}
-      </span>
-    </div>
-  `;
-
-    setChecked(true);
-    setLocked(true);
-
-    if (score === total) ValidationAlert.success(msg);
-    else if (score === 0) ValidationAlert.error(msg);
-    else ValidationAlert.warning(msg);
+  // ── Dot colors — أورنج دايماً ──
+  const leftDotColor = (id) => {
+    if (selectedLeft === id)          return DOT_SELECTED;
+    if (showAns && connectedLeft(id)) return LINE_SHOW_ANS;
+    return DOT_DEFAULT;
   };
-  const handleStartAgain = () => {
-    setUserAnswers({});
-    setChecked(false);
-    setLocked(false);
+
+  const rightDotColor = (name) => {
+    if (showAns && connectedRight(name)) return LINE_SHOW_ANS;
+    return DOT_DEFAULT;
+  };
+
+  // ── Badge helpers — فقط على الغلط ──
+  const isLeftWrong  = (id) =>
+    showResults && !showAns && connectedLeft(id) && !isCorrect(id, connections[id]);
+
+  const isRightWrong = (name) => {
+    if (!showResults || showAns || !connectedRight(name)) return false;
+    const lid = Object.keys(connections).find((k) => connections[k] === name);
+    return lid && !isCorrect(lid, name);
   };
 
   return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        padding: "30px",
-      }}
-    >
-      <div className="div-forall">
-        <h5 className="header-title-page8">
-          <span className="ex-A" style={{ marginRight: "10px" }}>
-            B
-          </span>
-          Look and write.
-        </h5>
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            padding: "20px",
-          }}
+    <div className="main-container-component">
+      <style>{`
+        .rcm-body {
+          display: grid;
+          grid-template-columns: auto 1fr;
+          gap: clamp(20px, 3vw, 40px);
+          align-items: start;
+          width: 100%;
+          margin: 8% 0;
+        }
+
+        .rcm-match-area { position: relative; }
+
+        .rcm-match-grid {
+          display: grid;
+          grid-template-columns: 1fr auto;
+          align-items: start;
+        }
+
+        .rcm-left-col {
+          display: flex;
+          flex-direction: column;
+          gap: clamp(22px, 3.2vw, 42px);
+        }
+
+        .rcm-match-row {
+          display: flex;
+          align-items: center;
+          gap: clamp(6px, 0.8vw, 10px);
+        }
+
+        .rcm-num {
+          font-size: clamp(14px, 1.7vw, 20px);
+          font-weight: 700;
+          color: ${NUMBER_COLOR};
+          flex-shrink: 0;
+          min-width: clamp(18px, 2.2vw, 26px);
+        }
+
+        .rcm-sentence-wrap {
+          display: flex;
+          align-items: center;
+          gap: clamp(8px, 1vw, 14px);
+          border-radius: 10px;
+          border: 1px solid transparent;
+          transition: border-color 0.15s, background 0.15s;
+          cursor: pointer;
+          user-select: none;
+        }
+        .rcm-sentence-wrap--selected {
+          border-color: ${SENTENCE_SELECTED_BORDER};
+          background: ${SENTENCE_SELECTED_BG};
+        }
+        .rcm-sentence-wrap--locked { cursor: default; }
+
+        .rcm-sentence-text {
+          font-size: clamp(13px, 1.5vw, 18px);
+          color: ${TEXT_COLOR};
+          line-height: 1.4;
+          white-space: nowrap;
+        }
+
+        /* نقطة يمين + wrapper للـ badge */
+        .rcm-dot-left-wrap {
+          position: relative;
+          flex-shrink: 0;
+          margin-inline-start: auto;
+          left: -25%;
+        }
+
+        .rcm-dot-left {
+          width:  clamp(13px, 1.5vw, 17px);
+          height: clamp(13px, 1.5vw, 17px);
+          border-radius: 50%;
+          flex-shrink: 0;
+          transition: background 0.15s, transform 0.15s;
+          cursor: pointer;
+        }
+        .rcm-sentence-wrap:not(.rcm-sentence-wrap--locked):hover .rcm-dot-left {
+          transform: scale(1.3);
+        }
+
+        .rcm-right-col {
+          display: flex;
+          flex-direction: column;
+          gap: clamp(19px, 20.2vw, 45px);
+          padding-left: clamp(36px, 5.5vw, 80px);
+        }
+
+        .rcm-right-item {
+          display: flex;
+          align-items: center;
+          gap: clamp(6px, 0.8vw, 10px);
+        }
+
+        .rcm-dot-right {
+          width:  clamp(13px, 1.5vw, 17px);
+          height: clamp(13px, 1.5vw, 17px);
+          border-radius: 50%;
+          flex-shrink: 0;
+          cursor: pointer;
+          transition: background 0.15s, transform 0.15s;
+        }
+        .rcm-dot-right:hover { transform: scale(1.3); }
+
+        .rcm-name {
+          font-size: clamp(13px, 1.5vw, 18px);
+          color: ${NAME_COLOR};
+          font-weight: 500;
+          white-space: nowrap;
+        }
+
+        /* ✕ Badge */
+        .rcm-badge {
+          position: absolute;
+          top: -1px; right: 30px;
+          width: clamp(14px, 1.6vw, 18px);
+          height: clamp(14px, 1.6vw, 18px);
+          border-radius: 50%;
+          background: ${WRONG_BADGE_BG};
+          color: ${WRONG_BADGE_TEXT};
+          display: flex; align-items: center; justify-content: center;
+          font-size: clamp(7px, 0.8vw, 10px);
+          font-weight: 700;
+          border: 2px solid #fff;
+          box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+          pointer-events: none;
+          z-index: 3;
+        }
+
+        .rcm-svg-overlay {
+          position: absolute;
+          top: 0; left: 0;
+          width: 100%; height: 100%;
+          pointer-events: none;
+          overflow: visible;
+        }
+
+        .rcm-buttons {
+          display: flex;
+          justify-content: center;
+          margin-top: clamp(8px, 1.6vw, 18px);
+        }
+
+        @media (max-width: 600px) {
+          .rcm-body { grid-template-columns: 1fr; }
+          .rcm-sentence-text { white-space: normal; }
+        }
+      `}</style>
+
+      <div
+        className="div-forall"
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: "clamp(14px, 2vw, 22px)",
+          maxWidth: "1100px",
+          margin: "0 auto",
+        }}
+      >
+        {/* ── Header ── */}
+        <h1
+          className="WB-header-title-page8"
+          style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
         >
-          <div
-            style={{
-              width: "100%",
-              maxWidth: "900px",
-              display: "flex",
-              flexDirection: "column",
-              gap: "20px",
-            }}
-          >
-            {/* الأسئلة بالصور */}
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(2, 1fr)",
-                gap: "12px",
-              }}
-            >
-              {questions.map((q) => (
-                <div
-                  key={q.id}
-                  style={{
-                    padding: "12px",
-                    position: "relative",
-                  }}
-                >
-                  <div
-                    style={{
-                      position: "absolute",
-                      top: "0px",
-                      left: "0px",
-                      color: "black",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      fontSize: "16px",
-                      fontWeight: "bold",
-                      zIndex: 2,
-                    }}
-                  >
-                    {q.id}
-                  </div>
+          <span className="WB-ex-A">E</span>
+          Read the chart and match.
+        </h1>
 
-                  <img
-                    src={q.image}
-                    alt={`q${q.id}`}
-                    style={{
-                      width: "70%",
-                      height: "auto",
-                      objectFit: "cover",
-                      marginTop: "10px",
-                      marginBottom:"20px"
-                    }}
-                  />
-                  <div
-                    style={{
-                      marginTop: "5px",
-                      borderBottom: "2px solid black",
-                      paddingBottom: "3px",
-                      minWidth: "220px",
-                      display: "flex",
-                      alignItems: "baseline",
-                      gap: "6px",
-                      fontSize: "16px",
-                    }}
-                  >
-                    {q.id === 1 || q.id === 3 ? "He" : "She"}
-                    <div
-                      style={{ position: "relative", display: "inline-block" }}
-                    >
-                      <select
-                        value={userAnswers[q.id]?.word2 || ""}
-                        onChange={(e) =>
-                          handleChange(q.id, "word2", e.target.value)
-                        }
-                        disabled={locked}
-                        style={{
-                          appearance: "none",
-                          WebkitAppearance: "none",
-                          MozAppearance: "none",
+        {/* ── Body ── */}
+        <div className="rcm-body">
 
-                          border: "none",
-                          borderBottom: "1px dashed #aaa",
-                          backgroundColor: "transparent",
+   
+          {/* Matching */}
+          <div className="rcm-match-area" ref={containerRef} style={{ width: "100%" }}>
+            <div className="rcm-match-grid">
 
-                          fontSize: "inherit",
-                          fontWeight: "600",
-                          color: userAnswers[q.id]?.word2 ? "#1e3a8a" : "#aaa",
+              {/* Left */}
+              <div className="rcm-left-col">
+                {LEFT_ITEMS.map((item) => {
+                  const isSelected = selectedLeft === item.id;
+                  const isLocked   = showAns || (showResults && connectedLeft(item.id) && isCorrect(item.id, connections[item.id]));
+                  const dotWrong   = isLeftWrong(item.id);
+                  return (
+                    <div key={item.id} className="rcm-match-row" onClick={() => handleLeftClick(item.id)}>
+                      <span className="rcm-num">{item.id}</span>
+                      <div>
+                        <div className={[
+                          "rcm-sentence-wrap",
+                          isSelected ? "rcm-sentence-wrap--selected" : "",
+                          isLocked   ? "rcm-sentence-wrap--locked"   : "",
+                        ].filter(Boolean).join(" ")}>
+                          <span className="rcm-sentence-text">{item.sentence}</span>
+                        </div>
+                      </div>
 
-                          padding: "2px 18px 2px 4px",
-                          minWidth: "90px",
-
-                          cursor: locked ? "not-allowed" : "pointer",
-                        }}
-                      >
-                        <option value="" disabled hidden>
-                          Select
-                        </option>
-                        {q.word2.map((w, i) => (
-                          <option key={i} value={w} style={{color:"black"}}>
-                            {w}
-                          </option>
-                        ))}
-                      </select>
-                      {checked &&
-                        userAnswers[q.id]?.word2 &&
-                        userAnswers[q.id]?.word2 !==
-                          correctAnswers[q.id].word2 && (
-                          <div
-                            style={{
-                              position: "absolute",
-                              top: "-6px",
-                              right: "-6px",
-                              transform: "translateY(-50%)",
-                              width: "22px",
-                              height: "22px",
-                              background: "#ef4444",
-                              color: "white",
-                              borderRadius: "50%",
-                              fontSize: "12px",
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "center",
-                              fontWeight: "bold",
-                              border: "2px solid white",
-                              boxShadow: "0 2px 6px rgba(0,0,0,0.2)",
-                              pointerEvents: "none",
-                            }}
-                          >
-                            ✕
-                          </div>
-                        )}
-                      <span
-                        style={{
-                          position: "absolute",
-                          right: "4px",
-                          top: "50%",
-                          transform: "translateY(-50%)",
-                          pointerEvents: "none",
-                          fontSize: "10px",
-                          color: "#666",
-                        }}
-                      >
-                        ▾
-                      </span>
+                      {/* نقطة + badge */}
+                      <div className="rcm-dot-left-wrap">
+                        <div
+                          className="rcm-dot-left"
+                          ref={(el) => { leftRefs.current[item.id] = el; }}
+                          style={{ background: leftDotColor(item.id) }}
+                        />
+                        {dotWrong && <div className="rcm-badge">✕</div>}
+                      </div>
                     </div>
-                    <div
-                      style={{ position: "relative", display: "inline-block" }}
-                    >
-                      <select
-                        value={userAnswers[q.id]?.word1 || ""}
-                        onChange={(e) =>
-                          handleChange(q.id, "word1", e.target.value)
-                        }
-                        disabled={locked}
-                        style={{
-                          appearance: "none",
-                          WebkitAppearance: "none",
-                          MozAppearance: "none",
+                  );
+                })}
+              </div>
 
-                          border: "none",
-                          borderBottom: "1px dashed #aaa",
-                          backgroundColor: "transparent",
-
-                          fontSize: "inherit",
-                          fontWeight: "600",
-                          color: userAnswers[q.id]?.word1 ? "#1e3a8a" : "#aaa",
-
-                          padding: "2px 18px 2px 4px",
-                          minWidth: "90px",
-
-                          cursor: locked ? "not-allowed" : "pointer",
-                        }}
-                      >
-                        <option value="" disabled hidden>
-                          Select
-                        </option>
-                        {q.word1.map((w, i) => (
-                          <option
-                            key={i}
-                            value={w}
-                            disabled={isWordUsedInAnotherQuestion(q.id, w)}
-                            style={{
-                              color: isWordUsedInAnotherQuestion(q.id, w)
-                                ? "#999"
-                                : "#000",
-                            }}
-                          >
-                            {w}
-                          </option>
-                        ))}
-                      </select>
-                      {checked &&
-                        userAnswers[q.id]?.word1 &&
-                        userAnswers[q.id]?.word1 !==
-                          correctAnswers[q.id].word1 && (
-                          <div
-                            style={{
-                              position: "absolute",
-                              top: "-6px",
-                              right: "-6px",
-                              transform: "translateY(-50%)",
-                              width: "22px",
-                              height: "22px",
-                              background: "#ef4444",
-                              color: "white",
-                              borderRadius: "50%",
-                              fontSize: "12px",
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "center",
-                              fontWeight: "bold",
-                              border: "2px solid white",
-                              boxShadow: "0 2px 6px rgba(0,0,0,0.2)",
-                              pointerEvents: "none",
-                            }}
-                          >
-                            ✕
-                          </div>
-                        )}
-                      <span
-                        style={{
-                          position: "absolute",
-                          right: "4px",
-                          top: "50%",
-                          transform: "translateY(-50%)",
-                          pointerEvents: "none",
-                          fontSize: "10px",
-                          color: "#666",
-                        }}
-                      >
-                        ▾
-                      </span>
+              {/* Right */}
+              <div className="rcm-right-col">
+                {RIGHT_ITEMS.map((item) => {
+                  const dotWrong = isRightWrong(item.name);
+                  return (
+                    <div key={item.name} className="rcm-right-item">
+                      <div style={{ position: "relative", flexShrink: 0 }}>
+                        <div
+                          className="rcm-dot-right"
+                          ref={(el) => { rightRefs.current[item.name] = el; }}
+                          style={{ background: rightDotColor(item.name) }}
+                          onClick={() => handleRightClick(item.name)}
+                        />
+                      </div>
+                      <span className="rcm-name">{item.name}</span>
                     </div>
-                    .
-                  </div>
-                </div>
-              ))}
+                  );
+                })}
+              </div>
+
             </div>
-            <Button
-              handleShowAnswer={showAnswer}
-              handleStartAgain={handleStartAgain}
-              checkAnswers={checkAnswers}
-            />
+
+            <svg className="rcm-svg-overlay">{renderLines()}</svg>
           </div>
+
+        </div>
+
+        {/* ── Buttons ── */}
+        <div className="rcm-buttons">
+          <Button
+            checkAnswers={handleCheck}
+            handleShowAnswer={handleShowAnswer}
+            handleStartAgain={handleReset}
+          />
         </div>
       </div>
     </div>
   );
-};
-
-export default Unit10_Page5_Q3;
+}

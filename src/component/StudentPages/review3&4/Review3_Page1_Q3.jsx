@@ -295,7 +295,7 @@ export default function WB_ListenReadWriteCheckCross_QC() {
           style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
         >
           <span className="WB-ex-A-1">C</span>
-          Listen, read, and write ✓ and ✕.
+          Listen, read, and  <span style={{ color :"red"}} >✓</span>  and <span style={{ color :"red"}} >✕</span>.
         </h1>
 
         {/* ── Audio ── */}

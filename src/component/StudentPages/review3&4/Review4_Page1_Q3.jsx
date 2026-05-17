@@ -95,11 +95,11 @@ export default function WB_ReadWriteSentences_QC() {
     <div className="main-container-component">
       <style>{`
         .rwsc-list {
-          display: flex;
-          flex-direction: column;
-          gap: clamp(14px, 2.2vw, 26px);
-          width: 100%;
-          margin: 13% 0;
+      display: flex;
+    flex-direction: column;
+    gap: 50px;
+    width: 100%;
+    margin: 10% 0;
         }
 
         /* Single row: num + cue + input */
@@ -107,7 +107,7 @@ export default function WB_ReadWriteSentences_QC() {
           display: grid;
           grid-template-columns: auto clamp(120px, 16vw, 200px) 1fr;
           align-items: flex-end;
-          gap: clamp(8px, 1.2vw, 16px);
+          gap: clamp(8px, 1.2vw, 20px);
           min-width: 0;
         }
 

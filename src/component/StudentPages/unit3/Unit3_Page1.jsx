@@ -1,13 +1,15 @@
 import React, { useRef, useState } from "react";
 import page_6 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 3 Harley Eats All the Sweets Folder/Page 22.png";
 import mainSound from "../../../assets/audio/ClassBook/Grade 4/cd14pg22-conversation-adult-lady-t_zVHgP3JT.mp3";
-import vocSound from "../../../assets/audio/ClassBook/Grade 4/cd1pg4-conversation-adult-lady-t_1cApuaJF.mp3";
+import vocSound from "../../../assets/audio/ClassBook/Grade 4/cd15pg22-instruction-adult-lady_LwWyPA4T.mp3";
 import AudioWithCaption from "../../AudioWithCaption";
 import audioBtn from "../../../assets/Page 01/Audio btn.svg";
 import arrowBtn from "../../../assets/Page 01/Arrow.svg";
 import Vocabulary from "../Vocabulary";
 import "./Unit3_Page1.css";
 import CriticalThinking from "../CriticalThinking";
+import videoFile from "../../../assets/right grade 4/grade 4 unit 3 page 22.mp4";
+import pauseBtn from "../../../assets/Page 01/Right Video Button.svg";
 
 const Page6 = ({ openPopup }) => {
   const audioRef = useRef(null);
@@ -67,27 +69,115 @@ const captions = [
     text: "And rightly so. I'm glad you had a good birthday party, Helen and Harley.",
   },
 ];
-  const wordTimingsVoc = [
-    { start: 8.8, end: 11.1 },
-    { start: 11.2, end: 13.6 },
-    { start: 13.94, end: 15.5 },
-    { start: 16.4, end: 17.6 },
+const captionsV = [
+  {
+    start: 0.58,
+    end: 3.46,
+    text: "Page 22, unit three vocabulary.",
+  },
+  {
+    start: 3.46,
+    end: 9.08,
+    text: "Listen and repeat. Find the words and expressions in the conversation above.",
+  },
+  {
+    start: 9.08,
+    end: 10.60,
+    text: "Birthday.",
+  },
+  {
+    start: 10.60,
+    end: 12.16,
+    text: "Yesterday.",
+  },
+  {
+    start: 12.16,
+    end: 13.46,
+    text: "Gifts.",
+  },
+  {
+    start: 13.46,
+    end: 14.76,
+    text: "Family.",
+  },
+  {
+    start: 14.76,
+    end: 16.10,
+    text: "Friends.",
+  },
+  {
+    start: 16.10,
+    end: 17.42,
+    text: "Party.",
+  },
+  {
+    start: 17.42,
+    end: 18.96,
+    text: "Wonderful.",
+  },
+  {
+    start: 18.96,
+    end: 20.42,
+    text: "Delicious.",
+  },
+  {
+    start: 20.42,
+    end: 21.78,
+    text: "Made.",
+  },
+  {
+    start: 21.78,
+    end: 23.04,
+    text: "Ate.",
+  },
+  {
+    start: 24.58,
+    end: 25.32,
+    text: "Good morning.",
+  },
+  {
+    start: 25.32,
+    end: 28.10,
+    text: "Yeah, it was a great party.",
+  },
+  {
+    start: 28.10,
+    end: 30.40,
+    text: "That was the best part.",
+  },
+  {
+    start: 30.40,
+    end: 32.08,
+    text: "Not at all.",
+  },
+  {
+    start: 32.08,
+    end: 34.12,
+    text: "And rightly so!",
+  },
+];
 
-    { start: 19.04, end: 20.26 },
-    { start: 21.6, end: 22.94 },
-    { start: 24.2, end: 25.38 },
-    { start: 26.8, end: 28.64 },
+const wordTimingsVoc = [
+  { start: 9.08, end: 10.60 },  // Birthday
+  { start: 10.60, end: 12.16 }, // Yesterday
+  { start: 12.16, end: 13.46 }, // Gifts
+  { start: 13.46, end: 14.76 }, // Family
 
-    { start: 29.719, end: 31.5 },
-    { start: 32.32, end: 34.18 },
-    { start: 35.06, end: 37.06 },
-    { start: 37.719, end: 39.579 },
-    { start: 40.36, end: 42.499 },
-    { start: 43.279, end: 45.459 },
+  { start: 14.76, end: 16.10 }, // Friends
+  { start: 16.10, end: 17.42 }, // Party
+  { start: 17.42, end: 18.96 }, // Wonderful
+  { start: 18.96, end: 20.42 }, // Delicious
 
-    { start: 46.259, end: 48.459 },
-    { start: 49.52, end: 52.119 },
-  ];
+  { start: 20.42, end: 21.78 }, // Made
+  { start: 21.78, end: 23.04 }, // Ate
+  { start: 24.58, end: 25.32 }, // Good morning
+  { start: 25.32, end: 28.10 }, // Yeah, it was a great party
+
+  { start: 28.10, end: 30.40 }, // That was the best part
+  { start: 30.40, end: 32.08 }, // Not at all
+  { start: 32.08, end: 34.12 }, // And rightly so!
+];
+
 
   const clickableAreas = [
     {
@@ -284,27 +374,26 @@ const captions = [
                   title="VOCABULARY"
                   subtitle="Listen and repeat. Find the words and expressions in the conversation above."
                   sound={vocSound}
-                  captions={captions}
-                  stopAtSecond={8.5}
+                  captions={captionsV}
+                  stopAtSecond={3.46}
                   wordTimings={wordTimingsVoc}
-                  words={[
-                    "alarm",
-                    "notebook",
-                    "pillow",
-                    "counting",
-                    "face",
-                    "figure",
-                    "reviewing",
-                    "pancakes",
-                    "starving",
-                    "actually",
-                    "mirror",
-                    "Uh-oh!",
-                    "fell asleep",
-                    "How did you know?",
-                    "right away",
-                    "on one side",
-                  ]}
+words={[
+  "Birthday",
+  "Yesterday",
+  "Gifts",
+  "Family",
+  "Friends",
+  "Party",
+  "Wonderful",
+  "Delicious",
+  "Made",
+  "Ate",
+  "Good morning",
+  "Yeah, it was a great party",
+  "That was the best part",
+  "Not at all",
+  "And rightly so!",
+]}
                 />
               </div>,
             )
@@ -335,7 +424,7 @@ const captions = [
               "html",
               <CriticalThinking
                 title={
-                  "Why did Hansel’s mom say he could do an extra math problem?"
+                  "What did Harley like the most about the birthday party?"
                 }
               />,
             )
@@ -353,6 +442,31 @@ const captions = [
           />
         </svg>
       </div>
+              <div
+                className="pauseBtn-icon-CD-page4 hover:scale-110 transition"
+                style={{ overflow: "visible" }}
+              >
+                <svg
+                  width="22"
+                  height="22"
+                  viewBox="0 0 90 90"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    openPopup(
+                      "video",
+                      <div style={{ display: "flex", justifyContent: "center", alignContent: "center", alignItems: "center", height: "100%", width: "100%" }}>
+                        <video autoPlay controls style={{ width: "auto", height: "80%", objectFit: "fill", borderRadius: "20px" }}>
+                          <source src={videoFile} type="video/mp4" />
+                        </video>
+                      </div>
+                    );
+                  }}
+                  style={{ overflow: "visible" }}
+                >
+                  <image className="svg-img" href={pauseBtn} x="0" y="0" width="90" height="90" />
+                </svg>
+              </div>
+        
       <audio ref={audioRef} style={{ display: "none" }} />
     </div>
   );

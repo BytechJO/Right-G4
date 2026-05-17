@@ -1,7 +1,7 @@
 import WritingA from "./page7_WritingA";
 import WritingB from "./page7_WritingB";
 
-import image from "../../../assets/imgs/pages/Class Book/Right 4 Unit 6 Ready for School Folder/Page 49/SVG/Asset 20.svg";
+import image from "../../../assets/imgs/pages/Class Book/Right 4 Unit 10 Stella Goes Shopping Folder/Page 85/SVG/Asset 16.svg";
 import SectionBanner from "../SectionBanner";
 
 

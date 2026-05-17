@@ -2,10 +2,10 @@ import { useState } from "react";
 import ValidationAlert from "../../Popup/ValidationAlert";
 import { FaCheck, FaRedo, FaEye } from "react-icons/fa";
 
-import img1 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 5 Under the Weather Folder/Page 42/SVG/Asset 1.svg";
-import img2 from"../../../assets/imgs/pages/Class Book/Right 4 Unit 5 Under the Weather Folder/Page 42/SVG/Asset 1.svg";
-import img3 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 5 Under the Weather Folder/Page 42/SVG/Asset 1.svg";
-import img4 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 5 Under the Weather Folder/Page 42/SVG/Asset 1.svg";
+import img1 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 5 Under the Weather Folder/Page 42/SVG/1.svg";
+import img2 from"../../../assets/imgs/pages/Class Book/Right 4 Unit 5 Under the Weather Folder/Page 42/SVG/2.svg";
+import img3 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 5 Under the Weather Folder/Page 42/SVG/3.svg";
+import img4 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 5 Under the Weather Folder/Page 42/SVG/4.svg";
 
 const GrammarB = () => {
   const wordBank = ["between", "in front of", "behind", "on"];

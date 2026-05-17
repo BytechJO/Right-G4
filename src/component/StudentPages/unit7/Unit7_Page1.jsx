@@ -7,6 +7,10 @@ import audioBtn from "../../../assets/Page 01/Audio btn.svg";
 import arrowBtn from "../../../assets/Page 01/Arrow.svg";
 import Vocabulary from "../Vocabulary";
 import CriticalThinking from "../CriticalThinking";
+import pauseBtn from "../../../assets/Page 01/Right Video Button.svg";
+import videoFile from "../../../assets/right grade 4/grade 4 unit 7 page 58.mp4";
+
+
 
 const Page6 = ({ openPopup }) => {
   const audioRef = useRef(null);
@@ -439,6 +443,31 @@ words={[
             />
           </svg>
         </div>
+               <div
+                className="pauseBtn-icon-CD-page4 hover:scale-110 transition"
+                style={{ overflow: "visible" }}
+              >
+                <svg
+                  width="22"
+                  height="22"
+                  viewBox="0 0 90 90"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    openPopup(
+                      "video",
+                      <div style={{ display: "flex", justifyContent: "center", alignContent: "center", alignItems: "center", height: "100%", width: "100%" }}>
+                        <video autoPlay controls style={{ width: "auto", height: "80%", objectFit: "fill", borderRadius: "20px" }}>
+                          <source src={videoFile} type="video/mp4" />
+                        </video>
+                      </div>
+                    );
+                  }}
+                  style={{ overflow: "visible" }}
+                >
+                  <image className="svg-img" href={pauseBtn} x="0" y="0" width="90" height="90" />
+                </svg>
+              </div>
+        
       <audio ref={audioRef} style={{ display: "none" }} />
     </div>
   );

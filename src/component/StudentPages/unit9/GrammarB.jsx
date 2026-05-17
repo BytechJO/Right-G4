@@ -2,28 +2,39 @@ import { useState } from "react";
 import ValidationAlert from "../../Popup/ValidationAlert";
 import { FaCheck, FaRedo, FaEye } from "react-icons/fa";
 
-import img1 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 6 Ready for School Folder/Page 48/SVG/Asset 14.svg";
-import img2 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 6 Ready for School Folder/Page 48/SVG/Asset 19.svg";
+import img1 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 9 Tom Has Nothing to Do Folder/Page 78/SVG/Asset 4.svg";
+import img2 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 9 Tom Has Nothing to Do Folder/Page 78/SVG/Asset 5.svg";
+import img3 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 9 Tom Has Nothing to Do Folder/Page 78/SVG/Asset 7.svg";
 
 const GrammarB = () => {
-  const wordBank = ["read a book", "be late for school"];
-
   const questions = [
     {
       id: 1,
       image: img1,
-      phrase: "read a book",
-      answers: ["She should read a book.", "She should read a book"],
+      question: "Why do you want to go to the farm?",
+      answers: [
+        "I want to go to the farm because I like goats.",
+        "I want to go to the farm because I like goats",
+      ],
     },
     {
       id: 2,
       image: img2,
-      phrase: "be late for school",
+      question: "Why do you want to go to the park?",
       answers: [
-        "She shouldn't be late for school.",
-        "She shouldnt be late for school",
-        "She shouldnot be late for school.",
-        "She should not be late for school",
+        "I want to go to the park because I want to ride my bike.",
+        "I want to go to the park because I want to ride my bike",
+      ],
+    },
+    {
+      id: 3,
+      image: img3,
+      question: "Why don't you want to watch a scary movie?",
+      answers: [
+        "Because I don't like scary movies.",
+        "Because I don't like scary movies",
+        "Because I do not like scary movies.",
+        "Because I do not like scary movies",
       ],
     },
   ];
@@ -53,7 +64,7 @@ const GrammarB = () => {
 
     answers.forEach((ans, i) => {
       const isCorrect = questions[i].answers.some(
-        (a) => a.toLowerCase() === ans.trim().toLowerCase(),
+        (a) => a.toLowerCase() === ans.trim().toLowerCase()
       );
       if (isCorrect) {
         correctCount++;
@@ -102,85 +113,64 @@ const GrammarB = () => {
 
   return (
     <div className="mb-6 mx-auto">
-      <h5 className="header-title-page8-read mb-6">
+      <h5 className="header-title-page8-read mb-8">
         <span className="ex-A-read mr-2">B</span>
-        Look, read, and write. Use{" "}
-        <span className="text-[#f89631] font-bold">should</span> and{" "}
-        <span className="text-[#f89631] font-bold">shouldn't</span> and the
-        phrases below.
+        Read, look, and answer.
       </h5>
 
-      {/* Word Bank */}
-      <div
-        className="flex gap-4 flex-wrap mb-8 justify-start"
-        style={{ width: "100% ", gap: "35%" 
-          , marginLeft : "5%"
-         }}
-      >
-        {wordBank.map((word) => (
-          <div
-            key={word}
-            style={{
-              border: "2px solid #e8eff1",
-              borderRadius: "8px",
-              padding: "4px 18px",
-              fontSize: "18px",
-              fontWeight: "500",
-              color: "#1a1a1a",
-              background: "#e8eff1",
-            }}
-          >
-            {word}
-          </div>
-        ))}
-      </div>
-
-      {/* Questions Grid */}
-      <div className="grid grid-cols-2 gap-8">
+      <div className="flex flex-col gap-8">
         {questions.map((q, i) => (
-          <div key={q.id} className="flex flex-col items-center gap-4">
+          <div key={q.id} className="flex flex-col gap-3">
+
+            <div style={{display : "flex " , flexDirection : "row" , gap : "1em" }}>
+
             {/* Number */}
-            <div className="w-full" style={{ display: "flex", gap: "0.3em" }}>
-              <span
-                style={{
-                  fontWeight: "400",
-                  WebkitTextStroke: "1px black",
-                  color: "#1a1a1a",
-                  fontSize: "22px",
-                }}
+            <span
+              style={{
+               position : "relative" , top :"0.5em",
+                fontWeight: "400",
+                WebkitTextStroke: "1px black",
+                color: "#1a1a1a",
+                fontSize: "18px",
+              }}
               >
-                {q.id}
-              </span>
-              {/* Image */}
-              <img
-                src={q.image}
-                alt=""
-                style={{
-                  width: "50%",
-                  height: "auto",
-                }}
-              />
-            </div>
+              {q.id}
+            </span>
+
+            {/* Image */}
+            <img
+              src={q.image}
+              alt=""
+              style={{
+                width: "160px",
+                height: "130px",
+              }}
+            />
+
+              </div>
+            {/* Question */}
+            <p style={{ fontSize: "18px", color: "#1a1a1a" }}>{q.question}</p>
 
             {/* Input */}
-            <div className="relative w-full">
+            <div className="relative flex items-center">
               <input
                 type="text"
                 value={answers[i]}
                 onChange={(e) => handleChange(i, e.target.value)}
                 disabled={locked || errors[i] === false}
                 autoComplete="off"
-                style={{ fontSize: "18px", marginLeft: "1em" }}
-                className={`w-[50%] border-b-1 bg-transparent outline-none transition disabled:pointer-events-none text-center
+                style={{ fontSize: "18px" }}
+                className={`w-full border-b-1 bg-transparent outline-none transition disabled:pointer-events-none
                   ${
                     errors[i] === true
                       ? "border-red-500 text-gray-800"
                       : showed
-                        ? "border-[#333] text-red-500"
-                        : "border-[#333] text-gray-800"
+                      ? "border-[#333] text-red-500"
+                      : "border-[#333] text-gray-800"
                   }
                 `}
               />
+              <span style={{ fontSize: "18px", color: "#1a1a1a", flexShrink: 0 }}>.</span>
 
               {/* ❌ Error Badge */}
               {errors[i] === true && (
@@ -188,13 +178,12 @@ const GrammarB = () => {
                   style={{
                     position: "absolute",
                     right: "-24px",
-                    top: "0",
-                    width: "20px",
-                    height: "20px",
+                    width: "18px",
+                    height: "18px",
                     background: "#ef4444",
                     color: "white",
                     borderRadius: "50%",
-                    fontSize: "11px",
+                    fontSize: "10px",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",

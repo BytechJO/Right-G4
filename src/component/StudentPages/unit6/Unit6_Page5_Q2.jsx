@@ -245,7 +245,7 @@ export default function WB_ReadWrite_QB() {
           className="WB-header-title-page8"
           style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
         >
-          <span className="WB-ex-A-1">B</span>
+          <span className="WB-ex-A">B</span>
           Read and write. Use the words below.
         </h1>
 

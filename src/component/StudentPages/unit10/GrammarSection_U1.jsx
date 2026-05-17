@@ -2,41 +2,51 @@ import GrammarA from "./GrammarA";
 import GrammarB from "./GrammarB";
 import GrammarC from "./GrammarC";
 
-import image1 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 6 Ready for School Folder/Page 48/SVG/Asset 22.svg";
+import image1 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 10 Stella Goes Shopping Folder/Page 84/SVG/Asset 18.svg";
 import image  from "../../../assets/imgs/pages/Class Book/Right 4 Unit 6 Ready for School Folder/Page 48/SVG/Asset 7.svg";
 
-import sound from "../../../assets/audio/ClassBook/Grade 4/cd17pg24-grammar-adult-lady_DyQEJqoO.mp3";
+import sound from "../../../assets/audio/ClassBook/Grade 4/cd55pg84-grammar-adult-lady_t8salKcB.mp3";
 import QuestionAudioPlayer from "../../QuestionAudioPlayer";
 import SectionBanner from "../SectionBanner";
 const GrammarSection_U1 = () => {
 const captions = [
   {
-    start: 0.80,
-    end: 2.78,
-    text: "Page 24. Grammar.",
+    start: 0.32,
+    end: 2.26,
+    text: "Page 84. Grammar.",
   },
   {
-    start: 2.78,
-    end: 4.96,
-    text: "Past of have.",
+    start: 2.26,
+    end: 4.76,
+    text: "\"have\" as a main verb.",
   },
   {
-    start: 4.96,
-    end: 8.72,
-    text: "She had a bike. Did she have a kitten?",
+    start: 4.76,
+    end: 9.14,
+    text: "We have some shirts. Have we some shirts?",
   },
   {
-    start: 8.72,
-    end: 13.42,
-    text: "She did not have a kitten. Why did she have a kitten?",
+    start: 9.14,
+    end: 13.48,
+    text: "We don't have shirts. Why don't we have shirts?",
   },
   {
-    start: 13.42,
-    end: 18.06,
-    text: "I did not have books. What did she have?",
+    start: 13.48,
+    end: 16.92,
+    text: "Present perfect. \"has\" and \"have\".",
+  },
+  {
+    start: 16.92,
+    end: 22.60,
+    text: "I have been to many countries. She has made a sandcastle.",
+  },
+  {
+    start: 22.60,
+    end: 24.58,
+    text: "Have you done your homework?",
   },
 ];
-const stopAtSecond = 2.8;
+const stopAtSecond = 2.26;
  return (
     <div className="flex flex-col items-center ">
       <div className="w-[60%] mx-auto">

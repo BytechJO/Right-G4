@@ -1,13 +1,16 @@
 import React, { useRef, useState } from "react";
 import page_6 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 1 Robots of the Future Folder/Page4.png";
 import mainSound from "../../../assets/audio/ClassBook/Grade 4/cd1pg4-conversation-adult-lady-t_1cApuaJF.mp3";
-import vocSound from "../../../assets/audio/ClassBook/Grade 4/cd1pg4-conversation-adult-lady-t_1cApuaJF.mp3";
+import vocSound from "../../../assets/audio/ClassBook/Grade 4/cd2pg4-instruction-adult-lady-t_vw7gpYmr.mp3";
 import AudioWithCaption from "../../AudioWithCaption";
 import audioBtn from "../../../assets/Page 01/Audio btn.svg";
 import arrowBtn from "../../../assets/Page 01/Arrow.svg";
 import Vocabulary from "../Vocabulary";
 import "./Page4.css";
 import CriticalThinking from "../CriticalThinking";
+import pauseBtn from "../../../assets/Page 01/Right Video Button.svg";
+import videoFile from "../../../assets/right grade 4/grade 4 unit 1 page 4.mp4";
+
 
 const Page6 = ({ openPopup }) => {
   const audioRef = useRef(null);
@@ -29,27 +32,114 @@ const captions = [
   { start: 48.98, end: 52.8, text: "How will we learn? We must do our homework." },
   { start:52.8, end: 58.74, text: "Oh, I didn't think about that. You're right. Well, at least they will clean our rooms." },
 ];
- const wordTimingsVoc = [
-    { start: 8.8, end: 11.1 },
-    { start: 11.2, end: 13.6 },
-    { start: 13.94, end: 15.5 },
-    { start: 16.4, end: 17.6 },
+ const captionsC = [
+  {
+    start: 0.30,
+    end: 3.14,
+    text: "Page four, unit one vocabulary.",
+  },
+  {
+    start: 3.14,
+    end: 9.16,
+    text: "Listen and repeat. Find the words and expressions in the conversation above.",
+  },
+  {
+    start: 10.18,
+    end: 10.80,
+    text: "Robot.",
+  },
+  {
+    start: 10.80,
+    end: 12.20,
+    text: "Buildings.",
+  },
+  {
+    start: 12.20,
+    end: 13.66,
+    text: "Machines.",
+  },
+  {
+    start: 13.66,
+    end: 15.16,
+    text: "Homework.",
+  },
+  {
+    start: 15.16,
+    end: 16.64,
+    text: "Rooms.",
+  },
+  {
+    start: 16.64,
+    end: 18.04,
+    text: "Build.",
+  },
+  {
+    start: 18.04,
+    end: 19.68,
+    text: "Drive.",
+  },
+  {
+    start: 19.68,
+    end: 21.96,
+    text: "Learn.",
+  },
+  {
+    start: 21.96,
+    end: 22.36,
+    text: "Think.",
+  },
+  {
+    start: 22.36,
+    end: 23.84,
+    text: "Clean.",
+  },
+  {
+    start: 25.10,
+    end: 26.22,
+    text: "I like your...",
+  },
+  {
+    start: 27.30,
+    end: 28.10,
+    text: "Like what?",
+  },
+  {
+    start: 29.22,
+    end: 29.80,
+    text: "Thanks.",
+  },
+  {
+    start: 30.94,
+    end: 31.78,
+    text: "Won't mind.",
+  },
+  {
+    start: 32.94,
+    end: 37.16,
+    text: "After all. Of course. At least.",
+  },
+];
 
-    { start: 19.04, end: 20.26 },
-    { start: 21.6, end: 22.94 },
-    { start: 24.2, end: 25.38 },
-    { start: 26.8, end: 28.64 },
+const wordTimingsVoc = [
+  { start: 10.18, end: 10.80 }, // Robot
+  { start: 10.80, end: 12.20 }, // Buildings
+  { start: 12.20, end: 13.66 }, // Machines
+  { start: 13.66, end: 15.16 }, // Homework
 
-    { start: 29.719, end: 31.5 },
-    { start: 32.32, end: 34.18 },
-    { start: 35.06, end: 37.06 },
-    { start: 37.719, end: 39.579 },
-    { start: 40.36, end: 42.499 },
-    { start: 43.279, end: 45.459 },
+  { start: 15.16, end: 16.64 }, // Rooms
+  { start: 16.64, end: 18.04 }, // Build
+  { start: 18.04, end: 19.68 }, // Drive
+  { start: 19.68, end: 21.96 }, // Learn
 
-    { start: 46.259, end: 48.459 },
-    { start: 49.52, end: 52.119 },
-  ];
+  { start: 21.96, end: 22.36 }, // Think
+  { start: 22.36, end: 23.84 }, // Clean
+  { start: 25.10, end: 26.22 }, // I like your...
+  { start: 27.30, end: 28.10 }, // Like what?
+
+  { start: 29.22, end: 29.80 }, // Thanks
+  { start: 30.94, end: 31.78 }, // Won't mind
+  { start: 32.94, end: 37.16 }, // After all. Of course. At least
+];
 
   
   const clickableAreas = [
@@ -233,8 +323,8 @@ const captions = [
                     title="VOCABULARY"
                     subtitle="Listen and repeat. Find the words and expressions in the conversation above."
                     sound={vocSound}
-                    captions={captions}
-                    stopAtSecond={8.5}
+                    captions={captionsC}
+                    stopAtSecond={3.14}
                                         wordTimings={wordTimingsVoc}
 
                     words={[
@@ -304,6 +394,31 @@ const captions = [
             />
           </svg>
         </div>
+              <div
+                className="pauseBtn-icon-CD-page4 hover:scale-110 transition"
+                style={{ overflow: "visible" }}
+              >
+                <svg
+                  width="22"
+                  height="22"
+                  viewBox="0 0 90 90"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    openPopup(
+                      "video",
+                      <div style={{ display: "flex", justifyContent: "center", alignContent: "center", alignItems: "center", height: "100%", width: "100%" }}>
+                        <video autoPlay controls style={{ width: "auto", height: "80%", objectFit: "fill", borderRadius: "20px" }}>
+                          <source src={videoFile} type="video/mp4" />
+                        </video>
+                      </div>
+                    );
+                  }}
+                  style={{ overflow: "visible" }}
+                >
+                  <image className="svg-img" href={pauseBtn} x="0" y="0" width="90" height="90" />
+                </svg>
+              </div>
+        
       <audio ref={audioRef} style={{ display: "none" }} />
     </div>
   );

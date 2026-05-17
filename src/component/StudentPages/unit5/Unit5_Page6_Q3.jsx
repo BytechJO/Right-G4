@@ -145,7 +145,7 @@ export default function WB_ReadWriteOwn_QF() {
           className="WB-header-title-page8"
           style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
         >
-          <span className="WB-ex-A-1">F</span>
+          <span className="WB-ex-A">F</span>
           Read and write your own sentences.
         </h1>
 
