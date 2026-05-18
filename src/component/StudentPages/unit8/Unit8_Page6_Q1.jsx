@@ -27,37 +27,14 @@ const WRONG_BADGE_TEXT     = "#ffffff";
 //  📝  AUDIO CAPTIONS
 // ─────────────────────────────────────────────
 const captions = [
-  {
-    start: 0.36,
-    end: 7.24,
-    text: "Page 69, Write Activities Exercise E. Listen, read, and match.",
-  },
-  {
-    start: 7.24,
-    end: 11.90,
-    text: "Steve had a busy weekend. He woke up early and brushed his teeth.",
-  },
-  {
-    start: 11.90,
-    end: 14.72,
-    text: "He cooked a breakfast of eggs and toast.",
-  },
-  {
-    start: 14.72,
-    end: 17.96,
-    text: "He cleaned his room and helped his mom and dad.",
-  },
-  {
-    start: 19.54,
-    end: 24.40,
-    text: "In the afternoon, he went out with friends. They played soccer on a field.",
-  },
-  {
-    start: 24.40,
-    end: 30.02,
-    text: "He came home and ate dinner with his family. Then he went to bed.",
-  },
+  { start: 0.36,  end: 7.24,  text: "Page 69, Write Activities Exercise E. Listen, read, and match." },
+  { start: 7.24,  end: 11.90, text: "Steve had a busy weekend. He woke up early and brushed his teeth." },
+  { start: 11.90, end: 14.72, text: "He cooked a breakfast of eggs and toast." },
+  { start: 14.72, end: 17.96, text: "He cleaned his room and helped his mom and dad." },
+  { start: 19.54, end: 24.40, text: "In the afternoon, he went out with friends. They played soccer on a field." },
+  { start: 24.40, end: 30.02, text: "He came home and ate dinner with his family. Then he went to bed." },
 ];
+
 // ─────────────────────────────────────────────
 //  📝  EXERCISE DATA
 // ─────────────────────────────────────────────
@@ -69,9 +46,9 @@ const LEFT_ITEMS = [
 ];
 
 const RIGHT_ITEMS = [
-  { name: "r1", text: "on a field.",             correctLeftId: 3 },
-  { name: "r2", text: "of eggs and toast.",      correctLeftId: 1 },
-  { name: "r3", text: "and then went to bed.",   correctLeftId: 4 },
+  { name: "r1", text: "on a field.",                 correctLeftId: 3 },
+  { name: "r2", text: "of eggs and toast.",          correctLeftId: 1 },
+  { name: "r3", text: "and then went to bed.",       correctLeftId: 4 },
   { name: "r4", text: "and helped his mom and dad.", correctLeftId: 2 },
 ];
 
@@ -222,28 +199,45 @@ export default function WB_ListenReadMatch_QE() {
         }
 
         /* ── Matching area ── */
-        .lrm-match-area { position: relative; width: 100%; }
-
-        .lrm-match-grid {
-          display: grid;
-          grid-template-columns: 1fr auto 1fr;
-          align-items: center;
-          gap: 0;
+        .lrm-match-area {
+          position: relative;
           width: 100%;
         }
 
-        /* Left col */
-        .lrm-left-col {
-          display: flex;
-          flex-direction: column;
-          gap: clamp(18px, 2.8vw, 38px);
+        /*
+         * ✅ FIX: grid-auto-rows ensures every row on BOTH sides
+         * has the exact same height, so left and right dots
+         * are always vertically centred at the same Y coordinate.
+         */
+        .lrm-match-grid {
+          display: grid;
+          grid-template-columns: 1fr clamp(30px, 4vw, 60px) 1fr;
+          grid-auto-rows: clamp(48px, 6.5vw, 62px);
+          width: 100%;
+          align-items: center;
         }
 
+        /*
+         * ✅ FIX: display:contents makes .lrm-left-col and
+         * .lrm-right-col transparent to the grid, so each
+         * .lrm-left-row / .lrm-right-row is a direct grid item
+         * and shares the same implicit row track as its peer.
+         */
+        .lrm-right-col { display: contents; }
+        .lrm-right-col { display: contents; }
+
+        /* Left rows */
         .lrm-left-row {
+          grid-column: 1;
           display: flex;
           align-items: center;
           gap: clamp(5px, 0.6vw, 8px);
         }
+                  .lrm-right-row {          grid-column: 1;
+          display: flex;
+          align-items: center;
+          gap: clamp(5px, 0.6vw, 8px);
+ }
 
         .lrm-num {
           font-size: clamp(13px, 1.6vw, 19px);
@@ -257,15 +251,24 @@ export default function WB_ListenReadMatch_QE() {
           display: flex;
           align-items: center;
           gap: clamp(6px, 0.8vw, 10px);
-          padding: clamp(4px, 0.5vw, 7px) clamp(8px, 1vw, 12px);
+          /*
+           * ✅ FIX: padding is horizontal-only (no top/bottom).
+           * Top/bottom padding was shifting the dot vertically
+           * inside the row, causing misalignment with right dots.
+           */
+          padding: 0 clamp(8px, 1vw, 12px);
+          height: clamp(34px, 4.2vw, 42px);
           border-radius: 10px;
           border: 2px solid transparent;
           transition: border-color 0.15s, background 0.15s;
           cursor: pointer;
           user-select: none;
         }
-        .lrm-sentence-wrap--selected { border-color: ${LEFT_SEL_BD}; background: ${LEFT_SEL_BG}; }
-        .lrm-sentence-wrap--locked   { cursor: default; }
+        .lrm-sentence-wrap--selected {
+          border-color: ${LEFT_SEL_BD};
+          background: ${LEFT_SEL_BG};
+        }
+        .lrm-sentence-wrap--locked { cursor: default; }
 
         .lrm-sentence-text {
           font-size: clamp(12px, 1.45vw, 17px);
@@ -288,18 +291,18 @@ export default function WB_ListenReadMatch_QE() {
           transform: scale(1.3);
         }
 
-        /* Right col */
-        .lrm-right-col {
-          display: flex;
-          flex-direction: column;
-          gap: clamp(18px, 2.8vw, 38px);
-          padding-left: clamp(20px, 3vw, 40px);
-        }
-
+        /* Right rows */
         .lrm-right-row {
+          grid-column: 3;
           display: flex;
           align-items: center;
           gap: clamp(6px, 0.8vw, 10px);
+          /*
+           * ✅ FIX: padding-left replaces the old flex-column gap
+           * that was on .lrm-right-col; keeping it on the row
+           * itself means every right row has the same offset.
+           */
+          padding-left: clamp(20px, 3vw, 40px);
           cursor: pointer;
           user-select: none;
         }
@@ -344,7 +347,7 @@ export default function WB_ListenReadMatch_QE() {
           z-index: 3;
         }
 
-        /* SVG */
+        /* SVG overlay */
         .lrm-svg {
           position: absolute;
           top: 0; left: 0;
@@ -406,6 +409,14 @@ export default function WB_ListenReadMatch_QE() {
         <div className="lrm-match-area" ref={containerRef}>
           <div className="lrm-match-grid">
 
+            {/*
+             * ✅ FIX: .lrm-left-col and .lrm-right-col use display:contents,
+             * so their children (.lrm-left-row / .lrm-right-row) become direct
+             * grid items and share the same implicit row tracks — guaranteeing
+             * that row N on the left and row N on the right always sit at the
+             * exact same vertical position.
+             */}
+
             {/* Left sentences */}
             <div className="lrm-left-col">
               {LEFT_ITEMS.map((item) => {
@@ -437,9 +448,6 @@ export default function WB_ListenReadMatch_QE() {
                 );
               })}
             </div>
-
-            {/* Spacer for SVG lines */}
-            <div style={{ width: "clamp(30px,4vw,60px)" }} />
 
             {/* Right endings */}
             <div className="lrm-right-col">

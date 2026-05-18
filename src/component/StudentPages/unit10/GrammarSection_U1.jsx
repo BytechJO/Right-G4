@@ -3,7 +3,7 @@ import GrammarB from "./GrammarB";
 import GrammarC from "./GrammarC";
 
 import image1 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 10 Stella Goes Shopping Folder/Page 84/SVG/Asset 18.svg";
-import image  from "../../../assets/imgs/pages/Class Book/Right 4 Unit 6 Ready for School Folder/Page 48/SVG/Asset 7.svg";
+import image  from "../../../assets/imgs/pages/Class Book/Right 4 Unit 10 Stella Goes Shopping Folder/Page 84/SVG/Asset 25 (1).svg";
 
 import sound from "../../../assets/audio/ClassBook/Grade 4/cd55pg84-grammar-adult-lady_t8salKcB.mp3";
 import QuestionAudioPlayer from "../../QuestionAudioPlayer";
@@ -71,12 +71,6 @@ const stopAtSecond = 2.26;
         />
       </div>
 
-      <div className="w-[60%]  my-5">
-        <img
-          style={{ width: "100%", height: "auto", display: "block" , alignSelf : "center" }}
-          src={image1}
-        />
-      </div>
        <div className=" mt-2 space-y-10 w-[60%] ">
           <GrammarA />
           <GrammarB />

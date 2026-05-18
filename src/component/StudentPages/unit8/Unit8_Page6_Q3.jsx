@@ -95,6 +95,7 @@ export default function WB_ReadWriteNegative_QG() {
           flex-direction: column;
           gap: clamp(16px, 2.4vw, 30px);
           width: 100%;
+          margin : 12% 0 ;
         }
 
         /* num | cue | input */

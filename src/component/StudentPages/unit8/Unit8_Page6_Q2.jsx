@@ -16,12 +16,12 @@ import img4 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 8 I Lived i
 const TEXT_COLOR       = "#2b2b2b";
 const NUMBER_COLOR     = "#2b2b2b";
 const CHECK_COLOR      = "#c81e1e";
-const BOX_BORDER_DEF   = "#9ca3af";
+const BOX_BORDER_DEF   = "#2096a6";
 const BOX_BORDER_SEL   = "#2096a6";
 const BOX_BORDER_CORR  = "#2096a6";
-const BOX_BORDER_WRONG = "#ef4444";
-const BOX_BG_SEL       = "#f0f9ff";
-const BOX_BG_WRONG     = "#fff0f0";
+const BOX_BORDER_WRONG = "#2096a6";
+const BOX_BG_SEL       = "transparent";
+const BOX_BG_WRONG     = "transparent";
 const WRONG_BADGE_BG   = "#ef4444";
 const WRONG_BADGE_TEXT = "#ffffff";
 
@@ -129,9 +129,9 @@ export default function WB_ReadLookWriteCheck_QF() {
         {/* Circular checkbox */}
         <div style={{
           position: "relative",
-          width:  "clamp(28px,3.4vw,42px)",
-          height: "clamp(28px,3.4vw,42px)",
-          borderRadius: "50%",
+          width:  "clamp(40px,3.4vw,40px)",
+          height: "clamp(40px,3.4vw,40px)",
+          borderRadius: "30%",
           border: `2px solid ${boxBd}`,
           background: boxBg,
           display: "flex", alignItems: "center", justifyContent: "center",
@@ -165,7 +165,7 @@ export default function WB_ReadLookWriteCheck_QF() {
           display: grid;
           grid-template-columns: 1fr 1fr;
           gap: clamp(20px, 3vw, 40px) clamp(24px, 3.5vw, 48px);
-          width: 100%;
+          width: 70%;
         }
 
         /* Single item */
@@ -193,15 +193,15 @@ export default function WB_ReadLookWriteCheck_QF() {
 
         .rlwf-img {
           width: 100%;
-          height: clamp(100px, 14vw, 190px);
+          height: 100%;
           object-fit: cover;
-          border-radius: 10px;
           display: block;
-          border: 2px solid #e5e7eb;
         }
 
         /* Sentence row: text + checkbox */
         .rlwf-sent-row {
+            position: relative;
+    right: -1.35em;
           display: flex;
           align-items: center;
           justify-content: space-between;
@@ -246,7 +246,7 @@ export default function WB_ReadLookWriteCheck_QF() {
           style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
         >
           <span className="WB-ex-A">F</span>
-          Read, look, and write ✓.
+          Read, look, and write <span style={{color : "RED"}}>✓</span> .
         </h1>
 
         {/* ── 2×2 Grid ── */}

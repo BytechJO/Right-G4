@@ -5,7 +5,7 @@ import imgReading from "../../../assets/imgs/pages/Class Book/Right 4 Unit 9 Tom
 import readingAudio from "../../../assets/audio/ClassBook/Grade 4/cd48pg77-reading-adult-lady_oaCVYLur.mp3";
 import ReadingSection from "../ReadingSection";
 
-import img from"../../../assets/imgs/pages/Class Book/Right 4 Unit 5 Under the Weather Folder/Page 41/SVG/Asset 2.svg"
+import img from"../../../assets/imgs/pages/Class Book/Right 4 Unit 9 Tom Has Nothing to Do Folder/Page 77/SVG/Asset 23.svg"
 
 const ReadingSection_U1 = () => {
   const paragraphs = [

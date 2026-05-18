@@ -1,72 +1,79 @@
-import { useState, useRef } from "react";
+import { useState } from "react";
 import ValidationAlert from "../../Popup/ValidationAlert";
 import { FaCheck, FaRedo, FaEye } from "react-icons/fa";
 
-import img1 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 6 Ready for School Folder/Page 47/SVG/SVG/Asset 3.svg";
-import img2 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 6 Ready for School Folder/Page 47/SVG/SVG/Asset 4.svg";
-import img3 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 6 Ready for School Folder/Page 47/SVG/SVG/Asset 5.svg";
-import img4 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 6 Ready for School Folder/Page 47/SVG/SVG/Asset 6.svg";
-
 const ComprehensionA = () => {
-  // الترتيب الصح: img1=2, img2=4, img3=1, img4=3
-  const images = [
-    { id: 1, src: img1, answer: "2" },
-    { id: 2, src: img2, answer: "4" },
-    { id: 3, src: img3, answer: "1" },
-    { id: 4, src: img4, answer: "3" },
+  const rows = [
+    {
+      id: "arctic",
+      label: "Arctic/cold",
+      clothesFixed: "layered/warm",
+      clothesAnswers: null,
+      takeAnswers: ["food and water", "food and water."],
+    },
+    {
+      id: "desert",
+      label: "desert",
+      clothesAnswers: ["light, loose material", "light loose material"],
+      takeAnswers: ["water", "water."],
+    },
+    {
+      id: "rainforest",
+      label: "rainforest",
+      clothesAnswers: ["covers arms and legs", "cover arms and legs"],
+      takeAnswers: ["plenty of water", "plenty of water."],
+    },
   ];
 
-  const [values, setValues] = useState(["", "", "", ""]);
+  const [answers, setAnswers] = useState({
+    arctic_take: "",
+    desert_clothes: "",
+    desert_take: "",
+    rainforest_clothes: "",
+    rainforest_take: "",
+  });
   const [errors, setErrors] = useState({});
   const [locked, setLocked] = useState(false);
   const [showed, setShowed] = useState(false);
-  const inputRefs = useRef([]);
 
-  const handleChange = (index, value) => {
-    if (locked || errors[index] === false) return;
-    // قبول رقم واحد بس
-    if (value.length > 1) return;
-    if (value !== "" && !/^[1-4]$/.test(value)) return;
-
-    const updated = [...values];
-    updated[index] = value;
-    setValues(updated);
-
-    // انتقل تلقائي للتالي
-    if (value !== "" && index < images.length - 1) {
-      // ابحث عن أول فراغ فاضي بعده
-      const nextEmpty = updated.findIndex((v, i) => i > index && v === "" && errors[i] !== false);
-      if (nextEmpty !== -1) {
-        inputRefs.current[nextEmpty]?.focus();
-      } else {
-        // انتقل للتالي مباشرة
-        inputRefs.current[index + 1]?.focus();
-      }
-    }
+  const handleChange = (key, value) => {
+    if (locked || errors[key] === false) return;
+    setAnswers((prev) => ({ ...prev, [key]: value }));
   };
+
+  const allFields = [
+    { key: "arctic_take", answers: rows[0].takeAnswers },
+    { key: "desert_clothes", answers: rows[1].clothesAnswers },
+    { key: "desert_take", answers: rows[1].takeAnswers },
+    { key: "rainforest_clothes", answers: rows[2].clothesAnswers },
+    { key: "rainforest_take", answers: rows[2].takeAnswers },
+  ];
 
   const handleCheck = () => {
     if (locked) return;
-    const isEmpty = values.some((v) => v.trim() === "");
+    const isEmpty = Object.values(answers).some((v) => v.trim() === "");
     if (isEmpty) {
-      ValidationAlert.info("Please fill in all boxes.");
+      ValidationAlert.info("Please fill in all blanks.");
       return;
     }
 
     let correctCount = 0;
     const newErrors = {};
 
-    images.forEach((img, i) => {
-      if (values[i] === img.answer) {
+    allFields.forEach(({ key, answers: correctAnswers }) => {
+      const isCorrect = correctAnswers.some(
+        (a) => a.toLowerCase() === answers[key].trim().toLowerCase()
+      );
+      if (isCorrect) {
         correctCount++;
-        newErrors[i] = false;
+        newErrors[key] = false;
       } else {
-        newErrors[i] = true;
+        newErrors[key] = true;
       }
     });
 
     setErrors(newErrors);
-    const total = images.length;
+    const total = allFields.length;
     const color =
       correctCount === total ? "green" : correctCount === 0 ? "red" : "orange";
 
@@ -89,112 +96,128 @@ const ComprehensionA = () => {
   };
 
   const handleShow = () => {
-    setValues(images.map((img) => img.answer));
+    setAnswers({
+      arctic_take: rows[0].takeAnswers[0],
+      desert_clothes: rows[1].clothesAnswers[0],
+      desert_take: rows[1].takeAnswers[0],
+      rainforest_clothes: rows[2].clothesAnswers[0],
+      rainforest_take: rows[2].takeAnswers[0],
+    });
     setErrors({});
     setLocked(true);
     setShowed(true);
   };
 
   const handleReset = () => {
-    setValues(["", "", "", ""]);
+    setAnswers({
+      arctic_take: "",
+      desert_clothes: "",
+      desert_take: "",
+      rainforest_clothes: "",
+      rainforest_take: "",
+    });
     setErrors({});
     setLocked(false);
     setShowed(false);
-    inputRefs.current[0]?.focus();
+  };
+
+  const InputCell = ({ fieldKey }) => {
+    const isError = errors[fieldKey] === true;
+    const isCorrect = errors[fieldKey] === false;
+    return (
+      <div className="relative w-full">
+        <input
+          type="text"
+          value={answers[fieldKey]}
+          onChange={(e) => handleChange(fieldKey, e.target.value)}
+          disabled={locked || isCorrect}
+          autoComplete="off"
+          style={{
+            width: "100%",
+            fontSize: "15px",
+            borderBottom: `2px solid ${isError ? "#ef4444" : "#333"}`,
+            background: "transparent",
+            outline: "none",
+            color: showed ? "#ef4444" : "#1a1a1a",
+            padding: "2px 6px",
+          }}
+        />
+        {isError && (
+          <div style={{
+            position: "absolute", right: "-22px", top: "0",
+            width: "18px", height: "18px", background: "#ef4444",
+            color: "white", borderRadius: "50%", fontSize: "10px",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            fontWeight: "bold", border: "2px solid white",
+            boxShadow: "0 1px 6px rgba(0,0,0,0.2)", zIndex: 3,
+          }}>✕</div>
+        )}
+      </div>
+    );
+  };
+
+  const cellStyle = {
+    border: "1px solid #ccc",
+    padding: "10px 14px",
+    fontSize: "15px",
+    color: "#1a1a1a",
+  };
+
+  const headerStyle = {
+    ...cellStyle,
+    background: "#d1d5db",
+    fontWeight: "600",
+    textAlign: "center",
   };
 
   return (
     <div className="mb-6 mx-auto">
       <h5 className="header-title-page8-read mb-8">
         <span className="ex-A-read mr-2">A</span>
-        Number the pictures to show the order for planting a vegetable garden.
+        Complete the table below.
       </h5>
 
-      <div className="grid grid-cols-4 gap-4">
-        {images.map((img, i) => {
-          const isError = errors[i] === true;
-          const isCorrect = errors[i] === false;
+      <table style={{ width: "100%", borderCollapse: "collapse" }}>
+        <thead>
+          <tr>
+            <th style={{ ...headerStyle, width: "20%" }}></th>
+            <th style={{ ...headerStyle, width: "40%" }}>Clothes</th>
+            <th style={{ ...headerStyle, width: "40%" }}>What to take with you</th>
+          </tr>
+        </thead>
+        <tbody>
+          {/* Arctic/cold */}
+          <tr>
+            <td style={cellStyle}>Arctic/cold</td>
+            <td style={cellStyle}>layered/warm</td>
+            <td style={{ ...cellStyle, paddingRight: "28px" }}>
+              <InputCell fieldKey="arctic_take" />
+            </td>
+          </tr>
 
-          return (
-            <div key={img.id} className="flex flex-col items-center gap-2">
-              {/* Image with input badge */}
-              <div style={{ position: "relative", display: "inline-block" }}>
-                <img
-                  src={img.src}
-                  alt=""
-                  style={{
-                    width: "100%",
-                    height : "auto"
-                  }}
-                />
+          {/* desert */}
+          <tr>
+            <td style={cellStyle}>desert</td>
+            <td style={{ ...cellStyle, paddingRight: "28px" }}>
+              <InputCell fieldKey="desert_clothes" />
+            </td>
+            <td style={{ ...cellStyle, paddingRight: "28px" }}>
+              <InputCell fieldKey="desert_take" />
+            </td>
+          </tr>
 
-                {/* Number Input Badge */}
-                <div
-                  style={{
-                    position: "absolute",
-                    bottom: "8px",
-                    right: "8px",
-                    width: "36px",
-                    height: "36px",
-                    borderRadius: "50%",
-                    background:  "transparent",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  <input
-                    ref={(el) => (inputRefs.current[i] = el)}
-                    type="text"
-                    value={values[i]}
-                    onChange={(e) => handleChange(i, e.target.value)}
-                    disabled={locked || isCorrect}
-                    autoComplete="off"
-                    maxLength={1}
-                    style={{
-                      width: "100%",
-                      height: "100%",
-                      background: "transparent",
-                      border: "none",
-                      outline: "none",
-                      textAlign: "center",
-                      fontSize: "18px",
-                      fontWeight: "bold",
-                      color: "black",
-                      cursor: locked || isCorrect ? "default" : "text",
-                    }}
-                  />
-                </div>
-
-                {/* ❌ Error Badge */}
-                {isError && (
-                  <div
-                    style={{
-                      position: "absolute",
-                      top: "-8px",
-                      right: "-8px",
-                      width: "20px",
-                      height: "20px",
-                      background: "#ef4444",
-                      color: "white",
-                      borderRadius: "50%",
-                      fontSize: "11px",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      fontWeight: "bold",
-                      border: "2px solid white",
-                      boxShadow: "0 1px 6px rgba(0,0,0,0.2)",
-                    }}
-                  >
-                    ✕
-                  </div>
-                )}
-              </div>
-            </div>
-          );
-        })}
-      </div>
+          {/* rainforest */}
+          <tr>
+            <td style={cellStyle}>rainforest</td>
+            <td style={{ ...cellStyle, paddingRight: "28px" }}>
+              <InputCell fieldKey="rainforest_clothes" />
+            </td>
+            <td style={{ ...cellStyle, paddingRight: "28px" }}>
+              <InputCell fieldKey="rainforest_take" />
+            </td>
+          </tr>
+        </tbody>
+      </table>
 
       {/* Buttons */}
       <div className="flex justify-center gap-6 mt-8">
@@ -203,13 +226,9 @@ const ComprehensionA = () => {
             onClick={handleReset}
             className="flex items-center justify-center w-14 h-14 rounded-xl bg-[#ffc107] hover:bg-[#e0a800] cursor-pointer transition shadow-sm"
           >
-            <div className="bg-white p-3 rounded-full shadow">
-              <FaRedo size={14} />
-            </div>
+            <div className="bg-white p-3 rounded-full shadow"><FaRedo size={14} /></div>
           </div>
-          <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-black text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition">
-            Reset
-          </span>
+          <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-black text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition">Reset</span>
         </div>
 
         <div className="relative group">
@@ -217,13 +236,9 @@ const ComprehensionA = () => {
             onClick={handleShow}
             className="flex items-center justify-center w-14 h-14 rounded-xl bg-[#2c78b4] hover:bg-[#1a5a8a] cursor-pointer transition shadow-sm"
           >
-            <div className="bg-white p-3 rounded-full shadow">
-              <FaEye size={14} />
-            </div>
+            <div className="bg-white p-3 rounded-full shadow"><FaEye size={14} /></div>
           </div>
-          <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-black text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition whitespace-nowrap">
-            Show Answer
-          </span>
+          <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-black text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition whitespace-nowrap">Show Answer</span>
         </div>
 
         <div className="relative group">
@@ -231,13 +246,9 @@ const ComprehensionA = () => {
             onClick={handleCheck}
             className="flex items-center justify-center w-14 h-14 rounded-xl bg-[#55c271] hover:bg-[#449d5a] cursor-pointer transition shadow-sm"
           >
-            <div className="bg-white p-3 rounded-full shadow">
-              <FaCheck size={14} />
-            </div>
+            <div className="bg-white p-3 rounded-full shadow"><FaCheck size={14} /></div>
           </div>
-          <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-black text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition whitespace-nowrap">
-            Check Answer
-          </span>
+          <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-black text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition whitespace-nowrap">Check Answer</span>
         </div>
       </div>
     </div>

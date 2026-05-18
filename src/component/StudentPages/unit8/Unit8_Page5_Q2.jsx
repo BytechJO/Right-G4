@@ -72,6 +72,7 @@ export default function WB_ReadWrite_QB() {
           gap: clamp(8px, 1.2vw, 14px);
           width: 100%;
                     margin-top : 8%   ;
+                        justify-content: space-around;
 
         }
         .rwb-pill {

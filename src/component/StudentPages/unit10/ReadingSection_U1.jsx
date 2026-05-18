@@ -1,7 +1,7 @@
 import ComprehensionA from "./ComprehensionA";
 import ComprehensionB from "./ComprehensionB";
 
-import imgReading from "../../../assets/imgs/pages/Class Book/Right 4 Unit 6 Ready for School Folder/Page 47/SVG/SVG/Asset 2.svg";
+import imgReading from "../../../assets/imgs/pages/Class Book/Right 4 Unit 10 Stella Goes Shopping Folder/Page 83/SVG/Asset 24 (1).svg";
 import readingAudio from "../../../assets/audio/ClassBook/Grade 4/cd54pg83-reading-adult-lady_m7FZ8z2S.mp3";
 import ReadingSection from "../ReadingSection";
 
@@ -108,7 +108,9 @@ const captions = [
         mainTitle="
 hen it’s hot, what do you do to feel cooler? When it’s 
 cold, what do you do to feel warmer?"
-        image1= {img}
+        image1= {imgReading}
+                image={img}
+        
         question="Do you think new inventions will be good or bad for Earth?"
         sound={readingAudio}
         captions={captions}

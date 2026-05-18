@@ -2,47 +2,58 @@ import { useState } from "react";
 import ValidationAlert from "../../Popup/ValidationAlert";
 import { FaCheck, FaRedo, FaEye } from "react-icons/fa";
 
-import img1 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 6 Ready for School Folder/Page 48/SVG/Asset 16.svg";
-import img2 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 6 Ready for School Folder/Page 48/SVG/Asset 17.svg";
-import img3 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 6 Ready for School Folder/Page 48/SVG/Asset 18.svg";
+import img1 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 10 Stella Goes Shopping Folder/Page 84/SVG/Asset 18.svg";
+import img2 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 10 Stella Goes Shopping Folder/Page 84/SVG/Asset 13.svg";
+import img3 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 10 Stella Goes Shopping Folder/Page 84/SVG/Asset 17.svg";
+import img4 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 10 Stella Goes Shopping Folder/Page 84/SVG/Asset 15.svg";
 
 const GrammarC = () => {
   const questions = [
     {
       id: 1,
       image: img1,
-      sentence: "You shouldn't eat much sugar.",
-      correct: 0,
+      before: "I have been to",
+      after: ".",
+      answers: ["the store", "the store."],
     },
     {
       id: 2,
       image: img2,
-      sentence: "You should ride your skateboard.",
-      correct: 0,
+      before: "She has",
+      after: ".",
+      answers: ["washed the dishes", "washed the dishes."],
     },
     {
       id: 3,
       image: img3,
-      sentence: "You should do your homework.",
-      correct: 1,
+      before: "He has",
+      after: ".",
+      answers: ["taken a shower", "taken a shower."],
+    },
+    {
+      id: 4,
+      image: img4,
+      before: "He has",
+      after: ".",
+      answers: ["fed the chickens", "fed the chickens."],
     },
   ];
 
-  const [selected, setSelected] = useState(
-    Object.fromEntries(questions.map((q) => [q.id, null]))
-  );
+  const [answers, setAnswers] = useState(Array(questions.length).fill(""));
   const [errors, setErrors] = useState({});
   const [locked, setLocked] = useState(false);
   const [showed, setShowed] = useState(false);
 
-  const handleSelect = (qId, imgIndex) => {
-    if (locked || errors[qId] === false) return;
-    setSelected((prev) => ({ ...prev, [qId]: imgIndex }));
+  const handleChange = (index, value) => {
+    if (locked || errors[index] === false) return;
+    const updated = [...answers];
+    updated[index] = value;
+    setAnswers(updated);
   };
 
   const handleCheck = () => {
     if (locked) return;
-    const isEmpty = questions.some((q) => selected[q.id] === null);
+    const isEmpty = answers.some((a) => a.trim() === "");
     if (isEmpty) {
       ValidationAlert.info("Please answer all questions.");
       return;
@@ -51,12 +62,15 @@ const GrammarC = () => {
     let correctCount = 0;
     const newErrors = {};
 
-    questions.forEach((q) => {
-      if (selected[q.id] === q.correct) {
+    answers.forEach((ans, i) => {
+      const isCorrect = questions[i].answers.some(
+        (a) => a.toLowerCase() === ans.trim().toLowerCase()
+      );
+      if (isCorrect) {
         correctCount++;
-        newErrors[q.id] = false;
+        newErrors[i] = false;
       } else {
-        newErrors[q.id] = true;
+        newErrors[i] = true;
       }
     });
 
@@ -84,113 +98,28 @@ const GrammarC = () => {
   };
 
   const handleShow = () => {
-    setSelected(Object.fromEntries(questions.map((q) => [q.id, q.correct])));
+    setAnswers(questions.map((q) => q.answers[0]));
     setErrors({});
     setLocked(true);
     setShowed(true);
   };
 
   const handleReset = () => {
-    setSelected(Object.fromEntries(questions.map((q) => [q.id, null])));
+    setAnswers(Array(questions.length).fill(""));
     setErrors({});
     setLocked(false);
     setShowed(false);
-  };
-
-  const HalfImage = ({ q, imgIndex }) => {
-    const isSelected = selected[q.id] === imgIndex;
-    const isWrong = errors[q.id] === true;
-    const isLeft = imgIndex === 0;
-
-    return (
-      <div
-        onClick={() => handleSelect(q.id, imgIndex)}
-        style={{
-          flex: 1,
-          overflow: "hidden",
-          position: "relative",
-          cursor: locked ? "default" : "pointer",
-  
-        }}
-      >
-        {/* Half image */}
-        <img
-          src={q.image}
-          alt=""
-          style={{
-            width: "100%",
-            height : "auto ", 
-            display: "block",
-          }}
-        />
-
-        {/* Checkmark circle */}
-        <div
-          style={{
-            position: "absolute",
-            bottom: "6px",
-            right: "6px",
-            width: "28px",
-            height: "28px",
-            borderRadius: "50%",
-            border: `2px solid ${isSelected ? (isWrong ? "#ef4444" : "#2195a6") : "#ccc"}`,
-            background: "#fff",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          {isSelected && (
-            <svg viewBox="0 0 24 24" width="14" height="14" fill="none">
-              <polyline
-                points="4,12 9,18 20,6"
-                stroke={isWrong ? "#ef4444" : "#2195a6"}
-                strokeWidth="3"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          )}
-        </div>
-
-        {/* ❌ Error Badge */}
-        {isWrong && isSelected && (
-          <div
-            style={{
-              position: "absolute",
-              top: "-8px",
-              right: "-8px",
-              width: "18px",
-              height: "18px",
-              background: "#ef4444",
-              color: "white",
-              borderRadius: "50%",
-              fontSize: "10px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontWeight: "bold",
-              border: "2px solid white",
-              boxShadow: "0 1px 6px rgba(0,0,0,0.2)",
-              zIndex: 3,
-            }}
-          >
-            ✕
-          </div>
-        )}
-      </div>
-    );
   };
 
   return (
     <div className="mb-6 mx-auto">
       <h5 className="header-title-page8-read mb-8">
         <span className="ex-A-read mr-2">C</span>
-        Read and write ✓.
+        Look and write.
       </h5>
 
-      <div className="grid grid-cols-3 gap-6">
-        {questions.map((q) => (
+      <div className="grid grid-cols-2 gap-x-8 gap-y-8">
+        {questions.map((q, i) => (
           <div key={q.id} className="flex flex-col gap-3">
             {/* Number */}
             <span
@@ -204,16 +133,53 @@ const GrammarC = () => {
               {q.id}
             </span>
 
-            {/* Split image */}
-            <div style={{ display: "flex" }}>
-              <HalfImage q={q} imgIndex={0} />
-              <HalfImage q={q} imgIndex={1} />
-            </div>
+            {/* Image */}
+            <img
+              src={q.image}
+              alt=""
+              style={{
+                width: "100%",
+                maxWidth: "220px",
+                height: "auto",
+                objectFit: "cover",
+                borderRadius: "10px",
+              }}
+            />
 
-            {/* Sentence */}
-            <p style={{ fontSize: "15px", color: "#1a1a1a", textAlign: "center" }}>
-              {q.sentence}
-            </p>
+            {/* Sentence with input */}
+            <div className="flex items-end gap-1 flex-wrap">
+              <span style={{ fontSize: "18px", color: "#1a1a1a" }}>{q.before}</span>
+
+              <div className="relative flex-1" style={{ minWidth: "120px" }}>
+                <input
+                  type="text"
+                  value={answers[i]}
+                  onChange={(e) => handleChange(i, e.target.value)}
+                  disabled={locked || errors[i] === false}
+                  autoComplete="off"
+                  style={{
+                    width: "100%",
+                    fontSize: "18px",
+                    borderBottom: `1px solid ${errors[i] === true ? "#ef4444" : "#333"}`,
+                    background: "transparent",
+                    outline: "none",
+                    color: showed ? "#ef4444" : "#1a1a1a",
+                  }}
+                />
+                {errors[i] === true && (
+                  <div style={{
+                    position: "absolute", right: "-22px", top: "0",
+                    width: "18px", height: "18px", background: "#ef4444",
+                    color: "white", borderRadius: "50%", fontSize: "10px",
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    fontWeight: "bold", border: "2px solid white",
+                    boxShadow: "0 1px 6px rgba(0,0,0,0.2)",
+                  }}>✕</div>
+                )}
+              </div>
+
+              <span style={{ fontSize: "16px", color: "#1a1a1a" }}>{q.after}</span>
+            </div>
           </div>
         ))}
       </div>
@@ -225,13 +191,9 @@ const GrammarC = () => {
             onClick={handleReset}
             className="flex items-center justify-center w-14 h-14 rounded-xl bg-[#ffc107] hover:bg-[#e0a800] cursor-pointer transition shadow-sm"
           >
-            <div className="bg-white p-3 rounded-full shadow">
-              <FaRedo size={14} />
-            </div>
+            <div className="bg-white p-3 rounded-full shadow"><FaRedo size={14} /></div>
           </div>
-          <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-black text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition">
-            Reset
-          </span>
+          <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-black text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition">Reset</span>
         </div>
 
         <div className="relative group">
@@ -239,13 +201,9 @@ const GrammarC = () => {
             onClick={handleShow}
             className="flex items-center justify-center w-14 h-14 rounded-xl bg-[#2c78b4] hover:bg-[#1a5a8a] cursor-pointer transition shadow-sm"
           >
-            <div className="bg-white p-3 rounded-full shadow">
-              <FaEye size={14} />
-            </div>
+            <div className="bg-white p-3 rounded-full shadow"><FaEye size={14} /></div>
           </div>
-          <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-black text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition whitespace-nowrap">
-            Show Answer
-          </span>
+          <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-black text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition whitespace-nowrap">Show Answer</span>
         </div>
 
         <div className="relative group">
@@ -253,13 +211,9 @@ const GrammarC = () => {
             onClick={handleCheck}
             className="flex items-center justify-center w-14 h-14 rounded-xl bg-[#55c271] hover:bg-[#449d5a] cursor-pointer transition shadow-sm"
           >
-            <div className="bg-white p-3 rounded-full shadow">
-              <FaCheck size={14} />
-            </div>
+            <div className="bg-white p-3 rounded-full shadow"><FaCheck size={14} /></div>
           </div>
-          <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-black text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition whitespace-nowrap">
-            Check Answer
-          </span>
+          <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-black text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition whitespace-nowrap">Check Answer</span>
         </div>
       </div>
     </div>

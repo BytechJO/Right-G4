@@ -1,8 +1,6 @@
 import { useState } from "react";
 import { FaRedo } from "react-icons/fa";
 
-import img from "../../../assets/imgs/pages/Class Book/Right 4 Unit 6 Ready for School Folder/Page 49/SVG/Asset 28.svg";
-
 const WritingB = () => {
   const [f1, setF1] = useState("");
   const [f2, setF2] = useState("");
@@ -17,7 +15,7 @@ const WritingB = () => {
     setF4(""); setF5(""); setF6(""); setF7("");
   };
 
-  const inp = (value, setter, width = "flex-1") => (
+  const inp = (value, setter, flex = true) => (
     <input
       type="text"
       value={value}
@@ -29,15 +27,14 @@ const WritingB = () => {
         outline: "none",
         fontSize: "18px",
         color: "#1a1a1a",
-        flex: width === "flex-1" ? 1 : undefined,
-        width: width !== "flex-1" ? width : undefined,
+        flex: flex ? 1 : undefined,
         minWidth: "80px",
       }}
     />
   );
 
   const txt = (t) => (
-    <span style={{ fontSize: "18px", color: "#1a1a1a", whiteSpace: "nowrap" }}>
+    <span style={{ fontSize: "16px", color: "#1a1a1a", whiteSpace: "nowrap" }}>
       {t}
     </span>
   );
@@ -46,70 +43,54 @@ const WritingB = () => {
     <div className="mb-6 mx-auto">
       <h5 className="header-title-page8-read mb-8">
         <span className="ex-A-read mr-2">B</span>
-        Pick a simple activity and tell someone else how to do it. You can use <br />
-        the paragraph above and the sentences below to help you.
+        Write about something that you have done before. Use the outline below
+        to help you.
       </h5>
 
-      <div className="flex gap-6">
-        {/* Text content */}
-        <div className="flex flex-col gap-5 flex-1">
-
-          {/* Line 1: Would you like to know how to ___ ? */}
-          <div className="flex items-end gap-2 flex-wrap">
-            {txt("Would you like to know how to")}
-            {inp(f1, setF1)}
-            {txt("?")}
-          </div>
-
-          {/* Line 2: With just a few simple steps you can ___ . */}
-          <div className="flex items-end gap-2 flex-wrap">
-            {txt("With just a few simple steps you can")}
-            {inp(f2, setF2)}
-            {txt(".")}
-          </div>
-
-          {/* Line 3: First, you should ___ . */}
-          <div className="flex items-end gap-2 flex-wrap">
-            {txt("First, you should")}
-            {inp(f3, setF3)}
-            {txt(".")}
-          </div>
-
-          {/* Line 4: This will get you started correctly. Next, carefully ___ */}
-          <div className="flex items-end gap-2 flex-wrap">
-            {txt("This will get you started correctly. Next, carefully")}
-            {inp(f4, setF4)}
-          </div>
-
-          {/* Line 5: continuation ___ . */}
-          <div className="flex items-end gap-2">
-            {inp(f5, setF5)}
-            {txt(".")}
-          </div>
-
-          {/* Line 6: Now you just need to ___ . */}
-          <div className="flex items-end gap-2 flex-wrap">
-            {txt("Now you just need to")}
-            {inp(f6, setF6)}
-            {txt(".")}
-          </div>
-
-          {/* Line 7: You have successfully ___ . I hope you enjoyed it! */}
-          <div className="flex items-end gap-2 flex-wrap">
-            {txt("You have successfully")}
-            {inp(f7, setF7)}
-            {txt(". I hope you enjoyed it!")}
-          </div>
+      <div className="flex flex-col gap-5">
+        {/* Have you ever ___ before? I have ___ . */}
+        <div className="flex items-end gap-2 flex-wrap">
+          {txt("Have you ever")}
+          {inp(f1, setF1)}
+          {txt("before? I have")}
+          {inp(f2, setF2)}
+          {txt(".")}
         </div>
 
-        {/* Image */}
-        <div style={{ flexShrink: 0 }}>
-          <img
-            src={img}
-            alt=""
-            style={{ width: "78%", height : "auto", objectFit: "cover" }}
-          />
+        {/* First, I ___ . It feels ___ . */}
+        <div className="flex items-end gap-2 flex-wrap">
+          {txt("First, I")}
+          {inp(f3, setF3)}
+          {txt(". It feels")}
+          {inp(f4, setF4)}
+          {txt(".")}
         </div>
+
+        {/* Then, I ___ . */}
+        <div className="flex items-end gap-2">
+          {txt("Then, I")}
+          {inp(f5, setF5)}
+          {txt(".")}
+        </div>
+
+        {/* After that, ___ . */}
+        <div className="flex items-end gap-2">
+          {txt("After that,")}
+          {inp(f6, setF6)}
+          {txt(".")}
+        </div>
+
+        {/* It is ___ . */}
+        <div className="flex items-end gap-2">
+          {txt("It is")}
+          {inp(f7, setF7)}
+          {txt(".")}
+        </div>
+
+        {/* Static hint */}
+        <p style={{ fontSize: "14px", color: "#666", fontStyle: "italic" }}>
+          (the best/worst activity; something I want to try again soon; amazing; etc.)
+        </p>
       </div>
 
       {/* Reset Button */}

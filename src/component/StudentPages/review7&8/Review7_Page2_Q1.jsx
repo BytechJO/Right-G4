@@ -21,7 +21,7 @@ const INPUT_TEXT_COLOR        = "#2b2b2b";
 const INPUT_ANSWER_COLOR      = "#c81e1e";
 const WRONG_BADGE_BG          = "#ef4444";
 const WRONG_BADGE_TEXT        = "#ffffff";
-const CHECK_COLOR             = "#2b2b2b";
+const CHECK_COLOR             = "#ff0000ff";
 const CROSS_COLOR             = "#2b2b2b";
 const CIRCLE_BORDER           = "#9ca3af";
 
@@ -226,8 +226,8 @@ export default function WB_ReadComplete_QD() {
         .rcd-symbol {
           width: clamp(28px, 3.4vw, 42px);
           height: clamp(28px, 3.4vw, 42px);
-          border-radius: 50%;
-          border: 2px solid ${CIRCLE_BORDER};
+          border-radius: 30%;
+          border: 2px solid #2195a6;
           display: flex;
           align-items: center;
           justify-content: center;
@@ -312,7 +312,7 @@ export default function WB_ReadComplete_QD() {
                   {item.after && <span className="rcd-text">{item.after}</span>}
 
                   {/* Symbol circle */}
-                  <div className="rcd-symbol" style={{ color: item.symbol === "check" ? CHECK_COLOR : CROSS_COLOR }}>
+                  <div className="rcd-symbol">
                     {item.symbol === "check" ? "✓" : "✕"}
                   </div>
                 </div>

@@ -23,14 +23,14 @@ const GrammarA = () => {
           />
           <div>
             <p className="text-[18px]">
-              You should{" "}
-              <span className="text-[#f89631]">eat your vegetables</span>.
+             I have been to the {" "}
+              <span className="text-[#f89631]">desert</span>.
             </p>
 
             <div className="grid grid-cols-3 gap-10 mt-5 text-[17px]">
-              <span><b>1</b> wash the dishes</span>
-              <span><b>2</b> clean your room</span>
-              <span><b>3</b> take out the trash</span>
+              <span><b>1</b> Dead Sea</span>
+              <span><b>2</b> beach</span>
+              <span><b>3</b> mall</span>
             </div>
           </div>
         </div>
@@ -46,14 +46,14 @@ const GrammarA = () => {
           />
           <div>
             <p className="text-[18px]">
-              You shouldn't{" "}
+              She has{" "}
               <span className="text-[#f89631]">slam the door</span>.
             </p>
 
             <div className="grid grid-cols-3 gap-10 mt-5 text-[17px]">
-              <span><b>1</b> play in the street</span>
-              <span><b>2</b> drive fast</span>
-              <span><b>3</b> watch TV</span>
+              <span><b>1</b> taken a picture</span>
+              <span><b>2</b> skated on the pond</span>
+              <span><b>3</b> flown in a place</span>
             </div>
           </div>
         </div>

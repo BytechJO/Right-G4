@@ -2,30 +2,16 @@ import { useState } from "react";
 import ValidationAlert from "../../Popup/ValidationAlert";
 import { FaCheck, FaRedo, FaEye } from "react-icons/fa";
 
-import img1 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 6 Ready for School Folder/Page 48/SVG/Asset 14.svg";
-import img2 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 6 Ready for School Folder/Page 48/SVG/Asset 19.svg";
-
 const GrammarB = () => {
-  const wordBank = ["read a book", "be late for school"];
-
   const questions = [
-    {
-      id: 1,
-      image: img1,
-      phrase: "read a book",
-      answers: ["She should read a book.", "She should read a book"],
-    },
-    {
-      id: 2,
-      image: img2,
-      phrase: "be late for school",
-      answers: [
-        "She shouldn't be late for school.",
-        "She shouldnt be late for school",
-        "She shouldnot be late for school.",
-        "She should not be late for school",
-      ],
-    },
+    { id: 1, symbol: "✓", before: "She", after: "been to the park.", answers: ["has"] },
+    { id: 2, symbol: "✗", before: "He", after: "gone fishing.", answers: ["hasn't", "has not"] },
+    { id: 3, symbol: "✗", before: "They", after: "walked over the bridge.", answers: ["haven't", "have not"] },
+    { id: 4, symbol: "✓", before: "We", after: "been skiing.", answers: ["have"] },
+    { id: 5, symbol: "✓", before: "We", after: "found the lost backpack.", answers: ["have"] },
+    { id: 6, symbol: "✗", before: "You", after: "made your bed.", answers: ["haven't", "have not"] },
+    { id: 7, symbol: "✗", before: "I", after: "been to Canada before.", answers: ["haven't", "have not"] },
+    { id: 8, symbol: "✓", before: "She", after: "opened her present.", answers: ["has"] },
   ];
 
   const [answers, setAnswers] = useState(Array(questions.length).fill(""));
@@ -44,7 +30,7 @@ const GrammarB = () => {
     if (locked) return;
     const isEmpty = answers.some((a) => a.trim() === "");
     if (isEmpty) {
-      ValidationAlert.info("Please answer all questions.");
+      ValidationAlert.info("Please fill in all blanks.");
       return;
     }
 
@@ -53,7 +39,7 @@ const GrammarB = () => {
 
     answers.forEach((ans, i) => {
       const isCorrect = questions[i].answers.some(
-        (a) => a.toLowerCase() === ans.trim().toLowerCase(),
+        (a) => a.toLowerCase() === ans.trim().toLowerCase()
       );
       if (isCorrect) {
         correctCount++;
@@ -100,115 +86,91 @@ const GrammarB = () => {
     setShowed(false);
   };
 
+  const InputField = ({ index }) => {
+    const isError = errors[index] === true;
+    const isCorrect = errors[index] === false;
+    return (
+      <div className="relative inline-flex items-center">
+        <input
+          type="text"
+          value={answers[index]}
+          onChange={(e) => handleChange(index, e.target.value)}
+          disabled={locked || isCorrect}
+          autoComplete="off"
+          style={{
+            fontSize: "18px",
+            width: "90px",
+            borderBottom: `1px solid ${isError ? "#ef4444" : "#333"}`,
+            background: "transparent",
+            outline: "none",
+            color: showed ? "#ef4444" : "#1a1a1a",
+            textAlign: "center",
+          }}
+        />
+        {isError && (
+          <div style={{
+            position: "absolute", right: "-22px",
+            width: "16px", height: "16px", background: "#ef4444",
+            color: "white", borderRadius: "50%", fontSize: "9px",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            fontWeight: "bold", border: "2px solid white",
+            boxShadow: "0 1px 4px rgba(0,0,0,0.2)",
+          }}>✕</div>
+        )}
+      </div>
+    );
+  };
+
+  // تقسيم الأسئلة لعمودين
+  const leftQuestions = questions.filter((_, i) => i % 2 === 0);
+  const rightQuestions = questions.filter((_, i) => i % 2 !== 0);
+
+  const QuestionRow = ({ q, index }) => (
+    <div className="flex items-center gap-2 flex-wrap" style={{ fontSize: "18px", color: "#1a1a1a" }}>
+      {/* Symbol */}
+      <span style={{ fontSize: "20px", fontWeight: "bold", minWidth: "16px", color: "#ff0000ff" }}>
+        {q.symbol}
+      </span>
+      {/* Number */}
+      <span style={{ fontWeight: "700", minWidth: "18px", WebkitTextStroke: "0.5px black" }}>
+        {q.id}
+      </span>
+      {/* Before */}
+      <span>{q.before}</span>
+      {/* Input */}
+      <InputField index={index} />
+      {/* After */}
+      <span>{q.after}</span>
+    </div>
+  );
+
   return (
     <div className="mb-6 mx-auto">
-      <h5 className="header-title-page8-read mb-6">
+      <h5 className="header-title-page8-read mb-8">
         <span className="ex-A-read mr-2">B</span>
-        Look, read, and write. Use{" "}
-        <span className="text-[#f89631] font-bold">should</span> and{" "}
-        <span className="text-[#f89631] font-bold">shouldn't</span> and the
-        phrases below.
+        Read and write{" "}
+        <span className="text-[#f89631] font-bold">have</span>,{" "}
+        <span className="text-[#f89631] font-bold">haven't</span>,{" "}
+        <span className="text-[#f89631] font-bold">has</span>, or{" "}
+        <span className="text-[#f89631] font-bold">hasn't</span>.
       </h5>
 
-      {/* Word Bank */}
-      <div
-        className="flex gap-4 flex-wrap mb-8 justify-start"
-        style={{ width: "100% ", gap: "35%" 
-          , marginLeft : "5%"
-         }}
-      >
-        {wordBank.map((word) => (
-          <div
-            key={word}
-            style={{
-              border: "2px solid #e8eff1",
-              borderRadius: "8px",
-              padding: "4px 18px",
-              fontSize: "18px",
-              fontWeight: "500",
-              color: "#1a1a1a",
-              background: "#e8eff1",
-            }}
-          >
-            {word}
-          </div>
-        ))}
-      </div>
+      <div className="grid grid-cols-2 gap-x-8 gap-y-5">
+        {/* Left column */}
+        <div className="flex flex-col gap-5">
+          {leftQuestions.map((q) => {
+            const index = questions.findIndex((item) => item.id === q.id);
+            return <QuestionRow key={q.id} q={q} index={index} />;
+          })}
+        </div>
 
-      {/* Questions Grid */}
-      <div className="grid grid-cols-2 gap-8">
-        {questions.map((q, i) => (
-          <div key={q.id} className="flex flex-col items-center gap-4">
-            {/* Number */}
-            <div className="w-full" style={{ display: "flex", gap: "0.3em" }}>
-              <span
-                style={{
-                  fontWeight: "400",
-                  WebkitTextStroke: "1px black",
-                  color: "#1a1a1a",
-                  fontSize: "22px",
-                }}
-              >
-                {q.id}
-              </span>
-              {/* Image */}
-              <img
-                src={q.image}
-                alt=""
-                style={{
-                  width: "50%",
-                  height: "auto",
-                }}
-              />
-            </div>
-
-            {/* Input */}
-            <div className="relative w-full">
-              <input
-                type="text"
-                value={answers[i]}
-                onChange={(e) => handleChange(i, e.target.value)}
-                disabled={locked || errors[i] === false}
-                autoComplete="off"
-                style={{ fontSize: "18px", marginLeft: "1em" }}
-                className={`w-[50%] border-b-1 bg-transparent outline-none transition disabled:pointer-events-none text-center
-                  ${
-                    errors[i] === true
-                      ? "border-red-500 text-gray-800"
-                      : showed
-                        ? "border-[#333] text-red-500"
-                        : "border-[#333] text-gray-800"
-                  }
-                `}
-              />
-
-              {/* ❌ Error Badge */}
-              {errors[i] === true && (
-                <div
-                  style={{
-                    position: "absolute",
-                    right: "-24px",
-                    top: "0",
-                    width: "20px",
-                    height: "20px",
-                    background: "#ef4444",
-                    color: "white",
-                    borderRadius: "50%",
-                    fontSize: "11px",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    fontWeight: "bold",
-                    border: "2px solid white",
-                    boxShadow: "0 1px 6px rgba(0,0,0,0.2)",
-                  }}
-                >
-                  ✕
-                </div>
-              )}
-            </div>
-          </div>
-        ))}
+        {/* Right column */}
+        <div className="flex flex-col gap-5">
+          {rightQuestions.map((q) => {
+            const index = questions.findIndex((item) => item.id === q.id);
+            return <QuestionRow key={q.id} q={q} index={index} />;
+          })}
+        </div>
       </div>
 
       {/* Buttons */}
@@ -218,13 +180,9 @@ const GrammarB = () => {
             onClick={handleReset}
             className="flex items-center justify-center w-14 h-14 rounded-xl bg-[#ffc107] hover:bg-[#e0a800] cursor-pointer transition shadow-sm"
           >
-            <div className="bg-white p-3 rounded-full shadow">
-              <FaRedo size={14} />
-            </div>
+            <div className="bg-white p-3 rounded-full shadow"><FaRedo size={14} /></div>
           </div>
-          <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-black text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition">
-            Reset
-          </span>
+          <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-black text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition">Reset</span>
         </div>
 
         <div className="relative group">
@@ -232,13 +190,9 @@ const GrammarB = () => {
             onClick={handleShow}
             className="flex items-center justify-center w-14 h-14 rounded-xl bg-[#2c78b4] hover:bg-[#1a5a8a] cursor-pointer transition shadow-sm"
           >
-            <div className="bg-white p-3 rounded-full shadow">
-              <FaEye size={14} />
-            </div>
+            <div className="bg-white p-3 rounded-full shadow"><FaEye size={14} /></div>
           </div>
-          <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-black text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition whitespace-nowrap">
-            Show Answer
-          </span>
+          <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-black text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition whitespace-nowrap">Show Answer</span>
         </div>
 
         <div className="relative group">
@@ -246,13 +200,9 @@ const GrammarB = () => {
             onClick={handleCheck}
             className="flex items-center justify-center w-14 h-14 rounded-xl bg-[#55c271] hover:bg-[#449d5a] cursor-pointer transition shadow-sm"
           >
-            <div className="bg-white p-3 rounded-full shadow">
-              <FaCheck size={14} />
-            </div>
+            <div className="bg-white p-3 rounded-full shadow"><FaCheck size={14} /></div>
           </div>
-          <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-black text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition whitespace-nowrap">
-            Check Answer
-          </span>
+          <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-black text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition whitespace-nowrap">Check Answer</span>
         </div>
       </div>
     </div>

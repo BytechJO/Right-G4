@@ -1,341 +1,300 @@
-import React, { useState, useRef } from "react";
+import React, { useState } from "react";
+import Button from "../../Button";
 import ValidationAlert from "../../Popup/ValidationAlert";
-import "./Review9_Page2_Q1.css";
 
-import img1 from "../../../assets/imgs/pages/classbook/Right 3 Unit 10 What Shall We Do on the Weekend Folder/Page 89/Ex C 1.svg";
-import img2 from "../../../assets/imgs/pages/classbook/Right 3 Unit 10 What Shall We Do on the Weekend Folder/Page 89/Ex C 2.svg";
-import img3 from "../../../assets/imgs/pages/classbook/Right 3 Unit 10 What Shall We Do on the Weekend Folder/Page 89/Ex C 3.svg";
-import img4 from "../../../assets/imgs/pages/classbook/Right 3 Unit 10 What Shall We Do on the Weekend Folder/Page 89/Ex C 4.svg";
-import img5 from "../../../assets/imgs/pages/classbook/Right 3 Unit 10 What Shall We Do on the Weekend Folder/Page 89/Ex C 5.svg";
-import img6 from "../../../assets/imgs/pages/classbook/Right 3 Unit 10 What Shall We Do on the Weekend Folder/Page 89/Ex C 6.svg";
+// ─────────────────────────────────────────────
+//  🖼️  IMAGE — الصورة الكاملة مع الـ names و emojis و places
+// ─────────────────────────────────────────────
+import imgScene from "../../../assets/imgs/pages/Class Book/Right 4 Unit 10 Stella Goes Shopping Folder/Page 89/SVG/Asset 26 (1).svg";
 
-const Review9_Page2_Q1 = () => {
-  const [selectedImg, setSelectedImg] = useState(null);
-  const [matches, setMatches] = useState({});
-  const [showResult, setShowResult] = useState(false);
-  const [locked, setLocked] = useState(false);
-  const [selectedSentence, setSelectedSentence] = useState(null);
+// ─────────────────────────────────────────────
+//  🎨  COLORS
+// ─────────────────────────────────────────────
+const INPUT_UL_DEFAULT = "#3f3f3f";
+const INPUT_UL_WRONG   = "#ef4444";
+const INPUT_TEXT_COLOR = "#2b2b2b";
+const INPUT_ANS_COLOR  = "#c81e1e";
+const NUMBER_COLOR     = "#2b2b2b";
+const PREFIX_COLOR     = "#2b2b2b";
+const WRONG_BADGE_BG   = "#ef4444";
+const WRONG_BADGE_TEXT = "#ffffff";
 
-  const imageRefs = useRef([]);
-  const sentenceRefs = useRef([]);
-  const containerRef = useRef(null);
- 
-  const images = [
-    { id: 0, img: img1 },
-    { id: 1, img: img2 },
-    { id: 2, img: img3 },
-    { id: 3, img: img4 },
-    { id: 4, img: img5 },
-    { id: 5, img: img6 },
-  ];
+// ─────────────────────────────────────────────
+//  📝  EXERCISE DATA
+//  prefix: "Why?" | "Why not?"  — ثابت قبل الـ input
+//  before: نص ثابت قبل الـ input (مثل "Because John likes the")
+//  after:  نص ثابت بعد الـ input (إذا موجود)
+// ─────────────────────────────────────────────
+const ITEMS = [
+  {
+    id:      1,
+    prefix:  "Why?",
+    before:  "Because John likes the",
+    after:   "",
+    correct: ["library", "Library"],
+    answer:  "library",
+  },
+  {
+    id:      2,
+    prefix:  "Why not?",
+    before:  "Because he doesn't like the",
+    after:   "",
+    correct: ["swimming pool", "Swimming pool"],
+    answer:  "swimming pool.",
+  },
+  {
+    id:      3,
+    prefix:  "Why?",
+    before:  "Because she likes the",
+    after:   "",
+    correct: ["zoo", "Zoo"],
+    answer:  "zoo.",
+  },
+  {
+    id:      4,
+    prefix:  "Why?",
+    before:  "Because she likes the",
+    after:   "",
+    correct: ["farm", "Farm"],
+    answer:  "farm.",
+  },
+  {
+    id:      5,
+    prefix:  "Why not?",
+    before:  "Because she doesn't like the",
+    after:   "",
+    correct: ["mall", "Mall"],
+    answer:  "mall.",
+  },
+  {
+    id:      6,
+    prefix:  "Why?",
+    before:  "Because he likes the",
+    after:   "",
+    correct: ["cinema", "Cinema"],
+    answer:  "cinema",
+  },
+];
 
-  const sentences = [
-    { id: 0, text: "girls" },
-    { id: 1, text: "ducks" },
-    { id: 2, text: "caps" },
-    { id: 3, text: "cats" },
-    { id: 4, text: "bags" },
-    { id: 5, text: "peas" },
-  ];
+// ─────────────────────────────────────────────
+//  🔧  NORMALIZE
+// ─────────────────────────────────────────────
+const normalize = (str) =>
+  str.toLowerCase().replace(/[^a-z0-9'\s]/g, "").replace(/\s+/g, " ").trim();
 
-  const correct = {
-    0: 2,
-    1: 4,
-    2: 0,
-    3: 5,
-    4: 1,
-    5: 3,
+const isCorrect = (userVal, correctArr) =>
+  correctArr.some((c) => normalize(userVal) === normalize(c));
+
+// ─────────────────────────────────────────────
+//  COMPONENT
+// ─────────────────────────────────────────────
+export default function WB_LookWrite_QD() {
+  const [answers,     setAnswers]     = useState({});
+  const [showResults, setShowResults] = useState(false);
+  const [showAns,     setShowAns]     = useState(false);
+
+  const handleChange = (id, value) => {
+    if (showAns) return;
+    const item = ITEMS.find((i) => i.id === id);
+    if (showResults && item && isCorrect(answers[id] || "", item.correct)) return;
+    setAnswers((prev) => ({ ...prev, [id]: value }));
   };
 
-  const selectImage = (id) => {
-    if (locked || showResult) return;
-
-    // إذا اختار جملة → اربط
-    if (selectedSentence !== null) {
-      setMatches((prev) => {
-        const updated = { ...prev };
-
-        Object.keys(updated).forEach((imgKey) => {
-          if (updated[imgKey] === selectedSentence) {
-            delete updated[imgKey];
-          }
-        });
-
-        updated[id] = selectedSentence;
-        return updated;
-      });
-
-      setSelectedSentence(null);
-      return;
-    }
-
-    // السلوك القديم (اختيار صورة)
-    setSelectedImg(id);
+  const handleCheck = () => {
+    if (showAns) return;
+    const allAnswered = ITEMS.every((item) => answers[item.id]?.trim());
+    if (!allAnswered) { ValidationAlert.info("Please complete all answers first."); return; }
+    let score = 0;
+    ITEMS.forEach((item) => { if (isCorrect(answers[item.id] || "", item.correct)) score++; });
+    setShowResults(true);
+    if (score === ITEMS.length)   ValidationAlert.success(`Score: ${score} / ${ITEMS.length}`);
+    else if (score > 0)           ValidationAlert.warning(`Score: ${score} / ${ITEMS.length}`);
+    else                          ValidationAlert.error(`Score: ${score} / ${ITEMS.length}`);
   };
 
-  const selectSentence = (id) => {
-    if (locked || showResult) return;
-
-    // إذا في صورة مختارة → اربط
-    if (selectedImg !== null) {
-      setMatches((prev) => {
-        const updated = { ...prev };
-
-        Object.keys(updated).forEach((imgKey) => {
-          if (updated[imgKey] === id) {
-            delete updated[imgKey];
-          }
-        });
-
-        updated[selectedImg] = id;
-        return updated;
-      });
-
-      setSelectedImg(null);
-      return;
-    }
-    setSelectedSentence(id);
-  };
-  const checkAnswers = () => {
-    if (locked || showResult) return;
-
-    if (Object.keys(matches).length !== images.length) {
-      ValidationAlert.info("Please match all.");
-      return;
-    }
-
-    let correctCount = 0;
-
-    Object.entries(matches).forEach(([imgId, sentId]) => {
-      if (correct[imgId] === sentId) correctCount++;
-    });
-
-    const total = images.length;
-
-    const message = `
-        Score: ${correctCount} / ${total}
-  `;
-
-    if (correctCount === total) {
-      ValidationAlert.success(message);
-    } else if (correctCount === 0) {
-      ValidationAlert.error(message);
-    } else {
-      ValidationAlert.warning(message);
-    }
-
-    setShowResult(true);
-    setLocked(true);
+  const handleShowAnswer = () => {
+    const filled = {};
+    ITEMS.forEach((item) => { filled[item.id] = item.answer; });
+    setAnswers(filled); setShowResults(false); setShowAns(true);
   };
 
-  const showAnswers = () => {
-    setMatches(correct);
-    setLocked(true);
-    setShowResult(true);
+  const handleReset = () => {
+    setAnswers({}); setShowResults(false); setShowAns(false);
   };
 
-  const reset = () => {
-    setSelectedSentence(null);
-    setSelectedImg(null);
-    setMatches({});
-    setShowResult(false);
-    setLocked(false);
-  };
+  const isWrong    = (item) => showResults && !showAns && !isCorrect(answers[item.id] || "", item.correct);
+  const isDisabled = (item) => showAns || (showResults && isCorrect(answers[item.id] || "", item.correct));
 
   return (
-    <div
-      ref={containerRef}
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        padding: "30px",
-        position: "relative",
-      }}
-    >
+    <div className="main-container-component">
+      <style>{`
+        /* ── Scene image ── */
+        .lwd-scene-img {
+          width: 100%;
+          height: auto;
+          display: block;
+        }
+
+        /* ── Sentences list ── */
+        .lwd-list {
+          display: flex;
+          flex-direction: column;
+          gap: clamp(14px, 2vw, 24px);
+          width: 100%;
+        }
+
+        /* Single row: num | prefix | before | input | after */
+        .lwd-row {
+          display: flex;
+          align-items: flex-end;
+          flex-wrap: wrap;
+          gap: clamp(4px, 0.5vw, 7px);
+        }
+
+        .lwd-num {
+          font-size: clamp(14px, 1.7vw, 20px);
+          font-weight: 700;
+          color: ${NUMBER_COLOR};
+          flex-shrink: 0;
+          line-height: 1.5;
+        }
+
+        .lwd-prefix {
+          font-size: clamp(13px, 1.6vw, 18px);
+          color: ${PREFIX_COLOR};
+          font-weight: 600;
+          white-space: nowrap;
+          flex-shrink: 0;
+          line-height: 1.5;
+        }
+
+        .lwd-text {
+          font-size: clamp(13px, 1.6vw, 18px);
+          color: ${PREFIX_COLOR};
+          white-space: nowrap;
+          flex-shrink: 0;
+          line-height: 1.5;
+        }
+
+        /* Input */
+        .lwd-input-wrap {
+          position: relative;
+          flex: 1;
+          min-width: clamp(90px, 12vw, 170px);
+        }
+
+        .lwd-input {
+          width: 100%;
+          background: transparent;
+          border: none;
+          border-bottom: 1px solid ${INPUT_UL_DEFAULT};
+          outline: none;
+          font-size: clamp(13px, 1.6vw, 18px);
+          color: ${INPUT_TEXT_COLOR};
+          line-height: 1.5;
+          box-sizing: border-box;
+          font-family: inherit;
+          transition: border-color 0.2s;
+        }
+        .lwd-input:disabled  { opacity: 1; cursor: default; }
+        .lwd-input--wrong    { border-bottom-color: ${INPUT_UL_WRONG}; }
+        .lwd-input--answer   { color: ${INPUT_ANS_COLOR}; font-weight: 700; }
+
+        /* ✕ badge */
+        .lwd-badge {
+          position: absolute;
+          top: -8px; right: 0;
+          width: clamp(16px, 1.8vw, 20px);
+          height: clamp(16px, 1.8vw, 20px);
+          border-radius: 50%;
+          background: ${WRONG_BADGE_BG};
+          color: ${WRONG_BADGE_TEXT};
+          display: flex; align-items: center; justify-content: center;
+          font-size: clamp(8px, 0.9vw, 11px);
+          font-weight: 700;
+          border: 2px solid #fff;
+          box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+          pointer-events: none;
+          z-index: 2;
+        }
+
+        .lwd-buttons {
+          display: flex;
+          justify-content: center;
+          margin-top: clamp(8px, 1.6vw, 18px);
+        }
+      `}</style>
+
       <div
         className="div-forall"
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: "clamp(14px, 2vw, 22px)",
+          maxWidth: "1100px",
+          margin: "0 auto",
+        }}
       >
-        <h5 className="header-title-page8 mb-10">
-          <span style={{  marginRight: "10px" }}>C</span>
-          Look, read, and match.
-        </h5>
+        {/* ── Header ── */}
+        <h1
+          className="WB-header-title-page8"
+          style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
+        >
+          <span className="WB-ex-A-1">D</span>
+          Look and write.
+        </h1>
 
-        <div className="w-full flex flex-col items-center gap-16">
-          {/* 🔥 الصور فوق */}
-          <div className="grid grid-cols-6 gap-10 w-full justify-items-center">
-            {images.map((img, i) => (
-              <div
-                key={i}
-                onClick={() => selectImage(i)}
-                className="relative flex flex-col items-center gap-2 cursor-pointer transition"
-              >
-                 <span
-                style={{
-                  position: "absolute",
-                  top: "-10px",
-                  left: "-15px",
-                  fontWeight: "bold",
-                  fontSize: "18px",
-                }}
-              >
-                {i + 1}
-              </span>
-                <img
-                  src={img.img}
-                  style={{
-                    width: "85px",
-                    height: "85px",
-                    objectFit: "contain",
-                    border:
-                      selectedImg === i
-                        ? "3px solid #f97316"
-                        : "3px solid transparent",
-                    borderRadius: "12px",
-                    padding: "4px",
-                    backgroundColor:
-                      selectedImg === i ? "#ffedd5" : "transparent",
-                  }}
-                />
+        {/* ── Scene image ── */}
+        <img src={imgScene} alt="scene" className="lwd-scene-img" />
 
-                <div
-                  ref={(el) => (imageRefs.current[i] = el)} // 🔥 الريف هون على الدوت
-                  className="w-3 h-3 rounded-full mt-2 transition"
-                  style={{
-                    backgroundColor: selectedImg === i ? "#f97316" : "#fb923c",
-                    transform: selectedImg === i ? "scale(1.4)" : "scale(1)",
-                    boxShadow:
-                      selectedImg === i
-                        ? "0 0 0 4px rgba(249,115,22,0.2)"
-                        : "none",
-                  }}
-                ></div>
-              </div>
-            ))}
-          </div>
+        {/* ── Sentences ── */}
+        <div className="lwd-list">
+          {ITEMS.map((item) => {
+            const wrong    = isWrong(item);
+            const value    = answers[item.id] || "";
+            const tColor   = showAns ? INPUT_ANS_COLOR : INPUT_TEXT_COLOR;
+            const uColor   = wrong ? INPUT_UL_WRONG : INPUT_UL_DEFAULT;
+            const disabled = isDisabled(item);
 
-          {/* 🔥 الجمل تحت */}
-          <div className="grid grid-cols-6 gap-8 w-full justify-items-center mt-10">
-            {sentences.map((sent, i) => (
-              <div
-                key={i}
-                onClick={() => selectSentence(i)}
-                className="relative flex flex-col items-center cursor-pointer"
-              >
-                {/* 🔥 الدوت */}
-                <div
-                  ref={(el) => (sentenceRefs.current[i] = el)} // 🔥 هون كمان
-                  className="absolute -top-2 left-1/2 -translate-x-1/2 rounded-full z-10 transition"
-                  style={{
-                    width: "12px",
-                    height: "12px",
-                    backgroundColor: "#f97316",
-                    transform:
-                      selectedSentence === i ? "scale(1.4)" : "scale(1)",
-                    boxShadow:
-                      selectedSentence === i
-                        ? "0 0 0 4px rgba(249,115,22,0.2)"
-                        : "none",
-                  }}
-                ></div>
+            return (
+              <div key={item.id} className="lwd-row">
+                <span className="lwd-num">{item.id}</span>
+                <span className="lwd-prefix">{item.prefix}</span>
+                {item.before && <span className="lwd-text">{item.before}</span>}
 
-                {/* 🔥 البوكس */}
-                <div
-                  className="relative px-4 py-2 rounded-2xl text-sm text-center transition"
-                  style={{
-                    backgroundColor:
-                      selectedSentence === i ? "#fed7aa" : "#ffedd5",
-                    border:
-                      selectedSentence === i
-                        ? "2px solid #f97316"
-                        : "2px solid transparent",
-                  }}
-                >
-                  {sent.text}
-                  {showResult &&
-                    Object.entries(matches).some(
-                      ([imgId, sentId]) =>
-                        sentId == i && correct[imgId] !== sentId,
-                    ) && (
-                      <span
-                        style={{
-                          position: "absolute",
-                          top: "-10px",
-                          right: "-10px",
-                          transform: "translateY(-50%)",
-                          width: "20px",
-                          height: "20px",
-                          background: "#ef4444",
-                          color: "white",
-                          borderRadius: "50%",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          fontSize: "12px",
-                          fontWeight: "bold",
-                          border: "2px solid white",
-                          boxShadow: "0 1px 6px rgba(0,0,0,0.2)",
-                          pointerEvents: "none",
-                          zIndex: 3,
-                        }}
-                      >
-                        ✕
-                      </span>
-                    )}
+                <div className="lwd-input-wrap">
+                  <input
+                    type="text"
+                    className={[
+                      "lwd-input",
+                      wrong   ? "lwd-input--wrong"  : "",
+                      showAns ? "lwd-input--answer" : "",
+                    ].filter(Boolean).join(" ")}
+                    value={value}
+                    disabled={disabled}
+                    onChange={(e) => handleChange(item.id, e.target.value)}
+                    style={{ borderBottomColor: uColor, color: tColor }}
+                    spellCheck={false}
+                    autoComplete="off"
+                  />
+                  {wrong && <div className="lwd-badge">✕</div>}
                 </div>
+
+                {item.after && <span className="lwd-text">{item.after}</span>}
               </div>
-            ))}
-          </div>
+            );
+          })}
         </div>
-      </div>
 
-      <svg className="absolute top-0 left-0 w-full h-full pointer-events-none">
-        {Object.entries(matches).map(([imgId, sentId], i) => {
-          const imgDot = imageRefs.current[imgId];
-          const sentDot = sentenceRefs.current[sentId];
-
-          if (!imgDot || !sentDot || !containerRef.current) return null;
-
-          const imgRect = imgDot.getBoundingClientRect();
-          const sentRect = sentDot.getBoundingClientRect();
-          const containerRect = containerRef.current.getBoundingClientRect();
-
-          const x1 = sentRect.left + sentRect.width / 2 - containerRect.left;
-          const y1 = sentRect.top + sentRect.height / 2 - containerRect.top;
-
-          const x2 = imgRect.left + imgRect.width / 2 - containerRect.left;
-          const y2 = imgRect.top + imgRect.height / 2 - containerRect.top;
-          return (
-            <g key={i}>
-              <line
-                x1={x1}
-                y1={y1}
-                x2={x2}
-                y2={y2}
-                stroke="orange"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-              />
-            </g>
-          );
-        })}
-      </svg>
-
-      <div className="action-buttons-container">
-        <button className="try-again-button" onClick={reset}>
-          Start Again ↻
-        </button>
-
-        <button onClick={showAnswers} className="show-answer-btn">
-          Show Answer
-        </button>
-
-        <button className="check-button2" onClick={checkAnswers}>
-          Check Answer ✓
-        </button>
+        {/* ── Buttons ── */}
+        <div className="lwd-buttons">
+          <Button
+            checkAnswers={handleCheck}
+            handleShowAnswer={handleShowAnswer}
+            handleStartAgain={handleReset}
+          />
+        </div>
       </div>
     </div>
   );
-};
-
-export default Review9_Page2_Q1;
+}

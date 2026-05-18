@@ -1,253 +1,267 @@
 import React, { useState } from "react";
-import ValidationAlert from "../../Popup/ValidationAlert";
-import WrongMark from "../../WrongMark";
-
-import img1 from "../../../assets/imgs/pages/classbook/Right 3 Unit 10 What Shall We Do on the Weekend Folder/Page 86/Ex A 5.svg";
-import img2 from "../../../assets/imgs/pages/classbook/Right 3 Unit 10 What Shall We Do on the Weekend Folder/Page 86/Ex A 6.svg";
-import img3 from "../../../assets/imgs/pages/classbook/Right 3 Unit 10 What Shall We Do on the Weekend Folder/Page 86/Ex A 7.svg";
-import img4 from "../../../assets/imgs/pages/classbook/Right 3 Unit 10 What Shall We Do on the Weekend Folder/Page 86/Ex A 8.svg";
 import Button from "../../Button";
-import blue from "../../../assets/audio/ClassBook/Unit 10/P 86/unit10-pg86-EXA2.mp3";
+import ValidationAlert from "../../Popup/ValidationAlert";
 
-import QuestionAudioPlayer from "../../QuestionAudioPlayer";
+// ─────────────────────────────────────────────
+//  🖼️  IMAGES
+// ─────────────────────────────────────────────
+import img1 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 10 Stella Goes Shopping Folder/Page 86/SVG/Asset 24.svg"; // She
+import img2 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 10 Stella Goes Shopping Folder/Page 86/SVG/Asset 25.svg"; // He
+import img3 from"../../../assets/imgs/pages/Class Book/Right 4 Unit 10 Stella Goes Shopping Folder/Page 86/SVG/Asset 26.svg"; // They
+import img4 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 10 Stella Goes Shopping Folder/Page 86/SVG/Asset 27.svg"; // We
+import img5 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 10 Stella Goes Shopping Folder/Page 86/SVG/Asset 28.svg"; // You
+import img6 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 10 Stella Goes Shopping Folder/Page 86/SVG/Asset 29.svg"; // I
 
-const Unit10_Page5_Q2 = () => {
-  const items = [
-    {
-      img: img1,
-      options: ["br", "gr", "tr"],
-      correct: "gr",
-    },
-    {
-      img: img2,
-      options: ["tr", "cr", "dr"],
-      correct: "tr",
-    },
-    {
-      img: img3,
-      options: ["fr", "tr", "br"],
-      correct: "fr",
-    },
-    {
-      img: img4,
-      options: ["br", "dr", "cr"],
-      correct: "br",
-    },
-  ];
-  const captions = [
-  {
-    start: 0.28,
-    end: 6.899,
-    text: "Page 86, write activities, exercise A, number two. Listen and choose."
-  },
-  {
-    start: 6.899,
-    end: 15.46,
-    text: "One, grapes. Two, train. Three, fries. Four, broom."
-  }
+// ─────────────────────────────────────────────
+//  🎨  COLORS
+// ─────────────────────────────────────────────
+const TEXT_COLOR      = "#2b2b2b";
+const NUMBER_COLOR    = "#2b2b2b";
+const PRONOUN_COLOR   = "#2b2b2b";
+const CIRCLE_SELECTED = "#2195a6";
+const CIRCLE_CORRECT  = "#2195a6";
+const CIRCLE_WRONG    = "#ef4444";
+const WRONG_BADGE_BG  = "#ef4444";
+const WRONG_BADGE_TX  = "#ffffff";
+
+// ─────────────────────────────────────────────
+//  📝  EXERCISE DATA
+// ─────────────────────────────────────────────
+const ITEMS = [
+  { id: 1, src: img1, pronoun: "She",  correct: "has"  },
+  { id: 2, src: img2, pronoun: "He",   correct: "has"  },
+  { id: 3, src: img3, pronoun: "They", correct: "have" },
+  { id: 4, src: img4, pronoun: "We",   correct: "have" },
+  { id: 5, src: img5, pronoun: "You",  correct: "have" },
+  { id: 6, src: img6, pronoun: "I",    correct: "have" },
 ];
-  const [selected, setSelected] = useState(Array(items.length).fill(""));
-  const [answers, setAnswers] = useState(Array(items.length).fill(""));
-  const [locked, setLocked] = useState(false);
-  const [showResult, setShowResult] = useState(false);
 
-  const chooseOption = (i, value) => {
-    if (locked) return;
+// ─────────────────────────────────────────────
+//  COMPONENT
+// ─────────────────────────────────────────────
+export default function WB_ReadCircle_QB() {
+  const [selected,    setSelected]    = useState({});
+  const [showResults, setShowResults] = useState(false);
+  const [showAns,     setShowAns]     = useState(false);
 
-    const newSelected = [...selected];
-    newSelected[i] = value;
-    setSelected(newSelected);
+  const isLocked = showResults || showAns;
 
-    const newAnswers = [...answers];
-    newAnswers[i] = items[i].start + value + items[i].end;
-    setAnswers(newAnswers);
+  const handleSelect = (id, value) => {
+    if (isLocked) return;
+    setSelected((prev) => ({ ...prev, [id]: value }));
   };
 
-  const resetAll = () => {
-    setSelected(Array(items.length).fill(""));
-    setAnswers(Array(items.length).fill(""));
-    setLocked(false);
-    setShowResult(false);
-  };
-
-  const showAnswers = () => {
-    setSelected(items.map((i) => i.correct));
-    setAnswers(items.map((i) => i.start + i.correct + i.end));
-    setLocked(true);
-  };
-
-  const checkAnswers = () => {
-    if (locked) return;
-
-    if (selected.includes("")) {
-      ValidationAlert.info();
-      return;
-    }
-
+  const handleCheck = () => {
+    if (isLocked) return;
+    const allAnswered = ITEMS.every((item) => selected[item.id]);
+    if (!allAnswered) { ValidationAlert.info("Please answer all questions first."); return; }
     let score = 0;
+    ITEMS.forEach((item) => { if (selected[item.id] === item.correct) score++; });
+    setShowResults(true);
+    if (score === ITEMS.length)   ValidationAlert.success(`Score: ${score} / ${ITEMS.length}`);
+    else if (score > 0)           ValidationAlert.warning(`Score: ${score} / ${ITEMS.length}`);
+    else                          ValidationAlert.error(`Score: ${score} / ${ITEMS.length}`);
+  };
 
-    items.forEach((item, i) => {
-      if (selected[i] === item.correct) {
-        score++;
-      }
-    });
+  const handleShowAnswer = () => {
+    const filled = {};
+    ITEMS.forEach((item) => { filled[item.id] = item.correct; });
+    setSelected(filled); setShowResults(false); setShowAns(true);
+  };
 
-    const total = items.length;
+  const handleReset = () => {
+    setSelected({}); setShowResults(false); setShowAns(false);
+  };
 
-    const color = score === total ? "green" : score === 0 ? "red" : "orange";
+  const getState = (item, value) => {
+    const sel = selected[item.id];
+    if (sel !== value) return "idle";
+    if (showAns)       return "correct";
+    if (showResults)   return value === item.correct ? "correct" : "wrong";
+    return "selected";
+  };
 
-    const msg = `
-  <div style="font-size:20px;text-align:center;">
-    <span style="color:${color}; font-weight:bold;">
-      Score: ${score} / ${total}
-    </span>
-  </div>
-`;
+  const borderColor = (state) => {
+    if (state === "selected") return CIRCLE_SELECTED;
+    if (state === "correct")  return CIRCLE_CORRECT;
+    if (state === "wrong")    return CIRCLE_WRONG;
+    return "transparent";
+  };
 
-    if (score === total) ValidationAlert.success(msg);
-    else if (score === 0) ValidationAlert.error(msg);
-    else ValidationAlert.warning(msg);
+  const renderOption = (item, value) => {
+    const state   = getState(item, value);
+    const isWrong = state === "wrong";
 
-    setLocked(true);
-    setShowResult(true); // 🔥 مهم
+    return (
+      <div
+        key={value}
+        style={{
+          position: "relative",
+          display: "inline-flex",
+          alignItems: "center",
+          justifyContent: "center",
+          border: `2.5px solid ${borderColor(state)}`,
+          borderRadius: "999px",
+          padding: "clamp(4px,0.5vw,8px) clamp(14px,1.8vw,24px)",
+          cursor: isLocked ? "default" : "pointer",
+          userSelect: "none",
+          transition: "border-color 0.15s",
+          minWidth: "clamp(56px,7vw,90px)",
+        }}
+        onClick={() => handleSelect(item.id, value)}
+      >
+        <span style={{
+          fontSize: "clamp(14px,1.7vw,20px)",
+          color: TEXT_COLOR,
+          fontWeight: state !== "idle" ? 600 : 400,
+          lineHeight: 1.4,
+        }}>
+          {value}
+        </span>
+        {isWrong && (
+          <div style={{
+            position: "absolute", top: -7, right: -7,
+            width: "clamp(14px,1.6vw,17px)", height: "clamp(14px,1.6vw,17px)",
+            borderRadius: "50%", background: WRONG_BADGE_BG, color: WRONG_BADGE_TX,
+            display: "flex", alignItems: "center", justifyContent: "center",
+            fontSize: "clamp(6px,0.7vw,9px)", fontWeight: 700,
+            border: "2px solid #fff", boxShadow: "0 2px 6px rgba(0,0,0,0.2)",
+            pointerEvents: "none", zIndex: 3,
+          }}>✕</div>
+        )}
+      </div>
+    );
   };
 
   return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        padding: "30px",
-      }}
-    >
-      <div className="div-forall">
-        <h5 className="header-title-page8">
-          <span style={{ color: "#2e3192", marginRight: "10px" }}>2</span>
-          Listen and choose.
-        </h5>
-        <QuestionAudioPlayer src={blue} captions={captions} stopAtSecond={6.3} />
+    <div className="main-container-component">
+      <style>{`
+        /* ── 3×2 grid ── */
+        .rcb-grid {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: clamp(16px, 2.4vw, 32px) clamp(20px, 3vw, 40px);
+          width: 100%;
+        }
 
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 mt-10 mb-10 px-2">
-          {items.map((item, i) => (
-            <div
-              key={i}
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                gap: "12px",
-                alignItems: "center", // لتوسيط كل العناصر داخل العمود
-              }}
-            >
-              {/* الرقم */}
-              <div style={{ fontWeight: "bold", fontSize: "18px" }}>
-                {i + 1}
+        /* Single item */
+        .rcb-item {
+          display: flex;
+          flex-direction: column;
+          align-items: flex-start;
+          gap: clamp(6px, 0.8vw, 10px);
+        }
+
+        /* num row */
+        .rcb-num-row {
+          display: flex;
+          align-items: center;
+          gap: clamp(6px, 0.8vw, 10px);
+        }
+
+        .rcb-num {
+          font-size: clamp(14px, 1.7vw, 20px);
+          font-weight: 700;
+          color: ${NUMBER_COLOR};
+          flex-shrink: 0;
+          line-height: 1;
+        }
+
+        .rcb-img {
+          width:50%;
+          height: auto;
+          object-fit: contain;
+          display: block;
+        }
+
+        /* Options + pronoun */
+        .rcb-options-col {
+          display: flex;
+          flex-direction: column;
+          gap: clamp(6px, 0.9vw, 12px);
+          align-items: flex-start;
+        }
+
+        .rcb-pronoun {
+          font-size: clamp(13px, 1.6vw, 19px);
+          color: ${PRONOUN_COLOR};
+          font-weight: 500;
+          line-height: 1.4;
+        }
+
+        /* img + options side by side */
+        .rcb-body {
+          display: flex;
+          align-items: center;
+          gap: clamp(10px, 1.4vw, 18px);
+          width: 100%;
+        }
+
+        .rcb-buttons {
+          display: flex;
+          justify-content: center;
+          margin-top: clamp(8px, 1.6vw, 18px);
+        }
+
+        @media (max-width: 560px) {
+          .rcb-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+        @media (max-width: 360px) {
+          .rcb-grid { grid-template-columns: 1fr; }
+        }
+      `}</style>
+
+      <div
+        className="div-forall"
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: "clamp(14px, 2vw, 22px)",
+          maxWidth: "1100px",
+          margin: "0 auto",
+        }}
+      >
+        {/* ── Header ── */}
+        <h1
+          className="WB-header-title-page8"
+          style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
+        >
+          <span className="WB-ex-A">B</span>
+          Read and circle.
+        </h1>
+
+        {/* ── 3×2 Grid ── */}
+        <div className="rcb-grid">
+          {ITEMS.map((item) => (
+            <div key={item.id} className="rcb-item">
+
+              {/* Num */}
+              <span className="rcb-num">{item.id}</span>
+
+              {/* Image + options */}
+              <div className="rcb-body">
+                <img src={item.src} alt={`img-${item.id}`} className="rcb-img" />
+
+                <div className="rcb-options-col">
+                  {renderOption(item, "have")}
+                  <span className="rcb-pronoun">{item.pronoun}</span>
+                  {renderOption(item, "has")}
+                </div>
               </div>
 
-              {/* الصورة */}
-              <img
-                src={item.img}
-                alt=""
-                style={{
-                  width: "100%",
-                  maxWidth: "160px",
-                  height: "120px",
-                  objectFit: "contain",
-                }}
-              />
-
-              {/* الخيارات */}
-              <div
-                style={{
-                  display: "flex",
-                  gap: "10px", // مسافة منطقية بين الخيارات (بدل gap-12)
-                  width: "100%",
-                  justifyContent: "center",
-                }}
-              >
-                {item.options.map((opt, idx) => {
-                  // تحديد الألوان بناءً على الحالة
-                  let borderColor = "#e5e7eb"; // رمادي افتراضي
-                  let bgColor = "#f9fafb"; // خلفية افتراضية
-
-                  if (selected[i] === opt) {
-                    borderColor = "#1C398E";
-                    bgColor = "#EBF0FF"; // أزرق فاتح لما يختار
-                  }
-
-                  if (
-                    showResult &&
-                    selected[i] === opt &&
-                    opt !== item.correct
-                  ) {
-                    borderColor = "#ef4444";
-                    bgColor = "#FEF2F2"; // أحمر فاتح لما يكون غلط
-                  }
-
-                  return (
-                    <div
-                      key={idx}
-                      onClick={() => chooseOption(i, opt)}
-                      style={{
-                        flex: 1,
-                        textAlign: "center",
-                        padding: "8px 12px", // padding شامل عشان يبان كـ زر
-                        borderRadius: "20px",
-                        cursor: locked ? "not-allowed" : "pointer",
-                        border: `2px solid ${borderColor}`,
-                        backgroundColor: bgColor,
-                        fontWeight: "500",
-                        fontSize: "16px",
-                        position: "relative",
-                        transition: "all 0.2s ease", // حركة ناعمة لما يتغير اللون
-                        maxWidth: "120px", // حتى لو الكلام قصير ما يكبر أوي
-                      }}
-                    >
-                      {opt}
-
-                      {/* ❌ أيقونة الخطأ */}
-                      {showResult &&
-                        selected[i] === opt &&
-                        opt !== item.correct && (
-                          <div
-                            style={{
-                              position: "absolute",
-                              top: "-10px",
-                              left: "50%",
-                              transform: "translateX(-50%)", // ضبط التوسيط فوق الزر بالظبط
-                              width: "22px",
-                              height: "22px",
-                              background: "#ef4444",
-                              color: "white",
-                              borderRadius: "50%",
-                              fontSize: "12px",
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "center",
-                              fontWeight: "bold",
-                              border: "2px solid white",
-                              boxShadow: "0 2px 6px rgba(0,0,0,0.2)",
-                              pointerEvents: "none",
-                            }}
-                          >
-                            ✕
-                          </div>
-                        )}
-                    </div>
-                  );
-                })}
-              </div>
             </div>
           ))}
         </div>
-        <Button
-          handleShowAnswer={showAnswers}
-          handleStartAgain={resetAll}
-          checkAnswers={checkAnswers}
-        />
+
+        {/* ── Buttons ── */}
+        <div className="rcb-buttons">
+          <Button
+            checkAnswers={handleCheck}
+            handleShowAnswer={handleShowAnswer}
+            handleStartAgain={handleReset}
+          />
+        </div>
       </div>
     </div>
   );
-};
-
-export default Unit10_Page5_Q2;
+}

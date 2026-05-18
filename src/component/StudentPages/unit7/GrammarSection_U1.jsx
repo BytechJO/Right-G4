@@ -2,7 +2,7 @@ import GrammarA from "./GrammarA";
 import GrammarB from "./GrammarB";
 import GrammarC from "./GrammarC";
 
-import image1 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 6 Ready for School Folder/Page 48/SVG/Asset 22.svg";
+import image1 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 7  The Alligator Scare Folder/Page 60/SVG/24.svg";
 import image  from "../../../assets/imgs/pages/Class Book/Right 4 Unit 7  The Alligator Scare Folder/Page 60/SVG/Asset 7.svg";
 
 import sound from "../../../assets/audio/ClassBook/Grade 4/cd39pg60-grammar-adult-lady_yKkL6wML.mp3";
@@ -81,7 +81,7 @@ const stopAtSecond = 2.14;
         />
       </div>
 
-      <div className="w-[60%]  my-5">
+      <div className="w-[30%]  my-5">
         <img
           style={{ width: "100%", height: "auto", display: "block" , alignSelf : "center" }}
           src={image1}

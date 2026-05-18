@@ -1,30 +1,33 @@
-import React, { useRef, useState } from "react";
-
+import React, { useState, useRef } from "react";
 import AudioWithCaption from "../../AudioWithCaption";
 import audioBtn from "../../../assets/Page 01/Audio btn.svg";
 import pauseBtn from "../../../assets/Page 01/Right Video Button.svg";
+import { useAudio } from "../../../context/AudioContext";
 
 // ======================================================
-// 🖼️ استبدل بمسار الصورة الصحيح
-import pageImage from "../../../assets/imgs/pages/Class Book/Right 4 Unit 10 Stella Goes Shopping Folder/Page 92.png"
-// 🔊 صوت واحد بس - نفس الصوت للكل والمناطق
+import pageImage from "../../../assets/imgs/pages/Class Book/Right 4 Unit 10 Stella Goes Shopping Folder/Page 92.png";
 import soundAll from "../../../assets/audio/ClassBook/Grade 4/cd5pg92-story-adult-lady_ZnWsUclb.mp3";
-
-// 🎬 استبدل بمسار الفيديو الصحيح
 import videoFile from "../../../assets/right grade 4/reading/grade 4 unit 8 page 74-75 reading.mp4";
-
-// 🎨 استبدل باسم ملف CSS الصحيح
 // ======================================================
+
+const PAGE_ID = "page-92";
 
 const Reading_NewPage = ({ openPopup }) => {
+  const { registerAudio, stopCurrent, activePageId } = useAudio();
   const audioRef = useRef(null);
   const [hoveredAreaIndex, setHoveredAreaIndex] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [activeAreaIndex, setActiveAreaIndex] = useState(null);
 
-  // ======================================================
-  // 📝 Captions للصوت الكامل - عدّل النصوص والتوقيتات
-const captions = [
+  React.useEffect(() => {
+    if (activePageId !== PAGE_ID) {
+      setActiveAreaIndex(null);
+      setHoveredAreaIndex(null);
+      setIsPlaying(false);
+    }
+  }, [activePageId]);
+
+  const captions = [
   {
     start: 0.42,
     end: 1.56,
@@ -176,9 +179,8 @@ const captions = [
     text: "He did all of these things because he cared for others. Ma Liang was the greatest painter in China.",
   },
 ];
-  // 📍 مناطق النقر - كل منطقة عندها startFrom و stopAt من الصوت الأساسي
-const clickableAreas = [
-  // 1
+
+  const clickableAreas = [
   {
     x1: 15.11,
     y1: 35.5,
@@ -209,8 +211,6 @@ const clickableAreas = [
   },
 ];
 
-  // ======================================================
-
   const handleImageClick = (e) => {
     const rect = e.target.getBoundingClientRect();
     const xPercent = ((e.clientX - rect.left) / rect.width) * 100;
@@ -218,35 +218,41 @@ const clickableAreas = [
     console.log("X%:", xPercent.toFixed(2), "Y%:", yPercent.toFixed(2));
   };
 
-  // تشغيل slice من الصوت الأساسي
-  const playSlice = (slice) => {
+  const playSlice = (slice, newIndex) => {
     const audio = audioRef.current;
     if (!audio) return;
+
+    stopCurrent();
+    setActiveAreaIndex(null);
+    setHoveredAreaIndex(null);
 
     audio.src = soundAll;
     audio.currentTime = slice.startFrom;
     audio.play();
     setIsPlaying(true);
+    setActiveAreaIndex(newIndex);
 
-    const checkStop = setInterval(() => {
+    const id = setInterval(() => {
       if (audio.currentTime >= slice.stopAt) {
         audio.pause();
-        clearInterval(checkStop);
+        clearInterval(id);
         setIsPlaying(false);
         setActiveAreaIndex(null);
         setHoveredAreaIndex(null);
       }
     }, 100);
 
+    registerAudio(audio, id, PAGE_ID);
+
     audio.onended = () => {
-      clearInterval(checkStop);
+      clearInterval(id);
       setIsPlaying(false);
       setActiveAreaIndex(null);
       setHoveredAreaIndex(null);
     };
   };
 
-   return (
+  return (
     <div
       className="page1-img-wrapper"
       onClick={handleImageClick}
@@ -256,9 +262,7 @@ const clickableAreas = [
         <div
           key={index}
           className={`clickable-area ${
-            hoveredAreaIndex === index || activeAreaIndex === index
-              ? "highlight"
-              : ""
+            hoveredAreaIndex === index || activeAreaIndex === index ? "highlight" : ""
           }`}
           style={{
             position: "absolute",
@@ -269,34 +273,22 @@ const clickableAreas = [
           }}
           onClick={(e) => {
             e.stopPropagation();
-            setActiveAreaIndex(index);
-            playSlice(area.slice);
+            playSlice(area.slice, index);
           }}
-          onMouseEnter={() => {
-            if (!isPlaying) setHoveredAreaIndex(index);
-          }}
-          onMouseLeave={() => {
-            if (!isPlaying) setHoveredAreaIndex(null);
-          }}
+          onMouseEnter={() => { if (!isPlaying) setHoveredAreaIndex(index); }}
+          onMouseLeave={() => { if (!isPlaying) setHoveredAreaIndex(null); }}
         />
       ))}
 
-      {/* ⚙️ زر الصوت الكامل - عدّل اسم الـ CSS class */}
-      <div
-        className="headset-icon-CD-unit2-page11-1 hover:scale-110 transition"
-        style={{ overflow: "visible" }}
-      >
+      <div className="headset-icon-CD-unit2-page11-1 hover:scale-110 transition" style={{ overflow: "visible" }}>
         <svg
-          width="22"
-          height="22"
-          viewBox="0 0 90 90"
+          width="22" height="22" viewBox="0 0 90 90"
           onClick={(e) => {
             e.stopPropagation();
             openPopup(
               "audio",
               <div style={{ display: "flex", justifyContent: "center", alignContent: "center" }}>
-                <AudioWithCaption src={soundAll} captions={captions}            stopAtSecond={2.84}
-/>
+                <AudioWithCaption src={soundAll} captions={captions} stopAtSecond={2.84} />
               </div>
             );
           }}
@@ -306,15 +298,9 @@ const clickableAreas = [
         </svg>
       </div>
 
-      {/* ⚙️ زر الفيديو - عدّل اسم الـ CSS class */}
-      <div
-        className="pauseBtn-icon-CD-page21 hover:scale-110 transition"
-        style={{ overflow: "visible" }}
-      >
+      <div className="pauseBtn-icon-CD-page21 hover:scale-110 transition" style={{ overflow: "visible" }}>
         <svg
-          width="22"
-          height="22"
-          viewBox="0 0 90 90"
+          width="22" height="22" viewBox="0 0 90 90"
           onClick={(e) => {
             e.stopPropagation();
             openPopup(
