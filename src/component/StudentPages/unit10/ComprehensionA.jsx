@@ -135,7 +135,6 @@ const ComprehensionA = () => {
           style={{
             width: "100%",
             fontSize: "15px",
-            borderBottom: `2px solid ${isError ? "#ef4444" : "#333"}`,
             background: "transparent",
             outline: "none",
             color: showed ? "#ef4444" : "#1a1a1a",
@@ -157,7 +156,7 @@ const ComprehensionA = () => {
   };
 
   const cellStyle = {
-    border: "1px solid #ccc",
+    border: "2px solid #2195a6",
     padding: "10px 14px",
     fontSize: "15px",
     color: "#1a1a1a",
@@ -165,9 +164,10 @@ const ComprehensionA = () => {
 
   const headerStyle = {
     ...cellStyle,
-    background: "#d1d5db",
+    background: "rgb(33, 149, 166)",
     fontWeight: "600",
     textAlign: "center",
+    color : "white"
   };
 
   return (

@@ -16,8 +16,8 @@ import FlashCardViewer from "./FlashCardPages/FlashCardPages";
 // === POPUP ===
 import Popup from "./Popup/Popup";
 import LessonNavigator from "./StudentPages/LessonNavigator";
-// import teacherPdf from "../../public/Right International TB G2-Apple’s iMac (3).pdf";
-const teacherPdf = "../../public/Teacher Book 3-Apple’s iMac (3) (1).pdf"
+// import teacherPdf from "../../public/Right International TB G2-Apple's iMac (3).pdf";
+const teacherPdf = "../../public/Teacher Book 3-Apple's iMac (3) (1).pdf"
 // === ASSETS ===
 import logo from "../assets/Page 01/PMAAlogo.svg";
 import menu from "../assets/Page 01/menu.svg";
@@ -38,7 +38,7 @@ import {
   studentPages,
   workbookPages,
   teacherPages,
-  flashPages,
+  postersPages,
 } from "./BookData";
 import WorkBookNavigator from "./WorkBookPages/WorkBookNavigator";
 // import { postersVocabPages } from "./BookData/postersVocabPages";
@@ -78,7 +78,7 @@ export default function Book() {
     student: studentPages(openPopup, goToUnit),
     work: workbookPages(openPopup, goToUnit),
     teacher: teacherPages.map((t) => <TeacherBook teacher={t} />),
-    flash: flashPages,
+    flash: postersPages(openPopup), // ✅ تعديل 1: استدعاء كـ function مع openPopup
   }[activeTab];
 
   // ===========================================================
@@ -410,7 +410,7 @@ export default function Book() {
 
 
   const flashUnits = [
-    { id: 1, label: "Flashcards", start: 2, pages: flashPages.length },
+    { id: 1, label: "Posters", start: 1, pages: postersPages(openPopup).length }, // ✅ تعديل 2: function call للحصول على length
   ];
 
   // const posterUnits = [
@@ -425,9 +425,7 @@ export default function Book() {
   //                 📌 PAGE RENDERER
   // ===========================================================
   function renderPage(content) {
-    if (activeTab === "flash") {
-      return <FlashCardViewer card={content} openPopup={openPopup} />;
-    }
+    // ✅ تعديل 3: حذف FlashCardViewer wrapper — PostersPage بيرجع مباشرة
     if (typeof content === "string") {
       return <img src={content} className="w-full h-full object-contain" />;
     }
@@ -438,10 +436,10 @@ export default function Book() {
   //                 📌 TABS DEFINITION
   // ===========================================================
   const tabs = [
-    { id: "student", label: "Student’s Book" },
+    { id: "student", label: "Student's Book" },
     { id: "work", label: "Workbook" },
-    { id: "teacher", label: "Teacher’s Book" },
-    { id: "flash", label: "Flashcards" },
+    { id: "teacher", label: "Teacher's Book" },
+    { id: "flash", label: "Posters" }, // ✅ تعديل 4: "Poster" → "flash" عشان يتطابق مع pages selector
     // { id: "poster", label: "Grammar Poster" },
     // { id: "posterVocab", label: "Posters" },
   ];
@@ -475,7 +473,7 @@ export default function Book() {
   // const flashInfo = {
   //   cover: fcBookCover,
   //   title: "Right 1 flashcard",
-  //   pages: flashPages.length,
+  //   pages: postersPages.length,
   // };
 
   // const posterInfo = {

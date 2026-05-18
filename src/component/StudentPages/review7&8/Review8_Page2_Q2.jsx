@@ -95,7 +95,8 @@ export default function WB_UnscrambleWrite_QD() {
           flex-direction: column;
           gap: clamp(22px, 3.2vw, 42px);
           width: 100%;
-        }
+          margin : 5% 0 ;
+         }
 
         /* Single card */
         .uswqd-card {

@@ -1,4 +1,4 @@
-import page_1 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 1 Robots of the Future Folder/Page1.png";
+import page_1 from "../../../assets/imgs/pages/covers/G4 Cover SB.png";
 const Page1 = () => {
   return (
     <div

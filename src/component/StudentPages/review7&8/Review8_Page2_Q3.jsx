@@ -151,6 +151,8 @@ export default function WB_ReadCompleteStory_QE() {
           color: ${TEXT_COLOR};
           width: 100%;
           word-break: break-word;
+                    margin : 6% 0 ;
+
         }
 
         .rcs-text {
