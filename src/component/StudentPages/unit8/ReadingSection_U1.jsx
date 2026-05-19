@@ -125,11 +125,10 @@ How old were you when you first went to school? Was
 there anything special that you did before your classmates?"
         image={imgReading}
         image1= {img}
-        question="Do you think new inventions will be good or bad for Earth?"
         sound={readingAudio}
         captions={captions}
         stopAtSecond={2.42}
-      />
+        textLen = {31}     />
 
  </div>
       <div className="w-[60%] mt-4 space-y-6 mb-7">

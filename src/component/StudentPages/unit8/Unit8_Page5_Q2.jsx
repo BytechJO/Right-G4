@@ -71,7 +71,7 @@ export default function WB_ReadWrite_QB() {
           flex-wrap: wrap;
           gap: clamp(8px, 1.2vw, 14px);
           width: 100%;
-                    margin-top : 8%   ;
+                    margin-top : 6%   ;
                         justify-content: space-around;
 
         }
@@ -87,7 +87,7 @@ export default function WB_ReadWrite_QB() {
         .rwb-list {
           display: flex;
           flex-direction: column;
-          gap: clamp(16px, 2.4vw, 30px);
+          gap: clamp(40px, 2.4vw, 40px);
           width: 100%;
         }
         .rwb-row {

@@ -132,23 +132,7 @@ const Reading_NewPage = ({ openPopup }) => {
         />
       ))}
 
-      <div className="headset-icon-CD-unit2-page11-1 hover:scale-110 transition" style={{ overflow: "visible" }}>
-        <svg
-          width="22" height="22" viewBox="0 0 90 90"
-          onClick={(e) => {
-            e.stopPropagation();
-            openPopup(
-              "audio",
-              <div style={{ display: "flex", justifyContent: "center", alignContent: "center" }}>
-                <AudioWithCaption src={soundAll} captions={captions} stopAtSecond={2.84} />
-              </div>
-            );
-          }}
-          style={{ overflow: "visible" }}
-        >
-          <image className="svg-img" href={audioBtn} x="0" y="0" width="90" height="90" />
-        </svg>
-      </div>
+     
 
       <audio ref={audioRef} style={{ display: "none" }} />
     </div>

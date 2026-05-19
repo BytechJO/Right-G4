@@ -5,12 +5,13 @@ import { FaCheck, FaRedo, FaEye } from "react-icons/fa";
 import earthImg from "../../../assets/imgs/pages/Class Book/Right 4 Unit 4 Joy Makes a Friend Folder/Page 31/SVG/Asset 26.svg";
 
 const WritingB = () => {
-  const wordBank =["core", "mantle", "crust"];;
+  const wordBank = ["core", "mantle", "crust"];
 
   const questions = [
     { id: 1, answer: "lower mantle" },
     { id: 2, answer: "crust" },
-    { id: 3, answer: "inner core" },  ];
+    { id: 3, answer: "inner core" },
+  ];
 
   const [answers, setAnswers] = useState(
     Object.fromEntries(questions.map((q) => [q.id, ""]))
@@ -78,10 +79,10 @@ const WritingB = () => {
 
   // المواقع بالنسبة للصورة نفسها (%)
   const inputPositions = {
-    1: { top: "10%", left: "3%",  width: "27%" },   // يسار فوق - mesosphere
-    2: { top: "23%", left: "43%", width: "27%" },   // يمين فوق - thermosphere
-    3: { top: "33%", left: "6%",  width: "27%" },   // يسار تحت - troposphere
-  };  
+    1: { top: "10%", left: "3%", width: "27%" },
+    2: { top: "23%", left: "43%", width: "27%" },
+    3: { top: "33%", left: "6%", width: "27%" },
+  };
 
   return (
     <div className="mb-6 mx-auto">
@@ -97,7 +98,7 @@ const WritingB = () => {
           gap: "2rem",
           alignItems: "flex-start",
           width: "100%",
-          marginTop : "3em"
+          marginTop: "3em",
         }}
       >
         {/* Word Bank */}
@@ -128,12 +129,11 @@ const WritingB = () => {
           ))}
         </div>
 
-        {/* ✅ Image + Inputs في نفس الـ div */}
+        {/* Image + Inputs */}
         <div
           style={{
             flex: 2,
             position: "relative",
-  // ← الـ parent للـ inputs
           }}
         >
           <img
@@ -143,11 +143,9 @@ const WritingB = () => {
               width: "80%",
               height: "auto",
               display: "block",
-              top : ""
             }}
           />
 
-          {/* ✅ الـ inputs جوا نفس الـ div */}
           {questions.map((q) => {
             const pos = inputPositions[q.id];
             const isError = errors[q.id] === true;
@@ -163,56 +161,62 @@ const WritingB = () => {
                   top: pos.top,
                   left: pos.left,
                   width: pos.width,
+                  gap: "4px",
                 }}
               >
-        
-
-                <div style={{ position: "relative", flex: 1 }}>
-                  <input
-                    type="text"
-                    value={answers[q.id]}
-                    onChange={(e) => handleChange(q.id, e.target.value)}
-                    disabled={locked || isCorrect}
-                    autoComplete="off"
-                    style={{
-                      width: "100%",
-                      fontSize: "18px",
-                      background: "transparent",
-                      border: "none",
-                      outline: "none",
-                      color: showed ? "#ef4444" :  "#1a1a1a",
-                      textAlign: "center",
-                      padding: "2px 4px",
-                    }}
-                  />
-
-                  {/* ❌ Error Badge */}
+                {/* ✅ رقم السؤال + بادج الخطأ جنبه */}
+                <div
+                  style={{
+                    position: "relative",
+                    display: "flex",
+                    alignItems: "center",
+                    flexShrink: 0,
+                  }}
+                >
+                  {/* ❌ Error Badge جمب الرقم */}
                   {isError && (
                     <div
                       style={{
-                        position: "absolute",
-                        top: "-8px",
-                        right: "-8px",
-                        width: "18px",
-                        height: "18px",
+                        marginLeft: "3px",
+                        width: "16px",
+                        height: "16px",
                         background: "#ef4444",
                         color: "white",
                         borderRadius: "50%",
-                        fontSize: "10px",
+                        fontSize: "9px",
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
                         fontWeight: "bold",
                         border: "2px solid white",
                         boxShadow: "0 1px 6px rgba(0,0,0,0.2)",
+                        flexShrink: 0,
                       }}
                     >
                       ✕
                     </div>
                   )}
 
-                  
+  
                 </div>
+
+                {/* Input */}
+                <input
+                  type="text"
+                  value={answers[q.id]}
+                  onChange={(e) => handleChange(q.id, e.target.value)}
+                  disabled={locked || isCorrect}
+                  autoComplete="off"
+                  style={{
+                    flex: 1,
+                    fontSize: "18px",
+                    background: "transparent",
+                    border: "none",
+                    outline: "none",
+                    color: showed ? "#ef4444" : "#1a1a1a",
+                    padding: "-2px 4px 2px 2px",
+                  }}
+                />
               </div>
             );
           })}
@@ -220,7 +224,7 @@ const WritingB = () => {
       </div>
 
       {/* Buttons */}
-      <div className="flex justify-center gap-6 mt-8 ">
+      <div className="flex justify-center gap-6 mt-8">
         <div className="relative group">
           <div
             onClick={handleReset}

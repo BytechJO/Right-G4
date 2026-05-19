@@ -128,7 +128,7 @@ const GrammarC = () => {
             const isSelected = selected[q.id] !== null;
 
             return (
-              <div key={q.id} className="flex items-center gap-3 flex-wrap">
+              <div key={q.id} className="flex items-center gap-3 flex-wrap" style={{flexWrap : "nowrap"}}>
                 {/* Number */}
                 <span
                   style={{

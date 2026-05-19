@@ -31,16 +31,18 @@ const ITEMS = [
   {
     id:    1,
     src:   img1,
-    type:  "given",
-    given: "Have you talked on the phone today?",
+    type:  "input",
+    before:  "",
+    correct: ["Have you talked on the phone today?", "Have you talked on the phone today"],
+    answer: "Have you talked on the phone today?",
   },
   {
     id:      2,
     src:     img2,
     type:    "input",
-    before:  "Have they",
-    correct: ["washed the dishes?", "washed the dishes"],
-    answer:  "washed the dishes?",
+    before:  "",
+    correct: ["Have they washed the dishes?", "Have they washed the dishes"],
+    answer:  "Have they washed the dishes?",
   },
   {
     id:      3,

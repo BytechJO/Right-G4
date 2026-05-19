@@ -171,7 +171,7 @@ export default function WB_ReadLookComplete_QC() {
         .rlcc-list {
           display: flex;
           flex-direction: column;
-          gap: clamp(18px, 2.8vw, 36px);
+          gap:clamp(45px, 2.8vw, 45px);
           width: 100%;
         }
 

@@ -5,8 +5,8 @@ import ValidationAlert from "../../Popup/ValidationAlert";
 // ─────────────────────────────────────────────
 //  🖼️  IMAGES
 // ─────────────────────────────────────────────
-import img1 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 8 I Lived in the Library Folder/Page 71/SVG/Asset 6.svg";
-import img2 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 8 I Lived in the Library Folder/Page 71/SVG/Asset 5.svg";
+import img1 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 8 I Lived in the Library Folder/Page 71/SVG/Asset 5.svg";
+import img2 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 8 I Lived in the Library Folder/Page 71/SVG/Asset 6.svg";
 import img3 from"../../../assets/imgs/pages/Class Book/Right 4 Unit 8 I Lived in the Library Folder/Page 71/SVG/Asset 7.svg";
 import img4 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 8 I Lived in the Library Folder/Page 71/SVG/Asset 8.svg";
 
@@ -41,12 +41,12 @@ const LEFT_ITEMS = [
 ];
 
 const LEFT_IMGS = [
-  { name: "img1", src: img1, correctLeftId: 1 },
+  { name: "img1", src: img1, correctLeftId: 4 },
   { name: "img3", src: img3, correctLeftId: 3 },
 ];
 
 const RIGHT_IMGS = [
-  { name: "img2", src: img2, correctLeftId: 4 },
+  { name: "img2", src: img2, correctLeftId: 1 },
   { name: "img4", src: img4, correctLeftId: 2 },
 ];
 
@@ -296,7 +296,7 @@ export default function WB_ReadLookMatch_QD() {
           display: flex;
           flex-direction: column;
           gap: clamp(53.5px, 1vw, 30px);
-                    margin-top: 5%;
+                    margin-top: 30%;
 
         }
 
@@ -304,7 +304,7 @@ export default function WB_ReadLookMatch_QD() {
           display: flex;
           flex-direction: column;
           gap: clamp(53.5px, 1vw, 30px);
-          margin-top: 30%;
+          margin-top: 5%;
         }
 
         .rlm-img-wrap {

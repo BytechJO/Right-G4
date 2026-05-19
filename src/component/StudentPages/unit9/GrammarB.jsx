@@ -2,9 +2,9 @@ import { useState } from "react";
 import ValidationAlert from "../../Popup/ValidationAlert";
 import { FaCheck, FaRedo, FaEye } from "react-icons/fa";
 
-import img1 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 9 Tom Has Nothing to Do Folder/Page 78/SVG/Asset 4.svg";
+import img1 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 9 Tom Has Nothing to Do Folder/Page 78/SVG/Asset 7.svg";
 import img2 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 9 Tom Has Nothing to Do Folder/Page 78/SVG/Asset 5.svg";
-import img3 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 9 Tom Has Nothing to Do Folder/Page 78/SVG/Asset 7.svg";
+import img3 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 9 Tom Has Nothing to Do Folder/Page 78/SVG/Asset 4.svg";
 
 const GrammarB = () => {
   const questions = [
@@ -61,10 +61,12 @@ const GrammarB = () => {
 
     let correctCount = 0;
     const newErrors = {};
+const normalize = (str) =>
+  str.toLowerCase().replace(/[^a-z0-9'\s]/g, "").replace(/\s+/g, " ").trim().replace(/[\u2018\u2019\u201A\u201B\u0060\u00B4']/g, "’");;
 
     answers.forEach((ans, i) => {
       const isCorrect = questions[i].answers.some(
-        (a) => a.toLowerCase() === ans.trim().toLowerCase()
+        (a) => normalize(a) === ans.trim().toLowerCase()
       );
       if (isCorrect) {
         correctCount++;

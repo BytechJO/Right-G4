@@ -110,7 +110,7 @@ export default function WB_ReadComplete_QB() {
         .rcb-list {
           display: flex;
           flex-direction: column;
-          gap: clamp(18px, 2.8vw, 36px);
+          gap: clamp(60px, 2.8vw, 60px);
         }
 
         /* Single row: num | before | input | after */

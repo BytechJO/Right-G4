@@ -31,16 +31,19 @@ const ITEMS = [
   {
     id:      1,
     src:     img1,
-    type:    "given",
-    given:   "She has been on a bus.",
+    type:    "input",
+    before:  "",
+    correct: ["She has been on a bus", "She has been on a bus."],
+
+    answer:   "She has been on a bus.",
   },
   {
     id:      2,
     src:     img2,
     type:    "input",
-    before:  "He has",
-    correct: ["been on a boat.", "been on a boat"],
-    answer:  "been on a boat.",
+    before:  "",
+    correct: ["He has been on a boat.", " He has been on a boat"],
+    answer:  "He has been on a boat.",
   },
   {
     id:      3,

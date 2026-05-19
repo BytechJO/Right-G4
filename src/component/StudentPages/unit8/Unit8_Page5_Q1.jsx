@@ -148,16 +148,16 @@ export default function WB_ReadChooseWrite_QA() {
         .rcwa-list {
           display: flex;
           flex-direction: column;
-          gap: clamp(16px, 2.4vw, 30px);
+          gap:clamp(40px, 2.4vw, 40px);
           width: 100%;
-                    margin : 10% 0 ;
+                    margin : 7% 0 ;
 
         }
 
         .rcwa-item {
           display: flex;
           flex-direction: column;
-          gap: clamp(4px, 0.5vw, 7px);
+          gap: clamp(15px, 0.5vw, 15px);
         }
 
         /* Sentence row */

@@ -54,10 +54,14 @@ const GrammarC = () => {
 
     let correctCount = 0;
     const newErrors = {};
-
+const normalize = (str) =>
+  str
+    .trim()
+    .toLowerCase()
+    .replace(/[\u2018\u2019\u201A\u201B\u0060\u00B4']/g, "’");
     answers.forEach((ans, i) => {
       const isCorrect = questions[i].answers.some(
-        (a) => a.toLowerCase() === ans.trim().toLowerCase()
+        (a) => normalize(a) === ans.trim().toLowerCase()
       );
       if (isCorrect) {
         correctCount++;

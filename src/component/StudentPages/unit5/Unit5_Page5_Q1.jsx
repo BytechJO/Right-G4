@@ -163,7 +163,7 @@ export default function WB_ReadCircleWrite_QA() {
         .rcwa-list {
           display: flex;
           flex-direction: column;
-          gap: clamp(18px, 2.6vw, 34px);
+          gap: clamp(35px, 2.6vw, 35px);
           width: 100%;
         }
 

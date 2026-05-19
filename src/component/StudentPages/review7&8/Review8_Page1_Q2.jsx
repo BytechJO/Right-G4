@@ -130,9 +130,9 @@ export default function WB_ReadWritePastTense_QB() {
 
         {/* ── Reset only ── */}
         <div className="rwpt-buttons">
-          <Button
-            handleStartAgain={handleReset}
-          />
+     <button onClick={handleReset} className="try-again-button">
+          Start Again ↻
+        </button>
         </div>
       </div>
     </div>

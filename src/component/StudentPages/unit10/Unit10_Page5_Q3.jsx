@@ -27,52 +27,17 @@ const WRONG_BADGE_TEXT = "#ffffff";
 //  📝  AUDIO CAPTIONS
 // ─────────────────────────────────────────────
 const captions = [
-  {
-    start: 0.48,
-    end: 3.06,
-    text: "Page 86, Write Activities.",
-  },
-  {
-    start: 3.06,
-    end: 7.62,
-    text: "Exercise C, Listen, read, and match.",
-  },
-  {
-    start: 7.62,
-    end: 10.54,
-    text: "Alex enjoys traveling around the world.",
-  },
-  {
-    start: 10.54,
-    end: 13.24,
-    text: "He has done many things in different countries.",
-  },
-  {
-    start: 13.24,
-    end: 18.72,
-    text: "Alex has been rock climbing in Oregon and has gone skiing in Switzerland.",
-  },
-  {
-    start: 18.72,
-    end: 21.86,
-    text: "He has watched chefs make pizza in Italy.",
-  },
-  {
-    start: 21.86,
-    end: 25.90,
-    text: "He has flown in a small plane over the Mediterranean Sea.",
-  },
-  {
-    start: 25.90,
-    end: 32.78,
-    text: "He has visited the Blue Mosque in Turkey and toured London in a double-decker bus.",
-  },
-  {
-    start: 32.78,
-    end: 37.04,
-    text: "He has done all of these things and plans to do more in the future.",
-  },
+  { start: 0.48,  end: 3.06,  text: "Page 86, Write Activities." },
+  { start: 3.06,  end: 7.62,  text: "Exercise C, Listen, read, and match." },
+  { start: 7.62,  end: 10.54, text: "Alex enjoys traveling around the world." },
+  { start: 10.54, end: 13.24, text: "He has done many things in different countries." },
+  { start: 13.24, end: 18.72, text: "Alex has been rock climbing in Oregon and has gone skiing in Switzerland." },
+  { start: 18.72, end: 21.86, text: "He has watched chefs make pizza in Italy." },
+  { start: 21.86, end: 25.90, text: "He has flown in a small plane over the Mediterranean Sea." },
+  { start: 25.90, end: 32.78, text: "He has visited the Blue Mosque in Turkey and toured London in a double-decker bus." },
+  { start: 32.78, end: 37.04, text: "He has done all of these things and plans to do more in the future." },
 ];
+
 // ─────────────────────────────────────────────
 //  📝  EXERCISE DATA
 // ─────────────────────────────────────────────
@@ -84,10 +49,10 @@ const LEFT_ITEMS = [
 ];
 
 const RIGHT_ITEMS = [
-  { name: "r1", text: "in a double-decker bus.", correctLeftId: 3 },
-  { name: "r2", text: "in Switzerland.",          correctLeftId: 4 },
-  { name: "r3", text: "over the Mediterranean Sea.", correctLeftId: 2 },
-  { name: "r4", text: "in Oregon.",               correctLeftId: 1 },
+  { name: "r1", text: "in a double-decker bus.",      correctLeftId: 3 },
+  { name: "r2", text: "in Switzerland.",               correctLeftId: 4 },
+  { name: "r3", text: "over the Mediterranean Sea.",   correctLeftId: 2 },
+  { name: "r4", text: "in Oregon.",                    correctLeftId: 1 },
 ];
 
 // ─────────────────────────────────────────────
@@ -171,7 +136,6 @@ export default function WB_ListenReadMatch_QC() {
   const leftDotColor  = (id) => { if (selectedLeft === id) return DOT_SELECTED; if (showAns && connectedLeft(id)) return LINE_SHOW_ANS; return DOT_DEFAULT; };
   const rightDotColor = (n)  => { if (showAns && connectedRight(n)) return LINE_SHOW_ANS; return DOT_DEFAULT; };
   const isLeftWrong   = (id) => showResults && !showAns && connectedLeft(id) && !isCorrect(id, connections[id]);
-  const isRightWrong  = (n)  => { if (!showResults || showAns || !connectedRight(n)) return false; const lid = Object.keys(connections).find((k) => connections[k] === n); return lid && !isCorrect(lid, n); };
 
   return (
     <div className="main-container-component">
@@ -183,31 +147,64 @@ export default function WB_ListenReadMatch_QC() {
           width: 100%;
         }
         .lrmc-area  { position: relative; width: 100%; }
-        .lrmc-grid  { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; width: 100%; }
-        .lrmc-left-col  { display: flex; flex-direction: column; gap: clamp(16px,2.4vw,32px); }
-        .lrmc-right-col { display: flex; flex-direction: column; gap: clamp(16px,2.4vw,32px); padding-left: clamp(20px,3vw,40px); }
-        .lrmc-left-row  { display: flex; align-items: center; gap: clamp(5px,0.6vw,8px); }
-        .lrmc-right-row { display: flex; align-items: center; gap: clamp(6px,0.8vw,10px); cursor: pointer; user-select: none; }
-        .lrmc-right-row--locked { cursor: default; }
-        .lrmc-num { font-size: clamp(14px,1.7vw,20px); font-weight:700; color:${NUMBER_COLOR}; flex-shrink:0; line-height:1.5; }
-        .lrmc-sent-wrap {
-          display: flex; align-items: center; gap: clamp(6px,0.8vw,10px);
-          padding: clamp(4px,0.5vw,7px) clamp(8px,1vw,12px);
-          border-radius: 10px; border: 2px solid transparent;
-          transition: border-color 0.15s, background 0.15s;
+
+        /* 3 cols: left | spacer | right */
+        .lrmc-table {
+          display: grid;
+          grid-template-columns: 1fr auto 1fr;
+          width: 100%;
+        }
+
+        .lrmc-left-col  { display: flex; flex-direction: column; }
+        .lrmc-right-col { display: flex; flex-direction: column; }
+
+        /* Each row same min-height so dots align horizontally */
+        .lrmc-left-row {
+          display: flex; align-items: center;
+          flex: 1; min-height: clamp(40px,5vw,60px);
           cursor: pointer; user-select: none;
+          padding: clamp(4px,0.6vw,8px) 0;
+        }
+        .lrmc-left-row--locked { cursor: default; }
+
+        .lrmc-right-row {
+          display: flex; align-items: center;
+          flex: 1; min-height: clamp(40px,5vw,60px);
+          cursor: pointer; user-select: none;
+          padding: clamp(4px,0.6vw,8px) 0;
+        }
+        .lrmc-right-row--locked { cursor: default; }
+
+        /* Sentence wrap */
+        .lrmc-sent-wrap {
+          display: flex; align-items: center;
+          gap: clamp(6px,0.8vw,10px);
+          border-radius: 10px; border: 2px solid transparent;
+          padding: clamp(3px,0.4vw,6px) clamp(6px,0.8vw,10px);
+          transition: border-color 0.15s, background 0.15s;
+          width: 100%;
         }
         .lrmc-sent-wrap--selected { border-color: ${LEFT_SEL_BD}; background: ${LEFT_SEL_BG}; }
-        .lrmc-sent-wrap--locked   { cursor: default; }
-        .lrmc-sent-text { font-size: clamp(12px,1.45vw,17px); color:${TEXT_COLOR}; white-space:nowrap; line-height:1.4; }
-        .lrmc-right-text { font-size: clamp(12px,1.45vw,17px); color:${TEXT_COLOR}; white-space:nowrap; line-height:1.4; }
-        .lrmc-dot-wrap  { position: relative; flex-shrink:0; }
-        .lrmc-dot       { width:clamp(12px,1.4vw,16px); height:clamp(12px,1.4vw,16px); border-radius:50%; transition:background 0.15s, transform 0.15s; cursor:pointer; }
-        .lrmc-rdot      { width:clamp(12px,1.4vw,16px); height:clamp(12px,1.4vw,16px); border-radius:50%; transition:background 0.15s, transform 0.15s; cursor:pointer; flex-shrink:0; }
-        .lrmc-sent-wrap:not(.lrmc-sent-wrap--locked):hover .lrmc-dot { transform: scale(1.3); }
-        .lrmc-right-row:not(.lrmc-right-row--locked):hover .lrmc-rdot { transform: scale(1.3); }
+
+        .lrmc-num {
+          font-size: clamp(13px,1.6vw,19px); font-weight:700;
+          color:${NUMBER_COLOR}; flex-shrink:0; line-height:1;
+        }
+        .lrmc-sent-text  { font-size:clamp(12px,1.45vw,17px); color:${TEXT_COLOR}; line-height:1.3; }
+        .lrmc-right-text { font-size:clamp(12px,1.45vw,17px); color:${TEXT_COLOR}; line-height:1.3; }
+
+        /* Dots */
+        .lrmc-dot-wrap { position: relative; flex-shrink:0; }
+        .lrmc-dot {
+          width:clamp(11px,1.3vw,15px); height:clamp(11px,1.3vw,15px);
+          border-radius:50%; transition:background 0.15s, transform 0.15s; cursor:pointer;
+        }
+        .lrmc-left-row:not(.lrmc-left-row--locked):hover  .lrmc-dot { transform:scale(1.3); }
+        .lrmc-right-row:not(.lrmc-right-row--locked):hover .lrmc-dot { transform:scale(1.3); }
+
+        /* Badge — يسار فقط */
         .lrmc-badge {
-          position: absolute; top:-7px; right:-7px;
+          position:absolute; top:-7px; right:-7px;
           width:clamp(13px,1.5vw,16px); height:clamp(13px,1.5vw,16px);
           border-radius:50%; background:${WRONG_BADGE_BG}; color:${WRONG_BADGE_TEXT};
           display:flex; align-items:center; justify-content:center;
@@ -215,6 +212,7 @@ export default function WB_ListenReadMatch_QC() {
           border:2px solid #fff; box-shadow:0 2px 6px rgba(0,0,0,0.2);
           pointer-events:none; z-index:3;
         }
+
         .lrmc-svg { position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; overflow:visible; }
         .lrmc-buttons { display:flex; justify-content:center; margin-top:clamp(8px,1.6vw,18px); }
       `}</style>
@@ -223,7 +221,7 @@ export default function WB_ListenReadMatch_QC() {
 
         {/* ── Header ── */}
         <h1 className="WB-header-title-page8" style={{ margin:0, display:"flex", alignItems:"center", gap:"12px", flexWrap:"wrap" }}>
-          <span className="WB-ex-A">C</span>
+          <span className="WB-ex-A-1">C</span>
           Listen, read, and match.
         </h1>
 
@@ -243,7 +241,7 @@ export default function WB_ListenReadMatch_QC() {
 
         {/* ── Matching ── */}
         <div className="lrmc-area" ref={containerRef}>
-          <div className="lrmc-grid">
+          <div className="lrmc-table">
 
             {/* Left */}
             <div className="lrmc-left-col">
@@ -252,13 +250,22 @@ export default function WB_ListenReadMatch_QC() {
                 const isLk    = showAns || (showResults && connectedLeft(item.id) && isCorrect(item.id, connections[item.id]));
                 const isWrong = isLeftWrong(item.id);
                 return (
-                  <div key={item.id} className="lrmc-left-row">
-                    <span className="lrmc-num">{item.id}</span>
-                    <div className={["lrmc-sent-wrap", isSel?"lrmc-sent-wrap--selected":"", isLk?"lrmc-sent-wrap--locked":""].filter(Boolean).join(" ")} onClick={() => handleLeftClick(item.id)}>
+                  <div key={item.id}
+                    className={["lrmc-left-row", isLk?"lrmc-left-row--locked":""].filter(Boolean).join(" ")}
+                    onClick={() => handleLeftClick(item.id)}
+                  >
+                    <div className={["lrmc-sent-wrap", isSel?"lrmc-sent-wrap--selected":""].filter(Boolean).join(" ")}>
+                      <span className="lrmc-num">{item.id}</span>
                       <span className="lrmc-sent-text">{item.text}</span>
-                      <div className="lrmc-dot-wrap">
-                        <div className="lrmc-dot" ref={(el) => { leftRefs.current[item.id] = el; }} style={{ background: leftDotColor(item.id) }} />
-                        {isWrong && <div className="lrmc-badge">✕</div>}
+                      {/* dot at right edge of sentence */}
+                      <div style={{ marginLeft:"auto", flexShrink:0 }}>
+                        <div className="lrmc-dot-wrap">
+                          <div className="lrmc-dot"
+                            ref={(el) => { leftRefs.current[item.id] = el; }}
+                            style={{ background: leftDotColor(item.id) }}
+                          />
+                          {isWrong && <div className="lrmc-badge">✕</div>}
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -266,22 +273,26 @@ export default function WB_ListenReadMatch_QC() {
               })}
             </div>
 
-            <div style={{ width:"clamp(30px,4vw,60px)" }} />
+            {/* Spacer */}
+            <div style={{ minWidth:"clamp(200px, 6vw, 200px);" }} />
 
             {/* Right */}
             <div className="lrmc-right-col">
-              {RIGHT_ITEMS.map((item) => {
-                const isWrong = isRightWrong(item.name);
-                return (
-                  <div key={item.name} className={["lrmc-right-row", showAns?"lrmc-right-row--locked":""].filter(Boolean).join(" ")} onClick={() => handleRightClick(item.name)}>
-                    <div className="lrmc-dot-wrap">
-                      <div className="lrmc-rdot" ref={(el) => { rightRefs.current[item.name] = el; }} style={{ background: rightDotColor(item.name) }} />
-                      {isWrong && <div className="lrmc-badge">✕</div>}
-                    </div>
-                    <span className="lrmc-right-text">{item.text}</span>
+              {RIGHT_ITEMS.map((item) => (
+                <div key={item.name}
+                  className={["lrmc-right-row", showAns?"lrmc-right-row--locked":""].filter(Boolean).join(" ")}
+                  onClick={() => handleRightClick(item.name)}
+                >
+                  {/* dot at left edge */}
+                  <div className="lrmc-dot-wrap" style={{ marginRight:"clamp(6px,0.8vw,10px)", flexShrink:0 }}>
+                    <div className="lrmc-dot"
+                      ref={(el) => { rightRefs.current[item.name] = el; }}
+                      style={{ background: rightDotColor(item.name) }}
+                    />
                   </div>
-                );
-              })}
+                  <span className="lrmc-right-text">{item.text}</span>
+                </div>
+              ))}
             </div>
 
           </div>

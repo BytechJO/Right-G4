@@ -29,50 +29,42 @@ const ITEMS = [
   {
     id:      1,
     prefix:  "Why?",
-    before:  "Because John likes the",
     after:   "",
-    correct: ["library", "Library"],
-    answer:  "library",
+    correct: ["Because John likes the library.", "Because John likes the Library"],
+    answer:  "Because John likes the library.",
   },
   {
     id:      2,
     prefix:  "Why not?",
-    before:  "Because he doesn't like the",
-    after:   "",
-    correct: ["swimming pool", "Swimming pool"],
-    answer:  "swimming pool.",
+    before:  "",
+    correct: ["Because he doesn't like the swimming pool.", "Because he doesn't like the Swimming pool"],
+    answer:  "Because he doesn't like the swimming pool.",
   },
   {
     id:      3,
     prefix:  "Why?",
-    before:  "Because she likes the",
     after:   "",
-    correct: ["zoo", "Zoo"],
-    answer:  "zoo.",
+    correct: ["Because she likes the zoo."],
+    answer:  "Because she likes the zoo.",
   },
   {
     id:      4,
     prefix:  "Why?",
-    before:  "Because she likes the",
-    after:   "",
-    correct: ["farm", "Farm"],
-    answer:  "farm.",
+    correct: ["Because she likes the farm."],
+    answer:  "Because she likes the farm.",
   },
   {
     id:      5,
     prefix:  "Why not?",
-    before:  "Because she doesn't like the",
     after:   "",
-    correct: ["mall", "Mall"],
-    answer:  "mall.",
+    correct: ["Because she doesn't like the mall."],
+    answer:  "Because she doesn't like the mall.",
   },
   {
     id:      6,
     prefix:  "Why?",
-    before:  "Because he likes the",
-    after:   "",
-    correct: ["cinema", "Cinema"],
-    answer:  "cinema",
+    correct: ["Because he likes the cinema."],
+    answer:  "Because he likes the cinema.",
   },
 ];
 
@@ -80,7 +72,7 @@ const ITEMS = [
 //  🔧  NORMALIZE
 // ─────────────────────────────────────────────
 const normalize = (str) =>
-  str.toLowerCase().replace(/[^a-z0-9'\s]/g, "").replace(/\s+/g, " ").trim();
+  str.toLowerCase().replace(/[^a-z0-9'\s]/g, "").replace(/\s+/g, " ").trim().replace(/[\u2018\u2019\u201A\u201B\u0060\u00B4']/g, "’");;
 
 const isCorrect = (userVal, correctArr) =>
   correctArr.some((c) => normalize(userVal) === normalize(c));

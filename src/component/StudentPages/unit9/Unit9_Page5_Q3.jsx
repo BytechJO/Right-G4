@@ -213,11 +213,11 @@ export default function WB_ListenReadCircle_QC() {
           line-height: 1.5;
         }
 
-        /* Options row: a | b */
+        /* Options row: a | b — grid for vertical alignment across all questions */
         .lrcc-options {
-          display: flex;
+          display: grid;
+          grid-template-columns: 1fr 1fr;
           align-items: center;
-          flex-wrap: wrap;
           gap: clamp(16px, 2.4vw, 32px);
           padding-left: clamp(22px, 3vw, 36px);
         }

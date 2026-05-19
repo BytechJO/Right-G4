@@ -173,9 +173,9 @@ export default function WB_ReadWriteOwn_QF() {
 
         {/* ── Buttons ── */}
         <div className="rwof-buttons">
-          <Button
-            handleStartAgain={handleReset}
-          />
+        <button onClick={handleReset} className="try-again-button">
+          Start Again ↻
+        </button>
         </div>
       </div>
     </div>

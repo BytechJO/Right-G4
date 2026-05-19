@@ -5,11 +5,11 @@ import ValidationAlert from "../../Popup/ValidationAlert";
 // ─────────────────────────────────────────────
 //  🖼️  IMAGES — 5 images
 // ─────────────────────────────────────────────
-import img1 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 6 Ready for School Folder/Page 51/SVG/Asset 30.svg";
-import img2 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 6 Ready for School Folder/Page 51/SVG/Asset 25.svg";
-import img3 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 6 Ready for School Folder/Page 51/SVG/Asset 26.svg";
-import img4 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 6 Ready for School Folder/Page 51/SVG/Asset 29.svg";
-import img5 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 6 Ready for School Folder/Page 51/SVG/Asset 24.svg";
+import img1 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 6 Ready for School Folder/Page 51/SVG/Asset 26.svg";
+import img2 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 6 Ready for School Folder/Page 51/SVG/Asset 30.svg";
+import img3 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 6 Ready for School Folder/Page 51/SVG/Asset 29.svg";
+import img4 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 6 Ready for School Folder/Page 51/SVG/Asset 24.svg";
+import img5 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 6 Ready for School Folder/Page 51/SVG/Asset 25.svg";
 
 // ─────────────────────────────────────────────
 //  🎨  COLORS
@@ -42,18 +42,14 @@ const LEFT_ITEMS = [
   { id: 5, sentence: "She should fly a kite."                                },
 ];
 
-const LEFT_IMGS = [
-  { name: "img2", src: img2, correctLeftId: 1 },
-  { name: "img4", src: img4, correctLeftId: 5 },
+// All images in a single column — order determines vertical position (1→5)
+const ALL_IMGS = [
+  { name: "img1", src: img2, correctLeftId: 3 },
+  { name: "img2", src: img5, correctLeftId: 1 },
+  { name: "img3", src: img1, correctLeftId: 4 },
+  { name: "img4", src: img3, correctLeftId: 5 },
+  { name: "img5", src: img4, correctLeftId: 2 },
 ];
-
-const RIGHT_IMGS = [
-  { name: "img1", src: img1, correctLeftId: 3 },
-  { name: "img3", src: img3, correctLeftId: 4 },
-  { name: "img5", src: img5, correctLeftId: 2 },
-];
-
-const ALL_IMGS = [...LEFT_IMGS, ...RIGHT_IMGS];
 
 // ─────────────────────────────────────────────
 //  COMPONENT
@@ -191,72 +187,47 @@ export default function WB_ReadLookMatch_QE() {
     return lid && !isCorrect(lid, name);
   };
 
-  const renderImgCard = (item) => {
-    const isLocked = showAns;
-    return (
-      <div key={item.name} className="rlm-img-wrap">
-        <div style={{ position: "relative", flexShrink: 0 }}>
-          <div
-            className="rlm-dot-img"
-            ref={(el) => { rightRefs.current[item.name] = el; }}
-            style={{ background: rightDotColor(item.name) }}
-            onClick={() => handleRightClick(item.name)}
-          />
-        </div>
-        <div
-          className={["rlm-img-card", isLocked ? "rlm-img-card--locked" : ""].filter(Boolean).join(" ")}
-          style={{ borderColor: imgBorderColor(item.name) }}
-          onClick={() => handleRightClick(item.name)}
-        >
-          <img src={item.src} alt={item.name} className="rlm-img" />
-        </div>
-      </div>
-    );
-  };
+  // ── Card height used to compute row heights for both columns ──
+  // Each row is: image height + gap. We use CSS vars so both columns
+  // share the exact same rhythm.
+  const ROW_HEIGHT = "clamp(90px, 10.5vw, 130px)";
+  const ROW_GAP    = "clamp(14px, 2vw, 26px)";
 
   return (
     <div className="main-container-component">
       <style>{`
-        .rlm-area { position: relative; width: 100%; }
+        /* ─── layout shell ─── */
+        .rlm-area {
+          position: relative;
+          width: 100%;
+        }
 
         .rlm-grid {
           display: flex;
           flex-direction: row;
           align-items: flex-start;
           width: 100%;
+          /* Both columns share the same row-height + gap rhythm */
+          --row-h: ${ROW_HEIGHT};
+          --row-gap: ${ROW_GAP};
         }
 
-        /* ── Left section: sentences + dots column ── */
+        /* ─── LEFT side: number + sentence + dot ─── */
         .rlm-left-section {
           flex: 1;
           min-width: 0;
           display: flex;
-          flex-direction: row;
-          align-items: stretch;
-          padding-top: clamp(16px, 2.4vw, 34px);
-        }
-
-        /* عمود الجمل */
-        .rlm-sentences-col {
-          flex: 1;
-          display: flex;
           flex-direction: column;
-          gap: clamp(18px, 2.8vw, 38px);
+          gap: var(--row-gap);
         }
 
-        /* عمود النقاط — منفصل ومحاذي */
-        .rlm-dots-col {
-          display: flex;
-          flex-direction: column;
-          gap: clamp(18px, 2.8vw, 38px);
-          justify-content: flex-start;
-          padding-left: clamp(8px, 1vw, 14px);
-          flex-shrink: 0;
-        }
-
+        /* Each sentence row is exactly --row-h tall so it aligns with the image opposite */
         .rlm-row {
           display: flex;
+          flex-direction: row;
           align-items: center;
+          height: var(--row-h);
+          gap: 0;
         }
 
         .rlm-num {
@@ -268,6 +239,7 @@ export default function WB_ReadLookMatch_QE() {
         }
 
         .rlm-sentence-wrap {
+          flex: 1;
           display: flex;
           align-items: center;
           padding: clamp(4px, 0.5vw, 7px) clamp(8px, 1vw, 12px);
@@ -276,6 +248,8 @@ export default function WB_ReadLookMatch_QE() {
           transition: border-color 0.15s, background 0.15s;
           cursor: pointer;
           user-select: none;
+          height: 100%;
+          box-sizing: border-box;
         }
         .rlm-sentence-wrap--selected {
           border-color: ${SENTENCE_SEL_BORDER};
@@ -290,13 +264,15 @@ export default function WB_ReadLookMatch_QE() {
           white-space: normal;
         }
 
-        /* نقطة الجملة في العمود المنفصل */
+        /* dot beside sentence — right edge of left section */
         .rlm-dot-sentence-wrap {
           position: relative;
+          flex-shrink: 0;
           display: flex;
           align-items: center;
           justify-content: center;
-          height: clamp(32px, 4vw, 48px);
+          width: clamp(24px, 2.5vw, 32px);
+          height: 100%;
         }
 
         .rlm-dot-sentence {
@@ -307,38 +283,25 @@ export default function WB_ReadLookMatch_QE() {
           transition: background 0.15s, transform 0.15s;
           flex-shrink: 0;
         }
-        .rlm-dot-sentence:hover {
-          transform: scale(1.3);
-        }
+        .rlm-dot-sentence:hover { transform: scale(1.3); }
 
-        /* ── Right: two staggered image columns ── */
+        /* ─── RIGHT side: single image column ─── */
         .rlm-images-area {
           display: flex;
-          flex-direction: row;
-          align-items: flex-start;
-          gap: clamp(6px, 1vw, 14px);
-          padding-left: 40px;
+          flex-direction: column;
+          gap: var(--row-gap);
+     padding-left: clamp(200px, 3vw, 200px);
+
           flex-shrink: 0;
         }
 
-        .rlm-img-col-left {
-          display: flex;
-          flex-direction: column;
-          gap: clamp(40px, 5.5vw, 70px);
-          margin-top: clamp(50px, 7vw, 87px);
-        }
-
-        .rlm-img-col-right {
-          display: flex;
-          flex-direction: column;
-          gap: clamp(40px, 5.5vw, 70px);
-        }
-
+        /* Each image row is exactly --row-h, matching the sentence row */
         .rlm-img-wrap {
           display: flex;
           flex-direction: row;
           align-items: center;
           gap: clamp(4px, 0.5vw, 7px);
+          height: var(--row-h);
         }
 
         .rlm-dot-img {
@@ -346,22 +309,28 @@ export default function WB_ReadLookMatch_QE() {
           height: clamp(11px, 1.3vw, 15px);
           border-radius: 50%;
           cursor: pointer;
+          flex-shrink: 0;
           transition: background 0.15s;
         }
 
         .rlm-img-card {
           cursor: pointer;
           overflow: hidden;
+          border: 2px solid;
+          border-radius: 8px;
           transition: border-color 0.15s, transform 0.1s;
           flex-shrink: 0;
+          height: 100%;
+          display: flex;
+          align-items: center;
         }
         .rlm-img-card:hover { transform: scale(1.02); }
         .rlm-img-card--locked { cursor: default; }
         .rlm-img-card--locked:hover { transform: none; }
 
         .rlm-img {
+          height: 100%;
           width: 100%;
-          height: clamp(70px, 8.5vw, 115px);
           object-fit: cover;
           display: block;
           pointer-events: none;
@@ -400,12 +369,8 @@ export default function WB_ReadLookMatch_QE() {
         }
 
         @media (max-width: 520px) {
-          .rlm-grid          { flex-direction: column; }
-          .rlm-left-section  { padding-top: 0; }
-          .rlm-sentences-col { gap: 14px; }
-          .rlm-dots-col      { gap: 14px; }
-          .rlm-images-area   { padding-left: 0; }
-          .rlm-img-col-right { margin-top: 0; }
+          .rlm-grid { flex-direction: column; }
+          .rlm-images-area { padding-left: 0; }
         }
       `}</style>
 
@@ -430,57 +395,69 @@ export default function WB_ReadLookMatch_QE() {
         <div className="rlm-area" ref={containerRef}>
           <div className="rlm-grid">
 
-            {/* ── Left section: جمل + عمود نقاط منفصل ── */}
+            {/* ── Left: sentences (each row = --row-h) ── */}
             <div className="rlm-left-section">
+              {LEFT_ITEMS.map((item) => {
+                const isSelected = selectedLeft === item.id;
+                const isLocked   = showAns || (showResults && connectedLeft(item.id) && isCorrect(item.id, connections[item.id]));
+                return (
+                  <div key={item.id} className="rlm-row">
+                    <span className="rlm-num">{item.id}</span>
 
-              {/* عمود الجمل */}
-              <div className="rlm-sentences-col">
-                {LEFT_ITEMS.map((item) => {
-                  const isSelected = selectedLeft === item.id;
-                  const isLocked   = showAns || (showResults && connectedLeft(item.id) && isCorrect(item.id, connections[item.id]));
-                  return (
-                    <div key={item.id} className="rlm-row">
-                      <span className="rlm-num">{item.id}</span>
-                      <div
-                        className={[
-                          "rlm-sentence-wrap",
-                          isSelected ? "rlm-sentence-wrap--selected" : "",
-                          isLocked   ? "rlm-sentence-wrap--locked"   : "",
-                        ].filter(Boolean).join(" ")}
-                        onClick={() => handleLeftClick(item.id)}
-                      >
-                        <span className="rlm-sentence-text">{item.sentence}</span>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-
-              {/* عمود النقاط — منفصل ومحاذي */}
-              <div className="rlm-dots-col">
-                {LEFT_ITEMS.map((item) => (
-                  <div key={item.id} className="rlm-dot-sentence-wrap">
                     <div
-                      className="rlm-dot-sentence"
-                      ref={(el) => { leftRefs.current[item.id] = el; }}
-                      style={{ background: leftDotColor(item.id) }}
+                      className={[
+                        "rlm-sentence-wrap",
+                        isSelected ? "rlm-sentence-wrap--selected" : "",
+                        isLocked   ? "rlm-sentence-wrap--locked"   : "",
+                      ].filter(Boolean).join(" ")}
                       onClick={() => handleLeftClick(item.id)}
-                    />
-                    {isLeftWrong(item.id) && <div className="rlm-badge">✕</div>}
-                  </div>
-                ))}
-              </div>
+                    >
+                      <span className="rlm-sentence-text">{item.sentence}</span>
+                    </div>
 
+                    {/* dot on the RIGHT edge of the sentence, same row height */}
+                    <div className="rlm-dot-sentence-wrap">
+                      <div
+                        className="rlm-dot-sentence"
+                        ref={(el) => { leftRefs.current[item.id] = el; }}
+                        style={{ background: leftDotColor(item.id) }}
+                        onClick={() => handleLeftClick(item.id)}
+                      />
+                      {isLeftWrong(item.id) && <div className="rlm-badge">✕</div>}
+                    </div>
+                  </div>
+                );
+              })}
             </div>
 
-            {/* ── Images (right) ── */}
+            {/* ── Right: single column of images (each row = --row-h) ── */}
             <div className="rlm-images-area">
-              <div className="rlm-img-col-left">
-                {LEFT_IMGS.map(renderImgCard)}
-              </div>
-              <div className="rlm-img-col-right">
-                {RIGHT_IMGS.map(renderImgCard)}
-              </div>
+              {ALL_IMGS.map((item) => {
+                const isLocked = showAns;
+                return (
+                  <div key={item.name} className="rlm-img-wrap">
+                    {/* dot on LEFT edge of image */}
+                    <div
+                      className="rlm-dot-img"
+                      ref={(el) => { rightRefs.current[item.name] = el; }}
+                      style={{ background: rightDotColor(item.name) }}
+                      onClick={() => handleRightClick(item.name)}
+                    />
+
+                    <div
+                      className={["rlm-img-card", isLocked ? "rlm-img-card--locked" : ""].filter(Boolean).join(" ")}
+                      style={{ borderColor:"transparent" }}
+                      onClick={() => handleRightClick(item.name)}
+                    >
+                      <img src={item.src} alt={item.name} className="rlm-img" />
+                    </div>
+
+                    {isRightWrong(item.name) && (
+                      <div className="rlm-badge" style={{ position: "relative", top: "unset", right: "unset", marginLeft: "4px" }}>✕</div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
 
           </div>

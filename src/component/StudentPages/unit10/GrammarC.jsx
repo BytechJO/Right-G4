@@ -122,6 +122,8 @@ const GrammarC = () => {
         {questions.map((q, i) => (
           <div key={q.id} className="flex flex-col gap-3">
             {/* Number */}
+            <div style={{display : "flex" , flexDirection : "row" , gap : "1em"}}>
+
             <span
               style={{
                 fontWeight: "400",
@@ -129,7 +131,7 @@ const GrammarC = () => {
                 color: "#1a1a1a",
                 fontSize: "18px",
               }}
-            >
+              >
               {q.id}
             </span>
 
@@ -145,9 +147,10 @@ const GrammarC = () => {
                 borderRadius: "10px",
               }}
             />
+              </div>
 
             {/* Sentence with input */}
-            <div className="flex items-end gap-1 flex-wrap">
+            <div className="flex items-end gap-1 flex-wrap mt-3">
               <span style={{ fontSize: "18px", color: "#1a1a1a" }}>{q.before}</span>
 
               <div className="relative flex-1" style={{ minWidth: "120px" }}>

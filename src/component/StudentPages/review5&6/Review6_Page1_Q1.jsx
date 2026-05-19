@@ -130,8 +130,8 @@ export default function WB_ReadChooseComplete_QA() {
     let score = 0;
     const total = ITEMS.length * 2;
     ITEMS.forEach((item) => {
-      if (selected[item.id] === item.correct)                              score++;
-      if (normalize(written[item.id] || "") === normalize(item.answer))    score++;
+      if (selected[item.id] === item.correct)                           score++;
+      if (normalize(written[item.id] || "") === normalize(item.answer)) score++;
     });
     setShowResults(true);
     if (score === total)   ValidationAlert.success(`Score: ${score} / ${total}`);
@@ -182,7 +182,7 @@ export default function WB_ReadChooseComplete_QA() {
           gap: clamp(20px, 3vw, 40px);
           align-items: start;
           width: 100%;
-          margin :5% 0 ; 
+          margin: 5% 0;
         }
 
         /* ── Left: sentences list ── */
@@ -198,7 +198,6 @@ export default function WB_ReadChooseComplete_QA() {
           gap: clamp(2px, 0.3vw, 4px);
         }
 
-        /* Sentence row: num + before + input + after */
         .rcca-sentence {
           display: flex;
           align-items: flex-end;
@@ -221,7 +220,6 @@ export default function WB_ReadChooseComplete_QA() {
           white-space: nowrap;
         }
 
-        /* Input inline */
         .rcca-input-wrap {
           position: relative;
           flex: 0 1 clamp(80px, 10vw, 150px);
@@ -243,7 +241,7 @@ export default function WB_ReadChooseComplete_QA() {
         }
         .rcca-input:disabled  { opacity: 1; cursor: default; }
         .rcca-input--wrong    { border-bottom-color: ${INPUT_UNDERLINE_WRONG}; }
-        .rcca-input--answer   { color: ${INPUT_ANSWER_COLOR};}
+        .rcca-input--answer   { color: ${INPUT_ANSWER_COLOR}; }
 
         .rcca-input-badge {
           position: absolute;
@@ -262,24 +260,23 @@ export default function WB_ReadChooseComplete_QA() {
           z-index: 2;
         }
 
-        /* ── Right: options column ── */
+        /*
+         * ── Right: ONE CSS grid with 2 fixed columns ──
+         * All "a" options go into col 1, all "b" options go into col 2.
+         * Because it's a single grid (not per-row flex), the columns share
+         * the same width across every row → perfect vertical alignment.
+         * Row gap matches the sentence-list gap so rows stay in sync.
+         */
         .rcca-options-col {
-          display: flex;
-          flex-direction: column;
-          gap: clamp(14px, 2vw, 26px);
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          column-gap: clamp(8px, 1.2vw, 16px);
+          row-gap: clamp(14px, 2vw, 26px);
           flex-shrink: 0;
           align-self: start;
         }
 
-        /* Options row per item */
-        .rcca-options {
-          display: flex;
-          align-items: center;
-          gap: clamp(8px, 1.2vw, 16px);
-          flex-wrap: nowrap;
-        }
-
-        /* Single option: oval border */
+        /* Each option pill */
         .rcca-option {
           position: relative;
           display: flex;
@@ -336,7 +333,6 @@ export default function WB_ReadChooseComplete_QA() {
 
         @media (max-width: 580px) {
           .rcca-body { grid-template-columns: 1fr; }
-          .rcca-options-col { flex-direction: row; flex-wrap: wrap; gap: 10px; }
         }
       `}</style>
 
@@ -402,33 +398,35 @@ export default function WB_ReadChooseComplete_QA() {
             })}
           </div>
 
-          {/* Right: options column */}
+          {/*
+           * Right: single CSS grid — flattened list of ALL options.
+           * Grid auto-places them: a→col1, b→col2, a→col1, b→col2 …
+           * so every "b" is perfectly aligned vertically above the next "b".
+           */}
           <div className="rcca-options-col">
-            {ITEMS.map((item) => (
-              <div key={item.id} className="rcca-options">
-                {item.options.map((opt) => {
-                  const state   = getOptionState(item, opt.label);
-                  const isWrong = state === "wrong";
-                  return (
-                    <div
-                      key={opt.label}
-                      className={[
-                        "rcca-option",
-                        state === "selected" ? "rcca-option--selected" : "",
-                        state === "correct"  ? "rcca-option--correct"  : "",
-                        state === "wrong"    ? "rcca-option--wrong"    : "",
-                        isLocked             ? "rcca-option--locked"   : "",
-                      ].filter(Boolean).join(" ")}
-                      onClick={() => handleSelect(item.id, opt.label)}
-                    >
-                      <span className="rcca-option-label">{opt.label}</span>
-                      <span className="rcca-option-text">{opt.text}</span>
-                      {isWrong && <div className="rcca-option-badge">✕</div>}
-                    </div>
-                  );
-                })}
-              </div>
-            ))}
+            {ITEMS.flatMap((item) =>
+              item.options.map((opt) => {
+                const state   = getOptionState(item, opt.label);
+                const isWrong = state === "wrong";
+                return (
+                  <div
+                    key={`${item.id}-${opt.label}`}
+                    className={[
+                      "rcca-option",
+                      state === "selected" ? "rcca-option--selected" : "",
+                      state === "correct"  ? "rcca-option--correct"  : "",
+                      state === "wrong"    ? "rcca-option--wrong"    : "",
+                      isLocked             ? "rcca-option--locked"   : "",
+                    ].filter(Boolean).join(" ")}
+                    onClick={() => handleSelect(item.id, opt.label)}
+                  >
+                    <span className="rcca-option-label">{opt.label}</span>
+                    <span className="rcca-option-text">{opt.text}</span>
+                    {isWrong && <div className="rcca-option-badge">✕</div>}
+                  </div>
+                );
+              })
+            )}
           </div>
 
         </div>

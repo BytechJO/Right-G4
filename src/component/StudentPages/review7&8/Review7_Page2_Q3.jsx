@@ -30,9 +30,13 @@ const ITEMS = [
   {
     id:           1,
     src:          img1,
-    type:         "given",
-    questionText: "Was there any honey?",
-    answerText:   "Yes, there was some.",
+    type:         "input",
+  questionParts: [
+      { t: "input", id: "2b", correct: [" Was there any honey"], answer: " Was there any honey ?"           },
+    ],    
+      answerParts: [
+      { t: "input", id: "24", correct: ["Yes, there was some.", "Yes there was some."], answer: "Yes, there was some." },
+    ],
   },
   {
     id:   2,
@@ -40,9 +44,8 @@ const ITEMS = [
     type: "input",
     // السؤال: "Were there any ___ figs?"
     questionParts: [
-      { t: "text",  v: "Were there any"                                    },
-      { t: "input", id: "2q", correct: ["figs"], answer: "figs"           },
-      { t: "text",  v: "?"                                                  },
+      { t: "input", id: "2q", correct: ["Where there any"], answer: "Where there any"           },
+      { t: "text",  v: "figs?"                                                  },
     ],
     // الجواب: "Yes, there were some."
     answerParts: [

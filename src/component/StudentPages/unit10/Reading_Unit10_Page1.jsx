@@ -298,25 +298,29 @@ const Reading_NewPage = ({ openPopup }) => {
         </svg>
       </div>
 
-      <div className="pauseBtn-icon-CD-page21 hover:scale-110 transition" style={{ overflow: "visible" }}>
-        <svg
-          width="22" height="22" viewBox="0 0 90 90"
-          onClick={(e) => {
-            e.stopPropagation();
-            openPopup(
-              "video",
-              <div style={{ display: "flex", justifyContent: "center", alignContent: "center", alignItems: "center", height: "100%", width: "100%" }}>
-                <video autoPlay controls style={{ width: "auto", height: "80%", objectFit: "fill", borderRadius: "20px" }}>
-                  <source src={videoFile} type="video/mp4" />
-                </video>
-              </div>
-            );
-          }}
-          style={{ overflow: "visible" }}
-        >
-          <image className="svg-img" href={pauseBtn} x="0" y="0" width="90" height="90" />
-        </svg>
-      </div>
+   <div className="pauseBtn-icon-CD-page21 hover:scale-110 transition" style={{ overflow: "visible" }}>
+  <svg
+    width="22" height="22" viewBox="0 0 90 90"
+    onClick={(e) => {
+      e.stopPropagation();
+      stopCurrent(); // ← أضف هاد السطر
+      setIsPlaying(false);
+      setActiveAreaIndex(null);
+      setHoveredAreaIndex(null);
+      openPopup(
+        "video",
+        <div style={{ display: "flex", justifyContent: "center", alignContent: "center", alignItems: "center", height: "100%", width: "100%" }}>
+          <video autoPlay controls style={{ width: "auto", height: "80%", objectFit: "fill", borderRadius: "20px" }}>
+            <source src={videoFile} type="video/mp4" />
+          </video>
+        </div>
+      );
+    }}
+    style={{ overflow: "visible" }}
+  >
+    <image className="svg-img" href={pauseBtn} x="0" y="0" width="90" height="90" />
+  </svg>
+</div>
 
       <audio ref={audioRef} style={{ display: "none" }} />
     </div>

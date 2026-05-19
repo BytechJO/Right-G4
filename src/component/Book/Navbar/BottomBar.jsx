@@ -201,7 +201,7 @@ export default function BottomBar({
             onClick={() => {
               const link = document.createElement("a");
               link.href = teacherPdf;
-              link.download = "Right-G3-Teacher-Book.pdf";
+              link.download = "Right-G4-Teacher-Book.pdf";
               link.click();
             }}
             className="cursor-pointer p-1 rounded-lg hover:bg-purple-100 transition"

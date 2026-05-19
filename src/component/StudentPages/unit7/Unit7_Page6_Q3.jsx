@@ -48,7 +48,7 @@ const ITEMS = [
 //  🔧  NORMALIZE
 // ─────────────────────────────────────────────
 const normalize = (str) =>
-  str.toLowerCase().replace(/[^a-z0-9'\s]/g, "").replace(/\s+/g, " ").trim();
+  str.toLowerCase().replace(/[^a-z0-9'\s]/g, "").replace(/\s+/g, " ").trim().replace(/[\u2018\u2019\u201A\u201B\u0060\u00B4']/g, "’");;
 
 const isCorrect = (userVal, correctArr) =>
   correctArr.some((c) => normalize(userVal) === normalize(c));
@@ -104,7 +104,7 @@ export default function WB_UnscrambleWrite_QG() {
         .uswg-grid {
           display: grid;
           grid-template-columns: auto 1fr;
-          gap: clamp(14px, 2vw, 24px) clamp(20px, 2.8vw, 38px);
+          gap: clamp(35px, 2vw, 35px) clamp(20px, 2.8vw, 38px);
           width: 100%;
           align-items: center;
           margin: 10% 0 ;

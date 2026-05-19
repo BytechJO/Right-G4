@@ -100,7 +100,7 @@ export default function WB_UnscrambleWrite_QB() {
         .uswb-grid {
           display: grid;
           grid-template-columns: repeat(2, 1fr);
-          gap: clamp(20px, 3vw, 40px) clamp(24px, 3.5vw, 48px);
+          gap: clamp(60px, 3vw, 60px) clamp(24px, 3.5vw, 48px);
           width: 100%;
               margin: 10% 0;
         }

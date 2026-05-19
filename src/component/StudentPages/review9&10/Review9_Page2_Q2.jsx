@@ -186,8 +186,6 @@ export default function WB_LookReadMatch_QE() {
         .lrm-img-wrap {
           position: relative;
           cursor: pointer;
-          border-radius: 10px;
-          border: 3px solid ${IMG_BORDER_DEF};
           overflow: visible;
           transition: border-color 0.15s;
           flex-shrink: 0;
@@ -214,7 +212,7 @@ export default function WB_LookReadMatch_QE() {
 
         /* ✕ badge */
         .lrm-badge {
-          position: absolute; top: -7px; right: -7px;
+          position: absolute; top: 35px; right: -1px;
           width: clamp(13px,1.5vw,16px); height: clamp(13px,1.5vw,16px);
           border-radius: 50%; background: ${WRONG_BADGE_BG}; color: ${WRONG_BADGE_TEXT};
           display: flex; align-items: center; justify-content: center;
@@ -230,6 +228,8 @@ export default function WB_LookReadMatch_QE() {
           justify-content: space-around;
           gap: clamp(8px,1.2vw,18px);
           height: 100%;
+              padding-left: 50vh;
+
         }
 
         .lrm-right-row {
@@ -301,7 +301,6 @@ export default function WB_LookReadMatch_QE() {
                     onClick={() => handleLeftClick(img.id)}
                   >
                     <img src={img.src} alt={`img-${img.id}`} className="lrm-img" />
-                    {isWrong && <div className="lrm-badge">✕</div>}
                   </div>
                 );
               })}
@@ -342,7 +341,6 @@ export default function WB_LookReadMatch_QE() {
                         ref={(el) => { rightRefs.current[item.id] = el; }}
                         style={{ background: rightDotColor(item.id) }}
                       />
-                      {isWrong && <div className="lrm-badge">✕</div>}
                     </div>
                     <span className="lrm-right-num">{item.id}</span>
                     <span className="lrm-right-text">{item.text}</span>

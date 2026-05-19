@@ -496,7 +496,7 @@ export default function WB_ListenReadCircle_QC() {
         }
 
         .lrc-scene-img {
-          width: clamp(120px, 18vw, 240px);
+          width: 100%;
           height: auto;
           display: block;
           flex-shrink: 0;

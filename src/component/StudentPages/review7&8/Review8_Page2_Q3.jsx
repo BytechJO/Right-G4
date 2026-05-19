@@ -27,7 +27,7 @@ const WRONG_BADGE_TEXT        = "#ffffff";
 const PARTS = [
   { t: "text",  v: "Cynthia" },
   { t: "verb",  v: "(celebrate)" },
-  { t: "given", v: "celebrated" },
+  { t: "input", id: "celebrate", correct: ["celebrated"], answer: "celebrated" },
   { t: "text",  v: "her birthday in August. Her mom" },
   { t: "verb",  v: "(bake)" },
   { t: "input", id: "bake", correct: ["baked"], answer: "baked" },
@@ -147,11 +147,11 @@ export default function WB_ReadCompleteStory_QE() {
         /* ── Story paragraph ── */
         .rcs-story {
           font-size: clamp(14px, 1.7vw, 20px);
-          line-height: 2.4;
+          line-height: 2.8;
           color: ${TEXT_COLOR};
           width: 100%;
           word-break: break-word;
-                    margin : 6% 0 ;
+                    margin : 4% 0 ;
 
         }
 
@@ -240,7 +240,7 @@ export default function WB_ReadCompleteStory_QE() {
         {/* ── Header ── */}
         <h1
           className="WB-header-title-page8"
-          style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
+          style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", }}
         >
           <span className="WB-ex-A-1">E</span>
           Read and complete the story. Write the past tense of each verb in parenthesis.

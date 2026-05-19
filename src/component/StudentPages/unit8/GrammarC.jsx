@@ -286,7 +286,7 @@ const GrammarC = () => {
                     <div
                       ref={(el) => { leftRefs.current[item.id] = el; }}
                       style={{
-                        width: "13px", height: "13px", borderRadius: "50%", marginRight : "2.9em",
+                        width: "13px", height: "13px", borderRadius: "50%", marginRight : "20em",
                         background: leftDotColor(item.id),
                       }}
                     />

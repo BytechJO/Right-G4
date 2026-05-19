@@ -8,9 +8,9 @@ import ValidationAlert from "../../Popup/ValidationAlert";
 import imgA from "../../../assets/imgs/pages/Class Book/Right 4 Unit 8 I Lived in the Library Folder/Page 72/SVG/Asset 25.svg"; // library
 import imgB from "../../../assets/imgs/pages/Class Book/Right 4 Unit 8 I Lived in the Library Folder/Page 72/SVG/Asset 26.svg"; // baseball
 import imgC from "../../../assets/imgs/pages/Class Book/Right 4 Unit 8 I Lived in the Library Folder/Page 72/SVG/Asset 27.svg"; // soccer
-import imgD from "../../../assets/imgs/pages/Class Book/Right 4 Unit 8 I Lived in the Library Folder/Page 72/SVG/Asset 31.svg"; // garden
-import imgE from "../../../assets/imgs/pages/Class Book/Right 4 Unit 8 I Lived in the Library Folder/Page 72/SVG/Asset 32.svg"; // car race
-import imgF from "../../../assets/imgs/pages/Class Book/Right 4 Unit 8 I Lived in the Library Folder/Page 72/SVG/Asset 33.svg"; // volleyball
+import imgD from "../../../assets/imgs/pages/Class Book/Right 4 Unit 8 I Lived in the Library Folder/Page 72/SVG/Asset 32.svg"; // garden
+import imgE from "../../../assets/imgs/pages/Class Book/Right 4 Unit 8 I Lived in the Library Folder/Page 72/SVG/Asset 33.svg"; // car race
+import imgF from "../../../assets/imgs/pages/Class Book/Right 4 Unit 8 I Lived in the Library Folder/Page 72/SVG/Asset 31.svg"; // volleyball
 
 // ─────────────────────────────────────────────
 //  🎨  COLORS
