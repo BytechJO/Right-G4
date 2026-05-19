@@ -2,6 +2,9 @@ import { useState, useEffect, useRef, forwardRef } from "react";
 import { TbMessageCircle } from "react-icons/tb";
 import { FaPlay, FaPause } from "react-icons/fa";
 import { IoMdSettings } from "react-icons/io";
+import { useAudio } from "../context/AudioContext";
+
+const PLAYER_ID = "question-audio-player";
 
 const QuestionAudioPlayer = forwardRef(function QuestionAudioPlayer(
   {
@@ -9,27 +12,29 @@ const QuestionAudioPlayer = forwardRef(function QuestionAudioPlayer(
     captions = [],
     stopAtSecond = null,
     stops = [],
-    onTimeUpdate, // ← جديد
+    onTimeUpdate,
+    onPlay,
   },
-  ref // ← جديد
+  ref
 ) {
-  const clickAudioRef = useRef(null);
-  const internalRef = useRef(null);
+  const clickAudioRef  = useRef(null);
+  const internalRef    = useRef(null);
+  const audioRef       = ref || internalRef;
+  const isMounted      = useRef(false);
 
-  // استخدم الـ ref الخارجي إذا موجود، وإلا الداخلي
-  const audioRef = ref || internalRef;
+  const { registerAudio, stopCurrent, activePageId } = useAudio();
 
-  const [paused, setPaused] = useState(false);
+  const [paused,       setPaused]       = useState(false);
   const [showSettings, setShowSettings] = useState(false);
-  const [volume, setVolume] = useState(1);
-  const settingsRef = useRef(null);
-  const [forceRender, setForceRender] = useState(0);
+  const [volume,       setVolume]       = useState(1);
+  const settingsRef    = useRef(null);
+  const [forceRender,  setForceRender]  = useState(0);
   const [showContinue, setShowContinue] = useState(false);
-  const [isPlaying, setIsPlaying] = useState(true);
-  const [current, setCurrent] = useState(0);
-  const [duration, setDuration] = useState(0);
-  const [showCaption, setShowCaption] = useState(false);
-  const [activeIndex, setActiveIndex] = useState(null);
+  const [isPlaying,    setIsPlaying]    = useState(false); // ← false بالبداية لحد ما يشتغل فعلاً
+  const [current,      setCurrent]      = useState(0);
+  const [duration,     setDuration]     = useState(0);
+  const [showCaption,  setShowCaption]  = useState(false);
+  const [activeIndex,  setActiveIndex]  = useState(null);
   const triggeredStops = useRef(new Set());
 
   const updateCaption = (time) => {
@@ -39,74 +44,106 @@ const QuestionAudioPlayer = forwardRef(function QuestionAudioPlayer(
     setActiveIndex(index);
   };
 
+  // مزامنة isPlaying مع الـ audio element مباشرة
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
 
-    audio.currentTime = 0;
-    audio.play();
+    const handlePause = () => {
+      setIsPlaying(false);
+      setPaused(true);
+    };
+
+    const handlePlay = () => {
+      setIsPlaying(true);
+      setPaused(false);
+    };
+
+    audio.addEventListener("pause", handlePause);
+    audio.addEventListener("play",  handlePlay);
+
+    return () => {
+      audio.removeEventListener("pause", handlePause);
+      audio.removeEventListener("play",  handlePlay);
+    };
+  }, []);
+
+  // تشغيل أول مرة + intervals
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
 
     let stopsInterval;
     let stopAtInterval;
 
-    if (stops && stops.length > 0) {
-      stopsInterval = setInterval(() => {
-        const currentTime = audio.currentTime;
-        for (const stop of stops) {
-          if (
-            currentTime >= stop.stopAt &&
-            !triggeredStops.current.has(stop.stopAt)
-          ) {
-            triggeredStops.current.add(stop.stopAt);
-            audio.pause();
-            setPaused(true);
-            setIsPlaying(false);
-            setShowContinue(true);
-            if (stop.resumeFrom !== undefined) {
-              audio.currentTime = stop.resumeFrom;
-              updateCaption(stop.resumeFrom);
-            }
-            break;
-          }
-        }
-      }, 100);
-    }
+    const startPlayback = () => {
+      audio.currentTime = 0;
+      audio.play().catch(() => {});
 
-    if (stopAtSecond) {
-      stopAtInterval = setInterval(() => {
-        if (audio.currentTime >= stopAtSecond) {
-          audio.pause();
-          setPaused(true);
-          setIsPlaying(false);
-          setShowContinue(true);
-          clearInterval(stopAtInterval);
-        }
-      }, 100);
-    }
+      if (stops && stops.length > 0) {
+        stopsInterval = setInterval(() => {
+          const currentTime = audio.currentTime;
+          for (const stop of stops) {
+            if (
+              currentTime >= stop.stopAt &&
+              !triggeredStops.current.has(stop.stopAt)
+            ) {
+              triggeredStops.current.add(stop.stopAt);
+              audio.pause();
+              setShowContinue(true);
+              if (stop.resumeFrom !== undefined) {
+                audio.currentTime = stop.resumeFrom;
+                updateCaption(stop.resumeFrom);
+              }
+              break;
+            }
+          }
+        }, 100);
+      }
+
+      if (stopAtSecond) {
+        stopAtInterval = setInterval(() => {
+          if (audio.currentTime >= stopAtSecond) {
+            audio.pause();
+            setShowContinue(true);
+            clearInterval(stopAtInterval);
+          }
+        }, 100);
+      }
+
+      registerAudio(audio, stopAtInterval || stopsInterval || null, PLAYER_ID);
+    };
 
     const handleEnded = () => {
       audio.currentTime = 0;
-      setIsPlaying(false);
-      setPaused(false);
       setActiveIndex(null);
       setShowContinue(true);
     };
 
     audio.addEventListener("ended", handleEnded);
 
+    // ← الإصلاح: انتظر canplay إذا الصوت مش جاهز بعد
+    if (audio.readyState >= 3) {
+      startPlayback();
+    } else {
+      audio.addEventListener("canplay", startPlayback, { once: true });
+    }
+
     return () => {
-      if (stopsInterval) clearInterval(stopsInterval);
+      if (stopsInterval)  clearInterval(stopsInterval);
       if (stopAtInterval) clearInterval(stopAtInterval);
-      audio.removeEventListener("ended", handleEnded);
+      audio.removeEventListener("ended",   handleEnded);
+      audio.removeEventListener("canplay", startPlayback);
     };
   }, []);
 
+  // scroll للـ caption النشط
   useEffect(() => {
     const timer = setInterval(() => {
       setForceRender((prev) => prev + 1);
     }, 1000);
 
-    if (activeIndex === -1 || activeIndex === null) return;
+    if (activeIndex === -1 || activeIndex === null) return () => clearInterval(timer);
 
     const el = document.getElementById(`caption-${activeIndex}`);
     if (el) {
@@ -121,24 +158,17 @@ const QuestionAudioPlayer = forwardRef(function QuestionAudioPlayer(
     if (!audio) return;
 
     if (audio.paused) {
+      stopCurrent();
+      if (onPlay) onPlay();
       audio.play();
-      setPaused(false);
-      setIsPlaying(true);
+      registerAudio(audio, null, PLAYER_ID);
     } else {
       audio.pause();
-      setPaused(true);
-      setIsPlaying(false);
     }
   };
 
   return (
-    <div
-      style={{
-        display: "flex",
-        justifyContent: "center",
-        width: "100%",
-      }}
-    >
+    <div style={{ display: "flex", justifyContent: "center", width: "100%" }}>
       <div className="audio-popup-read" style={{ width: "50%" }}>
         <div className="audio-inner player-ui">
           <audio
@@ -148,7 +178,7 @@ const QuestionAudioPlayer = forwardRef(function QuestionAudioPlayer(
               const time = e.target.currentTime;
               setCurrent(time);
               updateCaption(time);
-              if (onTimeUpdate) onTimeUpdate(time); // ← جديد
+              if (onTimeUpdate) onTimeUpdate(time);
             }}
             onLoadedMetadata={(e) => setDuration(e.target.duration)}
           />

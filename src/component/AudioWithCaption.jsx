@@ -1,21 +1,27 @@
 import { useRef, useState, useEffect } from "react";
-import { FaPlay, FaPause, FaVolumeUp, FaVolumeMute } from "react-icons/fa";
+import { FaPlay, FaPause } from "react-icons/fa";
 import { TbMessageCircle } from "react-icons/tb";
 import { IoMdSettings } from "react-icons/io";
 import "./AudioWithCaption.css";
+import { useAudio } from "../context/AudioContext";
+
+const PLAYER_ID = "audio-with-caption";
 
 const AudioWithCaption = ({ src, captions, onCaptionChange, stops = [] }) => {
-  const audioRef = useRef(null);
-  const settingsRef = useRef(null);
-  const captionRef = useRef(null);
+  const audioRef      = useRef(null);
+  const settingsRef   = useRef(null);
+  const captionRef    = useRef(null);
   const triggeredStops = useRef(new Set());
+  const intervalRef   = useRef(null);
 
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [current, setCurrent] = useState(0);
-  const [duration, setDuration] = useState(0);
-  const [showCaption, setShowCaption] = useState(false);
-  const [activeIndex, setActiveIndex] = useState(-1);
-  const [volume, setVolume] = useState(1);
+  const { registerAudio, stopCurrent } = useAudio();
+
+  const [isPlaying,    setIsPlaying]    = useState(false);
+  const [current,      setCurrent]      = useState(0);
+  const [duration,     setDuration]     = useState(0);
+  const [showCaption,  setShowCaption]  = useState(false);
+  const [activeIndex,  setActiveIndex]  = useState(-1);
+  const [volume,       setVolume]       = useState(1);
   const [showSettings, setShowSettings] = useState(false);
 
   const updateCaption = (time) => {
@@ -28,25 +34,49 @@ const AudioWithCaption = ({ src, captions, onCaptionChange, stops = [] }) => {
   };
 
   const togglePlay = () => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
     if (isPlaying) {
-      audioRef.current.pause();
+      audio.pause();
+      setIsPlaying(false);
     } else {
-      audioRef.current.play();
+      // وقف أي صوت ثاني في الـ app قبل التشغيل
+      stopCurrent();
+
+      audio.play();
       if (captions) setShowCaption(true);
+      setIsPlaying(true);
+
+      // سجّل هالـ audio في الـ context
+      const id = setInterval(() => {}, 9999); // placeholder interval
+      clearInterval(id);
+      registerAudio(audio, null, PLAYER_ID);
     }
-    setIsPlaying(!isPlaying);
   };
+
+  // وقف الـ audio لو الـ context طلب وقفه من خارج
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    const handlePause = () => {
+      if (!audio.paused) return;
+      setIsPlaying(false);
+    };
+
+    audio.addEventListener("pause", handlePause);
+    return () => audio.removeEventListener("pause", handlePause);
+  }, []);
 
   // معالجة الـ stops
   useEffect(() => {
     if (!stops || stops.length === 0) return;
-
     const audio = audioRef.current;
     if (!audio) return;
 
     const interval = setInterval(() => {
       const currentTime = audio.currentTime;
-
       for (const stop of stops) {
         if (
           currentTime >= stop.stopAt &&
@@ -60,7 +90,6 @@ const AudioWithCaption = ({ src, captions, onCaptionChange, stops = [] }) => {
             audio.currentTime = stop.resumeFrom;
             updateCaption(stop.resumeFrom);
           }
-
           break;
         }
       }

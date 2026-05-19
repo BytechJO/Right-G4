@@ -1,6 +1,8 @@
 import React from "react";
 import QuestionAudioPlayer from "../QuestionAudioPlayer";
 import SectionBanner from "./SectionBanner";
+import { useAudio } from "../../context/AudioContext";
+
 const ReadingSection = ({
   mainTitle,
   image,
@@ -9,6 +11,8 @@ const ReadingSection = ({
   captions,
   stopAtSecond,
 }) => {
+  const { stopCurrent } = useAudio();
+
   return (
     <div className="flex flex-col items-center">
       <div className="w-[100%] mx-auto">
@@ -18,16 +22,16 @@ const ReadingSection = ({
             {mainTitle}
           </h2>
         </div>
-        <div style={{margin:"3em 0 2em"}}>
-        <QuestionAudioPlayer
-          src={sound}
-          captions={captions}
-          stopAtSecond={stopAtSecond}
-        />
-      </div>
+        <div style={{ margin: "3em 0 2em" }}>
+          <QuestionAudioPlayer
+            src={sound}
+            captions={captions}
+            stopAtSecond={stopAtSecond}
+            onPlay={stopCurrent}
+          />
+        </div>
       </div>
 
-      {/* ✅ شلنا الـ title badge والـ paragraphs، والصورة تملأ كل شي */}
       <div className="w-[100%] mt-2">
         <img
           src={image}
@@ -35,7 +39,7 @@ const ReadingSection = ({
         />
       </div>
 
-      <div className="w-[100%]  my-5">
+      <div className="w-[100%] my-5">
         <img
           style={{ width: "100%", height: "auto", display: "block" }}
           src={image1}
@@ -46,12 +50,15 @@ const ReadingSection = ({
       <div className="mt-3 space-y-6 w-[100%] mb-3">
         <div className="flex items-center gap-4">
           <SectionBanner title="Comprehension" />
-          <h2 style={{ display: "flex", flexDirection: "row", gap: "10px", whiteSpace: "nowrap", marginLeft: "auto" }} className="font-bold text-[18px] text-black nowrap">
+          <h2
+            style={{ display: "flex", flexDirection: "row", gap: "10px", whiteSpace: "nowrap", marginLeft: "auto" }}
+            className="font-bold text-[18px] text-black nowrap"
+          >
           </h2>
         </div>
-      
       </div>
     </div>
   );
 };
+
 export default ReadingSection;
