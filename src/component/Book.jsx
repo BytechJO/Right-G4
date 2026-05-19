@@ -16,7 +16,7 @@ import FlashCardViewer from "./FlashCardPages/FlashCardPages";
 // === POPUP ===
 import Popup from "./Popup/Popup";
 import LessonNavigator from "./StudentPages/LessonNavigator";
-import teacherPdf from "../../../Right-G3/public/Teacher Book 3-Apple’s iMac (3) (1).pdf";
+import teacherPdf from "../assets/Right Int TB G4.pdf";
 // const teacherPdf = "../../public/Teacher Book 3-Apple's iMac (3) (1).pdf"
 // === ASSETS ===
 import logo from "../assets/Page 01/PMAAlogo.svg";
