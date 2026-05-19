@@ -20,8 +20,6 @@ const WRONG_BADGE_TEXT = "#ffffff";
 
 // ─────────────────────────────────────────────
 //  📝  EXERCISE DATA
-//  paragraph broken into parts:
-//  { type: "text", value } or { type: "choice", id, options: ["will","won't"], correct }
 // ─────────────────────────────────────────────
 const PARTS = [
   { type: "text", value: "Hansel " },
@@ -81,43 +79,17 @@ export default function WB_ReadListenChoose_QC() {
     setShowResults(false);
     setShowAns(false);
   };
-const captions = [
-  {
-    start: 0.20,
-    end: 6.60,
-    text: "Page 16, review one, exercise C. Read, listen, and choose.",
-  },
-  {
-    start: 7.82,
-    end: 10.10,
-    text: "Hansel will go to the beach on Saturday.",
-  },
-  {
-    start: 10.10,
-    end: 13.22,
-    text: "He won't lie in the sun.",
-  },
-  {
-    start: 13.22,
-    end: 15.30,
-    text: "Harley will go swimming in the sea.",
-  },
-  {
-    start: 15.30,
-    end: 18.78,
-    text: "He will stay near the shore when he swims.",
-  },
-  {
-    start: 19.86,
-    end: 22.74,
-    text: "John won't fly a kite while at the beach.",
-  },
-  {
-    start: 22.74,
-    end: 25.92,
-    text: "He will sit in the sand while reading a book.",
-  },
-];
+
+  const captions = [
+    { start: 0.20,  end: 6.60,  text: "Page 16, review one, exercise C. Read, listen, and choose." },
+    { start: 7.82,  end: 10.10, text: "Hansel will go to the beach on Saturday." },
+    { start: 10.10, end: 13.22, text: "He won't lie in the sun." },
+    { start: 13.22, end: 15.30, text: "Harley will go swimming in the sea." },
+    { start: 15.30, end: 18.78, text: "He will stay near the shore when he swims." },
+    { start: 19.86, end: 22.74, text: "John won't fly a kite while at the beach." },
+    { start: 22.74, end: 25.92, text: "He will sit in the sand while reading a book." },
+  ];
+
   const getOptionState = (choice, option) => {
     const sel = selected[choice.id];
     if (sel !== option) return "idle";
@@ -131,7 +103,6 @@ const captions = [
       return <span key={i} className="rlcq-text">{part.value}</span>;
     }
 
-    // choice: render option1 / option2 inline
     return (
       <span key={part.id} className="rlcq-choice-group">
         {part.options.map((option, oi) => {
@@ -177,7 +148,7 @@ const captions = [
 
         .rlcq-img {
           width: 100%;
-    height: 100%;
+          height: 100%;
           display: block;
           border-radius: 8px;
           flex-shrink: 0;
@@ -233,13 +204,14 @@ const captions = [
           border-radius: 999px;
           border: 2px solid transparent;
           line-height: 1.6;
-          transition: border-color 0.15s, color 0.15s;
+          transition: border-color 0.15s, color 0.15s, background-color 0.15s;
         }
         .rlcq-option--locked { cursor: default; }
 
         /* States */
-        .rlcq-option--selected { border-color: ${CIRCLE_DEFAULT};  }
-        .rlcq-option--wrong    { border-color: ${CIRCLE_WRONG};     }
+        .rlcq-option--selected { border-color: ${CIRCLE_DEFAULT}; }
+        .rlcq-option--wrong    { border-color: ${CIRCLE_WRONG}; }
+        .rlcq-option--correct  { border-color:${CIRCLE_WRONG};  }
 
         /* ✕ badge */
         .rlcq-badge {
@@ -290,13 +262,15 @@ const captions = [
           <span className="WB-ex-A-1">C</span>
           Read, listen, and choose.
         </h1>
-     <div style={{margin:"3em 0 2em"}} >
-        <QuestionAudioPlayer
-          src={sound}
-          captions={captions}
-          stopAtSecond={7}
-        />
-      </div>
+
+        <div style={{ margin: "3em 0 2em" }}>
+          <QuestionAudioPlayer
+            src={sound}
+            captions={captions}
+            stopAtSecond={7}
+          />
+        </div>
+
         {/* ── Image + Paragraph ── */}
         <div className="rlcq-top">
           <img src={imgScene} alt="beach" className="rlcq-img" />

@@ -180,6 +180,7 @@ export default function WB_ReadLookWrite_QA() {
           box-sizing: border-box;
           transition: border-color 0.2s;
           text-align: center;
+    margin-top: 7%;
 
         }
         .rlwa-input:disabled   { opacity: 1; cursor: default; }

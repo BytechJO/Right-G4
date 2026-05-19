@@ -25,8 +25,8 @@ const CriticalThinking = ({ title }) => {
           marginTop: "20px",
         }}
       >
-        <img src={Rabbit} style={{ height: "50px", width: "auto" }} />
-        <h5 className="header-title-page8">{title}</h5>
+        <img src={Rabbit} style={{ height: "50px", width: "auto" , paddingTop : "5px" }} />
+        <h5 style={{ paddingTop : "8px" }} className="header-title-page8">{title}</h5>
       </div>
 
       {/* input */}
@@ -36,7 +36,7 @@ const CriticalThinking = ({ title }) => {
         onChange={(e) => setAnswer(e.target.value)}
         placeholder="Write your answer here..."
         style={{
-          marginTop: "20px",
+          margin: "15% 0",
           width: "60%",
           padding: "10px",
           borderRadius: "8px",

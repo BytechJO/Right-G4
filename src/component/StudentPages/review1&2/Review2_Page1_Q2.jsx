@@ -85,7 +85,7 @@ export default function WB_UnscrambleWrite_QB2() {
         .usw2-list {
           display: flex;
           flex-direction: column;
-          gap: clamp(30px, 1.8vw, 30px);
+          gap: clamp(45px, 1.8vw, 45px);
           width: 100%;
           margin : 12% 0 ;
         }

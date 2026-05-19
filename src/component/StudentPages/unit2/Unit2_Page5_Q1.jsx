@@ -181,7 +181,8 @@ export default function WB_ReadLookWrite_QA_5() {
           box-sizing: border-box;
           transition: border-color 0.2s;
           text-align: center;
-          padding: 4px 2px;
+    margin-top: 7%;
+
         }
         .rlwa5-input:disabled   { opacity: 1; cursor: default; }
         .rlwa5-input--wrong     { border-bottom-color: ${INPUT_UNDERLINE_WRONG}; }

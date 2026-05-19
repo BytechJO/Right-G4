@@ -138,7 +138,7 @@ export default function WB_ReadWrite_QB() {
         .rwb-grid {
           display: grid;
           grid-template-columns: repeat(2, 1fr);
-          gap: clamp(12px, 1.8vw, 22px) clamp(20px, 3vw, 40px);
+          gap: clamp(35px, 1.8vw, 35px) clamp(20px, 3vw, 40px);
           width: 100%;
         }
 
@@ -156,7 +156,6 @@ export default function WB_ReadWrite_QB() {
           font-weight: 700;
           color: ${NUMBER_COLOR};
           flex-shrink: 0;
-          padding-bottom: 4px;
           line-height: 1.5;
         }
 

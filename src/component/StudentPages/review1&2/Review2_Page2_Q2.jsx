@@ -85,7 +85,7 @@ export default function WB_ReadWriteSentences_QE() {
         .rwse-list {
           display: flex;
           flex-direction: column;
-          gap: clamp(14px, 2.2vw, 26px);
+          gap: clamp(35px, 2.2vw, 35px);
           width: 100%;
           margin : 10% 0 ; 
         }
@@ -124,7 +124,7 @@ export default function WB_ReadWriteSentences_QE() {
           width: 100%;
           background: transparent;
           border: none;
-          border-bottom: 2px solid ${INPUT_UNDERLINE_DEFAULT};
+          border-bottom: 1px solid ${INPUT_UNDERLINE_DEFAULT};
           outline: none;
           font-size: clamp(14px, 1.7vw, 20px);
           color: ${INPUT_TEXT_COLOR};

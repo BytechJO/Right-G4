@@ -126,11 +126,11 @@ const ComprehensionA = () => {
                   }}
                 >
                   {isSelected && (
-                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none">
+                    <svg viewBox="0 0 24 24" width="24" height="24" fill="none">
                       <polyline
                         points="4,12 9,18 20,6"
-                        stroke="#2195a6"
-                        strokeWidth="3"
+                        stroke="#ff0000ff"
+                        strokeWidth="2.5"
                         strokeLinecap="round"
                         strokeLinejoin="round"
                       />

@@ -139,7 +139,7 @@ export default function WB_ReadWrite_Review_QB() {
         .rwrb-list {
           display: flex;
           flex-direction: column;
-          gap: clamp(14px, 2.2vw, 26px);
+          gap: clamp(35px, 2.2vw, 35px);
           width: 100%;
         }
 
