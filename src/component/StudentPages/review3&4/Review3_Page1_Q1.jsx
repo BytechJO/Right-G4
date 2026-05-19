@@ -139,7 +139,7 @@ export default function WB_ReadWrite_QA() {
         .rwa-list {
           display: flex;
           flex-direction: column;
-          gap: clamp(12px, 1.8vw, 22px);
+          gap: clamp(35px, 1.8vw, 35px);;
           width: 100%;
         }
 

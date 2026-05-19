@@ -23,9 +23,9 @@ const WRONG_BADGE_TEXT = "#ffffff";
 //  📝  EXERCISE DATA
 // ─────────────────────────────────────────────
 const ITEMS = [
-  { id: 1, src: img1, words: ["video games", "chores"],  correct: "video games" },
-  { id: 2, src: img2, words: ["bored", "call"],          correct: "bored"       },
-  { id: 3, src: img3, words: ["call", "room"],           correct: "room"        },
+  { id: 1, src: img1, words: ["picnic", "baby"],  correct: "baby" },
+  { id: 2, src: img2, words: ["taller", "shorter"],          correct: "taller"       },
+  { id: 3, src: img3, words: ["picnic", "grass"],           correct: "grass"        },
 ];
 
 // ─────────────────────────────────────────────

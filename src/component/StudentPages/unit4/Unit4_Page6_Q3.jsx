@@ -235,9 +235,10 @@ export default function CB_ListenReadCircle_QG() {
           <span className="WB-ex-A">G</span>
           Listen, read, and circle.
         </h1>
-
+<div style={{margin : "2% 0"}}>
+  
         {/* ── Audio ── */}
-        <div style={{ marginTop: "5em" }}>
+        <div style={{ margin: "3em 0" }}>
           <QuestionAudioPlayer
             src={sound}
             captions={captions}
@@ -247,14 +248,15 @@ export default function CB_ListenReadCircle_QG() {
 
         {/* ── Grid ── */}
         <div className="lrc-grid">
-          <div style={{ display: "flex", flexDirection: "column", gap: "clamp(14px,2vw,24px)" }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: "clamp(35px, 2vw, 35px)" }}>
             {leftItems.map(renderItem)}
           </div>
-          <div style={{ display: "flex", flexDirection: "column", gap: "clamp(14px,2vw,24px)" }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: "clamp(35px, 2vw, 35px)" }}>
             {rightItems.map(renderItem)}
           </div>
         </div>
 
+</div>
         {/* ── Buttons ── */}
         <div className="lrc-buttons">
           <Button

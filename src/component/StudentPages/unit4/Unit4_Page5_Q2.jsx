@@ -20,7 +20,7 @@ const RIGHT_COLOR  = "#2096a6";
 //  📝  EXERCISE DATA
 // ─────────────────────────────────────────────
 const ITEMS = [
-  { id: 1, base: "big",  baseBlank: false, comp: "bigger",  compBlank: false, super: "biggest", superBlank: false },
+  { id: 1, base: "big", baseBlank: false, comp: "bigger",  compBlank: true,  super: "biggest", superBlank: true   },
   { id: 2, base: "tall", baseBlank: true,  comp: "taller",  compBlank: false, super: "tallest", superBlank: true  },
   { id: 3, base: "slow", baseBlank: false, comp: "slower",  compBlank: true,  super: "slowest", superBlank: true  },
 ];

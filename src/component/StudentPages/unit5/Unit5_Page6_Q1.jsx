@@ -194,9 +194,7 @@ export default function WB_ReadLookMatch_QD() {
     const isLocked = showAns;
     return (
       <div key={item.name} className="rlm-img-wrap">
-
-        {/* نقطة يسار الصورة — مع badge لو غلط */}
-        <div style={{ position: "relative", flexShrink: 0 }}>
+        <div style={{ position: "relative", flexShrink: 0}}>
           <div
             className="rlm-dot-img"
             ref={(el) => { rightRefs.current[item.name] = el; }}
@@ -228,28 +226,52 @@ export default function WB_ReadLookMatch_QD() {
           width: 100%;
         }
 
-        .rlm-left-col {
+        /* ── Left section: sentences + dots column ── */
+        .rlm-left-section {
           flex: 1;
           min-width: 0;
           display: flex;
-          flex-direction: column;
-          gap: clamp(30px, 6vw, 60px);
+          flex-direction: row;
+          align-items: stretch;
           padding-top: clamp(20px, 3.5vw, 50px);
         }
 
-        .rlm-row { display: flex; align-items: center; }
+        /* عمود الجمل */
+        .rlm-sentences-col {
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+          gap: clamp(30px, 6vw, 60px);
+        }
+
+        /* عمود النقاط — عرض ثابت، محاذاة مع بعض */
+        .rlm-dots-col {
+          display: flex;
+          flex-direction: column;
+          gap: clamp(30px, 6vw, 60px);
+          justify-content: flex-start;
+          padding-left: clamp(8px, 1vw, 14px);
+          flex-shrink: 0;
+        }
+
+        /* كل صف: رقم + جملة */
+        .rlm-row {
+          display: flex;
+          align-items: center;
+          height: 100%;
+        }
 
         .rlm-num {
           font-size: clamp(13px, 1.6vw, 19px);
           font-weight: 700;
           color: ${NUMBER_COLOR};
           flex-shrink: 0;
+          margin-right: clamp(4px, 0.5vw, 8px);
         }
 
         .rlm-sentence-wrap {
           display: flex;
           align-items: center;
-          gap: clamp(6px, 0.9vw, 12px);
           padding: clamp(4px, 0.5vw, 7px) clamp(8px, 1vw, 12px);
           border-radius: 10px;
           border: 2px solid transparent;
@@ -270,16 +292,25 @@ export default function WB_ReadLookMatch_QD() {
           white-space: nowrap;
         }
 
-        /* نقطة الجملة مع wrapper للـ badge */
-        .rlm-dot-sentence-wrap { position: relative; flex-shrink: 0; }
+        /* نقطة الجملة في العمود المنفصل */
+        .rlm-dot-sentence-wrap {
+          position: relative;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          /* ارتفاع ثابت يساوي ارتفاع الصف */
+          height: clamp(32px, 4vw, 48px);
+        }
 
         .rlm-dot-sentence {
           width:  clamp(11px, 1.3vw, 15px);
           height: clamp(11px, 1.3vw, 15px);
           border-radius: 50%;
+          cursor: pointer;
           transition: background 0.15s, transform 0.15s;
+          flex-shrink: 0;
         }
-        .rlm-sentence-wrap:not(.rlm-sentence-wrap--locked):hover .rlm-dot-sentence {
+        .rlm-dot-sentence:hover {
           transform: scale(1.3);
         }
 
@@ -325,6 +356,7 @@ export default function WB_ReadLookMatch_QD() {
           border-radius: 12px;
           transition: border-color 0.15s, transform 0.1s;
           flex-shrink: 0;
+          overflow: hidden;
         }
         .rlm-img-card:hover { transform: scale(1.02); }
         .rlm-img-card--locked { cursor: default; }
@@ -341,7 +373,7 @@ export default function WB_ReadLookMatch_QD() {
         /* ── ✕ Badge ── */
         .rlm-badge {
           position: absolute;
-          top: -20px; right: -1px;
+          top: -8px; right: -8px;
           width: clamp(14px, 1.6vw, 18px);
           height: clamp(14px, 1.6vw, 18px);
           border-radius: 50%;
@@ -372,7 +404,9 @@ export default function WB_ReadLookMatch_QD() {
 
         @media (max-width: 520px) {
           .rlm-grid          { flex-direction: column; }
-          .rlm-left-col      { padding-top: 0; gap: 14px; }
+          .rlm-left-section  { padding-top: 0; }
+          .rlm-sentences-col { gap: 14px; }
+          .rlm-dots-col      { gap: 14px; }
           .rlm-images-area   { padding-left: 0; }
           .rlm-img-col-right { margin-top: 0; }
           .rlm-sentence-text { white-space: normal; }
@@ -400,37 +434,47 @@ export default function WB_ReadLookMatch_QD() {
         <div className="rlm-area" ref={containerRef}>
           <div className="rlm-grid">
 
-            {/* Sentences */}
-            <div className="rlm-left-col">
-              {LEFT_ITEMS.map((item) => {
-                const isSelected = selectedLeft === item.id;
-                const isLocked   = showAns || (showResults && connectedLeft(item.id) && isCorrect(item.id, connections[item.id]));
-                return (
-                  <div key={item.id} className="rlm-row">
-                    <span className="rlm-num">{item.id}</span>
-                    <div
-                      className={[
-                        "rlm-sentence-wrap",
-                        isSelected ? "rlm-sentence-wrap--selected" : "",
-                        isLocked   ? "rlm-sentence-wrap--locked"   : "",
-                      ].filter(Boolean).join(" ")}
-                      onClick={() => handleLeftClick(item.id)}
-                    >
-                      <span className="rlm-sentence-text">{item.sentence}</span>
+            {/* ── Left section: جمل + عمود نقاط منفصل ── */}
+            <div className="rlm-left-section">
 
-                      {/* نقطة + badge */}
-                      <div className="rlm-dot-sentence-wrap">
-                        <div
-                          className="rlm-dot-sentence"
-                          ref={(el) => { leftRefs.current[item.id] = el; }}
-                          style={{ background: leftDotColor(item.id) }}
-                        />
-                        {isLeftWrong(item.id) && <div className="rlm-badge">✕</div>}
+              {/* عمود الجمل */}
+              <div className="rlm-sentences-col">
+                {LEFT_ITEMS.map((item) => {
+                  const isSelected = selectedLeft === item.id;
+                  const isLocked   = showAns || (showResults && connectedLeft(item.id) && isCorrect(item.id, connections[item.id]));
+                  return (
+                    <div key={item.id} className="rlm-row">
+                      <span className="rlm-num">{item.id}</span>
+                      <div
+                        className={[
+                          "rlm-sentence-wrap",
+                          isSelected ? "rlm-sentence-wrap--selected" : "",
+                          isLocked   ? "rlm-sentence-wrap--locked"   : "",
+                        ].filter(Boolean).join(" ")}
+                        onClick={() => handleLeftClick(item.id)}
+                      >
+                        <span className="rlm-sentence-text">{item.sentence}</span>
                       </div>
                     </div>
+                  );
+                })}
+              </div>
+
+              {/* عمود النقاط — منفصل ومحاذي */}
+              <div className="rlm-dots-col">
+                {LEFT_ITEMS.map((item) => (
+                  <div key={item.id} className="rlm-dot-sentence-wrap">
+                    <div
+                      className="rlm-dot-sentence"
+                      ref={(el) => { leftRefs.current[item.id] = el; }}
+                      style={{ background: leftDotColor(item.id) ,  position: "relative" ,  left :"-3em"  }}
+                      onClick={() => handleLeftClick(item.id)}
+                    />
+                    {isLeftWrong(item.id) && <div className="rlm-badge">✕</div>}
                   </div>
-                );
-              })}
+                ))}
+              </div>
+
             </div>
 
             {/* Images */}

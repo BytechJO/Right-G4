@@ -5,7 +5,7 @@ import ValidationAlert from "../../Popup/ValidationAlert";
 // ─────────────────────────────────────────────
 //  🖼️  IMAGES — 5 images
 // ─────────────────────────────────────────────
-import img1 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 6 Ready for School Folder/Page 51/SVG/Asset 30.svg"; // painting
+import img1 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 6 Ready for School Folder/Page 51/SVG/Asset 30.svg";
 import img2 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 6 Ready for School Folder/Page 51/SVG/Asset 25.svg";
 import img3 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 6 Ready for School Folder/Page 51/SVG/Asset 26.svg";
 import img4 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 6 Ready for School Folder/Page 51/SVG/Asset 29.svg";
@@ -42,28 +42,15 @@ const LEFT_ITEMS = [
   { id: 5, sentence: "She should fly a kite."                                },
 ];
 
-// Layout:
-//   Left col (3 imgs):  img_L1 (top) → img_L2 (mid) → img_L3 (bottom)
-//   Right col (2 imgs): img_R1 (top-offset) → img_R2 (bottom-offset)
-//
-// From the screenshot:
-//   Left col:  img2 (radio)   correctLeftId=2
-//              img4 (kite)    correctLeftId=4   ← mid
-//              (none)
-//   Right col: img1 (paint)   correctLeftId=1
-//              img3 (flowers) correctLeftId=3
-//              img5 (phone)   correctLeftId=5
-//
-// Adjust correctLeftId to match your actual images!
 const LEFT_IMGS = [
-  { name: "img2", src: img2, correctLeftId: 1 },  // radio — يسار فوق
-  { name: "img4", src: img4, correctLeftId: 5 },  // kite  — يسار وسط
+  { name: "img2", src: img2, correctLeftId: 1 },
+  { name: "img4", src: img4, correctLeftId: 5 },
 ];
 
 const RIGHT_IMGS = [
-  { name: "img1", src: img1, correctLeftId: 3 },  // paint   — يمين فوق (offset)
-  { name: "img3", src: img3, correctLeftId: 4 },  // flowers — يمين وسط
-  { name: "img5", src: img5, correctLeftId: 2 },  // phone   — يمين تحت
+  { name: "img1", src: img1, correctLeftId: 3 },
+  { name: "img3", src: img3, correctLeftId: 4 },
+  { name: "img5", src: img5, correctLeftId: 2 },
 ];
 
 const ALL_IMGS = [...LEFT_IMGS, ...RIGHT_IMGS];
@@ -111,7 +98,6 @@ export default function WB_ReadLookMatch_QE() {
     return LINE_DEFAULT;
   }, [showAns, showResults]);
 
-  // ── Click handlers ──
   const handleLeftClick = (leftId) => {
     if (showAns) return;
     if (showResults && connectedLeft(leftId) && isCorrect(leftId, connections[leftId])) return;
@@ -134,7 +120,6 @@ export default function WB_ReadLookMatch_QE() {
     if (showResults) setShowResults(false);
   };
 
-  // ── Button handlers ──
   const handleCheck = () => {
     if (showAns) return;
     if (Object.keys(connections).length < LEFT_ITEMS.length) {
@@ -158,7 +143,6 @@ export default function WB_ReadLookMatch_QE() {
     setConnections({}); setShowResults(false); setShowAns(false); setSelectedLeft(null);
   };
 
-  // ── SVG lines ──
   const renderLines = () =>
     Object.entries(connections).map(([leftId, imgName]) => {
       const p1 = getDotCenter(leftRefs.current[leftId]);
@@ -173,7 +157,6 @@ export default function WB_ReadLookMatch_QE() {
       );
     });
 
-  // ── Dot colors ──
   const leftDotColor = (id) => {
     if (selectedLeft === id) return DOT_SELECTED;
     if (connectedLeft(id)) {
@@ -201,7 +184,6 @@ export default function WB_ReadLookMatch_QE() {
     return IMG_BORDER_SELECTED;
   };
 
-  // ── Badge helpers ──
   const isLeftWrong  = (id)   => showResults && !showAns && connectedLeft(id) && !isCorrect(id, connections[id]);
   const isRightWrong = (name) => {
     if (!showResults || showAns || !connectedRight(name)) return false;
@@ -209,7 +191,6 @@ export default function WB_ReadLookMatch_QE() {
     return lid && !isCorrect(lid, name);
   };
 
-  // ── Render image card ──
   const renderImgCard = (item) => {
     const isLocked = showAns;
     return (
@@ -238,7 +219,6 @@ export default function WB_ReadLookMatch_QE() {
       <style>{`
         .rlm-area { position: relative; width: 100%; }
 
-        /* ── Main flex row ── */
         .rlm-grid {
           display: flex;
           flex-direction: row;
@@ -246,17 +226,38 @@ export default function WB_ReadLookMatch_QE() {
           width: 100%;
         }
 
-        /* ── Left: 5 sentences ── */
-        .rlm-left-col {
+        /* ── Left section: sentences + dots column ── */
+        .rlm-left-section {
           flex: 1;
           min-width: 0;
           display: flex;
-          flex-direction: column;
-          gap: clamp(18px, 2.8vw, 38px);
+          flex-direction: row;
+          align-items: stretch;
           padding-top: clamp(16px, 2.4vw, 34px);
         }
 
-        .rlm-row { display: flex; align-items: center; }
+        /* عمود الجمل */
+        .rlm-sentences-col {
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+          gap: clamp(18px, 2.8vw, 38px);
+        }
+
+        /* عمود النقاط — منفصل ومحاذي */
+        .rlm-dots-col {
+          display: flex;
+          flex-direction: column;
+          gap: clamp(18px, 2.8vw, 38px);
+          justify-content: flex-start;
+          padding-left: clamp(8px, 1vw, 14px);
+          flex-shrink: 0;
+        }
+
+        .rlm-row {
+          display: flex;
+          align-items: center;
+        }
 
         .rlm-num {
           font-size: clamp(13px, 1.6vw, 19px);
@@ -269,7 +270,6 @@ export default function WB_ReadLookMatch_QE() {
         .rlm-sentence-wrap {
           display: flex;
           align-items: center;
-          gap: clamp(6px, 0.9vw, 12px);
           padding: clamp(4px, 0.5vw, 7px) clamp(8px, 1vw, 12px);
           border-radius: 10px;
           border: 2px solid transparent;
@@ -290,16 +290,24 @@ export default function WB_ReadLookMatch_QE() {
           white-space: normal;
         }
 
-        /* نقطة الجملة */
-        .rlm-dot-sentence-wrap { position: relative; flex-shrink: 0; }
+        /* نقطة الجملة في العمود المنفصل */
+        .rlm-dot-sentence-wrap {
+          position: relative;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          height: clamp(32px, 4vw, 48px);
+        }
 
         .rlm-dot-sentence {
           width:  clamp(11px, 1.3vw, 15px);
           height: clamp(11px, 1.3vw, 15px);
           border-radius: 50%;
+          cursor: pointer;
           transition: background 0.15s, transform 0.15s;
+          flex-shrink: 0;
         }
-        .rlm-sentence-wrap:not(.rlm-sentence-wrap--locked):hover .rlm-dot-sentence {
+        .rlm-dot-sentence:hover {
           transform: scale(1.3);
         }
 
@@ -309,26 +317,23 @@ export default function WB_ReadLookMatch_QE() {
           flex-direction: row;
           align-items: flex-start;
           gap: clamp(6px, 1vw, 14px);
-    padding-left: 40px;
+          padding-left: 40px;
           flex-shrink: 0;
         }
 
-        /* Left image col: 2 imgs, no offset */
         .rlm-img-col-left {
           display: flex;
           flex-direction: column;
-          gap: clamp(40px, 5.5vw, 70px);       margin-top: clamp(50px, 7vw, 87px);
-
+          gap: clamp(40px, 5.5vw, 70px);
+          margin-top: clamp(50px, 7vw, 87px);
         }
 
-        /* Right image col: 3 imgs, offset down ~1 img height + half gap */
         .rlm-img-col-right {
           display: flex;
           flex-direction: column;
           gap: clamp(40px, 5.5vw, 70px);
         }
 
-        /* dot + image card wrapper */
         .rlm-img-wrap {
           display: flex;
           flex-direction: row;
@@ -365,7 +370,7 @@ export default function WB_ReadLookMatch_QE() {
         /* ✕ badge */
         .rlm-badge {
           position: absolute;
-          top: -7px; right: -7px;
+          top: -8px; right: -8px;
           width: clamp(14px, 1.6vw, 18px);
           height: clamp(14px, 1.6vw, 18px);
           border-radius: 50%;
@@ -380,7 +385,6 @@ export default function WB_ReadLookMatch_QE() {
           z-index: 3;
         }
 
-        /* SVG overlay */
         .rlm-svg {
           position: absolute;
           top: 0; left: 0;
@@ -397,7 +401,9 @@ export default function WB_ReadLookMatch_QE() {
 
         @media (max-width: 520px) {
           .rlm-grid          { flex-direction: column; }
-          .rlm-left-col      { padding-top: 0; }
+          .rlm-left-section  { padding-top: 0; }
+          .rlm-sentences-col { gap: 14px; }
+          .rlm-dots-col      { gap: 14px; }
           .rlm-images-area   { padding-left: 0; }
           .rlm-img-col-right { margin-top: 0; }
         }
@@ -413,7 +419,6 @@ export default function WB_ReadLookMatch_QE() {
           margin: "0 auto",
         }}
       >
-        {/* ── Header ── */}
         <h1
           className="WB-header-title-page8"
           style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
@@ -422,63 +427,66 @@ export default function WB_ReadLookMatch_QE() {
           Read, look, and match.
         </h1>
 
-        {/* ── Matching area ── */}
         <div className="rlm-area" ref={containerRef}>
           <div className="rlm-grid">
 
-            {/* ── Sentences (left) ── */}
-            <div className="rlm-left-col">
-              {LEFT_ITEMS.map((item) => {
-                const isSelected = selectedLeft === item.id;
-                const isLocked   = showAns || (showResults && connectedLeft(item.id) && isCorrect(item.id, connections[item.id]));
-                return (
-                  <div key={item.id} className="rlm-row">
-                    <span className="rlm-num">{item.id}</span>
-                    <div
-                      className={[
-                        "rlm-sentence-wrap",
-                        isSelected ? "rlm-sentence-wrap--selected" : "",
-                        isLocked   ? "rlm-sentence-wrap--locked"   : "",
-                      ].filter(Boolean).join(" ")}
-                      onClick={() => handleLeftClick(item.id)}
-                    >
-                      <span className="rlm-sentence-text">{item.sentence}</span>
-                      <div className="rlm-dot-sentence-wrap">
-                        <div
-                          className="rlm-dot-sentence"
-                          ref={(el) => { leftRefs.current[item.id] = el; }}
-                          style={{ background: leftDotColor(item.id) }}
-                        />
-                        {isLeftWrong(item.id) && <div className="rlm-badge">✕</div>}
+            {/* ── Left section: جمل + عمود نقاط منفصل ── */}
+            <div className="rlm-left-section">
+
+              {/* عمود الجمل */}
+              <div className="rlm-sentences-col">
+                {LEFT_ITEMS.map((item) => {
+                  const isSelected = selectedLeft === item.id;
+                  const isLocked   = showAns || (showResults && connectedLeft(item.id) && isCorrect(item.id, connections[item.id]));
+                  return (
+                    <div key={item.id} className="rlm-row">
+                      <span className="rlm-num">{item.id}</span>
+                      <div
+                        className={[
+                          "rlm-sentence-wrap",
+                          isSelected ? "rlm-sentence-wrap--selected" : "",
+                          isLocked   ? "rlm-sentence-wrap--locked"   : "",
+                        ].filter(Boolean).join(" ")}
+                        onClick={() => handleLeftClick(item.id)}
+                      >
+                        <span className="rlm-sentence-text">{item.sentence}</span>
                       </div>
                     </div>
+                  );
+                })}
+              </div>
+
+              {/* عمود النقاط — منفصل ومحاذي */}
+              <div className="rlm-dots-col">
+                {LEFT_ITEMS.map((item) => (
+                  <div key={item.id} className="rlm-dot-sentence-wrap">
+                    <div
+                      className="rlm-dot-sentence"
+                      ref={(el) => { leftRefs.current[item.id] = el; }}
+                      style={{ background: leftDotColor(item.id) }}
+                      onClick={() => handleLeftClick(item.id)}
+                    />
+                    {isLeftWrong(item.id) && <div className="rlm-badge">✕</div>}
                   </div>
-                );
-              })}
+                ))}
+              </div>
+
             </div>
 
-            {/* ── Images (right) — two staggered columns ── */}
+            {/* ── Images (right) ── */}
             <div className="rlm-images-area">
-
-              {/* Left img col: 2 images */}
               <div className="rlm-img-col-left">
                 {LEFT_IMGS.map(renderImgCard)}
               </div>
-
-              {/* Right img col: 3 images, offset down */}
               <div className="rlm-img-col-right">
                 {RIGHT_IMGS.map(renderImgCard)}
               </div>
-
             </div>
 
           </div>
-
-          {/* SVG lines */}
           <svg className="rlm-svg">{renderLines()}</svg>
         </div>
 
-        {/* ── Buttons ── */}
         <div className="rlm-buttons">
           <Button
             checkAnswers={handleCheck}
