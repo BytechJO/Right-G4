@@ -1,6 +1,6 @@
 import page_7 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 1 Robots of the Future Folder/Page7.png";
 import arrowBtn from "../../../assets/Page 01/Audio btn.svg";
-import WritingSection_U1 from "../Unit2/page7_WritingSection_U1";
+import WritingSection_U1 from "./page7_WritingSection_U1";
 
 const Page7 = ({ openPopup }) => {
   return (
