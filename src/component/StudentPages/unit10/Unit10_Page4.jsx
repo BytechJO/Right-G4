@@ -2,7 +2,7 @@ import React, { useState, useRef } from "react";
 import page_4 from"../../../assets/imgs/pages/Class Book/Right 4 Unit 10 Stella Goes Shopping Folder/Page 85.png";
 import "./Unit10_Page4.css";
 import WritingSection_U1 from "./page7_WritingSection_U1";
-import arrowBtn from "../../../assets/Page 01/Audio btn.svg";
+import arrowBtn from "../../../assets/Page 01/Arrow.svg";
 
 const Page7 = ({ openPopup }) => {
   return (

@@ -31,8 +31,7 @@ const ITEMS = [
     id:  1,
     src: img1,
     Q: [
-      { t: "text",  v: "Were there any "                                         },
-      { t: "input", id: "1q", correct: ["watermelons"], answer: "watermelons"    },
+      { t: "input", id: "1q", correct: ["Were there any watermelons"], answer: "Were there any watermelons"    },
       { t: "text",  v: " ?"                                                      },
     ],
     A: [

@@ -8,7 +8,6 @@ import ValidationAlert from "../../Popup/ValidationAlert";
 const TEXT_COLOR              = "#2b2b2b";
 const NUMBER_COLOR            = "#2b2b2b";
 const OPTION_LABEL_CLR        = "#2b2b2b";
-const CIRCLE_DEFAULT          = "transparent";
 const CIRCLE_SELECTED         = "#2195a6";
 const CIRCLE_WRONG            = "#ef4444";
 const CIRCLE_CORRECT          = "#2195a6";
@@ -90,7 +89,6 @@ export default function WB_ReadCircleWrite_QA() {
 
   const isLocked = showResults || showAns;
 
-  // ── Handlers ──
   const handleSelect = (id, label) => {
     if (isLocked) return;
     setSelected((prev) => ({ ...prev, [id]: label }));
@@ -113,13 +111,13 @@ export default function WB_ReadCircleWrite_QA() {
     let score = 0;
     const total = ITEMS.length * 2;
     ITEMS.forEach((item) => {
-      if (selected[item.id] === item.correct)                             score++;
-      if (normalize(written[item.id] || "") === normalize(item.answer))   score++;
+      if (selected[item.id] === item.correct)                           score++;
+      if (normalize(written[item.id] || "") === normalize(item.answer)) score++;
     });
     setShowResults(true);
-    if (score === total)   ValidationAlert.success(`Score: ${score} / ${total}`);
-    else if (score > 0)    ValidationAlert.warning(`Score: ${score} / ${total}`);
-    else                   ValidationAlert.error(`Score: ${score} / ${total}`);
+    if (score === total)  ValidationAlert.success(`Score: ${score} / ${total}`);
+    else if (score > 0)   ValidationAlert.warning(`Score: ${score} / ${total}`);
+    else                  ValidationAlert.error(`Score: ${score} / ${total}`);
   };
 
   const handleShowAnswer = () => {
@@ -142,7 +140,6 @@ export default function WB_ReadCircleWrite_QA() {
     setShowAns(false);
   };
 
-  // ── State helpers ──
   const getOptionState = (item, label) => {
     const sel = selected[item.id];
     if (sel !== label) return "idle";
@@ -160,26 +157,29 @@ export default function WB_ReadCircleWrite_QA() {
   return (
     <div className="main-container-component">
       <style>{`
-        .rcwa-list {
-          display: flex;
-          flex-direction: column;
-          gap: clamp(35px, 2.6vw, 35px);
+        /* ── Layout: two columns ── */
+        .rcwa-table {
+          display: grid;
+          /* Left: sentence column, Right: options column */
+          grid-template-columns: 1fr auto;
           width: 100%;
+row-gap: clamp(45px, 2.4vw, 45px);
+margin : 8% 0 ;
         }
 
-        /* ── Single item ── */
-        .rcwa-item {
+        /* ── Left: sentence cell ── */
+        .rcwa-sentence-cell {
           display: flex;
           flex-direction: column;
-          gap: clamp(8px, 1vw, 12px);
+          justify-content: center;
+          padding-right: clamp(16px, 2vw, 32px);
         }
 
-        /* ── Sentence row ── */
-        .rcwa-sentence {
+        /* sentence row (number + text + input + after) */
+        .rcwa-sentence-row {
           display: flex;
           align-items: flex-end;
-          flex-wrap: wrap;
-          gap: clamp(4px, 0.5vw, 7px);
+          gap: clamp(4px, 0.5vw, 8px);
         }
 
         .rcwa-num {
@@ -187,32 +187,33 @@ export default function WB_ReadCircleWrite_QA() {
           font-weight: 700;
           color: ${NUMBER_COLOR};
           flex-shrink: 0;
-          line-height: 1.5;
+          line-height: 1.6;
+          min-width: 1.4em;
         }
 
         .rcwa-text {
           font-size: clamp(13px, 1.6vw, 19px);
           color: ${TEXT_COLOR};
-          line-height: 1.5;
+          line-height: 1.6;
           white-space: nowrap;
         }
 
-        /* Input inline */
+        /* Input underline */
         .rcwa-input-wrap {
           position: relative;
-          flex: 0 1 clamp(80px, 10vw, 150px);
-          min-width: clamp(70px, 9vw, 130px);
+          flex: 0 1 clamp(90px, 11vw, 160px);
+          min-width: clamp(80px, 10vw, 140px);
         }
 
         .rcwa-input {
           width: 100%;
           background: transparent;
           border: none;
-          border-bottom: 1px solid ${INPUT_UNDERLINE_DEFAULT};
+          border-bottom: 1.5px solid ${INPUT_UNDERLINE_DEFAULT};
           outline: none;
           font-size: clamp(13px, 1.6vw, 19px);
           color: ${INPUT_TEXT_COLOR};
-          line-height: 1.5;
+          line-height: 1.6;
           box-sizing: border-box;
           transition: border-color 0.2s;
           text-align: center;
@@ -221,7 +222,6 @@ export default function WB_ReadCircleWrite_QA() {
         .rcwa-input--wrong    { border-bottom-color: ${INPUT_UNDERLINE_WRONG}; }
         .rcwa-input--answer   { color: ${INPUT_ANSWER_COLOR}; font-weight: 700; }
 
-        /* ✕ badge on input */
         .rcwa-input-badge {
           position: absolute;
           top: -8px; right: 0;
@@ -239,33 +239,33 @@ export default function WB_ReadCircleWrite_QA() {
           z-index: 2;
         }
 
-        /* ── Options row ── */
-        .rcwa-options {
+        /* ── Right: options cell ── */
+        .rcwa-options-cell {
           display: flex;
-          flex-wrap: wrap;
-          gap: clamp(8px, 1.4vw, 18px);
-          padding-left: clamp(18px, 2.2vw, 28px);
+          align-items: center;
+          justify-content: flex-end;
+          gap: clamp(10px, 2vw, 28px);
         }
 
-        /* ── Single option: oval border حول label+text ── */
+        /* Single option pill */
         .rcwa-option {
           position: relative;
           display: flex;
           align-items: center;
-          gap: clamp(3px, 0.4vw, 5px);
+          gap: clamp(4px, 0.5vw, 7px);
           cursor: pointer;
           user-select: none;
-          border: 2px solid ${CIRCLE_DEFAULT};
+          border: 2px solid transparent;
           border-radius: 999px;
           padding: clamp(3px, 0.4vw, 6px) clamp(10px, 1.2vw, 16px);
           transition: border-color 0.15s;
+          min-width: clamp(70px, 8vw, 110px);
         }
         .rcwa-option--locked   { cursor: default; }
         .rcwa-option--selected { border-color: ${CIRCLE_SELECTED}; }
         .rcwa-option--correct  { border-color: ${CIRCLE_CORRECT};  }
         .rcwa-option--wrong    { border-color: ${CIRCLE_WRONG};    }
 
-        /* ✕ badge on option */
         .rcwa-option-badge {
           position: absolute;
           top: -7px; right: -7px;
@@ -297,6 +297,7 @@ export default function WB_ReadCircleWrite_QA() {
         }
 
         .rcwa-buttons {
+          grid-column: 1 / -1;
           display: flex;
           justify-content: center;
           margin-top: clamp(8px, 1.6vw, 18px);
@@ -322,8 +323,8 @@ export default function WB_ReadCircleWrite_QA() {
           Read, circle, and write.
         </h1>
 
-        {/* ── Items ── */}
-        <div className="rcwa-list">
+        {/* ── Two-column grid ── */}
+        <div className="rcwa-table">
           {ITEMS.map((item) => {
             const writeWrong    = isWriteWrong(item);
             const writeDisabled = isWriteDisabled(item);
@@ -332,40 +333,41 @@ export default function WB_ReadCircleWrite_QA() {
             const writeUColor   = writeWrong ? INPUT_UNDERLINE_WRONG : INPUT_UNDERLINE_DEFAULT;
 
             return (
-              <div key={item.id} className="rcwa-item">
+              <React.Fragment key={item.id}>
 
-                {/* ── Sentence + inline input ── */}
-                <div className="rcwa-sentence">
-                  <span className="rcwa-num">{item.id}</span>
-                  <span className="rcwa-text">{item.before}</span>
+                {/* ── LEFT: sentence + input ── */}
+                <div className="rcwa-sentence-cell">
+                  <div className="rcwa-sentence-row">
+                    <span className="rcwa-num">{item.id}</span>
+                    <span className="rcwa-text">{item.before}</span>
 
-                  <div className="rcwa-input-wrap">
-                    <input
-                      type="text"
-                      className={[
-                        "rcwa-input",
-                        writeWrong ? "rcwa-input--wrong"  : "",
-                        showAns    ? "rcwa-input--answer" : "",
-                      ].filter(Boolean).join(" ")}
-                      value={writeValue}
-                      disabled={writeDisabled}
-                      onChange={(e) => handleWrite(item.id, e.target.value, item.answer)}
-                      style={{ borderBottomColor: writeUColor, color: writeTColor }}
-                      spellCheck={false}
-                      autoComplete="off"
-                    />
-                    {writeWrong && <div className="rcwa-input-badge">✕</div>}
+                    <div className="rcwa-input-wrap">
+                      <input
+                        type="text"
+                        className={[
+                          "rcwa-input",
+                          writeWrong ? "rcwa-input--wrong"  : "",
+                          showAns    ? "rcwa-input--answer" : "",
+                        ].filter(Boolean).join(" ")}
+                        value={writeValue}
+                        disabled={writeDisabled}
+                        onChange={(e) => handleWrite(item.id, e.target.value, item.answer)}
+                        style={{ borderBottomColor: writeUColor, color: writeTColor }}
+                        spellCheck={false}
+                        autoComplete="off"
+                      />
+                      {writeWrong && <div className="rcwa-input-badge">✕</div>}
+                    </div>
+
+                    {item.after && <span className="rcwa-text">{item.after}</span>}
                   </div>
-
-                  {item.after && <span className="rcwa-text">{item.after}</span>}
                 </div>
 
-                {/* ── Options with oval circle ── */}
-                <div className="rcwa-options">
+                {/* ── RIGHT: options (a, b, c) aligned vertically per column ── */}
+                <div className="rcwa-options-cell">
                   {item.options.map((opt) => {
                     const state   = getOptionState(item, opt.label);
                     const isWrong = state === "wrong";
-
                     return (
                       <div
                         key={opt.label}
@@ -386,18 +388,18 @@ export default function WB_ReadCircleWrite_QA() {
                   })}
                 </div>
 
-              </div>
+              </React.Fragment>
             );
           })}
-        </div>
 
-        {/* ── Buttons ── */}
-        <div className="rcwa-buttons">
-          <Button
-            checkAnswers={handleCheck}
-            handleShowAnswer={handleShowAnswer}
-            handleStartAgain={handleReset}
-          />
+          {/* ── Buttons row ── */}
+          <div className="rcwa-buttons">
+            <Button
+              checkAnswers={handleCheck}
+              handleShowAnswer={handleShowAnswer}
+              handleStartAgain={handleReset}
+            />
+          </div>
         </div>
       </div>
     </div>

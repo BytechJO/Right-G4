@@ -156,7 +156,8 @@ export default function WB_ListenReadMatch_QC() {
         }
 
         .lrmc-left-col  { display: flex; flex-direction: column; }
-        .lrmc-right-col { display: flex; flex-direction: column; }
+        .lrmc-right-col { display: flex; flex-direction: column;     padding-left: 10em;
+ }
 
         /* Each row same min-height so dots align horizontally */
         .lrmc-left-row {
@@ -197,6 +198,10 @@ export default function WB_ListenReadMatch_QC() {
         .lrmc-dot-wrap { position: relative; flex-shrink:0; }
         .lrmc-dot {
           width:clamp(11px,1.3vw,15px); height:clamp(11px,1.3vw,15px);
+          border-radius:50%; transition:background 0.15s, transform 0.15s; cursor:pointer;
+        }
+            .lrmc-dot-1 {
+          width:clamp(11px,1.3vw,15px); height:clamp(11px,1.3vw,15px); position : relative; left : -5em ;
           border-radius:50%; transition:background 0.15s, transform 0.15s; cursor:pointer;
         }
         .lrmc-left-row:not(.lrmc-left-row--locked):hover  .lrmc-dot { transform:scale(1.3); }
@@ -260,7 +265,7 @@ export default function WB_ListenReadMatch_QC() {
                       {/* dot at right edge of sentence */}
                       <div style={{ marginLeft:"auto", flexShrink:0 }}>
                         <div className="lrmc-dot-wrap">
-                          <div className="lrmc-dot"
+                          <div className="lrmc-dot-1"
                             ref={(el) => { leftRefs.current[item.id] = el; }}
                             style={{ background: leftDotColor(item.id) }}
                           />

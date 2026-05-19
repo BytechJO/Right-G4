@@ -65,13 +65,13 @@ const GrammarB = () => {
       id: 1,
       image: img1,
       after: "her teeth.",
-      answers: ["her teeth", "her teeth."],
+      answers: ["She brushed", "She brushed"],
     },
     {
       id: 2,
       image: img2,
       after: "a tree.",
-      answers: ["a tree", "a tree."],
+      answers: ["It climbed", "a tree."],
     },
   ];
 

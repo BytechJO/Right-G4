@@ -12,30 +12,26 @@ const GrammarC = () => {
     {
       id: 1,
       image: img1,
-      before: "I have been to",
       after: ".",
-      answers: ["the store", "the store."],
+      answers: ["I have been to the store.", "I have been to the store."],
     },
     {
       id: 2,
       image: img2,
-      before: "She has",
       after: ".",
-      answers: ["washed the dishes", "washed the dishes."],
+      answers: [ "She has washed the dishes."],
     },
     {
       id: 3,
       image: img3,
-      before: "He has",
       after: ".",
-      answers: ["taken a shower", "taken a shower."],
+      answers: [ "He has taken a shower."],
     },
     {
       id: 4,
       image: img4,
-      before: "He has",
       after: ".",
-      answers: ["fed the chickens", "fed the chickens."],
+      answers: ["He has fed the chickens", "fed the chickens."],
     },
   ];
 

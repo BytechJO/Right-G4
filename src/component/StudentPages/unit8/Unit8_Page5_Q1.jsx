@@ -58,7 +58,6 @@ const ITEMS = [
       { label: "c", text: "car race" },
     ],
   },
-  // ── أضف المزيد هون لو في أسئلة إضافية ──
 ];
 
 // ─────────────────────────────────────────────
@@ -145,27 +144,23 @@ export default function WB_ReadChooseWrite_QA() {
   return (
     <div className="main-container-component">
       <style>{`
-        .rcwa-list {
-          display: flex;
-          flex-direction: column;
-          gap:clamp(40px, 2.4vw, 40px);
+        /* ── Two-column grid: sentence left | options right ── */
+        .rcwa-table {
+          display: grid;
+          grid-template-columns: 1fr auto;
           width: 100%;
-                    margin : 7% 0 ;
-
+         row-gap: clamp(45px, 2.4vw, 45px);
+          align-items: center;
+          margin : 12% 0 ;
         }
 
-        .rcwa-item {
-          display: flex;
-          flex-direction: column;
-          gap: clamp(15px, 0.5vw, 15px);
-        }
-
-        /* Sentence row */
-        .rcwa-sentence {
+        /* ── LEFT: sentence cell ── */
+        .rcwa-sentence-cell {
           display: flex;
           align-items: flex-end;
-          flex-wrap: wrap;
-          gap: clamp(4px, 0.5vw, 7px);
+
+          gap: clamp(4px, 0.5vw, 8px);
+          padding-right: clamp(16px, 2vw, 32px);
         }
 
         .rcwa-num {
@@ -173,17 +168,18 @@ export default function WB_ReadChooseWrite_QA() {
           font-weight: 700;
           color: ${NUMBER_COLOR};
           flex-shrink: 0;
-          line-height: 1.5;
+          line-height: 1.6;
+          min-width: 1.4em;
         }
 
         .rcwa-text {
           font-size: clamp(13px, 1.6vw, 19px);
           color: ${TEXT_COLOR};
-          line-height: 1.5;
+          line-height: 1.6;
           white-space: nowrap;
         }
 
-        /* Input inline */
+        /* Input underline */
         .rcwa-input-wrap {
           position: relative;
           flex: 0 1 clamp(90px, 11vw, 170px);
@@ -194,11 +190,11 @@ export default function WB_ReadChooseWrite_QA() {
           width: 100%;
           background: transparent;
           border: none;
-          border-bottom: 1px solid ${INPUT_UNDERLINE_DEFAULT};
+          border-bottom: 1.5px solid ${INPUT_UNDERLINE_DEFAULT};
           outline: none;
           font-size: clamp(13px, 1.6vw, 19px);
           color: ${INPUT_TEXT_COLOR};
-          line-height: 1.5;
+          line-height: 1.6;
           box-sizing: border-box;
           font-family: inherit;
           transition: border-color 0.2s;
@@ -225,28 +221,27 @@ export default function WB_ReadChooseWrite_QA() {
           z-index: 2;
         }
 
-        /* Options row — 3 options */
-        .rcwa-options {
+        /* ── RIGHT: options cell ── */
+        .rcwa-options-cell {
           display: flex;
           align-items: center;
-          flex-wrap: wrap;
-          gap: clamp(10px, 1.6vw, 22px);
-          padding-left: clamp(20px, 2.6vw, 32px);
+          gap: clamp(10px, 2vw, 28px);
         }
 
-        /* Single option: oval border */
+        /* Single option pill */
         .rcwa-option {
           position: relative;
           display: flex;
           align-items: center;
-          gap: clamp(3px, 0.4vw, 5px);
+          gap: clamp(4px, 0.5vw, 7px);
           cursor: pointer;
           user-select: none;
           border: 2px solid transparent;
           border-radius: 999px;
-          padding: clamp(2px, 0.3vw, 5px) clamp(10px, 1.2vw, 16px);
+          padding: clamp(3px, 0.4vw, 6px) clamp(10px, 1.2vw, 16px);
           transition: border-color 0.15s;
           white-space: nowrap;
+          min-width: clamp(75px, 8.5vw, 115px);
         }
         .rcwa-option--locked   { cursor: default; }
         .rcwa-option--selected { border-color: ${CIRCLE_SELECTED}; }
@@ -284,6 +279,7 @@ export default function WB_ReadChooseWrite_QA() {
         }
 
         .rcwa-buttons {
+          grid-column: 1 / -1;
           display: flex;
           justify-content: center;
           margin-top: clamp(8px, 1.6vw, 18px);
@@ -309,8 +305,8 @@ export default function WB_ReadChooseWrite_QA() {
           Read, choose, and write.
         </h1>
 
-        {/* ── Items ── */}
-        <div className="rcwa-list">
+        {/* ── Two-column grid ── */}
+        <div className="rcwa-table">
           {ITEMS.map((item) => {
             const writeWrong    = isWriteWrong(item);
             const writeDisabled = isWriteDisabled(item);
@@ -319,10 +315,10 @@ export default function WB_ReadChooseWrite_QA() {
             const writeUColor   = writeWrong ? INPUT_UNDERLINE_WRONG : INPUT_UNDERLINE_DEFAULT;
 
             return (
-              <div key={item.id} className="rcwa-item">
+              <React.Fragment key={item.id}>
 
-                {/* Sentence + inline input */}
-                <div className="rcwa-sentence">
+                {/* ── LEFT: sentence + input ── */}
+                <div className="rcwa-sentence-cell">
                   <span className="rcwa-num">{item.id}</span>
                   {item.before && <span className="rcwa-text">{item.before}</span>}
 
@@ -347,8 +343,8 @@ export default function WB_ReadChooseWrite_QA() {
                   {item.after && <span className="rcwa-text">{item.after}</span>}
                 </div>
 
-                {/* 3 options */}
-                <div className="rcwa-options">
+                {/* ── RIGHT: options (a, b, c) ── */}
+                <div className="rcwa-options-cell">
                   {item.options.map((opt) => {
                     const state   = getOptionState(item, opt.label);
                     const isWrong = state === "wrong";
@@ -372,18 +368,18 @@ export default function WB_ReadChooseWrite_QA() {
                   })}
                 </div>
 
-              </div>
+              </React.Fragment>
             );
           })}
-        </div>
 
-        {/* ── Buttons ── */}
-        <div className="rcwa-buttons">
-          <Button
-            checkAnswers={handleCheck}
-            handleShowAnswer={handleShowAnswer}
-            handleStartAgain={handleReset}
-          />
+          {/* ── Buttons ── */}
+          <div className="rcwa-buttons">
+            <Button
+              checkAnswers={handleCheck}
+              handleShowAnswer={handleShowAnswer}
+              handleStartAgain={handleReset}
+            />
+          </div>
         </div>
       </div>
     </div>

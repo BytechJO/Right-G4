@@ -113,6 +113,7 @@ take care of them, too?"
         sound={readingAudio}
         captions={captions}
         stopAtSecond={2.5}
+          textLen = {31}
       />
 
  </div>

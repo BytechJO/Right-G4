@@ -26,6 +26,11 @@ const ComprehensionA = () => {
 
   const handleCheck = () => {
     if (locked) return;
+  const hasSelected = Object.values(selected).some((v) => v === true);
+  if (!hasSelected) {
+    ValidationAlert.info("Please select at least one answer.");
+    return;
+  }
 
     let correctCount = 0;
     const newErrors = {};

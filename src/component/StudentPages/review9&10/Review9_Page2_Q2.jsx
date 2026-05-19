@@ -195,8 +195,7 @@ export default function WB_LookReadMatch_QE() {
         .lrm-img {
           width: clamp(100px, 14vw, 190px);
           height: clamp(70px, 9.5vw, 130px);
-          object-fit: cover;
-          border-radius: 8px;
+          object-fit: contain;
           display: block;
           pointer-events: none;
         }
@@ -228,7 +227,7 @@ export default function WB_LookReadMatch_QE() {
           justify-content: space-around;
           gap: clamp(8px,1.2vw,18px);
           height: 100%;
-              padding-left: 50vh;
+              padding-left: 40vh;
 
         }
 

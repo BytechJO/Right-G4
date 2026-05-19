@@ -319,7 +319,7 @@ export default function WB_ReadLookMatch_QD() {
           flex-direction: row;
           align-items: flex-start;
           gap: clamp(6px, 1vw, 14px);
-          padding-left: clamp(10px, 1.6vw, 22px);
+          padding-left: clamp(50vh, 1.6vw, 22px);
           flex-shrink: 0;
         }
 
@@ -327,6 +327,10 @@ export default function WB_ReadLookMatch_QD() {
           display: flex;
           flex-direction: column;
           gap: clamp(53.5px, 1vw, 30px);
+          position : relative ;
+          left : 20vh ;
+                    margin-top: 3.8%;
+
         }
 
         .rlm-img-col-right {
@@ -357,14 +361,15 @@ export default function WB_ReadLookMatch_QD() {
           transition: border-color 0.15s, transform 0.1s;
           flex-shrink: 0;
           overflow: hidden;
+  
         }
         .rlm-img-card:hover { transform: scale(1.02); }
         .rlm-img-card--locked { cursor: default; }
         .rlm-img-card--locked:hover { transform: none; }
 
         .rlm-img {
-          width: 100%;
-          height: clamp(75px, 9.5vw, 160px);
+          width: 50%;
+          height: auto;
           object-fit: cover;
           display: block;
           pointer-events: none;
@@ -467,7 +472,7 @@ export default function WB_ReadLookMatch_QD() {
                     <div
                       className="rlm-dot-sentence"
                       ref={(el) => { leftRefs.current[item.id] = el; }}
-                      style={{ background: leftDotColor(item.id) ,  position: "relative" ,  left :"-3em"  }}
+                      style={{ background: leftDotColor(item.id) ,  position: "relative" ,  left :"-1em"  }}
                       onClick={() => handleLeftClick(item.id)}
                     />
                     {isLeftWrong(item.id) && <div className="rlm-badge">✕</div>}

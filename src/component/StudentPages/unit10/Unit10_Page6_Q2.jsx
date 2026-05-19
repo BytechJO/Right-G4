@@ -311,13 +311,21 @@ export default function WB_WordSearch_QE() {
             display: "flex",
             alignItems: "center",
             gap: "12px",
-            flexWrap: "wrap",
           }}
         >
-          <span className="WB-ex-A">E</span>
-          Find and circle the words. Then <span style={{color : "red"}}>✓</span> the countries for each word you
-          find.
+          <span className="WB-ex-A" style={{ display : "flex" , flexDirection : "row"}} >E</span>
+          <div style={{ display: "flex" }}>
+            Read and write <span className="text-[#D1252B]">✓</span> or{" "}
+            <span className="text-[#D1252B]">✕</span> to show if the underlined
+            word is used for your correctly.
+            <div style={{ marginTop: "4px" }}>
+              Write the correct vocabulary word if the underlined word is
+              incorrect.
+            </div>
+          </div>
         </h1>
+
+ 
         <p
           style={{
             fontSize: "clamp(12px,1.4vw,16px)",
