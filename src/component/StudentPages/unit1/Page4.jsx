@@ -138,7 +138,13 @@ const wordTimingsVoc = [
 
   { start: 29.22, end: 29.80 }, // Thanks
   { start: 30.94, end: 31.78 }, // Won't mind
-  { start: 32.94, end: 37.16 }, // After all. Of course. At least
+  { start: 32.94, end: 33.78
+ }, // After all. Of course. At least
+  { start: 33.78
+
+, end: 35.50 }, // After all. Of course. At least
+  { start: 35.50, end: 37.16 }, // After all. Of course. At least
+
 ];
 
   
