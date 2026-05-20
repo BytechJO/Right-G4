@@ -304,27 +304,21 @@ export default function WB_WordSearch_QE() {
           margin: "0 auto",
         }}
       >
-        <h1
-          className="WB-header-title-page8"
-          style={{
+
+<div className="WB-header-title-page8"  style={{
             margin: 0,
             display: "flex",
-            alignItems: "center",
+            alignItems: "start",
             gap: "12px",
-          }}
-        >
-          <span className="WB-ex-A" style={{ display : "flex" , flexDirection : "row"}} >E</span>
-          <div style={{ display: "flex" }}>
-            Read and write <span className="text-[#D1252B]">✓</span> or{" "}
-            <span className="text-[#D1252B]">✕</span> to show if the underlined
-            word is used for your correctly.
-            <div style={{ marginTop: "4px" }}>
-              Write the correct vocabulary word if the underlined word is
-              incorrect.
+          }}>
+          <span className="WB-ex-A">I</span>
+          <div style={{ display: "block"  }}>
+            Find and circle the words.  Then <span className="text-[#D1252B]"> ✓</span>  the countries for each word you find. 
+            <div style={{ marginTop: "0" }}>
+             One word is not in the puzzle, so one country won’t be checked.
             </div>
           </div>
-        </h1>
-
+        </div>
  
         <p
           style={{
