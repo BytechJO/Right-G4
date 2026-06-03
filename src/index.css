@@ -553,10 +553,10 @@ img {
     font-size: 18px;
     min-width: 120px;
   }
-  .svg-img {
+  /* .svg-img {
     height: 90px !important;
     width: 75px !important;
-  }
+  } */
   .circle-area {
     width: 14px !important;
     height: 14px !important;
@@ -630,12 +630,12 @@ img {
   .page1-img-wrapper-teacher {
     width: 100%;
     height: 100%;
-    min-height: 75vh;
+    min-height: 80vh;
   }
-  .svg-img {
+  /* .svg-img {
     height: 140px;
     width: 140px;
-  }
+  } */
   .header-title-page8 {
     font-size: 22px;
   }
@@ -702,7 +702,7 @@ img {
   .page1-img-wrapper-teacher {
     width: 100%;
     height: 100%;
-    min-height: 70vh;
+    min-height: 75vh;
   }
   .page-image {
     width: 100%;
@@ -712,10 +712,10 @@ img {
     font-size: 22px;
     white-space: wrap;
   }
-  .svg-img {
+  /* .svg-img {
     height: 140px;
     width: 120px;
-  }
+  } */
   .headset-icon-CD-page4-1 {
     top: 6.5%;
     right: 10.2%;
