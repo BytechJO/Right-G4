@@ -7,7 +7,7 @@ import LeftSidebar from "./Book/Sidebars/LeftSidebar";
 import RightSidebar from "./Book/Sidebars/RightSidebar";
 // === cover img ===
 import workbookCover from "../assets/imgs/pages/covers/G4 Cover WB.png";
-import stbookCover from "../../../assets/imgs/pages/covers/G4 Cover SB.png";
+import stbookCover from "../assets/imgs/pages/covers/G4 Cover SB.png";
 import teacherBookCover from "../assets/imgs/pages/Right InternationalTB/Right 2nd edition TB G4_Page_001.png";
 
 // === VIEWERS ===
