@@ -164,12 +164,15 @@ export default function WB_WhatDoYouEat_QE() {
         </div>
 
         {/* ── Reset only ── */}
-        <div className="lrw-buttons">
+      
+      </div> 
+      <div className="action-buttons-container">
+       <div className="lrw-buttons">
     <button onClick={handleReset} className="try-again-button">
           Start Again ↻
         </button>
         </div>
-      </div>
+        </div>
     </div>
   );
 }

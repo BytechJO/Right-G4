@@ -286,7 +286,7 @@ export default function WB_WordSearch_QK() {
           className="WB-header-title-page8"
           style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
         >
-          <span className="WB-ex-A">B</span>
+          <span>A</span>
           Find and circle the words.
         </h1>
 

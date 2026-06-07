@@ -395,7 +395,7 @@ export default function WB_ReadLookMatch_QD() {
           className="WB-header-title-page8"
           style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
         >
-          <span className="WB-ex-A-1">D</span>
+          <span className="WB-ex-A-1">E</span>
           Read, look, and match.
         </h1>
 

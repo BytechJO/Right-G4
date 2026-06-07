@@ -313,7 +313,7 @@ export default function WB_MissingLetters_F() {
           className="WB-header-title-page8"
           style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
         >
-          <span className="WB-ex-A">F</span>
+          <span className="WB-ex-A">B</span>
           Write the missing letters.
         </h1>
 

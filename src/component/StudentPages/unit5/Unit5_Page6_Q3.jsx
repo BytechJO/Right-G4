@@ -6,17 +6,17 @@ import ValidationAlert from "../../Popup/ValidationAlert";
 //  🎨  COLORS
 // ─────────────────────────────────────────────
 const INPUT_UNDERLINE_DEFAULT = "#3f3f3f";
-const INPUT_TEXT_COLOR        = "#2b2b2b";
-const NUMBER_COLOR            = "#2b2b2b";
-const WORD_COLOR              = "#2b2b2b";
-const VARY_COLOR              = "#c81e1e";
+const INPUT_TEXT_COLOR = "#2b2b2b";
+const NUMBER_COLOR = "#2b2b2b";
+const WORD_COLOR = "#2b2b2b";
+const VARY_COLOR = "#c81e1e";
 
 // ─────────────────────────────────────────────
 //  📝  EXERCISE DATA
 //  open-ended — no correct answer check
 // ─────────────────────────────────────────────
 const ITEMS = [
-  { id: 1, word: "inside"  },
+  { id: 1, word: "inside" },
   { id: 2, word: "through" },
   { id: 3, word: "between" },
 ];
@@ -25,8 +25,8 @@ const ITEMS = [
 //  COMPONENT
 // ─────────────────────────────────────────────
 export default function WB_ReadWriteOwn_QF() {
-  const [answers,  setAnswers]  = useState({});
-  const [checked,  setChecked]  = useState(false);
+  const [answers, setAnswers] = useState({});
+  const [checked, setChecked] = useState(false);
 
   const handleChange = (id, value) => {
     if (checked) return;
@@ -35,7 +35,10 @@ export default function WB_ReadWriteOwn_QF() {
 
   const handleCheck = () => {
     const allAnswered = ITEMS.every((item) => answers[item.id]?.trim());
-    if (!allAnswered) { ValidationAlert.info("Please write a sentence for each word."); return; }
+    if (!allAnswered) {
+      ValidationAlert.info("Please write a sentence for each word.");
+      return;
+    }
     setChecked(true);
     ValidationAlert.success(`Score: ${ITEMS.length} / ${ITEMS.length}`);
   };
@@ -143,7 +146,13 @@ export default function WB_ReadWriteOwn_QF() {
         {/* ── Header ── */}
         <h1
           className="WB-header-title-page8"
-          style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
+          style={{
+            margin: 0,
+            display: "flex",
+            alignItems: "center",
+            gap: "12px",
+            flexWrap: "wrap",
+          }}
         >
           <span className="WB-ex-A">F</span>
           Read and write your own sentences.
@@ -170,12 +179,13 @@ export default function WB_ReadWriteOwn_QF() {
             </div>
           ))}
         </div>
-
-        {/* ── Buttons ── */}
+      </div>
+      {/* ── Buttons ── */}
+      <div className="action-buttons-container">
         <div className="rwof-buttons">
-        <button onClick={handleReset} className="try-again-button">
-          Start Again ↻
-        </button>
+          <button onClick={handleReset} className="try-again-button">
+            Start Again ↻
+          </button>
         </div>
       </div>
     </div>

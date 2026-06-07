@@ -46,6 +46,7 @@ export default function WorkBookNavigator({ startIndex = 0 }) {
       });
       return;
     }
+console.log(lesson.lastOfReview);
 
     // آخر درس في المراجعة
     if (lesson.lastOfReview) {
