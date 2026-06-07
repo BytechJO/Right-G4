@@ -15,7 +15,17 @@ img {
 .content-wrapper {
   overflow: auto;
 }
-
+.page1-img-wrapper-posters {
+  width: 100%;
+  height: 100%;
+  min-height: 80vh;
+  background-size: 100% auto;
+  background-repeat: no-repeat;
+  background-position: top left;
+  aspect-ratio: 813 / 558;
+  position: relative;
+  display: block;
+}
 button {
   cursor: pointer;
 }
@@ -36,16 +46,16 @@ button {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  padding: 50px 30px 30px 30px;
+  padding: 30px;
 }
+
 .div-forall {
   display: flex;
   flex-direction: column;
   width: 60%;
+  gap: 68px;
   justify-content: flex-start;
-            gap: 30px !important ;
-
-  
+  margin-top: 20px;
 }
 .tooltip-text {
   visibility: hidden;
@@ -96,6 +106,10 @@ button {
   body {
     overflow-y: auto;
   }
+}
+input:focus {
+  border-color: gray !important ; /* هنا يصير اللون رمادي */
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.1); /* ظل خفيف لطيف */
 }
 
 .clickable-area {
@@ -191,21 +205,21 @@ img {
   background-size: 100% auto;
   background-repeat: no-repeat;
   background-position: top left;
-  aspect-ratio: 879 / 1280;
+  aspect-ratio: 858 / 1280;
   position: relative;
   display: block;
 }
 
 .page1-img-wrapper-teacher {
-    width: 100%;
-    height: auto;
-    min-height: 85vh;
-    background-size: 100% auto;
-    background-repeat: no-repeat;
-    background-position: top left;
-    aspect-ratio: 792 / 1112;
-    position: relative;
-    display: block;
+  width: 100%;
+  height: 100%;
+  min-height: 85vh;
+  background-size: 100% auto;
+  background-repeat: no-repeat;
+  background-position: top left;
+  aspect-ratio: 827 / 1173;
+  position: relative;
+  display: block;
 }
 .number-icon {
   position: absolute;
@@ -226,8 +240,8 @@ img {
 }
 
 .ex-A {
-  background: #ffca94;
-  font-family: "Gill Sans MT", "Gill Sans", Calibri, "Trebuchet MS", sans-serif;
+  background: #f0bba6;
+  font-family: "Gill Sans", "Gill Sans MT", Calibri, "Trebuchet MS", sans-serif;
   color: white;
   font-weight: 700;
   font-size: 25px;
@@ -245,46 +259,33 @@ img {
 
 .header-title-page8 {
   font-size: 25px;
-  font-family: "Gill Sans MT", "Gill Sans", Calibri, "Trebuchet MS", sans-serif;
-  color: #f39b42;
+  font-family: "Gill Sans", "Gill Sans MT", Calibri, "Trebuchet MS", sans-serif;
+  color: #d2232a;
   font-weight: 700;
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 5px;
   white-space: nowrap;
-  width: 70%;
 }
 .WB-header-title-page8 {
   font-size: 25px;
-  font-family: "Gill Sans MT", "Gill Sans", Calibri, "Trebuchet MS", sans-serif;
-  color: #2096a6;
+  font-family: "Gill Sans", "Gill Sans MT", Calibri, "Trebuchet MS", sans-serif;
+  color: #ed1c2b;
   font-weight: 700;
+  display: flex;
   align-items: center;
   gap: 5px;
   white-space: nowrap;
 }
 .WB-ex-A {
-  background: #99c0cb;
-  font-family: "Gill Sans MT", "Gill Sans", Calibri, "Trebuchet MS", sans-serif;
+  background: #f6967d;
+  font-family: "Gill Sans", "Gill Sans MT", Calibri, "Trebuchet MS", sans-serif;
   color: white;
   font-weight: 700;
   font-size: 25px;
   padding: 0px 10px;
   border-radius: 6px;
   font-weight: bold;
-    white-space: nowrap;
-
-}
-.WB-ex-A-1 {
-  font-family: "Gill Sans MT", "Gill Sans", Calibri, "Trebuchet MS", sans-serif;
-  color: #2195a6;
-  font-weight: 700;
-  font-size: 25px;
-  padding: 0px 10px;
-  border-radius: 6px;
-  font-weight: bold;
-    white-space: nowrap;
-
 }
 .exercise-container {
   display: flex;
@@ -536,11 +537,26 @@ img {
   background: rgba(0, 0, 0, 0.15);
 }
 @media (max-width: 1180px) {
-  .circle-area {
+  /* .circle-area {
     width: 22px;
     height: 23px;
+  } */
+}
+@media screen and (max-width: 1367px) and (max-height: 1024px) {
+    .circle-area {
+        width: 26px;
+        height: 26px;
+    }
+    .page1-img-wrapper,
+  .page1-img-wrapper-flashcard,
+  .page1-img-wrapper-teacher {
+    width: 100%;
+    height: 100%;
+    min-height: 75vh;
   }
 }
+
+
 
 @media screen and (max-width: 1024px) and (max-height: 600px) {
   .header-title-page8 {
@@ -553,76 +569,11 @@ img {
     font-size: 18px;
     min-width: 120px;
   }
-  /* .svg-img {
-    height: 90px !important;
-    width: 75px !important;
-  } */
-  .circle-area {
+
+  /* .circle-area {
     width: 14px !important;
     height: 14px !important;
-  }
-  .headset-icon-CD-page4-1 {
-    top: 7.5% !important;
-    right: 5.2% !important;
-  }
-  .headset-icon-CD-page4-2 {
-    top: 60.5% !important;
-  }
-  .click-icon-page4 {
-    bottom: 8.5% !important;
-    right: 35% !important;
-  }
-  #CD-1-page5 {
-    top: 2% !important;
-    right: 2% !important;
-  }
-  #CD-2-page5 {
-    bottom: 29.5% !important;
-    right: 7.2% !important;
-  }
-  .click-icon-page5 {
-    bottom: 13% !important;
-  }
-  .headset-icon-CD-page6 {
-    top: 2.5% !important;
-  }
-  .pauseBtn-icon-CD-page6 {
-    top: 2.5% !important;
-  }
-  .headset-icon-CD-page7 {
-    top: 2.5% !important;
-    right: 56.2% !important;
-  }
-  .pauseBtn-icon-CD-page7 {
-    top: 2.5% !important;
-    right: 51% !important;
-  }
-  .click-icon-page8-1 {
-    top: 6.5% !important;
-    right: 1.4% !important;
-  }
-  .click-icon-page8-2 {
-    top: 25%;
-    left: 33.3%;
-  }
-  .click-icon-page8-3 {
-    top: 46%;
-    left: 32.5%;
-  }
-  .click-icon-page8-4 {
-    bottom: 22% !important;
-    left: 49.7%;
-  }
-  .click-icon-page9-1 {
-    top: 2.5%;
-  }
-  .click-icon-page9-2 {
-    top: 25%;
-    left: 32.8%;
-  }
-  .headset-icon-CD-page9 {
-    bottom: 28.5% !important;
-  }
+  } */
 }
 @media (max-width: 1024px) {
   .page1-img-wrapper,
@@ -632,67 +583,16 @@ img {
     height: 100%;
     min-height: 80vh;
   }
-  /* .svg-img {
-    height: 140px;
-    width: 140px;
-  } */
-  .header-title-page8 {
-    font-size: 22px;
-  }
-  .headset-icon-CD-page4-1 {
-    top: 5.5%;
-    right: 12.2%;
-  }
-  .click-icon-page4 {
-    bottom: 14.5%;
-    right: 42%;
-  }
 
-  .click-icon-page4-1 {
-    top: 35%;
-    left: 17%;
-  }
-  .headset-icon-CD-page4-2 {
-    top: 59.5%;
-  }
+  /* 
   .circle-area {
     width: 33px;
     height: 31px;
-  }
+  } */
   .word-text3 {
     border-radius: 20px;
     font-size: 18px;
     min-width: 120px;
-  }
-  .click-icon-page8-1 {
-    top: 8%;
-    right: 6.4%;
-  }
-  #CD-1-page5 {
-    top: 2%;
-    right: 6%;
-  }
-  #CD-2-page5 {
-    bottom: 32.5%;
-    right: 12.2%;
-  }
-  .click-icon-page5 {
-    bottom: 16%;
-    left: 52%;
-  }
-  .click-icon-page8-4 {
-    bottom: 25%;
-  }
-  .headset-icon-CD-page9 {
-    bottom: 32.5%;
-  }
-  .headset-icon-CD-page7 {
-    top: 3.5%;
-    right: 61.2%;
-  }
-  .pauseBtn-icon-CD-page7 {
-    top: 3.5%;
-    right: 56%;
   }
 }
 
@@ -712,67 +612,6 @@ img {
     font-size: 22px;
     white-space: wrap;
   }
-  /* .svg-img {
-    height: 140px;
-    width: 120px;
-  } */
-  .headset-icon-CD-page4-1 {
-    top: 6.5%;
-    right: 10.2%;
-  }
-  .headset-icon-CD-page4-2 {
-    top: 60.5%;
-  }
-  .click-icon-page4 {
-    bottom: 13.5%;
-    right: 41%;
-  }
-  #CD-2-page5 {
-    bottom: 31%;
-    right: 10.2%;
-  }
-  .click-icon-page5 {
-    bottom: 14.5%;
-    left: 52.5%;
-  }
-  #CD-1-page5 {
-    top: 3.5%;
-    right: 5.5%;
-  }
-  .headset-icon-CD-page6 {
-    top: 4%;
-  }
-  .pauseBtn-icon-CD-page6 {
-    top: 4%;
-    left: 39.2%;
-  }
-  .headset-icon-CD-page7 {
-    top: 4%;
-    right: 60.2%;
-  }
-  .pauseBtn-icon-CD-page7 {
-    top: 4%;
-    right: 56%;
-  }
-  .click-icon-page8-1 {
-    top: 8.3%;
-    right: 5.4%;
-  }
-  .click-icon-page8-2 {
-    top: 26.5%;
-  }
-  .click-icon-page8-3 {
-    top: 47.5%;
-  }
-  .click-icon-page8-4 {
-    bottom: 23.8%;
-  }
-  .click-icon-page9-2 {
-    top: 26.5%;
-  }
-  .headset-icon-CD-page9 {
-    bottom: 31%;
-  }
 
   .exercise-image-div {
     flex-wrap: wrap !important;
@@ -784,20 +623,20 @@ img {
   .audio-popup-read-container {
     width: 60% !important;
   }
-  .circle-area {
+  /* .circle-area {
     width: 27px;
-    height: 29px;
-  }
+    height: 27px;
+  } */
   .nav-btn {
     position: absolute;
     top: 0%;
   }
 }
 @media (max-width: 768px) {
-  .circle-area {
+  /* .circle-area {
     width: 23px;
     height: 25px;
-  }
+  } */
 }
 @media (max-width: 600px) {
   .action-buttons-container {
@@ -812,13 +651,5 @@ img {
 @media (max-width: 540px) {
   .exercise-image {
     height: 80px;
-  }
-}
-@media (max-width: 1200px) and (min-width: 768px) {
-  .header-title-page8 {
-    font-size: 20px; /* أصغر شوي من الديسكتوب */
-    width: 90%; /* أوسع */
-    white-space: normal; /* ينزل سطر */
-    line-height: 1.4;
   }
 }
