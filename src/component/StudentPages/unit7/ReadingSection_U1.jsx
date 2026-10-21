@@ -75,6 +75,51 @@ const captions = [
     text: "The ice age would have been an unusual time to live in.",
   },
 ];
+  // Measured from this unit's SVG; coordinates are percentages of its full image.
+  // Caption timing groups are preserved, including groups containing several sentences.
+  const sentenceHighlights = [
+    { captionIndex: 2, boxes: [
+      {x: 38.3519,y: 14.3146,width: 58.3,height: 4.9987},
+      {x: 35.5963,y: 20.3779,width: 58.7204,height: 4.1193},
+      {x: 35.6574,y: 27.5141,width: 7.15,height: 3.0211}
+    ] },
+    { captionIndex: 3, boxes: [
+      {x: 43.3389,y: 26.3738,width: 30.2407,height: 5.0576}
+    ] },
+    { captionIndex: 4, boxes: [
+      {x: 38.2722,y: 34.0486,width: 56.3907,height: 4.2035},
+      {x: 35.6537,y: 40.1708,width: 20.2963,height: 4.9945}
+    ] },
+    { captionIndex: 5, boxes: [
+      {x: 56.4315,y: 40.1708,width: 38.1,height: 4.9945},
+      {x: 35.6537,y: 47.3365,width: 3.513,height: 2.9917}
+    ] },
+    { captionIndex: 6, boxes: [
+      {x: 39.787,y: 46.1668,width: 58.3944,height: 5.0576},
+      {x: 35.7037,y: 52.2848,width: 60.6037,height: 4.9987},
+      {x: 35.6981,y: 58.3481,width: 31.8722,height: 4.9945}
+    ] },
+    { captionIndex: 7, boxes: [
+      {x: 68.1019,y: 58.3481,width: 29.8741,height: 4.1025},
+      {x: 35.7037,y: 64.3314,width: 31.3315,height: 5.0703}
+    ] },
+    { captionIndex: 8, boxes: [
+      {x: 38.4111,y: 72.0778,width: 55.6093,height: 4.9987},
+      {x: 35.6889,y: 78.0653,width: 25.7056,height: 4.1782}
+    ] },
+    { captionIndex: 9, boxes: [
+      {x: 61.9259,y: 78.0653,width: 34.1852,height: 4.1782},
+      {x: 2.2444,y: 84.1244,width: 34.063,height: 5.0703}
+    ] },
+    { captionIndex: 10, boxes: [
+      {x: 36.8389,y: 84.1244,width: 55.9574,height: 4.1951}
+    ] },
+    { captionIndex: 11, boxes: [
+      {x: 93.3278,y: 84.2001,width: 3.1537,height: 4.0941},
+      {x: 2.1704,y: 90.1961,width: 45.0981,height: 5.0576}
+    ] }
+  ];
+
   return (
     
     <div className="flex flex-col items-center">
@@ -87,6 +132,8 @@ live on icy land?"
         image1= {img}
         sound={readingAudio}
         captions={captions}
+        sentenceHighlights={sentenceHighlights}
+        pageId="sb_unit7_page59_reading"
         stopAtSecond={2.5}
       />
 

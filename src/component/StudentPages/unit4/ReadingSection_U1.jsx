@@ -84,6 +84,58 @@ const captions = [
     text: "All parts of the Earth's atmosphere are important, so it's important to take care of it.",
   },
 ];
+  // Measured from this unit's SVG; coordinates are percentages of its full image.
+  // Caption timing groups are preserved, including groups containing several sentences.
+  const sentenceHighlights = [
+    { captionIndex: 1, boxes: [
+      {x: 33.1741,y: 13.8024,width: 47.5667,height: 4.7564}
+    ] },
+    { captionIndex: 2, boxes: [
+      {x: 81.2222,y: 13.8617,width: 16.9944,height: 4.6971},
+      {x: 30.6074,y: 19.56,width: 48.0352,height: 4.6971}
+    ] },
+    { captionIndex: 3, boxes: [
+      {x: 79.1741,y: 19.56,width: 17.7,height: 4.6971},
+      {x: 30.65,y: 25.187,width: 28.4963,height: 4.7683}
+    ] },
+    { captionIndex: 4, boxes: [
+      {x: 59.6778,y: 25.187,width: 37.0333,height: 4.7683},
+      {x: 30.4963,y: 30.9564,width: 23.0241,height: 4.6971}
+    ] },
+    { captionIndex: 5, boxes: [
+      {x: 33.1815,y: 37.3155,width: 55.7278,height: 4.7683}
+    ] },
+    { captionIndex: 6, boxes: [
+      {x: 89.4407,y: 37.3828,width: 5.1315,height: 3.8582},
+      {x: 30.5574,y: 43.081,width: 27.9796,height: 4.701}
+    ] },
+    { captionIndex: 7, boxes: [
+      {x: 33.1815,y: 49.5113,width: 29.8093,height: 4.6971}
+    ] },
+    { captionIndex: 8, boxes: [
+      {x: 63.6519,y: 49.444,width: 26.9759,height: 4.7644},
+      {x: 30.5537,y: 55.2095,width: 63.787,height: 4.6971},
+      {x: 30.6519,y: 60.9078,width: 22.3167,height: 4.6971}
+    ] },
+    { captionIndex: 9, boxes: [
+      {x: 33.1815,y: 67.3381,width: 48.6685,height: 4.6971}
+    ] },
+    { captionIndex: 10, boxes: [
+      {x: 82.3815,y: 67.3381,width: 15.4315,height: 4.6971},
+      {x: 30.5537,y: 72.9888,width: 30.1852,height: 4.7446}
+    ] },
+    { captionIndex: 11, boxes: [
+      {x: 4.887,y: 79.4666,width: 28.3463,height: 4.6971}
+    ] },
+    { captionIndex: 12, boxes: [
+      {x: 33.7907,y: 79.3954,width: 61.9944,height: 4.7683},
+      {x: 2.287,y: 85.1173,width: 42.4167,height: 4.7446}
+    ] },
+    { captionIndex: 13, boxes: [
+      {x: 4.7685,y: 91.5239,width: 74.5611,height: 4.7683}
+    ] }
+  ];
+
   return (
     
     <div className="flex flex-col items-center">
@@ -96,6 +148,8 @@ const captions = [
         question="Do you think new inventions will be good or bad for Earth?"
         sound={readingAudio}
         captions={captions}
+        sentenceHighlights={sentenceHighlights}
+        pageId="sb_unit4_page29_reading"
         stopAtSecond={6.8}
       />
 

@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, forwardRef } from "react";
 import { TbMessageCircle } from "react-icons/tb";
-import { FaPlay, FaPause } from "react-icons/fa";
+import { FaPlay, FaPause, FaRedo } from "react-icons/fa";
 import { IoMdSettings } from "react-icons/io";
 import { useAudio } from "../context/AudioContext";
 
@@ -9,37 +9,41 @@ const PLAYER_ID = "question-audio-player";
 const QuestionAudioPlayer = forwardRef(function QuestionAudioPlayer(
   {
     src,
+    pageId,
     captions = [],
     stopAtSecond = null,
     stops = [],
     onTimeUpdate,
     onPlay,
   },
-  ref
+  ref,
 ) {
-  const clickAudioRef  = useRef(null);
-  const internalRef    = useRef(null);
-  const audioRef       = ref || internalRef;
-  const isMounted      = useRef(false);
+  const clickAudioRef = useRef(null);
+  const internalRef = useRef(null);
+  const audioRef = ref || internalRef;
+  const audioTimeKey = pageId ? `audio-position-${pageId}` : null;
+  const playbackOptions = useRef(null);
+  const restartPlaybackRef = useRef(null);
 
-  const { registerAudio, stopCurrent, activePageId } = useAudio();
+  const { registerAudio, stopCurrent } = useAudio();
 
-  const [paused,       setPaused]       = useState(false);
+  const [, setPaused] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
-  const [volume,       setVolume]       = useState(1);
-  const settingsRef    = useRef(null);
-  const [forceRender,  setForceRender]  = useState(0);
-  const [showContinue, setShowContinue] = useState(false);
-  const [isPlaying,    setIsPlaying]    = useState(false); // ← false بالبداية لحد ما يشتغل فعلاً
-  const [current,      setCurrent]      = useState(0);
-  const [duration,     setDuration]     = useState(0);
-  const [showCaption,  setShowCaption]  = useState(false);
-  const [activeIndex,  setActiveIndex]  = useState(null);
+  const [volume, setVolume] = useState(1);
+  const settingsRef = useRef(null);
+  const [, setForceRender] = useState(0);
+  const [, setShowContinue] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false); // ← false بالبداية لحد ما يشتغل فعلاً
+  const [current, setCurrent] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const [showCaption, setShowCaption] = useState(false);
+  const [activeIndex, setActiveIndex] = useState(null);
   const triggeredStops = useRef(new Set());
+  playbackOptions.current = { registerAudio, stops, stopAtSecond, captions };
 
   const updateCaption = (time) => {
     const index = captions.findIndex(
-      (cap) => time >= cap.start && time <= cap.end
+      (cap) => time >= cap.start && time <= cap.end,
     );
     setActiveIndex(index);
   };
@@ -60,13 +64,13 @@ const QuestionAudioPlayer = forwardRef(function QuestionAudioPlayer(
     };
 
     audio.addEventListener("pause", handlePause);
-    audio.addEventListener("play",  handlePlay);
+    audio.addEventListener("play", handlePlay);
 
     return () => {
       audio.removeEventListener("pause", handlePause);
-      audio.removeEventListener("play",  handlePlay);
+      audio.removeEventListener("play", handlePlay);
     };
-  }, []);
+  }, [audioRef]);
 
   // تشغيل أول مرة + intervals
   useEffect(() => {
@@ -75,17 +79,74 @@ const QuestionAudioPlayer = forwardRef(function QuestionAudioPlayer(
 
     let stopsInterval;
     let stopAtInterval;
+    let initialized = false;
+    let finished = false;
+    let disposed = false;
+    let lastTime = 0;
+    let singleStopReached = false;
+    let savedTime = 0;
+    if (audioTimeKey) {
+      try {
+        const stored = Number(localStorage.getItem(audioTimeKey));
+        if (Number.isFinite(stored) && stored > 0) savedTime = stored;
+      } catch {
+        /* Storage may be unavailable; playback still works. */
+      }
+    }
 
+    const savePosition = (time = audio.currentTime) => {
+      if (
+        !initialized ||
+        finished ||
+        !audioTimeKey ||
+        !Number.isFinite(time) ||
+        time < 0
+      )
+        return;
+      lastTime = time;
+      try {
+        localStorage.setItem(audioTimeKey, String(time));
+      } catch {
+        /* Optional persistence. */
+      }
+    };
+    const trackPosition = () => {
+      if (!initialized || finished) return;
+      lastTime = audio.currentTime;
+      savePosition(lastTime);
+    };
+    const updatePosition = (time) => {
+      setCurrent(time);
+      setActiveIndex(
+        playbackOptions.current.captions.findIndex(
+          (cap) => time >= cap.start && time <= cap.end,
+        ),
+      );
+    };
     const startPlayback = () => {
-      audio.currentTime = 0;
-      audio.play().catch(() => {});
+      if (initialized || disposed) return;
+      const initialTime =
+        savedTime > 0 && savedTime < audio.duration ? savedTime : 0;
+      audio.currentTime = initialTime;
+      lastTime = initialTime;
+      initialized = true;
+      finished = false;
+      triggeredStops.current = new Set();
+      setShowContinue(false);
+      updatePosition(initialTime);
+      const { stops: checkpoints, stopAtSecond: stopSecond } =
+        playbackOptions.current;
+      for (const stop of checkpoints) {
+        if (initialTime > 0 && stop.stopAt <= initialTime)
+          triggeredStops.current.add(stop.stopAt);
+      }
 
-      if (stops && stops.length > 0) {
+      if (checkpoints.length > 0) {
         stopsInterval = setInterval(() => {
-          const currentTime = audio.currentTime;
-          for (const stop of stops) {
+          if (disposed || audio.paused) return;
+          for (const stop of checkpoints) {
             if (
-              currentTime >= stop.stopAt &&
+              audio.currentTime >= stop.stopAt &&
               !triggeredStops.current.has(stop.stopAt)
             ) {
               triggeredStops.current.add(stop.stopAt);
@@ -93,49 +154,120 @@ const QuestionAudioPlayer = forwardRef(function QuestionAudioPlayer(
               setShowContinue(true);
               if (stop.resumeFrom !== undefined) {
                 audio.currentTime = stop.resumeFrom;
-                updateCaption(stop.resumeFrom);
+                updatePosition(stop.resumeFrom);
               }
+              trackPosition();
               break;
             }
           }
         }, 100);
       }
-
-      if (stopAtSecond) {
+      // A stop already passed in the saved recording must not stop it again.
+      singleStopReached = initialTime > 0 && initialTime >= stopSecond;
+      if (stopSecond) {
         stopAtInterval = setInterval(() => {
-          if (audio.currentTime >= stopAtSecond) {
+          if (!disposed && !audio.paused && !singleStopReached && audio.currentTime >= stopSecond) {
+            singleStopReached = true;
             audio.pause();
+            trackPosition();
             setShowContinue(true);
-            clearInterval(stopAtInterval);
+            // Keep monitoring so explicit Restart can re-arm this stop.
           }
         }, 100);
       }
 
-      registerAudio(audio, stopAtInterval || stopsInterval || null, PLAYER_ID);
+      // Own the stop timers locally so another sound cannot permanently clear them.
+      playbackOptions.current.registerAudio(audio, null, PLAYER_ID);
+      if (initialTime > 0) {
+        audio.pause();
+        setPaused(true);
+        setIsPlaying(false);
+      } else {
+        audio.play().catch(() => {
+          if (!disposed) {
+            setPaused(true);
+            setIsPlaying(false);
+          }
+        });
+      }
     };
 
-    const handleEnded = () => {
+    const restartPlayback = () => {
+      if (disposed) return;
+      savedTime = 0;
+      if (audioTimeKey) {
+        try { localStorage.removeItem(audioTimeKey); } catch { /* Optional persistence. */ }
+      }
+      if (!initialized) {
+        if (audio.readyState >= 1) startPlayback();
+        return;
+      }
+      audio.pause();
+      finished = false;
+      lastTime = 0;
       audio.currentTime = 0;
+      triggeredStops.current.clear();
+      singleStopReached = false;
+      updatePosition(0);
+      setShowContinue(false);
+      playbackOptions.current.registerAudio(audio, null, PLAYER_ID);
+      if (audioTimeKey) {
+        try { localStorage.removeItem(audioTimeKey); } catch { /* Optional persistence. */ }
+      }
+      audio.play().catch(() => {
+        if (!disposed) { setPaused(true); setIsPlaying(false); }
+      });
+    };
+    restartPlaybackRef.current = restartPlayback;
+
+    const handleReplay = () => {
+      if (initialized && finished) {
+        finished = false;
+        lastTime = audio.currentTime;
+      }
+    };
+    const handleEnded = () => {
+      finished = true;
+      lastTime = 0;
+      if (audioTimeKey) {
+        try {
+          localStorage.removeItem(audioTimeKey);
+        } catch {
+          /* Optional persistence. */
+        }
+      }
+      audio.currentTime = 0;
+      setCurrent(0);
       setActiveIndex(null);
       setShowContinue(true);
     };
 
+    audio.addEventListener("timeupdate", trackPosition);
+    audio.addEventListener("pause", trackPosition);
+    audio.addEventListener("seeked", trackPosition);
+    audio.addEventListener("play", handleReplay);
     audio.addEventListener("ended", handleEnded);
-
-    // ← الإصلاح: انتظر canplay إذا الصوت مش جاهز بعد
-    if (audio.readyState >= 3) {
-      startPlayback();
-    } else {
-      audio.addEventListener("canplay", startPlayback, { once: true });
-    }
+    window.addEventListener("pagehide", trackPosition);
+    if (audio.readyState >= 3) startPlayback();
+    else audio.addEventListener("canplay", startPlayback, { once: true });
 
     return () => {
-      if (stopsInterval)  clearInterval(stopsInterval);
+      // Keep the old source's tracked time if src/pageId changed before cleanup.
+      savePosition(lastTime);
+      disposed = true;
+      if (restartPlaybackRef.current === restartPlayback) restartPlaybackRef.current = null;
+      if (stopsInterval) clearInterval(stopsInterval);
       if (stopAtInterval) clearInterval(stopAtInterval);
-      audio.removeEventListener("ended",   handleEnded);
+      audio.removeEventListener("timeupdate", trackPosition);
+      audio.removeEventListener("pause", trackPosition);
+      audio.removeEventListener("seeked", trackPosition);
+      audio.removeEventListener("play", handleReplay);
+      audio.removeEventListener("ended", handleEnded);
       audio.removeEventListener("canplay", startPlayback);
+      window.removeEventListener("pagehide", trackPosition);
+      audio.pause();
     };
-  }, []);
+  }, [audioRef, src, audioTimeKey]);
 
   // scroll للـ caption النشط
   useEffect(() => {
@@ -143,7 +275,8 @@ const QuestionAudioPlayer = forwardRef(function QuestionAudioPlayer(
       setForceRender((prev) => prev + 1);
     }, 1000);
 
-    if (activeIndex === -1 || activeIndex === null) return () => clearInterval(timer);
+    if (activeIndex === -1 || activeIndex === null)
+      return () => clearInterval(timer);
 
     const el = document.getElementById(`caption-${activeIndex}`);
     if (el) {
@@ -160,15 +293,44 @@ const QuestionAudioPlayer = forwardRef(function QuestionAudioPlayer(
     if (audio.paused) {
       stopCurrent();
       if (onPlay) onPlay();
-      audio.play();
       registerAudio(audio, null, PLAYER_ID);
+      audio.play().catch(() => { setPaused(true); setIsPlaying(false); });
     } else {
       audio.pause();
     }
   };
 
+  const handleRestart = () => {
+    if (!restartPlaybackRef.current) return;
+    stopCurrent();
+    if (onPlay) onPlay();
+    restartPlaybackRef.current();
+  };
+  const buttonKeys = {
+    onKeyDown: (event) => {
+      if (event.key !== "Enter" && event.key !== " ") return;
+      event.preventDefault();
+      event.stopPropagation();
+      if (!event.repeat) event.currentTarget.click();
+    },
+    onKeyUp: (event) => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+    },
+  };
+
   return (
-    <div style={{ display: "flex", justifyContent: "center", width: "100%" }}>
+    <div className="question-audio-player" style={{ display: "flex", justifyContent: "center", width: "100%" }}>
+      <style>{`
+        .question-audio-player button:focus-visible,
+        .question-audio-player input:focus-visible {
+          outline: 3px solid #2563eb;
+          outline-offset: 3px;
+        }
+        .question-audio-player input:focus-visible { border-radius: 8px; }
+      `}</style>
       <div className="audio-popup-read" style={{ width: "50%" }}>
         <div className="audio-inner player-ui">
           <audio
@@ -191,6 +353,9 @@ const QuestionAudioPlayer = forwardRef(function QuestionAudioPlayer(
             <input
               type="range"
               className="audio-slider"
+              aria-label="Audio progress"
+              onKeyDown={(event) => event.stopPropagation()}
+              onKeyUp={(event) => event.stopPropagation()}
               min="0"
               max={duration}
               value={current}
@@ -214,11 +379,21 @@ const QuestionAudioPlayer = forwardRef(function QuestionAudioPlayer(
             <div
               className={`round-btn ${showCaption ? "active" : ""}`}
               style={{ position: "relative" }}
-              onClick={() => setShowCaption(!showCaption)}
             >
-              <TbMessageCircle size={36} />
+              <button
+                type="button"
+                className="round-btn"
+                style={{ background: "transparent", border: 0, padding: 0 }}
+                {...buttonKeys}
+                onClick={() => setShowCaption((value) => !value)}
+                aria-label={showCaption ? "Hide captions" : "Show captions"}
+                aria-expanded={showCaption}
+              >
+                <TbMessageCircle size={36} />
+              </button>
               <div
                 className={`caption-inPopup ${showCaption ? "show" : ""}`}
+                tabIndex={-1}
                 style={{ top: "100%", left: "10%" }}
               >
                 {captions.map((cap, i) => (
@@ -235,12 +410,24 @@ const QuestionAudioPlayer = forwardRef(function QuestionAudioPlayer(
               </div>
             </div>
 
-            <button className="play-btn2" onClick={togglePlay}>
-              {isPlaying ? <FaPause size={26} /> : <FaPlay size={26} />}
-            </button>
+            <div className="main-audio-controls">
+              <button type="button" className="main-audio-btn" {...buttonKeys}
+                onClick={togglePlay} aria-label={isPlaying ? "Pause audio" : "Play audio"}
+                title={isPlaying ? "Pause audio" : "Play audio"}>
+                {isPlaying ? <FaPause size={26} /> : <FaPlay size={26} />}
+              </button>
+              <button type="button" className="main-audio-btn" {...buttonKeys}
+                onClick={handleRestart} aria-label="Restart audio" title="Restart audio">
+                <FaRedo size={26} />
+              </button>
+            </div>
 
             <div className="settings-wrapper" ref={settingsRef}>
               <button
+                type="button"
+                {...buttonKeys}
+                aria-label="Audio settings"
+                aria-expanded={showSettings}
                 className={`round-btn ${showSettings ? "active" : ""}`}
                 onClick={() => setShowSettings(!showSettings)}
               >
@@ -252,6 +439,9 @@ const QuestionAudioPlayer = forwardRef(function QuestionAudioPlayer(
                   <label>Volume</label>
                   <input
                     type="range"
+                    aria-label="Volume"
+                    onKeyDown={(event) => event.stopPropagation()}
+                    onKeyUp={(event) => event.stopPropagation()}
                     min="0"
                     max="1"
                     step="0.05"

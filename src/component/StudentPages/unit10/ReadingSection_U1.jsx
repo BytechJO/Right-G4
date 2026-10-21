@@ -100,6 +100,65 @@ const captions = [
     text: "Most of all, be ready to take plenty of pictures.",
   },
 ];
+  // Measured from this unit's SVG; coordinates are percentages of its full image.
+  // Caption timing groups are preserved, including groups containing several sentences.
+  const sentenceHighlights = [
+    { captionIndex: 2, boxes: [
+      {x: 35.3722,y: 12.4123,width: 50.4944,height: 4.2918}
+    ] },
+    { captionIndex: 3, boxes: [
+      {x: 86.4204,y: 12.4764,width: 9.1074,height: 4.2277},
+      {x: 32.6556,y: 17.541,width: 62.0833,height: 4.2918}
+    ] },
+    { captionIndex: 4, boxes: [
+      {x: 35.3722,y: 25.1095,width: 59.387,height: 4.2277},
+      {x: 32.7056,y: 30.1742,width: 43.4056,height: 4.2918}
+    ] },
+    { captionIndex: 5, boxes: [
+      {x: 76.6204,y: 30.2383,width: 20.6982,height: 4.2277},
+      {x: 32.6815,y: 35.3029,width: 30.6796,height: 3.5509}
+    ] },
+    { captionIndex: 6, boxes: [
+      {x: 64.0074,y: 35.3029,width: 32.2333,height: 4.2918},
+      {x: 32.6611,y: 40.4317,width: 9.7611,height: 3.5367}
+    ] },
+    { captionIndex: 7, boxes: [
+      {x: 35.2778,y: 47.9396,width: 61.0889,height: 4.2882},
+      {x: 32.5944,y: 53.0683,width: 29.7648,height: 4.2882}
+    ] },
+    { captionIndex: 8, boxes: [
+      {x: 63.0074,y: 53.1289,width: 30.4204,height: 4.2277},
+      {x: 32.687,y: 58.2576,width: 5.9556,height: 4.2277}
+    ] },
+    { captionIndex: 9, boxes: [
+      {x: 39.1037,y: 58.2576,width: 44.3037,height: 4.2277}
+    ] },
+    { captionIndex: 10, boxes: [
+      {x: 83.9185,y: 58.2576,width: 11.7796,height: 4.2277},
+      {x: 32.5944,y: 63.3259,width: 61.9685,height: 4.2882}
+    ] },
+    { captionIndex: 11, boxes: [
+      {x: 32.7333,y: 68.5116,width: 61.8333,height: 4.2312}
+    ] },
+    { captionIndex: 12, boxes: [
+      {x: 32.7704,y: 73.6403,width: 30.1333,height: 4.2312}
+    ] },
+    { captionIndex: 13, boxes: [
+      {x: 4.7685,y: 81.0877,width: 48.5815,height: 3.5331}
+    ] },
+    { captionIndex: 14, boxes: [
+      {x: 53.9018,y: 81.0877,width: 40.4685,height: 4.2882},
+      {x: 2.2889,y: 86.2735,width: 38.2241,height: 4.2312}
+    ] },
+    { captionIndex: 15, boxes: [
+      {x: 41.0444,y: 86.2165,width: 53.5778,height: 4.2882},
+      {x: 2.2444,y: 91.4058,width: 12.9407,height: 4.2277}
+    ] },
+    { captionIndex: 16, boxes: [
+      {x: 15.7704,y: 91.3452,width: 42.2074,height: 4.2882}
+    ] }
+  ];
+
   return (
     
     <div className="flex flex-col items-center">
@@ -114,6 +173,8 @@ cold, what do you do to feel warmer?"
         question="Do you think new inventions will be good or bad for Earth?"
         sound={readingAudio}
         captions={captions}
+        sentenceHighlights={sentenceHighlights}
+        pageId="sb_unit10_page83_reading"
         stopAtSecond={1.94}
       />
 

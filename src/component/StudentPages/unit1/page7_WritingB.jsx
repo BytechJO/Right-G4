@@ -23,8 +23,38 @@ const WritingB = () => {
   const inputStyle =
     "w-full border-b-1 border-[#333] bg-transparent outline-none text-gray-800 px-1 py-1";
 
+  const buttonKeys = {
+    onKeyDown: (event) => {
+      if (event.key !== "Enter" && event.key !== " ") return;
+      event.preventDefault();
+      event.stopPropagation();
+      if (!event.repeat) event.currentTarget.click();
+    },
+    onKeyUp: (event) => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+    },
+  };
+  const fieldKeys = {
+    onKeyDown: (event) => {
+      if (event.key === "Enter" || event.key === " ") event.stopPropagation();
+    },
+    onKeyUp: (event) => {
+      if (event.key === "Enter" || event.key === " ") event.stopPropagation();
+    },
+  };
+
   return (
-    <div className="mb-6 mx-auto w-[60%]">
+    <div className="writing-b mb-6 mx-auto w-[60%]">
+      <style>{`
+        .writing-b input:focus-visible {
+          outline: 4px solid #2563eb;
+          outline-offset: 3px;
+          border-radius: 6px;
+        }
+      `}</style>
       {/* Header */}
       <h5 className="header-title-page8-read mb-8">
         <span className="ex-A-read mr-2">B</span>
@@ -39,7 +69,7 @@ const WritingB = () => {
             <span style={{ fontSize: "18px", whiteSpace: "nowrap", color: "#1a1a1a" }}>
               In the future, I will invent
             </span>
-            <input
+            <input aria-label="In the future, I will invent" {...fieldKeys}
               type="text"
               value={invent}
               onChange={(e) => setInvent(e.target.value)}
@@ -50,7 +80,7 @@ const WritingB = () => {
           </div>
 
           {/* Line 2 - full line */}
-          <input
+          <input aria-label="Continue describing your future invention" {...fieldKeys}
             type="text"
             value={inventLine2}
             onChange={(e) => setInventLine2(e.target.value)}
@@ -73,7 +103,7 @@ const WritingB = () => {
         <span style={{ fontSize: "18px", whiteSpace: "nowrap", color: "#1a1a1a" }}>
           It will
         </span>
-        <input
+        <input aria-label="It will" {...fieldKeys}
           type="text"
           value={itWill}
           onChange={(e) => setItWill(e.target.value)}
@@ -84,7 +114,7 @@ const WritingB = () => {
         <span style={{ fontSize: "18px", whiteSpace: "nowrap", color: "#1a1a1a" }}>
           . It will also
         </span>
-        <input
+        <input aria-label="It will also" {...fieldKeys}
           type="text"
           value={itWillAlso}
           onChange={(e) => setItWillAlso(e.target.value)}
@@ -96,7 +126,7 @@ const WritingB = () => {
 
       {/* Row 3: continuation line + I think people will like it because */}
       <div className="flex items-end gap-2 mb-4 mt-4">
-        <input
+        <input aria-label="Continue what your invention will also do" {...fieldKeys}
           type="text"
           value={itWillAlsoLine2}
           onChange={(e) => setItWillAlsoLine2(e.target.value)}
@@ -111,7 +141,7 @@ const WritingB = () => {
 
       {/* Row 4: last full line with period */}
       <div className="flex items-end gap-2 mb-6 mt-4">
-        <input
+        <input aria-label="I think people will like it because" {...fieldKeys}
           type="text"
           value={because}
           onChange={(e) => setBecause(e.target.value)}
@@ -137,14 +167,14 @@ const WritingB = () => {
       {/* Reset Button */}
       <div className="flex justify-center mt-8">
         <div className="relative group">
-          <div
+          <button type="button" aria-label="Reset" {...buttonKeys}
             onClick={handleReset}
             className="flex items-center justify-center w-14 h-14 rounded-xl bg-[#ffc107] hover:bg-[#e0a800] cursor-pointer transition shadow-sm"
           >
-            <div className="bg-white p-3 rounded-full shadow">
+            <span className="bg-white p-3 rounded-full shadow">
               <FaRedo size={14} />
-            </div>
-          </div>
+            </span>
+          </button>
           <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-black text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition">
             Reset
           </span>

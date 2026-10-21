@@ -20,8 +20,38 @@ const WritingA = () => {
     setAnswers(Array(questions.length).fill(""));
   };
 
+  const buttonKeys = {
+    onKeyDown: (event) => {
+      if (event.key !== "Enter" && event.key !== " ") return;
+      event.preventDefault();
+      event.stopPropagation();
+      if (!event.repeat) event.currentTarget.click();
+    },
+    onKeyUp: (event) => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+    },
+  };
+  const fieldKeys = {
+    onKeyDown: (event) => {
+      if (event.key === "Enter" || event.key === " ") event.stopPropagation();
+    },
+    onKeyUp: (event) => {
+      if (event.key === "Enter" || event.key === " ") event.stopPropagation();
+    },
+  };
+
   return (
-    <div className="mb-6 mx-auto w-[60%]">
+    <div className="writing-a mb-6 mx-auto w-[60%]">
+      <style>{`
+        .writing-a input:focus-visible {
+          outline: 4px solid #2563eb;
+          outline-offset: 3px;
+          border-radius: 6px;
+        }
+      `}</style>
       <h5 className="header-title-page8-read mb-8">
         <span className="ex-A-read mr-2">A</span>
         What are some things you'd like to do in the future? Write about them below.
@@ -49,7 +79,7 @@ const WritingA = () => {
             </span>
 
             {/* Input */}
-            <input
+            <input aria-label={`Sentence ${i + 1}. Complete: ${q.prefix}`} {...fieldKeys}
               type="text"
               value={answers[i]}
               onChange={(e) => handleChange(i, e.target.value)}
@@ -64,14 +94,14 @@ const WritingA = () => {
       {/* Reset Button Only */}
       <div className="flex justify-center mt-8">
         <div className="relative group">
-          <div
+          <button type="button" aria-label="Reset" {...buttonKeys}
             onClick={handleReset}
             className="flex items-center justify-center w-14 h-14 rounded-xl bg-[#ffc107] hover:bg-[#e0a800] cursor-pointer transition shadow-sm"
           >
-            <div className="bg-white p-3 rounded-full shadow">
+            <span className="bg-white p-3 rounded-full shadow">
               <FaRedo size={14} />
-            </div>
-          </div>
+            </span>
+          </button>
           <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-black text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition">
             Reset
           </span>

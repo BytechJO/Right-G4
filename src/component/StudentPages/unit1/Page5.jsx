@@ -1,5 +1,5 @@
 import React from "react";
-import page_5 from"../../../assets/imgs/pages/Class Book/Right 4 Unit 1 Robots of the Future Folder/Page5.png";
+import page_5 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 1 Robots of the Future Folder/Page5.png";
 import "./Page5.css";
 import ReadingSection_U1 from "./page5_ReadingSection_U1";
 import audioBtn from "../../../assets/Page 01/Audio btn.svg";
@@ -19,7 +19,16 @@ const Page5 = ({ openPopup }) => {
             width="22"
             height="22"
             viewBox="0 0 90 90"
+            tabIndex={0}
+            role="button"
+            aria-label="Open reading activity"
             onClick={() => openPopup("html", <ReadingSection_U1 />)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                openPopup("html", <ReadingSection_U1 />);
+              }
+            }}
             style={{ overflow: "visible" }}
           >
             <image

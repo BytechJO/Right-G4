@@ -1,5 +1,5 @@
 import React, { useState, useRef } from "react";
-import Button from "../../Button";
+import ExerciseHeader from "../../ExerciseHeader";
 import ValidationAlert from "../../Popup/ValidationAlert";
 
 import sound from "../../../assets/audio/ClassBook/Grade 4/cd5pg8-instruction1-adult-lady_YJxh5Hg5.mp3";
@@ -12,14 +12,14 @@ import QuestionAudioPlayer from "../../QuestionAudioPlayer";
 //  🎨  COLORS
 // ─────────────────────────────────────────────
 const BOX_BORDER_DEFAULT = "#2096a6";
-const BOX_BORDER_WRONG   = "#ef4444";
-const BOX_TEXT_DEFAULT   = "#2b2b2b";
-const BOX_TEXT_ANSWER    = "#c81e1e";
-const SENTENCE_COLOR     = "#2b2b2b";
-const LABEL_COLOR        = "#2b2b2b";
-const PARA_COLOR         = "#2b2b2b";
-const WRONG_BADGE_BG     = "#ef4444";
-const WRONG_BADGE_TEXT   = "#ffffff";
+const BOX_BORDER_WRONG = "#ef4444";
+const BOX_TEXT_DEFAULT = "#2b2b2b";
+const BOX_TEXT_ANSWER = "#c81e1e";
+const SENTENCE_COLOR = "#2b2b2b";
+const LABEL_COLOR = "#2b2b2b";
+const PARA_COLOR = "#2b2b2b";
+const WRONG_BADGE_BG = "#ef4444";
+const WRONG_BADGE_TEXT = "#ffffff";
 const captions = [
   {
     start: 0.26,
@@ -48,11 +48,11 @@ const captions = [
   },
   {
     start: 21.92,
-    end: 28.00,
+    end: 28.0,
     text: "He will have to remember to take his camera with him so he can take pictures in the museum.",
   },
   {
-    start: 28.00,
+    start: 28.0,
     end: 32.68,
     text: "Tim is certain they will have a lot of fun at the museum tomorrow.",
   },
@@ -66,84 +66,179 @@ const PARAGRAPH = `Tim will visit the new Museum of Inventions tomorrow. He will
 //  📝  EXERCISE DATA
 // ─────────────────────────────────────────────
 const ITEMS = [
-  { id: "a", sentence: "Tim will have to remember to take his camera with him.", correct: ["4"], answer: "4" },
-  { id: "b", sentence: "Tim will pack a lunch.",                                   correct: ["3"], answer: "3" },
-  { id: "c", sentence: "Tim will visit the museum tomorrow.",                      correct: ["1"], answer: "1" },
-  { id: "d", sentence: "They will have fun at the museum.",                        correct: ["5"], answer: "5" },
-  { id: "e", sentence: "Tim will take his brother and friend.",                    correct: ["2"], answer: "2" },
+  {
+    id: "a",
+    sentence: "Tim will have to remember to take his camera with him.",
+    correct: ["4"],
+    answer: "4",
+  },
+  { id: "b", sentence: "Tim will pack a lunch.", correct: ["3"], answer: "3" },
+  {
+    id: "c",
+    sentence: "Tim will visit the museum tomorrow.",
+    correct: ["1"],
+    answer: "1",
+  },
+  {
+    id: "d",
+    sentence: "They will have fun at the museum.",
+    correct: ["5"],
+    answer: "5",
+  },
+  {
+    id: "e",
+    sentence: "Tim will take his brother and friend.",
+    correct: ["2"],
+    answer: "2",
+  },
 ];
 
 // ─────────────────────────────────────────────
 //  🔧  HELPERS
 // ─────────────────────────────────────────────
+const NUMBER_OPTIONS = ITEMS.map((_, index) => String(index + 1));
+
 const isCorrect = (userVal, correctArr) =>
   correctArr.some((c) => userVal.trim() === c);
 
 // ─────────────────────────────────────────────
 //  COMPONENT
 // ─────────────────────────────────────────────
-export default function WB_ReadNumber_QC() {
-  const [answers,     setAnswers]     = useState({});
-  const [showResults, setShowResults] = useState(false);
-  const [showAns,     setShowAns]     = useState(false);
+const activationKeys = {
+  onKeyDown: (event) => {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    event.preventDefault();
+    event.stopPropagation();
+    if (!event.repeat) event.currentTarget.click();
+  },
+  onKeyUp: (event) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+  },
+};
+const fieldKeys = {
+  onKeyDown: (event) => {
+    if (event.key === "Enter" || event.key === " ") event.stopPropagation();
+  },
+  onKeyUp: (event) => {
+    if (event.key === "Enter" || event.key === " ") event.stopPropagation();
+  },
+};
 
-  const inputRefs = useRef({});
+export default function WB_ReadNumber_QC() {
+  const [answers, setAnswers] = useState({});
+  const [results, setResults] = useState({});
+  const [showAns, setShowAns] = useState(false);
+
+  const resetButtonRef = useRef(null);
+  const [announcement, setAnnouncement] = useState("");
+  const checkDisabled =
+    showAns || ITEMS.every((item) => results[item.id] === "correct");
 
   const handleChange = (id, value) => {
     if (showAns) return;
     const item = ITEMS.find((i) => i.id === id);
-    if (showResults && item && isCorrect(answers[id] || "", item.correct)) return;
-    if (value !== "" && !/^[1-9]$/.test(value)) return;
-    setAnswers((prev) => ({ ...prev, [id]: value }));
-
-    // انتقال تلقائي للتالي
-    if (value.length === 1) {
-      const currentIdx = ITEMS.findIndex((i) => i.id === id);
-      const next = ITEMS[currentIdx + 1];
-      if (next) inputRefs.current[next.id]?.focus();
+    if (!item || results[id] === "correct") return;
+    if (value !== "" && !NUMBER_OPTIONS.includes(value)) return;
+    if (
+      value &&
+      Object.entries(answers).some(
+        ([otherId, number]) => otherId !== id && number === value,
+      )
+    ) {
+      setAnnouncement(`Number ${value} is already used in another sentence.`);
+      return;
     }
+    setAnswers((prev) => ({ ...prev, [id]: value }));
+    setResults((prev) => {
+      const next = { ...prev };
+      delete next[id];
+      return next;
+    });
+
+    setAnnouncement(
+      value
+        ? `Sentence ${id}: number ${value} selected.`
+        : `Sentence ${id}: number cleared.`,
+    );
   };
 
   const handleCheck = () => {
-    if (showAns) return;
+    if (checkDisabled) return;
     const allAnswered = ITEMS.every((item) => answers[item.id]?.trim());
-    if (!allAnswered) { ValidationAlert.info("Please complete all answers first."); return; }
+    if (!allAnswered) {
+      setAnnouncement("Please complete all answers first.");
+      ValidationAlert.info("Please complete all answers first.");
+      return;
+    }
     let score = 0;
-    ITEMS.forEach((item) => { if (isCorrect(answers[item.id] || "", item.correct)) score++; });
-    setShowResults(true);
-    if (score === ITEMS.length)   ValidationAlert.success(`Score: ${score} / ${ITEMS.length}`);
-    else if (score > 0)           ValidationAlert.warning(`Score: ${score} / ${ITEMS.length}`);
-    else                          ValidationAlert.error(`Score: ${score} / ${ITEMS.length}`);
+    ITEMS.forEach((item) => {
+      if (isCorrect(answers[item.id] || "", item.correct)) score++;
+    });
+    const checked = Object.fromEntries(
+      ITEMS.map((item) => [
+        item.id,
+        results[item.id] === "correct" ||
+        isCorrect(answers[item.id] || "", item.correct)
+          ? "correct"
+          : "wrong",
+      ]),
+    );
+    setResults(checked);
+    setAnnouncement(
+      `Score: ${score} out of ${ITEMS.length}. ${ITEMS.map((item) => `Question ${item.id}: ${checked[item.id]}`).join(". ")}`,
+    );
+    if (score === ITEMS.length) {
+      resetButtonRef.current?.focus({ preventScroll: true });
+      ValidationAlert.success(`Score: ${score} / ${ITEMS.length}`);
+    } else if (score > 0)
+      ValidationAlert.warning(`Score: ${score} / ${ITEMS.length}`);
+    else ValidationAlert.error(`Score: ${score} / ${ITEMS.length}`);
   };
 
   const handleShowAnswer = () => {
     const filled = {};
-    ITEMS.forEach((item) => { filled[item.id] = item.answer; });
+    ITEMS.forEach((item) => {
+      filled[item.id] = item.answer;
+    });
     setAnswers(filled);
-    setShowResults(false);
+    setResults({});
     setShowAns(true);
+    setAnnouncement("Correct answers shown and locked.");
   };
 
   const handleReset = () => {
     setAnswers({});
-    setShowResults(false);
+    setResults({});
     setShowAns(false);
+    setAnnouncement("Answers and feedback cleared.");
   };
 
-  const isWrong = (item) => {
-    if (!showResults || showAns) return false;
-    return !isCorrect(answers[item.id] || "", item.correct);
-  };
-
-  const isDisabled = (item) => {
-    if (showAns) return true;
-    if (showResults && isCorrect(answers[item.id] || "", item.correct)) return true;
-    return false;
-  };
+  const isWrong = (item) => !showAns && results[item.id] === "wrong";
+  const isDisabled = (item) => showAns || results[item.id] === "correct";
 
   return (
-    <div className="main-container-component">
+    <div className="main-container-component sb-unit1-page8_q3">
+      <div
+        className="sr-only"
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+      >
+        {announcement}
+      </div>
       <style>{`
+        .sb-unit1-page8_q3 .rnqc-input:focus-visible {
+          outline: 4px solid #2563eb;
+          outline-offset: 3px;
+          border-radius: 8px;
+        }
+        .sb-unit1-page8_q3 select.rnqc-input {
+          appearance: none;
+          cursor: pointer;
+        }
         /* ── Paragraph + image row ── */
         .rnqc-top {
           display: grid;
@@ -267,64 +362,94 @@ export default function WB_ReadNumber_QC() {
         }}
       >
         {/* ── Header ── */}
-        <h1
-          className="WB-header-title-page8"
-          style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
-        >
-          <span className="WB-ex-A">C</span>
-          Listen, read, and number.
-        </h1>
- <div style={{marginTop:"10px"}}>
-        <QuestionAudioPlayer
-          src={sound}
-          captions={captions}
-          stopAtSecond={6}
+        <ExerciseHeader
+          sectionLetter="C"
+          title={"Listen, read, and number."}
+          subTitle={
+            "isten to the whole passage first, then number each statement or picture in the order you hear it."
+          }
         />
-      </div>
+        <div style={{ marginTop: "10px" }}>
+          <QuestionAudioPlayer
+            src={sound}
+            captions={captions}
+            stopAtSecond={6}
+            pageId="sb_unit1_page8_q3"
+          />
+        </div>
         {/* ── Paragraph + Image ── */}
         <div className="rnqc-top">
           <p className="rnqc-para">{PARAGRAPH}</p>
-          <img src={imgScene} alt="museum" className="rnqc-img" />
+          <img
+            src={imgScene}
+            alt="An adult and a child looking at an exhibit in a museum."
+            className="rnqc-img"
+          />
         </div>
 
         {/* ── Items ── */}
+        <p id="sb-unit1-page8-q3-number-help" className="sr-only">
+          Choose a number from 1 to 5 for each sentence. Each number can be used
+          once. Choose the dash to clear an editable answer and make its number
+          available again.
+        </p>
         <div className="rnqc-list">
           {ITEMS.map((item) => {
-            const wrong    = isWrong(item);
-            const value    = answers[item.id] || "";
-            const tColor   = showAns ? BOX_TEXT_ANSWER : BOX_TEXT_DEFAULT;
-            const bColor   = wrong ? BOX_BORDER_WRONG : showAns ? BOX_TEXT_ANSWER : BOX_BORDER_DEFAULT;
+            const wrong = isWrong(item);
+            const value = answers[item.id] || "";
+            const tColor = BOX_TEXT_DEFAULT;
+            const bColor = wrong
+              ? BOX_BORDER_WRONG
+              : isDisabled(item)
+                ? "#16a34a"
+                : BOX_BORDER_DEFAULT;
             const disabled = isDisabled(item);
 
             return (
               <div key={item.id} className="rnqc-row">
-
                 {/* Label a/b/c... */}
                 <span className="rnqc-label">{item.id}</span>
 
                 {/* Sentence */}
                 <span className="rnqc-sentence">{item.sentence}</span>
 
-                {/* Circle number input */}
+                {/* Number selector */}
                 <div className="rnqc-input-wrap">
-                  <input
-                    ref={(el) => (inputRefs.current[item.id] = el)}
-                    type="text"
-                    maxLength={1}
-                    className={[
-                      "rnqc-input",
-                      wrong   ? "rnqc-input--wrong"  : "",
-                   ].filter(Boolean).join(" ")}
+                  <select
+                    aria-label={`Sentence ${item.id}. ${item.sentence} Choose its order number.`}
+                    aria-invalid={wrong}
+                    aria-describedby="sb-unit1-page8-q3-number-help"
+                    {...fieldKeys}
+                    className={["rnqc-input", wrong ? "rnqc-input--wrong" : ""]
+                      .filter(Boolean)
+                      .join(" ")}
                     value={value}
                     disabled={disabled}
                     onChange={(e) => handleChange(item.id, e.target.value)}
                     style={{ borderColor: bColor, color: tColor }}
-                    spellCheck={false}
-                    autoComplete="off"
-                  />
+                  >
+                    <option
+                      value=""
+                      aria-label="Clear answer; no number selected"
+                    >
+                      —
+                    </option>
+                    {NUMBER_OPTIONS.map((number) => (
+                      <option
+                        key={number}
+                        value={number}
+                        disabled={ITEMS.some(
+                          (other) =>
+                            other.id !== item.id &&
+                            answers[other.id] === number,
+                        )}
+                      >
+                        {number}
+                      </option>
+                    ))}
+                  </select>
                   {wrong && <div className="rnqc-badge">✕</div>}
                 </div>
-
               </div>
             );
           })}
@@ -332,11 +457,35 @@ export default function WB_ReadNumber_QC() {
 
         {/* ── Buttons ── */}
         <div className="rnqc-buttons">
-          <Button
-            checkAnswers={handleCheck}
-            handleShowAnswer={handleShowAnswer}
-            handleStartAgain={handleReset}
-          />
+          <div className="action-buttons-container">
+            <button
+              type="button"
+              ref={resetButtonRef}
+              onClick={handleReset}
+              {...activationKeys}
+              className="try-again-button"
+            >
+              Start Again ↻
+            </button>
+            <button
+              type="button"
+              onClick={handleShowAnswer}
+              {...activationKeys}
+              className="show-answer-btn swal-continue"
+            >
+              Show Answer
+            </button>
+            <button
+              type="button"
+              onClick={handleCheck}
+              {...activationKeys}
+              disabled={checkDisabled}
+              style={{ cursor: checkDisabled ? "not-allowed" : "pointer" }}
+              className="check-button2"
+            >
+              Check Answer ✓
+            </button>
+          </div>
         </div>
       </div>
     </div>

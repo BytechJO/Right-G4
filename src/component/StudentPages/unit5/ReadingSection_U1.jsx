@@ -80,6 +80,54 @@ const captions = [
     text: "There is even a travel agency that offers trips to a space station.",
   },
 ];
+  // Measured from this unit's SVG; coordinates are percentages of its full image.
+  // Caption timing groups are preserved, including groups containing several sentences.
+  const sentenceHighlights = [
+    { captionIndex: 2, boxes: [
+      {x: 43.2296,y: 14.1544,width: 40.2185,height: 4.9428}
+    ] },
+    { captionIndex: 3, boxes: [
+      {x: 83.9556,y: 14.1169,width: 12.6519,height: 4.1481},
+      {x: 40.4574,y: 20.1456,width: 56.3685,height: 4.9428},
+      {x: 40.513,y: 26.0661,width: 31.1074,height: 5.0135}
+    ] },
+    { captionIndex: 4, boxes: [
+      {x: 72.1519,y: 26.141,width: 23.6722,height: 4.9386},
+      {x: 40.513,y: 32.1323,width: 25.7741,height: 4.9386}
+    ] },
+    { captionIndex: 5, boxes: [
+      {x: 43.1407,y: 40.8987,width: 54.0019,height: 4.9386},
+      {x: 40.5685,y: 46.8151,width: 36.9907,height: 5.0135}
+    ] },
+    { captionIndex: 6, boxes: [
+      {x: 78.1407,y: 46.8483,width: 17.2796,height: 4.9802},
+      {x: 40.5574,y: 52.8063,width: 55.5796,height: 5.0135},
+      {x: 40.5574,y: 58.8017,width: 15.3296,height: 5.0094}
+    ] },
+    { captionIndex: 7, boxes: [
+      {x: 56.4185,y: 58.8725,width: 38.5537,height: 4.9386},
+      {x: 40.5352,y: 65.0302,width: 6.9648,height: 3.8902}
+    ] },
+    { captionIndex: 8, boxes: [
+      {x: 48.1463,y: 64.7888,width: 42.1056,height: 5.0135}
+    ] },
+    { captionIndex: 9, boxes: [
+      {x: 43.1407,y: 73.5885,width: 54.7296,height: 4.9802},
+      {x: 40.55,y: 79.5507,width: 15.6,height: 5.0094}
+    ] },
+    { captionIndex: 10, boxes: [
+      {x: 56.6352,y: 79.5507,width: 39.4315,height: 5.0094},
+      {x: 2.2093,y: 85.6126,width: 33.9852,height: 4.9386}
+    ] },
+    { captionIndex: 11, boxes: [
+      {x: 36.7037,y: 85.5419,width: 61.3796,height: 4.9053},
+      {x: 2.2093,y: 91.554,width: 21.2278,height: 4.9886}
+    ] },
+    { captionIndex: 12, boxes: [
+      {x: 23.9685,y: 91.5332,width: 57.1611,height: 5.0094}
+    ] }
+  ];
+
   return (
     
     <div className="flex flex-col items-center">
@@ -92,6 +140,8 @@ be different from living on Earth? "
         image1= {img}
         sound={readingAudio}
         captions={captions}
+        sentenceHighlights={sentenceHighlights}
+        pageId="sb_unit5_page41_reading"
         stopAtSecond={8.28}
       />
 

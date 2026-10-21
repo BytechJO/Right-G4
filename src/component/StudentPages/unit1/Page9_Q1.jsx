@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import Button from "../../Button";
+import React, { useState, useRef } from "react";
+import ExerciseHeader from "../../ExerciseHeader";
 import ValidationAlert from "../../Popup/ValidationAlert";
 
 // ─────────────────────────────────────────────
@@ -17,66 +17,164 @@ import img4b from "../../../assets/imgs/pages/Class Book/Right 4 Unit 1 Robots o
 // ─────────────────────────────────────────────
 //  🎨  COLORS
 // ─────────────────────────────────────────────
-const CHECK_COLOR      = "#e53935";
-const CROSS_COLOR      = "#e53935";
-const IMG_BORDER       = "#d0d0d0";
-const SENTENCE_COLOR   = "#2b2b2b";
-const NUMBER_COLOR     = "#2b2b2b";
-const WRONG_BADGE_BG   = "#ef4444";
+const CHECK_COLOR = "#e53935";
+const CROSS_COLOR = "#e53935";
+const IMG_BORDER = "#d0d0d0";
+const SENTENCE_COLOR = "#2b2b2b";
+const NUMBER_COLOR = "#2b2b2b";
+const WRONG_BADGE_BG = "#ef4444";
 const WRONG_BADGE_TEXT = "#ffffff";
 
 // ─────────────────────────────────────────────
 //  📝  EXERCISE DATA
 // ─────────────────────────────────────────────
 const ITEMS = [
-  { id: 1, sentence: "Sarah will go to the beach tomorrow.",      imgA: img1a, imgB: img1b, correctSide: "a" },
-  { id: 2, sentence: "Stella will study for her test.",           imgA: img2a, imgB: img2b, correctSide: "b" },
-  { id: 3, sentence: "They will eat at a restaurant.",            imgA: img3a, imgB: img3b, correctSide: "a" },
-  { id: 4, sentence: "They will watch a movie at the cinema.",    imgA: img4a, imgB: img4b, correctSide: "a" },
+  {
+    id: 1,
+    sentence: "Sarah will go to the beach tomorrow.",
+    imgA: img1a,
+    imgB: img1b,
+    correctSide: "a",
+  },
+  {
+    id: 2,
+    sentence: "Stella will study for her test.",
+    imgA: img2a,
+    imgB: img2b,
+    correctSide: "b",
+  },
+  {
+    id: 3,
+    sentence: "They will eat at a restaurant.",
+    imgA: img3a,
+    imgB: img3b,
+    correctSide: "a",
+  },
+  {
+    id: 4,
+    sentence: "They will watch a movie at the cinema.",
+    imgA: img4a,
+    imgB: img4b,
+    correctSide: "a",
+  },
 ];
 
 // ─────────────────────────────────────────────
 //  COMPONENT
 // ─────────────────────────────────────────────
-export default function WB_ReadLookWriteCheckCross_QD() {
-  const [selected,    setSelected]    = useState({});
-  const [showResults, setShowResults] = useState(false);
-  const [showAns,     setShowAns]     = useState(false);
+const activationKeys = {
+  onKeyDown: (event) => {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    event.preventDefault();
+    event.stopPropagation();
+    if (!event.repeat) event.currentTarget.click();
+  },
+  onKeyUp: (event) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+  },
+};
 
-  const isLocked = showResults || showAns;
+const PICTURE_DESCRIPTIONS = {
+  1: {
+    a: "A girl relaxing on a beach under a sun umbrella.",
+    b: "A girl playing with dolls on a rug.",
+  },
+  2: {
+    a: "A girl planting flowers in a garden.",
+    b: "A girl writing in an open book at a desk.",
+  },
+  3: {
+    a: "Four people sitting at a restaurant table with a menu.",
+    b: "A boy building a sandcastle on a beach.",
+  },
+  4: {
+    a: "Four children seated in front of a large screen showing racing cars.",
+    b: "A girl reading an open book at a desk.",
+  },
+};
+
+const EXERCISE_TITLE = (
+  <>
+    Read, look, and write<span className="text-[#ff0000ff] font-bold"> ✓ </span>
+    and<span className="text-[#ff0000ff] font-bold"> ✕</span>.
+  </>
+);
+
+export default function WB_ReadLookWriteCheckCross_QD() {
+  const [selected, setSelected] = useState({});
+  const [results, setResults] = useState({});
+  const [showAns, setShowAns] = useState(false);
+
+  const resetButtonRef = useRef(null);
+  const [announcement, setAnnouncement] = useState("");
+  const checkDisabled =
+    showAns || ITEMS.every((item) => results[item.id] === "correct");
+  const isLocked = (id) => showAns || results[id] === "correct";
 
   const handleSelect = (itemId, side) => {
-    if (isLocked) return;
-    setSelected((prev) => ({
-      ...prev,
-      [itemId]: prev[itemId] === side ? null : side,
-    }));
+    if (isLocked(itemId)) {
+      setAnnouncement(`Question ${itemId} is correct and locked.`);
+      return;
+    }
+    const nextSide = selected[itemId] === side ? null : side;
+    setSelected((prev) => ({ ...prev, [itemId]: nextSide }));
+    setResults((prev) => {
+      const next = { ...prev };
+      delete next[itemId];
+      return next;
+    });
+    setAnnouncement(
+      `Question ${itemId}: ${nextSide ? PICTURE_DESCRIPTIONS[itemId][nextSide] + " selected." : "Selection cleared."}`,
+    );
   };
 
   const handleCheck = () => {
-    if (isLocked) return;
-    const allAnswered = ITEMS.every((item) => selected[item.id]);
-    if (!allAnswered) { ValidationAlert.info("Please choose a picture for each sentence."); return; }
-    let score = 0;
-    ITEMS.forEach((item) => { if (selected[item.id] === item.correctSide) score++; });
-    setShowResults(true);
-    if (score === ITEMS.length) ValidationAlert.success(`Score: ${score} / ${ITEMS.length}`);
-    else if (score > 0)         ValidationAlert.warning(`Score: ${score} / ${ITEMS.length}`);
-    else                        ValidationAlert.error(`Score: ${score} / ${ITEMS.length}`);
+    if (checkDisabled) return;
+    if (!ITEMS.every((item) => selected[item.id])) {
+      setAnnouncement("Please choose a picture for each sentence.");
+      ValidationAlert.info("Please choose a picture for each sentence.");
+      return;
+    }
+    const checked = Object.fromEntries(
+      ITEMS.map((item) => [
+        item.id,
+        results[item.id] === "correct" || selected[item.id] === item.correctSide
+          ? "correct"
+          : "wrong",
+      ]),
+    );
+    const score = Object.values(checked).filter(
+      (result) => result === "correct",
+    ).length;
+    setResults(checked);
+    setAnnouncement(
+      `Score: ${score} out of ${ITEMS.length}. ${ITEMS.map((item) => `Question ${item.id}: ${checked[item.id]}`).join(". ")}`,
+    );
+    if (score === ITEMS.length) {
+      resetButtonRef.current?.focus({ preventScroll: true });
+      ValidationAlert.success(`Score: ${score} / ${ITEMS.length}`);
+    } else if (score > 0)
+      ValidationAlert.warning(`Score: ${score} / ${ITEMS.length}`);
+    else ValidationAlert.error(`Score: ${score} / ${ITEMS.length}`);
   };
 
   const handleShowAnswer = () => {
-    const filled = {};
-    ITEMS.forEach((item) => { filled[item.id] = item.correctSide; });
-    setSelected(filled);
-    setShowResults(false);
+    setSelected(
+      Object.fromEntries(ITEMS.map((item) => [item.id, item.correctSide])),
+    );
+    setResults({});
     setShowAns(true);
+    setAnnouncement("Correct answers shown and locked.");
   };
 
   const handleReset = () => {
     setSelected({});
-    setShowResults(false);
+    setResults({});
     setShowAns(false);
+    setAnnouncement("Selections and feedback cleared.");
   };
 
   // ── التعديل 2: السيمبول يضل زي ما اختار الطالب دايماً ما يتغير ──
@@ -104,13 +202,34 @@ export default function WB_ReadLookWriteCheckCross_QD() {
 
   // ── التعديل 1: البادج يظهر جنب الجملة مش على الصورة ──
   const isWrongSelected = (item) => {
-    if (!showResults || showAns) return false;
-    return selected[item.id] && selected[item.id] !== item.correctSide;
+    return !showAns && results[item.id] === "wrong";
   };
 
   return (
-    <div className="main-container-component">
+    <div className="main-container-component sb-unit1-page9-q1">
+      <div
+        className="sr-only"
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+      >
+        {announcement}
+      </div>
       <style>{`
+        .sb-unit1-page9-q1 .rlcc-img-wrap {
+          border: 0;
+          padding: 0;
+          background: transparent;
+          text-align: inherit;
+          border-radius: 6px;
+        }
+        .sb-unit1-page9-q1 .rlcc-img-wrap[aria-pressed="true"] { box-shadow: 0 0 0 3px #2563eb; }
+        .sb-unit1-page9-q1 .rlcc-img-wrap[data-result="correct"] { box-shadow: 0 0 0 3px #16a34a; }
+        .sb-unit1-page9-q1 .rlcc-img-wrap[data-result="wrong"] { box-shadow: 0 0 0 3px #ef4444; }
+        .sb-unit1-page9-q1 .rlcc-img-wrap:focus-visible {
+          outline: 4px solid #2563eb;
+          outline-offset: 5px;
+        }
         /* ── Items list ── */
         .rlcc-list {
           display: flex;
@@ -235,37 +354,52 @@ export default function WB_ReadLookWriteCheckCross_QD() {
         }}
       >
         {/* ── Header ── */}
-        <h1
-          className="WB-header-title-page8"
-          style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
-        >
-          <span className="WB-ex-A">D</span>
-          Read, look, and write<span className="text-[#ff0000ff] font-bold"> ✓ </span>and<span className="text-[#ff0000ff] font-bold"> ✕</span>.
-        </h1>
+        <ExerciseHeader
+          sectionLetter="D"
+          title={EXERCISE_TITLE}
+          subTitle={
+            "Read each statement and compare it with the picture or clue, then choose the correct two-way answer."
+          }
+        />
 
         {/* ── Items ── */}
         <div className="rlcc-list" style={{ margin: "1% 0" }}>
           {ITEMS.map((item) => (
             <div key={item.id} className="rlcc-row">
-
               {/* Two images — السيمبول ما يتغير */}
               <div className="rlcc-imgs">
                 {["a", "b"].map((side) => {
-                  const sym   = getSymbol(item, side);
+                  const sym = getSymbol(item, side);
                   const color = getSymbolColor(item, side);
-                  const src   = side === "a" ? item.imgA : item.imgB;
+                  const src = side === "a" ? item.imgA : item.imgB;
 
                   return (
-                    <div
+                    <button
+                      type="button"
+                      {...activationKeys}
+                      aria-pressed={selected[item.id] === side}
+                      aria-disabled={isLocked(item.id)}
+                      aria-label={`Question ${item.id}. ${item.sentence} Picture ${side.toUpperCase()}: ${PICTURE_DESCRIPTIONS[item.id][side]}${isLocked(item.id) ? " Locked." : ""}`}
+                      data-result={
+                        selected[item.id] === side
+                          ? showAns
+                            ? "correct"
+                            : results[item.id]
+                          : undefined
+                      }
                       key={side}
-                      className={`rlcc-img-wrap${isLocked ? " rlcc-img-wrap--locked" : ""}`}
+                      className={`rlcc-img-wrap${isLocked(item.id) ? " rlcc-img-wrap--locked" : ""}`}
                       onClick={() => handleSelect(item.id, side)}
                     >
-                      <img src={src} alt={`${item.id}${side}`} className="rlcc-img" />
-                      <div className="rlcc-symbol" style={{ color: sym ? color : "transparent" }}>
+                      <img src={src} alt="" className="rlcc-img" />
+                      <span
+                        aria-hidden="true"
+                        className="rlcc-symbol"
+                        style={{ color: sym ? color : "transparent" }}
+                      >
                         {sym || ""}
-                      </div>
-                    </div>
+                      </span>
+                    </button>
                   );
                 })}
               </div>
@@ -278,18 +412,41 @@ export default function WB_ReadLookWriteCheckCross_QD() {
                   <div className="rlcc-wrong-badge">✕</div>
                 )}
               </div>
-
             </div>
           ))}
         </div>
 
         {/* ── Buttons ── */}
         <div className="rlcc-buttons">
-          <Button
-            checkAnswers={handleCheck}
-            handleShowAnswer={handleShowAnswer}
-            handleStartAgain={handleReset}
-          />
+          <div className="action-buttons-container">
+            <button
+              type="button"
+              ref={resetButtonRef}
+              onClick={handleReset}
+              {...activationKeys}
+              className="try-again-button"
+            >
+              Start Again ↻
+            </button>
+            <button
+              type="button"
+              onClick={handleShowAnswer}
+              {...activationKeys}
+              className="show-answer-btn swal-continue"
+            >
+              Show Answer
+            </button>
+            <button
+              type="button"
+              onClick={handleCheck}
+              {...activationKeys}
+              disabled={checkDisabled}
+              style={{ cursor: checkDisabled ? "not-allowed" : "pointer" }}
+              className="check-button2"
+            >
+              Check Answer ✓
+            </button>
+          </div>
         </div>
       </div>
     </div>

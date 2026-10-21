@@ -50,6 +50,38 @@ const captions = [
     text: "There are probably many ways your room has changed. Ask your parents or look at old pictures of your room. Find out what you had in your room when you were a baby. Do you remember any of the things?",
   },
 ];
+  // Measured from this unit's SVG; coordinates are percentages of its full image.
+  // Caption timing groups are preserved, including groups containing several sentences.
+  const sentenceHighlights = [
+    { captionIndex: 1, boxes: [
+      {x: 43.2333,y: 14.0093,width: 54.9111,height: 4.8866},
+      {x: 40.5685,y: 19.8633,width: 43.0574,height: 4.9607}
+    ] },
+    { captionIndex: 2, boxes: [
+      {x: 84.15,y: 19.8757,width: 14.1426,height: 4.9483},
+      {x: 40.513,y: 25.7914,width: 54.2482,height: 4.9607},
+      {x: 40.5185,y: 31.7196,width: 34.35,height: 4.9607}
+    ] },
+    { captionIndex: 3, boxes: [
+      {x: 43.2296,y: 40.3936,width: 52.1722,height: 4.9607},
+      {x: 40.5426,y: 46.3217,width: 56.4074,height: 4.9607},
+      {x: 40.5093,y: 52.2539,width: 38.7593,height: 4.9566}
+    ] },
+    { captionIndex: 4, boxes: [
+      {x: 79.8259,y: 52.2539,width: 18.0407,height: 4.9566},
+      {x: 40.5278,y: 58.252,width: 54.9815,height: 4.8866},
+      {x: 40.5167,y: 64.1102,width: 29.9185,height: 4.9566}
+    ] },
+    { captionIndex: 5, boxes: [
+      {x: 43.2296,y: 72.7842,width: 51.1389,height: 4.9566},
+      {x: 2.2407,y: 78.7123,width: 92.5333,height: 4.9566}
+    ] },
+    { captionIndex: 6, boxes: [
+      {x: 2.1889,y: 84.6404,width: 92.2074,height: 4.9566},
+      {x: 2.2852,y: 90.5685,width: 90.7167,height: 4.9566}
+    ] }
+  ];
+
   return (
     
     <div className="flex flex-col items-center">
@@ -62,6 +94,8 @@ const captions = [
         question="Do you think new inventions will be good or bad for Earth?"
         sound={readingAudio}
         captions={captions}
+        sentenceHighlights={sentenceHighlights}
+        pageId="sb_unit3_page23_reading"
         stopAtSecond={2.5}
       />
 

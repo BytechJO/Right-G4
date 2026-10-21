@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import ValidationAlert from "../../Popup/ValidationAlert";
 import { FaCheck, FaRedo, FaEye } from "react-icons/fa";
 
@@ -16,6 +16,7 @@ const ComprehensionA = () => {
   const [errors, setErrors] = useState({});
   const [locked, setLocked] = useState(false);
   const [showed, setShowed] = useState(false);
+  const resetButtonRef = useRef(null);
 
   const handleChange = (index, value) => {
     if (locked || errors[index] === false) return;
@@ -61,6 +62,7 @@ const ComprehensionA = () => {
 
     if (correctCount === total) {
       setLocked(true);
+      resetButtonRef.current?.focus({ preventScroll: true });
       ValidationAlert.success(msg);
     } else if (correctCount === 0) {
       ValidationAlert.error(msg);
@@ -83,8 +85,29 @@ const ComprehensionA = () => {
     setShowed(false);
   };
 
+  const buttonKeys = {
+    onKeyDown: (event) => {
+      if (event.key !== "Enter" && event.key !== " ") return;
+      event.preventDefault();
+      event.stopPropagation();
+      if (!event.repeat) event.currentTarget.click();
+    },
+    onKeyUp: (event) => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+    },
+  };
+
   return (
-    <div className="mb-6 mx-auto">
+    <div className="comprehension-a mb-6 mx-auto">
+      <style>{`
+        .comprehension-a .comprehension-answer:focus-visible {
+          outline: 4px solid #2563eb;
+          outline-offset: 3px;
+        }
+      `}</style>
       <h5 className="header-title-page8-read mb-8">
         <span className="ex-A-read mr-2">A</span>
         Read and write <span className="text-[#f89631] font-bold">true</span> or{" "}
@@ -109,12 +132,19 @@ const ComprehensionA = () => {
             <div className="flex items-center gap-2 relative">
               <input
                 type="text"
+                aria-label={`Question ${i + 1}. ${q} Enter true or false.`}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter" || event.key === " ") event.stopPropagation();
+                }}
+                onKeyUp={(event) => {
+                  if (event.key === "Enter" || event.key === " ") event.stopPropagation();
+                }}
                 disabled={locked || errors[i] === false}
                 value={answers[i]}
                 onChange={(e) => handleChange(i, e.target.value)}
                 placeholder=""
                 autoComplete="off"
-                className={`w-[110px] px-4 py-1 rounded-full border-2 text-sm font-semibold text-center outline-none transition
+                className={`comprehension-answer w-[110px] px-4 py-1 rounded-full border-2 text-sm font-semibold text-center outline-none transition
                   ${
                     errors[i] === true
                       ? "border-red-400 bg-white text-gray-800"
@@ -155,42 +185,42 @@ const ComprehensionA = () => {
       {/* Buttons */}
       <div className="flex justify-center gap-6 mt-8">
         <div className="relative group">
-          <div
+          <button type="button" aria-label="Start Again" {...buttonKeys} ref={resetButtonRef}
             onClick={handleReset}
             className="flex items-center justify-center w-14 h-14 rounded-xl bg-[#ffc107] hover:bg-[#e0a800] cursor-pointer transition shadow-sm"
           >
-            <div className="bg-white p-3 rounded-full shadow">
+            <span className="bg-white p-3 rounded-full shadow">
               <FaRedo size={14} />
-            </div>
-          </div>
+            </span>
+          </button>
           <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-black text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition">
             Reset
           </span>
         </div>
 
         <div className="relative group">
-          <div
+          <button type="button" aria-label="Show Answer" {...buttonKeys}
             onClick={handleShow}
             className="flex items-center justify-center w-14 h-14 rounded-xl bg-[#2c78b4] hover:bg-[#1a5a8a] cursor-pointer transition shadow-sm"
           >
-            <div className="bg-white p-3 rounded-full shadow">
+            <span className="bg-white p-3 rounded-full shadow">
               <FaEye size={14} />
-            </div>
-          </div>
+            </span>
+          </button>
           <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-black text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition whitespace-nowrap">
             Show Answer
           </span>
         </div>
 
         <div className="relative group">
-          <div
+          <button type="button" aria-label="Check Answer" {...buttonKeys} disabled={locked} style={{ cursor: locked ? "not-allowed" : "pointer" }}
             onClick={handleCheck}
             className="flex items-center justify-center w-14 h-14 rounded-xl bg-[#55c271] hover:bg-[#449d5a] cursor-pointer transition shadow-sm"
           >
-            <div className="bg-white p-3 rounded-full shadow">
+            <span className="bg-white p-3 rounded-full shadow">
               <FaCheck size={14} />
-            </div>
-          </div>
+            </span>
+          </button>
           <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-black text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition whitespace-nowrap">
             Check Answer
           </span>

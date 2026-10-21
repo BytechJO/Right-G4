@@ -16,7 +16,16 @@ const Page7 = ({ openPopup }) => {
           width="22"
           height="22"
           viewBox="0 0 90 90"
+          tabIndex={0}
+          role="button"
+          aria-label="Open writing activity"
           onClick={() => openPopup("html", <WritingSection_U1 />)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              openPopup("html", <WritingSection_U1 />);
+            }
+          }}
           style={{ overflow: "visible" }}
         >
           <image

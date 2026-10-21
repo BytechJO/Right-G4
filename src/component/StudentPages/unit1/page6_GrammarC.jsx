@@ -1,6 +1,13 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import ValidationAlert from "../../Popup/ValidationAlert";
 import { FaCheck, FaRedo, FaEye } from "react-icons/fa";
+
+// Normalize comparison only; preserve the learner's original visible answer.
+const normalizeAnswer = (value) =>
+  value.normalize("NFKC").toLowerCase()
+    .replace(/[\u2018\u2019\u201A\u201B\u0060\u00B4']/g, "")
+    .replace(/[.,!?;:…“”"]/g, " ")
+    .replace(/\s+/g, " ").trim();
 
 const GrammarC = () => {
   const questions = [
@@ -35,12 +42,18 @@ const GrammarC = () => {
   const [errors, setErrors] = useState({});
   const [locked, setLocked] = useState(false);
   const [showed, setShowed] = useState(false);
+  const resetButtonRef = useRef(null);
 
   const handleChange = (index, value) => {
     if (locked || errors[index] === false) return;
     const updated = [...answers];
     updated[index] = value;
     setAnswers(updated);
+    setErrors((previous) => {
+      const next = { ...previous };
+      delete next[index];
+      return next;
+    });
   };
 
   const handleCheck = () => {
@@ -54,14 +67,9 @@ const GrammarC = () => {
 
     let correctCount = 0;
     const newErrors = {};
-const normalize = (str) =>
-  str
-    .trim()
-    .toLowerCase()
-    .replace(/[\u2018\u2019\u201A\u201B\u0060\u00B4']/g, "’");
     answers.forEach((ans, i) => {
       const isCorrect = questions[i].answers.some(
-        (a) => normalize(a) === ans.trim().toLowerCase()
+        (a) => normalizeAnswer(a) === normalizeAnswer(ans)
       );
       if (isCorrect) {
         correctCount++;
@@ -87,6 +95,7 @@ const normalize = (str) =>
 
     if (correctCount === total) {
       setLocked(true);
+      resetButtonRef.current?.focus({ preventScroll: true });
       ValidationAlert.success(msg);
     } else if (correctCount === 0) {
       ValidationAlert.error(msg);
@@ -109,8 +118,30 @@ const normalize = (str) =>
     setShowed(false);
   };
 
+  const buttonKeys = {
+    onKeyDown: (event) => {
+      if (event.key !== "Enter" && event.key !== " ") return;
+      event.preventDefault();
+      event.stopPropagation();
+      if (!event.repeat) event.currentTarget.click();
+    },
+    onKeyUp: (event) => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+    },
+  };
+
   return (
-    <div className="mb-6 mx-auto">
+    <div className="grammar-c mb-6 mx-auto">
+      <style>{`
+        .grammar-c .grammar-answer:focus-visible {
+          outline: 4px solid #2563eb;
+          outline-offset: 3px;
+          border-radius: 6px;
+        }
+      `}</style>
       <h5 className="header-title-page8-read mb-8">
         <span className="ex-A-read mr-2">C</span>
         Unscramble and write.
@@ -141,17 +172,25 @@ const normalize = (str) =>
             <div className="relative flex items-center flex-1">
               <input
                 type="text"
+                aria-label={`Question ${i + 1}. Unscramble: ${q.scrambled}`}
+                aria-invalid={errors[i] === true}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter" || event.key === " ") event.stopPropagation();
+                }}
+                onKeyUp={(event) => {
+                  if (event.key === "Enter" || event.key === " ") event.stopPropagation();
+                }}
                 disabled={locked || errors[i] === false}
                 value={answers[i]}
                 onChange={(e) => handleChange(i, e.target.value)}
                 autoComplete="off"
                 style={{ fontSize: "18px" }}
-                className={`w-full px-2 py-1 border-b-1 bg-transparent outline-none transition disabled:pointer-events-none
+                className={`grammar-answer w-full px-2 py-1 border-b-1 bg-transparent outline-none transition disabled:pointer-events-none
                   ${
                     errors[i] === true
                       ? "border-red-500 text-gray-800"
-                      : showed
-                      ? "border-[#333] text-red-500"
+                      : showed || errors[i] === false
+                      ? "border-green-600 text-gray-800"
                       : "border-[#333] text-gray-800"
                   }
                 `}
@@ -188,42 +227,42 @@ const normalize = (str) =>
       {/* Buttons */}
       <div className="flex justify-center gap-6 mt-8">
         <div className="relative group">
-          <div
+          <button type="button" aria-label="Start Again" {...buttonKeys} ref={resetButtonRef}
             onClick={handleReset}
             className="flex items-center justify-center w-14 h-14 rounded-xl bg-[#ffc107] hover:bg-[#e0a800] cursor-pointer transition shadow-sm"
           >
-            <div className="bg-white p-3 rounded-full shadow">
+            <span className="bg-white p-3 rounded-full shadow">
               <FaRedo size={14} />
-            </div>
-          </div>
+            </span>
+          </button>
           <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-black text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition">
             Reset
           </span>
         </div>
 
         <div className="relative group">
-          <div
+          <button type="button" aria-label="Show Answer" {...buttonKeys}
             onClick={handleShow}
             className="flex items-center justify-center w-14 h-14 rounded-xl bg-[#2c78b4] hover:bg-[#1a5a8a] cursor-pointer transition shadow-sm"
           >
-            <div className="bg-white p-3 rounded-full shadow">
+            <span className="bg-white p-3 rounded-full shadow">
               <FaEye size={14} />
-            </div>
-          </div>
+            </span>
+          </button>
           <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-black text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition whitespace-nowrap">
             Show Answer
           </span>
         </div>
 
         <div className="relative group">
-          <div
+          <button type="button" aria-label="Check Answer" {...buttonKeys} disabled={locked} style={{ cursor: locked ? "not-allowed" : "pointer" }}
             onClick={handleCheck}
             className="flex items-center justify-center w-14 h-14 rounded-xl bg-[#55c271] hover:bg-[#449d5a] cursor-pointer transition shadow-sm"
           >
-            <div className="bg-white p-3 rounded-full shadow">
+            <span className="bg-white p-3 rounded-full shadow">
               <FaCheck size={14} />
-            </div>
-          </div>
+            </span>
+          </button>
           <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-black text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition whitespace-nowrap">
             Check Answer
           </span>
