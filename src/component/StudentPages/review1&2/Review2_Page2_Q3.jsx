@@ -1,5 +1,4 @@
-import React, { useState } from "react";
-import Button from "../../Button";
+import React, { useState, useRef } from "react";
 import ValidationAlert from "../../Popup/ValidationAlert";
 
 // ─────────────────────────────────────────────
@@ -8,42 +7,53 @@ import ValidationAlert from "../../Popup/ValidationAlert";
 import img1 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 2 Welcome to the Big Apple Folder/Page 19/SVG/Asset 42.svg";
 import img2 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 2 Welcome to the Big Apple Folder/Page 19/SVG/Asset 43.svg";
 import img3 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 2 Welcome to the Big Apple Folder/Page 19/SVG/Asset 44.svg";
+import ExerciseHeader from "../../ExerciseHeader";
 
 // ─────────────────────────────────────────────
 //  🎨  COLORS
 // ─────────────────────────────────────────────
 const INPUT_UNDERLINE_DEFAULT = "#3f3f3f";
-const INPUT_UNDERLINE_WRONG   = "#ef4444";
-const INPUT_TEXT_COLOR        = "#2b2b2b";
-const INPUT_ANSWER_COLOR      = "#c81e1e";
-const NUMBER_COLOR            = "#2b2b2b";
-const WRONG_BADGE_BG          = "#ef4444";
-const WRONG_BADGE_TEXT        = "#ffffff";
+const INPUT_UNDERLINE_WRONG = "#ef4444";
+const INPUT_TEXT_COLOR = "#2b2b2b";
+const INPUT_ANSWER_COLOR = "#c81e1e";
+const NUMBER_COLOR = "#2b2b2b";
+const WRONG_BADGE_BG = "#ef4444";
+const WRONG_BADGE_TEXT = "#ffffff";
 
 // ─────────────────────────────────────────────
 //  📝  EXERCISE DATA
 // ─────────────────────────────────────────────
 const ITEMS = [
   {
-    id:      1,
-    src:     img1,
-    prefix:  "She's going to the",
+    id: 1,
+    src: img1,
+    prefix: "She's going to the",
     correct: ["store."],
-    answer:  "store.",
+    answer: "store.",
   },
   {
-    id:      2,
-    src:     img2,
-    prefix:  "",
-    correct: ["He is going to the cafe.", "He's going to the cafe.", "he is going to the cafe", "he's going to the cafe"],
-    answer:  "He is going to the cafe.",
+    id: 2,
+    src: img2,
+    prefix: "",
+    correct: [
+      "He is going to the cafe.",
+      "He's going to the cafe.",
+      "he is going to the cafe",
+      "he's going to the cafe",
+    ],
+    answer: "He is going to the cafe.",
   },
   {
-    id:      3,
-    src:     img3,
-    prefix:  "",
-    correct: ["He is going to the hotel.", "He's going to the hotel.", "he is going to the hotel", "he's going to the hotel"],
-    answer:  "He is going to the hotel.",
+    id: 3,
+    src: img3,
+    prefix: "",
+    correct: [
+      "He is going to the hotel.",
+      "He's going to the hotel.",
+      "he is going to the hotel",
+      "he's going to the hotel",
+    ],
+    answer: "He is going to the hotel.",
   },
 ];
 
@@ -51,7 +61,13 @@ const ITEMS = [
 //  🔧  NORMALIZE
 // ─────────────────────────────────────────────
 const normalize = (str) =>
-  str.toLowerCase().replace(/[^a-z0-9'\s]/g, "").replace(/\s+/g, " ").trim();
+  str
+    .normalize("NFKC")
+    .toLowerCase()
+    .replace(/[\u2018\u2019\u201A\u201B\u0060\u00B4']/g, "")
+    .replace(/[.,!?;:…“”"]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
 
 const isCorrect = (userVal, correctArr) =>
   correctArr.some((c) => normalize(userVal) === normalize(c));
@@ -59,49 +75,119 @@ const isCorrect = (userVal, correctArr) =>
 // ─────────────────────────────────────────────
 //  COMPONENT
 // ─────────────────────────────────────────────
+const activationKeys = {
+  onKeyDown: (event) => {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    event.preventDefault();
+    event.stopPropagation();
+    if (!event.repeat) event.currentTarget.click();
+  },
+  onKeyUp: (event) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+  },
+};
+const fieldKeys = {
+  onKeyDown: (event) => {
+    if (event.key === "Enter" || event.key === " ") event.stopPropagation();
+  },
+  onKeyUp: (event) => {
+    if (event.key === "Enter" || event.key === " ") event.stopPropagation();
+  },
+};
+
 export default function WB_LookWriteGoingTo_QF() {
-  const [answers,     setAnswers]     = useState({});
-  const [showResults, setShowResults] = useState(false);
-  const [showAns,     setShowAns]     = useState(false);
+  const [answers, setAnswers] = useState({});
+  const [results, setResults] = useState({});
+  const [showAns, setShowAns] = useState(false);
+
+  const resetButtonRef = useRef(null);
+  const [announcement, setAnnouncement] = useState("");
+  const checkDisabled =
+    showAns || ITEMS.every((item) => results[item.id] === "correct");
 
   const handleChange = (id, value) => {
-    if (showAns) return;
-    const item = ITEMS.find((i) => i.id === id);
-    if (showResults && item && isCorrect(answers[id] || "", item.correct)) return;
-    setAnswers((prev) => ({ ...prev, [id]: value }));
+    if (showAns || results[id] === "correct") return;
+    if (!ITEMS.some((item) => item.id === id)) return;
+
+    setAnswers((previous) => ({ ...previous, [id]: value }));
+    setResults((previous) => {
+      const next = { ...previous };
+      delete next[id];
+      return next;
+    });
   };
 
   const handleCheck = () => {
-    if (showAns) return;
-    const allAnswered = ITEMS.every((item) => answers[item.id]?.trim());
-    if (!allAnswered) { ValidationAlert.info("Please complete all answers first."); return; }
-    let score = 0;
-    ITEMS.forEach((item) => { if (isCorrect(answers[item.id] || "", item.correct)) score++; });
-    setShowResults(true);
-    if (score === ITEMS.length)   ValidationAlert.success(`Score: ${score} / ${ITEMS.length}`);
-    else if (score > 0)           ValidationAlert.warning(`Score: ${score} / ${ITEMS.length}`);
-    else                          ValidationAlert.error(`Score: ${score} / ${ITEMS.length}`);
+    if (checkDisabled) return;
+    if (!ITEMS.every((item) => answers[item.id]?.trim())) {
+      setAnnouncement("Please complete all answers first.");
+      ValidationAlert.info("Please complete all answers first.");
+      return;
+    }
+    const checked = Object.fromEntries(
+      ITEMS.map((item) => [
+        item.id,
+        results[item.id] === "correct" ||
+        isCorrect(answers[item.id] || "", item.correct)
+          ? "correct"
+          : "wrong",
+      ]),
+    );
+    const score = Object.values(checked).filter(
+      (result) => result === "correct",
+    ).length;
+    setResults(checked);
+    setAnnouncement(
+      `Score: ${score} out of ${ITEMS.length}. Correct answers are locked; incorrect answers can be changed.`,
+    );
+    if (score === ITEMS.length) {
+      resetButtonRef.current?.focus({ preventScroll: true });
+      ValidationAlert.success(`Score: ${score} / ${ITEMS.length}`);
+    } else if (score > 0)
+      ValidationAlert.warning(`Score: ${score} / ${ITEMS.length}`);
+    else ValidationAlert.error(`Score: ${score} / ${ITEMS.length}`);
   };
 
   const handleShowAnswer = () => {
     const filled = {};
-    ITEMS.forEach((item) => { filled[item.id] = item.answer; });
+    ITEMS.forEach((item) => {
+      filled[item.id] = item.answer;
+    });
     setAnswers(filled);
-    setShowResults(false);
+    setResults({});
     setShowAns(true);
+    setAnnouncement("Correct answers shown and locked.");
   };
 
   const handleReset = () => {
     setAnswers({});
-    setShowResults(false);
+    setResults({});
     setShowAns(false);
+    setAnnouncement("Answers and feedback cleared.");
   };
 
-  const isWrong    = (item) => showResults && !showAns && !isCorrect(answers[item.id] || "", item.correct);
-  const isDisabled = (item) => showAns || (showResults && isCorrect(answers[item.id] || "", item.correct));
+  const isWrong = (item) => !showAns && results[item.id] === "wrong";
+  const isDisabled = (item) => showAns || results[item.id] === "correct";
 
   return (
-    <div className="main-container-component">
+    <div
+      className="main-container-component"
+      data-review12-scope="Review2_Page2_Q3"
+    >
+      <div
+        className="sr-only"
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+      >
+        {announcement}
+      </div>
+      <style>{`[data-review12-scope="Review2_Page2_Q3"] input:focus-visible {
+        outline: 4px solid #2563eb; outline-offset: 3px; border-radius: 6px;
+      }`}</style>
       <style>{`
         /* ── Items list ── */
         .lwgt-list {
@@ -219,39 +305,50 @@ export default function WB_LookWriteGoingTo_QF() {
           margin: "0 auto",
         }}
       >
-        {/* ── Header ── */}
-        <h1
-          className="WB-header-title-page8"
-          style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
-        >
-          <span className="WB-ex-A-1">F</span>
-          Look and write sentences using <em style={{ margin: "0 4px" ,color : "#ff8c00ff" }}>going to</em>.
-        </h1>
-
+        <ExerciseHeader
+          isReview
+          sectionLetter={"F"}
+          title={"Look and write sentences using going to."}
+          subTitle={
+            "Use each picture to decide the plan, then write a complete sentence with going to before checking."
+          }
+        />
         {/* ── Items ── */}
         <div className="lwgt-list">
           {ITEMS.map((item) => {
-            const wrong    = isWrong(item);
-            const value    = answers[item.id] || "";
-            const tColor   = showAns ? INPUT_ANSWER_COLOR : INPUT_TEXT_COLOR;
-            const uColor   = wrong ? INPUT_UNDERLINE_WRONG : INPUT_UNDERLINE_DEFAULT;
+            const wrong = isWrong(item);
+            const value = answers[item.id] || "";
+            const tColor = INPUT_TEXT_COLOR;
+            const uColor = wrong
+              ? INPUT_UNDERLINE_WRONG
+              : isDisabled(item)
+                ? "#16a34a"
+                : INPUT_UNDERLINE_DEFAULT;
             const disabled = isDisabled(item);
 
             return (
               <div key={item.id} className="lwgt-row">
-
                 {/* Left: num + prefix + input */}
                 <div className="lwgt-left">
                   <span className="lwgt-num">{item.id}</span>
-                  {item.prefix && <span className="lwgt-prefix">{item.prefix}</span>}
+                  {item.prefix && (
+                    <span className="lwgt-prefix">{item.prefix}</span>
+                  )}
                   <div className="lwgt-input-wrap">
                     <input
+                      {...fieldKeys}
+                      aria-label={`Question ${item.id}. ${item.before || item.prefix || item.cue || item.scrambled || "Write an answer using the picture or diagram."} ${item.after || ""}`}
+                      title={`Question ${item.id}. ${item.before || item.prefix || item.cue || item.scrambled || "Write an answer using the picture or diagram."} ${item.after || ""}`}
+                      placeholder="Answer"
+                      aria-invalid={wrong}
                       type="text"
                       className={[
                         "lwgt-input",
-                        wrong   ? "lwgt-input--wrong"  : "",
+                        wrong ? "lwgt-input--wrong" : "",
                         showAns ? "lwgt-input--answer" : "",
-                      ].filter(Boolean).join(" ")}
+                      ]
+                        .filter(Boolean)
+                        .join(" ")}
                       value={value}
                       disabled={disabled}
                       onChange={(e) => handleChange(item.id, e.target.value)}
@@ -265,9 +362,12 @@ export default function WB_LookWriteGoingTo_QF() {
 
                 {/* Right: image */}
                 <div className="lwgt-imgs">
-                  <img src={item.src} alt={`img-${item.id}`} className="lwgt-place" />
+                  <img
+                    src={item.src}
+                    alt={`img-${item.id}`}
+                    className="lwgt-place"
+                  />
                 </div>
-
               </div>
             );
           })}
@@ -275,11 +375,35 @@ export default function WB_LookWriteGoingTo_QF() {
 
         {/* ── Buttons ── */}
         <div className="lwgt-buttons">
-          <Button
-            checkAnswers={handleCheck}
-            handleShowAnswer={handleShowAnswer}
-            handleStartAgain={handleReset}
-          />
+          <div className="action-buttons-container">
+            <button
+              type="button"
+              ref={resetButtonRef}
+              {...activationKeys}
+              onClick={handleReset}
+              className="try-again-button"
+            >
+              Start Again ↻
+            </button>
+            <button
+              type="button"
+              {...activationKeys}
+              onClick={handleShowAnswer}
+              className="show-answer-btn swal-continue"
+            >
+              Show Answer
+            </button>
+            <button
+              type="button"
+              {...activationKeys}
+              onClick={handleCheck}
+              disabled={checkDisabled}
+              style={{ cursor: checkDisabled ? "not-allowed" : "pointer" }}
+              className="check-button2"
+            >
+              Check Answer ✓
+            </button>
+          </div>
         </div>
       </div>
     </div>

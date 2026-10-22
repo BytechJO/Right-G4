@@ -22,6 +22,7 @@ const GrammarSection_U1 = () => {
       <div className="w-[60%] mt-2">
         <img
           src={image}
+          alt="What My Great-grandpa Had. A child describes their great-grandfather’s childhood on a farm in the 1920s, before he had electricity, with no TV, computers or internet. Writing tips: use an interesting beginning, order your ideas, and choose exact words."
           style={{ width: "100%", height: "auto", display: "block" }}
         />
       </div>

@@ -11,6 +11,24 @@ import videoFile from "../../../assets/right grade 4/reading/grade 4 unit 8 page
 import "./Reading_Unit8_Page1.css";
 // ======================================================
 
+const pageKeys = {
+  onKeyDown: (event) => {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    event.preventDefault();
+    event.stopPropagation();
+    if (!event.repeat)
+      event.currentTarget.dispatchEvent(
+        new MouseEvent("click", { bubbles: true, cancelable: true }),
+      );
+  },
+  onKeyUp: (event) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+  },
+};
+
 const PAGE_ID = "page-74";
 
 const Reading_NewPage = ({ openPopup }) => {
@@ -102,35 +120,20 @@ const Reading_NewPage = ({ openPopup }) => {
   };
 
   return (
-    <div
+    <div data-reading-page="unit8-1"
       className="page1-img-wrapper"
       onClick={handleImageClick}
       style={{ backgroundImage: `url(${pageImage})` }}
     >
-      {clickableAreas.map((area, index) => (
-        <div
-          key={index}
-          className={`clickable-area ${
-            hoveredAreaIndex === index || activeAreaIndex === index ? "highlight" : ""
-          }`}
-          style={{
-            position: "absolute",
-            left: `${area.x1}%`,
-            top: `${area.y1}%`,
-            width: `${area.x2 - area.x1}%`,
-            height: `${area.y2 - area.y1}%`,
-          }}
-          onClick={(e) => {
-            e.stopPropagation();
-            playSlice(area.slice, index);
-          }}
-          onMouseEnter={() => { if (!isPlaying) setHoveredAreaIndex(index); }}
-          onMouseLeave={() => { if (!isPlaying) setHoveredAreaIndex(null); }}
-        />
-      ))}
+      <style>{`[data-reading-page="unit8-1"] :focus-visible {
+        outline: 4px solid #2563eb;
+        outline-offset: 3px;
+        border-radius: 6px;
+      }`}</style>
+      
 
       <div className="headset-icon-CD-unit2-page11-1 hover:scale-110 transition" style={{ overflow: "visible" }}>
-        <svg
+        <svg role="button" tabIndex={0} data-reading-control aria-label="Open reading audio" {...pageKeys}
           width="22" height="22" viewBox="0 0 90 90"
           onClick={(e) => {
             e.stopPropagation();
@@ -147,7 +150,7 @@ const Reading_NewPage = ({ openPopup }) => {
         </svg>
       </div>
 <div className="pauseBtn-icon-CD-page21 hover:scale-110 transition" style={{ overflow: "visible" }}>
-  <svg
+  <svg role="button" tabIndex={0} data-reading-control aria-label="Open reading video" {...pageKeys}
     width="22" height="22" viewBox="0 0 90 90"
     onClick={(e) => {
       e.stopPropagation();
@@ -170,6 +173,29 @@ const Reading_NewPage = ({ openPopup }) => {
   </svg>
 </div>
 
+      {clickableAreas.map((area, index) => (
+        <div role="button" tabIndex={0} data-reading-control {...pageKeys}
+          aria-label={`Read passage ${index + 1} on page 74`}
+          aria-pressed={activeAreaIndex === index}
+          key={index}
+          className={`clickable-area ${
+            hoveredAreaIndex === index || activeAreaIndex === index ? "highlight" : ""
+          }`}
+          style={{
+            position: "absolute",
+            left: `${area.x1}%`,
+            top: `${area.y1}%`,
+            width: `${area.x2 - area.x1}%`,
+            height: `${area.y2 - area.y1}%`,
+          }}
+          onClick={(e) => {
+            e.stopPropagation();
+            playSlice(area.slice, index);
+          }}
+          onMouseEnter={() => { if (!isPlaying) setHoveredAreaIndex(index); }}
+          onMouseLeave={() => { if (!isPlaying) setHoveredAreaIndex(null); }}
+        />
+      ))}
       <audio ref={audioRef} style={{ display: "none" }} />
     </div>
   );

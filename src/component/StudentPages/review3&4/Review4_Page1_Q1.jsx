@@ -1,6 +1,37 @@
-import React, { useState } from "react";
-import Button from "../../Button";
+import ExerciseHeader from "../../ExerciseHeader";
+import React, { useState, useRef } from "react";
 import ValidationAlert from "../../Popup/ValidationAlert";
+const activationKeys = {
+  onKeyDown: (event) => {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    event.preventDefault();
+    event.stopPropagation();
+    if (!event.repeat) event.currentTarget.click();
+  },
+  onKeyUp: (event) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+  },
+};
+const fieldKeys = {
+  onKeyDown: (event) => {
+    if (event.key === "Enter" || event.key === " ") event.stopPropagation();
+  },
+  onKeyUp: (event) => {
+    if (event.key === "Enter" || event.key === " ") event.stopPropagation();
+  },
+};
+const normalizeAnswer = (value) =>
+  value
+    .normalize("NFKC")
+    .toLowerCase()
+    .replace(/[\u2018\u2019\u201A\u201B\u0060\u00B4']/g, "")
+    .replace(/[.,!?;:\u2026\u201c\u201d"]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+
 
 // ─────────────────────────────────────────────
 //  🎨  COLORS
@@ -76,8 +107,7 @@ const ITEMS = [
 // ─────────────────────────────────────────────
 //  🔧  NORMALIZE
 // ─────────────────────────────────────────────
-const normalize = (str) =>
-  str.toLowerCase().replace(/[^a-z0-9\s]/g, "").replace(/\s+/g, " ").trim();
+const normalize = normalizeAnswer;
 
 // ─────────────────────────────────────────────
 //  COMPONENT
@@ -85,42 +115,20 @@ const normalize = (str) =>
 export default function WB_ReadChooseWrite_QA() {
   const [selected,    setSelected]    = useState({});
   const [written,     setWritten]     = useState({});
-  const [showResults, setShowResults] = useState(false);
+  const [, setShowResults] = useState(false);
   const [showAns,     setShowAns]     = useState(false);
+ const [partResults,setPartResults] = useState({});
+ const [announcement,setAnnouncement] = useState("");
+ const resetButtonRef = useRef(null);
+ const checkDisabled = showAns || ITEMS.every(item=>partResults[item.id+"c"] === "correct" && partResults[item.id+"w"] === "correct");
 
-  const isLocked = showResults || showAns;
+  const isLocked = checkDisabled;
 
-  const handleSelect = (id, label) => {
-    if (isLocked) return;
-    setSelected((prev) => ({ ...prev, [id]: label }));
-  };
+  const handleSelect = (id,label) => {if(showAns || partResults[id+"c"] === "correct")return;setSelected(prev=>({...prev,[id]:label}));setPartResults(prev=>{const next={...prev};delete next[id+"c"];return next;});};
 
-  const handleWrite = (id, value) => {
-    if (showAns) return;
-    const item = ITEMS.find((i) => i.id === id);
-    if (showResults && item && normalize(written[id] || "") === normalize(item.answer)) return;
-    setWritten((prev) => ({ ...prev, [id]: value }));
-  };
+  const handleWrite = (id,value) => {if(showAns || partResults[id+"w"] === "correct")return;setWritten(prev=>({...prev,[id]:value}));setPartResults(prev=>{const next={...prev};delete next[id+"w"];return next;});};
 
-  const handleCheck = () => {
-    if (isLocked) return;
-    const allCircled = ITEMS.every((item) => selected[item.id]);
-    const allWritten = ITEMS.every((item) => written[item.id]?.trim());
-    if (!allCircled || !allWritten) {
-      ValidationAlert.info("Please choose and write an answer for each question.");
-      return;
-    }
-    let score = 0;
-    const total = ITEMS.length * 2;
-    ITEMS.forEach((item) => {
-      if (selected[item.id] === item.correct)                           score++;
-      if (normalize(written[item.id] || "") === normalize(item.answer)) score++;
-    });
-    setShowResults(true);
-    if (score === total)   ValidationAlert.success(`Score: ${score} / ${total}`);
-    else if (score > 0)    ValidationAlert.warning(`Score: ${score} / ${total}`);
-    else                   ValidationAlert.error(`Score: ${score} / ${total}`);
-  };
+  const handleCheck = () => {if(checkDisabled)return;if(!ITEMS.every(item=>selected[item.id] && written[item.id]?.trim())){ValidationAlert.info("Please choose and write an answer for each question.");return;}const next={};ITEMS.forEach(item=>{next[item.id+"c"]=partResults[item.id+"c"] === "correct" || selected[item.id] === item.correct ? "correct":"wrong";next[item.id+"w"]=partResults[item.id+"w"] === "correct" || normalize(written[item.id]) === normalize(item.answer) ? "correct":"wrong";});const score=Object.values(next).filter(value=>value === "correct").length;const total=ITEMS.length*2;setPartResults(next);setShowResults(true);setAnnouncement(`Score: ${score} out of ${total}. Correct parts are locked; incorrect parts can be changed.`);if(score === total){resetButtonRef.current?.focus({preventScroll:true});ValidationAlert.success(`Score: ${score} / ${total}`);}else if(score)ValidationAlert.warning(`Score: ${score} / ${total}`);else ValidationAlert.error(`Score: ${score} / ${total}`);};
 
   const handleShowAnswer = () => {
     const filledSel = {};
@@ -132,29 +140,25 @@ export default function WB_ReadChooseWrite_QA() {
     setSelected(filledSel);
     setWritten(filledWr);
     setShowResults(false);
-    setShowAns(true);
+    setShowAns(true);setPartResults({});resetButtonRef.current?.focus({preventScroll:true});setAnnouncement("Correct answers shown and locked.");
   };
 
   const handleReset = () => {
     setSelected({});
     setWritten({});
     setShowResults(false);
-    setShowAns(false);
+    setShowAns(false);setPartResults({});setAnnouncement("Selections, answers and feedback cleared.");
   };
 
-  const getOptionState = (item, label) => {
-    const sel = selected[item.id];
-    if (sel !== label) return "idle";
-    if (showAns)       return "correct";
-    if (showResults)   return label === item.correct ? "correct" : "wrong";
-    return "selected";
-  };
+  const getOptionState = (item,label) => selected[item.id] !== label ? "idle" : showAns ? "correct" : partResults[item.id+"c"] || "selected";
 
-  const isWriteWrong    = (item) => showResults && !showAns && normalize(written[item.id] || "") !== normalize(item.answer);
-  const isWriteDisabled = (item) => showAns || (showResults && normalize(written[item.id] || "") === normalize(item.answer));
+  const isWriteWrong = item => !showAns && partResults[item.id+"w"] === "wrong";
+  const isWriteDisabled = item => showAns || partResults[item.id+"w"] === "correct";
 
   return (
-    <div className="main-container-component">
+    <div data-adapt-scope="review3&4_Review4_Page1_Q1" className="main-container-component">
+<style>{`[data-adapt-scope="review3&4_Review4_Page1_Q1"] input:focus-visible, [data-adapt-scope="review3&4_Review4_Page1_Q1"] [data-keyboard-choice]:focus-visible, [data-adapt-scope="review3&4_Review4_Page1_Q1"] [data-grid-cell]:focus-visible {outline:4px solid #2563eb;outline-offset:3px;border-radius:6px;}`}</style>
+<div className="sr-only" role="status" aria-live="polite" aria-atomic="true">{announcement}</div>
       <style>{`
 
         .rcwa-list {
@@ -312,13 +316,8 @@ export default function WB_ReadChooseWrite_QA() {
         }}
       >
         {/* ── Header ── */}
-        <h1
-          className="WB-header-title-page8"
-          style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
-        >
-          <span className="WB-ex-A-1">A</span>
-          Read, choose, and write.
-        </h1>
+        <ExerciseHeader
+          subTitle="Read the clue carefully, select the correct option first, then complete the blank before checking." isReview sectionLetter="A" title={<>Read, choose, and write.</>} />
 
         {/* ── Items ── */}
         <div className="rcwa-list">
@@ -338,7 +337,7 @@ export default function WB_ReadChooseWrite_QA() {
                   <span className="rcwa-text">{item.before}</span>
 
                   <div className="rcwa-input-wrap">
-                    <input
+                    <input {...fieldKeys} aria-label={`Question ${item.id}. ${item.before} blank ${item.after}`} title={`Question ${item.id}. ${item.before} blank ${item.after}`} placeholder="Word" aria-invalid={isWriteWrong(item)}
                       type="text"
                       className={[
                         "rcwa-input",
@@ -348,7 +347,7 @@ export default function WB_ReadChooseWrite_QA() {
                       value={writeValue}
                       disabled={writeDisabled}
                       onChange={(e) => handleWrite(item.id, e.target.value)}
-                      style={{ borderBottomColor: writeUColor, color: writeTColor }}
+                      style={{...({ borderBottomColor: writeUColor, color: writeTColor }),borderBottomColor:isWriteDisabled(item) ? "#16a34a" : isWriteWrong(item) ? "#ef4444" : "#3f3f3f"}}
                       spellCheck={false}
                       autoComplete="off"
                     />
@@ -365,7 +364,7 @@ export default function WB_ReadChooseWrite_QA() {
                     const isWrong = state === "wrong";
 
                     return (
-                      <div
+                      <div style={{...({}),borderRadius:({}).borderRadius || "6px",boxShadow:selected[item.id] === opt.label ? `inset 0 0 0 2px ${showAns || partResults[item.id+"c"] === "correct" ? "#16a34a" : partResults[item.id+"c"] === "wrong" ? "#ef4444" : "#2563eb"}` : undefined}} role="button" tabIndex={0} data-keyboard-choice {...activationKeys} aria-label={`Question ${item.id}. ${opt.text}`} aria-pressed={selected[item.id] === opt.label} aria-disabled={showAns || partResults[item.id+"c"] === "correct"}
                         key={opt.label}
                         className={[
                           "rcwa-option",
@@ -391,11 +390,11 @@ export default function WB_ReadChooseWrite_QA() {
 
         {/* ── Buttons ── */}
         <div className="rcwa-buttons">
-          <Button
-            checkAnswers={handleCheck}
-            handleShowAnswer={handleShowAnswer}
-            handleStartAgain={handleReset}
-          />
+          <div className="action-buttons-container">
+<button type="button" aria-label="Start Again" {...activationKeys} ref={resetButtonRef} onClick={handleReset} className="try-again-button">Start Again ↻</button>
+<button type="button" aria-label="Show Answer" {...activationKeys} onClick={handleShowAnswer} className="show-answer-btn swal-continue">Show Answer</button>
+<button type="button" aria-label="Check Answer" {...activationKeys} onClick={handleCheck} disabled={checkDisabled} style={{cursor:checkDisabled ? "not-allowed":"pointer"}} className="check-button2">Check Answer ✓</button>
+</div>
         </div>
       </div>
     </div>

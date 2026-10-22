@@ -69,7 +69,9 @@ const WritingB = () => {
             <span style={{ fontSize: "18px", whiteSpace: "nowrap", color: "#1a1a1a" }}>
               In the future, I will invent
             </span>
-            <input aria-label="In the future, I will invent" {...fieldKeys}
+            <input aria-label="In the future, I will invent"
+                      title="In the future, I will invent"
+                      placeholder="Your idea" {...fieldKeys}
               type="text"
               value={invent}
               onChange={(e) => setInvent(e.target.value)}
@@ -80,7 +82,9 @@ const WritingB = () => {
           </div>
 
           {/* Line 2 - full line */}
-          <input aria-label="Continue describing your future invention" {...fieldKeys}
+          <input aria-label="Continue describing your future invention"
+                      title="Continue describing your future invention"
+                      placeholder="Your idea" {...fieldKeys}
             type="text"
             value={inventLine2}
             onChange={(e) => setInventLine2(e.target.value)}
@@ -103,7 +107,9 @@ const WritingB = () => {
         <span style={{ fontSize: "18px", whiteSpace: "nowrap", color: "#1a1a1a" }}>
           It will
         </span>
-        <input aria-label="It will" {...fieldKeys}
+        <input aria-label="It will"
+                      title="It will"
+                      placeholder="Your idea" {...fieldKeys}
           type="text"
           value={itWill}
           onChange={(e) => setItWill(e.target.value)}
@@ -114,7 +120,9 @@ const WritingB = () => {
         <span style={{ fontSize: "18px", whiteSpace: "nowrap", color: "#1a1a1a" }}>
           . It will also
         </span>
-        <input aria-label="It will also" {...fieldKeys}
+        <input aria-label="It will also"
+                      title="It will also"
+                      placeholder="Your idea" {...fieldKeys}
           type="text"
           value={itWillAlso}
           onChange={(e) => setItWillAlso(e.target.value)}
@@ -126,7 +134,9 @@ const WritingB = () => {
 
       {/* Row 3: continuation line + I think people will like it because */}
       <div className="flex items-end gap-2 mb-4 mt-4">
-        <input aria-label="Continue what your invention will also do" {...fieldKeys}
+        <input aria-label="Continue what your invention will also do"
+                      title="Continue what your invention will also do"
+                      placeholder="Your idea" {...fieldKeys}
           type="text"
           value={itWillAlsoLine2}
           onChange={(e) => setItWillAlsoLine2(e.target.value)}
@@ -141,7 +151,9 @@ const WritingB = () => {
 
       {/* Row 4: last full line with period */}
       <div className="flex items-end gap-2 mb-6 mt-4">
-        <input aria-label="I think people will like it because" {...fieldKeys}
+        <input aria-label="I think people will like it because"
+                      title="I think people will like it because"
+                      placeholder="Your idea" {...fieldKeys}
           type="text"
           value={because}
           onChange={(e) => setBecause(e.target.value)}

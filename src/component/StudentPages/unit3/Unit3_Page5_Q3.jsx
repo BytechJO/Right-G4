@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import Button from "../../Button";
+import ExerciseHeader from "../../ExerciseHeader";
+import React, { useState, useRef } from "react";
 import ValidationAlert from "../../Popup/ValidationAlert";
 import sound from "../../../assets/audio/ClassBook/Grade 4/cd18pg26-instruction1-adult-lady_6tvKwa0U.mp3";
 import QuestionAudioPlayer from "../../QuestionAudioPlayer";
@@ -8,19 +8,49 @@ import QuestionAudioPlayer from "../../QuestionAudioPlayer";
 //  🖼️  IMAGE
 // ─────────────────────────────────────────────
 import imgScene from "../../../assets/imgs/pages/Class Book/Right 4 Unit 3 Harley Eats All the Sweets Folder/Page 26/SVG/Asset 5.svg";
+const activationKeys = {
+  onKeyDown: (event) => {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    event.preventDefault();
+    event.stopPropagation();
+    if (!event.repeat) event.currentTarget.click();
+  },
+  onKeyUp: (event) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+  },
+};
+const fieldKeys = {
+  onKeyDown: (event) => {
+    if (event.key === "Enter" || event.key === " ") event.stopPropagation();
+  },
+  onKeyUp: (event) => {
+    if (event.key === "Enter" || event.key === " ") event.stopPropagation();
+  },
+};
+const normalizeAnswer = (value) =>
+  value
+    .normalize("NFKC")
+    .toLowerCase()
+    .replace(/[\u2018\u2019\u201A\u201B\u0060\u00B4']/g, "")
+    .replace(/[.,!?;:\u2026\u201c\u201d"]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
 
 // ─────────────────────────────────────────────
 //  🎨  COLORS
 // ─────────────────────────────────────────────
 const BOX_BORDER_DEFAULT = "#2096a6";
-const BOX_BORDER_WRONG   = "#2096a6";
-const BOX_TEXT_DEFAULT   = "#2b2b2b";
-const BOX_TEXT_ANSWER    = "#c81e1e";
-const SENTENCE_COLOR     = "#2b2b2b";
-const NUMBER_COLOR       = "#2b2b2b";
-const PARA_COLOR         = "#2b2b2b";
-const WRONG_BADGE_BG     = "#ef4444";
-const WRONG_BADGE_TEXT   = "#ffffff";
+const BOX_BORDER_WRONG = "#2096a6";
+const BOX_TEXT_DEFAULT = "#2b2b2b";
+const BOX_TEXT_ANSWER = "#c81e1e";
+const SENTENCE_COLOR = "#2b2b2b";
+const NUMBER_COLOR = "#2b2b2b";
+const PARA_COLOR = "#2b2b2b";
+const WRONG_BADGE_BG = "#ef4444";
+const WRONG_BADGE_TEXT = "#ffffff";
 
 // ─────────────────────────────────────────────
 //  📝  PARAGRAPH
@@ -31,10 +61,30 @@ const PARAGRAPH = `Two years ago, my friends and I built a tree house in my back
 //  📝  EXERCISE DATA
 // ─────────────────────────────────────────────
 const ITEMS = [
-  { id: 1, sentence: "The tree house had a TV.",      correct: ["true",  "True"],  answer: "True"  },
-  { id: 2, sentence: "It had beds and tables.",        correct: ["false", "False"], answer: "False" },
-  { id: 3, sentence: "It had large windows.",          correct: ["true",  "True"],  answer: "True"  },
-  { id: 4, sentence: "The tree house had a desk.",     correct: ["false", "False"], answer: "False" },
+  {
+    id: 1,
+    sentence: "The tree house had a TV.",
+    correct: ["true", "True"],
+    answer: "True",
+  },
+  {
+    id: 2,
+    sentence: "It had beds and tables.",
+    correct: ["false", "False"],
+    answer: "False",
+  },
+  {
+    id: 3,
+    sentence: "It had large windows.",
+    correct: ["true", "True"],
+    answer: "True",
+  },
+  {
+    id: 4,
+    sentence: "The tree house had a desk.",
+    correct: ["false", "False"],
+    answer: "False",
+  },
 ];
 const captions = [
   {
@@ -53,7 +103,7 @@ const captions = [
     text: "Two years ago, my friends and I built a tree house in my backyard. It was big. It had chairs and tables. It had large windows.",
   },
   {
-    start: 21.40,
+    start: 21.4,
     end: 27.58,
     text: "There were two bookcases in the tree house. We had a TV so we could watch movies on the weekends.",
   },
@@ -61,56 +111,103 @@ const captions = [
 // ─────────────────────────────────────────────
 //  🔧  HELPERS
 // ─────────────────────────────────────────────
-const isCorrect = (userVal, correctArr) =>
-  correctArr.some((c) => userVal.trim().toLowerCase() === c.toLowerCase());
+const isCorrect = (value, alternatives) =>
+  alternatives.some(
+    (answer) => normalizeAnswer(value) === normalizeAnswer(answer),
+  );
 
 // ─────────────────────────────────────────────
 //  COMPONENT
 // ─────────────────────────────────────────────
 export default function WB_ListenReadTrueFalse_QC() {
-  const [answers,     setAnswers]     = useState({});
-  const [showResults, setShowResults] = useState(false);
-  const [showAns,     setShowAns]     = useState(false);
+  const [answers, setAnswers] = useState({});
+  const [results, setResults] = useState({});
+  const [announcement, setAnnouncement] = useState("");
+  const resetButtonRef = useRef(null);
+
+  const [showAns, setShowAns] = useState(false);
+  const checkDisabled =
+    showAns || ITEMS.every((item) => results[item.id] === "correct");
 
   const handleChange = (id, value) => {
-    if (showAns) return;
-    const item = ITEMS.find((i) => i.id === id);
-    if (showResults && item && isCorrect(answers[id] || "", item.correct)) return;
-    // only allow "true", "false" or partial typing
+    if (
+      showAns ||
+      results[id] === "correct" ||
+      !ITEMS.some((item) => item.id === id)
+    )
+      return;
     setAnswers((prev) => ({ ...prev, [id]: value }));
+    setResults((prev) => {
+      const next = { ...prev };
+      delete next[id];
+      return next;
+    });
   };
 
   const handleCheck = () => {
-    if (showAns) return;
-    const allAnswered = ITEMS.every((item) => answers[item.id]?.trim());
-    if (!allAnswered) { ValidationAlert.info("Please complete all answers first."); return; }
-    let score = 0;
-    ITEMS.forEach((item) => { if (isCorrect(answers[item.id] || "", item.correct)) score++; });
-    setShowResults(true);
-    if (score === ITEMS.length) ValidationAlert.success(`Score: ${score} / ${ITEMS.length}`);
-    else if (score > 0)         ValidationAlert.warning(`Score: ${score} / ${ITEMS.length}`);
-    else                        ValidationAlert.error(`Score: ${score} / ${ITEMS.length}`);
+    if (checkDisabled) return;
+    if (!ITEMS.every((item) => answers[item.id]?.trim())) {
+      setAnnouncement("Please complete all answers first.");
+      ValidationAlert.info("Please complete all answers first.");
+      return;
+    }
+    const next = Object.fromEntries(
+      ITEMS.map((item) => [
+        item.id,
+        results[item.id] === "correct" ||
+        isCorrect(answers[item.id] || "", item.correct)
+          ? "correct"
+          : "wrong",
+      ]),
+    );
+    const score = Object.values(next).filter(
+      (result) => result === "correct",
+    ).length;
+    setResults(next);
+    setAnnouncement(
+      `Score: ${score} out of ${ITEMS.length}. Correct answers are locked; incorrect answers can be changed.`,
+    );
+    if (score === ITEMS.length) {
+      resetButtonRef.current?.focus({ preventScroll: true });
+      ValidationAlert.success(`Score: ${score} / ${ITEMS.length}`);
+    } else if (score > 0)
+      ValidationAlert.warning(`Score: ${score} / ${ITEMS.length}`);
+    else ValidationAlert.error(`Score: ${score} / ${ITEMS.length}`);
   };
 
   const handleShowAnswer = () => {
     const filled = {};
-    ITEMS.forEach((item) => { filled[item.id] = item.answer; });
+    ITEMS.forEach((item) => {
+      filled[item.id] = item.answer;
+    });
     setAnswers(filled);
-    setShowResults(false);
+    setResults({});
     setShowAns(true);
+    resetButtonRef.current?.focus({ preventScroll: true });
+    setAnnouncement("Correct answers shown and locked.");
   };
 
   const handleReset = () => {
     setAnswers({});
-    setShowResults(false);
+    setResults({});
     setShowAns(false);
+    setAnnouncement("Answers and feedback cleared.");
   };
 
-  const isWrong    = (item) => showResults && !showAns && !isCorrect(answers[item.id] || "", item.correct);
-  const isDisabled = (item) => showAns || (showResults && isCorrect(answers[item.id] || "", item.correct));
+  const isWrong = (item) => !showAns && results[item.id] === "wrong";
+  const isDisabled = (item) => showAns || results[item.id] === "correct";
 
   return (
-    <div className="main-container-component">
+    <div data-unit3-scope="Unit3_Page5_Q3" className="main-container-component">
+     <style>{`[data-unit3-scope="Unit3_Page5_Q3"] input:focus-visible, [data-unit3-scope="Unit3_Page5_Q3"] [data-keyboard-choice]:focus-visible { outline: 4px solid #2563eb; outline-offset: 3px; border-radius: 6px; }`}</style>
+      <div
+        className="sr-only"
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+      >
+        {announcement}
+      </div>
       <style>{`
         /* ── Top: paragraph + image ── */
         .lrtf-top {
@@ -226,36 +323,51 @@ export default function WB_ListenReadTrueFalse_QC() {
 
       <div
         className="div-forall"
-        style={{ display: "flex", flexDirection: "column", gap: "clamp(14px, 2vw, 22px)", maxWidth: "1100px", margin: "0 auto" }}
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: "clamp(14px, 2vw, 22px)",
+          maxWidth: "1100px",
+          margin: "0 auto",
+        }}
       >
         {/* ── Header ── */}
-        <h1
-          className="WB-header-title-page8"
-          style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
-        >
-          <span className="WB-ex-A">C</span>
-          Listen, read, and write <span style={{ color: "#ff9900ff", margin: "0 4px" }}>true</span> or <span style={{ color: "#ff9900ff", margin: "0 4px" }}>false</span>.
-        </h1>
-  <div style={{marginTop:"10px"}}>
-        <QuestionAudioPlayer
-          src={sound}
-          captions={captions}
-          stopAtSecond={10}
+        <ExerciseHeader
+          sectionLetter="C"
+          title={"Listen, read, and write true or false."}
+          subTitle={
+            "Listen once, replay if needed, then compare each statement with what you heard before choosing the two-way answer."
+          }
         />
-      </div>
+        <div style={{ marginTop: "10px" }}>
+          <QuestionAudioPlayer
+            pageId="sb_unit3_page5_q3"
+            src={sound}
+            captions={captions}
+            stopAtSecond={10}
+          />
+        </div>
         {/* ── Paragraph + Image ── */}
         <div className="lrtf-top">
           <p className="lrtf-para">{PARAGRAPH}</p>
-          <img src={imgScene} alt="treehouse" className="lrtf-img" />
+          <img
+            src={imgScene}
+            alt="A wooden tree house with a ladder, door and windows."
+            className="lrtf-img"
+          />
         </div>
 
         {/* ── Items ── */}
         <div className="lrtf-list">
           {ITEMS.map((item) => {
-            const wrong    = isWrong(item);
-            const value    = answers[item.id] || "";
-            const tColor   = showAns ? BOX_TEXT_ANSWER : BOX_TEXT_DEFAULT;
-            const bColor   = wrong ? BOX_BORDER_WRONG : BOX_BORDER_DEFAULT;
+            const wrong = isWrong(item);
+            const value = answers[item.id] || "";
+            const tColor = BOX_TEXT_DEFAULT;
+            const bColor = wrong
+              ? BOX_BORDER_WRONG
+              : isDisabled(item)
+                ? "#16a34a"
+                : BOX_BORDER_DEFAULT;
             const disabled = isDisabled(item);
 
             return (
@@ -264,12 +376,17 @@ export default function WB_ListenReadTrueFalse_QC() {
                 <span className="lrtf-sentence">{item.sentence}</span>
                 <div className="lrtf-input-wrap">
                   <input
+                    {...fieldKeys}
+                    aria-label={`Statement ${item.id}. ${item.sentence} Write true or false.`}
+                    title={`Statement ${item.id}. ${item.sentence} Write true or false.`}
                     type="text"
                     className={[
                       "lrtf-input",
-                      wrong   ? "lrtf-input--wrong"  : "",
+                      wrong ? "lrtf-input--wrong" : "",
                       showAns ? "lrtf-input--answer" : "",
-                    ].filter(Boolean).join(" ")}
+                    ]
+                      .filter(Boolean)
+                      .join(" ")}
                     value={value}
                     disabled={disabled}
                     onChange={(e) => handleChange(item.id, e.target.value)}
@@ -287,11 +404,38 @@ export default function WB_ListenReadTrueFalse_QC() {
 
         {/* ── Buttons ── */}
         <div className="lrtf-buttons">
-          <Button
-            checkAnswers={handleCheck}
-            handleShowAnswer={handleShowAnswer}
-            handleStartAgain={handleReset}
-          />
+          <div className="action-buttons-container">
+            <button
+              type="button"
+              aria-label="Start Again"
+              {...activationKeys}
+              ref={resetButtonRef}
+              onClick={handleReset}
+              className="try-again-button"
+            >
+              Start Again ↻
+            </button>
+            <button
+              type="button"
+              aria-label="Show Answer"
+              {...activationKeys}
+              onClick={handleShowAnswer}
+              className="show-answer-btn swal-continue"
+            >
+              Show Answer
+            </button>
+            <button
+              type="button"
+              aria-label="Check Answer"
+              {...activationKeys}
+              onClick={handleCheck}
+              disabled={checkDisabled}
+              style={{ cursor: checkDisabled ? "not-allowed" : "pointer" }}
+              className="check-button2"
+            >
+              Check Answer ✓
+            </button>
+          </div>
         </div>
       </div>
     </div>

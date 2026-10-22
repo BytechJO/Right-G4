@@ -60,18 +60,32 @@ const ExerciseHeader = ({
         {sectionLetter && (
           <span
             className={`WB-ex-A${reviewClass}`}
-            style={isWorkbook ? { backgroundColor: isReview ? "white" : "#99c0cb", color: isReview ? "#2195a6" : "white" } : undefined}
-          >{sectionLetter}</span>
+            style={
+              isWorkbook
+                ? {
+                    backgroundColor: isReview ? "white" : "#99c0cb",
+                    color: isReview ? "#2195a6" : "white",
+                  }
+                : undefined
+            }
+          >
+            {sectionLetter}
+          </span>
         )}
 
         {questionNumber && (
           <span
             className={`number-of-q${reviewClass}`}
             style={isWorkbook ? { color: "#2195a6" } : undefined}
-          >{questionNumber}</span>
+          >
+            {questionNumber}
+          </span>
         )}
 
-        <header className={`header-title-page8${reviewClass}`} style={{ margin: 0, ...(isWorkbook ? { color: "#f04e3e" } : {}) }}>
+        <header
+          className={`header-title-page8${reviewClass}`}
+          style={{ margin: 0, ...(isWorkbook ? { color: "#f04e3e" } : {}) }}
+        >
           {title}
         </header>
 

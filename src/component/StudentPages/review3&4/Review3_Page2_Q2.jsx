@@ -1,11 +1,42 @@
-import React, { useState } from "react";
-import Button from "../../Button";
+import ExerciseHeader from "../../ExerciseHeader";
+import React, { useState, useRef } from "react";
 import ValidationAlert from "../../Popup/ValidationAlert";
 
 // ─────────────────────────────────────────────
 //  🖼️  TABLE IMAGE (ثابتة — كاملة مع محتوياتها)
 // ─────────────────────────────────────────────
-import imgTable from "../../../assets/imgs/pages/Class Book/Right 4 Unit 4 Joy Makes a Friend Folder/Page 35/SVG/Asset 22.svg";;
+import imgTable from "../../../assets/imgs/pages/Class Book/Right 4 Unit 4 Joy Makes a Friend Folder/Page 35/SVG/Asset 22.svg";
+const activationKeys = {
+  onKeyDown: (event) => {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    event.preventDefault();
+    event.stopPropagation();
+    if (!event.repeat) event.currentTarget.click();
+  },
+  onKeyUp: (event) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+  },
+};
+const fieldKeys = {
+  onKeyDown: (event) => {
+    if (event.key === "Enter" || event.key === " ") event.stopPropagation();
+  },
+  onKeyUp: (event) => {
+    if (event.key === "Enter" || event.key === " ") event.stopPropagation();
+  },
+};
+const normalizeAnswer = (value) =>
+  value
+    .normalize("NFKC")
+    .toLowerCase()
+    .replace(/[\u2018\u2019\u201A\u201B\u0060\u00B4']/g, "")
+    .replace(/[.,!?;:\u2026\u201c\u201d"]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+;
 
 // ─────────────────────────────────────────────
 //  🎨  COLORS
@@ -61,85 +92,48 @@ const ITEMS = [
 // ─────────────────────────────────────────────
 //  🔧  NORMALIZE
 // ─────────────────────────────────────────────
-const normalize = (str) =>
-  str.toLowerCase().replace(/[^a-z0-9'\s]/g, "").replace(/\s+/g, " ").trim().replace(/[\u2018\u2019\u201A\u201B\u0060\u00B4']/g, "’");;
+;
 
-const isCorrect = (userVal, correctArr) =>
-  correctArr.some((c) => normalize(userVal) === normalize(c));
+
 
 // ─────────────────────────────────────────────
 //  COMPONENT
 // ─────────────────────────────────────────────
 export default function WB_LookUnscrambleWriteAnswer_QE() {
   const [answers,     setAnswers]     = useState({});
-  const [showResults, setShowResults] = useState(false);
+  const [,setShowResults] = useState(false);
   const [showAns,     setShowAns]     = useState(false);
+ const [results,setResults] = useState({});
+ const [announcement,setAnnouncement] = useState("");
+ const resetButtonRef = useRef(null);
+ const answerTargets = ITEMS.flatMap(item=>[{key:`${item.id}q`, correct:item.correctQ, answer:item.answerQ, label:`Question ${item.id}. Write the question${item.scrambled ? ": unscramble " + item.scrambled : " for the picture"}.`},{key:`${item.id}a`,correct:item.correctA,answer:item.answerA,label:`Question ${item.id}. Write the answer for the picture or diagram.`}]);
+ const checkDisabled = showAns || answerTargets.every(item=>results[item.key] === "correct");
 
   const keyQ = (id) => `${id}q`;
   const keyA = (id) => `${id}a`;
 
-  const handleChange = (key, value, correctArr) => {
-    if (showAns) return;
-    if (showResults && isCorrect(answers[key] || "", correctArr)) return;
-    setAnswers((prev) => ({ ...prev, [key]: value }));
-  };
+  const handleChange = (key, value) => {  if(showAns || results[key] === "correct")return; if(!answerTargets.some(item=>item.key === key))return; setAnswers(prev=>({...prev,[key]:value})); setResults(prev=>{const next={...prev};delete next[key];return next;}); };
 
-  const handleCheck = () => {
-    if (showAns) return;
-    const allAnswered = ITEMS.every(
-      (item) => answers[keyQ(item.id)]?.trim() && answers[keyA(item.id)]?.trim()
-    );
-    if (!allAnswered) { ValidationAlert.info("Please complete all answers first."); return; }
-    let score = 0;
-    const total = ITEMS.length * 2;
-    ITEMS.forEach((item) => {
-      if (isCorrect(answers[keyQ(item.id)] || "", item.correctQ)) score++;
-      if (isCorrect(answers[keyA(item.id)] || "", item.correctA)) score++;
-    });
-    setShowResults(true);
-    if (score === total)   ValidationAlert.success(`Score: ${score} / ${total}`);
-    else if (score > 0)    ValidationAlert.warning(`Score: ${score} / ${total}`);
-    else                   ValidationAlert.error(`Score: ${score} / ${total}`);
-  };
+  const handleCheck = () => {if(checkDisabled)return;if(!answerTargets.every(item=>answers[item.key]?.trim())){setAnnouncement("Please complete all answers first.");ValidationAlert.info("Please complete all answers first.");return;}const next=Object.fromEntries(answerTargets.map(item=>[item.key,results[item.key] === "correct" || item.correct.some(answer=>normalizeAnswer(answers[item.key] || "") === normalizeAnswer(answer)) ? "correct":"wrong"]));const score=Object.values(next).filter(value=>value === "correct").length;setResults(next);setShowResults(true);setAnnouncement(`Score: ${score} out of ${answerTargets.length}. Correct answers are locked; incorrect answers can be changed.`);if(score === answerTargets.length){resetButtonRef.current?.focus({preventScroll:true});ValidationAlert.success(`Score: ${score} / ${answerTargets.length}`);}else if(score)ValidationAlert.warning(`Score: ${score} / ${answerTargets.length}`);else ValidationAlert.error(`Score: ${score} / ${answerTargets.length}`);};
 
-  const handleShowAnswer = () => {
-    const filled = {};
-    ITEMS.forEach((item) => {
-      filled[keyQ(item.id)] = item.answerQ;
-      filled[keyA(item.id)] = item.answerA;
-    });
-    setAnswers(filled);
-    setShowResults(false);
-    setShowAns(true);
-  };
+  const handleShowAnswer = () => {setAnswers(Object.fromEntries(answerTargets.map(item=>[item.key,item.answer])));setResults({});setShowResults(false);setShowAns(true);resetButtonRef.current?.focus({preventScroll:true});setAnnouncement("Correct answers shown and locked.");};
 
-  const handleReset = () => {
-    setAnswers({});
-    setShowResults(false);
-    setShowAns(false);
-  };
+  const handleReset = () => {setAnswers({});setResults({});setShowResults(false);setShowAns(false);setAnnouncement("Answers and feedback cleared.");};
 
-  const isWrongKey = (key, correctArr) => {
-    if (!showResults || showAns) return false;
-    return !isCorrect(answers[key] || "", correctArr);
-  };
+  const isWrongKey = (key) => !showAns && results[key] === "wrong";
 
-  const isDisabledKey = (key, correctArr) => {
-    if (showAns) return true;
-    if (showResults && isCorrect(answers[key] || "", correctArr)) return true;
-    return false;
-  };
+  
 
   const renderInput = (key, correctArr, flex = "1") => {
     const wrong    = isWrongKey(key, correctArr);
     const value    = answers[key] || "";
     const tColor   = showAns ? INPUT_ANSWER_COLOR : INPUT_TEXT_COLOR;
     const uColor   = wrong ? INPUT_UNDERLINE_WRONG : INPUT_UNDERLINE_DEFAULT;
-    const disabled = isDisabledKey(key, correctArr);
+    
 
     return (
       <div className="luwa-input-wrap" style={{ flex }}>
-        <input
+        <input placeholder="Answer" aria-invalid={results[key] === "wrong"} title={answerTargets.find(target=>target.key === key)?.label || "Write an answer"} aria-label={answerTargets.find(target=>target.key === key)?.label || "Write an answer"} {...fieldKeys}
           type="text"
           className={[
             "luwa-input",
@@ -147,9 +141,9 @@ export default function WB_LookUnscrambleWriteAnswer_QE() {
             showAns ? "luwa-input--answer" : "",
           ].filter(Boolean).join(" ")}
           value={value}
-          disabled={disabled}
+          disabled={showAns || results[key] === "correct"}
           onChange={(e) => handleChange(key, e.target.value, correctArr)}
-          style={{ borderBottomColor: uColor, color: tColor }}
+          style={{...({ borderBottomColor: uColor, color: tColor }),borderBottomColor:showAns || results[key] === "correct" ? "#16a34a" : results[key] === "wrong" ? "#ef4444" : ({ borderBottomColor: uColor, color: tColor }).borderBottomColor}}
           spellCheck={false}
           autoComplete="off"
         />
@@ -159,7 +153,9 @@ export default function WB_LookUnscrambleWriteAnswer_QE() {
   };
 
   return (
-    <div className="main-container-component">
+    <div data-adapt-scope="review3&4_Review3_Page2_Q2" className="main-container-component">
+<style>{`[data-adapt-scope="review3&4_Review3_Page2_Q2"] input:focus-visible, [data-adapt-scope="review3&4_Review3_Page2_Q2"] [data-keyboard-choice]:focus-visible, [data-adapt-scope="review3&4_Review3_Page2_Q2"] [data-grid-cell]:focus-visible {outline:4px solid #2563eb;outline-offset:3px;border-radius:6px;}`}</style>
+<div className="sr-only" role="status" aria-live="polite" aria-atomic="true">{announcement}</div>
       <style>{`
         /* ── Table image ── */
         .luwa-table-img {
@@ -280,16 +276,11 @@ export default function WB_LookUnscrambleWriteAnswer_QE() {
         }}
       >
         {/* ── Header ── */}
-        <h1
-          className="WB-header-title-page8"
-          style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
-        >
-          <span className="WB-ex-A-1">E</span>
-          Look, unscramble, write, and answer.
-        </h1>
+        <ExerciseHeader
+          subTitle="Use the picture clue, reorder the words into the correct sentence, then write the answer before checking." isReview sectionLetter="E" title={<>Look, unscramble, write, and answer.</>} />
 
         {/* ── Table image (ثابتة) ── */}
-        <img src={imgTable} alt="table" className="luwa-table-img" />
+        <img src={imgTable} alt="Picture clues grouped under a tick and a cross: a motorcycle, a swimming pool and boots under the tick; a ball and a hat under the cross." className="luwa-table-img" />
 
         {/* ── Items ── */}
         <div className="luwa-list">
@@ -315,11 +306,11 @@ export default function WB_LookUnscrambleWriteAnswer_QE() {
 
         {/* ── Buttons ── */}
         <div className="luwa-buttons">
-          <Button
-            checkAnswers={handleCheck}
-            handleShowAnswer={handleShowAnswer}
-            handleStartAgain={handleReset}
-          />
+          <div className="action-buttons-container">
+<button type="button" aria-label="Start Again" {...activationKeys} ref={resetButtonRef} onClick={handleReset} className="try-again-button">Start Again ↻</button>
+<button type="button" aria-label="Show Answer" {...activationKeys} onClick={handleShowAnswer} className="show-answer-btn swal-continue">Show Answer</button>
+<button type="button" aria-label="Check Answer" {...activationKeys} onClick={handleCheck} disabled={checkDisabled} style={{cursor:checkDisabled ? "not-allowed":"pointer"}} className="check-button2">Check Answer ✓</button>
+</div>
         </div>
       </div>
     </div>

@@ -173,6 +173,8 @@ const ComprehensionB = () => {
               <input
                 type="text"
                 aria-label={`Question ${i + 1}. ${q.before} blank ${q.after}`}
+                      title={`Question ${i + 1}. ${q.before} blank ${q.after}`}
+                      placeholder="Word"
                 onKeyDown={(event) => {
                   if (event.key === "Enter" || event.key === " ") event.stopPropagation();
                 }}

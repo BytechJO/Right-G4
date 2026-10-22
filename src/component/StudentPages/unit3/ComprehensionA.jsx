@@ -1,11 +1,23 @@
-import { useState } from "react";
+import ExerciseHeader from "../../ExerciseHeader";
+import { useState, useRef } from "react";
 import { FaRedo } from "react-icons/fa";
+const activationKeys = {
+ onKeyDown: (event) => { if (event.key !== "Enter" && event.key !== " ") return; event.preventDefault(); event.stopPropagation(); if (!event.repeat) event.currentTarget.click(); },
+ onKeyUp: (event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); event.stopPropagation(); } },
+};
+const fieldKeys = {
+ onKeyDown: (event) => { if (event.key === "Enter" || event.key === " ") event.stopPropagation(); },
+ onKeyUp: (event) => { if (event.key === "Enter" || event.key === " ") event.stopPropagation(); },
+};
+
 
 const ComprehensionA = () => {
   const [babyLine1, setBabyLine1] = useState("");
   const [babyLine2, setBabyLine2] = useState("");
   const [todayLine1, setTodayLine1] = useState("");
   const [todayLine2, setTodayLine2] = useState("");
+
+  const resetButtonRef = useRef(null);
 
   const handleReset = () => {
     setBabyLine1("");
@@ -25,14 +37,14 @@ const ComprehensionA = () => {
   };
 
   return (
-    <div className="mb-6 mx-auto">
-      <h5 className="header-title-page8-read mb-8">
+    <div data-unit3-scope="ComprehensionA" className="mb-6 mx-auto">
+ <style>{`[data-unit3-scope="ComprehensionA"] input:focus-visible, [data-unit3-scope="ComprehensionA"] [data-keyboard-choice]:focus-visible { outline: 4px solid #2563eb; outline-offset: 3px; border-radius: 6px; }`}</style>
+       <h5 className="header-title-page8-read mb-8">
         <span className="ex-A-read mr-2">A</span>
         On the chart below, write what you had in your room as a baby and what <br />
         you have now. Use some of the ideas from the reading, such as bed, toys,
         colors and so on.
       </h5>
-
       {/* Table */}
       <div
         style={{
@@ -94,14 +106,14 @@ const ComprehensionA = () => {
               gap: "24px",
             }}
           >
-            <input
+            <input {...fieldKeys} aria-label="My room when I was a baby, response 1" title="My room when I was a baby, response 1" placeholder="Your idea"
               type="text"
               value={babyLine1}
               onChange={(e) => setBabyLine1(e.target.value)}
               autoComplete="off"
               style={inputStyle}
             />
-            <input
+            <input {...fieldKeys} aria-label="My room when I was a baby, response 2" title="My room when I was a baby, response 2" placeholder="Your idea"
               type="text"
               value={babyLine2}
               onChange={(e) => setBabyLine2(e.target.value)}
@@ -119,14 +131,14 @@ const ComprehensionA = () => {
               gap: "24px",
             }}
           >
-            <input
+            <input {...fieldKeys} aria-label="My room today, response 1" title="My room today, response 1" placeholder="Your idea"
               type="text"
               value={todayLine1}
               onChange={(e) => setTodayLine1(e.target.value)}
               autoComplete="off"
               style={inputStyle}
             />
-            <input
+            <input {...fieldKeys} aria-label="My room today, response 2" title="My room today, response 2" placeholder="Your idea"
               type="text"
               value={todayLine2}
               onChange={(e) => setTodayLine2(e.target.value)}
@@ -140,14 +152,14 @@ const ComprehensionA = () => {
       {/* Reset Button */}
       <div className="flex justify-center mt-8">
         <div className="relative group">
-          <div
+          <button type="button" aria-label="Start Again" {...activationKeys} ref={resetButtonRef}
             onClick={handleReset}
             className="flex items-center justify-center w-14 h-14 rounded-xl bg-[#ffc107] hover:bg-[#e0a800] cursor-pointer transition shadow-sm"
           >
-            <div className="bg-white p-3 rounded-full shadow">
+            <span className="bg-white p-3 rounded-full shadow">
               <FaRedo size={14} />
-            </div>
-          </div>
+            </span>
+          </button>
           <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-black text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition">
             Reset
           </span>

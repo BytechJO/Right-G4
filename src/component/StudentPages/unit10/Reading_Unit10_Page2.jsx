@@ -1,6 +1,4 @@
 import React, { useState, useRef } from "react";
-import AudioWithCaption from "../../AudioWithCaption";
-import audioBtn from "../../../assets/Page 01/Audio btn.svg";
 import { useAudio } from "../../../context/AudioContext";
 
 // ======================================================
@@ -8,9 +6,27 @@ import pageImage from "../../../assets/imgs/pages/Class Book/Right 4 Unit 10 Ste
 import soundAll from "../../../assets/audio/ClassBook/Grade 4/cd5pg92-story-adult-lady_ZnWsUclb.mp3";
 // ======================================================
 
+const pageKeys = {
+  onKeyDown: (event) => {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    event.preventDefault();
+    event.stopPropagation();
+    if (!event.repeat)
+      event.currentTarget.dispatchEvent(
+        new MouseEvent("click", { bubbles: true, cancelable: true }),
+      );
+  },
+  onKeyUp: (event) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+  },
+};
+
 const PAGE_ID = "page-93";
 
-const Reading_NewPage = ({ openPopup }) => {
+const Reading_NewPage = () => {
   const { registerAudio, stopCurrent, activePageId } = useAudio();
   const audioRef = useRef(null);
   const [hoveredAreaIndex, setHoveredAreaIndex] = useState(null);
@@ -24,159 +40,6 @@ const Reading_NewPage = ({ openPopup }) => {
       setIsPlaying(false);
     }
   }, [activePageId]);
-
-  const captions = [
-  {
-    start: 0.42,
-    end: 1.56,
-    text: "Page 92.",
-  },
-  {
-    start: 1.56,
-    end: 5.52,
-    text: "Ma Liang and the Jade Paintbrush.",
-  },
-  {
-    start: 5.52,
-    end: 10.18,
-    text: "A long time ago in China, there was a boy named Ma Liang.",
-  },
-  {
-    start: 10.18,
-    end: 13.14,
-    text: "Ma Liang's father was a painter.",
-  },
-  {
-    start: 13.14,
-    end: 19.92,
-    text: "His father would spread a sheet of paper across the ground and make beautiful pictures.",
-  },
-  {
-    start: 19.92,
-    end: 25.54,
-    text: "Ma Liang loved to paint pictures of dragons, birds, and other animals.",
-  },
-  {
-    start: 26.64,
-    end: 30.58,
-    text: "Ma Liang hoped one day to be the best painter in China.",
-  },
-  {
-    start: 30.58,
-    end: 35.54,
-    text: "He painted on big walls and on tiny grains of rice.",
-  },
-  {
-    start: 35.54,
-    end: 39.98,
-    text: "He painted everywhere he could because he hoped to be famous in the future.",
-  },
-  {
-    start: 39.98,
-    end: 45.26,
-    text: "One day, an old man came to visit Ma Liang.",
-  },
-  {
-    start: 45.26,
-    end: 51.66,
-    text: "He gave him a special paintbrush. It was made from a beautiful green stone called jade.",
-  },
-  {
-    start: 51.66,
-    end: 58.18,
-    text: "Ma Liang started to use the new paintbrush. He painted a picture of a goat.",
-  },
-  {
-    start: 58.18,
-    end: 60.62,
-    text: "All of a sudden, the goat became real.",
-  },
-  {
-    start: 60.62,
-    end: 66.34,
-    text: "He painted a donkey. Suddenly, there was a donkey in his room.",
-  },
-  {
-    start: 66.34,
-    end: 69.40,
-    text: "Ma Liang did a dance around his room.",
-  },
-  {
-    start: 69.40,
-    end: 72.10,
-    text: "This was a very special paintbrush.",
-  },
-  {
-    start: 72.10,
-    end: 81.88,
-    text: "Ma Liang painted food, clothes, and shelter for all the poor people in his village. Everything he painted became real!",
-  },
-  {
-    start: 83.26,
-    end: 87.24,
-    text: "Soon, the king heard about Ma Liang and his jade paintbrush.",
-  },
-  {
-    start: 87.24,
-    end: 91.60,
-    text: "The king sent a man to bring Ma Liang to the palace where he lived.",
-  },
-  {
-    start: 91.60,
-    end: 97.86,
-    text: "\"Do you have the jade paintbrush? Give it to me,\" commanded the king.",
-  },
-  {
-    start: 97.86,
-    end: 101.38,
-    text: "Ma Liang gave the king the paintbrush.",
-  },
-  {
-    start: 101.38,
-    end: 106.50,
-    text: "The king tried to paint gold coins, but the coins turned to grains of sand.",
-  },
-  {
-    start: 106.50,
-    end: 109.08,
-    text: "The paintbrush would only work for Ma Liang.",
-  },
-  {
-    start: 109.08,
-    end: 116.50,
-    text: "\"Paint me a picture,\" ordered the king. Ma Liang started to paint a picture of an ocean.",
-  },
-  {
-    start: 116.50,
-    end: 123.80,
-    text: "As Ma Liang painted, the king could hear the sound of crashing ocean waves. The ocean was becoming real!",
-  },
-  {
-    start: 123.80,
-    end: 132.18,
-    text: "\"Paint me a boat to sail in,\" commanded the king. Ma Liang painted a boat. The king jumped into the boat.",
-  },
-  {
-    start: 132.18,
-    end: 144.10,
-    text: "Then Ma Liang painted a big storm. It blew the king's boat out into the ocean. No one saw the evil king again.",
-  },
-  {
-    start: 144.10,
-    end: 148.12,
-    text: "Ma Liang kept painting with the jade paintbrush.",
-  },
-  {
-    start: 148.12,
-    end: 151.78,
-    text: "He helped the poor people who needed food and shelter.",
-  },
-  {
-    start: 152.98,
-    end: 161.22,
-    text: "He did all of these things because he cared for others. Ma Liang was the greatest painter in China.",
-  },
-];
 
   const clickableAreas = [
   {
@@ -251,13 +114,20 @@ const Reading_NewPage = ({ openPopup }) => {
   };
 
   return (
-    <div
+    <div data-reading-page="unit10-2"
       className="page1-img-wrapper"
       onClick={handleImageClick}
       style={{ backgroundImage: `url(${pageImage})` }}
     >
+      <style>{`[data-reading-page="unit10-2"] :focus-visible {
+        outline: 4px solid #2563eb;
+        outline-offset: 3px;
+        border-radius: 6px;
+      }`}</style>
       {clickableAreas.map((area, index) => (
-        <div
+        <div role="button" tabIndex={0} data-reading-control {...pageKeys}
+          aria-label={`Read passage ${index + 1} on page 93`}
+          aria-pressed={activeAreaIndex === index}
           key={index}
           className={`clickable-area ${
             hoveredAreaIndex === index || activeAreaIndex === index ? "highlight" : ""

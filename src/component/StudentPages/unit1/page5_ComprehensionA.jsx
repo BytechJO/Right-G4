@@ -133,6 +133,7 @@ const ComprehensionA = () => {
               <input
                 type="text"
                 aria-label={`Question ${i + 1}. ${q} Enter true or false.`}
+                      title={`Question ${i + 1}. ${q} Enter true or false.`}
                 onKeyDown={(event) => {
                   if (event.key === "Enter" || event.key === " ") event.stopPropagation();
                 }}
@@ -142,7 +143,7 @@ const ComprehensionA = () => {
                 disabled={locked || errors[i] === false}
                 value={answers[i]}
                 onChange={(e) => handleChange(i, e.target.value)}
-                placeholder=""
+                placeholder="True / False"
                 autoComplete="off"
                 className={`comprehension-answer w-[110px] px-4 py-1 rounded-full border-2 text-sm font-semibold text-center outline-none transition
                   ${

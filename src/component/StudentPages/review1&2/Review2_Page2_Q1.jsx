@@ -1,5 +1,4 @@
-import React, { useState } from "react";
-import Button from "../../Button";
+import React, { useState, useRef } from "react";
 import ValidationAlert from "../../Popup/ValidationAlert";
 
 import img1 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 2 Welcome to the Big Apple Folder/Page 19/SVG/Asset 38.svg";
@@ -8,23 +7,44 @@ import img3 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 2 Welcome t
 import img4 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 2 Welcome to the Big Apple Folder/Page 19/SVG/Asset 41-a.svg";
 import sound from "../../../assets/audio/ClassBook/Grade 4/cd13pg19-instruction-adult-lady_CJNDmPbC.mp3";
 import QuestionAudioPlayer from "../../QuestionAudioPlayer";
+import ExerciseHeader from "../../ExerciseHeader";
 
-const CHECK_COLOR      = "#e53935";
-const CROSS_COLOR      = "#e53935";
-const WRONG_BADGE_BG   = "#ef4444";
+const CHECK_COLOR = "#e53935";
+const CROSS_COLOR = "#e53935";
+const WRONG_BADGE_BG = "#ef4444";
 const WRONG_BADGE_TEXT = "#ffffff";
-const PARA_COLOR       = "#2b2b2b";
-const NUMBER_COLOR     = "#2b2b2b";
+const PARA_COLOR = "#2b2b2b";
+const NUMBER_COLOR = "#2b2b2b";
 
 const captions = [
-  { start: 0.16,  end: 7.78,  text: "Page 19, review two, exercise D. Read, listen, and write check and X." },
-  { start: 9.06,  end: 10.18, text: "It's Tuesday morning." },
-  { start: 10.18, end: 13.02, text: "John is going to school at half past eight." },
-  { start: 13.02, end: 16.26, text: "He is going to wear an orange shirt and black pants." },
+  {
+    start: 0.16,
+    end: 7.78,
+    text: "Page 19, review two, exercise D. Read, listen, and write check and X.",
+  },
+  { start: 9.06, end: 10.18, text: "It's Tuesday morning." },
+  {
+    start: 10.18,
+    end: 13.02,
+    text: "John is going to school at half past eight.",
+  },
+  {
+    start: 13.02,
+    end: 16.26,
+    text: "He is going to wear an orange shirt and black pants.",
+  },
   { start: 16.34, end: 18.76, text: "He isn't going to wear a cap." },
-  { start: 18.76, end: 21.90, text: "He isn't going to ride his bike to school." },
-  { start: 21.90, end: 23.64, text: "He is going to take a bus." },
-  { start: 23.64, end: 27.36, text: "After school, he isn't going to watch TV." },
+  {
+    start: 18.76,
+    end: 21.9,
+    text: "He isn't going to ride his bike to school.",
+  },
+  { start: 21.9, end: 23.64, text: "He is going to take a bus." },
+  {
+    start: 23.64,
+    end: 27.36,
+    text: "After school, he isn't going to watch TV.",
+  },
   { start: 27.36, end: 28.84, text: "He's going to do his homework." },
 ];
 
@@ -33,82 +53,141 @@ const PARAGRAPH = `It's Tuesday morning. John is going to school at half past ei
 // correctSide: "left" | "right"  →  الجانب اللي يكون فيه ✓
 const ITEMS = [
   { id: 1, src: img1, correctSide: "right" },
-  { id: 2, src: img2, correctSide: "left"  },
+  { id: 2, src: img2, correctSide: "left" },
   { id: 3, src: img3, correctSide: "right" },
   { id: 4, src: img4, correctSide: "right" },
 ];
 
 // "A" = ✓ يسار  ✕ يمين
 // "B" = ✓ يمين  ✕ يسار
-const correctState = (item) => item.correctSide === "left" ? "A" : "B";
+const PICTURE_DESCRIPTIONS = [
+  "A boy wearing a helmet and backpack riding a bicycle.",
+  "A boy sitting in an armchair watching television with a bowl of snacks.",
+  "A boy putting on an orange jacket.",
+  "A boy in a white shirt and backpack leaving through a doorway.",
+];
+
+const correctState = (item) => (item.correctSide === "left" ? "A" : "B");
+
+const activationKeys = {
+  onKeyDown: (event) => {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    event.preventDefault();
+    event.stopPropagation();
+    if (!event.repeat) event.currentTarget.click();
+  },
+  onKeyUp: (event) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+  },
+};
 
 export default function WB_ReadListenWriteCheckCross_QD2() {
-  const [selected,    setSelected]    = useState({});
-  const [showResults, setShowResults] = useState(false);
-  const [showAns,     setShowAns]     = useState(false);
+  const [selected, setSelected] = useState({});
+  const [results, setResults] = useState({});
+  const [showAns, setShowAns] = useState(false);
 
-  const isLocked = showResults || showAns;
+  const resetButtonRef = useRef(null);
+  const [announcement, setAnnouncement] = useState("");
+  const checkDisabled =
+    showAns || ITEMS.every((item) => results[item.id] === "correct");
+
+  const isLocked = (id) => showAns || results[id] === "correct";
 
   // كل ضغطة على الصورة تقلب الحالة: null → "A" → "B" → "A" ...
   const handleSelect = (itemId) => {
-    if (isLocked) return;
-    setSelected((prev) => {
-      const cur  = prev[itemId];
-      const next = !cur ? "A" : cur === "A" ? "B" : "A";
-      return { ...prev, [itemId]: next };
+    if (isLocked(itemId)) return;
+    const next = selected[itemId] === "A" ? "B" : "A";
+    setSelected((previous) => ({ ...previous, [itemId]: next }));
+    setResults((previous) => {
+      const updated = { ...previous };
+      delete updated[itemId];
+      return updated;
     });
+    setAnnouncement(
+      `Question ${itemId}: tick on the ${next === "A" ? "left" : "right"}, cross on the ${next === "A" ? "right" : "left"}.`,
+    );
   };
 
   const handleCheck = () => {
-    if (isLocked) return;
-    const allAnswered = ITEMS.every((item) => selected[item.id]);
-    if (!allAnswered) { ValidationAlert.info("Please choose a picture for each question."); return; }
-    let score = 0;
-    ITEMS.forEach((item) => { if (selected[item.id] === correctState(item)) score++; });
-    setShowResults(true);
-    if (score === ITEMS.length) ValidationAlert.success(`Score: ${score} / ${ITEMS.length}`);
-    else if (score > 0)         ValidationAlert.warning(`Score: ${score} / ${ITEMS.length}`);
-    else                        ValidationAlert.error(`Score: ${score} / ${ITEMS.length}`);
+    if (checkDisabled) return;
+    if (!ITEMS.every((item) => selected[item.id])) {
+      setAnnouncement("Please choose a picture for each question.");
+      ValidationAlert.info("Please choose a picture for each question.");
+      return;
+    }
+    const checked = Object.fromEntries(
+      ITEMS.map((item) => [
+        item.id,
+        selected[item.id] === correctState(item) ? "correct" : "wrong",
+      ]),
+    );
+    const score = Object.values(checked).filter(
+      (result) => result === "correct",
+    ).length;
+    setResults(checked);
+    setAnnouncement(
+      `Score: ${score} out of ${ITEMS.length}. Correct answers are locked; incorrect answers can be changed.`,
+    );
+    if (score === ITEMS.length) {
+      resetButtonRef.current?.focus({ preventScroll: true });
+      ValidationAlert.success(`Score: ${score} / ${ITEMS.length}`);
+    } else if (score > 0)
+      ValidationAlert.warning(`Score: ${score} / ${ITEMS.length}`);
+    else ValidationAlert.error(`Score: ${score} / ${ITEMS.length}`);
   };
 
   const handleShowAnswer = () => {
     const filled = {};
-    ITEMS.forEach((item) => { filled[item.id] = correctState(item); });
+    ITEMS.forEach((item) => {
+      filled[item.id] = correctState(item);
+    });
     setSelected(filled);
-    setShowResults(false);
+    setResults({});
     setShowAns(true);
+    setAnnouncement("Correct answers shown and locked.");
   };
 
   const handleReset = () => {
     setSelected({});
-    setShowResults(false);
+    setResults({});
     setShowAns(false);
+    setAnnouncement("Answers and feedback cleared.");
   };
 
   // إيش يظهر على كل جانب
   const getSymbol = (item, side) => {
     const sel = selected[item.id];
     if (!sel) return null;
-    if (side === "left")  return sel === "A" ? "✓" : "✕";
+    if (side === "left") return sel === "A" ? "✓" : "✕";
     if (side === "right") return sel === "B" ? "✓" : "✕";
     return null;
   };
 
-  const getSymbolColor = (item, side) => {
-    const sym = getSymbol(item, side);
-    if (!sym) return "#2b2b2b";
-    if (showAns || showResults) {
-      const isCorrectSide = side === item.correctSide;
-      return isCorrectSide 
-    }
-    return sym === "✓" ? CHECK_COLOR : CROSS_COLOR;
-  };
+  const getSymbolColor = (item, side) =>
+    getSymbol(item, side) === "✓" ? CHECK_COLOR : CROSS_COLOR;
 
   const isWrongSide = (item, side) =>
-    showResults && !showAns && selected[item.id] && side !== item.correctSide && getSymbol(item, side) === "✓";
+    !showAns && results[item.id] === "wrong" && getSymbol(item, side) === "✓";
 
   return (
-    <div className="main-container-component">
+    <div
+      className="main-container-component"
+      data-review12-scope="Review2_Page2_Q1"
+    >
+      <div
+        className="sr-only"
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+      >
+        {announcement}
+      </div>
+      <style>{`[data-review12-scope="Review2_Page2_Q1"] [data-keyboard-choice]:focus-visible {
+        outline: 4px solid #2563eb; outline-offset: 3px; border-radius: 6px;
+      }`}</style>
       <style>{`
         .rlcc2-para {
           font-size: clamp(13px, 1.5vw, 18px);
@@ -210,22 +289,30 @@ export default function WB_ReadListenWriteCheckCross_QD2() {
 
       <div
         className="div-forall"
-        style={{ display: "flex", flexDirection: "column", gap: "clamp(14px, 2vw, 22px)", maxWidth: "1100px", margin: "0 auto" }}
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: "clamp(14px, 2vw, 22px)",
+          maxWidth: "1100px",
+          margin: "0 auto",
+        }}
       >
-        <h1
-          className="WB-header-title-page8"
-          style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
-        >
-          <span className="WB-ex-A">D</span>
-          Read, listen, and write <span style={{color : "#ff0000ff"}}>✓</span>  and<span style={{color : "#ff0000ff"}}>✕</span> .
-        </h1>
-    <div style={{margin:"3em 0 2em"}} >
-        <QuestionAudioPlayer
-          src={sound}
-          captions={captions}
-          stopAtSecond={4}
+        <ExerciseHeader
+          isReview
+          sectionLetter={"D"}
+          title={"Read, listen, and write ✓ or X."}
+          subTitle={
+            "Listen once, replay if needed, then compare each statement with what you heard before choosing the two-way answer."
+          }
         />
-      </div>
+        <div style={{ margin: "3em 0 2em" }}>
+          <QuestionAudioPlayer
+            pageId="sb_review2_page2_q1"
+            src={sound}
+            captions={captions}
+            stopAtSecond={4}
+          />
+        </div>
         <p className="rlcc2-para">{PARAGRAPH}</p>
 
         <div className="rlcc2-grid">
@@ -234,18 +321,33 @@ export default function WB_ReadListenWriteCheckCross_QD2() {
               <span className="rlcc2-num">{item.id}</span>
 
               <div
-                className={`rlcc2-img-wrap${isLocked ? " rlcc2-img-wrap--locked" : ""}`}
+                role="button"
+                tabIndex={0}
+                data-keyboard-choice
+                {...activationKeys}
+                aria-label={`Question ${item.id}. ${PICTURE_DESCRIPTIONS[item.id - 1]} ${selected[item.id] ? "Tick on the " + (selected[item.id] === "A" ? "left" : "right") + ", cross on the other side." : "No selection."} ${isLocked(item.id) ? "Locked." : "Press to switch tick and cross."}`}
+                aria-disabled={isLocked(item.id)}
+                style={{
+                  borderRadius: "6px",
+                  boxShadow: selected[item.id]
+                    ? ` 0 0 0 3px ${showAns || results[item.id] === "correct" ? "#16a34a" : results[item.id] === "wrong" ? "#ef4444" : "#2563eb"}`
+                    : undefined,
+                }}
+                className={`rlcc2-img-wrap${isLocked(item.id) ? " rlcc2-img-wrap--locked" : ""}`}
                 onClick={() => handleSelect(item.id)}
               >
-                <img src={item.src} alt={`q${item.id}`} className="rlcc2-img" />
+                <img src={item.src} alt="" className="rlcc2-img" />
 
                 {/* Left symbol */}
                 {(() => {
-                  const sym   = getSymbol(item, "left");
+                  const sym = getSymbol(item, "left");
                   const color = getSymbolColor(item, "left");
                   const wrong = isWrongSide(item, "left");
                   return sym ? (
-                    <div className="rlcc2-symbol rlcc2-symbol--left" style={{ color }}>
+                    <div
+                      className="rlcc2-symbol rlcc2-symbol--left"
+                      style={{ color }}
+                    >
                       {sym}
                       {wrong && <div className="rlcc2-badge">✕</div>}
                     </div>
@@ -254,11 +356,14 @@ export default function WB_ReadListenWriteCheckCross_QD2() {
 
                 {/* Right symbol */}
                 {(() => {
-                  const sym   = getSymbol(item, "right");
+                  const sym = getSymbol(item, "right");
                   const color = getSymbolColor(item, "right");
                   const wrong = isWrongSide(item, "right");
                   return sym ? (
-                    <div className="rlcc2-symbol rlcc2-symbol--right" style={{ color }}>
+                    <div
+                      className="rlcc2-symbol rlcc2-symbol--right"
+                      style={{ color }}
+                    >
                       {sym}
                       {wrong && <div className="rlcc2-badge">✕</div>}
                     </div>
@@ -270,11 +375,35 @@ export default function WB_ReadListenWriteCheckCross_QD2() {
         </div>
 
         <div className="rlcc2-buttons">
-          <Button
-            checkAnswers={handleCheck}
-            handleShowAnswer={handleShowAnswer}
-            handleStartAgain={handleReset}
-          />
+          <div className="action-buttons-container">
+            <button
+              type="button"
+              ref={resetButtonRef}
+              {...activationKeys}
+              onClick={handleReset}
+              className="try-again-button"
+            >
+              Start Again ↻
+            </button>
+            <button
+              type="button"
+              {...activationKeys}
+              onClick={handleShowAnswer}
+              className="show-answer-btn swal-continue"
+            >
+              Show Answer
+            </button>
+            <button
+              type="button"
+              {...activationKeys}
+              onClick={handleCheck}
+              disabled={checkDisabled}
+              style={{ cursor: checkDisabled ? "not-allowed" : "pointer" }}
+              className="check-button2"
+            >
+              Check Answer ✓
+            </button>
+          </div>
         </div>
       </div>
     </div>

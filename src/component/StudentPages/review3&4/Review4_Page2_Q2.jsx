@@ -1,11 +1,27 @@
+import ExerciseHeader from "../../ExerciseHeader";
 import React, { useState, useRef, useEffect, useCallback } from "react";
-import Button from "../../Button";
 import ValidationAlert from "../../Popup/ValidationAlert";
 
 // ─────────────────────────────────────────────
 //  🖼️  CHART IMAGE
 // ─────────────────────────────────────────────
 import imgChartTable from "../../../assets/imgs/pages/Class Book/Right 4 Unit 4 Joy Makes a Friend Folder/Page 37/SVG/Asset 23.svg";
+const activationKeys = {
+  onKeyDown: (event) => {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    event.preventDefault();
+    event.stopPropagation();
+    if (!event.repeat) event.currentTarget.click();
+  },
+  onKeyUp: (event) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+  },
+};
+
+
 
 // ─────────────────────────────────────────────
 //  🎨  COLORS
@@ -45,8 +61,22 @@ const RIGHT_ITEMS = [
 export default function WB_ReadChartMatch_QE() {
   const [connections,  setConnections]  = useState({});
   const [selectedLeft, setSelectedLeft] = useState(null);
-  const [showResults,  setShowResults]  = useState(false);
+  const [,  setShowResults]  = useState(false);
   const [showAns,      setShowAns]      = useState(false);
+ const [results,setResults] = useState({});
+ const [selectedRight,setSelectedRight] = useState(null);
+ const [previewEndpoint,setPreviewEndpoint] = useState(null);
+ const [announcement,setAnnouncement] = useState("");
+ const resetButtonRef = useRef(null), leftControlRefs = useRef({}), rightControlRefs = useRef({});
+ const checkDisabled = showAns || LEFT_ITEMS.every(item=>results[item.id] === "correct");
+ const leftLocked = id => showAns || results[id] === "correct";
+ const rightLocked = name => showAns || Object.entries(connections).some(([id,value])=>value===name && results[id] === "correct");
+ const cancelSelection = () => {setSelectedLeft(null);setSelectedRight(null);setPreviewEndpoint(null);};
+ const focusCandidate = side => {const ids=side==="left"?LEFT_ITEMS.map(item=>item.id):RIGHT_ITEMS.map(item=>item.name);const id=ids.find(value=>!(side==="left"?leftLocked(value):rightLocked(value)));if(id!==undefined){setPreviewEndpoint({side,id});(side==="left"?leftControlRefs:rightControlRefs).current[id]?.focus({preventScroll:true});}};
+ const connect = (id,name,keyboard=false) => {if(leftLocked(id)||rightLocked(name))return;const affected=[String(id),...Object.keys(connections).filter(key=>connections[key]===name && !leftLocked(key))];setConnections(prev=>{const next={...prev};for(const key of affected)delete next[key];next[id]=name;return next;});setResults(prev=>{const next={...prev};for(const key of affected)delete next[key];return next;});cancelSelection();setAnnouncement(`${LEFT_ITEMS.find(item=>item.id===Number(id))?.sentence} ${name}.`);if(keyboard){const next=LEFT_ITEMS.find(item=>item.id!==Number(id)&&!leftLocked(item.id));(leftControlRefs.current[next?.id]||resetButtonRef.current)?.focus({preventScroll:true});}};
+ const endpointKey = (event,side,id) => {if(event.key==="Enter"||event.key===" "){event.preventDefault();event.stopPropagation();if(!event.repeat)(side==="left"?handleLeftClick:handleRightClick)(id,true);return;}if(event.key==="Escape"){event.preventDefault();event.stopPropagation();const source=selectedLeft!==null?leftControlRefs.current[selectedLeft]:rightControlRefs.current[selectedRight];cancelSelection();source?.focus({preventScroll:true});setAnnouncement("Match cancelled.");return;}if(["ArrowLeft","ArrowRight","ArrowUp","ArrowDown"].includes(event.key)){event.preventDefault();event.stopPropagation();const ids=(side==="left"?LEFT_ITEMS.map(item=>item.id):RIGHT_ITEMS.map(item=>item.name)).filter(value=>!(side==="left"?leftLocked(value):rightLocked(value)));const step=event.key==="ArrowLeft"||event.key==="ArrowUp"?-1:1;const next=ids[(ids.indexOf(id)+step+ids.length)%ids.length];(side==="left"?leftControlRefs:rightControlRefs).current[next]?.focus({preventScroll:true});}};
+ const preview = (side,id) => {if((selectedLeft!==null&&side==="right"&&!rightLocked(id))||(selectedRight!==null&&side==="left"&&!leftLocked(id)))setPreviewEndpoint({side,id});};
+ const renderPreview = () => {if(!previewEndpoint)return null;const from=selectedLeft!==null?getDotCenter(leftRefs.current[selectedLeft]):selectedRight!==null?getDotCenter(rightRefs.current[selectedRight]):null;const to=getDotCenter((previewEndpoint.side==="left"?leftRefs:rightRefs).current[previewEndpoint.id]);return from&&to?<line x1={from.x} y1={from.y} x2={to.x} y2={to.y} stroke="#2563eb" strokeWidth="2.5" strokeDasharray="6,3" />:null;};
 
   const containerRef = useRef(null);
   const leftRefs     = useRef({});
@@ -64,8 +94,8 @@ export default function WB_ReadChartMatch_QE() {
     const cRect = containerRef.current.getBoundingClientRect();
     const eRect = el.getBoundingClientRect();
     return {
-      x: eRect.left - cRect.left + eRect.width  / 2,
-      y: eRect.top  - cRect.top  + eRect.height / 2,
+      x: (eRect.left - cRect.left + eRect.width / 2) * (containerRef.current.clientWidth / cRect.width),
+      y: (eRect.top - cRect.top + eRect.height / 2) * (containerRef.current.clientHeight / cRect.height),
     };
   }, []);
 
@@ -77,55 +107,23 @@ export default function WB_ReadChartMatch_QE() {
   const connectedLeft  = (id) => Object.prototype.hasOwnProperty.call(connections, id);
 
   // خط أورنج دايماً — يتغير فقط لـ Show Answer
-  const lineColor = useCallback(() => {
-    if (showAns) return LINE_SHOW_ANS;
-    return LINE_DEFAULT;
-  }, [showAns]);
+  const lineColor = leftId => showAns || results[leftId] === "correct" ? "#16a34a" : results[leftId] === "wrong" ? "#ef4444" : LINE_DEFAULT;
 
   // ── Handlers ──
-  const handleLeftClick = (leftId) => {
-    if (showAns) return;
-    if (showResults && connectedLeft(leftId) && isCorrect(leftId, connections[leftId])) return;
-    setSelectedLeft((prev) => (prev === leftId ? null : leftId));
-  };
+  const handleLeftClick = (id,keyboard=false) => {if(leftLocked(id))return;if(selectedRight!==null){connect(id,selectedRight,keyboard);return;}if(selectedLeft===id){cancelSelection();setAnnouncement("Match cancelled.");return;}setSelectedLeft(id);setSelectedRight(null);setPreviewEndpoint(null);setAnnouncement("Sentence selected. Choose a name.");if(keyboard)focusCandidate("right");};
 
-  const handleRightClick = (rightName) => {
-    if (showAns || selectedLeft === null) return;
-    if (showResults && connectedLeft(selectedLeft) && isCorrect(selectedLeft, connections[selectedLeft])) {
-      setSelectedLeft(null); return;
-    }
-    setConnections((prev) => {
-      const next = { ...prev };
-      Object.keys(next).forEach((k) => { if (next[k] === rightName) delete next[k]; });
-      if (next[selectedLeft] && !(showResults && isCorrect(selectedLeft, next[selectedLeft]))) delete next[selectedLeft];
-      next[selectedLeft] = rightName;
-      return next;
-    });
-    setSelectedLeft(null);
-    if (showResults) setShowResults(false);
-  };
+  const handleRightClick = (name,keyboard=false) => {if(rightLocked(name))return;if(selectedLeft!==null){connect(selectedLeft,name,keyboard);return;}if(selectedRight===name){cancelSelection();setAnnouncement("Match cancelled.");return;}setSelectedRight(name);setSelectedLeft(null);setPreviewEndpoint(null);setAnnouncement(`${name} selected. Choose a sentence.`);if(keyboard)focusCandidate("left");};
 
-  const handleCheck = () => {
-    if (showAns) return;
-    if (Object.keys(connections).length < LEFT_ITEMS.length) {
-      ValidationAlert.info("Please connect all items first."); return;
-    }
-    let score = 0;
-    Object.entries(connections).forEach(([lid, rn]) => { if (isCorrect(lid, rn)) score++; });
-    setShowResults(true);
-    if (score === LEFT_ITEMS.length) ValidationAlert.success(`Score: ${score} / ${LEFT_ITEMS.length}`);
-    else if (score > 0)              ValidationAlert.warning(`Score: ${score} / ${LEFT_ITEMS.length}`);
-    else                             ValidationAlert.error(`Score: ${score} / ${LEFT_ITEMS.length}`);
-  };
+  const handleCheck = () => {if(checkDisabled)return;cancelSelection();if(!LEFT_ITEMS.every(item=>connections[item.id])){ValidationAlert.info("Please connect all items first.");return;}const next=Object.fromEntries(LEFT_ITEMS.map(item=>[item.id,results[item.id] === "correct" || isCorrect(item.id,connections[item.id]) ? "correct":"wrong"]));const score=Object.values(next).filter(value=>value === "correct").length;setResults(next);setShowResults(true);setAnnouncement(`Score: ${score} out of ${LEFT_ITEMS.length}. Correct matches are locked; incorrect matches can be changed.`);if(score===LEFT_ITEMS.length){resetButtonRef.current?.focus({preventScroll:true});ValidationAlert.success(`Score: ${score} / ${LEFT_ITEMS.length}`);}else if(score)ValidationAlert.warning(`Score: ${score} / ${LEFT_ITEMS.length}`);else ValidationAlert.error(`Score: ${score} / ${LEFT_ITEMS.length}`);};
 
   const handleShowAnswer = () => {
     const ans = {};
     RIGHT_ITEMS.forEach((r) => { ans[r.correctLeftId] = r.name; });
-    setConnections(ans); setShowResults(false); setShowAns(true); setSelectedLeft(null);
+    setConnections(ans); setShowResults(false); setShowAns(true); setResults({});cancelSelection();resetButtonRef.current?.focus({preventScroll:true});setAnnouncement("Correct matches shown and locked.");
   };
 
   const handleReset = () => {
-    setConnections({}); setShowResults(false); setShowAns(false); setSelectedLeft(null);
+    setConnections({}); setShowResults(false); setShowAns(false);setResults({});cancelSelection();setAnnouncement("Matches and feedback cleared.");
   };
 
   // ── SVG lines ──
@@ -137,7 +135,7 @@ export default function WB_ReadChartMatch_QE() {
       return (
         <line key={`${leftId}-${rightName}`}
           x1={p1.x} y1={p1.y} x2={p2.x} y2={p2.y}
-          stroke={lineColor()}
+          stroke={lineColor(leftId)}
           strokeWidth="2.5" strokeLinecap="round"
         />
       );
@@ -145,28 +143,27 @@ export default function WB_ReadChartMatch_QE() {
 
   // ── Dot colors — أورنج دايماً ──
   const leftDotColor = (id) => {
+    if (leftLocked(id))return "#16a34a";
     if (selectedLeft === id)          return DOT_SELECTED;
     if (showAns && connectedLeft(id)) return LINE_SHOW_ANS;
     return DOT_DEFAULT;
   };
 
   const rightDotColor = (name) => {
+    if (rightLocked(name))return "#16a34a";
     if (showAns && connectedRight(name)) return LINE_SHOW_ANS;
     return DOT_DEFAULT;
   };
 
   // ── Badge helpers — فقط على الغلط ──
-  const isLeftWrong  = (id) =>
-    showResults && !showAns && connectedLeft(id) && !isCorrect(id, connections[id]);
+  const isLeftWrong = id => !showAns && results[id] === "wrong";
 
-  const isRightWrong = (name) => {
-    if (!showResults || showAns || !connectedRight(name)) return false;
-    const lid = Object.keys(connections).find((k) => connections[k] === name);
-    return lid && !isCorrect(lid, name);
-  };
+  const isRightWrong = name => !showAns && Object.entries(connections).some(([id,value])=>value===name && results[id] === "wrong");
 
   return (
-    <div className="main-container-component">
+    <div data-adapt-scope="review3&4_Review4_Page2_Q2" className="main-container-component">
+<style>{`[data-adapt-scope="review3&4_Review4_Page2_Q2"] input:focus-visible, [data-adapt-scope="review3&4_Review4_Page2_Q2"] [data-keyboard-choice]:focus-visible, [data-adapt-scope="review3&4_Review4_Page2_Q2"] [data-grid-cell]:focus-visible {outline:4px solid #2563eb;outline-offset:3px;border-radius:6px;}`}</style>
+<div className="sr-only" role="status" aria-live="polite" aria-atomic="true">{announcement}</div>
       <style>{`
         .rcm-body {
           display: grid;
@@ -327,20 +324,15 @@ export default function WB_ReadChartMatch_QE() {
         }}
       >
         {/* ── Header ── */}
-        <h1
-          className="WB-header-title-page8"
-          style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
-        >
-          <span className="WB-ex-A-1">E</span>
-          Read the chart and match.
-        </h1>
+        <ExerciseHeader
+          subTitle="Start with one item, then connect it to the picture, word, or sentence that matches before moving to the next pair." isReview sectionLetter="E" title={<>Read the chart and match.</>} />
 
         {/* ── Body ── */}
         <div className="rcm-body">
 
           {/* Chart */}
           <div style={{ overflow: "hidden", flexShrink: 0, width: "100%", height: "100%" }}>
-            <img src={imgChartTable} alt="chart" style={{ width: "100%", height: "100%" }} />
+            <img src={imgChartTable} alt="A comparison chart showing pairs of people and statements about height, strength and speed." style={{ width: "100%", height: "100%" }} />
           </div>
 
           {/* Matching */}
@@ -351,10 +343,10 @@ export default function WB_ReadChartMatch_QE() {
               <div className="rcm-left-col">
                 {LEFT_ITEMS.map((item) => {
                   const isSelected = selectedLeft === item.id;
-                  const isLocked   = showAns || (showResults && connectedLeft(item.id) && isCorrect(item.id, connections[item.id]));
+                  const isLocked = leftLocked(item.id);
                   const dotWrong   = isLeftWrong(item.id);
                   return (
-                    <div key={item.id} className="rcm-match-row" onClick={() => handleLeftClick(item.id)}>
+                    <div key={item.id} className="rcm-match-row" role="button" tabIndex={0} data-keyboard-choice ref={el=>{leftControlRefs.current[item.id]=el;}} aria-label={`${item.sentence}${connections[item.id]?" "+connections[item.id]:". Unmatched."}`} aria-pressed={isSelected} aria-disabled={isLocked} onClick={event=>handleLeftClick(item.id,event.detail===0)} onKeyDown={event=>endpointKey(event,"left",item.id)} onKeyUp={activationKeys.onKeyUp} onFocus={()=>preview("left",item.id)} onMouseEnter={()=>preview("left",item.id)} style={{borderRadius:"6px",boxShadow:isSelected?"0 0 0 3px #2563eb":isLocked?"0 0 0 2px #16a34a":undefined,background:isSelected?"#dbeafe":undefined}}>
                       <span className="rcm-num">{item.id}</span>
                       <div>
                         <div className={[
@@ -385,13 +377,13 @@ export default function WB_ReadChartMatch_QE() {
                 {RIGHT_ITEMS.map((item) => {
                   const dotWrong = isRightWrong(item.name);
                   return (
-                    <div key={item.name} className="rcm-right-item">
+                    <div key={item.name} className="rcm-right-item" role="button" tabIndex={0} data-keyboard-choice ref={el=>{rightControlRefs.current[item.name]=el;}} aria-label={item.name} aria-pressed={selectedRight===item.name} aria-disabled={rightLocked(item.name)} onClick={event=>handleRightClick(item.name,event.detail===0)} onKeyDown={event=>endpointKey(event,"right",item.name)} onKeyUp={activationKeys.onKeyUp} onFocus={()=>preview("right",item.name)} onMouseEnter={()=>preview("right",item.name)} style={{borderRadius:"6px",boxShadow:selectedRight===item.name?"0 0 0 3px #2563eb":rightLocked(item.name)?"0 0 0 2px #16a34a":undefined,background:selectedRight===item.name?"#dbeafe":undefined}}>
                       <div style={{ position: "relative", flexShrink: 0 }}>
                         <div
                           className="rcm-dot-right"
                           ref={(el) => { rightRefs.current[item.name] = el; }}
                           style={{ background: rightDotColor(item.name) }}
-                          onClick={() => handleRightClick(item.name)}
+
                         />
                       </div>
                       <span className="rcm-name">{item.name}</span>
@@ -402,18 +394,18 @@ export default function WB_ReadChartMatch_QE() {
 
             </div>
 
-            <svg className="rcm-svg-overlay">{renderLines()}</svg>
+            <svg className="rcm-svg-overlay" aria-hidden="true">{renderLines()}{renderPreview()}</svg>
           </div>
 
         </div>
 
         {/* ── Buttons ── */}
         <div className="rcm-buttons">
-          <Button
-            checkAnswers={handleCheck}
-            handleShowAnswer={handleShowAnswer}
-            handleStartAgain={handleReset}
-          />
+          <div className="action-buttons-container">
+<button type="button" aria-label="Start Again" {...activationKeys} ref={resetButtonRef} onClick={handleReset} className="try-again-button">Start Again ↻</button>
+<button type="button" aria-label="Show Answer" {...activationKeys} onClick={handleShowAnswer} className="show-answer-btn swal-continue">Show Answer</button>
+<button type="button" aria-label="Check Answer" {...activationKeys} onClick={handleCheck} disabled={checkDisabled} style={{cursor:checkDisabled ? "not-allowed":"pointer"}} className="check-button2">Check Answer ✓</button>
+</div>
         </div>
       </div>
     </div>

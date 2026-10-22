@@ -841,3 +841,277 @@ Reference: `src/component/Book.jsx`.
   local native action buttons retaining the shared Button appearance. This
   enables real disabled completion state without changing the shared component.
 - Page8_Q4.jsx is not active in LessonData and was left unchanged in this work.
+
+
+## Grade 4 Unit 2 — behavior-only adaptation from Unit 1
+
+- User scope: review the whole unit, excluding Reading_Unit2_Page1.jsx and
+  Reading_Unit2_Page2.jsx. Preserve existing styles, header markup, assets,
+  recordings, captions, timestamps and layout; add only the established keyboard,
+  focus, selection, validation and checked-answer state behavior locally.
+- Unit2_Page1 through Unit2_Page6 expose their existing click actions to Tab,
+  Enter and Space, with repeat suppression and scoped rounded focus. Keyboard
+  activation dispatches the same click; do not duplicate navigation/audio logic.
+  Vocabulary's shared keyboard support is reused with sb_unit2_page10_vocabulary.
+- ReadingSection_U1 already has the unit-specific reading highlights and player
+  ID; page7_WritingSection_U1 is a static wrapper. Both were reviewed and retained.
+- ComprehensionA/B, GrammarC, page7_WritingA/B and the active written exercises
+  retain typing and follow the written-answer reference. Keep raw typed text
+  visible; compare normalized case/spacing/punctuation and lock checked correct
+  answers individually. Correction clears only that field's stale feedback.
+- page7_WritingA uses renderInput as a render helper, rather than defining an
+  Input component inside the parent. This preserves the input DOM/focus while
+  typing. Keep its original actual widths/styles; do not copy unused width props
+  into new styling or redesign the email.
+- GrammarA follows Unit 1's oral substitution using Unit 2's own phrases.
+  GrammarB and Unit2_Page5_Q3 follow Select behavior, preserving their circle and
+  tick/cross concepts respectively. Wrong selections stay editable; correct
+  selections lock, and Show Answer uses the same green feedback.
+- Player IDs: sb_unit2_page12_grammar, sb_unit2_page14_q3 and sb_unit2_page15_q1.
+  Exercise reset never seeks/remounts these players. Existing recordings and
+  captions are retained, even when pre-existing content needs separate review.
+- Unit2_Page5_Q4 is inactive in LessonData and was left unchanged. No CSS file,
+  global style, shared component or unrelated unit is changed by this adaptation.
+
+
+## Grade 4 Review 1 and 2 — question behavior references
+
+- The twelve question components in StudentPages/review1&2 retain their own
+  layout, headers, images, answer data and recordings. Main-page components,
+  CSS and shared controls remain outside this question-only update.
+- Written questions follow Unit 1/2 writing behavior: labelled fields, native
+  typing including Space, stable DOM/focus, normalized comparison with raw text
+  kept visible, correct-answer locks and independently editable wrong fields.
+  Review1_Page2_Q2 keeps separate question/answer field IDs and the original
+  per-field score. Review2_Page1_Q1 remains a single-letter written match; do
+  not turn it into line Matching, Drag and Drop or unique selectors by assumption.
+- Review2_Page1_Q3 uses a static matching diagram as a writing prompt; keep it
+  static rather than inventing new line interactions.
+- Review1_Page1_Q3 follows Select on the original in-paragraph will/won't
+  options. Preserve pill shapes, option order and text fragments. Correct/reveal
+  feedback is green; wrong choices stay editable; only selected options get
+  result feedback. Its player ID is sb_review1_page1_q3.
+- Review2_Page2_Q1 is the existing tick/cross cycling picture Select: initially
+  empty, first activation sets tick left/cross right (A), then each activation
+  alternates A/B. Click/touch and Enter/Space perform the same single step.
+  Accessible names describe verified artwork and current tick/cross position.
+  Preserve the original correctSide mapping, symbol placement and glyph colors;
+  checked/revealed correct pictures get a green outline, wrong ones a red one.
+  Lock each correct picture, leaving other pictures editable. Its player ID is
+  sb_review2_page2_q1; reset never rewinds/remounts either review audio player.
+- All Check buttons use actual disabled state and a handler guard after full
+  checked success/reveal; Reset re-enables them. Keep action-button native focus
+  styling. Before success, establish an enabled in-exercise return-focus target.
+
+
+## Review 1&2 main-page keyboard launchers
+
+- The user subsequently requested keyboard activation for every launcher on
+  Review1_Page1, Review1_Page2, Review2_Page1 and Review2_Page2. Follow the Unit 2
+  main-page reference: SVG button semantics and names, tabIndex 0, Enter/Space
+  through the existing click action once, repeat suppression, native Tab order
+  and scoped rounded blue focus. Preserve wrappers, positions, dimensions,
+  images, CSS files and existing popup startIndex values.
+
+## ExerciseHeader scope — latest user correction
+
+- Use ExerciseHeader only for exercise components on the final two exercise pages
+  of each unit. It must not be used in Reading, Writing or Grammar sections or
+  their child components, even when those children contain questions/activities.
+  Classify by the section's actual location and purpose, not merely by filename.
+- In Reading, Writing and Grammar components, retain their original section and
+  activity heading markup and visual style. Do not replace those headings with
+  ExerciseHeader during future keyboard/accessibility or answer-state updates.
+- This correction overrides the earlier blanket requirement to use ExerciseHeader
+  in every question, and any conflicting header instructions/examples elsewhere
+  in this file, including the previous Unit 3 adaptation summary.
+- Where ExerciseHeader is applicable, preserve the target's own sectionLetter,
+  questionNumber and title. Keep an existing/approved subtitle only; never invent
+  one. Preserve the rest of the design and do not change the shared component.
+- This request registers the rule. Do not remove existing usages or migrate other
+  components retroactively without a requested implementation scope.
+
+## Unordered sentence answers — جمل صحيحة بأي ترتيب
+
+- User-approved example: StudentPages/review1&2/Review2_Page1_Q3.jsx. Accept the
+  four existing target sentences in any answer row, comparing against every
+  target's approved aliases with the existing normalization. Preserve typed text
+  and row positions; do not reorder or rewrite the learner's answers on Check.
+- Count each distinct target sentence once, including equivalent case/spacing/
+  punctuation variants. On first checking, repeated sentences count only in the
+  first matching row; other repeats stay incorrect/editable. Reserve matches for
+  previously locked rows before evaluating editable rows, so an earlier row can
+  never steal credit from a correct locked answer further down the exercise.
+- Preserve individual green locks, editable wrong/repeated answers, rechecking,
+  native Check disabling on completion, canonical Show Answer with no new score,
+  Reset, keyboard behavior, ExerciseHeader, artwork and existing layout.
+- This is an exercise-specific grading rule. Do not make other writing questions
+  order-independent or permit arbitrary grammatically correct sentences without
+  the user's instruction.
+
+
+## Grade 4 story reading pages — keyboard access
+
+- User-approved targets: StudentPages/unit2/Reading_Unit2_Page1.jsx and Page2.jsx
+  (the latter's full filename is Reading_Unit2_Page2.jsx). Their earlier exclusion
+  was lifted for this keyboard-only update. Interaction reference: Grade 2
+  unit6/Reading_Unit6_Page1.jsx and Reading_Unit6_Page2.jsx; adapt to Grade 4's
+  existing single recording and startFrom/stopAt slices, rather than copying
+  Grade 2's separate audio files or context implementation.
+- Each existing reading region and audio/video launcher has button semantics,
+  a meaningful name, tabIndex 0 and local rounded visible focus. On Page1, put
+  the existing top audio/video launchers before the reading regions in DOM/Tab
+  order; on Page2 traverse the three reading regions in their displayed order.
+  Tab/Shift+Tab never play or change audio. Enter/Space dispatch the
+  existing click once, suppress repeats and conflicting ancestor key handlers.
+  Keep current click/touch actions and playback highlighting; aria-pressed on
+  a reading region reflects its active playback state, not focus alone.
+- Keep page images, region coordinates, styles, recordings, captions, slice
+  boundaries and popup-player props unchanged in a keyboard-only update. Do not
+  fabricate corrected timings or replace local/shared audio machinery. Any timing
+  correction needs verification against the actual recording and printed text.
+
+
+## Even-unit story pages — keyboard adaptation coverage
+
+- Apply the approved Unit 2 story-reading keyboard pattern to both Reading_UnitN
+  pages at the ends of Units 4, 6, 8 and 10. Units 2/4/6/8/10 now use this pattern.
+- Adapt to the actual number of regions on each page (some have four, not three).
+  Preserve the original array/reading order, including side-by-side story panels
+  whose text starts at different heights. First-page audio/video launchers come
+  before reading regions in DOM/Tab order, without positive tab indices.
+- Region labels identify the passage and actual printed page number; active
+  aria-pressed reflects playback. Focus alone never starts playback. Enter/Space
+  dispatch the existing click once, ignoring repeats and stopping key conflicts.
+- Keep all original images, audio/video imports, captions, slice boundaries,
+  coordinates, context handling and popup props. Do not correct suspicious video
+  mappings or timestamps in a keyboard-only task without the user's instruction.
+  Leave shared components and CSS files unchanged; scope focus-only styles locally.
+
+## Written-response field labels — future unit work
+
+- In every requested writing exercise/component update, provide one clearly
+  identified text field or answer area for each response required by the existing
+  exercise. Adapt descriptions to that question; distinguish question/answer
+  fields and separate blanks, without revealing correct answers.
+- Preserve the existing field count, response structure, dimensions and layout
+  when they already provide the required answer areas. Do not convert other
+  exercise types to typing or add redundant inputs.
+- Provide a persistent accessible name with an appropriate associated label or
+  aria-label. A short task-specific placeholder may supplement it, but must not
+  be the only accessible name because it disappears during typing.
+- Use a descriptive native title for a mouse-hover hint when no visible label is
+  added. This is supplementary; do not rely on hover/title for keyboard, touch
+  or screen-reader access. Keep field names distinct within each exercise.
+- Reference the approved labeling adaptation in StudentPages/unit1,
+  StudentPages/unit2 and StudentPages/review1&2: short placeholders plus contextual
+  aria-label and title. Preserve typed answers, keyboard behavior, grading,
+  normalization, locks, reveal/reset, audio and existing styles.
+- Apply these conventions when working on Unit 3 and subsequent requested units;
+  do not migrate unrelated components without a request.
+
+## Image alternative text — every requested component update
+
+- Every image in a requested question, exercise or component must have appropriate
+  alternative text. Inspect actual artwork before writing a meaningful alt;
+  never infer its content from filenames, variables or the expected answer.
+- Informative img elements need concise, accurate alt text describing the relevant
+  visual information. Purely decorative or redundant images use alt=""; hide
+  decorative icons from assistive technology when appropriate.
+- Images inside named buttons/links should not repeat the control's accessible
+  name unnecessarily. Inline SVG and SVG image elements need an appropriate
+  accessible name (for example title with aria-labelledby or aria-label), or
+  aria-hidden when decorative; an unsupported alt attribute alone is insufficient.
+- For CSS background artwork that conveys required information, provide an
+  equivalent accessible description locally. Preserve artwork, styles and layout.
+- If artwork cannot be visually verified, report exactly which asset needs review
+  instead of inventing a description. Apply during requested work; this rule alone
+  does not authorize a project-wide image migration.
+## Grade 4 Unit 3 — approved adaptation and deferred content
+
+- Unit3_Page1 through Unit3_Page6 follow the existing main-page keyboard launcher
+  reference. Preserve their original popup indices, coordinates and audio slices.
+- Written activities and personal writing follow the Unit 1/2 writing references:
+  field-specific aria-label/title/placeholder, normal typing and stable field DOM,
+  normalized comparison on both sides, retained raw answers, per-field correct
+  locks and green reveal, correction of wrong answers, and actual disabled Check
+  after checked completion/reveal. Personal writing remains ungraded.
+- GrammarB uses renderInput as a render helper, preserving the original per-call
+  widths and avoiding a nested component that remounts fields during typing.
+- User-corrected GrammarA oral substitution examples: He had a whistle; choices
+  motorcycle, rabbit, computer. Did they have a house; choices car, swimming pool,
+  boat (retain the existing word boat). Replace only the noun in the chosen row;
+  use the established Unit 1/2 keyboard substitution action, without grading.
+- GrammarC uses the Select reference with its own pictures/options. User approved
+  retaining page7_WritingA's six-item scoring: selecting or not selecting each
+  item is evaluated; correctly unchecked items lock as well as checked ones.
+- ComprehensionB follows Matching with the original image/word ordering, source
+  selection from either side, keyboard focus to the opposite side, dashed preview,
+  one-to-one conflict replacement restricted to editable pairs, individual green
+  locks, pointer identity/capture/cancellation and geometry under Book scaling.
+  No new recordings or word-audio mappings were invented.
+- Verified image descriptions are local to the modified Unit 3 components. Keep
+  styles/CSS, recordings, captions, slice boundaries and shared components intact.
+- Player IDs: sb_unit3_page22_vocabulary, sb_unit3_page24_grammar,
+  sb_unit3_page5_q3. Exercise reset does not seek/remount the instruction players.
+- Explicitly deferred by the user: Unit3_Page6_Q2 (country answers do not match
+  the activity pictures), changing the third answer key in Unit3_Page5_Q2 (great
+  in the scrambled prompt versus quite in the answer), and adding optional image
+  alt props to shared ReadingSection.jsx. Do not change these without renewed
+  instruction. ReadingSection_U1's existing highlighting/audio remains unchanged;
+  the shared image-alt limitation was reported.
+- Verification used isolated render/handler/pointer simulations and actual asset
+  inspection, plus lint/build. These are not live browser, touch-device, audible
+  playback or screen-reader verification.
+## Unit3_Page6_Q2 — deferral lifted by the user
+
+- The user supplied the current question/answer data and explicitly authorized
+  updating Unit3_Page6_Q2 using the established writing reference. Its earlier
+  deferral is lifted. Keep the existing image variable names imgJapan, imgRussia,
+  imgUK and imgAus and their paths, even though their names do not describe the
+  actual artwork. Preserve all current prompts, accepted answers and model text.
+- Apply field-level writing behavior and ExerciseHeader, since this is on the
+  unit's final two exercise pages. Image alt descriptions come from the actual
+  bicycle, sailboat, doll and capped-child artwork, not the variable names.
+- Other deferred content and shared ReadingSection.jsx remain outside this update.
+## Grade 4 Unit 4 and Review 3&4 — approved adaptation
+
+- Unit 4 and Review 3&4 follow the established Unit 1/2/3 references for normal
+  writing, Select, mixed Select/writing, oral substitution, Matching, standalone
+  Word Search and main-page keyboard launchers. Preserve their own data, assets,
+  captions, audio slice boundaries, coordinates, layout, CSS and interaction types.
+- Keep original Reading/Writing/Grammar headings. ExerciseHeader is limited to
+  end-of-unit questions and review questions, using isReview for the latter.
+- Every scoped AudioWithCaption and QuestionAudioPlayer usage passes a literal,
+  stable sb-prefixed pageId identifying its owner. AudioWithCaption already accepts
+  pageId; no shared-player change is required. Keep Vocabulary's own distinct ID.
+  Exercise resets do not seek/remount the instruction player or erase saved time.
+- Unit4 GrammarA replaces all highlighted words in one example at a time, using
+  its existing sets of comparison terms, without grading or adding recordings.
+- Unit4 GrammarB and Review4_Page1_Q1 keep Select and typed answers independently
+  graded and locked, preserving their original score out of eight. A correct
+  selection never locks its incorrect typed completion, or the reverse.
+- User explicitly approved GrammarC's existing cycle: no mark, underline, circle,
+  no mark. Preserve its group score: both sentence marks must be right to lock
+  that group. Wrong groups remain editable. Keyboard activation cycles once.
+- Review4_Page1_Q2 follows standalone Word Search, retaining its exact grid,
+  seven paths and displayed word list. Accept forward/reverse exact paths,
+  including intersections. Use one roving Tab stop, arrows, endpoint Enter/Space,
+  Escape cancellation and Backspace undo. Support pointer drag and two taps with
+  pointer identity/capture/cancellation. Partial checking remains editable;
+  full success/reveal locks and uses green feedback. No word recordings invented.
+- Review4_Page2_Q2 follows Matching with original sentence/name sides, displayed
+  order and mapping. Either side may start a match; show source selection and a
+  dashed hover/focus preview. Protect both endpoints of correct pairs; clear only
+  affected editable results during replacement. Scale line coordinates locally.
+- All graded exercises disable native Check plus handler guards only after
+  checked full success or reveal. Keep action buttons' existing native focus.
+  Before success alerts, focus an enabled in-exercise return target. Normalizing
+  writing must preserve raw displayed text, word boundaries and negation.
+- Local image descriptions were based on actual artwork inspection. Shared
+  ReadingSection.jsx image-alt support remains deferred by the user's earlier
+  instruction. The already adapted story-reading keyboard behavior is retained;
+  only its scoped AudioWithCaption usage needed a pageId in this update.
+- Verification uses isolated render/handler/pointer simulations and asset
+  inspection, plus targeted lint and build. Do not claim real browser, touch,
+  audible playback, screen-reader or visual layout checks from those simulations.

@@ -50,7 +50,7 @@ const stopAtSecond = 1.9;
        
         </div>
      <div style={{margin:"3em 0 2em"}} >
-        <QuestionAudioPlayer
+        <QuestionAudioPlayer pageId="sb_unit4_page3_grammar"
           src={sound}
           captions={captions}
           stopAtSecond={stopAtSecond}
@@ -60,14 +60,14 @@ const stopAtSecond = 1.9;
 
       {/* ✅ شلنا الـ title badge والـ paragraphs، والصورة تملأ كل شي */}
       <div className="w-[60%] mt-2">
-        <img
+        <img alt="Comparatives: Angela is shorter than Tony; Angela is more careful than Tony. Superlatives: Molly is the tallest; Molly is the most careful."
           src={image}
           style={{ width: "100%", height: "auto", display: "block" }}
         />
       </div>
 
       <div className="w-[60%]  my-5">
-        <img
+        <img alt="Use -er and -est for one-syllable words or some words ending in y: clearer/clearest, bigger/biggest, easier/easiest. Use more and most for multi-syllable words: more difficult/most difficult, more famous/most famous."
           style={{ width: "100%", height: "auto", display: "block"  }}
           src={image1}
         />

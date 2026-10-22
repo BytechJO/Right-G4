@@ -1,5 +1,4 @@
-import React, { useState } from "react";
-import Button from "../../Button";
+import React, { useState, useRef } from "react";
 import ValidationAlert from "../../Popup/ValidationAlert";
 
 import sound from "../../../assets/audio/ClassBook/Grade 4/cd10pg14-instruction1-adult-lady_8RPyYe6a.mp3";
@@ -8,16 +7,17 @@ import sound from "../../../assets/audio/ClassBook/Grade 4/cd10pg14-instruction1
 // ─────────────────────────────────────────────
 import imgScene from "../../../assets/imgs/pages/Class Book/Right 4 Unit 2 Welcome to the Big Apple Folder/Page 14/SVG/Asset 77.svg";
 import QuestionAudioPlayer from "../../QuestionAudioPlayer";
+import ExerciseHeader from "../../ExerciseHeader";
 
 // ─────────────────────────────────────────────
 //  🎨  COLORS
 // ─────────────────────────────────────────────
-const CHECK_COLOR    = "#e53935";
-const CROSS_COLOR    = "#e53935";
-const BOX_BORDER     = "#2195a6";
+const CHECK_COLOR = "#e53935";
+const CROSS_COLOR = "#e53935";
+const BOX_BORDER = "#2195a6";
 const SENTENCE_COLOR = "#2b2b2b";
-const NUMBER_COLOR   = "#2b2b2b";
-const PARA_COLOR     = "#2b2b2b";
+const NUMBER_COLOR = "#2b2b2b";
+const PARA_COLOR = "#2b2b2b";
 const WRONG_BADGE_BG = "#ef4444";
 const WRONG_BADGE_TEXT = "#ffffff";
 
@@ -31,11 +31,31 @@ const PARAGRAPH = `Darren is going to the United Kingdom for the summer. He hope
 //  correctBox: "check" | "cross"
 // ─────────────────────────────────────────────
 const ITEMS = [
-  { id: 1, sentence: "Darren is going to take a tour of the English countryside.", correctBox: "check" },
-  { id: 2, sentence: "He isn't going to visit Buckingham Palace.",                  correctBox: "cross" },
-  { id: 3, sentence: "He is going to take a tour of London in a double-decker bus.", correctBox: "check" },
-  { id: 4, sentence: "First, he will visit the Clock Tower.",                       correctBox: "cross" },
-  { id: 5, sentence: "He is going to take his camera with him.",                    correctBox: "check" },
+  {
+    id: 1,
+    sentence: "Darren is going to take a tour of the English countryside.",
+    correctBox: "check",
+  },
+  {
+    id: 2,
+    sentence: "He isn't going to visit Buckingham Palace.",
+    correctBox: "cross",
+  },
+  {
+    id: 3,
+    sentence: "He is going to take a tour of London in a double-decker bus.",
+    correctBox: "check",
+  },
+  {
+    id: 4,
+    sentence: "First, he will visit the Clock Tower.",
+    correctBox: "cross",
+  },
+  {
+    id: 5,
+    sentence: "He is going to take his camera with him.",
+    correctBox: "check",
+  },
 ];
 const captions = [
   {
@@ -59,7 +79,7 @@ const captions = [
     text: "He plans to take a tour of the English countryside first.",
   },
   {
-    start: 21.20,
+    start: 21.2,
     end: 24.24,
     text: "Next, he is going to see Buckingham Palace.",
   },
@@ -82,16 +102,45 @@ const captions = [
 // ─────────────────────────────────────────────
 //  COMPONENT
 // ─────────────────────────────────────────────
+const activationKeys = {
+  onKeyDown: (event) => {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    event.preventDefault();
+    event.stopPropagation();
+    if (!event.repeat) event.currentTarget.click();
+  },
+  onKeyUp: (event) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+  },
+};
+
 export default function WB_ListenReadWriteCheckCross_QC() {
   // selected: { itemId: "check" | "cross" | null }
-  const [selected,    setSelected]    = useState({});
-  const [showResults, setShowResults] = useState(false);
-  const [showAns,     setShowAns]     = useState(false);
+  const [selected, setSelected] = useState({});
+  const [results, setResults] = useState({});
+  const [showAns, setShowAns] = useState(false);
 
-  const isLocked = showResults || showAns;
+  const resetButtonRef = useRef(null);
+  const [announcement, setAnnouncement] = useState("");
+  const checkDisabled =
+    showAns || ITEMS.every((item) => results[item.id] === "correct");
+  const isLocked = (id) => showAns || results[id] === "correct";
 
   const handleSelect = (itemId, box) => {
-    if (isLocked) return;
+    if (isLocked(itemId)) return;
+    setResults((prev) => {
+      const next = { ...prev };
+      delete next[itemId];
+      return next;
+    });
+    setAnnouncement(
+      selected[itemId] === box
+        ? `Sentence ${itemId}: selection cleared.`
+        : `Sentence ${itemId}: ${box === "check" ? "true" : "false"} selected.`,
+    );
     setSelected((prev) => ({
       ...prev,
       [itemId]: prev[itemId] === box ? null : box,
@@ -99,29 +148,51 @@ export default function WB_ListenReadWriteCheckCross_QC() {
   };
 
   const handleCheck = () => {
-    if (isLocked) return;
+    if (checkDisabled) return;
     const allAnswered = ITEMS.every((item) => selected[item.id]);
-    if (!allAnswered) { ValidationAlert.info("Please choose ✓ or ✕ for each sentence."); return; }
+    if (!allAnswered) {
+      ValidationAlert.info("Please choose ✓ or ✕ for each sentence.");
+      return;
+    }
     let score = 0;
-    ITEMS.forEach((item) => { if (selected[item.id] === item.correctBox) score++; });
-    setShowResults(true);
-    if (score === ITEMS.length) ValidationAlert.success(`Score: ${score} / ${ITEMS.length}`);
-    else if (score > 0)         ValidationAlert.warning(`Score: ${score} / ${ITEMS.length}`);
-    else                        ValidationAlert.error(`Score: ${score} / ${ITEMS.length}`);
+    ITEMS.forEach((item) => {
+      if (selected[item.id] === item.correctBox) score++;
+    });
+    setResults(
+      Object.fromEntries(
+        ITEMS.map((item) => [
+          item.id,
+          selected[item.id] === item.correctBox ? "correct" : "wrong",
+        ]),
+      ),
+    );
+    setAnnouncement(
+      `Score: ${score} out of ${ITEMS.length}. Correct answers are locked; incorrect answers can be changed.`,
+    );
+    if (score === ITEMS.length) {
+      resetButtonRef.current?.focus({ preventScroll: true });
+      ValidationAlert.success(`Score: ${score} / ${ITEMS.length}`);
+    } else if (score > 0)
+      ValidationAlert.warning(`Score: ${score} / ${ITEMS.length}`);
+    else ValidationAlert.error(`Score: ${score} / ${ITEMS.length}`);
   };
 
   const handleShowAnswer = () => {
     const filled = {};
-    ITEMS.forEach((item) => { filled[item.id] = item.correctBox; });
+    ITEMS.forEach((item) => {
+      filled[item.id] = item.correctBox;
+    });
     setSelected(filled);
-    setShowResults(false);
+    setResults({});
     setShowAns(true);
+    setAnnouncement("Correct answers shown and locked.");
   };
 
   const handleReset = () => {
     setSelected({});
-    setShowResults(false);
+    setResults({});
     setShowAns(false);
+    setAnnouncement("Selections and feedback cleared.");
   };
 
   // Get box state for a specific box type ("check"/"cross") for an item
@@ -130,14 +201,27 @@ export default function WB_ListenReadWriteCheckCross_QC() {
     const isActive = sel === box;
     if (!isActive) return "idle";
     if (showAns) return "correct";
-    if (showResults) return item.correctBox === box ? "correct" : "wrong";
+    if (results[item.id]) return results[item.id];
     return "selected";
   };
 
-  const getBoxSymbol = (box) => box === "check" ? "✓" : "✕";
+  const getBoxSymbol = (box) => (box === "check" ? "✓" : "✕");
 
   return (
-    <div className="main-container-component">
+    <div className="main-container-component" data-unit2-scope="Unit2_Page5_Q3">
+      <div
+        className="sr-only"
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+      >
+        {announcement}
+      </div>
+      <style>{`
+        [data-unit2-scope="Unit2_Page5_Q3"] [data-keyboard-choice]:focus-visible {
+          outline: 4px solid #2563eb; outline-offset: 3px; border-radius: 8px;
+        }
+      `}</style>
       <style>{`
         /* ── Top: paragraph + image ── */
         .lrcc-top {
@@ -268,21 +352,21 @@ export default function WB_ListenReadWriteCheckCross_QC() {
           margin: "0 auto",
         }}
       >
-        {/* ── Header ── */}
-        <h1
-          className="WB-header-title-page8"
-          style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
-        >
-          <span className="WB-ex-A">C</span>
-          Listen, read, and write <span style={{ color: "#ff0000ff" }}> ✓</span> or<span style={{ color: "#ff0000ff" }}> ✕</span>.
-        </h1>
-          <div style={{marginTop:"10px"}}>
-        <QuestionAudioPlayer
-          src={sound}
-          captions={captions}
-          stopAtSecond={7.5}
+        <ExerciseHeader
+          sectionLetter={"C"}
+          title={"Listen, read, and write ✓ or X."}
+          subTitle={
+            "Listen once, replay if needed, then compare each statement with what you heard before choosing the two-way answer."
+          }
         />
-      </div>
+        <div style={{ marginTop: "10px" }}>
+          <QuestionAudioPlayer
+            pageId="sb_unit2_page14_q3"
+            src={sound}
+            captions={captions}
+            stopAtSecond={7.5}
+          />
+        </div>
 
         {/* ── Paragraph + Image ── */}
         <div className="lrcc-top">
@@ -294,7 +378,6 @@ export default function WB_ListenReadWriteCheckCross_QC() {
         <div className="lrcc-list">
           {ITEMS.map((item) => (
             <div key={item.id} className="lrcc-row">
-
               {/* Number */}
               <span className="lrcc-num">{item.id}</span>
 
@@ -305,41 +388,89 @@ export default function WB_ListenReadWriteCheckCross_QC() {
               <div className="lrcc-boxes">
                 {["check", "cross"].map((box) => {
                   const state = getBoxState(item, box);
-                  const sym   = getBoxSymbol(box);
+                  const sym = getBoxSymbol(box);
 
                   const cls = [
                     "lrcc-box",
-                    isLocked ? "lrcc-box--locked" : "",
-                    state === "selected" && box === "check" ? "lrcc-box--selected-check" : "",
-                    state === "selected" && box === "cross" ? "lrcc-box--selected-cross" : "",
-                    state === "correct"  ? "lrcc-box--correct" : "",
-                    state === "wrong"    ? "lrcc-box--wrong"   : "",
-                  ].filter(Boolean).join(" ");
+                    isLocked(item.id) ? "lrcc-box--locked" : "",
+                    state === "selected" && box === "check"
+                      ? "lrcc-box--selected-check"
+                      : "",
+                    state === "selected" && box === "cross"
+                      ? "lrcc-box--selected-cross"
+                      : "",
+                    state === "correct" ? "lrcc-box--correct" : "",
+                    state === "wrong" ? "lrcc-box--wrong" : "",
+                  ]
+                    .filter(Boolean)
+                    .join(" ");
 
                   return (
                     <div
+                      role="button"
+                      tabIndex={0}
+                      data-keyboard-choice
+                      {...activationKeys}
+                      aria-label={`Sentence ${item.id}. ${item.sentence} ${box === "check" ? "True" : "False"}${isLocked(item.id) ? ". Locked" : ""}`}
+                      aria-pressed={selected[item.id] === box}
+                      aria-disabled={isLocked(item.id)}
+                      style={{
+                        background:
+                          selected[item.id] === box ? "#dbeafe" : undefined,
+                        borderColor:
+                          state === "correct"
+                            ? "#16a34a"
+                            : state === "wrong"
+                              ? "#ef4444"
+                              : undefined,
+                      }}
                       key={box}
                       className={cls}
                       onClick={() => handleSelect(item.id, box)}
                     >
                       {state !== "idle" ? sym : ""}
-                      {state === "wrong" && <div className="lrcc-wrong-badge">✕</div>}
+                      {state === "wrong" && (
+                        <div className="lrcc-wrong-badge">✕</div>
+                      )}
                     </div>
                   );
                 })}
               </div>
-
             </div>
           ))}
         </div>
 
         {/* ── Buttons ── */}
         <div className="lrcc-buttons">
-          <Button
-            checkAnswers={handleCheck}
-            handleShowAnswer={handleShowAnswer}
-            handleStartAgain={handleReset}
-          />
+          <div className="action-buttons-container">
+            <button
+              type="button"
+              ref={resetButtonRef}
+              onClick={handleReset}
+              {...activationKeys}
+              className="try-again-button"
+            >
+              Start Again ↻
+            </button>
+            <button
+              type="button"
+              onClick={handleShowAnswer}
+              {...activationKeys}
+              className="show-answer-btn swal-continue"
+            >
+              Show Answer
+            </button>
+            <button
+              type="button"
+              onClick={handleCheck}
+              {...activationKeys}
+              disabled={checkDisabled}
+              style={{ cursor: checkDisabled ? "not-allowed" : "pointer" }}
+              className="check-button2"
+            >
+              Check Answer ✓
+            </button>
+          </div>
         </div>
       </div>
     </div>

@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import Button from "../../Button";
+import ExerciseHeader from "../../ExerciseHeader";
+import React, { useState, useRef } from "react";
 import ValidationAlert from "../../Popup/ValidationAlert";
 
 // ─────────────────────────────────────────────
@@ -9,6 +9,37 @@ import imgA from "../../../assets/imgs/pages/Class Book/Right 4 Unit 4 Joy Makes
 import imgB from  "../../../assets/imgs/pages/Class Book/Right 4 Unit 4 Joy Makes a Friend Folder/Page 37/SVG/Asset 2.svg";
 import imgC from  "../../../assets/imgs/pages/Class Book/Right 4 Unit 4 Joy Makes a Friend Folder/Page 37/SVG/Asset 3.svg";
 import imgD from "../../../assets/imgs/pages/Class Book/Right 4 Unit 4 Joy Makes a Friend Folder/Page 37/SVG/Asset 4.svg";
+const activationKeys = {
+  onKeyDown: (event) => {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    event.preventDefault();
+    event.stopPropagation();
+    if (!event.repeat) event.currentTarget.click();
+  },
+  onKeyUp: (event) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+  },
+};
+const fieldKeys = {
+  onKeyDown: (event) => {
+    if (event.key === "Enter" || event.key === " ") event.stopPropagation();
+  },
+  onKeyUp: (event) => {
+    if (event.key === "Enter" || event.key === " ") event.stopPropagation();
+  },
+};
+const normalizeAnswer = (value) =>
+  value
+    .normalize("NFKC")
+    .toLowerCase()
+    .replace(/[\u2018\u2019\u201A\u201B\u0060\u00B4']/g, "")
+    .replace(/[.,!?;:\u2026\u201c\u201d"]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+
 
 // ─────────────────────────────────────────────
 //  🎨  COLORS
@@ -64,58 +95,38 @@ const ITEMS = [
 // ─────────────────────────────────────────────
 //  🔧  NORMALIZE
 // ─────────────────────────────────────────────
-const normalize = (str) =>
-  str.toLowerCase().replace(/[^a-z0-9'\s]/g, "").replace(/\s+/g, " ").trim();
 
-const isCorrect = (userVal, correctArr) =>
-  correctArr.some((c) => normalize(userVal) === normalize(c));
+
+
 
 // ─────────────────────────────────────────────
 //  COMPONENT
 // ─────────────────────────────────────────────
 export default function WB_LookWrite_QD() {
   const [answers,     setAnswers]     = useState({});
-  const [showResults, setShowResults] = useState(false);
+  const [,setShowResults] = useState(false);
   const [showAns,     setShowAns]     = useState(false);
+ const [results,setResults] = useState({});
+ const [announcement,setAnnouncement] = useState("");
+ const resetButtonRef = useRef(null);
+ const answerTargets = ITEMS.map(item=>({key:item.id,correct:Array.isArray(item.correct)?item.correct:[item.correct],answer:item.answer ?? item.correct,label:`Question ${item.id}. ${item.scrambled ? "Unscramble: "+item.scrambled : item.before ? item.before + " blank " + (item.after || "") : item.word ? "Write the opposite of " + item.word : item.question || item.cue || item.hint || "Write an answer using the diagram."}`}));
+ const checkDisabled = showAns || answerTargets.every(item=>results[item.key] === "correct");
 
-  const handleChange = (id, value) => {
-    if (showAns) return;
-    const item = ITEMS.find((i) => i.id === id);
-    if (showResults && item && isCorrect(answers[id] || "", item.correct)) return;
-    setAnswers((prev) => ({ ...prev, [id]: value }));
-  };
+  const handleChange = (key, value) => {  if(showAns || results[key] === "correct")return; if(!answerTargets.some(item=>item.key === key))return; setAnswers(prev=>({...prev,[key]:value})); setResults(prev=>{const next={...prev};delete next[key];return next;}); };
 
-  const handleCheck = () => {
-    if (showAns) return;
-    const allAnswered = ITEMS.every((item) => answers[item.id]?.trim());
-    if (!allAnswered) { ValidationAlert.info("Please complete all answers first."); return; }
-    let score = 0;
-    ITEMS.forEach((item) => { if (isCorrect(answers[item.id] || "", item.correct)) score++; });
-    setShowResults(true);
-    if (score === ITEMS.length)   ValidationAlert.success(`Score: ${score} / ${ITEMS.length}`);
-    else if (score > 0)           ValidationAlert.warning(`Score: ${score} / ${ITEMS.length}`);
-    else                          ValidationAlert.error(`Score: ${score} / ${ITEMS.length}`);
-  };
+  const handleCheck = () => {if(checkDisabled)return;if(!answerTargets.every(item=>answers[item.key]?.trim())){setAnnouncement("Please complete all answers first.");ValidationAlert.info("Please complete all answers first.");return;}const next=Object.fromEntries(answerTargets.map(item=>[item.key,results[item.key] === "correct" || item.correct.some(answer=>normalizeAnswer(answers[item.key] || "") === normalizeAnswer(answer)) ? "correct":"wrong"]));const score=Object.values(next).filter(value=>value === "correct").length;setResults(next);setShowResults(true);setAnnouncement(`Score: ${score} out of ${answerTargets.length}. Correct answers are locked; incorrect answers can be changed.`);if(score === answerTargets.length){resetButtonRef.current?.focus({preventScroll:true});ValidationAlert.success(`Score: ${score} / ${answerTargets.length}`);}else if(score)ValidationAlert.warning(`Score: ${score} / ${answerTargets.length}`);else ValidationAlert.error(`Score: ${score} / ${answerTargets.length}`);};
 
-  const handleShowAnswer = () => {
-    const filled = {};
-    ITEMS.forEach((item) => { filled[item.id] = item.answer; });
-    setAnswers(filled);
-    setShowResults(false);
-    setShowAns(true);
-  };
+  const handleShowAnswer = () => {setAnswers(Object.fromEntries(answerTargets.map(item=>[item.key,item.answer])));setResults({});setShowResults(false);setShowAns(true);resetButtonRef.current?.focus({preventScroll:true});setAnnouncement("Correct answers shown and locked.");};
 
-  const handleReset = () => {
-    setAnswers({});
-    setShowResults(false);
-    setShowAns(false);
-  };
+  const handleReset = () => {setAnswers({});setResults({});setShowResults(false);setShowAns(false);setAnnouncement("Answers and feedback cleared.");};
 
-  const isWrong    = (item) => showResults && !showAns && !isCorrect(answers[item.id] || "", item.correct);
-  const isDisabled = (item) => showAns || (showResults && isCorrect(answers[item.id] || "", item.correct));
+  const isWrong = (item) => !showAns && results[item.id] === "wrong";
+  
 
   return (
-    <div className="main-container-component">
+    <div data-adapt-scope="review3&4_Review4_Page2_Q1" className="main-container-component">
+<style>{`[data-adapt-scope="review3&4_Review4_Page2_Q1"] input:focus-visible, [data-adapt-scope="review3&4_Review4_Page2_Q1"] [data-keyboard-choice]:focus-visible, [data-adapt-scope="review3&4_Review4_Page2_Q1"] [data-grid-cell]:focus-visible {outline:4px solid #2563eb;outline-offset:3px;border-radius:6px;}`}</style>
+<div className="sr-only" role="status" aria-live="polite" aria-atomic="true">{announcement}</div>
       <style>{`
         /* ── Characters row ── */
         .lwqd-chars {
@@ -257,19 +268,14 @@ export default function WB_LookWrite_QD() {
         }}
       >
         {/* ── Header ── */}
-        <h1
-          className="WB-header-title-page8"
-          style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
-        >
-          <span className="WB-ex-A-1">D</span>
-          Look and write.
-        </h1>
+        <ExerciseHeader
+          subTitle="Use the picture as the main clue, then write the complete word or sentence before checking." isReview sectionLetter="D" title={<>Look and write.</>} />
 
         {/* ── Characters row ── */}
         <div className="lwqd-chars">
           {CHARS.map((ch) => (
             <div key={ch.label} className="lwqd-char-card">
-              <img src={ch.src} alt={`char-${ch.label}`} className="lwqd-char-img" />
+              <img src={ch.src} alt={({[imgA]:"Person A, wearing a red shirt and blue shorts.",[imgB]:"Person B, an elderly man with glasses, a green jacket and a walking stick.",[imgC]:"Person C, a man wearing a yellow shirt and blue trousers.",[imgD]:"Person D, with curly red hair, a green top and purple trousers."})[ch.src]} className="lwqd-char-img" />
               <div className="lwqd-char-label">{ch.label}</div>
             </div>
           ))}
@@ -282,14 +288,14 @@ export default function WB_LookWrite_QD() {
             const value    = answers[item.id] || "";
             const tColor   = showAns ? INPUT_ANSWER_COLOR : INPUT_TEXT_COLOR;
             const uColor   = wrong ? INPUT_UNDERLINE_WRONG : INPUT_UNDERLINE_DEFAULT;
-            const disabled = isDisabled(item);
+            
 
             return (
               <div key={item.id} className="lwqd-row">
                 <span className="lwqd-num">{item.id}</span>
                 <span className="lwqd-question">{item.question}</span>
                 <div className="lwqd-input-wrap">
-                  <input
+                  <input placeholder="Answer" aria-invalid={results[item.id] === "wrong"} title={answerTargets.find(target=>target.key === item.id)?.label || "Write an answer"} aria-label={answerTargets.find(target=>target.key === item.id)?.label || "Write an answer"} {...fieldKeys}
                     type="text"
                     className={[
                       "lwqd-input",
@@ -297,9 +303,9 @@ export default function WB_LookWrite_QD() {
                       showAns ? "lwqd-input--answer" : "",
                     ].filter(Boolean).join(" ")}
                     value={value}
-                    disabled={disabled}
+                    disabled={showAns || results[item.id] === "correct"}
                     onChange={(e) => handleChange(item.id, e.target.value)}
-                    style={{ borderBottomColor: uColor, color: tColor }}
+                    style={{...({ borderBottomColor: uColor, color: tColor }),borderBottomColor:showAns || results[item.id] === "correct" ? "#16a34a" : results[item.id] === "wrong" ? "#ef4444" : ({ borderBottomColor: uColor, color: tColor }).borderBottomColor}}
                     spellCheck={false}
                     autoComplete="off"
                   />
@@ -312,11 +318,11 @@ export default function WB_LookWrite_QD() {
 
         {/* ── Buttons ── */}
         <div className="lwqd-buttons">
-          <Button
-            checkAnswers={handleCheck}
-            handleShowAnswer={handleShowAnswer}
-            handleStartAgain={handleReset}
-          />
+          <div className="action-buttons-container">
+<button type="button" aria-label="Start Again" {...activationKeys} ref={resetButtonRef} onClick={handleReset} className="try-again-button">Start Again ↻</button>
+<button type="button" aria-label="Show Answer" {...activationKeys} onClick={handleShowAnswer} className="show-answer-btn swal-continue">Show Answer</button>
+<button type="button" aria-label="Check Answer" {...activationKeys} onClick={handleCheck} disabled={checkDisabled} style={{cursor:checkDisabled ? "not-allowed":"pointer"}} className="check-button2">Check Answer ✓</button>
+</div>
         </div>
       </div>
     </div>

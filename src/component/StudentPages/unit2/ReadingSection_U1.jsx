@@ -197,7 +197,11 @@ const ReadingSection_U1 = () => {
       <div className="w-[60%]">
         <ReadingSection
           mainTitle="What kinds of sports do you like? What kinds of sports 
-do you play during gym class?"
+          do you play during gym class?"
+          titleHeader={"Listen and read along: Sports Day."}
+          subTitle={
+            "Press Play, follow the text in Sports Day, then pause or replay any part you need to hear again."
+          }
           image={imgReading}
           image1={img}
           sound={readingAudio}

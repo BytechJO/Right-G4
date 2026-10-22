@@ -1,11 +1,27 @@
-import React, { useState } from "react";
-import Button from "../../Button";
+import ExerciseHeader from "../../ExerciseHeader";
+import React, { useState, useRef, useEffect } from "react";
 import ValidationAlert from "../../Popup/ValidationAlert";
 
 // ─────────────────────────────────────────────
 //  🖼️  SCENE IMAGE
 // ─────────────────────────────────────────────
 import imgScene from "../../../assets/imgs/pages/Class Book/Right 4 Unit 4 Joy Makes a Friend Folder/Page 36/SVG/Asset 1.svg";
+const activationKeys = {
+  onKeyDown: (event) => {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    event.preventDefault();
+    event.stopPropagation();
+    if (!event.repeat) event.currentTarget.click();
+  },
+  onKeyUp: (event) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+  },
+};
+
+
 
 // ─────────────────────────────────────────────
 //  🎨  COLORS
@@ -62,42 +78,50 @@ const WORD_LIST = [
 // ─────────────────────────────────────────────
 const cellKey = (r, c) => `${r}-${c}`;
 
-const getCellsBetween = (a, b) => {
-  if (!a || !b) return [];
-  const dr  = b[0] - a[0];
-  const dc  = b[1] - a[1];
-  const len = Math.max(Math.abs(dr), Math.abs(dc));
-  if (len === 0) return [a];
-  if (Math.abs(dr) !== 0 && Math.abs(dc) !== 0 && Math.abs(dr) !== Math.abs(dc)) return [a];
-  const sr = dr === 0 ? 0 : dr / Math.abs(dr);
-  const sc = dc === 0 ? 0 : dc / Math.abs(dc);
-  const cells = [];
-  for (let i = 0; i <= len; i++) cells.push([a[0] + sr * i, a[1] + sc * i]);
-  return cells;
-};
+const getCellsBetween = (a,b) => {if(!a||!b)return [];const dr=b[0]-a[0],dc=b[1]-a[1],len=Math.max(Math.abs(dr),Math.abs(dc));if(dr!==0&&dc!==0&&Math.abs(dr)!==Math.abs(dc))return [];const cells=Array.from({length:len+1},(_,i)=>[a[0]+i*Math.sign(dr),a[1]+i*Math.sign(dc)]);return cells.every(([r,col])=>GRID[r]?.[col]!==undefined)?cells:[];};
 
-const checkSelection = (cells, foundNames) => {
-  if (cells.length === 0) return null;
-  const selectedSet = new Set(cells.map(([r, c]) => `${r}-${c}`));
-  for (const def of WORD_DEFS) {
-    if (foundNames.has(def.word)) continue;
-    if (cells.length !== def.cells.length) continue;
-    const defSet = new Set(def.cells.map(([r, c]) => `${r}-${c}`));
-    if ([...selectedSet].every((k) => defSet.has(k))) return def;
-  }
-  return null;
-};
+const checkSelection = (cells,foundNames) => WORD_DEFS.find(def=>!foundNames.has(def.word)&&cells.length===def.cells.length&&(cells.every((cell,i)=>cellKey(...cell)===cellKey(...def.cells[i]))||cells.every((cell,i)=>cellKey(...cell)===cellKey(...def.cells[def.cells.length-1-i])))) || null;
 
 // ─────────────────────────────────────────────
 //  COMPONENT
 // ─────────────────────────────────────────────
 export default function WB_FindCircleWords_QB() {
-  const [selecting,   setSelecting]   = useState(false);
+  const [,   setSelecting]   = useState(false);
   const [startCell,   setStartCell]   = useState(null);
   const [hoveredCell, setHoveredCell] = useState(null);
   const [foundWords,  setFoundWords]  = useState([]);
   const [wrongFlash,  setWrongFlash]  = useState(false);
   const [answerShown, setAnswerShown] = useState(false);
+  const [completed,setCompleted] = useState(false);
+  const [checked,setChecked] = useState(false);
+  const [activeCell,setActiveCell] = useState([0,0]);
+  const [announcement,setAnnouncement] = useState("");
+  const resetButtonRef = useRef(null), gridRef = useRef(null), cellRefs = useRef({}), gestureRef = useRef(null);
+  const checkDisabled = answerShown || completed;
+  const release = () => {const g=gestureRef.current;gestureRef.current=null;if(g && gridRef.current?.hasPointerCapture?.(g.id))gridRef.current.releasePointerCapture(g.id);};
+  const cancelSelection = () => {release();setStartCell(null);setHoveredCell(null);setSelecting(false);};
+  useEffect(()=>()=>{const g=gestureRef.current;gestureRef.current=null;if(g && gridRef.current?.hasPointerCapture?.(g.id))gridRef.current.releasePointerCapture(g.id);},[]);
+  const accept = (a,b) => {
+    if(checkDisabled)return;
+    const cells=getCellsBetween(a,b), match=checkSelection(cells,foundNames);
+    cancelSelection();setChecked(false);
+    if(match){setFoundWords(prev=>[...prev,{word:match.word,cells:match.cells,color:FOUND_COLORS[prev.length % FOUND_COLORS.length]}]);setWrongFlash(false);setAnnouncement(`Found ${match.word}.`);}
+    else {setWrongFlash(true);setAnnouncement("That path is not a new target word. Try again.");}
+  };
+  const activateCell = (r,col) => {if(checkDisabled)return;setWrongFlash(false);if(!startCell){setStartCell([r,col]);setHoveredCell([r,col]);setSelecting(true);setAnnouncement(`Selection starts at row ${r+1}, column ${col+1}. Choose the final letter.`);}else accept(startCell,[r,col]);};
+  const gridKey = (event,r,col) => {
+    if(event.key === "Tab")return;
+    if(["ArrowLeft","ArrowRight","ArrowUp","ArrowDown"].includes(event.key)){
+      event.preventDefault();event.stopPropagation();let nr=r,nc=col;if(event.key === "ArrowLeft")nc=Math.max(0,col-1);if(event.key === "ArrowRight")nc=Math.min(GRID[r].length-1,col+1);if(event.key === "ArrowUp")nr=Math.max(0,r-1);if(event.key === "ArrowDown")nr=Math.min(GRID.length-1,r+1);nc=Math.min(nc,GRID[nr].length-1);setActiveCell([nr,nc]);if(startCell&&!checkDisabled)setHoveredCell([nr,nc]);cellRefs.current[cellKey(nr,nc)]?.focus({preventScroll:true});return;
+    }
+    if(event.key === "Enter" || event.key === " "){event.preventDefault();event.stopPropagation();if(!event.repeat)activateCell(r,col);return;}
+    if(event.key === "Escape"){event.preventDefault();event.stopPropagation();cancelSelection();setAnnouncement("Selection cancelled.");return;}
+    if(event.key === "Backspace"){event.preventDefault();event.stopPropagation();if(checkDisabled||event.repeat)return;if(startCell)cancelSelection();else setFoundWords(prev=>prev.slice(0,-1));setChecked(false);setWrongFlash(false);setAnnouncement("Last selection undone.");}
+  };
+  const cellAt = event => {const node=document.elementFromPoint(event.clientX,event.clientY)?.closest("[data-grid-cell]");if(!node||!gridRef.current?.contains(node))return null;return [Number(node.dataset.row),Number(node.dataset.col)];};
+  const pointerStart = (event,r,col) => {if(checkDisabled||event.button!==0||event.isPrimary===false||gestureRef.current)return;event.preventDefault();event.stopPropagation();const anchor=startCell||[r,col];gestureRef.current={id:event.pointerId,anchor,hadAnchor:!!startCell,moved:false,end:[r,col]};setStartCell(anchor);setHoveredCell([r,col]);setSelecting(true);setActiveCell([r,col]);setWrongFlash(false);gridRef.current?.setPointerCapture?.(event.pointerId);};
+  const pointerMove = event => {const g=gestureRef.current;if(!g||g.id!==event.pointerId)return;const cell=cellAt(event);if(!cell)return;g.end=cell;g.moved ||= cell[0]!==g.anchor[0]||cell[1]!==g.anchor[1];setHoveredCell(cell);};
+  const pointerEnd = event => {const g=gestureRef.current;if(!g||g.id!==event.pointerId)return;const cell=cellAt(event);release();if(!cell){cancelSelection();return;}if(g.hadAnchor||g.moved||cell[0]!==g.anchor[0]||cell[1]!==g.anchor[1])accept(g.anchor,cell);};
 
   const foundNames = new Set(foundWords.map((f) => f.word));
 
@@ -115,56 +139,19 @@ export default function WB_FindCircleWords_QB() {
   const selectionKeys  = new Set(selectionCells.map(([r, c]) => cellKey(r, c)));
 
   // ── Handlers ──
-  const handleMouseDown  = (r, c) => { setSelecting(true); setStartCell([r, c]); setHoveredCell([r, c]); };
-  const handleMouseEnter = (r, c) => { if (selecting) setHoveredCell([r, c]); };
+  
+  
 
-  const handleMouseUp = () => {
-    if (!selecting) return;
-    setSelecting(false);
-    if (selectionCells.length > 1) {
-      const match = checkSelection(selectionCells, foundNames);
-      if (match) {
-        const color = FOUND_COLORS[foundWords.length % FOUND_COLORS.length];
-        setFoundWords((prev) => [...prev, { word: match.word, cells: match.cells, color }]);
-      } else {
-        setWrongFlash(true);
-        setTimeout(() => setWrongFlash(false), 400);
-      }
-    }
-    setStartCell(null);
-    setHoveredCell(null);
-  };
+  
 
-  const handleReset = () => {
-    setAnswerShown(false);
-    setFoundWords([]);
-    setStartCell(null);
-    setHoveredCell(null);
-    setSelecting(false);
-    setWrongFlash(false);
-  };
+  const handleReset = () => {cancelSelection();setAnswerShown(false);setCompleted(false);setChecked(false);setFoundWords([]);setWrongFlash(false);setActiveCell([0,0]);setAnnouncement("All discoveries and feedback cleared.");cellRefs.current["0-0"]?.focus({preventScroll:true});};
 
-  const handleShowAnswer = () => {
-    setAnswerShown(true);
-    setFoundWords(
-      WORD_DEFS.map((def, i) => ({
-        word:  def.word,
-        cells: def.cells,
-        color: FOUND_COLORS[i % FOUND_COLORS.length],
-      }))
-    );
-  };
+  const handleShowAnswer = () => {cancelSelection();setWrongFlash(false);setAnswerShown(true);setChecked(false);setFoundWords(WORD_DEFS.map((def,i)=>({...def,color:FOUND_COLORS[i % FOUND_COLORS.length]})));resetButtonRef.current?.focus({preventScroll:true});setAnnouncement("All target words shown and locked.");};
 
-  const handleCheck = () => {
-    if (answerShown) return;
-    if (foundNames.size < WORD_DEFS.length) {
-      ValidationAlert.info("Please find all words first.");
-    } else {
-      ValidationAlert.success(`Score: ${WORD_DEFS.length} / ${WORD_DEFS.length}`);
-    }
-  };
+  const handleCheck = () => {if(checkDisabled)return;cancelSelection();if(!foundWords.length){ValidationAlert.info("Please find a word first.");setAnnouncement("Please find a word first.");return;}setChecked(true);setAnnouncement(`Score: ${foundWords.length} out of ${WORD_DEFS.length}.`);if(foundWords.length === WORD_DEFS.length){setCompleted(true);resetButtonRef.current?.focus({preventScroll:true});ValidationAlert.success(`Score: ${foundWords.length} / ${WORD_DEFS.length}`);}else ValidationAlert.warning(`Score: ${foundWords.length} / ${WORD_DEFS.length}`);};
 
   const getCellStyle = (key, isSel, isWrong) => {
+    if ((answerShown || completed) && foundCellMap[key]) return {background:"#bbf7d0"};
     if (isWrong) return { background: "#ffcdd2" };
     if (isSel)   return { background: CELL_BG_SELECTING };
     const colors = foundCellMap[key];
@@ -179,11 +166,12 @@ export default function WB_FindCircleWords_QB() {
   };
 
   return (
-    <div
+    <div data-adapt-scope="review3&4_Review4_Page1_Q2"
       className="main-container-component"
-      onMouseUp={handleMouseUp}
-      onMouseLeave={() => { if (selecting) handleMouseUp(); }}
+
     >
+<style>{`[data-adapt-scope="review3&4_Review4_Page1_Q2"] input:focus-visible, [data-adapt-scope="review3&4_Review4_Page1_Q2"] [data-keyboard-choice]:focus-visible, [data-adapt-scope="review3&4_Review4_Page1_Q2"] [data-grid-cell]:focus-visible {outline:4px solid #2563eb;outline-offset:3px;border-radius:6px;}`}</style>
+<div className="sr-only" role="status" aria-live="polite" aria-atomic="true">{announcement}</div>
       <style>{`
         /* ── Layout: grid | word-list | scene ── */
         .fcwb-body {
@@ -296,19 +284,14 @@ export default function WB_FindCircleWords_QB() {
         }}
       >
         {/* ── Header ── */}
-        <h1
-          className="WB-header-title-page8"
-          style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
-        >
-          <span className="WB-ex-A-1">B</span>
-          Find and circle the words.
-        </h1>
+        <ExerciseHeader
+          subTitle="Find one target word at a time, then select all its letters before moving to the next word." isReview sectionLetter="B" title={<>Find and circle the words.</>} />
 
         {/* ── Body: grid | word-list | scene ── */}
         <div className="fcwb-body">
 
           {/* الجدول */}
-          <div className="fcwb-grid">
+          <div className="fcwb-grid" ref={gridRef} role="group" aria-label="Word search grid. Use arrows to move, Enter or Space to choose endpoints, Escape to cancel, and Backspace to undo." onPointerMove={pointerMove} onPointerUp={pointerEnd} onPointerCancel={event=>{if(gestureRef.current?.id===event.pointerId)cancelSelection();}} onLostPointerCapture={event=>{if(gestureRef.current?.id===event.pointerId)cancelSelection();}}>
             {GRID.map((row, r) =>
               row.map((letter, c) => {
                 const key      = cellKey(r, c);
@@ -327,9 +310,8 @@ export default function WB_FindCircleWords_QB() {
                       isSeling ? "fcwb-cell--selecting" : "",
                       isWrong  ? "fcwb-cell--wrong"     : "",
                     ].filter(Boolean).join(" ")}
-                    style={getCellStyle(key, isSeling, isWrong)}
-                    onMouseDown={() => handleMouseDown(r, c)}
-                    onMouseEnter={() => handleMouseEnter(r, c)}
+                    style={{...getCellStyle(key, isSeling, isWrong),touchAction:"none"}}
+                    role="button" data-grid-cell data-row={r} data-col={c} tabIndex={activeCell[0] === r && activeCell[1] === c ? 0 : -1} ref={el=>{cellRefs.current[key]=el;}} aria-label={`Row ${r+1}, column ${c+1}: ${letter}${isFound?", found":""}`} aria-pressed={isSel || !!isFound} aria-disabled={checkDisabled} onKeyDown={event=>gridKey(event,r,c)} onKeyUp={activationKeys.onKeyUp} onPointerDown={event=>pointerStart(event,r,c)}
                   >
                     {letter}
                   </div>
@@ -344,7 +326,7 @@ export default function WB_FindCircleWords_QB() {
             {WORD_LIST.map((w) => (
               <span
                 key={w}
-                className={`fcwb-word-item ${foundNames.has(w) ? "fcwb-word-item--found" : ""}`}
+                className={`fcwb-word-item ${foundNames.has(w) ? "fcwb-word-item--found" : ""}`} style={{color:checked && !foundNames.has(w)?"#ef4444":undefined}}
               >
                 {w}
               </span>
@@ -352,18 +334,18 @@ export default function WB_FindCircleWords_QB() {
           </div>
           {/* الصورة */}
           <div className="fcwb-scene">
-            <img src={imgScene} alt="scene" className="fcwb-scene-img" />
+            <img src={imgScene} alt="People having a picnic beneath trees, with food on a blanket, a rabbit and a bicycle nearby." className="fcwb-scene-img" />
           </div>
 
         </div>
 
         {/* ── Buttons ── */}
         <div className="fcwb-buttons">
-          <Button
-            checkAnswers={handleCheck}
-            handleShowAnswer={handleShowAnswer}
-            handleStartAgain={handleReset}
-          />
+          <div className="action-buttons-container">
+<button type="button" aria-label="Start Again" {...activationKeys} ref={resetButtonRef} onClick={handleReset} className="try-again-button">Start Again ↻</button>
+<button type="button" aria-label="Show Answer" {...activationKeys} onClick={handleShowAnswer} className="show-answer-btn swal-continue">Show Answer</button>
+<button type="button" aria-label="Check Answer" {...activationKeys} onClick={handleCheck} disabled={checkDisabled} style={{cursor:checkDisabled ? "not-allowed":"pointer"}} className="check-button2">Check Answer ✓</button>
+</div>
         </div>
       </div>
     </div>

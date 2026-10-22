@@ -1,88 +1,181 @@
-import React, { useState } from "react";
-import Button from "../../Button";
+import ExerciseHeader from "../../ExerciseHeader";
+import React, { useState, useRef } from "react";
 import ValidationAlert from "../../Popup/ValidationAlert";
+const activationKeys = {
+  onKeyDown: (event) => {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    event.preventDefault();
+    event.stopPropagation();
+    if (!event.repeat) event.currentTarget.click();
+  },
+  onKeyUp: (event) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+  },
+};
+const fieldKeys = {
+  onKeyDown: (event) => {
+    if (event.key === "Enter" || event.key === " ") event.stopPropagation();
+  },
+  onKeyUp: (event) => {
+    if (event.key === "Enter" || event.key === " ") event.stopPropagation();
+  },
+};
+const normalizeAnswer = (value) =>
+  value
+    .normalize("NFKC")
+    .toLowerCase()
+    .replace(/[\u2018\u2019\u201A\u201B\u0060\u00B4']/g, "")
+    .replace(/[.,!?;:\u2026\u201c\u201d"]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
 
 // ─────────────────────────────────────────────
 //  🎨  COLORS
 // ─────────────────────────────────────────────
 const ANSWER_COLOR = "#c0392b";
 const TEXT_DEFAULT = "#2b2b2b";
-const LINE_COLOR   = "#2b2b2b";
-const WRONG_COLOR  = "#ef4444";
-const RIGHT_COLOR  = "#2096a6";
+const LINE_COLOR = "#2b2b2b";
+const WRONG_COLOR = "#ef4444";
+const RIGHT_COLOR = "#2096a6";
 
 // ─────────────────────────────────────────────
 //  📝  EXERCISE DATA
 // ─────────────────────────────────────────────
 const ITEMS = [
-  { id: 1, before: "They sound",          after: "professional than the other group.", correct: "more" },
-  { id: 2, before: "The youngest sister is the", after: "practical.",                  correct: "most" },
-  { id: 3, before: "Laura is",            after: "elegant than Rachel.",               correct: "more" },
-  { id: 4, before: "The baseball team is the",   after: "famous.",                     correct: "most" },
+  {
+    id: 1,
+    before: "They sound",
+    after: "professional than the other group.",
+    correct: "more",
+  },
+  {
+    id: 2,
+    before: "The youngest sister is the",
+    after: "practical.",
+    correct: "most",
+  },
+  { id: 3, before: "Laura is", after: "elegant than Rachel.", correct: "more" },
+  {
+    id: 4,
+    before: "The baseball team is the",
+    after: "famous.",
+    correct: "most",
+  },
 ];
 
 // ─────────────────────────────────────────────
 //  COMPONENT
 // ─────────────────────────────────────────────
 export default function CB_ReadAndComplete_QA() {
-  const [answers,     setAnswers]     = useState({});
-  const [showResults, setShowResults] = useState(false);
-  const [showAns,     setShowAns]     = useState(false);
+  const [answers, setAnswers] = useState({});
+  const [, setShowResults] = useState(false);
+  const [showAns, setShowAns] = useState(false);
+  const [results, setResults] = useState({});
+  const [announcement, setAnnouncement] = useState("");
+  const resetButtonRef = useRef(null);
+  const answerTargets = ITEMS.map((item) => ({
+    key: item.id,
+    correct: Array.isArray(item.correct) ? item.correct : [item.correct],
+    answer: item.answer ?? item.correct,
+    label: `Question ${item.id}. ${item.scrambled ? "Unscramble: " + item.scrambled : item.before ? item.before + " blank " + (item.after || "") : item.word ? "Write the opposite of " + item.word : item.question || item.cue || item.hint || "Write an answer using the diagram."}`,
+  }));
+  const checkDisabled =
+    showAns || answerTargets.every((item) => results[item.key] === "correct");
 
-  const isLocked = showResults || showAns;
-
-  const handleChange = (id, val) => {
-    if (isLocked) return;
-    setAnswers((prev) => ({ ...prev, [id]: val }));
+  const handleChange = (key, value) => {
+    if (showAns || results[key] === "correct") return;
+    if (!answerTargets.some((item) => item.key === key)) return;
+    setAnswers((prev) => ({ ...prev, [key]: value }));
+    setResults((prev) => {
+      const next = { ...prev };
+      delete next[key];
+      return next;
+    });
   };
 
   const handleCheck = () => {
-    if (isLocked) return;
-    const allFilled = ITEMS.every((item) => (answers[item.id] || "").trim() !== "");
-    if (!allFilled) { ValidationAlert.info("Please fill in all the blanks."); return; }
-    let score = 0;
-    ITEMS.forEach((item) => {
-      if ((answers[item.id] || "").trim().toLowerCase() === item.correct) score++;
-    });
+    if (checkDisabled) return;
+    if (!answerTargets.every((item) => answers[item.key]?.trim())) {
+      setAnnouncement("Please complete all answers first.");
+      ValidationAlert.info("Please complete all answers first.");
+      return;
+    }
+    const next = Object.fromEntries(
+      answerTargets.map((item) => [
+        item.key,
+        results[item.key] === "correct" ||
+        item.correct.some(
+          (answer) =>
+            normalizeAnswer(answers[item.key] || "") ===
+            normalizeAnswer(answer),
+        )
+          ? "correct"
+          : "wrong",
+      ]),
+    );
+    const score = Object.values(next).filter(
+      (value) => value === "correct",
+    ).length;
+    setResults(next);
     setShowResults(true);
-    if (score === ITEMS.length)  ValidationAlert.success(`Score: ${score} / ${ITEMS.length}`);
-    else if (score > 0)          ValidationAlert.warning(`Score: ${score} / ${ITEMS.length}`);
-    else                         ValidationAlert.error(`Score: ${score} / ${ITEMS.length}`);
+    setAnnouncement(
+      `Score: ${score} out of ${answerTargets.length}. Correct answers are locked; incorrect answers can be changed.`,
+    );
+    if (score === answerTargets.length) {
+      resetButtonRef.current?.focus({ preventScroll: true });
+      ValidationAlert.success(`Score: ${score} / ${answerTargets.length}`);
+    } else if (score)
+      ValidationAlert.warning(`Score: ${score} / ${answerTargets.length}`);
+    else ValidationAlert.error(`Score: ${score} / ${answerTargets.length}`);
   };
 
   const handleShowAnswer = () => {
-    const filled = {};
-    ITEMS.forEach((item) => { filled[item.id] = item.correct; });
-    setAnswers(filled);
+    setAnswers(
+      Object.fromEntries(answerTargets.map((item) => [item.key, item.answer])),
+    );
+    setResults({});
     setShowResults(false);
     setShowAns(true);
+    resetButtonRef.current?.focus({ preventScroll: true });
+    setAnnouncement("Correct answers shown and locked.");
   };
 
   const handleReset = () => {
     setAnswers({});
+    setResults({});
     setShowResults(false);
     setShowAns(false);
+    setAnnouncement("Answers and feedback cleared.");
   };
 
-  const getState = (item) => {
-    if (showAns) return "answer";
-    if (showResults) {
-      const val = (answers[item.id] || "").trim().toLowerCase();
-      return val === item.correct ? "correct" : "wrong";
-    }
-    return "editing";
-  };
+  const getState = (item) =>
+    showAns ? "answer" : results[item.id] || "editing";
 
-  const getColor = (item) => {
-    const state = getState(item);
-    if (state === "answer")  return ANSWER_COLOR;
-    if (state === "correct") return RIGHT_COLOR;
-    if (state === "wrong")   return WRONG_COLOR;
-    return TEXT_DEFAULT;
-  };
+  // const getColor = (item) => {
+  //   const state = getState(item);
+  //   if (state === "answer") return ANSWER_COLOR;
+  //   if (state === "correct") return RIGHT_COLOR;
+  //   if (state === "wrong") return WRONG_COLOR;
+  //   return TEXT_DEFAULT;
+  // };
 
   return (
-    <div className="main-container-component">
+    <div
+      data-adapt-scope="unit4_Unit4_Page5_Q4"
+      className="main-container-component"
+    >
+      <style>{`[data-adapt-scope="unit4_Unit4_Page5_Q4"] input:focus-visible, [data-adapt-scope="unit4_Unit4_Page5_Q4"] [data-keyboard-choice]:focus-visible, [data-adapt-scope="unit4_Unit4_Page5_Q4"] [data-grid-cell]:focus-visible {outline:4px solid #2563eb;outline-offset:3px;border-radius:6px;}`}</style>
+      <div
+        className="sr-only"
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+      >
+        {announcement}
+      </div>
       <style>{`
         .rc-rows {
           display: flex;
@@ -180,47 +273,72 @@ export default function CB_ReadAndComplete_QA() {
         }}
       >
         {/* Header */}
-        <h1
-          className="WB-header-title-page8"
-          style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
-        >
-          <span className="WB-ex-A">D</span>
-          Read and complete. Use{" "}
-          <span style={{ color: "#ff9900ff" }}>more</span>{" "}
-          or{" "}
-          <span style={{ color: "#ff9900ff" }}>most.</span>
-        </h1>
+        <ExerciseHeader
+          sectionLetter="D"
+          title={"Read and complete. Use more or most."}
+          subTitle={
+            "Read the whole sentence, decide whether it compares two or more than two, then complete it with more or most."
+          }
+        />
 
         {/* Rows */}
         <div className="rc-rows">
           {ITEMS.map((item) => {
             const state = getState(item);
-            const color = getColor(item);
-            const val   = answers[item.id] || "";
+            // const color = getColor(item);
+            const val = answers[item.id] || "";
 
             return (
               <div key={item.id} className="rc-row">
-
                 <span className="rc-num">{item.id}</span>
                 <span className="rc-text">{item.before}</span>
 
                 <span className="rc-input-wrap">
                   <input
+                    placeholder="Answer"
+                    aria-invalid={results[item.id] === "wrong"}
+                    title={
+                      answerTargets.find((target) => target.key === item.id)
+                        ?.label || "Write an answer"
+                    }
+                    aria-label={
+                      answerTargets.find((target) => target.key === item.id)
+                        ?.label || "Write an answer"
+                    }
+                    {...fieldKeys}
                     className="rc-input"
                     type="text"
                     value={state === "answer" ? item.correct : val}
-                    disabled={isLocked}
+                    disabled={showAns || results[item.id] === "correct"}
                     onChange={(e) => handleChange(item.id, e.target.value)}
                     style={{
-                      borderBottomColor: state === "wrong" ? WRONG_COLOR : val ? LINE_COLOR : LINE_COLOR,
+                      ...{
+                        borderBottomColor:
+                          state === "wrong"
+                            ? WRONG_COLOR
+                            : val
+                              ? LINE_COLOR
+                              : LINE_COLOR,
+                      },
+                      borderBottomColor:
+                        showAns || results[item.id] === "correct"
+                          ? "#16a34a"
+                          : results[item.id] === "wrong"
+                            ? "#ef4444"
+                            : {
+                                borderBottomColor:
+                                  state === "wrong"
+                                    ? WRONG_COLOR
+                                    : val
+                                      ? LINE_COLOR
+                                      : LINE_COLOR,
+                              }.borderBottomColor,
                     }}
                   />
                   {state === "wrong" && <div className="rc-badge">✕</div>}
-                 
                 </span>
 
                 <span className="rc-text">{item.after}</span>
-
               </div>
             );
           })}
@@ -228,11 +346,38 @@ export default function CB_ReadAndComplete_QA() {
 
         {/* Buttons */}
         <div className="rc-buttons">
-          <Button
-            checkAnswers={handleCheck}
-            handleShowAnswer={handleShowAnswer}
-            handleStartAgain={handleReset}
-          />
+          <div className="action-buttons-container">
+            <button
+              type="button"
+              aria-label="Start Again"
+              {...activationKeys}
+              ref={resetButtonRef}
+              onClick={handleReset}
+              className="try-again-button"
+            >
+              Start Again ↻
+            </button>
+            <button
+              type="button"
+              aria-label="Show Answer"
+              {...activationKeys}
+              onClick={handleShowAnswer}
+              className="show-answer-btn swal-continue"
+            >
+              Show Answer
+            </button>
+            <button
+              type="button"
+              aria-label="Check Answer"
+              {...activationKeys}
+              onClick={handleCheck}
+              disabled={checkDisabled}
+              style={{ cursor: checkDisabled ? "not-allowed" : "pointer" }}
+              className="check-button2"
+            >
+              Check Answer ✓
+            </button>
+          </div>
         </div>
       </div>
     </div>

@@ -1,46 +1,55 @@
-import React, { useState } from "react";
-import Button from "../../Button";
+import React, { useState, useRef } from "react";
 import ValidationAlert from "../../Popup/ValidationAlert";
 
 // ─────────────────────────────────────────────
 //  🖼️  Matching diagram image (ثابتة)
 // ─────────────────────────────────────────────
 import imgMatching from "../../../assets/imgs/pages/Class Book/Right 4 Unit 2 Welcome to the Big Apple Folder/Page 18/SVG/Asset 78.svg";
+import ExerciseHeader from "../../ExerciseHeader";
 
 // ─────────────────────────────────────────────
 //  🎨  COLORS
 // ─────────────────────────────────────────────
 const INPUT_UNDERLINE_DEFAULT = "#3f3f3f";
-const INPUT_UNDERLINE_WRONG   = "#ef4444";
-const INPUT_TEXT_COLOR        = "#2b2b2b";
-const INPUT_ANSWER_COLOR      = "#c81e1e";
-const NUMBER_COLOR            = "#2b2b2b";
-const WRONG_BADGE_BG          = "#ef4444";
-const WRONG_BADGE_TEXT        = "#ffffff";
+const INPUT_UNDERLINE_WRONG = "#ef4444";
+const INPUT_TEXT_COLOR = "#2b2b2b";
+const INPUT_ANSWER_COLOR = "#c81e1e";
+const NUMBER_COLOR = "#2b2b2b";
+const WRONG_BADGE_BG = "#ef4444";
+const WRONG_BADGE_TEXT = "#ffffff";
 
 // ─────────────────────────────────────────────
 //  📝  EXERCISE DATA
 // ─────────────────────────────────────────────
 const ITEMS = [
   {
-    id:      1,
-    correct: ["Tom is going to play a video game.", "tom is going to play a video game"],
-    answer:  "Tom is going to play a video game.",
+    id: 1,
+    correct: [
+      "Tom is going to play a video game.",
+      "tom is going to play a video game",
+    ],
+    answer: "Tom is going to play a video game.",
   },
   {
-    id:      2,
-    correct: ["Stella is going to read a book.", "stella is going to read a book"],
-    answer:  "Stella is going to read a book.",
+    id: 2,
+    correct: [
+      "Stella is going to read a book.",
+      "stella is going to read a book",
+    ],
+    answer: "Stella is going to read a book.",
   },
   {
-    id:      3,
+    id: 3,
     correct: ["John is going to ride a bike.", "john is going to ride a bike"],
-    answer:  "John is going to ride a bike.",
+    answer: "John is going to ride a bike.",
   },
   {
-    id:      4,
-    correct: ["Sarah is going to go to the library.", "sarah is going to go to the library"],
-    answer:  "Sarah is going to go to the library.",
+    id: 4,
+    correct: [
+      "Sarah is going to go to the library.",
+      "sarah is going to go to the library",
+    ],
+    answer: "Sarah is going to go to the library.",
   },
 ];
 
@@ -48,7 +57,13 @@ const ITEMS = [
 //  🔧  NORMALIZE
 // ─────────────────────────────────────────────
 const normalize = (str) =>
-  str.toLowerCase().replace(/[^a-z0-9'\s]/g, "").replace(/\s+/g, " ").trim();
+  str
+    .normalize("NFKC")
+    .toLowerCase()
+    .replace(/[\u2018\u2019\u201A\u201B\u0060\u00B4']/g, "")
+    .replace(/[.,!?;:…“”"]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
 
 const isCorrect = (userVal, correctArr) =>
   correctArr.some((c) => normalize(userVal) === normalize(c));
@@ -56,49 +71,132 @@ const isCorrect = (userVal, correctArr) =>
 // ─────────────────────────────────────────────
 //  COMPONENT
 // ─────────────────────────────────────────────
+const activationKeys = {
+  onKeyDown: (event) => {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    event.preventDefault();
+    event.stopPropagation();
+    if (!event.repeat) event.currentTarget.click();
+  },
+  onKeyUp: (event) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+  },
+};
+const fieldKeys = {
+  onKeyDown: (event) => {
+    if (event.key === "Enter" || event.key === " ") event.stopPropagation();
+  },
+  onKeyUp: (event) => {
+    if (event.key === "Enter" || event.key === " ") event.stopPropagation();
+  },
+};
+
 export default function WB_LookWriteSentences_QC() {
-  const [answers,     setAnswers]     = useState({});
-  const [showResults, setShowResults] = useState(false);
-  const [showAns,     setShowAns]     = useState(false);
+  const [answers, setAnswers] = useState({});
+  const [results, setResults] = useState({});
+  const [showAns, setShowAns] = useState(false);
+
+  const resetButtonRef = useRef(null);
+  const [announcement, setAnnouncement] = useState("");
+  const checkDisabled =
+    showAns || ITEMS.every((item) => results[item.id] === "correct");
 
   const handleChange = (id, value) => {
-    if (showAns) return;
-    const item = ITEMS.find((i) => i.id === id);
-    if (showResults && item && isCorrect(answers[id] || "", item.correct)) return;
-    setAnswers((prev) => ({ ...prev, [id]: value }));
+    if (showAns || results[id] === "correct") return;
+    if (!ITEMS.some((item) => item.id === id)) return;
+
+    setAnswers((previous) => ({ ...previous, [id]: value }));
+    setResults((previous) => {
+      const next = { ...previous };
+      delete next[id];
+      return next;
+    });
   };
 
   const handleCheck = () => {
-    if (showAns) return;
-    const allAnswered = ITEMS.every((item) => answers[item.id]?.trim());
-    if (!allAnswered) { ValidationAlert.info("Please complete all answers first."); return; }
-    let score = 0;
-    ITEMS.forEach((item) => { if (isCorrect(answers[item.id] || "", item.correct)) score++; });
-    setShowResults(true);
-    if (score === ITEMS.length)   ValidationAlert.success(`Score: ${score} / ${ITEMS.length}`);
-    else if (score > 0)           ValidationAlert.warning(`Score: ${score} / ${ITEMS.length}`);
-    else                          ValidationAlert.error(`Score: ${score} / ${ITEMS.length}`);
+    if (checkDisabled) return;
+    if (!ITEMS.every((item) => answers[item.id]?.trim())) {
+      setAnnouncement("Please complete all answers first.");
+      ValidationAlert.info("Please complete all answers first.");
+      return;
+    }
+    const checked = {};
+    const usedSentenceIds = new Set();
+
+    // Reserve already locked answers before checking editable rows, regardless of position.
+    ITEMS.forEach((slot) => {
+      if (results[slot.id] !== "correct") return;
+      const sentence = ITEMS.find((candidate) =>
+        isCorrect(answers[slot.id] || "", candidate.correct),
+      );
+      if (sentence) usedSentenceIds.add(sentence.id);
+      checked[slot.id] = "correct";
+    });
+
+    ITEMS.forEach((slot) => {
+      if (checked[slot.id] === "correct") return;
+      const sentence = ITEMS.find((candidate) =>
+        !usedSentenceIds.has(candidate.id) &&
+        isCorrect(answers[slot.id] || "", candidate.correct),
+      );
+      checked[slot.id] = sentence ? "correct" : "wrong";
+      if (sentence) usedSentenceIds.add(sentence.id);
+    });
+    const score = Object.values(checked).filter(
+      (result) => result === "correct",
+    ).length;
+    setResults(checked);
+    setAnnouncement(
+      `Score: ${score} out of ${ITEMS.length}. Each sentence is counted once. Correct answers are locked; incorrect or repeated answers can be changed.`,
+    );
+    if (score === ITEMS.length) {
+      resetButtonRef.current?.focus({ preventScroll: true });
+      ValidationAlert.success(`Score: ${score} / ${ITEMS.length}`);
+    } else if (score > 0)
+      ValidationAlert.warning(`Score: ${score} / ${ITEMS.length}`);
+    else ValidationAlert.error(`Score: ${score} / ${ITEMS.length}`);
   };
 
   const handleShowAnswer = () => {
     const filled = {};
-    ITEMS.forEach((item) => { filled[item.id] = item.answer; });
+    ITEMS.forEach((item) => {
+      filled[item.id] = item.answer;
+    });
     setAnswers(filled);
-    setShowResults(false);
+    setResults({});
     setShowAns(true);
+    setAnnouncement("Correct answers shown and locked.");
   };
 
   const handleReset = () => {
     setAnswers({});
-    setShowResults(false);
+    setResults({});
     setShowAns(false);
+    setAnnouncement("Answers and feedback cleared.");
   };
 
-  const isWrong    = (item) => showResults && !showAns && !isCorrect(answers[item.id] || "", item.correct);
-  const isDisabled = (item) => showAns || (showResults && isCorrect(answers[item.id] || "", item.correct));
+  const isWrong = (item) => !showAns && results[item.id] === "wrong";
+  const isDisabled = (item) => showAns || results[item.id] === "correct";
 
   return (
-    <div className="main-container-component">
+    <div
+      className="main-container-component"
+      data-review12-scope="Review2_Page1_Q3"
+    >
+      <div
+        className="sr-only"
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+      >
+        {announcement}
+      </div>
+      <style>{`[data-review12-scope="Review2_Page1_Q3"] input:focus-visible {
+        outline: 4px solid #2563eb; outline-offset: 3px; border-radius: 6px;
+      }`}</style>
       <style>{`
         /* ── Sentences list ── */
         .lwsc-list {
@@ -191,22 +289,25 @@ export default function WB_LookWriteSentences_QC() {
           margin: "0 auto",
         }}
       >
-        {/* ── Header ── */}
-        <h1
-          className="WB-header-title-page8"
-          style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
-        >
-          <span className="WB-ex-A">C</span>
-          Look and write sentences using <em style={{ margin: "0 4px" ,color : "#ff8800ff" }}>going to</em>.
-        </h1>
-
+        <ExerciseHeader
+          isReview
+          sectionLetter={"C"}
+          title={"Look and write sentences using going to."}
+          subTitle={
+            "Use each picture to decide the plan, then write a complete sentence with going to before checking."
+          }
+        />
         {/* ── Sentences ── */}
         <div className="lwsc-list">
           {ITEMS.map((item) => {
-            const wrong    = isWrong(item);
-            const value    = answers[item.id] || "";
-            const tColor   = showAns ? INPUT_ANSWER_COLOR : INPUT_TEXT_COLOR;
-            const uColor   = wrong ? INPUT_UNDERLINE_WRONG : INPUT_UNDERLINE_DEFAULT;
+            const wrong = isWrong(item);
+            const value = answers[item.id] || "";
+            const tColor = INPUT_TEXT_COLOR;
+            const uColor = wrong
+              ? INPUT_UNDERLINE_WRONG
+              : isDisabled(item)
+                ? "#16a34a"
+                : INPUT_UNDERLINE_DEFAULT;
             const disabled = isDisabled(item);
 
             return (
@@ -214,12 +315,19 @@ export default function WB_LookWriteSentences_QC() {
                 <span className="lwsc-num">{item.id}</span>
                 <div className="lwsc-input-wrap">
                   <input
+                    {...fieldKeys}
+                    aria-label={`Response ${item.id}. Write a sentence using going to from the diagram. Sentences may be written in any order.`}
+                      title={`Response ${item.id}. Write a sentence using going to from the diagram. Sentences may be written in any order.`}
+                      placeholder="Sentence"
+                    aria-invalid={wrong}
                     type="text"
                     className={[
                       "lwsc-input",
-                      wrong   ? "lwsc-input--wrong"  : "",
+                      wrong ? "lwsc-input--wrong" : "",
                       showAns ? "lwsc-input--answer" : "",
-                    ].filter(Boolean).join(" ")}
+                    ]
+                      .filter(Boolean)
+                      .join(" ")}
                     value={value}
                     disabled={disabled}
                     onChange={(e) => handleChange(item.id, e.target.value)}
@@ -235,15 +343,43 @@ export default function WB_LookWriteSentences_QC() {
         </div>
 
         {/* ── Matching image (ثابتة) ── */}
-        <img src={imgMatching} alt="matching diagram" className="lwsc-matching" />
+        <img
+          src={imgMatching}
+          alt="matching diagram"
+          className="lwsc-matching"
+        />
 
         {/* ── Buttons ── */}
         <div className="lwsc-buttons">
-          <Button
-            checkAnswers={handleCheck}
-            handleShowAnswer={handleShowAnswer}
-            handleStartAgain={handleReset}
-          />
+          <div className="action-buttons-container">
+            <button
+              type="button"
+              ref={resetButtonRef}
+              {...activationKeys}
+              onClick={handleReset}
+              className="try-again-button"
+            >
+              Start Again ↻
+            </button>
+            <button
+              type="button"
+              {...activationKeys}
+              onClick={handleShowAnswer}
+              className="show-answer-btn swal-continue"
+            >
+              Show Answer
+            </button>
+            <button
+              type="button"
+              {...activationKeys}
+              onClick={handleCheck}
+              disabled={checkDisabled}
+              style={{ cursor: checkDisabled ? "not-allowed" : "pointer" }}
+              className="check-button2"
+            >
+              Check Answer ✓
+            </button>
+          </div>
         </div>
       </div>
     </div>

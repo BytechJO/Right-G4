@@ -1,19 +1,33 @@
-import React, { useState } from "react";
-import Button from "../../Button";
+import ExerciseHeader from "../../ExerciseHeader";
+import React, { useState, useRef } from "react";
 import ValidationAlert from "../../Popup/ValidationAlert";
-import { div } from "framer-motion/client";
+// import { div } from "framer-motion/client";
+const activationKeys = {
+  onKeyDown: (event) => {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    event.preventDefault();
+    event.stopPropagation();
+    if (!event.repeat) event.currentTarget.click();
+  },
+  onKeyUp: (event) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+  },
+};
 
 // ─────────────────────────────────────────────
 //  🎨  COLORS
 // ─────────────────────────────────────────────
-const CIRCLE_COLOR     = "#2096a6";
-const CIRCLE_WRONG     = "#ef4444";
-const ANSWER_COLOR     = "#c0392b";
-const TEXT_DEFAULT     = "#2b2b2b";
-const LINE_COLOR       = "#2b2b2b";
-const WRONG_COLOR      = "#ef4444";
-const RIGHT_COLOR      = "#2096a6";
-const WRONG_BADGE_BG   = "#ef4444";
+const CIRCLE_COLOR = "#2096a6";
+const CIRCLE_WRONG = "#ef4444";
+const ANSWER_COLOR = "#c0392b";
+const TEXT_DEFAULT = "#2b2b2b";
+const LINE_COLOR = "#2b2b2b";
+const WRONG_COLOR = "#ef4444";
+const RIGHT_COLOR = "#2096a6";
+const WRONG_BADGE_BG = "#ef4444";
 const WRONG_BADGE_TEXT = "#ffffff";
 
 // ─────────────────────────────────────────────
@@ -56,48 +70,93 @@ const ITEMS = [
 //  COMPONENT
 // ─────────────────────────────────────────────
 export default function CB_ReadCircleWrite_QA() {
-  const [selected,    setSelected]    = useState({});  // { itemId: optionText }
-  const [showResults, setShowResults] = useState(false);
-  const [showAns,     setShowAns]     = useState(false);
+  const [selected, setSelected] = useState({}); // { itemId: optionText }
+  const [, setShowResults] = useState(false);
+  const [showAns, setShowAns] = useState(false);
+  const [results, setResults] = useState({});
+  const [announcement, setAnnouncement] = useState("");
+  const resetButtonRef = useRef(null);
+  const checkDisabled =
+    showAns || ITEMS.every((item) => results[item.id] === "correct");
 
-  const isLocked = showResults || showAns;
+  const isLocked = checkDisabled;
 
   const handleSelect = (itemId, text) => {
-    if (isLocked) return;
+    if (showAns || results[itemId] === "correct") return;
     setSelected((prev) => ({ ...prev, [itemId]: text }));
+    setResults((prev) => {
+      const next = { ...prev };
+      delete next[itemId];
+      return next;
+    });
+    setAnnouncement("Selection updated.");
   };
 
   const handleCheck = () => {
-    if (isLocked) return;
-    const allAnswered = ITEMS.every((item) => selected[item.id]);
-    if (!allAnswered) { ValidationAlert.info("Please circle an answer for each sentence."); return; }
-    let score = 0;
-    ITEMS.forEach((item) => { if (selected[item.id] === item.correct) score++; });
+    if (checkDisabled) return;
+    if (
+      !ITEMS.every(
+        (item) =>
+          selected[item.id] !== undefined &&
+          selected[item.id] !== null &&
+          selected[item.id] !== "",
+      )
+    ) {
+      ValidationAlert.info("Please choose an answer for each question.");
+      setAnnouncement("Please choose an answer for each question.");
+      return;
+    }
+    const next = Object.fromEntries(
+      ITEMS.map((item) => [
+        item.id,
+        results[item.id] === "correct" || selected[item.id] === item.correct
+          ? "correct"
+          : "wrong",
+      ]),
+    );
+    const score = Object.values(next).filter(
+      (value) => value === "correct",
+    ).length;
+    setResults(next);
     setShowResults(true);
-    if (score === ITEMS.length)  ValidationAlert.success(`Score: ${score} / ${ITEMS.length}`);
-    else if (score > 0)          ValidationAlert.warning(`Score: ${score} / ${ITEMS.length}`);
-    else                         ValidationAlert.error(`Score: ${score} / ${ITEMS.length}`);
+    setAnnouncement(
+      `Score: ${score} out of ${ITEMS.length}. Correct answers are locked; incorrect answers can be changed.`,
+    );
+    if (score === ITEMS.length) {
+      resetButtonRef.current?.focus({ preventScroll: true });
+      ValidationAlert.success(`Score: ${score} / ${ITEMS.length}`);
+    } else if (score)
+      ValidationAlert.warning(`Score: ${score} / ${ITEMS.length}`);
+    else ValidationAlert.error(`Score: ${score} / ${ITEMS.length}`);
   };
 
   const handleShowAnswer = () => {
     const filled = {};
-    ITEMS.forEach((item) => { filled[item.id] = item.correct; });
+    ITEMS.forEach((item) => {
+      filled[item.id] = item.correct;
+    });
     setSelected(filled);
     setShowResults(false);
     setShowAns(true);
+    setResults({});
+    resetButtonRef.current?.focus({ preventScroll: true });
+    setAnnouncement("Correct answers shown and locked.");
   };
 
   const handleReset = () => {
     setSelected({});
     setShowResults(false);
     setShowAns(false);
+    setResults({});
+    setAnnouncement("Selections and feedback cleared.");
   };
 
   const getOptionState = (item, optText) => {
     const isSel = selected[item.id] === optText;
     if (!isSel) return "none";
     if (showAns) return "correct";
-    if (showResults) return item.correct === optText ? "correct" : "wrong";
+    if (results[item.id] !== undefined)
+      return item.correct === optText ? "correct" : "wrong";
     return "selected";
   };
 
@@ -107,14 +166,27 @@ export default function CB_ReadCircleWrite_QA() {
     return sel;
   };
 
-  const getInputColor = (item) => {
-    if (!showResults && !showAns) return ANSWER_COLOR;
-    if (showAns) return ANSWER_COLOR;
-    return selected[item.id] === item.correct ? RIGHT_COLOR : WRONG_COLOR;
-  };
+  const getInputColor = (item) =>
+    showAns || results[item.id] === "correct"
+      ? "#16a34a"
+      : results[item.id] === "wrong"
+        ? WRONG_COLOR
+        : ANSWER_COLOR;
 
   return (
-    <div className="main-container-component">
+    <div
+      data-adapt-scope="unit4_Unit4_Page5_Q3"
+      className="main-container-component"
+    >
+      <style>{`[data-adapt-scope="unit4_Unit4_Page5_Q3"] input:focus-visible, [data-adapt-scope="unit4_Unit4_Page5_Q3"] [data-keyboard-choice]:focus-visible, [data-adapt-scope="unit4_Unit4_Page5_Q3"] [data-grid-cell]:focus-visible {outline:4px solid #2563eb;outline-offset:3px;border-radius:6px;}`}</style>
+      <div
+        className="sr-only"
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+      >
+        {announcement}
+      </div>
       <style>{`
         /* ── كل صف ── */
         .rcw-row {
@@ -256,80 +328,136 @@ export default function CB_ReadCircleWrite_QA() {
         }}
       >
         {/* Header */}
-        <h1
-          className="WB-header-title-page8"
-          style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
-        >
-          <span className="WB-ex-A">C</span>
-          Read, circle, and write.
-        </h1>
+        <ExerciseHeader
+          sectionLetter="C"
+          title={<>Read, circle, and write.</>}
+          subTitle={"Read the clue carefully, select the correct option first, then complete the blank before checking."}
+        />
 
         {/* Rows */}
         {ITEMS.map((item) => {
-          const inputVal   = getInputValue(item);
+          const inputVal = getInputValue(item);
           const inputColor = getInputColor(item);
 
           return (
-            <div style={{marginTop : "5%  "}}>
-            
-            <div key={item.id} className="rcw-row">
+            <div style={{ marginTop: "5%  " }}>
+              <div key={item.id} className="rcw-row">
+                {/* ── الجملة ── */}
+                <div className="rcw-sentence">
+                  <span className="rcw-num">{item.id}</span>
+                  <span className="rcw-text">{item.before}</span>
 
-              {/* ── الجملة ── */}
-              <div className="rcw-sentence">
-                <span className="rcw-num">{item.id}</span>
-                <span className="rcw-text">{item.before}</span>
+                  <span className="rcw-input-wrap">
+                    <input
+                      aria-label={`Question ${item.id}. Selected answer.`}
+                      title={`Question ${item.id}. Selected answer.`}
+                      className="rcw-input"
+                      type="text"
+                      readOnly
+                      value={inputVal}
+                      style={{
+                        color: inputColor,
+                        borderBottomColor: inputVal ? inputColor : LINE_COLOR,
+                      }}
+                    />
+                  </span>
 
-                <span className="rcw-input-wrap">
-                  <input
-                    className="rcw-input"
-                    type="text"
-                    readOnly
-                    value={inputVal}
-                    style={{ color: inputColor, borderBottomColor: inputVal ? inputColor : LINE_COLOR }}
-                  />
-                </span>
+                  <span className="rcw-text">{item.after}</span>
+                </div>
 
-                <span className="rcw-text">{item.after}</span>
+                {/* ── الخيارات ── */}
+                <div className="rcw-options">
+                  {item.options.map((opt) => {
+                    const state = getOptionState(item, opt.text);
+                    return (
+                      <div key={opt.label} className="rcw-option">
+                        <span className="rcw-opt-label">{opt.label}</span>
+                        <span
+                          style={{
+                            ...{},
+                            borderRadius: {}.borderRadius || "6px",
+                            background:
+                              selected[item.id] === opt.text &&
+                              !showAns &&
+                              results[item.id] === undefined
+                                ? "#dbeafe"
+                                : {}.background,
+                            boxShadow:
+                              selected[item.id] === opt.text
+                                ? `inset 0 0 0 2px ${showAns || results[item.id] === "correct" ? "#16a34a" : results[item.id] === "wrong" ? "#ef4444" : "#2563eb"}`
+                                : undefined,
+                          }}
+                          role="button"
+                          tabIndex={0}
+                          data-keyboard-choice
+                          {...activationKeys}
+                          aria-label={`Question ${item.id}. ${opt.text}`}
+                          aria-pressed={selected[item.id] === opt.text}
+                          aria-disabled={
+                            showAns || results[item.id] === "correct"
+                          }
+                          className={[
+                            "rcw-opt-word",
+                            isLocked ? "rcw-opt-word--locked" : "",
+                            state === "selected"
+                              ? "rcw-opt-word--selected"
+                              : "",
+                            state === "correct" ? "rcw-opt-word--correct" : "",
+                            state === "wrong" ? "rcw-opt-word--wrong" : "",
+                          ]
+                            .filter(Boolean)
+                            .join(" ")}
+                          onClick={() => handleSelect(item.id, opt.text)}
+                        >
+                          <div className="rcw-oval" />
+                          {opt.text}
+                          {state === "wrong" && (
+                            <div className="rcw-badge">✕</div>
+                          )}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
-
-              {/* ── الخيارات ── */}
-              <div className="rcw-options">
-                {item.options.map((opt) => {
-                  const state = getOptionState(item, opt.text);
-                  return (
-                    <div key={opt.label} className="rcw-option">
-                      <span className="rcw-opt-label">{opt.label}</span>
-                      <span
-                        className={[
-                          "rcw-opt-word",
-                          isLocked          ? "rcw-opt-word--locked"   : "",
-                          state === "selected" ? "rcw-opt-word--selected" : "",
-                          state === "correct"  ? "rcw-opt-word--correct"  : "",
-                          state === "wrong"    ? "rcw-opt-word--wrong"    : "",
-                        ].filter(Boolean).join(" ")}
-                        onClick={() => handleSelect(item.id, opt.text)}
-                      >
-                        <div className="rcw-oval" />
-                        {opt.text}
-                        {state === "wrong" && <div className="rcw-badge">✕</div>}
-                      </span>
-                    </div>
-                  );
-                })}
-              </div>
-
             </div>
-        </div>
           );
         })}
 
         {/* Buttons */}
         <div className="rcw-buttons">
-          <Button
-            checkAnswers={handleCheck}
-            handleShowAnswer={handleShowAnswer}
-            handleStartAgain={handleReset}
-            />
+          <div className="action-buttons-container">
+            <button
+              type="button"
+              aria-label="Start Again"
+              {...activationKeys}
+              ref={resetButtonRef}
+              onClick={handleReset}
+              className="try-again-button"
+            >
+              Start Again ↻
+            </button>
+            <button
+              type="button"
+              aria-label="Show Answer"
+              {...activationKeys}
+              onClick={handleShowAnswer}
+              className="show-answer-btn swal-continue"
+            >
+              Show Answer
+            </button>
+            <button
+              type="button"
+              aria-label="Check Answer"
+              {...activationKeys}
+              onClick={handleCheck}
+              disabled={checkDisabled}
+              style={{ cursor: checkDisabled ? "not-allowed" : "pointer" }}
+              className="check-button2"
+            >
+              Check Answer ✓
+            </button>
+          </div>
         </div>
       </div>
     </div>

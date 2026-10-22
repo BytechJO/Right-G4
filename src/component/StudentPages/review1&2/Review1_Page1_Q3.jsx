@@ -1,5 +1,4 @@
-import React, { useState } from "react";
-import Button from "../../Button";
+import React, { useState, useRef } from "react";
 import ValidationAlert from "../../Popup/ValidationAlert";
 
 // ─────────────────────────────────────────────
@@ -8,13 +7,14 @@ import ValidationAlert from "../../Popup/ValidationAlert";
 import imgScene from "../../../assets/imgs/pages/Class Book/Right 4 Unit 2 Welcome to the Big Apple Folder/Page 16/SVG/Asset 5.svg";
 import sound from "../../../assets/audio/ClassBook/Grade 4/cd12pg16-instruction-adult-lady_gGpt9qB6.mp3";
 import QuestionAudioPlayer from "../../QuestionAudioPlayer";
+import ExerciseHeader from "../../ExerciseHeader";
 
 // ─────────────────────────────────────────────
 //  🎨  COLORS
 // ─────────────────────────────────────────────
 const CIRCLE_DEFAULT = "#2096a6";
-const CIRCLE_WRONG   = "#ef4444";
-const TEXT_COLOR     = "#2b2b2b";
+const CIRCLE_WRONG = "#ef4444";
+const TEXT_COLOR = "#2b2b2b";
 const WRONG_BADGE_BG = "#ef4444";
 const WRONG_BADGE_TEXT = "#ffffff";
 
@@ -42,65 +42,141 @@ const ALL_CHOICES = PARTS.filter((p) => p.type === "choice");
 // ─────────────────────────────────────────────
 //  COMPONENT
 // ─────────────────────────────────────────────
-export default function WB_ReadListenChoose_QC() {
-  const [selected,    setSelected]    = useState({});
-  const [showResults, setShowResults] = useState(false);
-  const [showAns,     setShowAns]     = useState(false);
+const activationKeys = {
+  onKeyDown: (event) => {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    event.preventDefault();
+    event.stopPropagation();
+    if (!event.repeat) event.currentTarget.click();
+  },
+  onKeyUp: (event) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+  },
+};
 
-  const isLocked = showResults || showAns;
+export default function WB_ReadListenChoose_QC() {
+  const [selected, setSelected] = useState({});
+  const [results, setResults] = useState({});
+  const [showAns, setShowAns] = useState(false);
+
+  const resetButtonRef = useRef(null);
+  const [announcement, setAnnouncement] = useState("");
+  const checkDisabled =
+    showAns || ALL_CHOICES.every((choice) => results[choice.id] === "correct");
+
+  const isLocked = (id) => showAns || results[id] === "correct";
 
   const handleClick = (id, option) => {
-    if (isLocked) return;
-    setSelected((prev) => ({ ...prev, [id]: prev[id] === option ? null : option }));
+    if (isLocked(id)) return;
+    setSelected((previous) => ({
+      ...previous,
+      [id]: previous[id] === option ? null : option,
+    }));
+    setResults((previous) => {
+      const next = { ...previous };
+      delete next[id];
+      return next;
+    });
+    setAnnouncement(
+      selected[id] === option
+        ? `Blank ${id}: selection cleared.`
+        : `Blank ${id}: ${option} selected.`,
+    );
   };
 
   const handleCheck = () => {
-    if (isLocked) return;
-    const allAnswered = ALL_CHOICES.every((c) => selected[c.id]);
-    if (!allAnswered) { ValidationAlert.info("Please choose an option for each blank."); return; }
-    let score = 0;
-    ALL_CHOICES.forEach((c) => { if (selected[c.id] === c.correct) score++; });
-    setShowResults(true);
-    if (score === ALL_CHOICES.length) ValidationAlert.success(`Score: ${score} / ${ALL_CHOICES.length}`);
-    else if (score > 0)               ValidationAlert.warning(`Score: ${score} / ${ALL_CHOICES.length}`);
-    else                              ValidationAlert.error(`Score: ${score} / ${ALL_CHOICES.length}`);
+    if (checkDisabled) return;
+    if (!ALL_CHOICES.every((choice) => selected[choice.id])) {
+      setAnnouncement("Please choose an option for each blank.");
+      ValidationAlert.info("Please choose an option for each blank.");
+      return;
+    }
+    const checked = Object.fromEntries(
+      ALL_CHOICES.map((choice) => [
+        choice.id,
+        selected[choice.id] === choice.correct ? "correct" : "wrong",
+      ]),
+    );
+    const score = Object.values(checked).filter(
+      (result) => result === "correct",
+    ).length;
+    setResults(checked);
+    setAnnouncement(
+      `Score: ${score} out of ${ALL_CHOICES.length}. Correct answers are locked; incorrect answers can be changed.`,
+    );
+    if (score === ALL_CHOICES.length) {
+      resetButtonRef.current?.focus({ preventScroll: true });
+      ValidationAlert.success(`Score: ${score} / ${ALL_CHOICES.length}`);
+    } else if (score > 0)
+      ValidationAlert.warning(`Score: ${score} / ${ALL_CHOICES.length}`);
+    else ValidationAlert.error(`Score: ${score} / ${ALL_CHOICES.length}`);
   };
 
   const handleShowAnswer = () => {
     const filled = {};
-    ALL_CHOICES.forEach((c) => { filled[c.id] = c.correct; });
+    ALL_CHOICES.forEach((c) => {
+      filled[c.id] = c.correct;
+    });
     setSelected(filled);
-    setShowResults(false);
+    setResults({});
     setShowAns(true);
+    setAnnouncement("Correct answers shown and locked.");
   };
 
   const handleReset = () => {
     setSelected({});
-    setShowResults(false);
+    setResults({});
     setShowAns(false);
+    setAnnouncement("Answers and feedback cleared.");
   };
 
   const captions = [
-    { start: 0.20,  end: 6.60,  text: "Page 16, review one, exercise C. Read, listen, and choose." },
-    { start: 7.82,  end: 10.10, text: "Hansel will go to the beach on Saturday." },
-    { start: 10.10, end: 13.22, text: "He won't lie in the sun." },
-    { start: 13.22, end: 15.30, text: "Harley will go swimming in the sea." },
-    { start: 15.30, end: 18.78, text: "He will stay near the shore when he swims." },
-    { start: 19.86, end: 22.74, text: "John won't fly a kite while at the beach." },
-    { start: 22.74, end: 25.92, text: "He will sit in the sand while reading a book." },
+    {
+      start: 0.2,
+      end: 6.6,
+      text: "Page 16, review one, exercise C. Read, listen, and choose.",
+    },
+    {
+      start: 7.82,
+      end: 10.1,
+      text: "Hansel will go to the beach on Saturday.",
+    },
+    { start: 10.1, end: 13.22, text: "He won't lie in the sun." },
+    { start: 13.22, end: 15.3, text: "Harley will go swimming in the sea." },
+    {
+      start: 15.3,
+      end: 18.78,
+      text: "He will stay near the shore when he swims.",
+    },
+    {
+      start: 19.86,
+      end: 22.74,
+      text: "John won't fly a kite while at the beach.",
+    },
+    {
+      start: 22.74,
+      end: 25.92,
+      text: "He will sit in the sand while reading a book.",
+    },
   ];
 
-  const getOptionState = (choice, option) => {
-    const sel = selected[choice.id];
-    if (sel !== option) return "idle";
-    if (showAns)     return "correct";
-    if (showResults) return option === choice.correct ? "correct" : "wrong";
-    return "selected";
-  };
+  const getOptionState = (choice, option) =>
+    selected[choice.id] !== option
+      ? "idle"
+      : showAns
+        ? "correct"
+        : results[choice.id] || "selected";
 
   const renderPart = (part, i) => {
     if (part.type === "text") {
-      return <span key={i} className="rlcq-text">{part.value}</span>;
+      return (
+        <span key={i} className="rlcq-text">
+          {part.value}
+        </span>
+      );
     }
 
     return (
@@ -112,13 +188,32 @@ export default function WB_ReadListenChoose_QC() {
           return (
             <span key={option} className="rlcq-option-wrap">
               <span
+                role="button"
+                tabIndex={0}
+                data-keyboard-choice
+                {...activationKeys}
+                aria-label={`Blank ${part.id}. ${option}${isLocked(part.id) ? ". Locked" : ""}`}
+                aria-pressed={selected[part.id] === option}
+                aria-disabled={isLocked(part.id)}
+                style={{
+                  backgroundColor:
+                    selected[part.id] === option ? "#dbeafe" : undefined,
+                  borderColor:
+                    state === "correct"
+                      ? "#16a34a"
+                      : state === "wrong"
+                        ? "#ef4444"
+                        : undefined,
+                }}
                 className={[
                   "rlcq-option",
                   state === "selected" ? "rlcq-option--selected" : "",
-                  state === "correct"  ? "rlcq-option--correct"  : "",
-                  state === "wrong"    ? "rlcq-option--wrong"    : "",
-                  isLocked ? "rlcq-option--locked" : "",
-                ].filter(Boolean).join(" ")}
+                  state === "correct" ? "rlcq-option--correct" : "",
+                  state === "wrong" ? "rlcq-option--wrong" : "",
+                  isLocked(part.id) ? "rlcq-option--locked" : "",
+                ]
+                  .filter(Boolean)
+                  .join(" ")}
                 onClick={() => handleClick(part.id, option)}
               >
                 {option}
@@ -135,7 +230,21 @@ export default function WB_ReadListenChoose_QC() {
   };
 
   return (
-    <div className="main-container-component">
+    <div
+      className="main-container-component"
+      data-review12-scope="Review1_Page1_Q3"
+    >
+      <div
+        className="sr-only"
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+      >
+        {announcement}
+      </div>
+      <style>{`[data-review12-scope="Review1_Page1_Q3"] [data-keyboard-choice]:focus-visible {
+        outline: 4px solid #2563eb; outline-offset: 3px; border-radius: 999px;
+      }`}</style>
       <style>{`
         /* ── Top: image + paragraph ── */
         .rlcq-top {
@@ -148,7 +257,7 @@ export default function WB_ReadListenChoose_QC() {
 
         .rlcq-img {
           width: 100%;
-          height: 100%;
+          height: auto;
           display: block;
           border-radius: 8px;
           flex-shrink: 0;
@@ -166,10 +275,10 @@ export default function WB_ReadListenChoose_QC() {
         }
 
         .rlcq-text {
-          font-size: clamp(14px, 1.7vw, 20px);
+          font-size: clamp(14px, 1.7vw, 19px);
           color: ${TEXT_COLOR};
-          line-height: 2.2;
-          white-space: pre-wrap;
+          // line-height: 2.2;
+          // white-space: pre-wrap;
         }
 
         /* Choice group */
@@ -254,17 +363,18 @@ export default function WB_ReadListenChoose_QC() {
           margin: "0 auto",
         }}
       >
-        {/* ── Header ── */}
-        <h1
-          className="WB-header-title-page8"
-          style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
-        >
-          <span className="WB-ex-A-1">C</span>
-          Read, listen, and choose.
-        </h1>
-
+      
+        <ExerciseHeader
+          isReview
+          sectionLetter={"C"}
+          title={" Read, listen, and choose."}
+          subTitle={
+            "Listen once, replay if needed, then select the option that matches what you hear and read."
+          }
+        />
         <div style={{ margin: "3em 0 2em" }}>
           <QuestionAudioPlayer
+            pageId="sb_review1_page1_q3"
             src={sound}
             captions={captions}
             stopAtSecond={7}
@@ -281,11 +391,35 @@ export default function WB_ReadListenChoose_QC() {
 
         {/* ── Buttons ── */}
         <div className="rlcq-buttons">
-          <Button
-            checkAnswers={handleCheck}
-            handleShowAnswer={handleShowAnswer}
-            handleStartAgain={handleReset}
-          />
+          <div className="action-buttons-container">
+            <button
+              type="button"
+              ref={resetButtonRef}
+              {...activationKeys}
+              onClick={handleReset}
+              className="try-again-button"
+            >
+              Start Again ↻
+            </button>
+            <button
+              type="button"
+              {...activationKeys}
+              onClick={handleShowAnswer}
+              className="show-answer-btn swal-continue"
+            >
+              Show Answer
+            </button>
+            <button
+              type="button"
+              {...activationKeys}
+              onClick={handleCheck}
+              disabled={checkDisabled}
+              style={{ cursor: checkDisabled ? "not-allowed" : "pointer" }}
+              className="check-button2"
+            >
+              Check Answer ✓
+            </button>
+          </div>
         </div>
       </div>
     </div>

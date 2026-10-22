@@ -285,6 +285,8 @@ export default function WB_UnscrambleWrite_QB() {
                   <input
                     type="text"
                     aria-label={`Question ${item.id}. Unscramble: ${item.scrambled}`}
+                      title={`Question ${item.id}. Unscramble: ${item.scrambled}`}
+                      placeholder="Word"
                     aria-invalid={wrong}
                     {...fieldKeys}
                     className={[

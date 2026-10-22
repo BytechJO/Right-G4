@@ -79,7 +79,9 @@ const WritingA = () => {
             </span>
 
             {/* Input */}
-            <input aria-label={`Sentence ${i + 1}. Complete: ${q.prefix}`} {...fieldKeys}
+            <input aria-label={`Sentence ${i + 1}. Complete: ${q.prefix}`}
+                      title={`Sentence ${i + 1}. Complete: ${q.prefix}`}
+                      placeholder="Your idea" {...fieldKeys}
               type="text"
               value={answers[i]}
               onChange={(e) => handleChange(i, e.target.value)}

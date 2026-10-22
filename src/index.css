@@ -285,6 +285,10 @@ img {
   border-radius: 6px;
   font-weight: bold;
 }
+.WB-ex-A.is-review{
+  background: #fff;
+  color:#2195a6
+}
 .exercise-container {
   display: flex;
   margin-bottom: 80px;
@@ -402,6 +406,7 @@ img {
   gap: 20px;
   width: calc(100% - 40px);
   justify-content: center;
+      z-index: 9;
 }
 
 .check-button2,

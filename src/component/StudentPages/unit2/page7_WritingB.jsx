@@ -1,9 +1,27 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { FaRedo } from "react-icons/fa";
+
+const activationKeys = {
+  onKeyDown: (event) => {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    event.preventDefault(); event.stopPropagation();
+    if (!event.repeat) event.currentTarget.click();
+  },
+  onKeyUp: (event) => {
+    if (event.key === "Enter" || event.key === " ") { event.preventDefault(); event.stopPropagation(); }
+  },
+};
+const fieldKeys = {
+  onKeyDown: (event) => { if (event.key === "Enter" || event.key === " ") event.stopPropagation(); },
+  onKeyUp: (event) => { if (event.key === "Enter" || event.key === " ") event.stopPropagation(); },
+};
+
 
 const WritingB = () => {
   const [goingTo, setGoingTo] = useState("");
   const [maybeCan, setMaybeCan] = useState("");
+
+  const resetButtonRef = useRef(null);
 
   const handleReset = () => {
     setGoingTo("");
@@ -14,7 +32,16 @@ const WritingB = () => {
     "border-b-1 border-[#333] bg-transparent outline-none text-gray-800 px-1";
 
   return (
-    <div className="mb-6 mx-auto w-[60%]">
+    <div className="mb-6 mx-auto w-[60%]" data-unit2-scope="page7_WritingB">
+      <style>{`
+        [data-unit2-scope="page7_WritingB"] input:focus-visible,
+        [data-unit2-scope="page7_WritingB"] [data-keyboard-choice]:focus-visible {
+          outline: 4px solid #2563eb;
+          outline-offset: 3px;
+          border-radius: 6px;
+        }
+        
+      `}</style>
       <h5 className="header-title-page8-read mb-8">
         <span className="ex-A-read mr-2">B</span>
         Pretend you are writing to your friend and you want to tell them what you <br /> 
@@ -28,7 +55,9 @@ const WritingB = () => {
         <div className="flex items-end gap-3 flex-wrap">
           <span>I'm fine.</span>
           <span>I'm going to</span>
-          <input
+          <input aria-label={"I'm going to"}
+                      title={"I'm going to"}
+                      placeholder="Your idea" {...fieldKeys}
             type="text"
             value={goingTo}
             onChange={(e) => setGoingTo(e.target.value)}
@@ -42,7 +71,9 @@ const WritingB = () => {
         {/* Row 2 */}
         <div className="flex items-end gap-3 flex-wrap">
           <span>Maybe we can</span>
-          <input
+          <input aria-label={"Maybe we can"}
+                      title={"Maybe we can"}
+                      placeholder="Your idea" {...fieldKeys}
             type="text"
             value={maybeCan}
             onChange={(e) => setMaybeCan(e.target.value)}
@@ -59,14 +90,14 @@ const WritingB = () => {
       {/* Reset Button */}
       <div className="flex justify-center mt-8">
         <div className="relative group">
-          <div
+          <button type="button" aria-label="Start Again" {...activationKeys} ref={resetButtonRef}
             onClick={handleReset}
             className="flex items-center justify-center w-14 h-14 rounded-xl bg-[#ffc107] hover:bg-[#e0a800] cursor-pointer transition shadow-sm"
           >
-            <div className="bg-white p-3 rounded-full shadow">
+            <span className="bg-white p-3 rounded-full shadow">
               <FaRedo size={14} />
-            </div>
-          </div>
+            </span>
+          </button>
           <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-black text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition">
             Reset
           </span>

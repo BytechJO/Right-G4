@@ -194,6 +194,8 @@ const GrammarB = () => {
                 style={{ fontSize: "18px" }}
                 type="text"
                 aria-label={`Question ${i + 1}. ${q.symbol} ${q.pronoun}, ${q.place}. Write a sentence using will or won't.`}
+                      title={`Question ${i + 1}. ${q.symbol} ${q.pronoun}, ${q.place}. Write a sentence using will or won't.`}
+                      placeholder="Sentence"
                 aria-invalid={errors[i] === true}
                 onKeyDown={(event) => {
                   if (event.key === "Enter" || event.key === " ") event.stopPropagation();

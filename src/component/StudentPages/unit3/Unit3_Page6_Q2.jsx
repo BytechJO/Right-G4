@@ -1,44 +1,101 @@
-import React, { useState } from "react";
-import Button from "../../Button";
+import React, { useState, useRef } from "react";
+import ExerciseHeader from "../../ExerciseHeader";
 import ValidationAlert from "../../Popup/ValidationAlert";
 
 // ─────────────────────────────────────────────
 //  🖼️  IMAGES
 // ─────────────────────────────────────────────
-import imgJapan  from "../../../assets/imgs/pages/Class Book/Right 4 Unit 3 Harley Eats All the Sweets Folder/Page 27/SVG/Asset 13.svg";
+import imgJapan from "../../../assets/imgs/pages/Class Book/Right 4 Unit 3 Harley Eats All the Sweets Folder/Page 27/SVG/Asset 13.svg";
 import imgRussia from "../../../assets/imgs/pages/Class Book/Right 4 Unit 3 Harley Eats All the Sweets Folder/Page 27/SVG/Asset 14.svg";
-import imgUK     from "../../../assets/imgs/pages/Class Book/Right 4 Unit 3 Harley Eats All the Sweets Folder/Page 27/SVG/Asset 15.svg";
-import imgAus    from "../../../assets/imgs/pages/Class Book/Right 4 Unit 3 Harley Eats All the Sweets Folder/Page 27/SVG/Asset 16.svg";
+import imgUK from "../../../assets/imgs/pages/Class Book/Right 4 Unit 3 Harley Eats All the Sweets Folder/Page 27/SVG/Asset 15.svg";
+import imgAus from "../../../assets/imgs/pages/Class Book/Right 4 Unit 3 Harley Eats All the Sweets Folder/Page 27/SVG/Asset 16.svg";
+const activationKeys = {
+  onKeyDown: (event) => {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    event.preventDefault();
+    event.stopPropagation();
+    if (!event.repeat) event.currentTarget.click();
+  },
+  onKeyUp: (event) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+  },
+};
+const fieldKeys = {
+  onKeyDown: (event) => {
+    if (event.key === "Enter" || event.key === " ") event.stopPropagation();
+  },
+  onKeyUp: (event) => {
+    if (event.key === "Enter" || event.key === " ") event.stopPropagation();
+  },
+};
+const normalizeAnswer = (value) =>
+  value
+    .normalize("NFKC")
+    .toLowerCase()
+    .replace(/[\u2018\u2019\u201A\u201B\u0060\u00B4']/g, "")
+    .replace(/[.,!?;:\u2026\u201c\u201d"]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
 
 // ─────────────────────────────────────────────
 //  🎨  COLORS
 // ─────────────────────────────────────────────
 const INPUT_UNDERLINE_DEFAULT = "#3f3f3f";
-const INPUT_UNDERLINE_WRONG   = "#ef4444";
-const INPUT_TEXT_COLOR        = "#2b2b2b";
-const INPUT_ANSWER_COLOR      = "#c81e1e";
-const NUMBER_COLOR            = "#2b2b2b";
-const TEXT_COLOR              = "#2b2b2b";
-const WRONG_BADGE_BG          = "#ef4444";
-const WRONG_BADGE_TEXT        = "#ffffff";
+const INPUT_UNDERLINE_WRONG = "#ef4444";
+const INPUT_TEXT_COLOR = "#2b2b2b";
+const INPUT_ANSWER_COLOR = "#c81e1e";
+const NUMBER_COLOR = "#2b2b2b";
+const TEXT_COLOR = "#2b2b2b";
+const WRONG_BADGE_BG = "#ef4444";
+const WRONG_BADGE_TEXT = "#ffffff";
 
 // ─────────────────────────────────────────────
 //  📝  EXERCISE DATA
 // ─────────────────────────────────────────────
-const WORD_BANK = ["Australia", "Japan", "United Kingdom", "Russia"];
 
 const ITEMS = [
-  { id: 1, prefix: "Did she have a bike?", src: imgJapan,  correct: ["Yes, she did."],          answer: "Yes, she did."          },
-  { id: 2, prefix: "Did he have a boat?",      src: imgRussia, correct: ["Yes, he did."],         answer: "Yes, he did."        },
-  { id: 3, prefix: "Did she have a chicken?",   src: imgUK,     correct: ["No, she did'nt" , "No, she didnt", "No, she didnot", "No, she did not"], answer: "No, she did'nt." },
-  { id: 4, prefix: "Did he have a cap?",       src: imgAus,    correct: ["Yes, he did."],         answer: "Yes, he did."            },
+  {
+    id: 1,
+    prefix: "Did she have a bike?",
+    src: imgJapan,
+    correct: ["Yes, she did."],
+    answer: "Yes, she did.",
+  },
+  {
+    id: 2,
+    prefix: "Did he have a boat?",
+    src: imgRussia,
+    correct: ["Yes, he did."],
+    answer: "Yes, he did.",
+  },
+  {
+    id: 3,
+    prefix: "Did she have a chicken?",
+    src: imgUK,
+    correct: [
+      "No, she did'nt",
+      "No, she didnt",
+      "No, she didnot",
+      "No, she did not",
+    ],
+    answer: "No, she did'nt.",
+  },
+  {
+    id: 4,
+    prefix: "Did he have a cap?",
+    src: imgAus,
+    correct: ["Yes, he did."],
+    answer: "Yes, he did.",
+  },
 ];
 
 // ─────────────────────────────────────────────
 //  🔧  NORMALIZE
 // ─────────────────────────────────────────────
-const normalize = (str) =>
-  str.toLowerCase().replace(/[^a-z0-9'\s]/g, "").replace(/\s+/g, " ").trim().replace(/[\u2018\u2019\u201A\u201B\u0060\u00B4']/g, "’");;
+const normalize = normalizeAnswer;
 
 const isCorrect = (userVal, correctArr) =>
   correctArr.some((c) => normalize(userVal) === normalize(c));
@@ -47,56 +104,94 @@ const isCorrect = (userVal, correctArr) =>
 //  COMPONENT
 // ─────────────────────────────────────────────
 export default function WB_ListenReadWrite_QD() {
-  const [answers,     setAnswers]     = useState({});
-  const [showResults, setShowResults] = useState(false);
-  const [showAns,     setShowAns]     = useState(false);
+  const [answers, setAnswers] = useState({});
+  const [results, setResults] = useState({});
+  const [announcement, setAnnouncement] = useState("");
+  const resetButtonRef = useRef(null);
+
+  const [showAns, setShowAns] = useState(false);
+  const checkDisabled =
+    showAns || ITEMS.every((item) => results[item.id] === "correct");
 
   const handleChange = (id, value) => {
-    if (showAns) return;
-    const item = ITEMS.find((i) => i.id === id);
-    if (showResults && item && isCorrect(answers[id] || "", item.correct)) return;
+    if (
+      showAns ||
+      results[id] === "correct" ||
+      !ITEMS.some((item) => item.id === id)
+    )
+      return;
     setAnswers((prev) => ({ ...prev, [id]: value }));
+    setResults((prev) => {
+      const next = { ...prev };
+      delete next[id];
+      return next;
+    });
   };
 
   const handleCheck = () => {
-    if (showAns) return;
-    const allAnswered = ITEMS.every((item) => answers[item.id]?.trim());
-    if (!allAnswered) { ValidationAlert.info("Please complete all answers first."); return; }
-    let score = 0;
-    ITEMS.forEach((item) => { if (isCorrect(answers[item.id] || "", item.correct)) score++; });
-    setShowResults(true);
-    if (score === ITEMS.length)   ValidationAlert.success(`Score: ${score} / ${ITEMS.length}`);
-    else if (score > 0)           ValidationAlert.warning(`Score: ${score} / ${ITEMS.length}`);
-    else                          ValidationAlert.error(`Score: ${score} / ${ITEMS.length}`);
+    if (checkDisabled) return;
+    if (!ITEMS.every((item) => answers[item.id]?.trim())) {
+      setAnnouncement("Please complete all answers first.");
+      ValidationAlert.info("Please complete all answers first.");
+      return;
+    }
+    const next = Object.fromEntries(
+      ITEMS.map((item) => [
+        item.id,
+        results[item.id] === "correct" ||
+        isCorrect(answers[item.id] || "", item.correct)
+          ? "correct"
+          : "wrong",
+      ]),
+    );
+    const score = Object.values(next).filter(
+      (result) => result === "correct",
+    ).length;
+    setResults(next);
+    setAnnouncement(
+      `Score: ${score} out of ${ITEMS.length}. Correct answers are locked; incorrect answers can be changed.`,
+    );
+    if (score === ITEMS.length) {
+      resetButtonRef.current?.focus({ preventScroll: true });
+      ValidationAlert.success(`Score: ${score} / ${ITEMS.length}`);
+    } else if (score > 0)
+      ValidationAlert.warning(`Score: ${score} / ${ITEMS.length}`);
+    else ValidationAlert.error(`Score: ${score} / ${ITEMS.length}`);
   };
 
   const handleShowAnswer = () => {
     const filled = {};
-    ITEMS.forEach((item) => { filled[item.id] = item.answer; });
+    ITEMS.forEach((item) => {
+      filled[item.id] = item.answer;
+    });
     setAnswers(filled);
-    setShowResults(false);
+    setResults({});
     setShowAns(true);
+    resetButtonRef.current?.focus({ preventScroll: true });
+    setAnnouncement("Correct answers shown and locked.");
   };
 
   const handleReset = () => {
     setAnswers({});
-    setShowResults(false);
+    setResults({});
     setShowAns(false);
+    setAnnouncement("Answers and feedback cleared.");
   };
 
-  const isWrong = (item) => {
-    if (!showResults || showAns) return false;
-    return !isCorrect(answers[item.id] || "", item.correct);
-  };
-
-  const isDisabled = (item) => {
-    if (showAns) return true;
-    if (showResults && isCorrect(answers[item.id] || "", item.correct)) return true;
-    return false;
-  };
+  const isWrong = (item) => !showAns && results[item.id] === "wrong";
+  const isDisabled = (item) => showAns || results[item.id] === "correct";
 
   return (
-    <div className="main-container-component">
+    <div className="main-container-component" data-unit3-scope="Unit3_Page6_Q2">
+      <style>{`[data-unit3-scope="Unit3_Page6_Q2"] input:focus-visible {outline:4px solid #2563eb;outline-offset:3px;border-radius:6px;}`}</style>
+      <div
+        className="sr-only"
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+      >
+        {announcement}
+      </div>
       <style>{`
         /* ── Word bank ── */
         .lrwd-bank {
@@ -225,28 +320,29 @@ export default function WB_ListenReadWrite_QD() {
         }}
       >
         {/* ── Header ── */}
-        <h1
-          className="WB-header-title-page8"
-          style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
-        >
-          <span className="WB-ex-A">D</span>
-          Listen, read, and write.
-        </h1>
-
-
+        <ExerciseHeader
+          sectionLetter="D"
+          title="Listen, read, and write."
+          subTitle={
+            "Study the picture first, then write the correct short answer for each question before checking."
+          }
+        />
 
         {/* ── 2×2 grid ── */}
         <div className="lrwd-grid">
           {ITEMS.map((item) => {
-            const wrong    = isWrong(item);
-            const value    = answers[item.id] || "";
-            const tColor   = showAns ? INPUT_ANSWER_COLOR : INPUT_TEXT_COLOR;
-            const uColor   = wrong ? INPUT_UNDERLINE_WRONG : INPUT_UNDERLINE_DEFAULT;
+            const wrong = isWrong(item);
+            const value = answers[item.id] || "";
+            const tColor = INPUT_TEXT_COLOR;
+            const uColor = wrong
+              ? INPUT_UNDERLINE_WRONG
+              : isDisabled(item)
+                ? "#16a34a"
+                : INPUT_UNDERLINE_DEFAULT;
             const disabled = isDisabled(item);
 
             return (
               <div key={item.id} className="lrwd-card">
-
                 {/* Prefix */}
                 <div className="lrwd-prefix-row">
                   <span className="lrwd-num">{item.id}</span>
@@ -254,17 +350,35 @@ export default function WB_ListenReadWrite_QD() {
                 </div>
 
                 {/* Image */}
-                <img src={item.src} alt={`img-${item.id}`} className="lrwd-img" />
+                <img
+                  src={item.src}
+                  alt={
+                    [
+                      "A girl wearing a helmet and riding a bicycle.",
+                      "A boy wearing a life jacket on a sailboat.",
+                      "A girl holding a doll.",
+                      "A boy wearing a cap and backpack inside a shop.",
+                    ][item.id - 1]
+                  }
+                  className="lrwd-img"
+                />
 
                 {/* Input */}
                 <div className="lrwd-input-wrap">
                   <input
+                    {...fieldKeys}
+                    aria-label={`Question ${item.id}. ${item.prefix} Write the answer.`}
+                    title={`Question ${item.id}. ${item.prefix} Write the answer.`}
+                    placeholder="Answer"
+                    aria-invalid={wrong}
                     type="text"
                     className={[
                       "lrwd-input",
-                      wrong   ? "lrwd-input--wrong"  : "",
+                      wrong ? "lrwd-input--wrong" : "",
                       showAns ? "lrwd-input--answer" : "",
-                    ].filter(Boolean).join(" ")}
+                    ]
+                      .filter(Boolean)
+                      .join(" ")}
                     value={value}
                     disabled={disabled}
                     onChange={(e) => handleChange(item.id, e.target.value)}
@@ -274,7 +388,6 @@ export default function WB_ListenReadWrite_QD() {
                   />
                   {wrong && <div className="lrwd-badge">✕</div>}
                 </div>
-
               </div>
             );
           })}
@@ -282,11 +395,38 @@ export default function WB_ListenReadWrite_QD() {
 
         {/* ── Buttons ── */}
         <div className="lrwd-buttons">
-          <Button
-            checkAnswers={handleCheck}
-            handleShowAnswer={handleShowAnswer}
-            handleStartAgain={handleReset}
-          />
+          <div className="action-buttons-container">
+            <button
+              type="button"
+              aria-label="Start Again"
+              {...activationKeys}
+              ref={resetButtonRef}
+              onClick={handleReset}
+              className="try-again-button"
+            >
+              Start Again ↻
+            </button>
+            <button
+              type="button"
+              aria-label="Show Answer"
+              {...activationKeys}
+              onClick={handleShowAnswer}
+              className="show-answer-btn swal-continue"
+            >
+              Show Answer
+            </button>
+            <button
+              type="button"
+              aria-label="Check Answer"
+              {...activationKeys}
+              onClick={handleCheck}
+              disabled={checkDisabled}
+              style={{ cursor: checkDisabled ? "not-allowed" : "pointer" }}
+              className="check-button2"
+            >
+              Check Answer ✓
+            </button>
+          </div>
         </div>
       </div>
     </div>

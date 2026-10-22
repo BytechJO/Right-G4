@@ -360,6 +360,8 @@ export default function WB_ReadLookWrite_QA() {
                     <input
                       type="text"
                       aria-label={`Question ${item.id}. Write the word for the picture.`}
+                      title={`Question ${item.id}. Write the word for the picture.`}
+                      placeholder="Word"
                       aria-invalid={wrong}
                       {...fieldKeys}
                       className={[

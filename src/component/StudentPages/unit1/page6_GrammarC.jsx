@@ -173,6 +173,8 @@ const GrammarC = () => {
               <input
                 type="text"
                 aria-label={`Question ${i + 1}. Unscramble: ${q.scrambled}`}
+                      title={`Question ${i + 1}. Unscramble: ${q.scrambled}`}
+                      placeholder="Sentence"
                 aria-invalid={errors[i] === true}
                 onKeyDown={(event) => {
                   if (event.key === "Enter" || event.key === " ") event.stopPropagation();
