@@ -1,6 +1,167 @@
-import React, { useState } from "react";
+import clipPage45F3 from "../../../assets/audio/ClassBook/Unit 5/Page 45 - F/Item_003_between.mp3";
+import clipPage45F2 from "../../../assets/audio/ClassBook/Unit 5/Page 45 - F/Item_002_through.mp3";
+import clipPage45F1 from "../../../assets/audio/ClassBook/Unit 5/Page 45 - F/Item_001_inside.mp3";
+import {useEffect as useListeningEffect,useRef as useListeningRef,useState as useListeningState} from "react";
+import {useAudio} from "../../../context/AudioContext";
+import {FaVolumeUp as ListeningSpeakerIcon} from "react-icons/fa";
+import ExerciseHeader from "../../ExerciseHeader";
+import React, {useState} from "react";
 import Button from "../../Button";
 import ValidationAlert from "../../Popup/ValidationAlert";
+function useExerciseListening(pageId) {
+  const coordinator = useAudio();
+  const audioRef = useListeningRef(null),
+    generation = useListeningRef(0);
+  const [activeId, setActiveId] = useListeningState(null),
+    [error, setError] = useListeningState("");
+  const clearOwned = () => {
+    const current = audioRef.current;
+    if (current) {
+      current.onended = current.onplaying = current.onerror = current.onpause = null;
+      current.pause();
+      current.remove();
+      audioRef.current = null;
+    }
+  };
+  const stop = () => {
+    generation.current++;
+    clearOwned();
+    setActiveId(null);
+    setError("");
+  };
+  const play = (id, sources) => {
+    const queue = (Array.isArray(sources) ? sources : [sources]).filter(Boolean);
+    if (!queue.length) return;
+    stop();
+    const token = generation.current;
+    let index = 0;
+    const next = () => {
+      if (token !== generation.current) return;
+      clearOwned();
+      if (index >= queue.length) {
+        setActiveId(null);
+        return;
+      }
+      const media = new Audio(queue[index++]);
+      media.hidden = true;
+      media.dataset.exerciseListening = pageId;
+      document.body.appendChild(media);
+      audioRef.current = media;
+      const current = () => token === generation.current && audioRef.current === media;
+      const fail = () => {
+        if (!current()) return;
+        generation.current++;
+        clearOwned();
+        setActiveId(null);
+        setError("Audio could not be played. Please try again.");
+      };
+      media.onplaying = () => {
+        if (current()) setActiveId(id);
+      };
+      media.onended = () => {
+        if (current()) next();
+      };
+      media.onerror = fail;
+      media.onpause = () => {
+        if (!current()) return;
+        generation.current++;
+        clearOwned();
+        setActiveId(null);
+      };
+      document.querySelectorAll("audio,video").forEach(other => {
+        if (other !== media) other.pause();
+      });
+      coordinator?.registerAudio(media, null, pageId);
+      media.play().catch(fail);
+    };
+    next();
+  };
+  useListeningEffect(() => () => {
+    generation.current++;
+    const media = audioRef.current;
+    if (media) {
+      media.onended = media.onplaying = media.onerror = media.onpause = null;
+      media.pause();
+      media.remove();
+      audioRef.current = null;
+    }
+  }, []);
+  return {
+    play,
+    stop,
+    activeId,
+    error
+  };
+}
+function renderExerciseSpeaker() {
+  return <span aria-hidden="true" style={{
+    position: "absolute",
+    top: -10,
+    right: -10,
+    width: 22,
+    height: 22,
+    borderRadius: "50%",
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    background: "white",
+    color: "black",
+    boxShadow: "0 1px 3px rgba(0,0,0,.25)",
+    pointerEvents: "none",
+    zIndex: 3
+  }}><ListeningSpeakerIcon size={12} /></span>;
+}
+function renderExerciseAudioText({
+  audio,
+  id,
+  src,
+  label,
+  children
+}) {
+  if (!src || Array.isArray(src) && !src.some(Boolean)) return children;
+  const playing = audio.activeId === id;
+  const keys = event => {
+    if (event.target !== event.currentTarget || event.key !== "Enter" && event.key !== " ") return;
+    event.preventDefault();
+    event.stopPropagation();
+    if (event.type === "keydown" && !event.repeat) audio.play(id, src);
+  };
+  return <span role="button" tabIndex={0} data-listening={id} aria-label={label} onClick={event => {
+    event.stopPropagation();
+    audio.play(id, src);
+  }} onKeyDown={keys} onKeyUp={keys} style={{
+    position: "relative",
+    cursor: "pointer",
+    borderRadius: 6,
+    boxShadow: playing ? "0 0 0 3px #2563eb" : undefined,
+    backgroundColor: playing ? "#dbeafe" : undefined
+  }}>{children}{playing && renderExerciseSpeaker()}</span>;
+}
+
+
+const activationKeys = {
+  onKeyDown: (event) => {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    event.preventDefault();
+    event.stopPropagation();
+    if (!event.repeat) event.currentTarget.click();
+  },
+  onKeyUp: (event) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+  },
+};
+const fieldKeys = {
+  onKeyDown: (event) => {
+    if (event.key === "Enter" || event.key === " ") event.stopPropagation();
+  },
+  onKeyUp: (event) => {
+    if (event.key === "Enter" || event.key === " ") event.stopPropagation();
+  },
+};
+
 
 // ─────────────────────────────────────────────
 //  🎨  COLORS
@@ -25,36 +186,31 @@ const ITEMS = [
 //  COMPONENT
 // ─────────────────────────────────────────────
 export default function WB_ReadWriteOwn_QF() {
+const listening=useExerciseListening("sb_unit5_page6_q3");
+
   const [answers, setAnswers] = useState({});
   const [checked, setChecked] = useState(false);
 
+ const [announcement,setAnnouncement]=useState("");
   const handleChange = (id, value) => {
     if (checked) return;
     setAnswers((prev) => ({ ...prev, [id]: value }));
   };
 
-  const handleCheck = () => {
-    const allAnswered = ITEMS.every((item) => answers[item.id]?.trim());
-    if (!allAnswered) {
-      ValidationAlert.info("Please write a sentence for each word.");
-      return;
-    }
-    setChecked(true);
-    ValidationAlert.success(`Score: ${ITEMS.length} / ${ITEMS.length}`);
-  };
+  
 
-  const handleReset = () => {
+  const handleReset = () => {listening.stop();
     setAnswers({});
-    setChecked(false);
+    setChecked(false);setAnnouncement("Answers cleared.");
   };
 
   // no show answer for open-ended
-  const handleShowAnswer = () => {
-    ValidationAlert.info("Students' answers will vary.");
-  };
+  
 
   return (
-    <div className="main-container-component">
+    <div data-adapt-scope="unit5_Unit5_Page6_Q3" className="main-container-component"><span className="sr-only" role="status" aria-live="polite">{listening.error}</span>
+<style>{`[data-adapt-scope="unit5_Unit5_Page6_Q3"] input:focus-visible, [data-adapt-scope="unit5_Unit5_Page6_Q3"] [data-keyboard-choice]:focus-visible, [data-adapt-scope="unit5_Unit5_Page6_Q3"] [data-grid-cell]:focus-visible {outline:4px solid #2563eb;outline-offset:3px;border-radius:6px;}`}</style>
+<div className="sr-only" role="status" aria-live="polite" aria-atomic="true">{announcement}</div>
       <style>{`
         /* ── Header note ── */
         .rwof-vary {
@@ -144,28 +300,16 @@ export default function WB_ReadWriteOwn_QF() {
         }}
       >
         {/* ── Header ── */}
-        <h1
-          className="WB-header-title-page8"
-          style={{
-            margin: 0,
-            display: "flex",
-            alignItems: "center",
-            gap: "12px",
-            flexWrap: "wrap",
-          }}
-        >
-          <span className="WB-ex-A">F</span>
-          Read and write your own sentences.
-        </h1>
+        <ExerciseHeader subTitle="Use the target word in a complete sentence, reread it for meaning and punctuation, then move to the next line." sectionLetter="F" title={<>Read and write your own sentences.</>} />
 
         {/* ── Items ── */}
         <div className="rwof-list">
           {ITEMS.map((item) => (
             <div key={item.id} className="rwof-row">
               <span className="rwof-num">{item.id}</span>
-              <span className="rwof-word">{item.word}</span>
+              <span className="rwof-word">{renderExerciseAudioText({audio:listening,id:`word-${item.id}`,src:[clipPage45F1,clipPage45F2,clipPage45F3][item.id-1],label:item.word,children:item.word})}</span>
               <div className="rwof-input-wrap">
-                <input
+                <input {...fieldKeys} aria-label={`Question ${item.id}. Write your own sentence using ${item.word}.`} title={`Write a sentence using ${item.word}.`} placeholder="Your sentence"
                   type="text"
                   className="rwof-input"
                   value={answers[item.id] || ""}
@@ -183,7 +327,7 @@ export default function WB_ReadWriteOwn_QF() {
       {/* ── Buttons ── */}
       <div className="action-buttons-container">
         <div className="rwof-buttons">
-          <button onClick={handleReset} className="try-again-button">
+          <button type="button" {...activationKeys} onClick={handleReset} className="try-again-button">
             Start Again ↻
           </button>
         </div>

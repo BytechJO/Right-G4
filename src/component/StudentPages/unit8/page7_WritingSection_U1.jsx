@@ -19,7 +19,7 @@ const GrammarSection_U1 = () => {
 
       {/* ✅ شلنا الـ title badge والـ paragraphs، والصورة تملأ كل شي */}
       <div className="w-[60%] mt-2">
-        <img
+        <img alt={"An Amazing Child: a biographical form about Beethoven and tips for writing full sentences about a person."}
           src={image}
           style={{ width: "100%", height: "auto", display: "block" }}
         />

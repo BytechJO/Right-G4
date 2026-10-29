@@ -39,7 +39,7 @@ const stopAtSecond = 2.46;
        
         </div>
      <div style={{margin:"3em 0 2em"}} >
-        <QuestionAudioPlayer
+        <QuestionAudioPlayer pageId="sb_unit8_page3_grammar"
           src={sound}
           captions={captions}
           stopAtSecond={stopAtSecond}
@@ -49,14 +49,14 @@ const stopAtSecond = 2.46;
 
       {/* ✅ شلنا الـ title badge والـ paragraphs، والصورة تملأ كل شي */}
       <div className="w-[60%] mt-2">
-        <img
+        <img alt={"Past-tense grammar table with positive and negative sentences and questions."}
           src={image}
           style={{ width: "100%", height: "auto", display: "block" }}
         />
       </div>
 
       <div className="w-[60%]  my-5">
-        <img
+        <img alt={"Examples of regular and irregular past-tense verbs."}
           style={{ width: "100%", height: "auto", display: "block" , alignSelf : "center" }}
           src={image1}
         />

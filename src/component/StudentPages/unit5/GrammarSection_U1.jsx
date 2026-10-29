@@ -40,7 +40,7 @@ const stopAtSecond = 2.14;
        
         </div>
      <div style={{margin:"3em 0 2em"}} >
-        <QuestionAudioPlayer
+        <QuestionAudioPlayer pageId="sb_unit5_page3_grammar"
           src={sound}
           captions={captions}
           stopAtSecond={stopAtSecond}
@@ -50,14 +50,14 @@ const stopAtSecond = 2.14;
 
       {/* ✅ شلنا الـ title badge والـ paragraphs، والصورة تملأ كل شي */}
       <div className="w-[60%] mt-2">
-        <img
+        <img alt="Prepositional phrase example: Lolo is under the bed. Is Lolo under the table?"
           src={image}
           style={{ width: "100%", height: "auto", display: "block" }}
         />
       </div>
 
       <div className="w-[40%]  my-5">
-        <img
+        <img alt="Prepositions including in, on, into, about, inside, beyond, of, by, next to, above, beside, towards, at, with, from, across, behind, beneath, to, over, near, among, outside and between."
           style={{ width: "100%", height: "auto", display: "block" , alignSelf : "center" }}
           src={image1}
         />

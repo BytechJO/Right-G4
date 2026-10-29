@@ -1,3 +1,13 @@
+import clipC2 from "../../../assets/audio/ClassBook/Unit 4/Page 32 - C/Item_002_slow.mp3";
+import clipC1 from "../../../assets/audio/ClassBook/Unit 4/Page 32 - C/Item_001_big.mp3";
+import clipC3 from "../../../assets/audio/ClassBook/Unit 4/Page 32 - A/Item_002_taller.mp3";
+import {
+  useEffect as useListeningEffect,
+  useRef as useListeningRef,
+  useState as useListeningState,
+} from "react";
+import { useAudio } from "../../../context/AudioContext";
+import { FaVolumeUp as ListeningSpeakerIcon } from "react-icons/fa";
 import ExerciseHeader from "../../ExerciseHeader";
 import React, { useState, useRef } from "react";
 import ValidationAlert from "../../Popup/ValidationAlert";
@@ -6,6 +16,166 @@ import ValidationAlert from "../../Popup/ValidationAlert";
 //  🖼️  IMAGE
 // ─────────────────────────────────────────────
 import familyImg from "../../../assets/imgs/pages/Class Book/Right 4 Unit 4 Joy Makes a Friend Folder/Page 32/SVG/Asset 4.svg";
+
+function useExerciseListening(pageId) {
+  const coordinator = useAudio();
+  const audioRef = useListeningRef(null),
+    generation = useListeningRef(0);
+  const [activeId, setActiveId] = useListeningState(null),
+    [error, setError] = useListeningState("");
+  const clearOwned = () => {
+    const current = audioRef.current;
+    if (current) {
+      current.onended =
+        current.onplaying =
+        current.onerror =
+        current.onpause =
+          null;
+      current.pause();
+      current.remove();
+      audioRef.current = null;
+    }
+  };
+  const stop = () => {
+    generation.current++;
+    clearOwned();
+    setActiveId(null);
+    setError("");
+  };
+  const play = (id, sources) => {
+    const queue = (Array.isArray(sources) ? sources : [sources]).filter(
+      Boolean,
+    );
+    if (!queue.length) return;
+    stop();
+    const token = generation.current;
+    let index = 0;
+    const next = () => {
+      if (token !== generation.current) return;
+      clearOwned();
+      if (index >= queue.length) {
+        setActiveId(null);
+        return;
+      }
+      const media = new Audio(queue[index++]);
+      media.hidden = true;
+      media.dataset.exerciseListening = pageId;
+      document.body.appendChild(media);
+      audioRef.current = media;
+      const current = () =>
+        token === generation.current && audioRef.current === media;
+      const fail = () => {
+        if (!current()) return;
+        generation.current++;
+        clearOwned();
+        setActiveId(null);
+        setError("Audio could not be played. Please try again.");
+      };
+      media.onplaying = () => {
+        if (current()) setActiveId(id);
+      };
+      media.onended = () => {
+        if (current()) next();
+      };
+      media.onerror = fail;
+      media.onpause = () => {
+        if (!current()) return;
+        generation.current++;
+        clearOwned();
+        setActiveId(null);
+      };
+      document.querySelectorAll("audio,video").forEach((other) => {
+        if (other !== media) other.pause();
+      });
+      coordinator?.registerAudio(media, null, pageId);
+      media.play().catch(fail);
+    };
+    next();
+  };
+  useListeningEffect(
+    () => () => {
+      generation.current++;
+      const media = audioRef.current;
+      if (media) {
+        media.onended = media.onplaying = media.onerror = media.onpause = null;
+        media.pause();
+        media.remove();
+        audioRef.current = null;
+      }
+    },
+    [],
+  );
+  return {
+    play,
+    stop,
+    activeId,
+    error,
+  };
+}
+function renderExerciseSpeaker() {
+  return (
+    <span
+      aria-hidden="true"
+      style={{
+        position: "absolute",
+        top: -10,
+        right: -10,
+        width: 22,
+        height: 22,
+        borderRadius: "50%",
+        display: "inline-flex",
+        alignItems: "center",
+        justifyContent: "center",
+        background: "white",
+        color: "black",
+        boxShadow: "0 1px 3px rgba(0,0,0,.25)",
+        pointerEvents: "none",
+        zIndex: 3,
+      }}
+    >
+      <ListeningSpeakerIcon size={12} />
+    </span>
+  );
+}
+function renderExerciseAudioText({ audio, id, src, label, children }) {
+  if (!src || (Array.isArray(src) && !src.some(Boolean))) return children;
+  const playing = audio.activeId === id;
+  const keys = (event) => {
+    if (
+      event.target !== event.currentTarget ||
+      (event.key !== "Enter" && event.key !== " ")
+    )
+      return;
+    event.preventDefault();
+    event.stopPropagation();
+    if (event.type === "keydown" && !event.repeat) audio.play(id, src);
+  };
+  return (
+    <span
+      role="button"
+      tabIndex={0}
+      data-listening={id}
+      aria-label={label}
+      onClick={(event) => {
+        event.stopPropagation();
+        audio.play(id, src);
+      }}
+      onKeyDown={keys}
+      onKeyUp={keys}
+      style={{
+        position: "relative",
+        cursor: "pointer",
+        borderRadius: 6,
+        boxShadow: playing ? "0 0 0 3px #2563eb" : undefined,
+        backgroundColor: playing ? "#dbeafe" : undefined,
+      }}
+    >
+      {children}
+      {playing && renderExerciseSpeaker()}
+    </span>
+  );
+}
+
 const activationKeys = {
   onKeyDown: (event) => {
     if (event.key !== "Enter" && event.key !== " ") return;
@@ -83,6 +253,8 @@ const ITEMS = [
 //  COMPONENT
 // ─────────────────────────────────────────────
 export default function CB_ReadAndWrite_QA() {
+  const listening = useExerciseListening("sb_unit4_page5_q2");
+
   const [answers, setAnswers] = useState({});
   const [, setShowResults] = useState(false);
   const [showAns, setShowAns] = useState(false);
@@ -140,6 +312,7 @@ export default function CB_ReadAndWrite_QA() {
 
   const handleCheck = () => {
     if (checkDisabled) return;
+    listening.stop();
     if (!answerTargets.every((item) => answers[item.key]?.trim())) {
       setAnnouncement("Please complete all answers first.");
       ValidationAlert.info("Please complete all answers first.");
@@ -175,6 +348,7 @@ export default function CB_ReadAndWrite_QA() {
   };
 
   const handleShowAnswer = () => {
+    listening.stop();
     setAnswers(
       Object.fromEntries(answerTargets.map((item) => [item.key, item.answer])),
     );
@@ -186,6 +360,7 @@ export default function CB_ReadAndWrite_QA() {
   };
 
   const handleReset = () => {
+    listening.stop();
     setAnswers({});
     setResults({});
     setShowResults(false);
@@ -207,7 +382,17 @@ export default function CB_ReadAndWrite_QA() {
     const corr = getCorrect(item, field);
 
     if (!blank) {
-      return <span className="raw-cell">{corr}</span>;
+      return (
+        <span className="raw-cell">
+          {renderExerciseAudioText({
+            audio: listening,
+            id: `word-${item.id}-${field}`,
+            src: { big: clipC1, slow: clipC2, taller: clipC3 }[corr],
+            label: `Hear ${corr}`,
+            children: <>{corr}</>,
+          })}
+        </span>
+      );
     }
 
     let color = TEXT_DEFAULT;
@@ -248,7 +433,13 @@ export default function CB_ReadAndWrite_QA() {
         />
         {state === "wrong" && (
           <span className="wrong-hint" style={{ color: ANSWER_COLOR }}>
-            {corr}
+            {renderExerciseAudioText({
+              audio: listening,
+              id: `word-${item.id}-${field}`,
+              src: { big: clipC1, slow: clipC2, taller: clipC3 }[corr],
+              label: `Hear ${corr}`,
+              children: <>{corr}</>,
+            })}
           </span>
         )}
       </span>
@@ -257,9 +448,14 @@ export default function CB_ReadAndWrite_QA() {
 
   return (
     <div
+      data-listening-scope={"sb_unit4_page5_q2"}
       data-adapt-scope="unit4_Unit4_Page5_Q2"
       className="main-container-component"
     >
+      <style>{`[data-listening-scope="sb_unit4_page5_q2"] [data-listening]:focus-visible{outline:4px solid #2563eb;outline-offset:3px;border-radius:6px;}`}</style>
+      <span className="sr-only" role="status" aria-live="polite">
+        {listening.error}
+      </span>
       <style>{`[data-adapt-scope="unit4_Unit4_Page5_Q2"] input:focus-visible, [data-adapt-scope="unit4_Unit4_Page5_Q2"] [data-keyboard-choice]:focus-visible, [data-adapt-scope="unit4_Unit4_Page5_Q2"] [data-grid-cell]:focus-visible {outline:4px solid #2563eb;outline-offset:3px;border-radius:6px;}`}</style>
       <div
         className="sr-only"
@@ -362,7 +558,9 @@ export default function CB_ReadAndWrite_QA() {
         <ExerciseHeader
           sectionLetter="B"
           title={<>Read and write.</>}
-          subTitle={"Read the full prompt first, then complete each answer carefully before checking your work."}
+          subTitle={
+            "Read the full prompt first, then complete each answer carefully before checking your work."
+          }
         />
 
         {/* Layout */}

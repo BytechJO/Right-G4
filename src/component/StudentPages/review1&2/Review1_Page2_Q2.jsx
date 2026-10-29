@@ -1,3 +1,9 @@
+import clipE3 from "../../../assets/audio/ClassBook/Unit 2/Page 17 - E/Item_003_you.mp3";
+import clipE2 from "../../../assets/audio/ClassBook/Unit 2/Page 17 - E/Item_002_she.mp3";
+import clipE1 from "../../../assets/audio/ClassBook/Unit 2/Page 17 - E/Item_001_they.mp3";
+import {useEffect as useListeningEffect,useRef as useListeningRef,useState as useListeningState} from "react";
+import {useAudio} from "../../../context/AudioContext";
+import {FaVolumeUp as ListeningSpeakerIcon} from "react-icons/fa";
 import React, { useState, useRef } from "react";
 import ValidationAlert from "../../Popup/ValidationAlert";
 
@@ -8,6 +14,142 @@ import img1 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 2 Welcome t
 import img2 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 2 Welcome to the Big Apple Folder/Page 17/SVG/Asset 28.svg";
 import img3 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 2 Welcome to the Big Apple Folder/Page 17/SVG/Asset 29.svg";
 import ExerciseHeader from "../../ExerciseHeader";
+
+function useExerciseListening(pageId) {
+  const coordinator = useAudio();
+  const audioRef = useListeningRef(null),
+    generation = useListeningRef(0);
+  const [activeId, setActiveId] = useListeningState(null),
+    [error, setError] = useListeningState("");
+  const clearOwned = () => {
+    const current = audioRef.current;
+    if (current) {
+      current.onended = current.onplaying = current.onerror = current.onpause = null;
+      current.pause();
+      current.remove();
+      audioRef.current = null;
+    }
+  };
+  const stop = () => {
+    generation.current++;
+    clearOwned();
+    setActiveId(null);
+    setError("");
+  };
+  const play = (id, sources) => {
+    const queue = (Array.isArray(sources) ? sources : [sources]).filter(Boolean);
+    if (!queue.length) return;
+    stop();
+    const token = generation.current;
+    let index = 0;
+    const next = () => {
+      if (token !== generation.current) return;
+      clearOwned();
+      if (index >= queue.length) {
+        setActiveId(null);
+        return;
+      }
+      const media = new Audio(queue[index++]);
+      media.hidden = true;
+      media.dataset.exerciseListening = pageId;
+      document.body.appendChild(media);
+      audioRef.current = media;
+      const current = () => token === generation.current && audioRef.current === media;
+      const fail = () => {
+        if (!current()) return;
+        generation.current++;
+        clearOwned();
+        setActiveId(null);
+        setError("Audio could not be played. Please try again.");
+      };
+      media.onplaying = () => {
+        if (current()) setActiveId(id);
+      };
+      media.onended = () => {
+        if (current()) next();
+      };
+      media.onerror = fail;
+      media.onpause = () => {
+        if (!current()) return;
+        generation.current++;
+        clearOwned();
+        setActiveId(null);
+      };
+      document.querySelectorAll("audio,video").forEach(other => {
+        if (other !== media) other.pause();
+      });
+      coordinator?.registerAudio(media, null, pageId);
+      media.play().catch(fail);
+    };
+    next();
+  };
+  useListeningEffect(() => () => {
+    generation.current++;
+    const media = audioRef.current;
+    if (media) {
+      media.onended = media.onplaying = media.onerror = media.onpause = null;
+      media.pause();
+      media.remove();
+      audioRef.current = null;
+    }
+  }, []);
+  return {
+    play,
+    stop,
+    activeId,
+    error
+  };
+}
+function renderExerciseSpeaker() {
+  return <span aria-hidden="true" style={{
+    position: "absolute",
+    top: -10,
+    right: -10,
+    width: 22,
+    height: 22,
+    borderRadius: "50%",
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    background: "white",
+    color: "black",
+    boxShadow: "0 1px 3px rgba(0,0,0,.25)",
+    pointerEvents: "none",
+    zIndex: 3
+  }}><ListeningSpeakerIcon size={12} /></span>;
+}
+function renderExerciseAudioText({
+  audio,
+  id,
+  src,
+  label,
+  children
+}) {
+  if (!src || Array.isArray(src) && !src.some(Boolean)) return children;
+  const playing = audio.activeId === id;
+  const keys = event => {
+    if (event.target !== event.currentTarget || event.key !== "Enter" && event.key !== " ") return;
+    event.preventDefault();
+    event.stopPropagation();
+    if (event.type === "keydown" && !event.repeat) audio.play(id, src);
+  };
+  return <span role="button" tabIndex={0} data-listening={id} aria-label={label} onClick={event => {
+    event.stopPropagation();
+    audio.play(id, src);
+  }} onKeyDown={keys} onKeyUp={keys} style={{
+    position: "relative",
+    cursor: "pointer",
+    borderRadius: 6,
+    boxShadow: playing ? "0 0 0 3px #2563eb" : undefined,
+    backgroundColor: playing ? "#dbeafe" : undefined
+  }}>{children}{playing && renderExerciseSpeaker()}</span>;
+}
+
+// ─────────────────────────────────────────────
+//  🎨  COLORS
+// ─────────────────────────────────────────────
+
+
 
 // ─────────────────────────────────────────────
 //  🎨  COLORS
@@ -115,6 +257,8 @@ const fieldKeys = {
 };
 
 export default function WB_LookWriteQA_QE() {
+  const listening=useExerciseListening("sb_review1_page2_q2");
+
   const [answers, setAnswers] = useState({});
   const [results, setResults] = useState({});
   const [showAns, setShowAns] = useState(false);
@@ -137,7 +281,7 @@ export default function WB_LookWriteQA_QE() {
   };
 
   const handleCheck = () => {
-    if (checkDisabled) return;
+    if (checkDisabled) return;listening.stop();
     if (!ALL_INPUTS.every((inp) => answers[inp.key]?.trim())) {
       setAnnouncement("Please complete all answers first.");
       ValidationAlert.info("Please complete all answers first.");
@@ -167,7 +311,7 @@ export default function WB_LookWriteQA_QE() {
     else ValidationAlert.error(`Score: ${score} / ${ALL_INPUTS.length}`);
   };
 
-  const handleShowAnswer = () => {
+  const handleShowAnswer = () => {listening.stop();
     const filled = {};
     ALL_INPUTS.forEach((inp) => {
       filled[inp.key] = inp.answer;
@@ -178,7 +322,7 @@ export default function WB_LookWriteQA_QE() {
     setAnnouncement("Correct answers shown and locked.");
   };
 
-  const handleReset = () => {
+  const handleReset = () => {listening.stop();
     setAnswers({});
     setResults({});
     setShowAns(false);
@@ -228,10 +372,10 @@ export default function WB_LookWriteQA_QE() {
   };
 
   return (
-    <div
+    <div data-listening-scope={"sb_review1_page2_q2"}
       className="main-container-component"
       data-review12-scope="Review1_Page2_Q2"
-    >
+    ><style>{`[data-listening-scope="sb_review1_page2_q2"] [data-listening]:focus-visible{outline:4px solid #2563eb;outline-offset:3px;border-radius:6px;}`}</style><span className="sr-only" role="status" aria-live="polite">{listening.error}</span>
       <div
         className="sr-only"
         role="status"
@@ -405,7 +549,7 @@ height : auto ;
               <div className="lwqa-right">
                 {/* Question line */}
                 <div className="lwqa-q-line">
-                  <span className="lwqa-hint">{item.hint}</span>
+                  <span className="lwqa-hint">{renderExerciseAudioText({"audio":listening,"id":`hint-${item.id}`,"src":[clipE1,clipE2,clipE3][item.id-1],"label":`Hear the subject clue for question ${item.id}`,children:<>{item.hint}</>})}</span>
                   {renderInput(`${item.id}q`, item.correctQ)}
                 </div>
                 {/* Answer line */}

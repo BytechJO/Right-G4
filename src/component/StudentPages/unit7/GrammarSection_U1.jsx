@@ -65,7 +65,7 @@ const stopAtSecond = 2.14;
        
         </div>
      <div style={{margin:"3em 0 2em"}} >
-        <QuestionAudioPlayer
+        <QuestionAudioPlayer pageId="sb_unit7_page3_grammar"
           src={sound}
           captions={captions}
           stopAtSecond={stopAtSecond}
@@ -75,7 +75,7 @@ const stopAtSecond = 2.14;
 
       {/* ✅ شلنا الـ title badge والـ paragraphs، والصورة تملأ كل شي */}
       <div className="w-[60%] mt-2">
-        <img
+        <img alt="Examples of there was and there were, their negatives, and questions using some and any."
           src={image}
           style={{ width: "100%", height: "auto", display: "block" }}
         />
@@ -84,7 +84,7 @@ const stopAtSecond = 2.14;
       <div className="w-[30%]  my-5">
         <img
           style={{ width: "100%", height: "auto", display: "block" , alignSelf : "center" }}
-          src={image1}
+          src={image1} alt="Grammar reminder: use any in negative sentences and questions, and some in positive sentences." 
         />
       </div>
        <div className=" mt-2 space-y-10 w-[60%] ">

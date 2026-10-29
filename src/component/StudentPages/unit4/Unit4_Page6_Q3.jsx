@@ -1,9 +1,137 @@
+import clipG18 from "../../../assets/audio/ClassBook/Unit 4/Page 33 - G/Item_018_lighter.mp3";
+import clipG17 from "../../../assets/audio/ClassBook/Unit 4/Page 33 - G/Item_017_softer.mp3";
+import clipG16 from "../../../assets/audio/ClassBook/Unit 4/Page 33 - G/Item_016_braver.mp3";
+import clipG15 from "../../../assets/audio/ClassBook/Unit 4/Page 33 - G/Item_015_widest.mp3";
+import clipG14 from "../../../assets/audio/ClassBook/Unit 4/Page 33 - G/Item_014_thinnest.mp3";
+import clipG13 from "../../../assets/audio/ClassBook/Unit 4/Page 33 - G/Item_013_tallest.mp3";
+import clipG12 from "../../../assets/audio/ClassBook/Unit 4/Page 33 - G/Item_012_harder.mp3";
+import clipG11 from "../../../assets/audio/ClassBook/Unit 4/Page 33 - G/Item_011_fatter.mp3";
+import clipG10 from "../../../assets/audio/ClassBook/Unit 4/Page 33 - G/Item_010_younger.mp3";
+import clipG9 from "../../../assets/audio/ClassBook/Unit 4/Page 33 - G/Item_009_friendliest.mp3";
+import clipG8 from "../../../assets/audio/ClassBook/Unit 4/Page 33 - G/Item_008_kindest.mp3";
+import clipG7 from "../../../assets/audio/ClassBook/Unit 4/Page 33 - G/Item_007_tiniest.mp3";
+import clipG6 from "../../../assets/audio/ClassBook/Unit 4/Page 33 - G/Item_006_healthier.mp3";
+import clipG5 from "../../../assets/audio/ClassBook/Unit 4/Page 33 - G/Item_005_wider.mp3";
+import clipG4 from "../../../assets/audio/ClassBook/Unit 4/Page 33 - G/Item_004_taller.mp3";
+import clipG3 from "../../../assets/audio/ClassBook/Unit 4/Page 33 - G/Item_003_heaviest.mp3";
+import clipG2 from "../../../assets/audio/ClassBook/Unit 4/Page 33 - G/Item_002_shortest.mp3";
+import clipG1 from "../../../assets/audio/ClassBook/Unit 4/Page 33 - G/Item_001_smallest.mp3";
+import {useEffect as useListeningEffect,useRef as useListeningRef,useState as useListeningState} from "react";
+import {useAudio} from "../../../context/AudioContext";
+import {FaVolumeUp as ListeningSpeakerIcon} from "react-icons/fa";
 import ExerciseHeader from "../../ExerciseHeader";
 import React, { useState, useRef } from "react";
 import ValidationAlert from "../../Popup/ValidationAlert";
 import QuestionAudioPlayer from "../../QuestionAudioPlayer";
 
 import sound from "../../../assets/audio/ClassBook/Grade 4/cd5pg8-instruction1-adult-lady_YJxh5Hg5.mp3";
+
+function useExerciseListening(pageId) {
+  const coordinator = useAudio();
+  const audioRef = useListeningRef(null),
+    generation = useListeningRef(0);
+  const [activeId, setActiveId] = useListeningState(null),
+    [error, setError] = useListeningState("");
+  const clearOwned = () => {
+    const current = audioRef.current;
+    if (current) {
+      current.onended = current.onplaying = current.onerror = current.onpause = null;
+      current.pause();
+      current.remove();
+      audioRef.current = null;
+    }
+  };
+  const stop = () => {
+    generation.current++;
+    clearOwned();
+    setActiveId(null);
+    setError("");
+  };
+  const play = (id, sources) => {
+    const queue = (Array.isArray(sources) ? sources : [sources]).filter(Boolean);
+    if (!queue.length) return;
+    stop();
+    const token = generation.current;
+    let index = 0;
+    const next = () => {
+      if (token !== generation.current) return;
+      clearOwned();
+      if (index >= queue.length) {
+        setActiveId(null);
+        return;
+      }
+      const media = new Audio(queue[index++]);
+      media.hidden = true;
+      media.dataset.exerciseListening = pageId;
+      document.body.appendChild(media);
+      audioRef.current = media;
+      const current = () => token === generation.current && audioRef.current === media;
+      const fail = () => {
+        if (!current()) return;
+        generation.current++;
+        clearOwned();
+        setActiveId(null);
+        setError("Audio could not be played. Please try again.");
+      };
+      media.onplaying = () => {
+        if (current()) setActiveId(id);
+      };
+      media.onended = () => {
+        if (current()) next();
+      };
+      media.onerror = fail;
+      media.onpause = () => {
+        if (!current()) return;
+        generation.current++;
+        clearOwned();
+        setActiveId(null);
+      };
+      document.querySelectorAll("audio,video").forEach(other => {
+        if (other !== media) other.pause();
+      });
+      coordinator?.registerAudio(media, null, pageId);
+      media.play().catch(fail);
+    };
+    next();
+  };
+  useListeningEffect(() => () => {
+    generation.current++;
+    const media = audioRef.current;
+    if (media) {
+      media.onended = media.onplaying = media.onerror = media.onpause = null;
+      media.pause();
+      media.remove();
+      audioRef.current = null;
+    }
+  }, []);
+  return {
+    play,
+    stop,
+    activeId,
+    error
+  };
+}
+function renderExerciseSpeaker() {
+  return <span aria-hidden="true" style={{
+    position: "absolute",
+    top: -10,
+    right: -10,
+    width: 22,
+    height: 22,
+    borderRadius: "50%",
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    background: "white",
+    color: "black",
+    boxShadow: "0 1px 3px rgba(0,0,0,.25)",
+    pointerEvents: "none",
+    zIndex: 3
+  }}><ListeningSpeakerIcon size={12} /></span>;
+}
+
+
+
 const activationKeys = {
   onKeyDown: (event) => {
     if (event.key !== "Enter" && event.key !== " ") return;
@@ -85,6 +213,8 @@ const ITEMS = [
 //  COMPONENT
 // ─────────────────────────────────────────────
 export default function CB_ListenReadCircle_QG() {
+  const listening=useExerciseListening("sb_unit4_page6_q3");
+
   const [selected, setSelected] = useState({});
   const [, setShowResults] = useState(false);
   const [showAns, setShowAns] = useState(false);
@@ -111,7 +241,7 @@ export default function CB_ListenReadCircle_QG() {
   };
 
   const handleCheck = () => {
-    if (checkDisabled) return;
+    if (checkDisabled) return;listening.stop();
     if (
       !ITEMS.every(
         (item) =>
@@ -148,7 +278,7 @@ export default function CB_ListenReadCircle_QG() {
     else ValidationAlert.error(`Score: ${score} / ${ITEMS.length}`);
   };
 
-  const handleShowAnswer = () => {
+  const handleShowAnswer = () => {listening.stop();
     const filled = {};
     ITEMS.forEach((item) => {
       filled[item.id] = item.correct;
@@ -161,7 +291,7 @@ export default function CB_ListenReadCircle_QG() {
     setAnnouncement("Correct answers shown and locked.");
   };
 
-  const handleReset = () => {
+  const handleReset = () => {listening.stop();
     setSelected({});
     setShowResults(false);
     setShowAns(false);
@@ -189,7 +319,7 @@ export default function CB_ListenReadCircle_QG() {
         {item.words.map((word) => {
           const state = getWordState(item, word);
           return (
-            <div
+            <div data-listening={`word-${item.id}-${word}`}
               style={{
                 ...{},
                 borderRadius: {}.borderRadius || "6px",
@@ -199,11 +329,9 @@ export default function CB_ListenReadCircle_QG() {
                   results[item.id] === undefined
                     ? "#dbeafe"
                     : {}.background,
-                boxShadow:
-                  selected[item.id] === word
+                position:"relative",boxShadow:listening.activeId===(`word-${item.id}-${word}`)?"0 0 0 3px #2563eb":selected[item.id] === word
                     ? `inset 0 0 0 2px ${showAns || results[item.id] === "correct" ? "#16a34a" : results[item.id] === "wrong" ? "#ef4444" : "#2563eb"}`
-                    : undefined,
-              }}
+                    : undefined,backgroundColor:listening.activeId===(`word-${item.id}-${word}`)?"#dbeafe":undefined}}
               role="button"
               tabIndex={0}
               data-keyboard-choice
@@ -221,12 +349,12 @@ export default function CB_ListenReadCircle_QG() {
               ]
                 .filter(Boolean)
                 .join(" ")}
-              onClick={() => handleSelect(item.id, word)}
+              onClick={event=>{listening.play(`word-${item.id}-${word}`,[clipG1,clipG2,clipG3,clipG4,clipG5,clipG6,clipG7,clipG8,clipG9,clipG10,clipG11,clipG12,clipG13,clipG14,clipG15,clipG16,clipG17,clipG18][(item.id-1)*3+item.words.indexOf(word)]);return (() => handleSelect(item.id, word))(event);}}
             >
               <div className="lrc-oval" />
               <span className="lrc-word">{word}</span>
               {state === "wrong" && <div className="lrc-badge">✕</div>}
-            </div>
+            {listening.activeId===(`word-${item.id}-${word}`)&&renderExerciseSpeaker()}</div>
           );
         })}
       </div>
@@ -234,10 +362,10 @@ export default function CB_ListenReadCircle_QG() {
   );
 
   return (
-    <div
+    <div data-listening-scope={"sb_unit4_page6_q3"}
       data-adapt-scope="unit4_Unit4_Page6_Q3"
       className="main-container-component"
-    >
+    ><style>{`[data-listening-scope="sb_unit4_page6_q3"] [data-listening]:focus-visible{outline:4px solid #2563eb;outline-offset:3px;border-radius:6px;}`}</style><span className="sr-only" role="status" aria-live="polite">{listening.error}</span>
       <style>{`[data-adapt-scope="unit4_Unit4_Page6_Q3"] input:focus-visible, [data-adapt-scope="unit4_Unit4_Page6_Q3"] [data-keyboard-choice]:focus-visible, [data-adapt-scope="unit4_Unit4_Page6_Q3"] [data-grid-cell]:focus-visible {outline:4px solid #2563eb;outline-offset:3px;border-radius:6px;}`}</style>
       <div
         className="sr-only"

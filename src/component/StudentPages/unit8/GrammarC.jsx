@@ -5,7 +5,25 @@ import { FaCheck, FaRedo, FaEye } from "react-icons/fa";
 import img1 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 8 I Lived in the Library Folder/Page 66/SVG/Asset 14.svg"; // He fixed the car
 import img2 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 8 I Lived in the Library Folder/Page 66/SVG/Asset 11.svg"; // She cooked soup
 import img3 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 8 I Lived in the Library Folder/Page 66/SVG/Asset 10.svg"; // I painted a picture
-import img4 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 8 I Lived in the Library Folder/Page 66/SVG/Asset 9.svg"; // They played soccer
+import img4 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 8 I Lived in the Library Folder/Page 66/SVG/Asset 9.svg";
+const imageDescriptions={img1:"A person repairing a red car.",img2:"A man cooking at a stove with two children beside him.",img3:"A girl painting a landscape.",img4:"Two boys playing soccer."};
+
+const activationKeys = {
+  onKeyDown: (event) => {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    event.preventDefault();
+    event.stopPropagation();
+    if (!event.repeat) event.currentTarget.click();
+  },
+  onKeyUp: (event) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+  },
+};
+
+ // They played soccer
 
 
 const TEXT_COLOR = "#2b2b2b";
@@ -41,9 +59,18 @@ const ALL_IMGS = [...LEFT_IMGS, ...RIGHT_IMGS];
 const GrammarC = () => {
   const [connections, setConnections] = useState({});
   const [selectedLeft, setSelectedLeft] = useState(null);
-  const [showResults, setShowResults] = useState(false);
+  const [, setShowResults] = useState(false);
   const [showed, setShowed] = useState(false);
   const [locked, setLocked] = useState(false);
+
+const [results,setResults]=useState({}),[selectedRight,setSelectedRight]=useState(null),[preview,setPreview]=useState(null),[announcement,setAnnouncement]=useState("");
+const resetButtonRef=useRef(null),endpointRefs=useRef({}),focusFrame=useRef(null);const checkDisabled=showed||LEFT_ITEMS.every(item=>results[item.id]===true);const orderedRight=()=>[...ALL_IMGS].sort((a,b)=>a.row-b.row);
+const lockedLeft=id=>showed||results[id]===true;const lockedRight=name=>showed||Object.keys(connections).some(id=>connections[id]===name&&results[id]===true);
+const cancelFocus=()=>{if(focusFrame.current!==null)cancelAnimationFrame(focusFrame.current);focusFrame.current=null;};const cancel=()=>{cancelFocus();setSelectedLeft(null);setSelectedRight(null);setPreview(null);};
+useEffect(()=>()=>{if(focusFrame.current!==null)cancelAnimationFrame(focusFrame.current);},[]);
+const focusSide=side=>{cancelFocus();focusFrame.current=requestAnimationFrame(()=>{focusFrame.current=null;const item=side==='left'?LEFT_ITEMS.find(x=>!lockedLeft(x.id)):orderedRight().find(x=>!lockedRight(x.name));endpointRefs.current[side+'-'+(side==='left'?item?.id:item?.name)]?.focus({preventScroll:true});});};
+const connect=(id,name,keyboard)=>{if(lockedLeft(id)||lockedRight(name))return;const next={...connections};Object.keys(next).forEach(k=>{if(Number(k)===id||next[k]===name)delete next[k];});next[id]=name;setConnections(next);setResults(prev=>Object.fromEntries(Object.entries(prev).filter(([key,value])=>value===true||(Number(key)!==id&&next[key]===connections[key]))));cancel();setAnnouncement('Connection made.');if(keyboard)focusSide('left');};
+const endpointKeys=(event,side,value)=>{if(event.key==='Escape'){event.preventDefault();event.stopPropagation();cancel();return;}const items=side==='left'?LEFT_ITEMS.map(x=>x.id):orderedRight().map(x=>x.name);let index=items.indexOf(value);if(['ArrowUp','ArrowDown'].includes(event.key)){event.preventDefault();event.stopPropagation();const available=items.filter(x=>side==='left'?!lockedLeft(x):!lockedRight(x));index=available.indexOf(value);const next=available[(index+(event.key==='ArrowDown'?1:-1)+available.length)%available.length];endpointRefs.current[side+'-'+next]?.focus();return;}if(event.key==='Tab'&&side==='right'){const next=items[index+(event.shiftKey?-1:1)];if(next!==undefined){event.preventDefault();event.stopPropagation();endpointRefs.current['right-'+next]?.focus();}return;}if(event.key==='Enter'||event.key===' '){event.preventDefault();event.stopPropagation();if(!event.repeat)(side==='left'?handleLeftClick:handleRightClick)(value,true);}};
 
   const containerRef = useRef(null);
   const leftRefs = useRef({});
@@ -61,8 +88,8 @@ const GrammarC = () => {
     const cRect = containerRef.current.getBoundingClientRect();
     const eRect = el.getBoundingClientRect();
     return {
-      x: eRect.left - cRect.left + eRect.width / 2,
-      y: eRect.top - cRect.top + eRect.height / 2,
+      x: (eRect.left - cRect.left + eRect.width / 2)/(cRect.width/containerRef.current.clientWidth || 1),
+      y: (eRect.top - cRect.top + eRect.height / 2)/(cRect.height/containerRef.current.clientHeight || 1),
     };
   }, []);
 
@@ -74,56 +101,18 @@ const GrammarC = () => {
   const connectedRight = (name) => Object.values(connections).includes(name);
   const connectedLeft = (id) => Object.prototype.hasOwnProperty.call(connections, id);
 
-  const lineColor = useCallback((leftId, imgName) => {
-    if (showed) return LINE_DEFAULT;
-    if (showResults) return isCorrect(leftId, imgName) ? LINE_CORRECT : LINE_WRONG;
-    return LINE_DEFAULT;
-  }, [showed, showResults]);
+  const lineColor=id=>showed||results[id]===true?"#16a34a":results[id]===false?"#ef4444":LINE_DEFAULT;
 
-  const handleLeftClick = (leftId) => {
-    if (locked) return;
-    if (showResults && connectedLeft(leftId) && isCorrect(leftId, connections[leftId])) return;
-    setSelectedLeft((prev) => (prev === leftId ? null : leftId));
-  };
+  const handleLeftClick=(id,keyboard=false)=>{if(lockedLeft(id))return;if(selectedRight!==null){connect(id,selectedRight,keyboard);return;}setSelectedLeft(prev=>prev===id?null:id);setPreview(null);setAnnouncement('Sentence selected. Choose its match.');if(keyboard&&selectedLeft!==id)focusSide('right');};
 
-  const handleRightClick = (imgName) => {
-    if (locked || selectedLeft === null) return;
-    if (showResults && connectedLeft(selectedLeft) && isCorrect(selectedLeft, connections[selectedLeft])) {
-      setSelectedLeft(null);
-      return;
-    }
-    setConnections((prev) => {
-      const next = { ...prev };
-      Object.keys(next).forEach((k) => { if (next[k] === imgName) delete next[k]; });
-      if (next[selectedLeft] && !(showResults && isCorrect(selectedLeft, next[selectedLeft]))) delete next[selectedLeft];
-      next[selectedLeft] = imgName;
-      return next;
-    });
-    setSelectedLeft(null);
-    if (showResults) setShowResults(false);
-  };
+  const handleRightClick=(name,keyboard=false)=>{if(lockedRight(name))return;if(selectedLeft!==null){connect(selectedLeft,name,keyboard);return;}setSelectedRight(prev=>prev===name?null:name);setPreview(null);setAnnouncement('Match selected. Choose a sentence.');if(keyboard&&selectedRight!==name)focusSide('left');};
 
-  const handleCheck = () => {
-    if (locked) return;
-    if (Object.keys(connections).length < LEFT_ITEMS.length) {
-      ValidationAlert.info("Please connect all sentences to images first.");
-      return;
-    }
-    let score = 0;
-    Object.entries(connections).forEach(([lid, name]) => { if (isCorrect(lid, name)) score++; });
-    setShowResults(true);
-    const total = LEFT_ITEMS.length;
-    const color = score === total ? "green" : score === 0 ? "red" : "orange";
-    const msg = `<div style="font-size:20px;text-align:center;"><span style="color:${color};font-weight:bold;">Score: ${score} / ${total}</span></div>`;
-    if (score === total) { setLocked(true); ValidationAlert.success(msg); }
-    else if (score > 0) ValidationAlert.warning(msg);
-    else ValidationAlert.error(msg);
-  };
+  const handleCheck=()=>{if(checkDisabled)return;cancel();if(Object.keys(connections).length<LEFT_ITEMS.length){ValidationAlert.info('Please connect all sentences first.');return;}const next=Object.fromEntries(LEFT_ITEMS.map(item=>[item.id,isCorrect(item.id,connections[item.id])]));const score=Object.values(next).filter(Boolean).length;setResults(next);setShowResults(true);setAnnouncement(`Score: ${score} out of ${LEFT_ITEMS.length}. Correct connections are locked.`);if(score===LEFT_ITEMS.length){setLocked(true);resetButtonRef.current?.focus({preventScroll:true});ValidationAlert.success(`Score: ${score} / ${LEFT_ITEMS.length}`);}else if(score)ValidationAlert.warning(`Score: ${score} / ${LEFT_ITEMS.length}`);else ValidationAlert.error(`Score: ${score} / ${LEFT_ITEMS.length}`);};
 
   const handleShow = () => {
     const ans = {};
     ALL_IMGS.forEach((r) => { ans[r.correctLeftId] = r.name; });
-    setConnections(ans);
+    cancel();setResults({});resetButtonRef.current?.focus({preventScroll:true});setAnnouncement("Correct connections shown and locked.");setConnections(ans);
     setShowResults(false);
     setShowed(true);
     setLocked(true);
@@ -131,48 +120,21 @@ const GrammarC = () => {
   };
 
   const handleReset = () => {
-    setConnections({});
+    cancel();setResults({});setAnnouncement("Connections cleared.");setConnections({});
     setShowResults(false);
     setShowed(false);
     setLocked(false);
     setSelectedLeft(null);
   };
 
-  const leftDotColor = (id) => {
-    if (selectedLeft === id) return DOT_SELECTED;
-    if (connectedLeft(id)) {
-      if (showed) return LINE_DEFAULT;
-      if (showResults) return isCorrect(id, connections[id]) ? LINE_CORRECT : LINE_WRONG;
-      return DOT_SELECTED;
-    }
-    return DOT_DEFAULT;
-  };
+  const leftDotColor=id=>lockedLeft(id)?"#16a34a":results[id]===false?"#ef4444":selectedLeft===id||connectedLeft(id)?"#2195a6":DOT_DEFAULT;
 
-  const rightDotColor = (name) => {
-    if (!connectedRight(name)) return DOT_DEFAULT;
-    const lid = Object.keys(connections).find((k) => connections[k] === name);
-    if (!lid) return DOT_DEFAULT;
-    if (showed) return LINE_DEFAULT;
-    if (showResults) return isCorrect(lid, name) ? LINE_CORRECT : LINE_WRONG;
-    return DOT_SELECTED;
-  };
+  const rightDotColor=name=>lockedRight(name)?"#16a34a":Object.keys(connections).some(id=>connections[id]===name&&results[id]===false)?"#ef4444":selectedRight===name||connectedRight(name)?"#2195a6":DOT_DEFAULT;
 
-  const imgBorder = (name) => {
-    if (!connectedRight(name)) return "#e5e7eb";
-    if (showed) return "#2195a6";
-    if (showResults) {
-      const lid = Object.keys(connections).find((k) => connections[k] === name);
-      return lid && isCorrect(lid, name) ? "#2195a6" : "#ef4444";
-    }
-    return "#2195a6";
-  };
+  
 
-  const isLeftWrong = (id) => showResults && !showed && connectedLeft(id) && !isCorrect(id, connections[id]);
-  const isRightWrong = (name) => {
-    if (!showResults || showed || !connectedRight(name)) return false;
-    const lid = Object.keys(connections).find((k) => connections[k] === name);
-    return lid && !isCorrect(lid, name);
-  };
+  const isLeftWrong=id=>!showed&&results[id]===false;
+  
 
   const renderLines = () =>
     Object.entries(connections).map(([leftId, imgName]) => {
@@ -189,13 +151,13 @@ const GrammarC = () => {
       );
     });
 
-  const ImgCell = ({ imgList, rowId }) => {
+  const renderImgCell = (imgList,rowId) => {
     const item = imgList.find((i) => i.row === rowId);
     if (!item) return <div style={{ width: "120px" }} />;
-    const wrong = isRightWrong(item.name);
+    
     return (
-      <div
-        style={{ display: "flex", alignItems: "center", gap: "6px", cursor: locked ? "default" : "pointer" }}
+      <div role="button" tabIndex={0} data-keyboard-choice data-match-side="right" data-match-id={item.name} ref={el=>{endpointRefs.current['right-'+item.name]=el;}} aria-label={imageDescriptions[item.name]} aria-pressed={selectedRight===item.name} aria-disabled={lockedRight(item.name)} onKeyDown={event=>endpointKeys(event,'right',item.name)} onKeyUp={activationKeys.onKeyUp} onFocus={()=>setPreview({side:'right',id:item.name})} onMouseEnter={()=>setPreview({side:'right',id:item.name})} onMouseLeave={()=>setPreview(null)}
+        style={{...({ display: "flex", alignItems: "center", gap: "6px", cursor: locked ? "default" : "pointer" }),borderRadius:({ display: "flex", alignItems: "center", gap: "6px", cursor: locked ? "default" : "pointer" }).borderRadius||6,boxShadow:lockedRight(item.name)?"inset 0 0 0 2px #16a34a":selectedRight===item.name?"inset 0 0 0 2px #2563eb":undefined,background:selectedRight===item.name?"#dbeafe":({ display: "flex", alignItems: "center", gap: "6px", cursor: locked ? "default" : "pointer" }).background}}
         onClick={() => handleRightClick(item.name)}
       >
         <div
@@ -208,7 +170,7 @@ const GrammarC = () => {
         />
         <div style={{ position: "relative" }}>
           <img
-            src={item.src} alt=""
+            src={item.src} alt={imageDescriptions[item.name]}
             style={{
               width: "120px",
               height: `auto`,
@@ -223,7 +185,9 @@ const GrammarC = () => {
   };
 
   return (
-    <div className="mb-6 mx-auto">
+    <div onKeyDown={event=>{if(event.key==="Escape"&&(selectedLeft!==null||selectedRight!==null)){event.preventDefault();event.stopPropagation();cancel();setAnnouncement("Selection cancelled.");}}} data-adapt-scope="unit8_GrammarC" className="mb-6 mx-auto">
+<style>{`[data-adapt-scope="unit8_GrammarC"] input:focus-visible, [data-adapt-scope="unit8_GrammarC"] [data-keyboard-choice]:focus-visible, [data-adapt-scope="unit8_GrammarC"] [data-grid-cell]:focus-visible, [data-adapt-scope="unit8_GrammarC"] [data-listening]:focus-visible {outline:4px solid #2563eb !important;outline-offset:3px;border-radius:6px;}`}</style>
+<div className="sr-only" role="status" aria-live="polite" aria-atomic="true">{announcement}</div>
       <h5 className="header-title-page8-read mb-8">
         <span className="ex-A-read mr-2">C</span>
         Look and match.
@@ -247,23 +211,37 @@ const GrammarC = () => {
           <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: `${ROW_GAP}px` }}>
             {LEFT_ITEMS.map((item) => {
               const isSelected = selectedLeft === item.id;
-              const isLock = locked || (showResults && connectedLeft(item.id) && isCorrect(item.id, connections[item.id]));
-              const wrong = isLeftWrong(item.id);
+              const isLock = lockedLeft(item.id);
+              
               return (
                 <div
                   key={item.id}
                   style={{ height: ROW_HEIGHT, display: "flex", alignItems: "center" }}
                 >
-                  <div
+                  <div role="button" tabIndex={0} data-keyboard-choice data-match-side="left" data-match-id={item.id} ref={el=>{endpointRefs.current['left-'+item.id]=el;}} aria-label={item.text} aria-pressed={selectedLeft===item.id} aria-disabled={lockedLeft(item.id)} onKeyDown={event=>endpointKeys(event,'left',item.id)} onKeyUp={activationKeys.onKeyUp} onFocus={()=>setPreview({side:'left',id:item.id})} onMouseEnter={()=>setPreview({side:'left',id:item.id})} onMouseLeave={()=>setPreview(null)}
                     onClick={() => handleLeftClick(item.id)}
-                    style={{
+                    style={{...({
                       display: "flex", alignItems: "center", gap: "6px",
                       padding: "4px 10px", borderRadius: "10px",
                       border: `2px solid ${isSelected ? "#2195a6" : "transparent"}`,
                       background: isSelected ? "#e0f7fa" : "transparent",
                       cursor: isLock ? "default" : "pointer",
                       userSelect: "none",
-                    }}
+                    }),borderRadius:({
+                      display: "flex", alignItems: "center", gap: "6px",
+                      padding: "4px 10px", borderRadius: "10px",
+                      border: `2px solid ${isSelected ? "#2195a6" : "transparent"}`,
+                      background: isSelected ? "#e0f7fa" : "transparent",
+                      cursor: isLock ? "default" : "pointer",
+                      userSelect: "none",
+                    }).borderRadius||6,boxShadow:lockedLeft(item.id)?"inset 0 0 0 2px #16a34a":selectedLeft===item.id?"inset 0 0 0 2px #2563eb":undefined,background:selectedLeft===item.id?"#dbeafe":({
+                      display: "flex", alignItems: "center", gap: "6px",
+                      padding: "4px 10px", borderRadius: "10px",
+                      border: `2px solid ${isSelected ? "#2195a6" : "transparent"}`,
+                      background: isSelected ? "#e0f7fa" : "transparent",
+                      cursor: isLock ? "default" : "pointer",
+                      userSelect: "none",
+                    }).background}}
                   >
                     <span style={{ fontSize: "15px", color: TEXT_COLOR }}>{item.text}</span>
                   </div>
@@ -309,7 +287,7 @@ const GrammarC = () => {
           <div style={{ display: "flex", flexDirection: "column", gap: `${ROW_GAP}px`, flexShrink: 0, marginRight: "10px" }}>
             {LEFT_ITEMS.map((item) => (
               <div key={item.id} style={{ height: ROW_HEIGHT, display: "flex", alignItems: "center" }}>
-                <ImgCell imgList={LEFT_IMGS} rowId={item.id} />
+                {renderImgCell(LEFT_IMGS,item.id)}
               </div>
             ))}
           </div>
@@ -318,7 +296,7 @@ const GrammarC = () => {
           <div style={{ display: "flex", flexDirection: "column", gap: `${ROW_GAP}px`, flexShrink: 0 }}>
             {LEFT_ITEMS.map((item) => (
               <div key={item.id} style={{ height: ROW_HEIGHT, display: "flex", alignItems: "center" }}>
-                <ImgCell imgList={RIGHT_IMGS} rowId={item.id} />
+                {renderImgCell(RIGHT_IMGS,item.id)}
               </div>
             ))}
           </div>
@@ -326,35 +304,35 @@ const GrammarC = () => {
         </div>
 
         {/* SVG Lines */}
-        <svg style={{
+        <svg aria-hidden="true" style={{
           position: "absolute", top: 0, left: 0,
           width: "100%", height: "100%",
           pointerEvents: "none", overflow: "visible", zIndex: 10,
         }}>
-          {renderLines()}
+          {renderLines()}{(()=>{let id=selectedLeft,name=selectedRight;if(id!==null&&preview?.side==='right')name=preview.id;else if(name!==null&&preview?.side==='left')id=preview.id;else return null;if(lockedLeft(id)||lockedRight(name))return null;const a=getDotCenter(leftRefs.current[id]),b=getDotCenter(rightRefs.current[name]);return a&&b?<line data-match-preview x1={a.x} y1={a.y} x2={b.x} y2={b.y} stroke="#2563eb" strokeWidth="2.5" strokeDasharray="6 4"/>:null;})()}
         </svg>
       </div>
 
       {/* Buttons */}
       <div className="flex justify-center gap-6 mt-8">
         <div className="relative group">
-          <div onClick={handleReset} className="flex items-center justify-center w-14 h-14 rounded-xl bg-[#ffc107] hover:bg-[#e0a800] cursor-pointer transition shadow-sm">
-            <div className="bg-white p-3 rounded-full shadow"><FaRedo size={14} /></div>
-          </div>
+          <button type="button" aria-label="Start Again" {...activationKeys} ref={resetButtonRef} onClick={handleReset} className="flex items-center justify-center w-14 h-14 rounded-xl bg-[#ffc107] hover:bg-[#e0a800] cursor-pointer transition shadow-sm">
+            <span className="bg-white p-3 rounded-full shadow"><FaRedo size={14} /></span>
+          </button>
           <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-black text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition">Reset</span>
         </div>
 
         <div className="relative group">
-          <div onClick={handleShow} className="flex items-center justify-center w-14 h-14 rounded-xl bg-[#2c78b4] hover:bg-[#1a5a8a] cursor-pointer transition shadow-sm">
-            <div className="bg-white p-3 rounded-full shadow"><FaEye size={14} /></div>
-          </div>
+          <button type="button" aria-label="Show Answer" {...activationKeys} onClick={handleShow} className="flex items-center justify-center w-14 h-14 rounded-xl bg-[#2c78b4] hover:bg-[#1a5a8a] cursor-pointer transition shadow-sm">
+            <span className="bg-white p-3 rounded-full shadow"><FaEye size={14} /></span>
+          </button>
           <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-black text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition whitespace-nowrap">Show Answer</span>
         </div>
 
         <div className="relative group">
-          <div onClick={handleCheck} className="flex items-center justify-center w-14 h-14 rounded-xl bg-[#55c271] hover:bg-[#449d5a] cursor-pointer transition shadow-sm">
-            <div className="bg-white p-3 rounded-full shadow"><FaCheck size={14} /></div>
-          </div>
+          <button type="button" aria-label="Check Answer" {...activationKeys} disabled={checkDisabled} style={{cursor:checkDisabled ? "not-allowed":"pointer"}} onClick={handleCheck} className="flex items-center justify-center w-14 h-14 rounded-xl bg-[#55c271] hover:bg-[#449d5a] cursor-pointer transition shadow-sm">
+            <span className="bg-white p-3 rounded-full shadow"><FaCheck size={14} /></span>
+          </button>
           <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-black text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition whitespace-nowrap">Check Answer</span>
         </div>
       </div>

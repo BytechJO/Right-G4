@@ -30,6 +30,8 @@ const PAGE_ID = "page-75";
 const Reading_NewPage = () => {
   const { registerAudio, stopCurrent, activePageId } = useAudio();
   const audioRef = useRef(null);
+  const sliceTimer = useRef(null);
+  React.useEffect(()=>{const audio=audioRef.current;return()=>{clearInterval(sliceTimer.current);if(audio){audio.onended=audio.onerror=null;audio.pause();}};},[]);
   const [hoveredAreaIndex, setHoveredAreaIndex] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [activeAreaIndex, setActiveAreaIndex] = useState(null);
@@ -60,13 +62,14 @@ const Reading_NewPage = () => {
     const audio = audioRef.current;
     if (!audio) return;
 
+    clearInterval(sliceTimer.current);
     stopCurrent();
     setActiveAreaIndex(null);
     setHoveredAreaIndex(null);
 
     audio.src = soundAll;
     audio.currentTime = slice.startFrom;
-    audio.play();
+    audio.play().catch(() => {clearInterval(sliceTimer.current);setIsPlaying(false);setActiveAreaIndex(null);setHoveredAreaIndex(null);});
     setIsPlaying(true);
     setActiveAreaIndex(newIndex);
 
@@ -80,6 +83,8 @@ const Reading_NewPage = () => {
       }
     }, 100);
 
+    sliceTimer.current=id;
+    audio.onerror=()=>{clearInterval(id);setIsPlaying(false);setActiveAreaIndex(null);setHoveredAreaIndex(null);};
     registerAudio(audio, id, PAGE_ID);
 
     audio.onended = () => {
@@ -92,7 +97,7 @@ const Reading_NewPage = () => {
 
   return (
     <div data-reading-page="unit8-2"
-      className="page1-img-wrapper"
+      role="group" aria-label="Stories in our dreams, page 75. Select a passage to listen to its story." className="page1-img-wrapper"
       onClick={handleImageClick}
       style={{ backgroundImage: `url(${pageImage})` }}
     >
@@ -100,7 +105,10 @@ const Reading_NewPage = () => {
         outline: 4px solid #2563eb;
         outline-offset: 3px;
         border-radius: 6px;
-      }`}</style>
+      }
+[data-reading-page="unit8-2"] .clickable-area.highlight { background-color:rgba(255,0,0,.078);border:2px solid rgba(255,0,0,.8);border-radius:8px;}
+[data-reading-page="unit8-2"] .clickable-area:focus-visible {outline-offset:-4px;z-index:11;}
+`}</style>
       {clickableAreas.map((area, index) => (
         <div role="button" tabIndex={0} data-reading-control {...pageKeys}
           aria-label={`Read passage ${index + 1} on page 75`}
@@ -111,6 +119,8 @@ const Reading_NewPage = () => {
           }`}
           style={{
             position: "absolute",
+            zIndex: hoveredAreaIndex === index || activeAreaIndex === index ? 10 : 1,
+            pointerEvents: "auto",
             left: `${area.x1}%`,
             top: `${area.y1}%`,
             width: `${area.x2 - area.x1}%`,

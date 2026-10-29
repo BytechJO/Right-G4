@@ -1,7 +1,30 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { FaRedo } from "react-icons/fa";
 
 import roomImg from "../../../assets/imgs/pages/Class Book/Right 4 Unit 7  The Alligator Scare Folder/Page 61/SVG/Asset 2.svg";
+const activationKeys = {
+  onKeyDown: (event) => {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    event.preventDefault();
+    event.stopPropagation();
+    if (!event.repeat) event.currentTarget.click();
+  },
+  onKeyUp: (event) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+  },
+};
+const fieldKeys = {
+  onKeyDown: (event) => {
+    if (event.key === "Enter" || event.key === " ") event.stopPropagation();
+  },
+  onKeyUp: (event) => {
+    if (event.key === "Enter" || event.key === " ") event.stopPropagation();
+  },
+};
+
 
 const WritingA = () => {
   const [lines, setLines] = useState(["", "", "", "", ""]);
@@ -12,12 +35,15 @@ const WritingA = () => {
     setLines(updated);
   };
 
+const [announcement,setAnnouncement]=useState("");const resetButtonRef=useRef(null);
   const handleReset = () => {
-    setLines(["", "", "", "", ""]);
+    setLines(["", "", "", "", ""]);setAnnouncement("Your sentences cleared.");
   };
 
   return (
-    <div className="mb-6 mx-auto">
+    <div data-adapt-scope="unit7_page7_WritingA" className="mb-6 mx-auto">
+<style>{`[data-adapt-scope="unit7_page7_WritingA"] input:focus-visible, [data-adapt-scope="unit7_page7_WritingA"] [data-keyboard-choice]:focus-visible, [data-adapt-scope="unit7_page7_WritingA"] [data-grid-cell]:focus-visible {outline:4px solid #2563eb;outline-offset:3px;border-radius:6px;}`}</style>
+<div className="sr-only" role="status" aria-live="polite" aria-atomic="true">{announcement}</div>
       <h5 className="header-title-page8-read mb-8">
         <span className="ex-A-read mr-2">A</span>
         
@@ -44,7 +70,7 @@ const WritingA = () => {
             >
               {i + 1}
             </span>
-            <input
+            <input {...fieldKeys} aria-label={`Sentence ${i+1}. Describe the old living room using there was or there were.`} title={`Sentence ${i+1}. Describe the room.`} placeholder="Your sentence"
               type="text"
               value={line}
               onChange={(e) => handleChange(i, e.target.value)}
@@ -66,21 +92,21 @@ const WritingA = () => {
       {/* Room Image */}
       <img
         src={roomImg}
-        alt="living room"
+        alt={"An old living room with wooden furniture, windows, and a wall clock."}
         style={{ width: "100%", borderRadius: "12px", display: "block"  , height : "auto "}}
       />
 
       {/* Reset Button */}
       <div className="flex justify-center mt-8">
         <div className="relative group">
-          <div
+          <button type="button" aria-label="Start Again" {...activationKeys} ref={resetButtonRef}
             onClick={handleReset}
             className="flex items-center justify-center w-14 h-14 rounded-xl bg-[#ffc107] hover:bg-[#e0a800] cursor-pointer transition shadow-sm"
           >
-            <div className="bg-white p-3 rounded-full shadow">
+            <span className="bg-white p-3 rounded-full shadow">
               <FaRedo size={14} />
-            </div>
-          </div>
+            </span>
+          </button>
           <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-black text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition">
             Reset
           </span>

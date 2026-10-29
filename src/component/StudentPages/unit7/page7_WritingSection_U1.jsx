@@ -19,7 +19,7 @@ const GrammarSection_U1 = () => {
       {/* ✅ شلنا الـ title badge والـ paragraphs، والصورة تملأ كل شي */}
       <div className="w-[60%] mt-2">
         <img
-          src={image}
+          src={image} alt="What Can You Find? A model paragraph and tips for describing objects in an old room."
           style={{ width: "100%", height: "auto", display: "block" }}
         />
       </div>

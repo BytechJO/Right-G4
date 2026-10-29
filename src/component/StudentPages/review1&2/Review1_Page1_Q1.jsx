@@ -1,3 +1,18 @@
+import clipA12 from "../../../assets/audio/ClassBook/Unit 2/Page 16 - A/Item_012_to_finish.mp3";
+import clipA11 from "../../../assets/audio/ClassBook/Unit 2/Page 16 - A/Item_011_I_can't_go_to_the_mall_because_I_have.mp3";
+import clipA10 from "../../../assets/audio/ClassBook/Unit 2/Page 16 - A/Item_010_in_this_city.mp3";
+import clipA9 from "../../../assets/audio/ClassBook/Unit 2/Page 16 - A/Item_009_There_are_so_many.mp3";
+import clipA8 from "../../../assets/audio/ClassBook/Unit 2/Page 16 - A/Item_008_a_big_truck.mp3";
+import clipA7 from "../../../assets/audio/ClassBook/Unit 2/Page 16 - A/Item_007_My_dad_will.mp3";
+import clipA6 from "../../../assets/audio/ClassBook/Unit 2/Page 16 - A/Item_006_many_things_in_school.mp3";
+import clipA5 from "../../../assets/audio/ClassBook/Unit 2/Page 16 - A/Item_005_They_will.mp3";
+import clipA4 from "../../../assets/audio/ClassBook/Unit 2/Page 16 - A/Item_004_homework.mp3";
+import clipA3 from "../../../assets/audio/ClassBook/Unit 2/Page 16 - A/Item_003_buildings.mp3";
+import clipA2 from "../../../assets/audio/ClassBook/Unit 2/Page 16 - A/Item_002_learn.mp3";
+import clipA1 from "../../../assets/audio/ClassBook/Unit 2/Page 16 - A/Item_001_drive.mp3";
+import {useEffect as useListeningEffect,useRef as useListeningRef,useState as useListeningState} from "react";
+import {useAudio} from "../../../context/AudioContext";
+import {FaVolumeUp as ListeningSpeakerIcon} from "react-icons/fa";
 import React, { useState, useRef } from "react";
 import ValidationAlert from "../../Popup/ValidationAlert";
 
@@ -9,6 +24,142 @@ import img2 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 2 Welcome t
 import img3 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 2 Welcome to the Big Apple Folder/Page 16/SVG/Asset 20.svg";
 import img4 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 2 Welcome to the Big Apple Folder/Page 16/SVG/Asset 19.svg";
 import ExerciseHeader from "../../ExerciseHeader";
+
+function useExerciseListening(pageId) {
+  const coordinator = useAudio();
+  const audioRef = useListeningRef(null),
+    generation = useListeningRef(0);
+  const [activeId, setActiveId] = useListeningState(null),
+    [error, setError] = useListeningState("");
+  const clearOwned = () => {
+    const current = audioRef.current;
+    if (current) {
+      current.onended = current.onplaying = current.onerror = current.onpause = null;
+      current.pause();
+      current.remove();
+      audioRef.current = null;
+    }
+  };
+  const stop = () => {
+    generation.current++;
+    clearOwned();
+    setActiveId(null);
+    setError("");
+  };
+  const play = (id, sources) => {
+    const queue = (Array.isArray(sources) ? sources : [sources]).filter(Boolean);
+    if (!queue.length) return;
+    stop();
+    const token = generation.current;
+    let index = 0;
+    const next = () => {
+      if (token !== generation.current) return;
+      clearOwned();
+      if (index >= queue.length) {
+        setActiveId(null);
+        return;
+      }
+      const media = new Audio(queue[index++]);
+      media.hidden = true;
+      media.dataset.exerciseListening = pageId;
+      document.body.appendChild(media);
+      audioRef.current = media;
+      const current = () => token === generation.current && audioRef.current === media;
+      const fail = () => {
+        if (!current()) return;
+        generation.current++;
+        clearOwned();
+        setActiveId(null);
+        setError("Audio could not be played. Please try again.");
+      };
+      media.onplaying = () => {
+        if (current()) setActiveId(id);
+      };
+      media.onended = () => {
+        if (current()) next();
+      };
+      media.onerror = fail;
+      media.onpause = () => {
+        if (!current()) return;
+        generation.current++;
+        clearOwned();
+        setActiveId(null);
+      };
+      document.querySelectorAll("audio,video").forEach(other => {
+        if (other !== media) other.pause();
+      });
+      coordinator?.registerAudio(media, null, pageId);
+      media.play().catch(fail);
+    };
+    next();
+  };
+  useListeningEffect(() => () => {
+    generation.current++;
+    const media = audioRef.current;
+    if (media) {
+      media.onended = media.onplaying = media.onerror = media.onpause = null;
+      media.pause();
+      media.remove();
+      audioRef.current = null;
+    }
+  }, []);
+  return {
+    play,
+    stop,
+    activeId,
+    error
+  };
+}
+function renderExerciseSpeaker() {
+  return <span aria-hidden="true" style={{
+    position: "absolute",
+    top: -10,
+    right: -10,
+    width: 22,
+    height: 22,
+    borderRadius: "50%",
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    background: "white",
+    color: "black",
+    boxShadow: "0 1px 3px rgba(0,0,0,.25)",
+    pointerEvents: "none",
+    zIndex: 3
+  }}><ListeningSpeakerIcon size={12} /></span>;
+}
+function renderExerciseAudioText({
+  audio,
+  id,
+  src,
+  label,
+  children
+}) {
+  if (!src || Array.isArray(src) && !src.some(Boolean)) return children;
+  const playing = audio.activeId === id;
+  const keys = event => {
+    if (event.target !== event.currentTarget || event.key !== "Enter" && event.key !== " ") return;
+    event.preventDefault();
+    event.stopPropagation();
+    if (event.type === "keydown" && !event.repeat) audio.play(id, src);
+  };
+  return <span role="button" tabIndex={0} data-listening={id} aria-label={label} onClick={event => {
+    event.stopPropagation();
+    audio.play(id, src);
+  }} onKeyDown={keys} onKeyUp={keys} style={{
+    position: "relative",
+    cursor: "pointer",
+    borderRadius: 6,
+    boxShadow: playing ? "0 0 0 3px #2563eb" : undefined,
+    backgroundColor: playing ? "#dbeafe" : undefined
+  }}>{children}{playing && renderExerciseSpeaker()}</span>;
+}
+
+// ─────────────────────────────────────────────
+//  🎨  COLORS
+// ─────────────────────────────────────────────
+
+
 
 // ─────────────────────────────────────────────
 //  🎨  COLORS
@@ -104,6 +255,8 @@ const fieldKeys = {
 };
 
 export default function WB_ReadLookWrite_Review_QA() {
+  const listening=useExerciseListening("sb_review1_page1_q1");
+
   const [answers, setAnswers] = useState({});
   const [results, setResults] = useState({});
   const [showAns, setShowAns] = useState(false);
@@ -126,7 +279,7 @@ export default function WB_ReadLookWrite_Review_QA() {
   };
 
   const handleCheck = () => {
-    if (checkDisabled) return;
+    if (checkDisabled) return;listening.stop();
     if (!ITEMS.every((item) => answers[item.id]?.trim())) {
       setAnnouncement("Please complete all answers first.");
       ValidationAlert.info("Please complete all answers first.");
@@ -156,7 +309,7 @@ export default function WB_ReadLookWrite_Review_QA() {
     else ValidationAlert.error(`Score: ${score} / ${ITEMS.length}`);
   };
 
-  const handleShowAnswer = () => {
+  const handleShowAnswer = () => {listening.stop();
     const filled = {};
     ITEMS.forEach((item) => {
       filled[item.id] = item.answer;
@@ -167,7 +320,7 @@ export default function WB_ReadLookWrite_Review_QA() {
     setAnnouncement("Correct answers shown and locked.");
   };
 
-  const handleReset = () => {
+  const handleReset = () => {listening.stop();
     setAnswers({});
     setResults({});
     setShowAns(false);
@@ -179,10 +332,10 @@ export default function WB_ReadLookWrite_Review_QA() {
   const isDisabled = (item) => showAns || results[item.id] === "correct";
 
   return (
-    <div
+    <div data-listening-scope={"sb_review1_page1_q1"}
       className="main-container-component"
       data-review12-scope="Review1_Page1_Q1"
-    >
+    ><style>{`[data-listening-scope="sb_review1_page1_q1"] [data-listening]:focus-visible{outline:4px solid #2563eb;outline-offset:3px;border-radius:6px;}`}</style><span className="sr-only" role="status" aria-live="polite">{listening.error}</span>
       <div
         className="sr-only"
         role="status"
@@ -345,7 +498,7 @@ export default function WB_ReadLookWrite_Review_QA() {
         <div className="rlwr-bank">
           {WORD_BANK.map((w) => (
             <div key={w} className="rlwr-pill">
-              {w}
+              {renderExerciseAudioText({"audio":listening,"id":`bank-${w}`,"src":[clipA1,clipA2,clipA3,clipA4][WORD_BANK.indexOf(w)],"label":`Hear ${w}`,children:<>{w}</>})}
             </div>
           ))}
         </div>
@@ -370,7 +523,7 @@ export default function WB_ReadLookWrite_Review_QA() {
 
                 {/* Sentence */}
                 <div className="rlwr-sentence">
-                  <span className="rlwr-text">{item.before}</span>
+                  <span className="rlwr-text">{renderExerciseAudioText({"audio":listening,"id":`before-${item.id}`,"src":[clipA5,clipA7,clipA9,clipA11][item.id-1],"label":`Hear ${item.before}`,children:<>{item.before}</>})}</span>
                   <div className="rlwr-input-wrap">
                     <input
                       {...fieldKeys}
@@ -395,7 +548,7 @@ export default function WB_ReadLookWrite_Review_QA() {
                     />
                     {wrong && <div className="rlwr-badge">✕</div>}
                   </div>
-                  <span className="rlwr-text">{item.after}</span>
+                  <span className="rlwr-text">{renderExerciseAudioText({"audio":listening,"id":`after-${item.id}`,"src":[clipA6,clipA8,clipA10,clipA12][item.id-1],"label":`Hear ${item.after}`,children:<>{item.after}</>})}</span>
                 </div>
 
                 {/* Image */}

@@ -1,3 +1,10 @@
+import clipD4 from "../../../assets/audio/ClassBook/Unit 1/Page 9 - D/Item_004_They_will_watch_a_movie_at_the_cinema.mp3";
+import clipD3 from "../../../assets/audio/ClassBook/Unit 1/Page 9 - D/Item_003_They_will_eat_at_a_restaurant.mp3";
+import clipD2 from "../../../assets/audio/ClassBook/Unit 1/Page 9 - D/Item_002_Stella_will_study_for_her_test.mp3";
+import clipD1 from "../../../assets/audio/ClassBook/Unit 1/Page 9 - D/Item_001_Sarah_will_go_to_the_beach_tomorrow.mp3";
+import {useEffect as useListeningEffect,useRef as useListeningRef,useState as useListeningState} from "react";
+import {useAudio} from "../../../context/AudioContext";
+import {FaVolumeUp as ListeningSpeakerIcon} from "react-icons/fa";
 import React, { useState, useRef } from "react";
 import ExerciseHeader from "../../ExerciseHeader";
 import ValidationAlert from "../../Popup/ValidationAlert";
@@ -13,6 +20,146 @@ import img3a from "../../../assets/imgs/pages/Class Book/Right 4 Unit 1 Robots o
 import img3b from "../../../assets/imgs/pages/Class Book/Right 4 Unit 1 Robots of the Future Folder/Page9/SVG/Asset 19.svg";
 import img4a from "../../../assets/imgs/pages/Class Book/Right 4 Unit 1 Robots of the Future Folder/Page9/SVG/Asset 18.svg";
 import img4b from "../../../assets/imgs/pages/Class Book/Right 4 Unit 1 Robots of the Future Folder/Page9/SVG/Asset 17.svg";
+
+function useExerciseListening(pageId) {
+  const coordinator = useAudio();
+  const audioRef = useListeningRef(null),
+    generation = useListeningRef(0);
+  const [activeId, setActiveId] = useListeningState(null),
+    [error, setError] = useListeningState("");
+  const clearOwned = () => {
+    const current = audioRef.current;
+    if (current) {
+      current.onended = current.onplaying = current.onerror = current.onpause = null;
+      current.pause();
+      current.remove();
+      audioRef.current = null;
+    }
+  };
+  const stop = () => {
+    generation.current++;
+    clearOwned();
+    setActiveId(null);
+    setError("");
+  };
+  const play = (id, sources) => {
+    const queue = (Array.isArray(sources) ? sources : [sources]).filter(Boolean);
+    if (!queue.length) return;
+    stop();
+    const token = generation.current;
+    let index = 0;
+    const next = () => {
+      if (token !== generation.current) return;
+      clearOwned();
+      if (index >= queue.length) {
+        setActiveId(null);
+        return;
+      }
+      const media = new Audio(queue[index++]);
+      media.hidden = true;
+      media.dataset.exerciseListening = pageId;
+      document.body.appendChild(media);
+      audioRef.current = media;
+      const current = () => token === generation.current && audioRef.current === media;
+      const fail = () => {
+        if (!current()) return;
+        generation.current++;
+        clearOwned();
+        setActiveId(null);
+        setError("Audio could not be played. Please try again.");
+      };
+      media.onplaying = () => {
+        if (current()) setActiveId(id);
+      };
+      media.onended = () => {
+        if (current()) next();
+      };
+      media.onerror = fail;
+      media.onpause = () => {
+        if (!current()) return;
+        generation.current++;
+        clearOwned();
+        setActiveId(null);
+      };
+      document.querySelectorAll("audio,video").forEach(other => {
+        if (other !== media) other.pause();
+      });
+      coordinator?.registerAudio(media, null, pageId);
+      media.play().catch(fail);
+    };
+    next();
+  };
+  useListeningEffect(() => () => {
+    generation.current++;
+    const media = audioRef.current;
+    if (media) {
+      media.onended = media.onplaying = media.onerror = media.onpause = null;
+      media.pause();
+      media.remove();
+      audioRef.current = null;
+    }
+  }, []);
+  return {
+    play,
+    stop,
+    activeId,
+    error
+  };
+}
+function renderExerciseSpeaker() {
+  return <span aria-hidden="true" style={{
+    position: "absolute",
+    top: -10,
+    right: -10,
+    width: 22,
+    height: 22,
+    borderRadius: "50%",
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    background: "white",
+    color: "black",
+    boxShadow: "0 1px 3px rgba(0,0,0,.25)",
+    pointerEvents: "none",
+    zIndex: 3
+  }}><ListeningSpeakerIcon size={12} /></span>;
+}
+
+function renderExerciseAudioGroup({
+  audio,
+  id,
+  src,
+  label,
+  children,
+  style,
+  key: renderKey,
+  ...props
+}) {
+  if (!src || Array.isArray(src) && !src.some(Boolean)) return <div key={renderKey} {...props} style={style}>{children}</div>;
+  const playing = audio.activeId === id;
+  const keys = event => {
+    if (event.target !== event.currentTarget || event.key !== "Enter" && event.key !== " ") return;
+    event.preventDefault();
+    event.stopPropagation();
+    if (event.type === "keydown" && !event.repeat) audio.play(id, src);
+  };
+  return <div key={renderKey} {...props} role="group" aria-roledescription="sentence audio" tabIndex={0} data-listening={id} aria-label={label} onKeyDown={keys} onKeyUp={keys} onClick={event => {
+    if (event.target.closest('input,select,textarea,button,[role="button"]')) return;
+    event.stopPropagation();
+    audio.play(id, src);
+  }} style={{
+    ...style,
+    position: style?.position || "relative",
+    borderRadius: style?.borderRadius || 6,
+    boxShadow: playing ? "0 0 0 3px #2563eb" : style?.boxShadow,
+    backgroundColor: playing ? "#dbeafe" : style?.backgroundColor
+  }}>{children}{playing && renderExerciseSpeaker()}</div>;
+}
+
+// ─────────────────────────────────────────────
+//  🎨  COLORS
+// ─────────────────────────────────────────────
+
 
 // ─────────────────────────────────────────────
 //  🎨  COLORS
@@ -104,6 +251,8 @@ const EXERCISE_TITLE = (
 );
 
 export default function WB_ReadLookWriteCheckCross_QD() {
+  const listening=useExerciseListening("sb_unit1_page9_q1");
+
   const [selected, setSelected] = useState({});
   const [results, setResults] = useState({});
   const [showAns, setShowAns] = useState(false);
@@ -132,7 +281,7 @@ export default function WB_ReadLookWriteCheckCross_QD() {
   };
 
   const handleCheck = () => {
-    if (checkDisabled) return;
+    if (checkDisabled) return;listening.stop();
     if (!ITEMS.every((item) => selected[item.id])) {
       setAnnouncement("Please choose a picture for each sentence.");
       ValidationAlert.info("Please choose a picture for each sentence.");
@@ -161,7 +310,7 @@ export default function WB_ReadLookWriteCheckCross_QD() {
     else ValidationAlert.error(`Score: ${score} / ${ITEMS.length}`);
   };
 
-  const handleShowAnswer = () => {
+  const handleShowAnswer = () => {listening.stop();
     setSelected(
       Object.fromEntries(ITEMS.map((item) => [item.id, item.correctSide])),
     );
@@ -170,7 +319,7 @@ export default function WB_ReadLookWriteCheckCross_QD() {
     setAnnouncement("Correct answers shown and locked.");
   };
 
-  const handleReset = () => {
+  const handleReset = () => {listening.stop();
     setSelected({});
     setResults({});
     setShowAns(false);
@@ -206,7 +355,7 @@ export default function WB_ReadLookWriteCheckCross_QD() {
   };
 
   return (
-    <div className="main-container-component sb-unit1-page9-q1">
+    <div data-listening-scope={"sb_unit1_page9_q1"} className="main-container-component sb-unit1-page9-q1"><style>{`[data-listening-scope="sb_unit1_page9_q1"] [data-listening]:focus-visible{outline:4px solid #2563eb;outline-offset:3px;border-radius:6px;}`}</style><span className="sr-only" role="status" aria-live="polite">{listening.error}</span>
       <div
         className="sr-only"
         role="status"
@@ -405,13 +554,13 @@ export default function WB_ReadLookWriteCheckCross_QD() {
               </div>
 
               {/* Number + Sentence + البادج جنب الجملة */}
-              <div className="rlcc-right">
+              {renderExerciseAudioGroup({"label":`Hear sentence ${item.id}`,"src":[clipD1,clipD2,clipD3,clipD4][item.id-1],"id":`sentence-${item.id}`,"audio":listening,"className":"rlcc-right",children:<>
                 <span className="rlcc-num">{item.id}</span>
                 <span className="rlcc-sentence">{item.sentence}</span>
                 {isWrongSelected(item) && (
                   <div className="rlcc-wrong-badge">✕</div>
                 )}
-              </div>
+              </>})}
             </div>
           ))}
         </div>

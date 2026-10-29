@@ -1,7 +1,30 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { FaRedo } from "react-icons/fa";
 
 import img from "../../../assets/imgs/pages/Class Book/Right 4 Unit 6 Ready for School Folder/Page 49/SVG/Asset 28.svg";
+const activationKeys = {
+  onKeyDown: (event) => {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    event.preventDefault();
+    event.stopPropagation();
+    if (!event.repeat) event.currentTarget.click();
+  },
+  onKeyUp: (event) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+  },
+};
+const fieldKeys = {
+  onKeyDown: (event) => {
+    if (event.key === "Enter" || event.key === " ") event.stopPropagation();
+  },
+  onKeyUp: (event) => {
+    if (event.key === "Enter" || event.key === " ") event.stopPropagation();
+  },
+};
+
 
 const WritingB = () => {
   const [f1, setF1] = useState("");
@@ -12,13 +35,14 @@ const WritingB = () => {
   const [f6, setF6] = useState("");
   const [f7, setF7] = useState("");
 
+ const [announcement,setAnnouncement]=useState("");const resetButtonRef=useRef(null);
   const handleReset = () => {
     setF1(""); setF2(""); setF3("");
-    setF4(""); setF5(""); setF6(""); setF7("");
+    setF4(""); setF5(""); setF6(""); setF7("");setAnnouncement("Your instructions cleared.");
   };
 
-  const inp = (value, setter, width = "flex-1") => (
-    <input
+  const inp = (value, setter, label, width = "flex-1") => (
+    <input {...fieldKeys} aria-label={label} title={label} placeholder="Your answer"
       type="text"
       value={value}
       onChange={(e) => setter(e.target.value)}
@@ -43,7 +67,9 @@ const WritingB = () => {
   );
 
   return (
-    <div className="mb-6 mx-auto">
+    <div data-adapt-scope="unit6_page7_WritingB" className="mb-6 mx-auto">
+<style>{`[data-adapt-scope="unit6_page7_WritingB"] input:focus-visible, [data-adapt-scope="unit6_page7_WritingB"] [data-keyboard-choice]:focus-visible, [data-adapt-scope="unit6_page7_WritingB"] [data-grid-cell]:focus-visible {outline:4px solid #2563eb;outline-offset:3px;border-radius:6px;}`}</style>
+<div className="sr-only" role="status" aria-live="polite" aria-atomic="true">{announcement}</div>
       <h5 className="header-title-page8-read mb-8">
         <span className="ex-A-read mr-2">B</span>
         Pick a simple activity and tell someone else how to do it. You can use <br />
@@ -57,47 +83,47 @@ const WritingB = () => {
           {/* Line 1: Would you like to know how to ___ ? */}
           <div className="flex items-end gap-2 flex-wrap">
             {txt("Would you like to know how to")}
-            {inp(f1, setF1)}
+            {inp(f1, setF1, "Activity to explain")}
             {txt("?")}
           </div>
 
           {/* Line 2: With just a few simple steps you can ___ . */}
           <div className="flex items-end gap-2 flex-wrap">
             {txt("With just a few simple steps you can")}
-            {inp(f2, setF2)}
+            {inp(f2, setF2, "What the steps help someone do")}
             {txt(".")}
           </div>
 
           {/* Line 3: First, you should ___ . */}
           <div className="flex items-end gap-2 flex-wrap">
             {txt("First, you should")}
-            {inp(f3, setF3)}
+            {inp(f3, setF3, "First step")}
             {txt(".")}
           </div>
 
           {/* Line 4: This will get you started correctly. Next, carefully ___ */}
           <div className="flex items-end gap-2 flex-wrap">
             {txt("This will get you started correctly. Next, carefully")}
-            {inp(f4, setF4)}
+            {inp(f4, setF4, "Second step")}
           </div>
 
           {/* Line 5: continuation ___ . */}
           <div className="flex items-end gap-2">
-            {inp(f5, setF5)}
+            {inp(f5, setF5, "Third step")}
             {txt(".")}
           </div>
 
           {/* Line 6: Now you just need to ___ . */}
           <div className="flex items-end gap-2 flex-wrap">
             {txt("Now you just need to")}
-            {inp(f6, setF6)}
+            {inp(f6, setF6, "Next step")}
             {txt(".")}
           </div>
 
           {/* Line 7: You have successfully ___ . I hope you enjoyed it! */}
           <div className="flex items-end gap-2 flex-wrap">
             {txt("You have successfully")}
-            {inp(f7, setF7)}
+            {inp(f7, setF7, "Final step")}
             {txt(". I hope you enjoyed it!")}
           </div>
         </div>
@@ -106,7 +132,7 @@ const WritingB = () => {
         <div style={{ flexShrink: 0 }}>
           <img
             src={img}
-            alt=""
+            alt="Two children planting a young tree outdoors."
             style={{ width: "78%", height : "auto", objectFit: "cover" }}
           />
         </div>
@@ -115,14 +141,14 @@ const WritingB = () => {
       {/* Reset Button */}
       <div className="flex justify-center mt-8">
         <div className="relative group">
-          <div
+          <button type="button" aria-label="Start Again" {...activationKeys} ref={resetButtonRef}
             onClick={handleReset}
             className="flex items-center justify-center w-14 h-14 rounded-xl bg-[#ffc107] hover:bg-[#e0a800] cursor-pointer transition shadow-sm"
           >
-            <div className="bg-white p-3 rounded-full shadow">
+            <span className="bg-white p-3 rounded-full shadow">
               <FaRedo size={14} />
-            </div>
-          </div>
+            </span>
+          </button>
           <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-black text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition">
             Reset
           </span>

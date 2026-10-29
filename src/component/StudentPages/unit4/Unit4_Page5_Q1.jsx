@@ -1,3 +1,11 @@
+import clipA5 from "../../../assets/audio/ClassBook/Unit 4/Page 32 - A/Item_005_grass.mp3";
+import clipA4 from "../../../assets/audio/ClassBook/Unit 4/Page 32 - A/Item_004_shorter.mp3";
+import clipA3 from "../../../assets/audio/ClassBook/Unit 4/Page 32 - A/Item_003_baby.mp3";
+import clipA2 from "../../../assets/audio/ClassBook/Unit 4/Page 32 - A/Item_002_taller.mp3";
+import clipA1 from "../../../assets/audio/ClassBook/Unit 4/Page 32 - A/Item_001_picnic.mp3";
+import {useEffect as useListeningEffect,useRef as useListeningRef,useState as useListeningState} from "react";
+import {useAudio} from "../../../context/AudioContext";
+import {FaVolumeUp as ListeningSpeakerIcon} from "react-icons/fa";
 import ExerciseHeader from "../../ExerciseHeader";
 import React, { useState, useRef } from "react";
 import ValidationAlert from "../../Popup/ValidationAlert";
@@ -8,6 +16,113 @@ import ValidationAlert from "../../Popup/ValidationAlert";
 import img1 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 4 Joy Makes a Friend Folder/Page 32/SVG/Asset 9.svg";
 import img2 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 4 Joy Makes a Friend Folder/Page 32/SVG/Asset 10.svg";
 import img3 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 4 Joy Makes a Friend Folder/Page 32/SVG/Asset 12.svg";
+
+function useExerciseListening(pageId) {
+  const coordinator = useAudio();
+  const audioRef = useListeningRef(null),
+    generation = useListeningRef(0);
+  const [activeId, setActiveId] = useListeningState(null),
+    [error, setError] = useListeningState("");
+  const clearOwned = () => {
+    const current = audioRef.current;
+    if (current) {
+      current.onended = current.onplaying = current.onerror = current.onpause = null;
+      current.pause();
+      current.remove();
+      audioRef.current = null;
+    }
+  };
+  const stop = () => {
+    generation.current++;
+    clearOwned();
+    setActiveId(null);
+    setError("");
+  };
+  const play = (id, sources) => {
+    const queue = (Array.isArray(sources) ? sources : [sources]).filter(Boolean);
+    if (!queue.length) return;
+    stop();
+    const token = generation.current;
+    let index = 0;
+    const next = () => {
+      if (token !== generation.current) return;
+      clearOwned();
+      if (index >= queue.length) {
+        setActiveId(null);
+        return;
+      }
+      const media = new Audio(queue[index++]);
+      media.hidden = true;
+      media.dataset.exerciseListening = pageId;
+      document.body.appendChild(media);
+      audioRef.current = media;
+      const current = () => token === generation.current && audioRef.current === media;
+      const fail = () => {
+        if (!current()) return;
+        generation.current++;
+        clearOwned();
+        setActiveId(null);
+        setError("Audio could not be played. Please try again.");
+      };
+      media.onplaying = () => {
+        if (current()) setActiveId(id);
+      };
+      media.onended = () => {
+        if (current()) next();
+      };
+      media.onerror = fail;
+      media.onpause = () => {
+        if (!current()) return;
+        generation.current++;
+        clearOwned();
+        setActiveId(null);
+      };
+      document.querySelectorAll("audio,video").forEach(other => {
+        if (other !== media) other.pause();
+      });
+      coordinator?.registerAudio(media, null, pageId);
+      media.play().catch(fail);
+    };
+    next();
+  };
+  useListeningEffect(() => () => {
+    generation.current++;
+    const media = audioRef.current;
+    if (media) {
+      media.onended = media.onplaying = media.onerror = media.onpause = null;
+      media.pause();
+      media.remove();
+      audioRef.current = null;
+    }
+  }, []);
+  return {
+    play,
+    stop,
+    activeId,
+    error
+  };
+}
+function renderExerciseSpeaker() {
+  return <span aria-hidden="true" style={{
+    position: "absolute",
+    top: -10,
+    right: -10,
+    width: 22,
+    height: 22,
+    borderRadius: "50%",
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    background: "white",
+    color: "black",
+    boxShadow: "0 1px 3px rgba(0,0,0,.25)",
+    pointerEvents: "none",
+    zIndex: 3
+  }}><ListeningSpeakerIcon size={12} /></span>;
+}
+
+
+
 const activationKeys = {
   onKeyDown: (event) => {
     if (event.key !== "Enter" && event.key !== " ") return;
@@ -46,6 +161,8 @@ const ITEMS = [
 //  COMPONENT
 // ─────────────────────────────────────────────
 export default function WB_LookReadCircle_QA() {
+  const listening=useExerciseListening("sb_unit4_page5_q1");
+
   const [selected, setSelected] = useState({});
   const [, setShowResults] = useState(false);
   const [showAns, setShowAns] = useState(false);
@@ -72,7 +189,7 @@ export default function WB_LookReadCircle_QA() {
   };
 
   const handleCheck = () => {
-    if (checkDisabled) return;
+    if (checkDisabled) return;listening.stop();
     if (
       !ITEMS.every(
         (item) =>
@@ -109,7 +226,7 @@ export default function WB_LookReadCircle_QA() {
     else ValidationAlert.error(`Score: ${score} / ${ITEMS.length}`);
   };
 
-  const handleShowAnswer = () => {
+  const handleShowAnswer = () => {listening.stop();
     const filled = {};
     ITEMS.forEach((item) => {
       filled[item.id] = item.correct;
@@ -122,7 +239,7 @@ export default function WB_LookReadCircle_QA() {
     setAnnouncement("Correct answers shown and locked.");
   };
 
-  const handleReset = () => {
+  const handleReset = () => {listening.stop();
     setSelected({});
     setShowResults(false);
     setShowAns(false);
@@ -140,10 +257,10 @@ export default function WB_LookReadCircle_QA() {
   };
 
   return (
-    <div
+    <div data-listening-scope={"sb_unit4_page5_q1"}
       data-adapt-scope="unit4_Unit4_Page5_Q1"
       className="main-container-component"
-    >
+    ><style>{`[data-listening-scope="sb_unit4_page5_q1"] [data-listening]:focus-visible{outline:4px solid #2563eb;outline-offset:3px;border-radius:6px;}`}</style><span className="sr-only" role="status" aria-live="polite">{listening.error}</span>
     <style>{`[data-unit4-scope="Unit4_Page5_Q1"] input:focus-visible, [data-unit4-scope="Unit4_Page5_Q1"] [data-keyboard-choice]:focus-visible { outline: 4px solid #2563eb; outline-offset: 3px; border-radius: 6px; }`}</style>
       <div
         className="sr-only"
@@ -324,7 +441,7 @@ export default function WB_LookReadCircle_QA() {
                 {item.words.map((word) => {
                   const state = getWordState(item, word);
                   return (
-                    <div
+                    <div data-listening={`word-${item.id}-${word}`}
                       style={{
                         ...{},
                         borderRadius: {}.borderRadius || "6px",
@@ -334,11 +451,9 @@ export default function WB_LookReadCircle_QA() {
                           results[item.id] === undefined
                             ? "#dbeafe"
                             : {}.background,
-                        boxShadow:
-                          selected[item.id] === word
+                        position:"relative",boxShadow:listening.activeId===(`word-${item.id}-${word}`)?"0 0 0 3px #2563eb":selected[item.id] === word
                             ? `inset 0 0 0 2px ${showAns || results[item.id] === "correct" ? "#16a34a" : results[item.id] === "wrong" ? "#ef4444" : "#2563eb"}`
-                            : undefined,
-                      }}
+                            : undefined,backgroundColor:listening.activeId===(`word-${item.id}-${word}`)?"#dbeafe":undefined}}
                       role="button"
                       tabIndex={0}
                       data-keyboard-choice
@@ -356,12 +471,12 @@ export default function WB_LookReadCircle_QA() {
                       ]
                         .filter(Boolean)
                         .join(" ")}
-                      onClick={() => handleSelect(item.id, word)}
+                      onClick={event=>{listening.play(`word-${item.id}-${word}`,({picnic:clipA1,taller:clipA2,baby:clipA3,shorter:clipA4,grass:clipA5})[word]);return (() => handleSelect(item.id, word))(event);}}
                     >
                       <div className="lrc-oval" />
                       <span className="lrc-word">{word}</span>
                       {state === "wrong" && <div className="lrc-badge">✕</div>}
-                    </div>
+                    {listening.activeId===(`word-${item.id}-${word}`)&&renderExerciseSpeaker()}</div>
                   );
                 })}
               </div>

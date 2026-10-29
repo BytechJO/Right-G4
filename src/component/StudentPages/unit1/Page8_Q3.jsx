@@ -1,3 +1,16 @@
+import clipC10 from "../../../assets/audio/ClassBook/Unit 1/Page 8 - C/Item_010_They_will_have_fun_at_the_museum.mp3";
+import clipC9 from "../../../assets/audio/ClassBook/Unit 1/Page 8 - C/Item_009_Tim_will_visit_the_museum_tomorrow.mp3";
+import clipC8 from "../../../assets/audio/ClassBook/Unit 1/Page 8 - C/Item_008_Tim_will_pack_a_lunch.mp3";
+import clipC7 from "../../../assets/audio/ClassBook/Unit 1/Page 8 - C/Item_007_Tim_will_have_to_remember_to_take_his_camera_with_him.mp3";
+import clipC6 from "../../../assets/audio/ClassBook/Unit 1/Page 8 - C/Item_006_have_a_lot_of_fun_at_the_museum_tomorrow.mp3";
+import clipC5 from "../../../assets/audio/ClassBook/Unit 1/Page 8 - C/Item_005_with_him,_so_he_can_take_pictures_in_the_museum._Tim_is_certain_they_wil.mp3";
+import clipC4 from "../../../assets/audio/ClassBook/Unit 1/Page 8 - C/Item_004_in_case_they_get_hungry._He_will_have_to_remember_to_take_his_camera.mp3";
+import clipC3 from "../../../assets/audio/ClassBook/Unit 1/Page 8 - C/Item_003_o'clock_and_arrive_at_the_museum_at_nine_o'clock._Tim_will_pack_a_lunch.mp3";
+import clipC2 from "../../../assets/audio/ClassBook/Unit 1/Page 8 - C/Item_002_his_little_brother_and_friend_with_him._They_will_take_a_bus_at_eight.mp3";
+import clipC1 from "../../../assets/audio/ClassBook/Unit 1/Page 8 - C/Item_001_Tim_will_visit_the_new_Museum_of_Inventions_tomorrow._He_will_take.mp3";
+import {useEffect as useListeningEffect,useRef as useListeningRef,useState as useListeningState} from "react";
+import {useAudio} from "../../../context/AudioContext";
+import {FaVolumeUp as ListeningSpeakerIcon} from "react-icons/fa";
 import React, { useState, useRef } from "react";
 import ExerciseHeader from "../../ExerciseHeader";
 import ValidationAlert from "../../Popup/ValidationAlert";
@@ -7,6 +20,171 @@ import sound from "../../../assets/audio/ClassBook/Grade 4/cd5pg8-instruction1-a
 // ─────────────────────────────────────────────
 import imgScene from "../../../assets/imgs/pages/Class Book/Right 4 Unit 1 Robots of the Future Folder/Page8/SVG/Asset 1.svg";
 import QuestionAudioPlayer from "../../QuestionAudioPlayer";
+
+function useExerciseListening(pageId) {
+  const coordinator = useAudio();
+  const audioRef = useListeningRef(null),
+    generation = useListeningRef(0);
+  const [activeId, setActiveId] = useListeningState(null),
+    [error, setError] = useListeningState("");
+  const clearOwned = () => {
+    const current = audioRef.current;
+    if (current) {
+      current.onended = current.onplaying = current.onerror = current.onpause = null;
+      current.pause();
+      current.remove();
+      audioRef.current = null;
+    }
+  };
+  const stop = () => {
+    generation.current++;
+    clearOwned();
+    setActiveId(null);
+    setError("");
+  };
+  const play = (id, sources) => {
+    const queue = (Array.isArray(sources) ? sources : [sources]).filter(Boolean);
+    if (!queue.length) return;
+    stop();
+    const token = generation.current;
+    let index = 0;
+    const next = () => {
+      if (token !== generation.current) return;
+      clearOwned();
+      if (index >= queue.length) {
+        setActiveId(null);
+        return;
+      }
+      const media = new Audio(queue[index++]);
+      media.hidden = true;
+      media.dataset.exerciseListening = pageId;
+      document.body.appendChild(media);
+      audioRef.current = media;
+      const current = () => token === generation.current && audioRef.current === media;
+      const fail = () => {
+        if (!current()) return;
+        generation.current++;
+        clearOwned();
+        setActiveId(null);
+        setError("Audio could not be played. Please try again.");
+      };
+      media.onplaying = () => {
+        if (current()) setActiveId(id);
+      };
+      media.onended = () => {
+        if (current()) next();
+      };
+      media.onerror = fail;
+      media.onpause = () => {
+        if (!current()) return;
+        generation.current++;
+        clearOwned();
+        setActiveId(null);
+      };
+      document.querySelectorAll("audio,video").forEach(other => {
+        if (other !== media) other.pause();
+      });
+      coordinator?.registerAudio(media, null, pageId);
+      media.play().catch(fail);
+    };
+    next();
+  };
+  useListeningEffect(() => () => {
+    generation.current++;
+    const media = audioRef.current;
+    if (media) {
+      media.onended = media.onplaying = media.onerror = media.onpause = null;
+      media.pause();
+      media.remove();
+      audioRef.current = null;
+    }
+  }, []);
+  return {
+    play,
+    stop,
+    activeId,
+    error
+  };
+}
+function renderExerciseSpeaker() {
+  return <span aria-hidden="true" style={{
+    position: "absolute",
+    top: -10,
+    right: -10,
+    width: 22,
+    height: 22,
+    borderRadius: "50%",
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    background: "white",
+    color: "black",
+    boxShadow: "0 1px 3px rgba(0,0,0,.25)",
+    pointerEvents: "none",
+    zIndex: 3
+  }}><ListeningSpeakerIcon size={12} /></span>;
+}
+function renderExerciseAudioText({
+  audio,
+  id,
+  src,
+  label,
+  children
+}) {
+  if (!src || Array.isArray(src) && !src.some(Boolean)) return children;
+  const playing = audio.activeId === id;
+  const keys = event => {
+    if (event.target !== event.currentTarget || event.key !== "Enter" && event.key !== " ") return;
+    event.preventDefault();
+    event.stopPropagation();
+    if (event.type === "keydown" && !event.repeat) audio.play(id, src);
+  };
+  return <span role="button" tabIndex={0} data-listening={id} aria-label={label} onClick={event => {
+    event.stopPropagation();
+    audio.play(id, src);
+  }} onKeyDown={keys} onKeyUp={keys} style={{
+    position: "relative",
+    cursor: "pointer",
+    borderRadius: 6,
+    boxShadow: playing ? "0 0 0 3px #2563eb" : undefined,
+    backgroundColor: playing ? "#dbeafe" : undefined
+  }}>{children}{playing && renderExerciseSpeaker()}</span>;
+}
+function renderExerciseAudioGroup({
+  audio,
+  id,
+  src,
+  label,
+  children,
+  style,
+  key: renderKey,
+  ...props
+}) {
+  if (!src || Array.isArray(src) && !src.some(Boolean)) return <div key={renderKey} {...props} style={style}>{children}</div>;
+  const playing = audio.activeId === id;
+  const keys = event => {
+    if (event.target !== event.currentTarget || event.key !== "Enter" && event.key !== " ") return;
+    event.preventDefault();
+    event.stopPropagation();
+    if (event.type === "keydown" && !event.repeat) audio.play(id, src);
+  };
+  return <div key={renderKey} {...props} role="group" aria-roledescription="sentence audio" tabIndex={0} data-listening={id} aria-label={label} onKeyDown={keys} onKeyUp={keys} onClick={event => {
+    if (event.target.closest('input,select,textarea,button,[role="button"]')) return;
+    event.stopPropagation();
+    audio.play(id, src);
+  }} style={{
+    ...style,
+    position: style?.position || "relative",
+    borderRadius: style?.borderRadius || 6,
+    boxShadow: playing ? "0 0 0 3px #2563eb" : style?.boxShadow,
+    backgroundColor: playing ? "#dbeafe" : style?.backgroundColor
+  }}>{children}{playing && renderExerciseSpeaker()}</div>;
+}
+
+// ─────────────────────────────────────────────
+//  🎨  COLORS
+// ─────────────────────────────────────────────
+
 
 // ─────────────────────────────────────────────
 //  🎨  COLORS
@@ -128,6 +306,8 @@ const fieldKeys = {
 };
 
 export default function WB_ReadNumber_QC() {
+  const listening=useExerciseListening("sb_unit1_page8_q3");
+
   const [answers, setAnswers] = useState({});
   const [results, setResults] = useState({});
   const [showAns, setShowAns] = useState(false);
@@ -166,7 +346,7 @@ export default function WB_ReadNumber_QC() {
   };
 
   const handleCheck = () => {
-    if (checkDisabled) return;
+    if (checkDisabled) return;listening.stop();
     const allAnswered = ITEMS.every((item) => answers[item.id]?.trim());
     if (!allAnswered) {
       setAnnouncement("Please complete all answers first.");
@@ -198,7 +378,7 @@ export default function WB_ReadNumber_QC() {
     else ValidationAlert.error(`Score: ${score} / ${ITEMS.length}`);
   };
 
-  const handleShowAnswer = () => {
+  const handleShowAnswer = () => {listening.stop();
     const filled = {};
     ITEMS.forEach((item) => {
       filled[item.id] = item.answer;
@@ -209,7 +389,7 @@ export default function WB_ReadNumber_QC() {
     setAnnouncement("Correct answers shown and locked.");
   };
 
-  const handleReset = () => {
+  const handleReset = () => {listening.stop();
     setAnswers({});
     setResults({});
     setShowAns(false);
@@ -220,7 +400,7 @@ export default function WB_ReadNumber_QC() {
   const isDisabled = (item) => showAns || results[item.id] === "correct";
 
   return (
-    <div className="main-container-component sb-unit1-page8_q3">
+    <div data-listening-scope={"sb_unit1_page8_q3"} className="main-container-component sb-unit1-page8_q3"><style>{`[data-listening-scope="sb_unit1_page8_q3"] [data-listening]:focus-visible{outline:4px solid #2563eb;outline-offset:3px;border-radius:6px;}`}</style><span className="sr-only" role="status" aria-live="polite">{listening.error}</span>
       <div
         className="sr-only"
         role="status"
@@ -379,7 +559,7 @@ export default function WB_ReadNumber_QC() {
         </div>
         {/* ── Paragraph + Image ── */}
         <div className="rnqc-top">
-          <p className="rnqc-para">{PARAGRAPH}</p>
+          <p className="rnqc-para">{renderExerciseAudioText({"audio":listening,"id":"paragraph-0","src":clipC1,"label":"Hear Tim will visit the new Museum of Inventions tomorrow. He will take ",children:<>{"Tim will visit the new Museum of Inventions tomorrow. He will take "}</>})}{renderExerciseAudioText({"audio":listening,"id":"paragraph-1","src":clipC2,"label":"Hear his little brother and friend with him. They will take a bus at eight ",children:<>{"his little brother and friend with him. They will take a bus at eight "}</>})}{renderExerciseAudioText({"audio":listening,"id":"paragraph-2","src":clipC3,"label":"Hear o'clock and arrive at the museum at nine o'clock. Tim will pack a lunch ",children:<>{"o'clock and arrive at the museum at nine o'clock. Tim will pack a lunch "}</>})}{renderExerciseAudioText({"audio":listening,"id":"paragraph-3","src":clipC4,"label":"Hear in case they get hungry. He will have to remember to take his camera ",children:<>{"in case they get hungry. He will have to remember to take his camera "}</>})}{renderExerciseAudioText({"audio":listening,"id":"paragraph-4","src":clipC5,"label":"Hear with him, so he can take pictures in the museum. Tim is certain they will ",children:<>{"with him, so he can take pictures in the museum. Tim is certain they will "}</>})}{renderExerciseAudioText({"audio":listening,"id":"paragraph-5","src":clipC6,"label":"Hear have a lot of fun at the museum tomorrow.",children:<>{"have a lot of fun at the museum tomorrow."}</>})}</p>
           <img
             src={imgScene}
             alt="An adult and a child looking at an exhibit in a museum."
@@ -406,7 +586,7 @@ export default function WB_ReadNumber_QC() {
             const disabled = isDisabled(item);
 
             return (
-              <div key={item.id} className="rnqc-row">
+              renderExerciseAudioGroup({"label":`Hear sentence ${item.id}`,"src":[clipC7,clipC8,clipC9,clipC10,null][ITEMS.findIndex(candidate=>candidate.id===item.id)],"id":`sentence-${item.id}`,"audio":listening,"key":item.id,"className":"rnqc-row",children:<>
                 {/* Label a/b/c... */}
                 <span className="rnqc-label">{item.id}</span>
 
@@ -450,7 +630,7 @@ export default function WB_ReadNumber_QC() {
                   </select>
                   {wrong && <div className="rnqc-badge">✕</div>}
                 </div>
-              </div>
+              </>})
             );
           })}
         </div>

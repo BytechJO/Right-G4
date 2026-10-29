@@ -1,3 +1,18 @@
+import clipE12 from "../../../assets/audio/ClassBook/Unit 4/Page 37 - E/Item_012_Andy.mp3";
+import clipE11 from "../../../assets/audio/ClassBook/Unit 4/Page 37 - E/Item_011_Susan_is_slower_than.mp3";
+import clipE10 from "../../../assets/audio/ClassBook/Unit 4/Page 37 - E/Item_010_Trevor.mp3";
+import clipE9 from "../../../assets/audio/ClassBook/Unit 4/Page 37 - E/Item_009_Alex_is_taller_than.mp3";
+import clipE8 from "../../../assets/audio/ClassBook/Unit 4/Page 37 - E/Item_008_Rachel.mp3";
+import clipE7 from "../../../assets/audio/ClassBook/Unit 4/Page 37 - E/Item_007_Ned_is_stronger_than.mp3";
+import clipE6 from "../../../assets/audio/ClassBook/Unit 4/Page 37 - E/Item_006_Tanya.mp3";
+import clipE5 from "../../../assets/audio/ClassBook/Unit 4/Page 37 - E/Item_005_Naomi_is_shorter_than.mp3";
+import clipE4 from "../../../assets/audio/ClassBook/Unit 4/Page 37 - E/Item_004_Tanya_is_faster_than_Susan.mp3";
+import clipE3 from "../../../assets/audio/ClassBook/Unit 4/Page 37 - E/Item_003_Trevor_is_weaker_than_Ned.mp3";
+import clipE2 from "../../../assets/audio/ClassBook/Unit 4/Page 37 - E/Item_002_Rachel_is_taller_than_Naomi.mp3";
+import clipE1 from "../../../assets/audio/ClassBook/Unit 4/Page 37 - E/Item_001_Andy_is_shorter_than_Alex.mp3";
+import {useEffect as useListeningEffect,useRef as useListeningRef,useState as useListeningState} from "react";
+import {useAudio} from "../../../context/AudioContext";
+import {FaVolumeUp as ListeningSpeakerIcon} from "react-icons/fa";
 import ExerciseHeader from "../../ExerciseHeader";
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import ValidationAlert from "../../Popup/ValidationAlert";
@@ -6,6 +21,113 @@ import ValidationAlert from "../../Popup/ValidationAlert";
 //  🖼️  CHART IMAGE
 // ─────────────────────────────────────────────
 import imgChartTable from "../../../assets/imgs/pages/Class Book/Right 4 Unit 4 Joy Makes a Friend Folder/Page 37/SVG/Asset 23.svg";
+
+function useExerciseListening(pageId) {
+  const coordinator = useAudio();
+  const audioRef = useListeningRef(null),
+    generation = useListeningRef(0);
+  const [activeId, setActiveId] = useListeningState(null),
+    [error, setError] = useListeningState("");
+  const clearOwned = () => {
+    const current = audioRef.current;
+    if (current) {
+      current.onended = current.onplaying = current.onerror = current.onpause = null;
+      current.pause();
+      current.remove();
+      audioRef.current = null;
+    }
+  };
+  const stop = () => {
+    generation.current++;
+    clearOwned();
+    setActiveId(null);
+    setError("");
+  };
+  const play = (id, sources) => {
+    const queue = (Array.isArray(sources) ? sources : [sources]).filter(Boolean);
+    if (!queue.length) return;
+    stop();
+    const token = generation.current;
+    let index = 0;
+    const next = () => {
+      if (token !== generation.current) return;
+      clearOwned();
+      if (index >= queue.length) {
+        setActiveId(null);
+        return;
+      }
+      const media = new Audio(queue[index++]);
+      media.hidden = true;
+      media.dataset.exerciseListening = pageId;
+      document.body.appendChild(media);
+      audioRef.current = media;
+      const current = () => token === generation.current && audioRef.current === media;
+      const fail = () => {
+        if (!current()) return;
+        generation.current++;
+        clearOwned();
+        setActiveId(null);
+        setError("Audio could not be played. Please try again.");
+      };
+      media.onplaying = () => {
+        if (current()) setActiveId(id);
+      };
+      media.onended = () => {
+        if (current()) next();
+      };
+      media.onerror = fail;
+      media.onpause = () => {
+        if (!current()) return;
+        generation.current++;
+        clearOwned();
+        setActiveId(null);
+      };
+      document.querySelectorAll("audio,video").forEach(other => {
+        if (other !== media) other.pause();
+      });
+      coordinator?.registerAudio(media, null, pageId);
+      media.play().catch(fail);
+    };
+    next();
+  };
+  useListeningEffect(() => () => {
+    generation.current++;
+    const media = audioRef.current;
+    if (media) {
+      media.onended = media.onplaying = media.onerror = media.onpause = null;
+      media.pause();
+      media.remove();
+      audioRef.current = null;
+    }
+  }, []);
+  return {
+    play,
+    stop,
+    activeId,
+    error
+  };
+}
+function renderExerciseSpeaker() {
+  return <span aria-hidden="true" style={{
+    position: "absolute",
+    top: -10,
+    right: -10,
+    width: 22,
+    height: 22,
+    borderRadius: "50%",
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    background: "white",
+    color: "black",
+    boxShadow: "0 1px 3px rgba(0,0,0,.25)",
+    pointerEvents: "none",
+    zIndex: 3
+  }}><ListeningSpeakerIcon size={12} /></span>;
+}
+
+
+
 const activationKeys = {
   onKeyDown: (event) => {
     if (event.key !== "Enter" && event.key !== " ") return;
@@ -59,6 +181,8 @@ const RIGHT_ITEMS = [
 //  COMPONENT
 // ─────────────────────────────────────────────
 export default function WB_ReadChartMatch_QE() {
+  const listening=useExerciseListening("sb_review4_page2_q2");
+
   const [connections,  setConnections]  = useState({});
   const [selectedLeft, setSelectedLeft] = useState(null);
   const [,  setShowResults]  = useState(false);
@@ -110,19 +234,19 @@ export default function WB_ReadChartMatch_QE() {
   const lineColor = leftId => showAns || results[leftId] === "correct" ? "#16a34a" : results[leftId] === "wrong" ? "#ef4444" : LINE_DEFAULT;
 
   // ── Handlers ──
-  const handleLeftClick = (id,keyboard=false) => {if(leftLocked(id))return;if(selectedRight!==null){connect(id,selectedRight,keyboard);return;}if(selectedLeft===id){cancelSelection();setAnnouncement("Match cancelled.");return;}setSelectedLeft(id);setSelectedRight(null);setPreviewEndpoint(null);setAnnouncement("Sentence selected. Choose a name.");if(keyboard)focusCandidate("right");};
+  const handleLeftClick = (id,keyboard=false) => {listening.play(`left-${id}`,[clipE5,clipE7,clipE9,clipE11][id-1]);if(leftLocked(id))return;if(selectedRight!==null){connect(id,selectedRight,keyboard);return;}if(selectedLeft===id){cancelSelection();setAnnouncement("Match cancelled.");return;}setSelectedLeft(id);setSelectedRight(null);setPreviewEndpoint(null);setAnnouncement("Sentence selected. Choose a name.");if(keyboard)focusCandidate("right");};
 
-  const handleRightClick = (name,keyboard=false) => {if(rightLocked(name))return;if(selectedLeft!==null){connect(selectedLeft,name,keyboard);return;}if(selectedRight===name){cancelSelection();setAnnouncement("Match cancelled.");return;}setSelectedRight(name);setSelectedLeft(null);setPreviewEndpoint(null);setAnnouncement(`${name} selected. Choose a sentence.`);if(keyboard)focusCandidate("left");};
+  const handleRightClick = (name,keyboard=false) => {listening.play(`right-${name}`,({Tanya:clipE6,Rachel:clipE8,Trevor:clipE10,Andy:clipE12})[name]);if(rightLocked(name))return;if(selectedLeft!==null){connect(selectedLeft,name,keyboard);return;}if(selectedRight===name){cancelSelection();setAnnouncement("Match cancelled.");return;}setSelectedRight(name);setSelectedLeft(null);setPreviewEndpoint(null);setAnnouncement(`${name} selected. Choose a sentence.`);if(keyboard)focusCandidate("left");};
 
-  const handleCheck = () => {if(checkDisabled)return;cancelSelection();if(!LEFT_ITEMS.every(item=>connections[item.id])){ValidationAlert.info("Please connect all items first.");return;}const next=Object.fromEntries(LEFT_ITEMS.map(item=>[item.id,results[item.id] === "correct" || isCorrect(item.id,connections[item.id]) ? "correct":"wrong"]));const score=Object.values(next).filter(value=>value === "correct").length;setResults(next);setShowResults(true);setAnnouncement(`Score: ${score} out of ${LEFT_ITEMS.length}. Correct matches are locked; incorrect matches can be changed.`);if(score===LEFT_ITEMS.length){resetButtonRef.current?.focus({preventScroll:true});ValidationAlert.success(`Score: ${score} / ${LEFT_ITEMS.length}`);}else if(score)ValidationAlert.warning(`Score: ${score} / ${LEFT_ITEMS.length}`);else ValidationAlert.error(`Score: ${score} / ${LEFT_ITEMS.length}`);};
+  const handleCheck = () => {if(checkDisabled)return;listening.stop();cancelSelection();if(!LEFT_ITEMS.every(item=>connections[item.id])){ValidationAlert.info("Please connect all items first.");return;}const next=Object.fromEntries(LEFT_ITEMS.map(item=>[item.id,results[item.id] === "correct" || isCorrect(item.id,connections[item.id]) ? "correct":"wrong"]));const score=Object.values(next).filter(value=>value === "correct").length;setResults(next);setShowResults(true);setAnnouncement(`Score: ${score} out of ${LEFT_ITEMS.length}. Correct matches are locked; incorrect matches can be changed.`);if(score===LEFT_ITEMS.length){resetButtonRef.current?.focus({preventScroll:true});ValidationAlert.success(`Score: ${score} / ${LEFT_ITEMS.length}`);}else if(score)ValidationAlert.warning(`Score: ${score} / ${LEFT_ITEMS.length}`);else ValidationAlert.error(`Score: ${score} / ${LEFT_ITEMS.length}`);};
 
-  const handleShowAnswer = () => {
+  const handleShowAnswer = () => {listening.stop();
     const ans = {};
     RIGHT_ITEMS.forEach((r) => { ans[r.correctLeftId] = r.name; });
     setConnections(ans); setShowResults(false); setShowAns(true); setResults({});cancelSelection();resetButtonRef.current?.focus({preventScroll:true});setAnnouncement("Correct matches shown and locked.");
   };
 
-  const handleReset = () => {
+  const handleReset = () => {listening.stop();
     setConnections({}); setShowResults(false); setShowAns(false);setResults({});cancelSelection();setAnnouncement("Matches and feedback cleared.");
   };
 
@@ -161,7 +285,7 @@ export default function WB_ReadChartMatch_QE() {
   const isRightWrong = name => !showAns && Object.entries(connections).some(([id,value])=>value===name && results[id] === "wrong");
 
   return (
-    <div data-adapt-scope="review3&4_Review4_Page2_Q2" className="main-container-component">
+    <div data-listening-scope={"sb_review4_page2_q2"} data-adapt-scope="review3&4_Review4_Page2_Q2" className="main-container-component"><style>{`[data-listening-scope="sb_review4_page2_q2"] [data-listening]:focus-visible{outline:4px solid #2563eb;outline-offset:3px;border-radius:6px;}`}</style><span className="sr-only" role="status" aria-live="polite">{listening.error}</span>
 <style>{`[data-adapt-scope="review3&4_Review4_Page2_Q2"] input:focus-visible, [data-adapt-scope="review3&4_Review4_Page2_Q2"] [data-keyboard-choice]:focus-visible, [data-adapt-scope="review3&4_Review4_Page2_Q2"] [data-grid-cell]:focus-visible {outline:4px solid #2563eb;outline-offset:3px;border-radius:6px;}`}</style>
 <div className="sr-only" role="status" aria-live="polite" aria-atomic="true">{announcement}</div>
       <style>{`
@@ -331,9 +455,9 @@ export default function WB_ReadChartMatch_QE() {
         <div className="rcm-body">
 
           {/* Chart */}
-          <div style={{ overflow: "hidden", flexShrink: 0, width: "100%", height: "100%" }}>
+          <div style={{ overflow: "hidden", flexShrink: 0, width: "100%", height: "100%" ,position:"relative"}}>
             <img src={imgChartTable} alt="A comparison chart showing pairs of people and statements about height, strength and speed." style={{ width: "100%", height: "100%" }} />
-          </div>
+          <span role="button" tabIndex={0} data-listening="chart-0" aria-label="Hear Andy is shorter than Alex." onClick={event=>{event.stopPropagation();listening.play("chart-0",clipE1);}} onKeyDown={event=>{if(event.key!=="Enter"&&event.key!==" ")return;event.preventDefault();event.stopPropagation();if(!event.repeat)listening.play("chart-0",clipE1);}} onKeyUp={event=>{if(event.key==="Enter"||event.key===" "){event.preventDefault();event.stopPropagation();}}} style={{position:"absolute",left:"1%",top:"0.6%",width:"98%",height:"23.8%",cursor:"pointer",borderRadius:6,boxShadow:listening.activeId==="chart-0"?"0 0 0 3px #2563eb":undefined,backgroundColor:listening.activeId==="chart-0"?"rgba(219,234,254,.5)":undefined}}>{listening.activeId==="chart-0"&&renderExerciseSpeaker()}</span><span role="button" tabIndex={0} data-listening="chart-1" aria-label="Hear Rachel is taller than Naomi." onClick={event=>{event.stopPropagation();listening.play("chart-1",clipE2);}} onKeyDown={event=>{if(event.key!=="Enter"&&event.key!==" ")return;event.preventDefault();event.stopPropagation();if(!event.repeat)listening.play("chart-1",clipE2);}} onKeyUp={event=>{if(event.key==="Enter"||event.key===" "){event.preventDefault();event.stopPropagation();}}} style={{position:"absolute",left:"1%",top:"25.6%",width:"98%",height:"23.8%",cursor:"pointer",borderRadius:6,boxShadow:listening.activeId==="chart-1"?"0 0 0 3px #2563eb":undefined,backgroundColor:listening.activeId==="chart-1"?"rgba(219,234,254,.5)":undefined}}>{listening.activeId==="chart-1"&&renderExerciseSpeaker()}</span><span role="button" tabIndex={0} data-listening="chart-2" aria-label="Hear Trevor is weaker than Ned." onClick={event=>{event.stopPropagation();listening.play("chart-2",clipE3);}} onKeyDown={event=>{if(event.key!=="Enter"&&event.key!==" ")return;event.preventDefault();event.stopPropagation();if(!event.repeat)listening.play("chart-2",clipE3);}} onKeyUp={event=>{if(event.key==="Enter"||event.key===" "){event.preventDefault();event.stopPropagation();}}} style={{position:"absolute",left:"1%",top:"50.6%",width:"98%",height:"23.8%",cursor:"pointer",borderRadius:6,boxShadow:listening.activeId==="chart-2"?"0 0 0 3px #2563eb":undefined,backgroundColor:listening.activeId==="chart-2"?"rgba(219,234,254,.5)":undefined}}>{listening.activeId==="chart-2"&&renderExerciseSpeaker()}</span><span role="button" tabIndex={0} data-listening="chart-3" aria-label="Hear Tanya is faster than Susan." onClick={event=>{event.stopPropagation();listening.play("chart-3",clipE4);}} onKeyDown={event=>{if(event.key!=="Enter"&&event.key!==" ")return;event.preventDefault();event.stopPropagation();if(!event.repeat)listening.play("chart-3",clipE4);}} onKeyUp={event=>{if(event.key==="Enter"||event.key===" "){event.preventDefault();event.stopPropagation();}}} style={{position:"absolute",left:"1%",top:"75.6%",width:"98%",height:"23.8%",cursor:"pointer",borderRadius:6,boxShadow:listening.activeId==="chart-3"?"0 0 0 3px #2563eb":undefined,backgroundColor:listening.activeId==="chart-3"?"rgba(219,234,254,.5)":undefined}}>{listening.activeId==="chart-3"&&renderExerciseSpeaker()}</span></div>
 
           {/* Matching */}
           <div className="rcm-match-area" ref={containerRef} style={{ width: "100%" }}>
@@ -346,7 +470,7 @@ export default function WB_ReadChartMatch_QE() {
                   const isLocked = leftLocked(item.id);
                   const dotWrong   = isLeftWrong(item.id);
                   return (
-                    <div key={item.id} className="rcm-match-row" role="button" tabIndex={0} data-keyboard-choice ref={el=>{leftControlRefs.current[item.id]=el;}} aria-label={`${item.sentence}${connections[item.id]?" "+connections[item.id]:". Unmatched."}`} aria-pressed={isSelected} aria-disabled={isLocked} onClick={event=>handleLeftClick(item.id,event.detail===0)} onKeyDown={event=>endpointKey(event,"left",item.id)} onKeyUp={activationKeys.onKeyUp} onFocus={()=>preview("left",item.id)} onMouseEnter={()=>preview("left",item.id)} style={{borderRadius:"6px",boxShadow:isSelected?"0 0 0 3px #2563eb":isLocked?"0 0 0 2px #16a34a":undefined,background:isSelected?"#dbeafe":undefined}}>
+                    <div aria-invalid={dotWrong} data-listening={`left-${item.id}`} key={item.id} className="rcm-match-row" role="button" tabIndex={0} data-keyboard-choice ref={el=>{leftControlRefs.current[item.id]=el;}} aria-label={`${item.sentence}${connections[item.id]?" "+connections[item.id]:". Unmatched."}`} aria-pressed={isSelected} aria-disabled={isLocked} onClick={event=>handleLeftClick(item.id,event.detail===0)} onKeyDown={event=>endpointKey(event,"left",item.id)} onKeyUp={activationKeys.onKeyUp} onFocus={()=>preview("left",item.id)} onMouseEnter={()=>preview("left",item.id)} style={{borderRadius:"6px",background:isSelected?"#dbeafe":undefined,position:"relative",boxShadow:listening.activeId===(`left-${item.id}`)?"0 0 0 3px #2563eb":isSelected?"0 0 0 3px #2563eb":isLocked?"0 0 0 2px #16a34a":undefined,backgroundColor:listening.activeId===(`left-${item.id}`)?"#dbeafe":undefined}}>
                       <span className="rcm-num">{item.id}</span>
                       <div>
                         <div className={[
@@ -367,7 +491,7 @@ export default function WB_ReadChartMatch_QE() {
                         />
                         {dotWrong && <div className="rcm-badge">✕</div>}
                       </div>
-                    </div>
+                    {listening.activeId===(`left-${item.id}`)&&renderExerciseSpeaker()}</div>
                   );
                 })}
               </div>
@@ -377,7 +501,7 @@ export default function WB_ReadChartMatch_QE() {
                 {RIGHT_ITEMS.map((item) => {
                   const dotWrong = isRightWrong(item.name);
                   return (
-                    <div key={item.name} className="rcm-right-item" role="button" tabIndex={0} data-keyboard-choice ref={el=>{rightControlRefs.current[item.name]=el;}} aria-label={item.name} aria-pressed={selectedRight===item.name} aria-disabled={rightLocked(item.name)} onClick={event=>handleRightClick(item.name,event.detail===0)} onKeyDown={event=>endpointKey(event,"right",item.name)} onKeyUp={activationKeys.onKeyUp} onFocus={()=>preview("right",item.name)} onMouseEnter={()=>preview("right",item.name)} style={{borderRadius:"6px",boxShadow:selectedRight===item.name?"0 0 0 3px #2563eb":rightLocked(item.name)?"0 0 0 2px #16a34a":undefined,background:selectedRight===item.name?"#dbeafe":undefined}}>
+                    <div aria-invalid={dotWrong} data-listening={`right-${item.name}`} key={item.name} className="rcm-right-item" role="button" tabIndex={0} data-keyboard-choice ref={el=>{rightControlRefs.current[item.name]=el;}} aria-label={item.name} aria-pressed={selectedRight===item.name} aria-disabled={rightLocked(item.name)} onClick={event=>handleRightClick(item.name,event.detail===0)} onKeyDown={event=>endpointKey(event,"right",item.name)} onKeyUp={activationKeys.onKeyUp} onFocus={()=>preview("right",item.name)} onMouseEnter={()=>preview("right",item.name)} style={{borderRadius:"6px",background:selectedRight===item.name?"#dbeafe":undefined,position:"relative",boxShadow:listening.activeId===(`right-${item.name}`)?"0 0 0 3px #2563eb":selectedRight===item.name?"0 0 0 3px #2563eb":rightLocked(item.name)?"0 0 0 2px #16a34a":undefined,backgroundColor:listening.activeId===(`right-${item.name}`)?"#dbeafe":undefined}}>
                       <div style={{ position: "relative", flexShrink: 0 }}>
                         <div
                           className="rcm-dot-right"
@@ -387,7 +511,7 @@ export default function WB_ReadChartMatch_QE() {
                         />
                       </div>
                       <span className="rcm-name">{item.name}</span>
-                    </div>
+                    {listening.activeId===(`right-${item.name}`)&&renderExerciseSpeaker()}</div>
                   );
                 })}
               </div>

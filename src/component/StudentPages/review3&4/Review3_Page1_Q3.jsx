@@ -1,3 +1,12 @@
+import clipC6 from "../../../assets/audio/ClassBook/Unit 4/Page 34 - C/Item_006_We_had_a_nice_coffee_break.mp3";
+import clipC4 from "../../../assets/audio/ClassBook/Unit 4/Page 34 - C/Item_004_She_had_a_white_cat.mp3";
+import clipC2 from "../../../assets/audio/ClassBook/Unit 4/Page 34 - C/Item_002_They_had_a_large_swimming_pool.mp3";
+import clipC5 from "../../../assets/audio/ClassBook/Unit 4/Page 34 - C/Item_005_We_had_a_nice_breakfast.mp3";
+import clipC3 from "../../../assets/audio/ClassBook/Unit 4/Page 34 - C/Item_003_She_had_a_white_rabbit.mp3";
+import clipC1 from "../../../assets/audio/ClassBook/Unit 4/Page 34 - C/Item_001_They_had_a_large_house.mp3";
+import {useEffect as useListeningEffect,useRef as useListeningRef,useState as useListeningState} from "react";
+import {useAudio} from "../../../context/AudioContext";
+import {FaVolumeUp as ListeningSpeakerIcon} from "react-icons/fa";
 import ExerciseHeader from "../../ExerciseHeader";
 import React, { useState, useRef } from "react";
 import ValidationAlert from "../../Popup/ValidationAlert";
@@ -13,6 +22,142 @@ import img4 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 4 Joy Makes
 // 🔊 AUDIO
 import sound from "../../../assets/audio/ClassBook/Grade 4/cd25pg34-instruction1-adult-lady_E7S8IYrE.mp3";
 import QuestionAudioPlayer from "../../QuestionAudioPlayer";
+
+function useExerciseListening(pageId) {
+  const coordinator = useAudio();
+  const audioRef = useListeningRef(null),
+    generation = useListeningRef(0);
+  const [activeId, setActiveId] = useListeningState(null),
+    [error, setError] = useListeningState("");
+  const clearOwned = () => {
+    const current = audioRef.current;
+    if (current) {
+      current.onended = current.onplaying = current.onerror = current.onpause = null;
+      current.pause();
+      current.remove();
+      audioRef.current = null;
+    }
+  };
+  const stop = () => {
+    generation.current++;
+    clearOwned();
+    setActiveId(null);
+    setError("");
+  };
+  const play = (id, sources) => {
+    const queue = (Array.isArray(sources) ? sources : [sources]).filter(Boolean);
+    if (!queue.length) return;
+    stop();
+    const token = generation.current;
+    let index = 0;
+    const next = () => {
+      if (token !== generation.current) return;
+      clearOwned();
+      if (index >= queue.length) {
+        setActiveId(null);
+        return;
+      }
+      const media = new Audio(queue[index++]);
+      media.hidden = true;
+      media.dataset.exerciseListening = pageId;
+      document.body.appendChild(media);
+      audioRef.current = media;
+      const current = () => token === generation.current && audioRef.current === media;
+      const fail = () => {
+        if (!current()) return;
+        generation.current++;
+        clearOwned();
+        setActiveId(null);
+        setError("Audio could not be played. Please try again.");
+      };
+      media.onplaying = () => {
+        if (current()) setActiveId(id);
+      };
+      media.onended = () => {
+        if (current()) next();
+      };
+      media.onerror = fail;
+      media.onpause = () => {
+        if (!current()) return;
+        generation.current++;
+        clearOwned();
+        setActiveId(null);
+      };
+      document.querySelectorAll("audio,video").forEach(other => {
+        if (other !== media) other.pause();
+      });
+      coordinator?.registerAudio(media, null, pageId);
+      media.play().catch(fail);
+    };
+    next();
+  };
+  useListeningEffect(() => () => {
+    generation.current++;
+    const media = audioRef.current;
+    if (media) {
+      media.onended = media.onplaying = media.onerror = media.onpause = null;
+      media.pause();
+      media.remove();
+      audioRef.current = null;
+    }
+  }, []);
+  return {
+    play,
+    stop,
+    activeId,
+    error
+  };
+}
+function renderExerciseSpeaker() {
+  return <span aria-hidden="true" style={{
+    position: "absolute",
+    top: -10,
+    right: -10,
+    width: 22,
+    height: 22,
+    borderRadius: "50%",
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    background: "white",
+    color: "black",
+    boxShadow: "0 1px 3px rgba(0,0,0,.25)",
+    pointerEvents: "none",
+    zIndex: 3
+  }}><ListeningSpeakerIcon size={12} /></span>;
+}
+
+function renderExerciseAudioGroup({
+  audio,
+  id,
+  src,
+  label,
+  children,
+  style,
+  key: renderKey,
+  ...props
+}) {
+  if (!src || Array.isArray(src) && !src.some(Boolean)) return <div key={renderKey} {...props} style={style}>{children}</div>;
+  const playing = audio.activeId === id;
+  const keys = event => {
+    if (event.target !== event.currentTarget || event.key !== "Enter" && event.key !== " ") return;
+    event.preventDefault();
+    event.stopPropagation();
+    if (event.type === "keydown" && !event.repeat) audio.play(id, src);
+  };
+  return <div key={renderKey} {...props} role="group" aria-roledescription="sentence audio" tabIndex={0} data-listening={id} aria-label={label} onKeyDown={keys} onKeyUp={keys} onClick={event => {
+    if (event.target.closest('input,select,textarea,button,[role="button"]')) return;
+    event.stopPropagation();
+    audio.play(id, src);
+  }} style={{
+    ...style,
+    position: style?.position || "relative",
+    borderRadius: style?.borderRadius || 6,
+    boxShadow: playing ? "0 0 0 3px #2563eb" : style?.boxShadow,
+    backgroundColor: playing ? "#dbeafe" : style?.backgroundColor
+  }}>{children}{playing && renderExerciseSpeaker()}</div>;
+}
+
 const activationKeys = {
   onKeyDown: (event) => {
     if (event.key !== "Enter" && event.key !== " ") return;
@@ -106,6 +251,8 @@ const ITEMS = [
 //  COMPONENT
 // ─────────────────────────────────────────────
 export default function WB_ListenReadWriteCheckCross_QC() {
+  const listening=useExerciseListening("sb_review3_page1_q3");
+
   const [selected,    setSelected]    = useState({});
   const [, setShowResults] = useState(false);
   const [showAns,     setShowAns]     = useState(false);
@@ -118,9 +265,9 @@ export default function WB_ListenReadWriteCheckCross_QC() {
 
   const handleSelect = (id,side) => {if(showAns || results[id] === "correct")return;setSelected(prev=>({...prev,[id]:prev[id] === side ? null : side}));setResults(prev=>{const next={...prev};delete next[id];return next;});setAnnouncement("Selection updated.");};
 
-  const handleCheck = () => {if(checkDisabled)return;if(!ITEMS.every(item=>selected[item.id] !== undefined && selected[item.id] !== null && selected[item.id] !== "")){ValidationAlert.info("Please choose an answer for each question.");setAnnouncement("Please choose an answer for each question.");return;}const next=Object.fromEntries(ITEMS.map(item=>[item.id,results[item.id] === "correct" || selected[item.id] === item.correctSide ? "correct":"wrong"]));const score=Object.values(next).filter(value=>value === "correct").length;setResults(next);setShowResults(true);setAnnouncement(`Score: ${score} out of ${ITEMS.length}. Correct answers are locked; incorrect answers can be changed.`);if(score === ITEMS.length){resetButtonRef.current?.focus({preventScroll:true});ValidationAlert.success(`Score: ${score} / ${ITEMS.length}`);}else if(score)ValidationAlert.warning(`Score: ${score} / ${ITEMS.length}`);else ValidationAlert.error(`Score: ${score} / ${ITEMS.length}`);};
+  const handleCheck = () => {if(checkDisabled)return;listening.stop();if(!ITEMS.every(item=>selected[item.id] !== undefined && selected[item.id] !== null && selected[item.id] !== "")){ValidationAlert.info("Please choose an answer for each question.");setAnnouncement("Please choose an answer for each question.");return;}const next=Object.fromEntries(ITEMS.map(item=>[item.id,results[item.id] === "correct" || selected[item.id] === item.correctSide ? "correct":"wrong"]));const score=Object.values(next).filter(value=>value === "correct").length;setResults(next);setShowResults(true);setAnnouncement(`Score: ${score} out of ${ITEMS.length}. Correct answers are locked; incorrect answers can be changed.`);if(score === ITEMS.length){resetButtonRef.current?.focus({preventScroll:true});ValidationAlert.success(`Score: ${score} / ${ITEMS.length}`);}else if(score)ValidationAlert.warning(`Score: ${score} / ${ITEMS.length}`);else ValidationAlert.error(`Score: ${score} / ${ITEMS.length}`);};
 
-  const handleShowAnswer = () => {
+  const handleShowAnswer = () => {listening.stop();
     const filled = {};
     ITEMS.forEach((item) => { filled[item.id] = item.correctSide; });
     setSelected(filled);
@@ -129,7 +276,7 @@ export default function WB_ListenReadWriteCheckCross_QC() {
  setResults({});resetButtonRef.current?.focus({preventScroll:true});setAnnouncement("Correct answers shown and locked.");
   };
 
-  const handleReset = () => {
+  const handleReset = () => {listening.stop();
     setSelected({});
     setShowResults(false);
     setShowAns(false);
@@ -166,7 +313,7 @@ export default function WB_ListenReadWriteCheckCross_QC() {
   };
 
   return (
-    <div data-adapt-scope="review3&4_Review3_Page1_Q3" className="main-container-component">
+    <div data-listening-scope={"sb_review3_page1_q3"} data-adapt-scope="review3&4_Review3_Page1_Q3" className="main-container-component"><style>{`[data-listening-scope="sb_review3_page1_q3"] [data-listening]:focus-visible{outline:4px solid #2563eb;outline-offset:3px;border-radius:6px;}`}</style><span className="sr-only" role="status" aria-live="polite">{listening.error}</span>
 <style>{`[data-adapt-scope="review3&4_Review3_Page1_Q3"] input:focus-visible, [data-adapt-scope="review3&4_Review3_Page1_Q3"] [data-keyboard-choice]:focus-visible, [data-adapt-scope="review3&4_Review3_Page1_Q3"] [data-grid-cell]:focus-visible {outline:4px solid #2563eb;outline-offset:3px;border-radius:6px;}`}</style>
 <div className="sr-only" role="status" aria-live="polite" aria-atomic="true">{announcement}</div>
       <style>{`
@@ -316,10 +463,10 @@ export default function WB_ListenReadWriteCheckCross_QC() {
             <div key={item.id} className="lrcc-row">
 
               {/* Col 1: num + text */}
-              <div className="lrcc-left">
+              {renderExerciseAudioGroup({"label":`Hear ${item.leftText}`,"src":[clipC1,clipC3,clipC5][item.id-1],"id":`left-${item.id}`,"audio":listening,"className":"lrcc-left",children:<>
                 <span className="lrcc-num">{item.id}</span>
                 <span className="lrcc-text">{item.leftText}</span>
-              </div>
+              </>})}
 
               {/* Col 2: left checkbox */}
               {renderCheckbox(item, "left")}
@@ -331,9 +478,9 @@ export default function WB_ListenReadWriteCheckCross_QC() {
               {renderCheckbox(item, "right")}
 
               {/* Col 5: text */}
-              <div className="lrcc-right">
+              {renderExerciseAudioGroup({"label":`Hear ${item.rightText}`,"src":[clipC2,clipC4,clipC6][item.id-1],"id":`right-${item.id}`,"audio":listening,"className":"lrcc-right",children:<>
                 <span className="lrcc-text">{item.rightText}</span>
-              </div>
+              </>})}
 
             </div>
           ))}

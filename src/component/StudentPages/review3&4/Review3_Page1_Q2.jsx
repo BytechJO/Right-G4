@@ -1,6 +1,148 @@
+import clipB3 from "../../../assets/audio/ClassBook/Unit 4/Page 34 - B/Item_003_the_was_that_part_best.mp3";
+import clipB2 from "../../../assets/audio/ClassBook/Unit 4/Page 34 - B/Item_002_morning!_good.mp3";
+import clipB1 from "../../../assets/audio/ClassBook/Unit 4/Page 34 - B/Item_001_all_not_at.mp3";
+import {useEffect as useListeningEffect,useRef as useListeningRef,useState as useListeningState} from "react";
+import {useAudio} from "../../../context/AudioContext";
+import {FaVolumeUp as ListeningSpeakerIcon} from "react-icons/fa";
 import ExerciseHeader from "../../ExerciseHeader";
 import React, { useState, useRef } from "react";
 import ValidationAlert from "../../Popup/ValidationAlert";
+
+function useExerciseListening(pageId) {
+  const coordinator = useAudio();
+  const audioRef = useListeningRef(null),
+    generation = useListeningRef(0);
+  const [activeId, setActiveId] = useListeningState(null),
+    [error, setError] = useListeningState("");
+  const clearOwned = () => {
+    const current = audioRef.current;
+    if (current) {
+      current.onended = current.onplaying = current.onerror = current.onpause = null;
+      current.pause();
+      current.remove();
+      audioRef.current = null;
+    }
+  };
+  const stop = () => {
+    generation.current++;
+    clearOwned();
+    setActiveId(null);
+    setError("");
+  };
+  const play = (id, sources) => {
+    const queue = (Array.isArray(sources) ? sources : [sources]).filter(Boolean);
+    if (!queue.length) return;
+    stop();
+    const token = generation.current;
+    let index = 0;
+    const next = () => {
+      if (token !== generation.current) return;
+      clearOwned();
+      if (index >= queue.length) {
+        setActiveId(null);
+        return;
+      }
+      const media = new Audio(queue[index++]);
+      media.hidden = true;
+      media.dataset.exerciseListening = pageId;
+      document.body.appendChild(media);
+      audioRef.current = media;
+      const current = () => token === generation.current && audioRef.current === media;
+      const fail = () => {
+        if (!current()) return;
+        generation.current++;
+        clearOwned();
+        setActiveId(null);
+        setError("Audio could not be played. Please try again.");
+      };
+      media.onplaying = () => {
+        if (current()) setActiveId(id);
+      };
+      media.onended = () => {
+        if (current()) next();
+      };
+      media.onerror = fail;
+      media.onpause = () => {
+        if (!current()) return;
+        generation.current++;
+        clearOwned();
+        setActiveId(null);
+      };
+      document.querySelectorAll("audio,video").forEach(other => {
+        if (other !== media) other.pause();
+      });
+      coordinator?.registerAudio(media, null, pageId);
+      media.play().catch(fail);
+    };
+    next();
+  };
+  useListeningEffect(() => () => {
+    generation.current++;
+    const media = audioRef.current;
+    if (media) {
+      media.onended = media.onplaying = media.onerror = media.onpause = null;
+      media.pause();
+      media.remove();
+      audioRef.current = null;
+    }
+  }, []);
+  return {
+    play,
+    stop,
+    activeId,
+    error
+  };
+}
+function renderExerciseSpeaker() {
+  return <span aria-hidden="true" style={{
+    position: "absolute",
+    top: -10,
+    right: -10,
+    width: 22,
+    height: 22,
+    borderRadius: "50%",
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    background: "white",
+    color: "black",
+    boxShadow: "0 1px 3px rgba(0,0,0,.25)",
+    pointerEvents: "none",
+    zIndex: 3
+  }}><ListeningSpeakerIcon size={12} /></span>;
+}
+
+function renderExerciseAudioGroup({
+  audio,
+  id,
+  src,
+  label,
+  children,
+  style,
+  key: renderKey,
+  ...props
+}) {
+  if (!src || Array.isArray(src) && !src.some(Boolean)) return <div key={renderKey} {...props} style={style}>{children}</div>;
+  const playing = audio.activeId === id;
+  const keys = event => {
+    if (event.target !== event.currentTarget || event.key !== "Enter" && event.key !== " ") return;
+    event.preventDefault();
+    event.stopPropagation();
+    if (event.type === "keydown" && !event.repeat) audio.play(id, src);
+  };
+  return <div key={renderKey} {...props} role="group" aria-roledescription="sentence audio" tabIndex={0} data-listening={id} aria-label={label} onKeyDown={keys} onKeyUp={keys} onClick={event => {
+    if (event.target.closest('input,select,textarea,button,[role="button"]')) return;
+    event.stopPropagation();
+    audio.play(id, src);
+  }} style={{
+    ...style,
+    position: style?.position || "relative",
+    borderRadius: style?.borderRadius || 6,
+    boxShadow: playing ? "0 0 0 3px #2563eb" : style?.boxShadow,
+    backgroundColor: playing ? "#dbeafe" : style?.backgroundColor
+  }}>{children}{playing && renderExerciseSpeaker()}</div>;
+}
+
 const activationKeys = {
   onKeyDown: (event) => {
     if (event.key !== "Enter" && event.key !== " ") return;
@@ -76,6 +218,8 @@ const ITEMS = [
 //  COMPONENT
 // ─────────────────────────────────────────────
 export default function WB_UnscrambleWrite_QB() {
+  const listening=useExerciseListening("sb_review3_page1_q2");
+
   const [answers, setAnswers] = useState({});
   const [, setShowResults] = useState(false);
   const [showAns, setShowAns] = useState(false);
@@ -103,7 +247,7 @@ export default function WB_UnscrambleWrite_QB() {
   };
 
   const handleCheck = () => {
-    if (checkDisabled) return;
+    if (checkDisabled) return;listening.stop();
     if (!answerTargets.every((item) => answers[item.key]?.trim())) {
       setAnnouncement("Please complete all answers first.");
       ValidationAlert.info("Please complete all answers first.");
@@ -138,7 +282,7 @@ export default function WB_UnscrambleWrite_QB() {
     else ValidationAlert.error(`Score: ${score} / ${answerTargets.length}`);
   };
 
-  const handleShowAnswer = () => {
+  const handleShowAnswer = () => {listening.stop();
     setAnswers(
       Object.fromEntries(answerTargets.map((item) => [item.key, item.answer])),
     );
@@ -149,7 +293,7 @@ export default function WB_UnscrambleWrite_QB() {
     setAnnouncement("Correct answers shown and locked.");
   };
 
-  const handleReset = () => {
+  const handleReset = () => {listening.stop();
     setAnswers({});
     setResults({});
     setShowResults(false);
@@ -160,10 +304,10 @@ export default function WB_UnscrambleWrite_QB() {
   const isWrong = (item) => !showAns && results[item.id] === "wrong";
 
   return (
-    <div
+    <div data-listening-scope={"sb_review3_page1_q2"}
       data-adapt-scope="review3&4_Review3_Page1_Q2"
       className="main-container-component"
-    >
+    ><style>{`[data-listening-scope="sb_review3_page1_q2"] [data-listening]:focus-visible{outline:4px solid #2563eb;outline-offset:3px;border-radius:6px;}`}</style><span className="sr-only" role="status" aria-live="polite">{listening.error}</span>
       <style>{`[data-adapt-scope="review3&4_Review3_Page1_Q2"] input:focus-visible, [data-adapt-scope="review3&4_Review3_Page1_Q2"] [data-keyboard-choice]:focus-visible, [data-adapt-scope="review3&4_Review3_Page1_Q2"] [data-grid-cell]:focus-visible {outline:4px solid #2563eb;outline-offset:3px;border-radius:6px;}`}</style>
       <div
         className="sr-only"
@@ -286,10 +430,10 @@ export default function WB_UnscrambleWrite_QB() {
 
             return (
               <div key={item.id} className="uswb-item">
-                <div className="uswb-scrambled-row">
+                {renderExerciseAudioGroup({"label":`Hear sentence ${item.id}`,"src":[clipB1,clipB2,clipB3][item.id-1],"id":`sentence-${item.id}`,"audio":listening,"className":"uswb-scrambled-row",children:<>
                   <span className="uswb-num">{item.id}</span>
                   <span className="uswb-scrambled">{item.scrambled}</span>
-                </div>
+                </>})}
                 <div className="uswb-input-wrap">
                   <input
                     placeholder="Answer"

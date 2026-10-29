@@ -1,3 +1,13 @@
+import clipHey from "../../../assets/audio/ClassBook/Unit 4/Page 32 - B/Item_005_hey.mp3";
+import clipB6 from "../../../assets/audio/ClassBook/Unit 4/Page 36 - B/Item_006_picnic.mp3";
+import clipB5 from "../../../assets/audio/ClassBook/Unit 4/Page 36 - B/Item_005_youngest.mp3";
+import clipB4 from "../../../assets/audio/ClassBook/Unit 4/Page 36 - B/Item_004_shorter.mp3";
+import clipB3 from "../../../assets/audio/ClassBook/Unit 4/Page 36 - B/Item_003_over.mp3";
+import clipB2 from "../../../assets/audio/ClassBook/Unit 4/Page 36 - B/Item_002_leave.mp3";
+import clipB1 from "../../../assets/audio/ClassBook/Unit 4/Page 36 - B/Item_001_cousin.mp3";
+import {useEffect as useListeningEffect,useRef as useListeningRef,useState as useListeningState} from "react";
+import {useAudio} from "../../../context/AudioContext";
+import {FaVolumeUp as ListeningSpeakerIcon} from "react-icons/fa";
 import ExerciseHeader from "../../ExerciseHeader";
 import React, { useState, useRef, useEffect } from "react";
 import ValidationAlert from "../../Popup/ValidationAlert";
@@ -6,6 +16,138 @@ import ValidationAlert from "../../Popup/ValidationAlert";
 //  🖼️  SCENE IMAGE
 // ─────────────────────────────────────────────
 import imgScene from "../../../assets/imgs/pages/Class Book/Right 4 Unit 4 Joy Makes a Friend Folder/Page 36/SVG/Asset 1.svg";
+
+function useExerciseListening(pageId) {
+  const coordinator = useAudio();
+  const audioRef = useListeningRef(null),
+    generation = useListeningRef(0);
+  const [activeId, setActiveId] = useListeningState(null),
+    [error, setError] = useListeningState("");
+  const clearOwned = () => {
+    const current = audioRef.current;
+    if (current) {
+      current.onended = current.onplaying = current.onerror = current.onpause = null;
+      current.pause();
+      current.remove();
+      audioRef.current = null;
+    }
+  };
+  const stop = () => {
+    generation.current++;
+    clearOwned();
+    setActiveId(null);
+    setError("");
+  };
+  const play = (id, sources) => {
+    const queue = (Array.isArray(sources) ? sources : [sources]).filter(Boolean);
+    if (!queue.length) return;
+    stop();
+    const token = generation.current;
+    let index = 0;
+    const next = () => {
+      if (token !== generation.current) return;
+      clearOwned();
+      if (index >= queue.length) {
+        setActiveId(null);
+        return;
+      }
+      const media = new Audio(queue[index++]);
+      media.hidden = true;
+      media.dataset.exerciseListening = pageId;
+      document.body.appendChild(media);
+      audioRef.current = media;
+      const current = () => token === generation.current && audioRef.current === media;
+      const fail = () => {
+        if (!current()) return;
+        generation.current++;
+        clearOwned();
+        setActiveId(null);
+        setError("Audio could not be played. Please try again.");
+      };
+      media.onplaying = () => {
+        if (current()) setActiveId(id);
+      };
+      media.onended = () => {
+        if (current()) next();
+      };
+      media.onerror = fail;
+      media.onpause = () => {
+        if (!current()) return;
+        generation.current++;
+        clearOwned();
+        setActiveId(null);
+      };
+      document.querySelectorAll("audio,video").forEach(other => {
+        if (other !== media) other.pause();
+      });
+      coordinator?.registerAudio(media, null, pageId);
+      media.play().catch(fail);
+    };
+    next();
+  };
+  useListeningEffect(() => () => {
+    generation.current++;
+    const media = audioRef.current;
+    if (media) {
+      media.onended = media.onplaying = media.onerror = media.onpause = null;
+      media.pause();
+      media.remove();
+      audioRef.current = null;
+    }
+  }, []);
+  return {
+    play,
+    stop,
+    activeId,
+    error
+  };
+}
+function renderExerciseSpeaker() {
+  return <span aria-hidden="true" style={{
+    position: "absolute",
+    top: -10,
+    right: -10,
+    width: 22,
+    height: 22,
+    borderRadius: "50%",
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    background: "white",
+    color: "black",
+    boxShadow: "0 1px 3px rgba(0,0,0,.25)",
+    pointerEvents: "none",
+    zIndex: 3
+  }}><ListeningSpeakerIcon size={12} /></span>;
+}
+function renderExerciseAudioText({
+  audio,
+  id,
+  src,
+  label,
+  children
+}) {
+  if (!src || Array.isArray(src) && !src.some(Boolean)) return children;
+  const playing = audio.activeId === id;
+  const keys = event => {
+    if (event.target !== event.currentTarget || event.key !== "Enter" && event.key !== " ") return;
+    event.preventDefault();
+    event.stopPropagation();
+    if (event.type === "keydown" && !event.repeat) audio.play(id, src);
+  };
+  return <span role="button" tabIndex={0} data-listening={id} aria-label={label} onClick={event => {
+    event.stopPropagation();
+    audio.play(id, src);
+  }} onKeyDown={keys} onKeyUp={keys} style={{
+    position: "relative",
+    cursor: "pointer",
+    borderRadius: 6,
+    boxShadow: playing ? "0 0 0 3px #2563eb" : undefined,
+    backgroundColor: playing ? "#dbeafe" : undefined
+  }}>{children}{playing && renderExerciseSpeaker()}</span>;
+}
+
+
 const activationKeys = {
   onKeyDown: (event) => {
     if (event.key !== "Enter" && event.key !== " ") return;
@@ -86,6 +228,8 @@ const checkSelection = (cells,foundNames) => WORD_DEFS.find(def=>!foundNames.has
 //  COMPONENT
 // ─────────────────────────────────────────────
 export default function WB_FindCircleWords_QB() {
+  const listening=useExerciseListening("sb_review4_page1_q2");
+
   const [,   setSelecting]   = useState(false);
   const [startCell,   setStartCell]   = useState(null);
   const [hoveredCell, setHoveredCell] = useState(null);
@@ -144,11 +288,11 @@ export default function WB_FindCircleWords_QB() {
 
   
 
-  const handleReset = () => {cancelSelection();setAnswerShown(false);setCompleted(false);setChecked(false);setFoundWords([]);setWrongFlash(false);setActiveCell([0,0]);setAnnouncement("All discoveries and feedback cleared.");cellRefs.current["0-0"]?.focus({preventScroll:true});};
+  const handleReset = () => {listening.stop();cancelSelection();setAnswerShown(false);setCompleted(false);setChecked(false);setFoundWords([]);setWrongFlash(false);setActiveCell([0,0]);setAnnouncement("All discoveries and feedback cleared.");cellRefs.current["0-0"]?.focus({preventScroll:true});};
 
-  const handleShowAnswer = () => {cancelSelection();setWrongFlash(false);setAnswerShown(true);setChecked(false);setFoundWords(WORD_DEFS.map((def,i)=>({...def,color:FOUND_COLORS[i % FOUND_COLORS.length]})));resetButtonRef.current?.focus({preventScroll:true});setAnnouncement("All target words shown and locked.");};
+  const handleShowAnswer = () => {listening.stop();cancelSelection();setWrongFlash(false);setAnswerShown(true);setChecked(false);setFoundWords(WORD_DEFS.map((def,i)=>({...def,color:FOUND_COLORS[i % FOUND_COLORS.length]})));resetButtonRef.current?.focus({preventScroll:true});setAnnouncement("All target words shown and locked.");};
 
-  const handleCheck = () => {if(checkDisabled)return;cancelSelection();if(!foundWords.length){ValidationAlert.info("Please find a word first.");setAnnouncement("Please find a word first.");return;}setChecked(true);setAnnouncement(`Score: ${foundWords.length} out of ${WORD_DEFS.length}.`);if(foundWords.length === WORD_DEFS.length){setCompleted(true);resetButtonRef.current?.focus({preventScroll:true});ValidationAlert.success(`Score: ${foundWords.length} / ${WORD_DEFS.length}`);}else ValidationAlert.warning(`Score: ${foundWords.length} / ${WORD_DEFS.length}`);};
+  const handleCheck = () => {if(checkDisabled)return;listening.stop();cancelSelection();if(!foundWords.length){ValidationAlert.info("Please find a word first.");setAnnouncement("Please find a word first.");return;}setChecked(true);setAnnouncement(`Score: ${foundWords.length} out of ${WORD_DEFS.length}.`);if(foundWords.length === WORD_DEFS.length){setCompleted(true);resetButtonRef.current?.focus({preventScroll:true});ValidationAlert.success(`Score: ${foundWords.length} / ${WORD_DEFS.length}`);}else ValidationAlert.warning(`Score: ${foundWords.length} / ${WORD_DEFS.length}`);};
 
   const getCellStyle = (key, isSel, isWrong) => {
     if ((answerShown || completed) && foundCellMap[key]) return {background:"#bbf7d0"};
@@ -166,10 +310,10 @@ export default function WB_FindCircleWords_QB() {
   };
 
   return (
-    <div data-adapt-scope="review3&4_Review4_Page1_Q2"
+    <div data-listening-scope={"sb_review4_page1_q2"} data-adapt-scope="review3&4_Review4_Page1_Q2"
       className="main-container-component"
 
-    >
+    ><style>{`[data-listening-scope="sb_review4_page1_q2"] [data-listening]:focus-visible{outline:4px solid #2563eb;outline-offset:3px;border-radius:6px;}`}</style><span className="sr-only" role="status" aria-live="polite">{listening.error}</span>
 <style>{`[data-adapt-scope="review3&4_Review4_Page1_Q2"] input:focus-visible, [data-adapt-scope="review3&4_Review4_Page1_Q2"] [data-keyboard-choice]:focus-visible, [data-adapt-scope="review3&4_Review4_Page1_Q2"] [data-grid-cell]:focus-visible {outline:4px solid #2563eb;outline-offset:3px;border-radius:6px;}`}</style>
 <div className="sr-only" role="status" aria-live="polite" aria-atomic="true">{announcement}</div>
       <style>{`
@@ -328,7 +472,7 @@ export default function WB_FindCircleWords_QB() {
                 key={w}
                 className={`fcwb-word-item ${foundNames.has(w) ? "fcwb-word-item--found" : ""}`} style={{color:checked && !foundNames.has(w)?"#ef4444":undefined}}
               >
-                {w}
+                {renderExerciseAudioText({"audio":listening,"id":`word-${w}`,"src":({cousin:clipB1,leave:clipB2,over:clipB3,shorter:clipB4,youngest:clipB5,picnic:clipB6,hey:clipHey})[w],"label":`Hear ${w}`,children:<>{w}</>})}
               </span>
             ))}
           </div>
