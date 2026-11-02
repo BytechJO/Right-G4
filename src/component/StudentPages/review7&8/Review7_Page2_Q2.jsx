@@ -1,5 +1,12 @@
+import clipPage71E4 from "../../../assets/audio/ClassBook/Unit 8/Page 71 - E/Item_004_Were_there_any_watermelons.mp3";
+import clipPage71E3 from "../../../assets/audio/ClassBook/Unit 8/Page 71 - E/Item_003_Was_there_any_candy.mp3";
+import clipPage71E2 from "../../../assets/audio/ClassBook/Unit 8/Page 71 - E/Item_002_Were_there_any_nuts.mp3";
+import clipPage71E1 from "../../../assets/audio/ClassBook/Unit 8/Page 71 - E/Item_001_Was_there_any_tea.mp3";
+import {useEffect as useListeningEffect,useRef as useListeningRef,useState as useListeningState} from "react";
+import {useAudio} from "../../../context/AudioContext";
+import {FaVolumeUp as ListeningSpeakerIcon} from "react-icons/fa";
+import ExerciseHeader from "../../ExerciseHeader";
 import React, { useState, useRef, useEffect, useCallback } from "react";
-import Button from "../../Button";
 import ValidationAlert from "../../Popup/ValidationAlert";
 
 // ─────────────────────────────────────────────
@@ -9,6 +16,131 @@ import img1 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 8 I Lived i
 import img2 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 8 I Lived in the Library Folder/Page 71/SVG/Asset 6.svg";
 import img3 from"../../../assets/imgs/pages/Class Book/Right 4 Unit 8 I Lived in the Library Folder/Page 71/SVG/Asset 7.svg";
 import img4 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 8 I Lived in the Library Folder/Page 71/SVG/Asset 8.svg";
+function useExerciseListening(pageId) {
+  const coordinator = useAudio();
+  const audioRef = useListeningRef(null),
+    generation = useListeningRef(0);
+  const [activeId, setActiveId] = useListeningState(null),
+    [error, setError] = useListeningState("");
+  const clearOwned = () => {
+    const current = audioRef.current;
+    if (current) {
+      current.onended = current.onplaying = current.onerror = current.onpause = null;
+      current.pause();
+      current.remove();
+      audioRef.current = null;
+    }
+  };
+  const stop = () => {
+    generation.current++;
+    clearOwned();
+    setActiveId(null);
+    setError("");
+  };
+  const play = (id, sources) => {
+    const queue = (Array.isArray(sources) ? sources : [sources]).filter(Boolean);
+    if (!queue.length) return;
+    stop();
+    const token = generation.current;
+    let index = 0;
+    const next = () => {
+      if (token !== generation.current) return;
+      clearOwned();
+      if (index >= queue.length) {
+        setActiveId(null);
+        return;
+      }
+      const media = new Audio(queue[index++]);
+      media.hidden = true;
+      media.dataset.exerciseListening = pageId;
+      document.body.appendChild(media);
+      audioRef.current = media;
+      const current = () => token === generation.current && audioRef.current === media;
+      const fail = () => {
+        if (!current()) return;
+        generation.current++;
+        clearOwned();
+        setActiveId(null);
+        setError("Audio could not be played. Please try again.");
+      };
+      media.onplaying = () => {
+        if (current()) setActiveId(id);
+      };
+      media.onended = () => {
+        if (current()) next();
+      };
+      media.onerror = fail;
+      media.onpause = () => {
+        if (!current()) return;
+        generation.current++;
+        clearOwned();
+        setActiveId(null);
+      };
+      document.querySelectorAll("audio,video").forEach(other => {
+        if (other !== media) other.pause();
+      });
+      coordinator?.registerAudio(media, null, pageId);
+      media.play().catch(fail);
+    };
+    next();
+  };
+  useListeningEffect(() => () => {
+    generation.current++;
+    const media = audioRef.current;
+    if (media) {
+      media.onended = media.onplaying = media.onerror = media.onpause = null;
+      media.pause();
+      media.remove();
+      audioRef.current = null;
+    }
+  }, []);
+  return {
+    play,
+    stop,
+    activeId,
+    error
+  };
+}
+function renderExerciseSpeaker() {
+  return <span aria-hidden="true" style={{
+    position: "absolute",
+    top: -10,
+    right: -10,
+    width: 22,
+    height: 22,
+    borderRadius: "50%",
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    background: "white",
+    color: "black",
+    boxShadow: "0 1px 3px rgba(0,0,0,.25)",
+    pointerEvents: "none",
+    zIndex: 3
+  }}><ListeningSpeakerIcon size={12} /></span>;
+}
+
+
+
+
+const imageDescriptions={img1:"Two watermelons.",img2:"A cup and saucer with a hot drink.",img3:"Three wrapped candies.",img4:"Two nuts in brown shells."};
+
+const activationKeys = {
+  onKeyDown: (event) => {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    event.preventDefault();
+    event.stopPropagation();
+    if (!event.repeat) event.currentTarget.click();
+  },
+  onKeyUp: (event) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+  },
+};
+
+
 
 // ─────────────────────────────────────────────
 //  🎨  COLORS
@@ -56,11 +188,24 @@ const ALL_IMGS = [...LEFT_IMGS, ...RIGHT_IMGS];
 //  COMPONENT
 // ─────────────────────────────────────────────
 export default function WB_ReadLookMatch_QD() {
+const listening=useExerciseListening("sb_review7_page2_q2");
+
   const [connections,  setConnections]  = useState({});
   const [selectedLeft, setSelectedLeft] = useState(null);
-  const [showResults,  setShowResults]  = useState(false);
+  const [,  setShowResults]  = useState(false);
   const [showAns,      setShowAns]      = useState(false);
 
+const [results,setResults]=useState({}),[selectedImage,setSelectedImage]=useState(null),[preview,setPreview]=useState(null),[announcement,setAnnouncement]=useState("");
+ const resetButtonRef=useRef(null),sentenceRefs=useRef({}),imageRefs=useRef({}),focusFrame=useRef(null);
+ const checkDisabled=showAns || LEFT_ITEMS.every(item=>results[item.id]===true);
+ const lockedLeft=id=>showAns || results[id]===true;
+ const lockedImage=name=>showAns || Object.keys(connections).some(id=>connections[id]===name && results[id]===true);
+ const cancelFocus=()=>{if(focusFrame.current!==null)cancelAnimationFrame(focusFrame.current);focusFrame.current=null;};
+ const focusTarget=(side)=>{cancelFocus();focusFrame.current=requestAnimationFrame(()=>{focusFrame.current=null;const item=side==='image'?LEFT_IMGS.flatMap((item,i)=>[item,RIGHT_IMGS[i]]).filter(Boolean).find(x=>!lockedImage(x.name)):LEFT_ITEMS.find(x=>!lockedLeft(x.id));(side==='image'?imageRefs.current[item?.name]:sentenceRefs.current[item?.id])?.focus({preventScroll:true});});};
+ useEffect(()=>()=>{if(focusFrame.current!==null)cancelAnimationFrame(focusFrame.current);},[]);
+ const cancel=()=>{cancelFocus();setSelectedLeft(null);setSelectedImage(null);setPreview(null);};
+ const connect=(id,name,keyboard)=>{if(lockedLeft(id)||lockedImage(name))return;const next={...connections};Object.keys(next).forEach(k=>{if(Number(k)===id||next[k]===name)delete next[k];});next[id]=name;setConnections(next);setResults(prev=>Object.fromEntries(Object.entries(prev).filter(([k,v])=>v===true||next[k]===connections[k]&&Number(k)!==id)));cancel();setAnnouncement('Connection made.');if(keyboard)focusTarget('text');};
+ const endpointKeys=(event,side,value)=>{if(event.key==='Tab'&&side==='image'){const items=LEFT_IMGS.flatMap((item,i)=>[item,RIGHT_IMGS[i]]).filter(Boolean),at=items.findIndex(item=>item.name===value),next=items[at+(event.shiftKey?-1:1)];if(next){event.preventDefault();event.stopPropagation();imageRefs.current[next.name]?.focus();}return;}if(event.key==='Escape'){event.preventDefault();event.stopPropagation();cancel();return;}if(['ArrowUp','ArrowDown'].includes(event.key)){event.preventDefault();event.stopPropagation();const items=side==='text'?LEFT_ITEMS.filter(x=>!lockedLeft(x.id)).map(x=>x.id):LEFT_IMGS.flatMap((item,i)=>[item,RIGHT_IMGS[i]]).filter(Boolean).filter(x=>!lockedImage(x.name)).map(x=>x.name);const index=items.indexOf(value),next=items[(index+(event.key==='ArrowDown'?1:-1)+items.length)%items.length];(side==='text'?sentenceRefs.current[next]:imageRefs.current[next])?.focus();return;}if(event.key==='Enter'||event.key===' '){event.preventDefault();event.stopPropagation();if(!event.repeat)(side==='text'?handleLeftClick:handleRightClick)(value,true);}};
   const containerRef = useRef(null);
   const leftRefs     = useRef({});
   const rightRefs    = useRef({});
@@ -72,15 +217,7 @@ export default function WB_ReadLookMatch_QD() {
     return () => ro.disconnect();
   }, []);
 
-  const getDotCenter = useCallback((el) => {
-    if (!el || !containerRef.current) return null;
-    const cRect = containerRef.current.getBoundingClientRect();
-    const eRect = el.getBoundingClientRect();
-    return {
-      x: eRect.left - cRect.left + eRect.width  / 2,
-      y: eRect.top  - cRect.top  + eRect.height / 2,
-    };
-  }, []);
+  const getDotCenter=useCallback(el=>{if(!el||!containerRef.current)return null;const root=containerRef.current,c=root.getBoundingClientRect(),e=el.getBoundingClientRect(),sx=c.width/root.clientWidth||1,sy=c.height/root.clientHeight||1;return{x:(e.left-c.left+e.width/2)/sx,y:(e.top-c.top+e.height/2)/sy};},[]);
 
   const isCorrect      = (leftId, imgName) => {
     const r = ALL_IMGS.find((ri) => ri.name === imgName);
@@ -89,55 +226,33 @@ export default function WB_ReadLookMatch_QD() {
   const connectedRight = (name) => Object.values(connections).includes(name);
   const connectedLeft  = (id)   => Object.prototype.hasOwnProperty.call(connections, id);
 
-  const lineColor = useCallback((leftId, imgName) => {
-    if (showAns)     return LINE_SHOW_ANS;
-    if (showResults) return isCorrect(leftId, imgName) ? LINE_CORRECT : LINE_WRONG;
-    return LINE_DEFAULT;
-  }, [showAns, showResults]);
+  const lineColor=(id)=>showAns||results[id]===true?"#16a34a":results[id]===false?"#ef4444":LINE_DEFAULT;
 
-  const handleLeftClick = (leftId) => {
-    if (showAns) return;
-    if (showResults && connectedLeft(leftId) && isCorrect(leftId, connections[leftId])) return;
-    setSelectedLeft((prev) => (prev === leftId ? null : leftId));
-  };
+  const handleLeftClick=(id,keyboard=false)=>{listening.play(`sentence-${id}`,[clipPage71E1,clipPage71E2,clipPage71E3,clipPage71E4][id-1]);if(lockedLeft(id))return;if(selectedImage!==null){connect(id,selectedImage,keyboard);return;}setSelectedLeft(prev=>prev===id?null:id);setPreview(null);setAnnouncement('Sentence selected. Choose a picture.');if(keyboard&&selectedLeft!==id)focusTarget('image');};
 
-  const handleRightClick = (imgName) => {
-    if (showAns || selectedLeft === null) return;
-    if (showResults && connectedLeft(selectedLeft) && isCorrect(selectedLeft, connections[selectedLeft])) {
-      setSelectedLeft(null); return;
-    }
-    setConnections((prev) => {
-      const next = { ...prev };
-      Object.keys(next).forEach((k) => { if (next[k] === imgName) delete next[k]; });
-      if (next[selectedLeft] && !(showResults && isCorrect(selectedLeft, next[selectedLeft]))) delete next[selectedLeft];
-      next[selectedLeft] = imgName;
-      return next;
-    });
-    setSelectedLeft(null);
-    if (showResults) setShowResults(false);
-  };
+  const handleRightClick=(name,keyboard=false)=>{if(lockedImage(name))return;if(selectedLeft!==null){connect(selectedLeft,name,keyboard);return;}setSelectedImage(prev=>prev===name?null:name);setPreview(null);setAnnouncement('Picture selected. Choose a sentence.');if(keyboard&&selectedImage!==name)focusTarget('text');};
 
   const handleCheck = () => {
-    if (showAns) return;
+    if (checkDisabled) return;listening.stop();
     if (Object.keys(connections).length < LEFT_ITEMS.length) {
       ValidationAlert.info("Please connect all sentences to images first."); return;
     }
     let score = 0;
     Object.entries(connections).forEach(([lid, name]) => { if (isCorrect(lid, name)) score++; });
-    setShowResults(true);
-    if (score === LEFT_ITEMS.length) ValidationAlert.success(`Score: ${score} / ${LEFT_ITEMS.length}`);
+    setShowResults(true);setResults(Object.fromEntries(LEFT_ITEMS.map(item=>[item.id,isCorrect(item.id,connections[item.id])])));cancel();setAnnouncement(`Score: ${score} out of ${LEFT_ITEMS.length}.`);
+    if (score === LEFT_ITEMS.length) {resetButtonRef.current?.focus({preventScroll:true});ValidationAlert.success(`Score: ${score} / ${LEFT_ITEMS.length}`);}
     else if (score > 0)              ValidationAlert.warning(`Score: ${score} / ${LEFT_ITEMS.length}`);
     else                             ValidationAlert.error(`Score: ${score} / ${LEFT_ITEMS.length}`);
   };
 
-  const handleShowAnswer = () => {
+  const handleShowAnswer = () => {listening.stop();
     const ans = {};
     ALL_IMGS.forEach((r) => { ans[r.correctLeftId] = r.name; });
-    setConnections(ans); setShowResults(false); setShowAns(true); setSelectedLeft(null);
+    cancel();setResults({});resetButtonRef.current?.focus({preventScroll:true});setAnnouncement("Correct connections shown and locked.");cancel();setResults({});resetButtonRef.current?.focus({preventScroll:true});setAnnouncement("Correct connections shown and locked.");setConnections(ans); setShowResults(false); setShowAns(true); setSelectedLeft(null);
   };
 
-  const handleReset = () => {
-    setConnections({}); setShowResults(false); setShowAns(false); setSelectedLeft(null);
+  const handleReset = () => {listening.stop();
+    cancel();setResults({});setAnnouncement("Connections cleared.");cancel();setResults({});setAnnouncement("Connections cleared.");setConnections({}); setShowResults(false); setShowAns(false); setSelectedLeft(null);
   };
 
   const renderLines = () =>
@@ -155,43 +270,18 @@ export default function WB_ReadLookMatch_QD() {
     });
 
   // ── Dot colors ──
-  const leftDotColor = (id) => {
-    if (selectedLeft === id) return DOT_SELECTED;
-    if (connectedLeft(id)) {
-      if (showAns)     return LINE_SHOW_ANS;
-      if (showResults) return isCorrect(id, connections[id]) ? LINE_CORRECT : LINE_WRONG;
-    }
-    return DOT_DEFAULT;
-  };
+  const leftDotColor=id=>lockedLeft(id)?"#16a34a":isLeftWrong(id)?"#ef4444":selectedLeft===id||connectedLeft(id)?DOT_SELECTED:DOT_DEFAULT;
 
-  const rightDotColor = (name) => {
-    if (!connectedRight(name)) return DOT_DEFAULT;
-    const lid = Object.keys(connections).find((k) => connections[k] === name);
-    if (!lid) return DOT_DEFAULT;
-    if (showAns)     return LINE_SHOW_ANS;
-    if (showResults) return isCorrect(lid, name) ? LINE_CORRECT : LINE_WRONG;
-    return DOT_DEFAULT;
-  };
+  const rightDotColor=name=>lockedImage(name)?"#16a34a":isRightWrong(name)?"#ef4444":selectedImage===name||connectedRight(name)?DOT_SELECTED:DOT_DEFAULT;
 
-  const imgBorderColor = (name) => {
-    if (!connectedRight(name)) return IMG_BORDER_DEFAULT;
-    const lid = Object.keys(connections).find((k) => connections[k] === name);
-    if (!lid) return IMG_BORDER_DEFAULT;
-    if (showAns)     return LINE_SHOW_ANS;
-    if (showResults) return isCorrect(lid, name) ? IMG_BORDER_CORRECT : IMG_BORDER_WRONG;
-    return IMG_BORDER_SELECTED;
-  };
+  const imgBorderColor=name=>lockedImage(name)?"#16a34a":isRightWrong(name)?IMG_BORDER_WRONG:selectedImage===name?IMG_BORDER_SELECTED:connectedRight(name)?IMG_BORDER_SELECTED:IMG_BORDER_DEFAULT;
 
   // ── Badge helpers ──
-  const isLeftWrong  = (id)   => showResults && !showAns && connectedLeft(id) && !isCorrect(id, connections[id]);
-  const isRightWrong = (name) => {
-    if (!showResults || showAns || !connectedRight(name)) return false;
-    const lid = Object.keys(connections).find((k) => connections[k] === name);
-    return lid && !isCorrect(lid, name);
-  };
+  const isLeftWrong=id=>!showAns&&results[id]===false;
+  const isRightWrong=name=>!showAns&&Object.keys(connections).some(id=>connections[id]===name&&results[id]===false);
 
   const renderImgCard = (item) => {
-    const isLocked = showAns;
+    const isLocked = lockedImage(item.name);
     return (
       <div key={item.name} className="rlm-img-wrap">
 
@@ -205,19 +295,23 @@ export default function WB_ReadLookMatch_QD() {
           />
         </div>
 
-        <div
+        <div role="button" tabIndex={0} data-keyboard-choice ref={el=>{imageRefs.current[item.name]=el;}} aria-label={imageDescriptions[item.name]} aria-pressed={selectedImage===item.name} aria-disabled={lockedImage(item.name)} onKeyDown={event=>endpointKeys(event,"image",item.name)} onKeyUp={event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();event.stopPropagation();}}} onFocus={()=>setPreview({side:"image",id:item.name})} onMouseEnter={()=>setPreview({side:"image",id:item.name})} onMouseLeave={()=>setPreview(null)}
           className={["rlm-img-card", isLocked ? "rlm-img-card--locked" : ""].filter(Boolean).join(" ")}
           style={{ borderColor: imgBorderColor(item.name) }}
           onClick={() => handleRightClick(item.name)}
         >
-          <img src={item.src} alt={item.name} className="rlm-img" />
+          <img src={item.src} alt={imageDescriptions[item.name]} className="rlm-img" />
         </div>
       </div>
     );
   };
 
   return (
-    <div className="main-container-component">
+    <div onKeyDown={event=>{if(event.key==="Escape"&&(selectedLeft!==null||selectedImage!==null)){event.preventDefault();event.stopPropagation();cancel();setAnnouncement("Selection cancelled.");}}} data-adapt-scope="review7&8_Review7_Page2_Q2" className="main-container-component"><span className="sr-only" role="status" aria-live="polite">{listening.error}</span>
+<style>{`[data-adapt-scope="review7&8_Review7_Page2_Q2"] input:focus-visible, [data-adapt-scope="review7&8_Review7_Page2_Q2"] [data-keyboard-choice]:focus-visible, [data-adapt-scope="review7&8_Review7_Page2_Q2"] [data-grid-cell]:focus-visible, [data-adapt-scope="review7&8_Review7_Page2_Q2"] [data-listening]:focus-visible {outline:4px solid #2563eb !important;outline-offset:3px;border-radius:6px;}
+[data-adapt-scope="review7&8_Review7_Page2_Q2"] input[aria-invalid="true"]:focus {border-bottom-color:#ef4444 !important;}
+`}</style>
+<div className="sr-only" role="status" aria-live="polite" aria-atomic="true">{announcement}</div>
       <style>{`
         .rlm-area { position: relative; width: 100%; }
 
@@ -391,13 +485,7 @@ export default function WB_ReadLookMatch_QD() {
           margin: "0 auto",
         }}
       >
-        <h1
-          className="WB-header-title-page8"
-          style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
-        >
-          <span className="WB-ex-A-1">E</span>
-          Read, look, and match.
-        </h1>
+        <ExerciseHeader subTitle="Start with one item, then connect it to the picture, word, or sentence that matches before moving to the next pair." isReview sectionLetter="E" title={<>Read, look, and match.</>} />
 
         <div className="rlm-area" ref={containerRef}>
           <div className="rlm-grid">
@@ -406,11 +494,11 @@ export default function WB_ReadLookMatch_QD() {
             <div className="rlm-left-col">
               {LEFT_ITEMS.map((item) => {
                 const isSelected = selectedLeft === item.id;
-                const isLocked   = showAns || (showResults && connectedLeft(item.id) && isCorrect(item.id, connections[item.id]));
+                const isLocked = lockedLeft(item.id);
                 return (
                   <div key={item.id} className="rlm-row">
                     <span className="rlm-num">{item.id}</span>
-                    <div
+                    <div style={{...({}),position:"relative",backgroundColor:listening.activeId===`sentence-${item.id}`?"#dbeafe":({}).backgroundColor,boxShadow:listening.activeId===`sentence-${item.id}`?"0 0 0 3px #2563eb":({}).boxShadow}} data-listening={`sentence-${item.id}`} role="button" tabIndex={0} data-keyboard-choice ref={el=>{sentenceRefs.current[item.id]=el;}} aria-label={item.sentence} aria-pressed={selectedLeft===item.id} aria-disabled={lockedLeft(item.id)} onKeyDown={event=>endpointKeys(event,"text",item.id)} onKeyUp={event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();event.stopPropagation();}}} onFocus={()=>setPreview({side:"text",id:item.id})} onMouseEnter={()=>setPreview({side:"text",id:item.id})} onMouseLeave={()=>setPreview(null)}
                       className={[
                         "rlm-sentence-wrap",
                         isSelected ? "rlm-sentence-wrap--selected" : "",
@@ -429,7 +517,7 @@ export default function WB_ReadLookMatch_QD() {
                         />
                         {isLeftWrong(item.id) && <div className="rlm-badge">✕</div>}
                       </div>
-                    </div>
+                    {listening.activeId===`sentence-${item.id}`&&renderExerciseSpeaker()}</div>
                   </div>
                 );
               })}
@@ -446,15 +534,15 @@ export default function WB_ReadLookMatch_QD() {
             </div>
 
           </div>
-          <svg className="rlm-svg">{renderLines()}</svg>
+          <svg className="rlm-svg" aria-hidden="true" style={{pointerEvents:'none'}}>{renderLines()}{(()=>{let id=selectedLeft,name=selectedImage;if(id!==null&&preview?.side==='image')name=preview.id;else if(name!==null&&preview?.side==='text')id=preview.id;else return null;if(lockedLeft(id)||lockedImage(name))return null;const a=getDotCenter(leftRefs.current[id]),b=getDotCenter(rightRefs.current[name]);return a&&b?<line x1={a.x} y1={a.y} x2={b.x} y2={b.y} stroke="#2563eb" strokeWidth="2.5" strokeDasharray="6 4"/>:null;})()}</svg>
         </div>
 
         <div className="rlm-buttons">
-          <Button
-            checkAnswers={handleCheck}
-            handleShowAnswer={handleShowAnswer}
-            handleStartAgain={handleReset}
-          />
+          <div className="action-buttons-container">
+<button type="button" aria-label="Start Again" {...activationKeys} ref={resetButtonRef} onClick={handleReset} className="try-again-button">Start Again ↻</button>
+<button type="button" aria-label="Show Answer" {...activationKeys} onClick={handleShowAnswer} className="show-answer-btn swal-continue">Show Answer</button>
+<button type="button" aria-label="Check Answer" {...activationKeys} onClick={handleCheck} disabled={checkDisabled} style={{cursor:checkDisabled ? "not-allowed":"pointer"}} className="check-button2">Check Answer ✓</button>
+</div>
         </div>
       </div>
     </div>

@@ -1,6 +1,29 @@
 import { useState, useRef } from "react";
 import ValidationAlert from "../../Popup/ValidationAlert";
 import { FaCheck, FaRedo, FaEye } from "react-icons/fa";
+const activationKeys = {
+  onKeyDown: (event) => {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    event.preventDefault();
+    event.stopPropagation();
+    if (!event.repeat) event.currentTarget.click();
+  },
+  onKeyUp: (event) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+  },
+};
+const fieldKeys = {
+  onKeyDown: (event) => {
+    if (event.key === "Enter" || event.key === " ") event.stopPropagation();
+  },
+  onKeyUp: (event) => {
+    if (event.key === "Enter" || event.key === " ") event.stopPropagation();
+  },
+};
+
 
 const ComprehensionB = () => {
   const CELL_SIZE = 36;
@@ -30,6 +53,10 @@ const ComprehensionB = () => {
 
   const allCells = Object.keys(gridMap);
 
+const [announcement,setAnnouncement]=useState("");
+const focusCell=key=>{const input=inputRefs.current[key];if(input&&!input.disabled)input.focus();};
+const cellFocus=key=>setActiveWord(previous=>previous&&words[previous.wordId].cells.some(([r,col])=>r+','+col===key)?previous:{wordId:gridMap[key][0].wordId,direction:getWordDirection(gridMap[key][0].wordId)});
+const cellKeys=(event,key)=>{if(event.key==='Tab')return;if(event.key==='Enter'||event.key===' '){event.preventDefault();event.stopPropagation();if(!event.repeat){handleCellClick(key);setAnnouncement('Word direction selected. Use arrow keys to move and type one letter.');}return;}if(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(event.key)){event.preventDefault();event.stopPropagation();const [r,col]=key.split(',').map(Number),dr=event.key==='ArrowUp'?-1:event.key==='ArrowDown'?1:0,dc=event.key==='ArrowLeft'?-1:event.key==='ArrowRight'?1:0;for(let nr=r+dr,nc=col+dc;nr>=0&&nr<maxRow&&nc>=0&&nc<maxCol;nr+=dr,nc+=dc){const next=nr+','+nc;if(gridMap[next]&&!inputRefs.current[next]?.disabled){const entry=gridMap[next].find(e=>getWordDirection(e.wordId)===(dr?'down':'across'))||gridMap[next][0];setActiveWord({wordId:entry.wordId,direction:getWordDirection(entry.wordId)});focusCell(next);break;}}}}
   const getWordDirection = (wordId) =>
     wordId.startsWith("down") ? "down" : "across";
 
@@ -180,7 +207,7 @@ const wordNumbers = {
                     fontSize: "9px", fontWeight: "bold", color: "#333", zIndex: 2,
                   }}>{num}</span>
                 )}
-                <input
+                <input data-cell={key} aria-label={`Row ${r+1}, column ${c+1}. One letter. Use arrows to move, Enter or Space to choose a word direction.`} title={`Row ${r+1}, column ${c+1}`} onFocus={()=>cellFocus(key)} onKeyDown={event=>cellKeys(event,key)} onKeyUp={fieldKeys.onKeyUp}
                   ref={(el) => (inputRefs.current[key] = el)}
                   type="text"
                   value={cellValues[key] || ""}
@@ -224,7 +251,7 @@ const wordNumbers = {
   };
 
   return (
-    <div className="mb-6 mx-auto">
+    <div data-keyboard-crossword="unit9" className="mb-6 mx-auto"><style>{`[data-keyboard-crossword="unit9"] input:focus-visible {outline:4px solid #2563eb !important;outline-offset:-4px;border-radius:4px;position:relative;z-index:3;}`}</style><span className="sr-only" role="status" aria-live="polite">{announcement}</span>
       <h5 className="header-title-page8-read mb-8">
         <span className="ex-A-read mr-2">B</span>
         Read and complete the puzzle.
@@ -272,23 +299,23 @@ const wordNumbers = {
 
       <div className="flex justify-center gap-6 mt-8">
         <div className="relative group">
-          <div onClick={handleReset} className="flex items-center justify-center w-14 h-14 rounded-xl bg-[#ffc107] hover:bg-[#e0a800] cursor-pointer transition shadow-sm">
-            <div className="bg-white p-3 rounded-full shadow"><FaRedo size={14} /></div>
-          </div>
+          <button type="button" {...activationKeys} aria-label="Start Again" onClick={handleReset} className="flex items-center justify-center w-14 h-14 rounded-xl bg-[#ffc107] hover:bg-[#e0a800] cursor-pointer transition shadow-sm">
+            <span className="bg-white p-3 rounded-full shadow"><FaRedo size={14} /></span>
+          </button>
           <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-black text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition">Reset</span>
         </div>
 
         <div className="relative group">
-          <div onClick={handleShow} className="flex items-center justify-center w-14 h-14 rounded-xl bg-[#2c78b4] hover:bg-[#1a5a8a] cursor-pointer transition shadow-sm">
-            <div className="bg-white p-3 rounded-full shadow"><FaEye size={14} /></div>
-          </div>
+          <button type="button" {...activationKeys} aria-label="Show Answer" onClick={handleShow} className="flex items-center justify-center w-14 h-14 rounded-xl bg-[#2c78b4] hover:bg-[#1a5a8a] cursor-pointer transition shadow-sm">
+            <span className="bg-white p-3 rounded-full shadow"><FaEye size={14} /></span>
+          </button>
           <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-black text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition whitespace-nowrap">Show Answer</span>
         </div>
 
         <div className="relative group">
-          <div onClick={handleCheck} className="flex items-center justify-center w-14 h-14 rounded-xl bg-[#55c271] hover:bg-[#449d5a] cursor-pointer transition shadow-sm">
-            <div className="bg-white p-3 rounded-full shadow"><FaCheck size={14} /></div>
-          </div>
+          <button type="button" {...activationKeys} aria-label="Check Answer" onClick={handleCheck} className="flex items-center justify-center w-14 h-14 rounded-xl bg-[#55c271] hover:bg-[#449d5a] cursor-pointer transition shadow-sm">
+            <span className="bg-white p-3 rounded-full shadow"><FaCheck size={14} /></span>
+          </button>
           <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-black text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition whitespace-nowrap">Check Answer</span>
         </div>
       </div>

@@ -2,63 +2,93 @@ import React from "react";
 import page2 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U3 Folder/Page 20.png";
 import "./WB_unit1.css";
 import arrowBtn from "../../../assets/Page 01/Arrow.svg";
+const activationKeys = {
+  onKeyDown: (event) => {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    event.preventDefault();
+    event.stopPropagation();
+    if (!event.repeat)
+      event.currentTarget.dispatchEvent(
+        new MouseEvent("click", { bubbles: true, cancelable: true }),
+      );
+  },
+  onKeyUp: (event) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+  },
+};
 
 const WB_Unit1_Page8 = ({ openPopup }) => {
-return (
+  return (
+    <div
+      data-workbook-page="20"
+      role="group"
+      aria-label="Workbook Unit 3, page 20 exercise launchers"
+      className="page1-img-wrapper"
+      style={{ backgroundImage: `url(${page2})` }}
+    >
+      <style>{`[data-workbook-page="20"] :focus-visible {outline:3px solid #2563eb !important;outline-offset:3px;border-radius:6px;}`}</style>
       <div
-        className="page1-img-wrapper"
-        style={{ backgroundImage: `url(${page2})` }}
+        className="q12-3 hover:scale-110 transition "
+        style={{ overflow: "visible" }}
       >
-        <div
-          className="q12-3 hover:scale-110 transition "
+        <svg
+          role="button"
+          tabIndex={0}
+          data-keyboard-choice
+          {...activationKeys}
+          aria-label="Open exercise 1"
+          width="22"
+          height="22"
+          viewBox="0 0 90 90"
+          onClick={() => openPopup("exercise", { startIndex: 32 })}
           style={{ overflow: "visible" }}
+          // className="click-icon-page8-2 hover:scale-110 transition"
         >
-          <svg
-            width="22"
-            height="22"
-            viewBox="0 0 90 90"
-            onClick={() => openPopup("exercise", { startIndex: 32 })}
-            style={{ overflow: "visible" }}
-            // className="click-icon-page8-2 hover:scale-110 transition"
-          >
-            <image
-              className="svg-img"
-              href={arrowBtn}
-              x="0"
-              y="0"
-              width="100%"
-              height="100%"
-              preserveAspectRatio="xMidYMid meet"
-            />
-          </svg>
-        </div>
-  
-        <div
-          className="q13-3 hover:scale-110 transition "
-          style={{ overflow: "visible" }}
-        >
-          <svg
-            width="22"
-            height="22"
-            viewBox="0 0 90 90"
-            onClick={() => openPopup("exercise", { startIndex: 33 })}
-            style={{ overflow: "visible" }}
-            // className="click-icon-page8-2 hover:scale-110 tra5nsition"
-          >
-            <image
-              className="svg-img"
-              href={arrowBtn}
-              x="0"
-              y="0"
-              width="100%"
-              height="100%"
-              preserveAspectRatio="xMidYMid meet"
-            />
-          </svg>
-        </div>
-     
+          <image
+            className="svg-img"
+            href={arrowBtn}
+            x="0"
+            y="0"
+            width="100%"
+            height="100%"
+            preserveAspectRatio="xMidYMid meet"
+          />
+        </svg>
       </div>
-    );
+
+      <div
+        className="q13-3 hover:scale-110 transition "
+        style={{ overflow: "visible" }}
+      >
+        <svg
+          role="button"
+          tabIndex={0}
+          data-keyboard-choice
+          {...activationKeys}
+          aria-label="Open exercise 2"
+          width="22"
+          height="22"
+          viewBox="0 0 90 90"
+          onClick={() => openPopup("exercise", { startIndex: 33 })}
+          style={{ overflow: "visible" }}
+          // className="click-icon-page8-2 hover:scale-110 tra5nsition"
+        >
+          <image
+            className="svg-img"
+            href={arrowBtn}
+            x="0"
+            y="0"
+            width="100%"
+            height="100%"
+            preserveAspectRatio="xMidYMid meet"
+          />
+        </svg>
+      </div>
+    </div>
+  );
 };
 
 export default WB_Unit1_Page8;

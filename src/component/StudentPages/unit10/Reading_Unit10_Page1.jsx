@@ -33,12 +33,15 @@ const PAGE_ID = "page-92";
 const Reading_NewPage = ({ openPopup }) => {
   const { registerAudio, stopCurrent, activePageId } = useAudio();
   const audioRef = useRef(null);
+  const sliceTimer=useRef(null),sliceGeneration=useRef({value:0});
+  React.useEffect(()=>{const audio=audioRef.current,generation=sliceGeneration.current;return()=>{generation.value++;clearInterval(sliceTimer.current);if(audio){audio.onended=audio.onerror=null;audio.pause();}};},[]);
   const [hoveredAreaIndex, setHoveredAreaIndex] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [activeAreaIndex, setActiveAreaIndex] = useState(null);
 
   React.useEffect(() => {
     if (activePageId !== PAGE_ID) {
+      clearInterval(sliceTimer.current);
       setActiveAreaIndex(null);
       setHoveredAreaIndex(null);
       setIsPlaying(false);
@@ -236,43 +239,11 @@ const Reading_NewPage = ({ openPopup }) => {
     console.log("X%:", xPercent.toFixed(2), "Y%:", yPercent.toFixed(2));
   };
 
-  const playSlice = (slice, newIndex) => {
-    const audio = audioRef.current;
-    if (!audio) return;
-
-    stopCurrent();
-    setActiveAreaIndex(null);
-    setHoveredAreaIndex(null);
-
-    audio.src = soundAll;
-    audio.currentTime = slice.startFrom;
-    audio.play();
-    setIsPlaying(true);
-    setActiveAreaIndex(newIndex);
-
-    const id = setInterval(() => {
-      if (audio.currentTime >= slice.stopAt) {
-        audio.pause();
-        clearInterval(id);
-        setIsPlaying(false);
-        setActiveAreaIndex(null);
-        setHoveredAreaIndex(null);
-      }
-    }, 100);
-
-    registerAudio(audio, id, PAGE_ID);
-
-    audio.onended = () => {
-      clearInterval(id);
-      setIsPlaying(false);
-      setActiveAreaIndex(null);
-      setHoveredAreaIndex(null);
-    };
-  };
+  const playSlice=(slice,newIndex)=>{const audio=audioRef.current;if(!audio)return;const token=++sliceGeneration.current.value;clearInterval(sliceTimer.current);stopCurrent();audio.onended=audio.onerror=null;audio.src=soundAll;audio.currentTime=slice.startFrom;setIsPlaying(true);setActiveAreaIndex(newIndex);setHoveredAreaIndex(null);const finish=()=>{if(sliceGeneration.current.value!==token)return;clearInterval(sliceTimer.current);sliceTimer.current=null;audio.pause();setIsPlaying(false);setActiveAreaIndex(null);setHoveredAreaIndex(null);};const id=setInterval(()=>{if(sliceGeneration.current.value===token&&audio.currentTime>=slice.stopAt)finish();},100);sliceTimer.current=id;audio.onended=audio.onerror=finish;registerAudio(audio,id,PAGE_ID);audio.play().catch(finish);};
 
   return (
     <div data-reading-page="unit10-1"
-      className="page1-img-wrapper"
+      role="group" aria-label="Illustrated reading passages on page 92" className="page1-img-wrapper"
       onClick={handleImageClick}
       style={{ backgroundImage: `url(${pageImage})` }}
     >
@@ -280,7 +251,10 @@ const Reading_NewPage = ({ openPopup }) => {
         outline: 4px solid #2563eb;
         outline-offset: 3px;
         border-radius: 6px;
-      }`}</style>
+      }
+[data-reading-page="unit10-1"] .clickable-area.highlight {background-color:rgba(255,0,0,.078);border:2px solid rgba(255,0,0,.8);border-radius:8px;}
+[data-reading-page="unit10-1"] .clickable-area:focus-visible {outline-offset:-4px;z-index:11;}
+`}</style>
       
 
       <div className="headset-icon-CD-unit2-page11-1 hover:scale-110 transition" style={{ overflow: "visible" }}>
@@ -291,7 +265,7 @@ const Reading_NewPage = ({ openPopup }) => {
             openPopup(
               "audio",
               <div style={{ display: "flex", justifyContent: "center", alignContent: "center" }}>
-                <AudioWithCaption src={soundAll} captions={captions} stopAtSecond={2.84} />
+                <AudioWithCaption pageId="sb_unit10_page92_reading" src={soundAll} captions={captions} stopAtSecond={2.84} />
               </div>
             );
           }}
@@ -335,6 +309,8 @@ const Reading_NewPage = ({ openPopup }) => {
           }`}
           style={{
             position: "absolute",
+            zIndex: hoveredAreaIndex === index || activeAreaIndex === index ? 10 : 1,
+            pointerEvents: "auto",
             left: `${area.x1}%`,
             top: `${area.y1}%`,
             width: `${area.x2 - area.x1}%`,

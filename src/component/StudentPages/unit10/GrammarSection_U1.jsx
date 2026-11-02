@@ -2,7 +2,7 @@ import GrammarA from "./GrammarA";
 import GrammarB from "./GrammarB";
 import GrammarC from "./GrammarC";
 
-import image1 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 10 Stella Goes Shopping Folder/Page 84/SVG/Asset 18.svg";
+
 import image  from "../../../assets/imgs/pages/Class Book/Right 4 Unit 10 Stella Goes Shopping Folder/Page 84/SVG/Asset 25 (1).svg";
 
 import sound from "../../../assets/audio/ClassBook/Grade 4/cd55pg84-grammar-adult-lady_t8salKcB.mp3";
@@ -55,7 +55,7 @@ const stopAtSecond = 2.26;
        
         </div>
      <div style={{margin:"3em 0 2em"}} >
-        <QuestionAudioPlayer
+        <QuestionAudioPlayer pageId="sb_unit10_page3_grammar"
           src={sound}
           captions={captions}
           stopAtSecond={stopAtSecond}
@@ -65,7 +65,7 @@ const stopAtSecond = 2.26;
 
       {/* ✅ شلنا الـ title badge والـ paragraphs، والصورة تملأ كل شي */}
       <div className="w-[60%] mt-2">
-        <img
+        <img alt={"Examples of have as a main verb and present perfect have and have not."}
           src={image}
           style={{ width: "100%", height: "auto", display: "block" }}
         />

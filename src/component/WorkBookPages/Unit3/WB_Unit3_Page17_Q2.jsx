@@ -1,10 +1,26 @@
+import ExerciseHeader from "../../ExerciseHeader";
 import React, { useState, useRef, useEffect, useCallback } from "react";
-import Button from "../Button";
 
 // ─────────────────────────────────────────────
 //  🖼️  IMAGE — نفس صورة Exercise E
 // ─────────────────────────────────────────────
-import roomImg from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U3 Folder/Page 17/SVG/Asset 23.svg"; // صورة الغرفة
+import roomImg from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U3 Folder/Page 17/SVG/Asset 23.svg";
+const activationKeys = {
+  onKeyDown: (event) => {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    event.preventDefault();
+    event.stopPropagation();
+    if (!event.repeat) event.currentTarget.click();
+  },
+  onKeyUp: (event) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+  },
+};
+
+ // صورة الغرفة
 
 // ─────────────────────────────────────────────
 //  🎨  COLORS
@@ -31,6 +47,7 @@ export default function WB_DrawMissing_QF() {
   const [lineWidth, setLineWidth] = useState(3);
   const [imgLoaded, setImgLoaded] = useState(false);
 
+  const [announcement,setAnnouncement]=useState(""),[cursor,setCursor]=useState({x:50,y:50}),[keyboardDrawing,setKeyboardDrawing]=useState(false),[showCursor,setShowCursor]=useState(false);const pointerId=useRef(null),generation=useRef(0);
   const COLORS = ["#2096a6","#e53935","#43a047","#f4511e","#8e24aa","#000000"];
   const SIZES  = [2, 4, 8, 14];
 
@@ -52,6 +69,7 @@ export default function WB_DrawMissing_QF() {
       setImgLoaded(true);
     };
     img.src = roomImg;
+    return ()=>{img.onload=null;img.onerror=null;};
   }, []);
 
   useEffect(() => {
@@ -92,6 +110,7 @@ export default function WB_DrawMissing_QF() {
     e.preventDefault();
     const canvas = canvasRef.current;
     if (!canvas) return;
+    generation.current++;
     saveHistory();
     isDrawing.current = true;
     lastPos.current   = getPos(e, canvas);
@@ -115,8 +134,8 @@ export default function WB_DrawMissing_QF() {
       ctx.lineWidth = eraserSize;
       ctx.lineCap   = "round";
       ctx.lineJoin  = "round";
-      ctx.clip();
-      ctx.drawImage(imgRef.current, 0, 0, canvas.width, canvas.height);
+      ctx.globalCompositeOperation="destination-out";ctx.stroke();
+      ctx.globalCompositeOperation="destination-over";ctx.drawImage(imgRef.current, 0, 0, canvas.width, canvas.height);
       ctx.restore();
     } else {
       ctx.globalCompositeOperation = "source-over";
@@ -139,22 +158,10 @@ export default function WB_DrawMissing_QF() {
   };
 
   // ── Undo ─────────────────────────────────
-  const handleUndo = () => {
-    if (historyRef.current.length === 0) return;
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx      = canvas.getContext("2d");
-    const prev     = historyRef.current.pop();
-    const img      = new Image();
-    img.onload = () => ctx.drawImage(img, 0, 0);
-    img.src    = prev;
-  };
+  const handleUndo=()=>{stopDraw();releasePointer();setKeyboardDrawing(false);if(!historyRef.current.length)return;const canvas=canvasRef.current;if(!canvas)return;const token=++generation.current,prev=historyRef.current.pop(),img=new Image();img.onload=()=>{if(generation.current===token&&canvasRef.current===canvas){const ctx=canvas.getContext("2d");ctx.clearRect(0,0,canvas.width,canvas.height);ctx.drawImage(img,0,0);}};img.src=prev;setAnnouncement("Last stroke undone.");};
 
   // ── Reset — redraw base image ─────────────
-  const handleReset = () => {
-    historyRef.current = [];
-    drawImageToCanvas();
-  };
+  const handleReset=()=>{generation.current++;stopDraw();releasePointer();setKeyboardDrawing(false);historyRef.current=[];drawImageToCanvas();setAnnouncement("Drawing cleared.");};
 
   // ── Resize observer ───────────────────────
   useEffect(() => {
@@ -169,16 +176,26 @@ export default function WB_DrawMissing_QF() {
       canvas.height = rect.height;
       drawImageToCanvas();
       // restore drawing
-      const img = new Image();
-      img.onload = () => canvas.getContext("2d").drawImage(img, 0, 0, canvas.width, canvas.height);
+      const token=++generation.current;const img = new Image();
+      img.onload = () => {if(generation.current===token&&canvasRef.current===canvas)canvas.getContext("2d").drawImage(img, 0, 0, canvas.width, canvas.height);};
       img.src    = saved;
     });
     ro.observe(canvas);
     return () => ro.disconnect();
   }, [imgLoaded, drawImageToCanvas]);
 
+
+  const releasePointer=()=>{const id=pointerId.current;pointerId.current=null;if(id!==null&&canvasRef.current?.hasPointerCapture(id))canvasRef.current.releasePointerCapture(id);};
+  useEffect(()=>()=>{generation.current++;isDrawing.current=false;const id=pointerId.current;pointerId.current=null;if(id!==null&&canvasRef.current?.hasPointerCapture(id))canvasRef.current.releasePointerCapture(id);},[]);
+  const pointerStart=event=>{if(!imgLoaded||pointerId.current!==null||event.button!==0)return;stopDraw();setKeyboardDrawing(false);setShowCursor(false);pointerId.current=event.pointerId;event.currentTarget.setPointerCapture(event.pointerId);startDraw(event);};
+  const pointerMove=event=>{if(pointerId.current===event.pointerId)draw(event);};
+  const pointerEnd=event=>{if(pointerId.current!==event.pointerId)return;stopDraw();releasePointer();};
+  const cursorEvent=position=>{const rect=canvasRef.current.getBoundingClientRect();return {preventDefault(){},clientX:rect.left+rect.width*position.x/100,clientY:rect.top+rect.height*position.y/100};};
+  const canvasKeys=event=>{if(event.key==="Tab")return;const directions={ArrowLeft:[-1,0],ArrowRight:[1,0],ArrowUp:[0,-1],ArrowDown:[0,1]};if(directions[event.key]){event.preventDefault();event.stopPropagation();const [dx,dy]=directions[event.key],step=event.shiftKey?5:1,next={x:Math.max(0,Math.min(100,cursor.x+dx*step)),y:Math.max(0,Math.min(100,cursor.y+dy*step))};setCursor(next);setShowCursor(true);if(keyboardDrawing)draw(cursorEvent(next));return;}if(event.key==="Enter"||event.key===" "){event.preventDefault();event.stopPropagation();if(event.repeat||!imgLoaded||pointerId.current!==null)return;if(keyboardDrawing){stopDraw();setKeyboardDrawing(false);setAnnouncement("Stroke finished.");}else{startDraw(cursorEvent(cursor));setKeyboardDrawing(true);setShowCursor(true);setAnnouncement("Drawing. Move with arrow keys; Enter or Space finishes the stroke.");}}else if(event.key==="Escape"){event.preventDefault();event.stopPropagation();stopDraw();setKeyboardDrawing(false);setAnnouncement("Stroke finished.");}};
   return (
-    <div className="main-container-component">
+    <div data-adapt-scope="Unit3_WB_Unit3_Page17_Q2" className="main-container-component">
+<style>{`[data-adapt-scope="Unit3_WB_Unit3_Page17_Q2"] input:focus-visible, [data-adapt-scope="Unit3_WB_Unit3_Page17_Q2"] [data-keyboard-choice]:focus-visible, [data-adapt-scope="Unit3_WB_Unit3_Page17_Q2"] [data-grid-cell]:focus-visible, [data-adapt-scope="Unit3_WB_Unit3_Page17_Q2"] [data-listening]:focus-visible {outline:4px solid #2563eb !important;outline-offset:3px;border-radius:6px;}`}</style>
+<div className="sr-only" role="status" aria-live="polite" aria-atomic="true">{announcement}</div>
       <style>{`
         /* ── Toolbar ── */
         .dmf-toolbar {
@@ -304,26 +321,20 @@ export default function WB_DrawMissing_QF() {
         }}
       >
         {/* ── Header ── */}
-        <h1
-          className="WB-header-title-page8"
-          style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
-        >
-          <span className="WB-ex-A">F</span>
-          Draw the missing items from Exercise E in the picture.
-        </h1>
+        <ExerciseHeader subTitle="Reread Exercise E, identify each missing bedroom item, then draw it in the correct place in the picture." sectionLetter="F" title={<>Draw the missing items from Exercise E in the picture.</>} />
 
         {/* ── Toolbar ── */}
         <div className="dmf-toolbar">
 
           {/* Tools */}
           <div className="dmf-tool-group">
-            <button
+            <button type="button" data-keyboard-choice {...activationKeys}
               className={`dmf-tool-btn ${tool === "pen" ? "dmf-tool-btn--active" : ""}`}
-              onClick={() => setTool("pen")}
+              aria-pressed={tool==="pen"} onClick={() => setTool("pen")}
             >✏️ Pen</button>
-            <button
+            <button type="button" data-keyboard-choice {...activationKeys}
               className={`dmf-tool-btn ${tool === "eraser" ? "dmf-tool-btn--active" : ""}`}
-              onClick={() => setTool("eraser")}
+              aria-pressed={tool==="eraser"} onClick={() => setTool("eraser")}
             >🧹 Eraser</button>
           </div>
 
@@ -332,7 +343,7 @@ export default function WB_DrawMissing_QF() {
           {/* Colors */}
           <div className="dmf-tool-group">
             {COLORS.map((c) => (
-              <div
+              <div role="button" tabIndex={0} data-keyboard-choice {...activationKeys} aria-label={`Pen color ${["teal","red","green","orange","purple","black"][COLORS.indexOf(c)]}`} aria-pressed={color===c&&tool==="pen"}
                 key={c}
                 className={`dmf-color ${color === c && tool === "pen" ? "dmf-color--active" : ""}`}
                 style={{ background: c }}
@@ -346,7 +357,7 @@ export default function WB_DrawMissing_QF() {
           {/* Sizes */}
           <div className="dmf-tool-group">
             {SIZES.map((s) => (
-              <div
+              <div role="button" tabIndex={0} data-keyboard-choice {...activationKeys} aria-label={`Stroke width ${s}`} aria-pressed={lineWidth===s}
                 key={s}
                 className={`dmf-size ${lineWidth === s ? "dmf-size--active" : ""}`}
                 style={{ width: s * 2.5, height: s * 2.5 }}
@@ -358,24 +369,25 @@ export default function WB_DrawMissing_QF() {
           <div className="dmf-divider" />
 
           {/* Undo */}
-          <button className="dmf-action-btn" onClick={handleUndo}>↩ Undo</button>
+          <button type="button" data-keyboard-choice {...activationKeys} className="dmf-action-btn" onClick={handleUndo}>↩ Undo</button>
 
         </div>
 
         {/* ── Canvas ── */}
         <div className="dmf-canvas-wrap">
-          <canvas
+          <canvas aria-description="A bedroom with two beds, a window, a lamp and backpacks. Draw the missing items described in Exercise E." tabIndex={0} data-keyboard-choice role="application" aria-label="Bedroom drawing canvas. Use arrow keys to move; Enter or Space starts or finishes a stroke; Shift and arrows moves faster; Escape finishes the stroke. The drawing is not graded." onKeyDown={canvasKeys} onKeyUp={activationKeys.onKeyUp} onFocus={event=>setShowCursor(event.currentTarget.matches(":focus-visible"))} onBlur={()=>{if(keyboardDrawing){stopDraw();setKeyboardDrawing(false);}setShowCursor(false);}} onPointerDown={pointerStart} onPointerMove={pointerMove} onPointerUp={pointerEnd} onPointerCancel={pointerEnd} onLostPointerCapture={pointerEnd}
             ref={canvasRef}
             className={`dmf-canvas ${tool === "eraser" ? "dmf-canvas--eraser" : ""}`}
             style={{ aspectRatio: "3/2" }}
-            onMouseDown={startDraw}
-            onMouseMove={draw}
-            onMouseUp={stopDraw}
-            onMouseLeave={stopDraw}
-            onTouchStart={startDraw}
-            onTouchMove={draw}
-            onTouchEnd={stopDraw}
+            
+            
+            
+            
+            
+            
+            
           />
+          {showCursor&&<span aria-hidden="true" style={{position:"absolute",left:cursor.x+"%",top:cursor.y+"%",transform:"translate(-50%,-50%)",width:12,height:12,border:"2px solid #2563eb",background:keyboardDrawing?"#dbeafe":"transparent",borderRadius:"50%",pointerEvents:"none"}}/>}
           {!imgLoaded && (
             <div style={{
               position: "absolute", inset: 0,
@@ -389,10 +401,7 @@ export default function WB_DrawMissing_QF() {
 
         {/* ── Action buttons ── */}
         <div className="dmf-buttons">
-        <Button
-           
-            handleStartAgain={handleReset}
-          />
+        <div className="action-buttons-container"><button type="button" aria-label="Start Again" {...activationKeys} onClick={handleReset} className="try-again-button">Start Again ↻</button></div>
         </div>
 
       </div>
