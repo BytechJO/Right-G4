@@ -1,3 +1,4 @@
+import missingNew0 from "../../../assets/audio/G4-Missing/worked on the laptop.mp3";
 import clipPage59E2 from "../../../assets/audio/WorkBook/Unit 10/Page 59 - E/Item_002_Has.mp3";
 import clipPage59E1 from "../../../assets/audio/WorkBook/Unit 10/Page 59 - E/Item_001_Has_she_done_her.mp3";
 import {useEffect as useListeningEffect,useRef as useListeningRef,useState as useListeningState} from "react";
@@ -273,7 +274,7 @@ const [results,setResults]=useState({}),[announcement,setAnnouncement]=useState(
     if (part.type === "text") {
       return (
         <span key={i} className="lrwe-text">
-          {renderExerciseAudioText({audio:listening,id:`fragment-${part.value}`,src:part.value==="Has she done her"?clipPage59E1:part.value==="Has"?clipPage59E2:null,label:part.value,children:part.value})}
+          {renderExerciseAudioText({audio:listening,id:`fragment-${part.value}`,src:part.value==="Has she done her"?clipPage59E1:part.value==="Has"?clipPage59E2:part.value==="worked on the laptop?"?missingNew0:null,label:part.value,children:part.value})}
         </span>
       );
     }

@@ -1,3 +1,4 @@
+import missingNew0 from "../../../assets/audio/G4-Missing/What do you think might be in each of the gifts.mp3";
 /* eslint-disable react-refresh/only-export-components */
 import {useCallback} from "react";
 import clipPage26I6 from "../../../assets/audio/WorkBook/Unit 4/Page 26 - I/Item_006_Hansel.mp3";
@@ -582,7 +583,7 @@ font-size: clamp(15px, 1.9vw, 20px);
 
         {/* ── Question + input ── */}
         <div className="rad-question-row">
-          <span className="rad-question-text">{QUESTION}</span>
+          <span className="rad-question-text">{renderExerciseAudioText({audio:listening,id:"drawing-question",src:missingNew0,label:QUESTION,children:QUESTION})}</span>
           <input {...fieldKeys} aria-label={QUESTION} title={QUESTION} placeholder="Your own idea"
             type="text"
             className="rad-q-input"

@@ -1,3 +1,6 @@
+import missingNew0 from "../../../assets/audio/G4-Missing/But no matter where I roam,.mp3";
+import missingNew1 from "../../../assets/audio/G4-Missing/There's always one place I want to be. I'm sure to miss it..mp3";
+import missingNew2 from "../../../assets/audio/G4-Missing/There's just no place like home!.mp3";
 import clipPage14J20 from "../../../assets/audio/WorkBook/Unit 2/Page 14 - J/Item_020_There_are_so_many_places_in_the_world_to.mp3";
 import clipPage14J19 from "../../../assets/audio/WorkBook/Unit 2/Page 14 - J/Item_019_And_Europe's_known.mp3";
 import clipPage14J18 from "../../../assets/audio/WorkBook/Unit 2/Page 14 - J/Item_018_In_Alaska_you_can_take_a_cruise.mp3";
@@ -318,7 +321,7 @@ const [results,setResults]=useState({}),[announcement,setAnnouncement]=useState(
   const renderLine = (line, idx, poem) => (
     <div key={idx} className="rw-line">
       {line.parts.map((part, i) => {
-        if(typeof part==="string"){const sound=({"1-0-0":clipPage14J7,"1-1-0":clipPage14J8,"1-2-0":clipPage14J9,"1-3-0":clipPage14J10,"1-4-0":clipPage14J11,"1-4-2":clipPage14J12,"1-5-0":clipPage14J13,"1-6-0":clipPage14J14,"1-7-0":clipPage14J15,"2-0-0":clipPage14J16,"2-1-0":clipPage14J17,"2-2-0":clipPage14J18,"2-3-0":clipPage14J19,"2-4-0":clipPage14J20})[poem+"-"+idx+"-"+i];return <span key={i}>{renderExerciseAudioText({audio:listening,id:`poem-${poem}-${idx}-${i}`,src:sound,label:part,children:part})}</span>;}
+        if(typeof part==="string"){const sound=({"1-0-0":clipPage14J7,"1-1-0":clipPage14J8,"1-2-0":clipPage14J9,"1-3-0":clipPage14J10,"1-4-0":clipPage14J11,"1-4-2":clipPage14J12,"1-5-0":clipPage14J13,"1-6-0":clipPage14J14,"1-7-0":clipPage14J15,"2-0-0":clipPage14J16,"2-1-0":clipPage14J17,"2-2-0":clipPage14J18,"2-3-0":clipPage14J19,"2-4-0":clipPage14J20,"2-5-0":missingNew0,"2-6-0":missingNew1,"2-7-0":missingNew2})[poem+"-"+idx+"-"+i];return <span key={i}>{renderExerciseAudioText({audio:listening,id:`poem-${poem}-${idx}-${i}`,src:sound,label:part,children:part})}</span>;}
         const wrong = isWrong(part.id, part.answer);
         return (
           <span key={i} className="rw-blank-wrap">

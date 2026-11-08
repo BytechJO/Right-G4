@@ -1,3 +1,8 @@
+import missingNew1 from "../../../assets/audio/G4-Missing/Kevin will.mp3";
+import missingNew2 from "../../../assets/audio/G4-Missing/Rosie will.mp3";
+import missingNew3 from "../../../assets/audio/G4-Missing/go to the lake..mp3";
+import missingNew4 from "../../../assets/audio/G4-Missing/ride a horse..mp3";
+import missingNew5 from "../../../assets/audio/G4-Missing/eat at a restaurant..mp3";
 import clipPage7J13 from "../../../assets/audio/WorkBook/Unit 1/Page 7 - J/Item_013_Jake_will.mp3";
 import clipPage7J12 from "../../../assets/audio/WorkBook/Unit 1/Page 7 - J/Item_012_shop_at_the_mall.mp3";
 import clipPage7J11 from "../../../assets/audio/WorkBook/Unit 1/Page 7 - J/Item_011_Lilly_will.mp3";
@@ -225,9 +230,9 @@ const getDotCenter=key=>{const e=dotRefs.current[key],root=containerRef.current;
     return ()=>{cancelAnimationFrame(frame);observer.disconnect();window.removeEventListener("resize",raf);};
   }, [matches]);
 
-  const handleLeftClick=(id,keyboard=false)=>{listening.play("left-"+id,({1:clipPage7J7,2:clipPage7J9,3:clipPage7J11,4:clipPage7J13})[id]);if(lockedLeft(id))return;if(selectedRight!==null){connect(id,selectedRight,keyboard);return;}setSelectedLeft(prev=>prev===id?null:id);setPreview(null);setAnnouncement("Sentence beginning selected. Choose its ending.");if(keyboard&&selectedLeft!==id)focusSide("right");};
+  const handleLeftClick=(id,keyboard=false)=>{listening.play("left-"+id,({1:clipPage7J7,2:clipPage7J9,3:clipPage7J11,4:clipPage7J13,5:missingNew1,6:missingNew2})[id]);if(lockedLeft(id))return;if(selectedRight!==null){connect(id,selectedRight,keyboard);return;}setSelectedLeft(prev=>prev===id?null:id);setPreview(null);setAnnouncement("Sentence beginning selected. Choose its ending.");if(keyboard&&selectedLeft!==id)focusSide("right");};
 
-  const handleRightClick=(id,keyboard=false)=>{listening.play("right-"+id,({1:clipPage7J8,2:clipPage7J10,3:clipPage7J12})[id]);if(lockedRight(id))return;if(selectedLeft!==null){connect(selectedLeft,id,keyboard);return;}setSelectedRight(prev=>prev===id?null:id);setPreview(null);setAnnouncement("Sentence ending selected. Choose its beginning.");if(keyboard&&selectedRight!==id)focusSide("left");};
+  const handleRightClick=(id,keyboard=false)=>{listening.play("right-"+id,({1:clipPage7J8,2:clipPage7J10,3:clipPage7J12,4:missingNew3,5:missingNew4,6:missingNew5})[id]);if(lockedRight(id))return;if(selectedLeft!==null){connect(selectedLeft,id,keyboard);return;}setSelectedRight(prev=>prev===id?null:id);setPreview(null);setAnnouncement("Sentence ending selected. Choose its beginning.");if(keyboard&&selectedRight!==id)focusSide("left");};
 
   const handleCheck=()=>{if(checkDisabled)return;listening.stop();cancel();if(Object.keys(matches).length<LEFT_ITEMS.length){ValidationAlert.info("Please connect all items first.");return;}const next=Object.fromEntries(LEFT_ITEMS.map(i=>[i.id,matches[i.id]===CORRECT_MATCHES[i.id]])),score=Object.values(next).filter(Boolean).length;setResults(next);setShowResults(true);setAnnouncement(`Score: ${score} out of ${LEFT_ITEMS.length}. Correct connections are locked.`);if(score===LEFT_ITEMS.length){resetButtonRef.current?.focus({preventScroll:true});ValidationAlert.success(`Score: ${score} / ${LEFT_ITEMS.length}`);}else if(score)ValidationAlert.warning(`Score: ${score} / ${LEFT_ITEMS.length}`);else ValidationAlert.error(`Score: ${score} / ${LEFT_ITEMS.length}`);};
 

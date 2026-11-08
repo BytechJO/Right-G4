@@ -1,3 +1,4 @@
+import missingNew0 from "../../../assets/audio/G4-Missing/Tim will take his brother and friend..mp3";
 import clipC10 from "../../../assets/audio/ClassBook/Unit 1/Page 8 - C/Item_010_They_will_have_fun_at_the_museum.mp3";
 import clipC9 from "../../../assets/audio/ClassBook/Unit 1/Page 8 - C/Item_009_Tim_will_visit_the_museum_tomorrow.mp3";
 import clipC8 from "../../../assets/audio/ClassBook/Unit 1/Page 8 - C/Item_008_Tim_will_pack_a_lunch.mp3";
@@ -586,7 +587,7 @@ export default function WB_ReadNumber_QC() {
             const disabled = isDisabled(item);
 
             return (
-              renderExerciseAudioGroup({"label":`Hear sentence ${item.id}`,"src":[clipC7,clipC8,clipC9,clipC10,null][ITEMS.findIndex(candidate=>candidate.id===item.id)],"id":`sentence-${item.id}`,"audio":listening,"key":item.id,"className":"rnqc-row",children:<>
+              renderExerciseAudioGroup({"label":`Hear sentence ${item.id}`,"src":[clipC7,clipC8,clipC9,clipC10,missingNew0][ITEMS.findIndex(candidate=>candidate.id===item.id)],"id":`sentence-${item.id}`,"audio":listening,"key":item.id,"className":"rnqc-row",children:<>
                 {/* Label a/b/c... */}
                 <span className="rnqc-label">{item.id}</span>
 

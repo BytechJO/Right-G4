@@ -1,3 +1,7 @@
+import missingNew0 from "../../../assets/audio/G4-Missing/He.mp3";
+import missingNew1 from "../../../assets/audio/G4-Missing/take his sleeping bag and.mp3";
+import missingNew2 from "../../../assets/audio/G4-Missing/so he.mp3";
+import missingNew3 from "../../../assets/audio/G4-Missing/be sure to bring a flashlight..mp3";
 import clipPage51D10 from "../../../assets/audio/ClassBook/Unit 6/Page 51 - D/Item_010_leave_any_trash_or_litter_on_the_ground._It_can_get_very_dark_at_night,.mp3";
 import clipPage51D9 from "../../../assets/audio/ClassBook/Unit 6/Page 51 - D/Item_009_food._He.mp3";
 import clipPage51D8 from "../../../assets/audio/ClassBook/Unit 6/Page 51 - D/Item_008_leave_food_out_as_bears_sometimes_walk_around_in_the_woods_looking_for.mp3";
@@ -6,7 +10,6 @@ import clipPage51D6 from "../../../assets/audio/ClassBook/Unit 6/Page 51 - D/Ite
 import clipPage51D5 from "../../../assets/audio/ClassBook/Unit 6/Page 51 - D/Item_005_be_careful.mp3";
 import clipPage51D4 from "../../../assets/audio/ClassBook/Unit 6/Page 51 - D/Item_004_the_woods._Thomas.mp3";
 import clipPage51D3 from "../../../assets/audio/ClassBook/Unit 6/Page 51 - D/Item_003_also_take_his_boots_for_hiking_in.mp3";
-import clipPage51D2 from "../../../assets/audio/ClassBook/Unit 6/Page 51 - D/Item_002_tent,_so_he'll_be_comfortable_when_he_sleeps._He.mp3";
 import clipPage51D1 from "../../../assets/audio/ClassBook/Unit 6/Page 51 - D/Item_001_Thomas_is_going_on_a_camping_trip_tomorrow.mp3";
 import {
   useEffect as useListeningEffect,
@@ -145,7 +148,7 @@ function renderExerciseSpeaker() {
     </span>
   );
 }
-function renderExerciseAudioText({ audio, id, src, label, children }) {
+function renderExerciseAudioText({ audio, id, src, label, children, tabIndex = 0, showSpeaker = true }) {
   if (!src || (Array.isArray(src) && !src.some(Boolean))) return children;
   const playing = audio.activeId === id;
   const keys = (event) => {
@@ -161,7 +164,7 @@ function renderExerciseAudioText({ audio, id, src, label, children }) {
   return (
     <span
       role="button"
-      tabIndex={0}
+      tabIndex={tabIndex}
       data-listening={id}
       aria-label={label}
       onClick={(event) => {
@@ -179,7 +182,7 @@ function renderExerciseAudioText({ audio, id, src, label, children }) {
       }}
     >
       {children}
-      {playing && renderExerciseSpeaker()}
+      {playing && showSpeaker && renderExerciseSpeaker()}
     </span>
   );
 }
@@ -353,6 +356,24 @@ const LINES = [
   ],
 ];
 
+// Match each recording to its printed fragment; repeated words share the same recording.
+const FRAGMENT_AUDIO = {
+  "Thomas is going on a camping trip tomorrow.": clipPage51D1,
+  "He": missingNew0,
+  "take his sleeping bag and": missingNew1,
+  "tent, so he'll be comfortable when he sleeps. He": missingNew1,
+  "also take his boots for hiking in": clipPage51D3,
+  "the woods. Thomas": clipPage51D4,
+  "be careful": clipPage51D5,
+  "when starting a campfire, and he": clipPage51D6,
+  "leave a fire unattended.": clipPage51D7,
+  "leave food out as bears sometimes walk around in the woods looking for": clipPage51D8,
+  "food. He": clipPage51D9,
+  "leave any trash or litter on the ground. It can get very dark at night,": clipPage51D10,
+  "so he": missingNew2,
+  "be sure to bring a flashlight.": missingNew3,
+};
+
 const ALL_INPUTS = LINES.flat().filter((p) => p.t === "input");
 
 // ─────────────────────────────────────────────
@@ -452,24 +473,21 @@ export default function WB_ListenReadCompleteStory_QD() {
 
   const renderPart = (part, i) => {
     if (part.t === "text") {
+      // One recording spans these two printed lines; retain their existing layout.
+      const startsSleepingBag = part.v.trim() === "take his sleeping bag and";
+      const endsSleepingBag = part.v.trim() === "tent, so he'll be comfortable when he sleeps. He";
+      const sleepingBag = startsSleepingBag || endsSleepingBag;
       return (
         <span key={i} className="lrcs-text">
           {renderExerciseAudioText({
             audio: listening,
-            id: `fragment-${i}`,
-            src: {
-              "0-0": clipPage51D1,
-              "2-0": clipPage51D2,
-              "3-1": clipPage51D3,
-              "4-0": clipPage51D4,
-              "4-2": clipPage51D5,
-              "5-0": clipPage51D6,
-              "6-0": clipPage51D7,
-              "8-2": clipPage51D8,
-              "9-0": clipPage51D9,
-              "9-2": clipPage51D10,
-            }[i],
-            label: part.v,
+            id: sleepingBag ? "sleeping-bag" : `fragment-${i}`,
+            src: FRAGMENT_AUDIO[part.v.trim()],
+            label: sleepingBag
+              ? "take his sleeping bag and tent, so he'll be comfortable when he sleeps. He"
+              : part.v,
+            tabIndex: endsSleepingBag ? -1 : 0,
+            showSpeaker: !startsSleepingBag,
             children: part.v,
           })}
         </span>

@@ -1,3 +1,5 @@
+import missingNew0 from "../../../assets/audio/G4-Missing/Stella's rabbit is.mp3";
+import missingNew1 from "../../../assets/audio/G4-Missing/the swing..mp3";
 import clipPage28D10 from "../../../assets/audio/WorkBook/Unit 5/Page 28 - D/Item_010_the_bed.mp3";
 import clipPage28D9 from "../../../assets/audio/WorkBook/Unit 5/Page 28 - D/Item_009_Sarah_is.mp3";
 import clipPage28D8 from "../../../assets/audio/WorkBook/Unit 5/Page 28 - D/Item_008_the_sink.mp3";
@@ -458,7 +460,7 @@ font-size: clamp(15px, 1.9vw, 18px);
 
                 {/* Sentence */}
                 <div className="rlwd-sentence">
-                  <span className="rlwd-text">{renderExerciseAudioText({audio:listening,id:`prefix-${item.id}`,src:({1:clipPage28D5,2:clipPage28D7,3:clipPage28D9})[item.id],label:item.before,children:item.before})}</span>
+                  <span className="rlwd-text">{renderExerciseAudioText({audio:listening,id:`prefix-${item.id}`,src:({1:clipPage28D5,2:clipPage28D7,3:clipPage28D9,4:missingNew0})[item.id],label:item.before,children:item.before})}</span>
                   <div className="rlwd-input-wrap">
                     <input aria-invalid={results[item.id]==="wrong"} placeholder="Word or phrase" title={answerTargets.find(t=>t.key===item.id)?.label||"Complete this answer"} aria-label={answerTargets.find(t=>t.key===item.id)?.label||"Complete this answer"} {...fieldKeys}
                       type="text"
@@ -476,7 +478,7 @@ font-size: clamp(15px, 1.9vw, 18px);
                     />
                     {wrong && <div className="rlwd-badge">✕</div>}
                   </div>
-                  <span className="rlwd-text">{renderExerciseAudioText({audio:listening,id:`suffix-${item.id}`,src:({1:clipPage28D6,2:clipPage28D8,4:clipPage28D10})[item.id],label:item.after,children:item.after})}</span>
+                  <span className="rlwd-text">{renderExerciseAudioText({audio:listening,id:`suffix-${item.id}`,src:({1:clipPage28D6,2:clipPage28D8,4:clipPage28D10,3:missingNew1})[item.id],label:item.after,children:item.after})}</span>
                 </div>
 
               </div>

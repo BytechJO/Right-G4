@@ -1,3 +1,7 @@
+import missingNew0 from "../../../assets/audio/G4-Missing/. I have seen them on nature programs..mp3";
+import missingNew1 from "../../../assets/audio/G4-Missing/Let me show you more pictures. I think Australia is so beautiful!.mp3";
+import missingNew2 from "../../../assets/audio/G4-Missing/Would you like to visit Australia.mp3";
+import missingNew3 from "../../../assets/audio/G4-Missing/Yes. I hope my family can go there next.mp3";
 import clipPage10C18 from "../../../assets/audio/WorkBook/Unit 2/Page 10 - C/Item_018_They_can_hop_very_fast!.mp3";
 import clipPage10C17 from "../../../assets/audio/WorkBook/Unit 2/Page 10 - C/Item_017_Harley_No,_because_they_don't_have_tigers_there._But_we_saw_some.mp3";
 import clipPage10C16 from "../../../assets/audio/WorkBook/Unit 2/Page 10 - C/Item_016_Stella_Did_you_see_any_tigers.mp3";
@@ -336,7 +340,7 @@ const [results,setResults]=useState({}),[announcement,setAnnouncement]=useState(
       <span className="raw-speaker">{line.speaker}:</span>
       <span className="raw-text">
         {line.parts.map((part, i) => {
-          if(typeof part==="string"){const sound=({"0-0":clipPage10C9,"0-2":clipPage10C10,"0-4":clipPage10C11,"0-6":clipPage10C12,"1-0":clipPage10C13,"2-0":clipPage10C14,"2-2":clipPage10C15,"3-0":clipPage10C16,"4-0":clipPage10C17,"4-2":clipPage10C18})[idx+"-"+i];return <span key={i}>{renderExerciseAudioText({audio:listening,id:`dialogue-${idx}-${i}`,src:sound,label:(i===0?line.speaker+": ":"")+part,children:part})}</span>;}
+          if(typeof part==="string"){const sound=({"0-0":clipPage10C9,"0-2":clipPage10C10,"0-4":clipPage10C11,"0-6":clipPage10C12,"1-0":clipPage10C13,"2-0":clipPage10C14,"2-2":clipPage10C15,"3-0":clipPage10C16,"4-0":clipPage10C17,"4-2":clipPage10C18,"5-1":missingNew0,"6-0":missingNew1,"6-2":missingNew2,"7-0":missingNew3})[idx+"-"+i];return <span key={i}>{renderExerciseAudioText({audio:listening,id:`dialogue-${idx}-${i}`,src:sound,label:(i===0?line.speaker+": ":"")+part,children:part})}</span>;}
           const wrong = isWrong(part.id, part.answer);
           return (
             <span key={i} className="raw-blank-wrap">

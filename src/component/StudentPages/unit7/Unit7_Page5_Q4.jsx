@@ -1,3 +1,4 @@
+import missingNew0 from "../../../assets/audio/G4-Missing/No,.mp3";
 import clipPage62D2 from "../../../assets/audio/ClassBook/Unit 7/Page 62 - D/Item_002_cake.mp3";
 import clipPage62D1 from "../../../assets/audio/ClassBook/Unit 7/Page 62 - D/Item_001_Yes,_there_were_some.mp3";
 import {useEffect as useListeningEffect,useRef as useListeningRef,useState as useListeningState} from "react";
@@ -269,11 +270,11 @@ const listening=useExerciseListening("sb_unit7_page5_q4");
     parts.map((part, i) => {
       if (part.t === "given") {
         return (
-          <span key={i} className="lrwd-given">{renderExerciseAudioText({audio:listening,id:`fragment-${part.v}`,src:part.v.trim()==="Yes, there were some."?clipPage62D1:part.v.trim()==="cake?"?clipPage62D2:null,label:part.v,children:part.v})}</span>
+          <span key={i} className="lrwd-given">{renderExerciseAudioText({audio:listening,id:`fragment-${part.v}`,src:part.v.trim()==="Yes, there were some."?clipPage62D1:part.v.trim()==="cake?"?clipPage62D2:part.v.trim()==="No,"?missingNew0:null,label:part.v,children:part.v})}</span>
         );
       }
       if (part.t === "text") {
-        return <span key={i} className="lrwd-text">{renderExerciseAudioText({audio:listening,id:`fragment-${part.v}`,src:part.v.trim()==="Yes, there were some."?clipPage62D1:part.v.trim()==="cake?"?clipPage62D2:null,label:part.v,children:part.v})}</span>;
+        return <span key={i} className="lrwd-text">{renderExerciseAudioText({audio:listening,id:`fragment-${part.v}`,src:part.v.trim()==="Yes, there were some."?clipPage62D1:part.v.trim()==="cake?"?clipPage62D2:part.v.trim()==="No,"?missingNew0:null,label:part.v,children:part.v})}</span>;
       }
       // input
       if (part.correct[0] === "") return null; // skip empty input slots

@@ -1,3 +1,4 @@
+import missingNew0 from "../../../assets/audio/G4-Missing/The cat.mp3";
 import clipPage58C2 from "../../../assets/audio/WorkBook/Unit 10/Page 58 - C/Item_002_He.mp3";
 import clipPage58C1 from "../../../assets/audio/WorkBook/Unit 10/Page 58 - C/Item_001_She_has.mp3";
 import {useEffect as useListeningEffect,useRef as useListeningRef,useState as useListeningState} from "react";
@@ -434,7 +435,7 @@ const [results,setResults]=useState({}),[announcement,setAnnouncement]=useState(
                 {/* Middle: prefix + input */}
                 <div className="lrwc-middle">
                   {item.prefix && (
-                    <span className="lrwc-prefix">{renderExerciseAudioText({audio:listening,id:`prefix-${item.id}`,src:item.prefix==="She has"?clipPage58C1:item.prefix==="He"?clipPage58C2:null,label:item.prefix,children:item.prefix})}</span>
+                    <span className="lrwc-prefix">{renderExerciseAudioText({audio:listening,id:`prefix-${item.id}`,src:item.prefix==="She has"?clipPage58C1:item.prefix==="He"?clipPage58C2:item.prefix==="The cat"?missingNew0:null,label:item.prefix,children:item.prefix})}</span>
                   )}
                   <div className="lrwc-input-wrap">
                     <input aria-invalid={results[item.id]==="wrong"} placeholder="Your answer" title={answerTargets.find(t=>t.key===item.id)?.label||"Complete this answer"} aria-label={answerTargets.find(t=>t.key===item.id)?.label||"Complete this answer"} {...fieldKeys}

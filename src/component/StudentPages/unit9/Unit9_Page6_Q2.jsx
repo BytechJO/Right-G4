@@ -1,3 +1,5 @@
+import missingNew0 from "../../../assets/audio/G4-Missing/I like my class because.mp3";
+import missingNew1 from "../../../assets/audio/G4-Missing/I like the zoo because.mp3";
 import clipPage81E2 from "../../../assets/audio/ClassBook/Unit 9/Page 81 - E/Item_002_I_like_my_room_because.mp3";
 import clipPage81E1 from "../../../assets/audio/ClassBook/Unit 9/Page 81 - E/Item_001_I_like_my_house_because.mp3";
 import {useEffect as useListeningEffect,useRef as useListeningRef,useState as useListeningState} from "react";
@@ -416,7 +418,7 @@ const listening=useExerciseListening("sb_unit9_page6_q2");
                 <img src={item.src} alt={["A family visiting a lion enclosure at a zoo.","A teacher and pupils in a classroom.","A bedroom with toys on the floor.","Children playing at a backyard party."][item.id-1]} className="luw-img" />
 
                 {/* Prefix text */}
-                <span className="luw-prefix">{renderExerciseAudioText({audio:listening,id:`prefix-${item.id}`,src:[clipPage81E1,clipPage81E2][item.id-1],label:item.prefix,children:item.prefix})}</span>
+                <span className="luw-prefix">{renderExerciseAudioText({audio:listening,id:`prefix-${item.id}`,src:[clipPage81E1,clipPage81E2,missingNew0,missingNew1][item.id-1],label:item.prefix,children:item.prefix})}</span>
 
                 {/* Input */}
                 <div className="luw-input-wrap">

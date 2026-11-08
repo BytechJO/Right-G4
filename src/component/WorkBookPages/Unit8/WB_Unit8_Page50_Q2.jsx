@@ -1,3 +1,5 @@
+import missingNew0 from "../../../assets/audio/G4-Missing/They watched a movie..mp3";
+import missingNew1 from "../../../assets/audio/G4-Missing/I played the violin..mp3";
 import clipPage50L4 from "../../../assets/audio/WorkBook/Unit 8/Page 50 - L/Item_004_He_cooked_food.mp3";
 import clipPage50L3 from "../../../assets/audio/WorkBook/Unit 8/Page 50 - L/Item_003_He_listened_to_the_radio.mp3";
 import clipPage50L2 from "../../../assets/audio/WorkBook/Unit 8/Page 50 - L/Item_002_They_played_in_the_snow.mp3";
@@ -380,7 +382,7 @@ const listening=useExerciseListening("wb_unit8_page50_q2");
               <div key={item.id} className="rlwc-card">
 
                 {/* Sentence */}
-                {renderExerciseAudioGroup({audio:listening,id:`sentence-${item.id}`,src:[clipPage50L1,clipPage50L2,clipPage50L3,clipPage50L4][item.id-1],label:item.id+". "+item.sentence,className:"rlwc-sentence-row",style:undefined,key:item.id,children:<>
+                {renderExerciseAudioGroup({audio:listening,id:`sentence-${item.id}`,src:[clipPage50L1,clipPage50L2,clipPage50L3,clipPage50L4,missingNew0,missingNew1][item.id-1],label:item.id+". "+item.sentence,className:"rlwc-sentence-row",style:undefined,key:item.id,children:<>
                   <span className="rlwc-num">{item.id}</span>
                   <span className="rlwc-sentence">{item.sentence}</span>
                 </>})}

@@ -1,3 +1,4 @@
+import missingNew0 from "../../../assets/audio/G4-Missing/I'm.mp3";
 import clipPage50B7 from "../../../assets/audio/ClassBook/Unit 6/Page 50 - B/Item_007_for_school.mp3";
 import clipPage50B6 from "../../../assets/audio/ClassBook/Unit 6/Page 50 - B/Item_006_these.mp3";
 import clipPage50B5 from "../../../assets/audio/ClassBook/Unit 6/Page 50 - B/Item_005_,_dear.mp3";
@@ -518,6 +519,7 @@ export default function WB_ReadWrite_QB() {
                   "All set": clipPage50B1,
                   "What about": clipPage50B2,
                   Okay: clipPage50B3,
+                  "I'm": missingNew0,
                 }[w],
                 label: w,
                 children: w,

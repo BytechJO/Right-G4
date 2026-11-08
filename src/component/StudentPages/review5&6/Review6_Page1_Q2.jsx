@@ -1,3 +1,6 @@
+import missingNew0 from "../../../assets/audio/G4-Missing/She should take a picture..mp3";
+import missingNew1 from "../../../assets/audio/G4-Missing/Hansel shouldn't eat ice cream now..mp3";
+import missingNew2 from "../../../assets/audio/G4-Missing/She shouldn't take a picture..mp3";
 import clipPage54B5 from "../../../assets/audio/ClassBook/Unit 6/Page 54 - B/Item_005_Hansel_should_eat_ice_cream.mp3";
 import clipPage54B4 from "../../../assets/audio/ClassBook/Unit 6/Page 54 - B/Item_004_He_shouldn't_swim_in_the_sea.mp3";
 import clipPage54B3 from "../../../assets/audio/ClassBook/Unit 6/Page 54 - B/Item_003_He_should_swim_in_the_sea.mp3";
@@ -443,11 +446,11 @@ const listening=useExerciseListening("sb_review6_page1_q2");
               {/* Two text rows with checkboxes */}
               <div className="lrwc-rows">
                 <div className="lrwc-row">
-                  <span className="lrwc-text">{renderExerciseAudioText({audio:listening,id:`top-${item.id}`,src:({1:clipPage54B1,2:clipPage54B3,3:clipPage54B5})[item.id],label:item.topText,children:item.topText})}</span>
+                  <span className="lrwc-text">{renderExerciseAudioText({audio:listening,id:`top-${item.id}`,src:({1:clipPage54B1,2:clipPage54B3,3:clipPage54B5,4:missingNew0})[item.id],label:item.topText,children:item.topText})}</span>
                   {renderCheckbox(item, "top")}
                 </div>
                 <div className="lrwc-row">
-                  <span className="lrwc-text">{renderExerciseAudioText({audio:listening,id:`bottom-${item.id}`,src:({1:clipPage54B2,2:clipPage54B4})[item.id],label:item.bottomText,children:item.bottomText})}</span>
+                  <span className="lrwc-text">{renderExerciseAudioText({audio:listening,id:`bottom-${item.id}`,src:({1:clipPage54B2,2:clipPage54B4,3:missingNew1,4:missingNew2})[item.id],label:item.bottomText,children:item.bottomText})}</span>
                   {renderCheckbox(item, "bottom")}
                 </div>
               </div>

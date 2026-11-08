@@ -1,3 +1,4 @@
+import missingNew0 from "../../../assets/audio/G4-Missing/next to.mp3";
 import clipPage45E5 from "../../../assets/audio/ClassBook/Unit 5/Page 45 - E/Item_005_over.mp3";
 import clipPage45E4 from "../../../assets/audio/ClassBook/Unit 5/Page 45 - E/Item_004_through.mp3";
 import clipPage45E3 from "../../../assets/audio/ClassBook/Unit 5/Page 45 - E/Item_003_in_front_of.mp3";
@@ -407,7 +408,7 @@ left : -5px ;
         {/* ── Word bank ── */}
         <div className="lwe-bank">
           {WORD_BANK.map((w) => (
-            <div key={w} className="lwe-pill">{renderExerciseAudioText({audio:listening,id:`bank-${w}`,src:({under:clipPage45E1,around:clipPage45E2,"in front of":clipPage45E3,through:clipPage45E4,over:clipPage45E5})[w],label:w,children:w})}</div>
+            <div key={w} className="lwe-pill">{renderExerciseAudioText({audio:listening,id:`bank-${w}`,src:({under:clipPage45E1,around:clipPage45E2,"in front of":clipPage45E3,through:clipPage45E4,over:clipPage45E5,"next to":missingNew0})[w],label:w,children:w})}</div>
           ))}
         </div>
 

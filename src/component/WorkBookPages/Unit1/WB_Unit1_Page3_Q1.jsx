@@ -1,3 +1,4 @@
+import missingNew0 from "../../../assets/audio/G4-Missing/a tractor on the farm..mp3";
 import clipPage3A8 from "../../../assets/audio/WorkBook/Unit 1/Page 3 - A/Item_008_The_city_will_build_more.mp3";
 import clipPage3A7 from "../../../assets/audio/WorkBook/Unit 1/Page 3 - A/Item_007_Will_he_play_with_his.mp3";
 import clipPage3A6 from "../../../assets/audio/WorkBook/Unit 1/Page 3 - A/Item_006_his_room.mp3";
@@ -476,7 +477,7 @@ const [results,setResults]=useState({}),[announcement,setAnnouncement]=useState(
                   </div>
 
                   {item.after && (
-                    <span className="wlrw-text">{renderExerciseAudioText({audio:listening,id:`after-${item.id}`,src:item.id===1?clipPage3A6:null,label:item.after,children:item.after})}</span>
+                    <span className="wlrw-text">{renderExerciseAudioText({audio:listening,id:`after-${item.id}`,src:item.id===1?clipPage3A6:item.id===4?missingNew0:null,label:item.after,children:item.after})}</span>
                   )}
 
                 </div>

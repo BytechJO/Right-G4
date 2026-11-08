@@ -1,3 +1,7 @@
+import missingNew0 from "../../../assets/audio/G4-Missing/She cleaned the floor..mp3";
+import missingNew1 from "../../../assets/audio/G4-Missing/She painted a picture..mp3";
+import missingNew2 from "../../../assets/audio/G4-Missing/She played with her doll..mp3";
+import missingNew3 from "../../../assets/audio/G4-Missing/She fixed her toy..mp3";
 import clipPage69F4 from "../../../assets/audio/ClassBook/Unit 8/Page 69 - F/Item_004_She_cooked_dinner.mp3";
 import clipPage69F3 from "../../../assets/audio/ClassBook/Unit 8/Page 69 - F/Item_003_He_rowed_the_boat.mp3";
 import clipPage69F2 from "../../../assets/audio/ClassBook/Unit 8/Page 69 - F/Item_002_She_washed_the_car.mp3";
@@ -238,7 +242,7 @@ const listening=useExerciseListening("sb_unit8_page6_q2");
       <div data-listening={`choice-${item.id}-${side}`} style={{...({...({}),borderRadius:({}).borderRadius || "6px",background:selected[item.id] === side && !showAns && results[item.id] === undefined ? "#dbeafe" : ({}).background,boxShadow:selected[item.id] === side ? `inset 0 0 0 2px ${showAns || results[item.id] === "correct" ? "#16a34a" : results[item.id] === "wrong" ? "#ef4444" : "#2563eb"}` : undefined}),position:"relative",background:listening.activeId===`choice-${item.id}-${side}`?"#dbeafe":({...({}),borderRadius:({}).borderRadius || "6px",background:selected[item.id] === side && !showAns && results[item.id] === undefined ? "#dbeafe" : ({}).background,boxShadow:selected[item.id] === side ? `inset 0 0 0 2px ${showAns || results[item.id] === "correct" ? "#16a34a" : results[item.id] === "wrong" ? "#ef4444" : "#2563eb"}` : undefined}).background}} role="button" tabIndex={0} data-keyboard-choice {...activationKeys} aria-label={`Question ${item.id}. ${side === "a" ? item.textA:item.textB}`} aria-pressed={selected[item.id] === side} aria-disabled={showAns || results[item.id] === "correct"}
         key={side}
         className={["rlwf-sent-row", isLocked ? "rlwf-sent-row--locked" : ""].filter(Boolean).join(" ")}
-        onClick={()=>{listening.play(`choice-${item.id}-${side}`,item.id===1?(side==="a"?clipPage69F1:clipPage69F3):item.id===2?(side==="a"?clipPage69F2:clipPage69F4):null);handleSelect(item.id,side);}}
+        onClick={()=>{listening.play(`choice-${item.id}-${side}`,item.id===1?(side==="a"?clipPage69F1:clipPage69F3):item.id===2?(side==="a"?clipPage69F2:clipPage69F4):item.id===3?(side==="a"?missingNew0:missingNew1):(side==="a"?missingNew2:missingNew3));handleSelect(item.id,side);}}
       >
         <span className="rlwf-sent-text">{text}</span>
 

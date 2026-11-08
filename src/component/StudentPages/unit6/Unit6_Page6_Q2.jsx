@@ -1,3 +1,4 @@
+import missingNew0 from "../../../assets/audio/G4-Missing/She should fly a kite..mp3";
 import clipPage51E5 from "../../../assets/audio/ClassBook/Unit 6/Page 51 - E/Item_005_She_should_plant_some_flowers.mp3";
 import clipPage51E4 from "../../../assets/audio/ClassBook/Unit 6/Page 51 - E/Item_004_homework_to_do.mp3";
 import clipPage51E3 from "../../../assets/audio/ClassBook/Unit 6/Page 51 - E/Item_003_He_shouldn't_talk_on_the_phone_because_he_has.mp3";
@@ -236,7 +237,7 @@ const [results,setResults]=useState({}),[selectedImage,setSelectedImage]=useStat
 
   const lineColor=(id)=>showAns||results[id]===true?"#16a34a":results[id]===false?"#ef4444":LINE_DEFAULT;
 
-  const handleLeftClick=(id,keyboard=false)=>{listening.play(`sentence-${id}`,({1:clipPage51E1,2:clipPage51E2,3:[clipPage51E3,clipPage51E4],4:clipPage51E5})[id]);if(lockedLeft(id))return;if(selectedImage!==null){connect(id,selectedImage,keyboard);return;}setSelectedLeft(prev=>prev===id?null:id);setPreview(null);setAnnouncement('Sentence selected. Choose a picture.');if(keyboard&&selectedLeft!==id)focusTarget('image');};
+  const handleLeftClick=(id,keyboard=false)=>{listening.play(`sentence-${id}`,({1:clipPage51E1,2:clipPage51E2,3:[clipPage51E3,clipPage51E4],4:clipPage51E5,5:missingNew0})[id]);if(lockedLeft(id))return;if(selectedImage!==null){connect(id,selectedImage,keyboard);return;}setSelectedLeft(prev=>prev===id?null:id);setPreview(null);setAnnouncement('Sentence selected. Choose a picture.');if(keyboard&&selectedLeft!==id)focusTarget('image');};
 
   const handleRightClick=(name,keyboard=false)=>{if(lockedImage(name))return;if(selectedLeft!==null){connect(selectedLeft,name,keyboard);return;}setSelectedImage(prev=>prev===name?null:name);setPreview(null);setAnnouncement('Picture selected. Choose a sentence.');if(keyboard&&selectedImage!==name)focusTarget('text');};
 

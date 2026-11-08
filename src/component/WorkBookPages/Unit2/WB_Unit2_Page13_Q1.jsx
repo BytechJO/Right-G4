@@ -1,3 +1,7 @@
+import missingNew0 from "../../../assets/audio/G4-Missing/Is the man going to study.mp3";
+import missingNew1 from "../../../assets/audio/G4-Missing/Is Lolo going to sleep.mp3";
+import missingNew2 from "../../../assets/audio/G4-Missing/Yes, they are going to play a game..mp3";
+import missingNew3 from "../../../assets/audio/G4-Missing/Yes, Hansel is going to eat an apple..mp3";
 import clipPage13I2 from "../../../assets/audio/WorkBook/Unit 2/Page 13 - I/Item_002_Yes,_John_is_going_to_drink_some_water.mp3";
 import clipPage13I1 from "../../../assets/audio/WorkBook/Unit 2/Page 13 - I/Item_001_Is_Jack_going_to_ride_a_horse.mp3";
 import {useEffect as useListeningEffect,useRef as useListeningRef,useState as useListeningState} from "react";
@@ -502,13 +506,13 @@ const [results,setResults]=useState({}),[announcement,setAnnouncement]=useState(
 
               {/* question line */}
               {row.fixedQuestion
-                ? <span className="lrw-plain">{renderExerciseAudioText({audio:listening,id:`question-${row.id}`,src:row.id===1?clipPage13I1:null,label:row.fixedQuestion,children:row.fixedQuestion})}</span>
+                ? <span className="lrw-plain">{renderExerciseAudioText({audio:listening,id:`question-${row.id}`,src:row.id===1?clipPage13I1:row.id===4?missingNew0:row.id===5?missingNew1:null,label:row.fixedQuestion,children:row.fixedQuestion})}</span>
                 : renderInput(`q-${row.id}`, row.questionBlanks.correct, "Write the question…")
               }
 
               {/* answer line */}
               {row.fixedAnswer
-                ? <span className="lrw-plain">{renderExerciseAudioText({audio:listening,id:`answer-${row.id}`,src:row.id===2?clipPage13I2:null,label:row.fixedAnswer,children:row.fixedAnswer})}</span>
+                ? <span className="lrw-plain">{renderExerciseAudioText({audio:listening,id:`answer-${row.id}`,src:row.id===2?clipPage13I2:row.id===3?missingNew2:row.id===6?missingNew3:null,label:row.fixedAnswer,children:row.fixedAnswer})}</span>
                 : renderInput(`a-${row.id}`, row.answerBlanks.correct, "Write the answer…")
               }
             </div>

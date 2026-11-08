@@ -1,3 +1,6 @@
+import missingNew0 from "../../../assets/audio/G4-Missing/why don't to the circus.mp3";
+import missingNew1 from "../../../assets/audio/G4-Missing/why doesn't  to the cave.mp3";
+import missingNew2 from "../../../assets/audio/G4-Missing/why don't  to the library.mp3";
 import clipPage55H3 from "../../../assets/audio/WorkBook/Unit 9/Page 55 - H/Item_003_why_doesn't_to_the_mall.mp3";
 import clipPage55H2 from "../../../assets/audio/WorkBook/Unit 9/Page 55 - H/Item_002_why_doesn't_to_the_playground.mp3";
 import clipPage55H1 from "../../../assets/audio/WorkBook/Unit 9/Page 55 - H/Item_001_why_don't_to_the_museum.mp3";
@@ -450,7 +453,7 @@ const [results,setResults]=useState({}),[announcement,setAnnouncement]=useState(
                 {/* Hint row */}
                 <div className="lrwq-hint-row">
                   <span className="lrwq-num">{item.id}</span>
-                  <span className="lrwq-hint">{renderExerciseAudioText({audio:listening,id:`hint-${item.id}`,src:[clipPage55H1,clipPage55H2,clipPage55H3][item.id-1],label:item.hint,children:item.hint})}</span>
+                  <span className="lrwq-hint">{renderExerciseAudioText({audio:listening,id:`hint-${item.id}`,src:[clipPage55H1,clipPage55H2,clipPage55H3,missingNew0,missingNew1,missingNew2][item.id-1],label:item.hint,children:item.hint})}</span>
                 </div>
 
                 {/* Content row: img + input */}

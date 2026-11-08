@@ -1,3 +1,4 @@
+import missingNew0 from "../../../assets/audio/G4-Missing/Oh,.mp3";
 import clipPage62C1 from "../../../assets/audio/ClassBook/Unit 7/Page 62 - C/Item_001_happened_next.mp3";
 import {useEffect as useListeningEffect,useRef as useListeningRef,useState as useListeningState} from "react";
 import {useAudio} from "../../../context/AudioContext";
@@ -379,7 +380,7 @@ const listening=useExerciseListening("sb_unit7_page5_q3");
                   <span className="rcc-num">{item.id}</span>
 
                   {item.before && (
-                    <span className="rcc-text">{item.before}</span>
+                    <span className="rcc-text">{renderExerciseAudioText({audio:listening,id:`before-${item.id}`,src:missingNew0,label:item.before,children:item.before})}</span>
                   )}
 
                   <div className="rcc-input-wrap">

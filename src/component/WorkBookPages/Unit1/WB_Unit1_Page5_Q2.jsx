@@ -1,5 +1,7 @@
-import clipPage5F6 from "../../../assets/audio/WorkBook/Unit 1/Page 5 - F/Item_006_do_it_for_us.mp3";
-import clipPage5F5 from "../../../assets/audio/WorkBook/Unit 1/Page 5 - F/Item_005_Of_course,.mp3";
+import missingNew0 from "../../../assets/audio/G4-Missing/Of course! We won't have to do homework anymore. The robots will do it for us..mp3";
+import missingNew1 from "../../../assets/audio/G4-Missing/The robots will have a lot of work to do..mp3";
+import missingNew2 from "../../../assets/audio/G4-Missing/Thanks, Sarah. Robots will do many things in the future..mp3";
+import missingNew3 from "../../../assets/audio/G4-Missing/Hello, Botboy! I like your robot, Hansel..mp3";
 import clipPage5F4 from "../../../assets/audio/WorkBook/Unit 1/Page 5 - F/Item_004_Yes,_but_they_won't_mind._Robots_don't_get_tired._They're_machines,_afte.mp3";
 import clipPage5F3 from "../../../assets/audio/WorkBook/Unit 1/Page 5 - F/Item_003_How_will_we_learn_We_must_do_our_homework.mp3";
 import clipPage5F2 from "../../../assets/audio/WorkBook/Unit 1/Page 5 - F/Item_002_Robots_will_build_buildings._They_will_drive_fire_trucks.mp3";
@@ -426,7 +428,7 @@ const [results,setResults]=useState({}),[announcement,setAnnouncement]=useState(
                 </div>
 
                 {/* Sentence */}
-                <span className="rnm-text">{item.id!=="e"?renderExerciseAudioText({audio:listening,id:"sentence-"+item.id,src:[clipPage5F1,clipPage5F2,clipPage5F3,clipPage5F4][["a","b","c","d"].indexOf(item.id)],label:item.text,children:item.text}):<>{renderExerciseAudioText({audio:listening,id:"e-before",src:clipPage5F5,label:"Of course!",children:"Of course!"})}{item.text.slice("Of course!".length,item.text.indexOf("do it for us."))}{renderExerciseAudioText({audio:listening,id:"e-after",src:clipPage5F6,label:"do it for us.",children:"do it for us."})}</>}</span>
+                <span className="rnm-text">{renderExerciseAudioText({audio:listening,id:"sentence-"+item.id,src:[clipPage5F1,clipPage5F2,clipPage5F3,clipPage5F4,missingNew0,missingNew1,missingNew2,missingNew3][["a","b","c","d","e","f","g","h"].indexOf(item.id)],label:item.text,children:item.text})}</span>
 
               </div>
             );

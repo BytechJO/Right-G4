@@ -1,3 +1,5 @@
+import missingNew0 from "../../../assets/audio/G4-Missing/We had a nice party..mp3";
+import missingNew1 from "../../../assets/audio/G4-Missing/He had a colorful scooter..mp3";
 import clipC6 from "../../../assets/audio/ClassBook/Unit 4/Page 34 - C/Item_006_We_had_a_nice_coffee_break.mp3";
 import clipC4 from "../../../assets/audio/ClassBook/Unit 4/Page 34 - C/Item_004_She_had_a_white_cat.mp3";
 import clipC2 from "../../../assets/audio/ClassBook/Unit 4/Page 34 - C/Item_002_They_had_a_large_swimming_pool.mp3";
@@ -463,7 +465,7 @@ export default function WB_ListenReadWriteCheckCross_QC() {
             <div key={item.id} className="lrcc-row">
 
               {/* Col 1: num + text */}
-              {renderExerciseAudioGroup({"label":`Hear ${item.leftText}`,"src":[clipC1,clipC3,clipC5][item.id-1],"id":`left-${item.id}`,"audio":listening,"className":"lrcc-left",children:<>
+              {renderExerciseAudioGroup({"label":`Hear ${item.leftText}`,"src":[clipC1,clipC3,clipC5,missingNew0][item.id-1],"id":`left-${item.id}`,"audio":listening,"className":"lrcc-left",children:<>
                 <span className="lrcc-num">{item.id}</span>
                 <span className="lrcc-text">{item.leftText}</span>
               </>})}
@@ -478,7 +480,7 @@ export default function WB_ListenReadWriteCheckCross_QC() {
               {renderCheckbox(item, "right")}
 
               {/* Col 5: text */}
-              {renderExerciseAudioGroup({"label":`Hear ${item.rightText}`,"src":[clipC2,clipC4,clipC6][item.id-1],"id":`right-${item.id}`,"audio":listening,"className":"lrcc-right",children:<>
+              {renderExerciseAudioGroup({"label":`Hear ${item.rightText}`,"src":[clipC2,clipC4,clipC6,missingNew1][item.id-1],"id":`right-${item.id}`,"audio":listening,"className":"lrcc-right",children:<>
                 <span className="lrcc-text">{item.rightText}</span>
               </>})}
 

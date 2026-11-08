@@ -1,3 +1,4 @@
+import missingNew0 from "../../../assets/audio/G4-Missing/Because she likes writing in her diary..mp3";
 import clipPage89E4 from "../../../assets/audio/ClassBook/Unit 10/Page 89 - E/Item_004_Because_he_likes_soccer.mp3";
 import clipPage89E3 from "../../../assets/audio/ClassBook/Unit 10/Page 89 - E/Item_003_Because_they_like_playing_chess.mp3";
 import clipPage89E2 from "../../../assets/audio/ClassBook/Unit 10/Page 89 - E/Item_002_Because_she_likes_shopping_in_the_store.mp3";
@@ -369,7 +370,7 @@ export default function WB_LookReadMatch_QE() {
   const handleRightClick = (value, keyboard = false) => {
     listening.play(
       `sentence-${value}`,
-      [clipPage89E1, clipPage89E2, clipPage89E3, clipPage89E4][value - 1],
+      [clipPage89E1, clipPage89E2, clipPage89E3, clipPage89E4, missingNew0][value - 1],
     );
     if (lockedRight(value)) return;
     if (selectedLeft !== null) {

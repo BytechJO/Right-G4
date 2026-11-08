@@ -1,3 +1,4 @@
+import missingNew0 from "../../../assets/audio/G4-Missing/I can't come over now, Tom, because I'm cleaning my room. I should be finished in an hour, and I can come then..mp3";
 import clipPage51B5 from "../../../assets/audio/WorkBook/Unit 9/Page 51 - B/Item_005_That's_great!.mp3";
 import clipPage51B4 from "../../../assets/audio/WorkBook/Unit 9/Page 51 - B/Item_004_What's_up,_John.mp3";
 import clipPage51B3 from "../../../assets/audio/WorkBook/Unit 9/Page 51 - B/Item_003_Sorry,_Tom._I_can't_because_I'm_helping_my_mom_with_some_chores.mp3";
@@ -408,7 +409,7 @@ const [results,setResults]=useState({}),[announcement,setAnnouncement]=useState(
                   {wrong && <div className="rnb2-badge">✕</div>}
                 </div>
 
-                <span className="rnb2-sentence">{renderExerciseAudioText({audio:listening,id:`sentence-${item.id}`,src:[clipPage51B1,clipPage51B2,clipPage51B3,clipPage51B4,clipPage51B5][ITEMS.indexOf(item)],label:item.sentence,children:item.sentence})}</span>
+                <span className="rnb2-sentence">{renderExerciseAudioText({audio:listening,id:`sentence-${item.id}`,src:[clipPage51B1,clipPage51B2,clipPage51B3,clipPage51B4,clipPage51B5,missingNew0][ITEMS.indexOf(item)],label:item.sentence,children:item.sentence})}</span>
 
               </div>
             );

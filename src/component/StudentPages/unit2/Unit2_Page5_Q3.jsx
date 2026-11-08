@@ -1,3 +1,5 @@
+import missingNew0 from "../../../assets/audio/G4-Missing/First, he will visit the Clock Tower..mp3";
+import missingNew1 from "../../../assets/audio/G4-Missing/He is going to take his camera with him..mp3";
 import clipC9 from "../../../assets/audio/ClassBook/Unit 2/Page 14 - C/Item_009_He_is_going_to_take_a_tour_of_London_in_a_double-decker_bus.mp3";
 import clipC8 from "../../../assets/audio/ClassBook/Unit 2/Page 14 - C/Item_008_He_isn't_going_to_visit_Buckingham_Palace.mp3";
 import clipC7 from "../../../assets/audio/ClassBook/Unit 2/Page 14 - C/Item_007_Darren_is_going_to_take_a_tour_of_the_English_countryside.mp3";
@@ -556,7 +558,7 @@ export default function WB_ListenReadWriteCheckCross_QC() {
         {/* ── Items ── */}
         <div className="lrcc-list">
           {ITEMS.map((item) => (
-            renderExerciseAudioGroup({"label":`Hear sentence ${item.id}`,"src":[clipC7,clipC8,clipC9,null,null][item.id-1],"id":`sentence-${item.id}`,"audio":listening,"key":item.id,"className":"lrcc-row",children:<>
+            renderExerciseAudioGroup({"label":`Hear sentence ${item.id}`,"src":[clipC7,clipC8,clipC9,missingNew0,missingNew1][item.id-1],"id":`sentence-${item.id}`,"audio":listening,"key":item.id,"className":"lrcc-row",children:<>
               {/* Number */}
               <span className="lrcc-num">{item.id}</span>
 

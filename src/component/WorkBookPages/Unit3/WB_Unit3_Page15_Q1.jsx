@@ -1,3 +1,9 @@
+import missingNew0 from "../../../assets/audio/G4-Missing/made.mp3";
+import missingNew1 from "../../../assets/audio/G4-Missing/family.mp3";
+import missingNew2 from "../../../assets/audio/G4-Missing/yesterday.mp3";
+import missingNew3 from "../../../assets/audio/G4-Missing/She had a large.mp3";
+import missingNew4 from "../../../assets/audio/G4-Missing/I had a.mp3";
+import missingNew5 from "../../../assets/audio/G4-Missing/time..mp3";
 import clipPage15A11 from "../../../assets/audio/WorkBook/Unit 3/Page 15 - A/Item_011_We_had_a_fun.mp3";
 import clipPage15A10 from "../../../assets/audio/WorkBook/Unit 3/Page 15 - A/Item_010_We_went_to_the_museum.mp3";
 import clipPage15A9 from "../../../assets/audio/WorkBook/Unit 3/Page 15 - A/Item_009_wonderful.mp3";
@@ -318,6 +324,9 @@ export default function WB_ReadLookCircleWrite_A() {
         gifts: clipPage15A7,
         birthday: clipPage15A8,
         wonderful: clipPage15A9,
+        made: missingNew0,
+        family: missingNew1,
+        yesterday: missingNew2,
       }[option],
     );
     if (showAns || selectionResults[id] === "correct") return;
@@ -423,6 +432,8 @@ export default function WB_ReadLookCircleWrite_A() {
                 2: clipPage15A2,
                 3: clipPage15A10,
                 4: clipPage15A11,
+                5: missingNew3,
+                6: missingNew4,
               }[item.id],
               label: item.sentenceBefore,
               children: item.sentenceBefore,
@@ -463,7 +474,7 @@ export default function WB_ReadLookCircleWrite_A() {
             {renderExerciseAudioText({
               audio: listening,
               id: `after-${item.id}`,
-              src: item.id === 2 ? clipPage15A3 : null,
+              src: item.id === 2 ? clipPage15A3 : item.id === 6 ? missingNew5 : null,
               label: item.sentenceAfter,
               children: item.sentenceAfter,
             })}

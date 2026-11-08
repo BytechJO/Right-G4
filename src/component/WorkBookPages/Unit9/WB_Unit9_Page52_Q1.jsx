@@ -1,3 +1,5 @@
+import missingNew0 from "../../../assets/audio/G4-Missing/Why doesn't John want to wear hats.mp3";
+import missingNew1 from "../../../assets/audio/G4-Missing/Why does Stella want to go to the baseball field.mp3";
 import clipPage52C22 from "../../../assets/audio/WorkBook/Unit 9/Page 52 - C/Item_022_Why_does_Helen_want_to_buy_a_skirt.mp3";
 import clipPage52C21 from "../../../assets/audio/WorkBook/Unit 9/Page 52 - C/Item_021_Why_doesn't_Jack_want_any_chicken.mp3";
 import clipPage52C20 from "../../../assets/audio/WorkBook/Unit 9/Page 52 - C/Item_020_Why_doesn't_Sarah_want_to_eat_eggplant.mp3";
@@ -426,7 +428,7 @@ const [results,setResults]=useState({}),[announcement,setAnnouncement]=useState(
             return (
               <div key={item.id} className="rcc-row">
                 <span className="rcc-num">{item.id}</span>
-                <span className="rcc-question">{renderExerciseAudioText({audio:listening,id:`question-${item.id}`,src:[clipPage52C19,clipPage52C20,clipPage52C21,clipPage52C22][item.id-1],label:item.question,children:item.question})}</span>
+                <span className="rcc-question">{renderExerciseAudioText({audio:listening,id:`question-${item.id}`,src:[clipPage52C19,clipPage52C20,clipPage52C21,clipPage52C22,missingNew0,missingNew1][item.id-1],label:item.question,children:item.question})}</span>
                 <div className="rcc-input-wrap">
                   <input aria-invalid={results[item.id]==="wrong"} placeholder="Your answer" title={answerTargets.find(t=>t.key===item.id)?.label||"Complete this answer"} aria-label={answerTargets.find(t=>t.key===item.id)?.label||"Complete this answer"} {...fieldKeys}
                     type="text"

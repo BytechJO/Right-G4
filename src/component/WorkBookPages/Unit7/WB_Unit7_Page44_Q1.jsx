@@ -1,3 +1,5 @@
+import missingNew0 from "../../../assets/audio/G4-Missing/any chocolate..mp3";
+import missingNew1 from "../../../assets/audio/G4-Missing/any carrots..mp3";
 import clipPage44K5 from "../../../assets/audio/WorkBook/Unit 7/Page 44 - K/Item_005_any_cherries.mp3";
 import clipPage44K4 from "../../../assets/audio/WorkBook/Unit 7/Page 44 - K/Item_004_cake.mp3";
 import clipPage44K3 from "../../../assets/audio/WorkBook/Unit 7/Page 44 - K/Item_003_sandwiches.mp3";
@@ -503,7 +505,7 @@ const [results,setResults]=useState({}),[announcement,setAnnouncement]=useState(
                     {wrong && <div className="lrwk-badge">✕</div>}
                   </div>
 
-                  {item.after && <span className="lrwk-text">{renderExerciseAudioText({audio:listening,id:`suffix-${item.id}`,src:[clipPage44K2,clipPage44K3,clipPage44K4,clipPage44K5][item.id-1],label:item.after,children:item.after})}</span>}
+                  {item.after && <span className="lrwk-text">{renderExerciseAudioText({audio:listening,id:`suffix-${item.id}`,src:[clipPage44K2,clipPage44K3,clipPage44K4,clipPage44K5,missingNew0,missingNew1][item.id-1],label:item.after,children:item.after})}</span>}
                 </div>
 
               </div>

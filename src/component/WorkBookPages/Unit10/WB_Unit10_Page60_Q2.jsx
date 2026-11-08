@@ -1,3 +1,5 @@
+import missingNew0 from "../../../assets/audio/G4-Missing/Have they played on the swings.mp3";
+import missingNew1 from "../../../assets/audio/G4-Missing/Has she listened to music.mp3";
 import clipPage60H4 from "../../../assets/audio/WorkBook/Unit 10/Page 60 - H/Item_004_Has_she_cooked_dinner.mp3";
 import clipPage60H3 from "../../../assets/audio/WorkBook/Unit 10/Page 60 - H/Item_003_Have_they_watched_a_movie.mp3";
 import clipPage60H2 from "../../../assets/audio/WorkBook/Unit 10/Page 60 - H/Item_002_Has_he_read_a_book.mp3";
@@ -428,7 +430,7 @@ const [results,setResults]=useState({}),[announcement,setAnnouncement]=useState(
                 {/* Question */}
                 <div className="rlw-question-row">
                   <span className="rlw-num">{item.id}</span>
-                  <span className="rlw-question">{renderExerciseAudioText({audio:listening,id:`question-${item.id}`,src:[clipPage60H1,clipPage60H2,clipPage60H3,clipPage60H4][item.id-1],label:item.question,children:item.question})}</span>
+                  <span className="rlw-question">{renderExerciseAudioText({audio:listening,id:`question-${item.id}`,src:[clipPage60H1,clipPage60H2,clipPage60H3,clipPage60H4,missingNew0,missingNew1][item.id-1],label:item.question,children:item.question})}</span>
                 </div>
 
                 {/* Image + icon */}
