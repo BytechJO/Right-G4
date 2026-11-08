@@ -1,5 +1,172 @@
+import missingNew0 from "../../../assets/audio/G4-Missing/What do you think might be in each of the gifts.mp3";
+/* eslint-disable react-refresh/only-export-components */
+import {useCallback} from "react";
+import clipPage26I6 from "../../../assets/audio/WorkBook/Unit 4/Page 26 - I/Item_006_Hansel.mp3";
+import clipPage26I5 from "../../../assets/audio/WorkBook/Unit 4/Page 26 - I/Item_005_Helen.mp3";
+import clipPage26I4 from "../../../assets/audio/WorkBook/Unit 4/Page 26 - I/Item_004_Tom.mp3";
+import clipPage26I3 from "../../../assets/audio/WorkBook/Unit 4/Page 26 - I/Item_003_Helen's_gift_was_bigger_than_Hansel's_but_not_as_big_as_Tom's.mp3";
+import clipPage26I2 from "../../../assets/audio/WorkBook/Unit 4/Page 26 - I/Item_002_Tom_had_the_gift_that_was_the_biggest_and_the_tallest.mp3";
+import clipPage26I1 from "../../../assets/audio/WorkBook/Unit 4/Page 26 - I/Item_001_Stella's_mom_gave_each_of_the_children_a_gift!.mp3";
+import {useEffect as useListeningEffect,useRef as useListeningRef,useState as useListeningState} from "react";
+import {useAudio} from "../../../context/AudioContext";
+import {FaVolumeUp as ListeningSpeakerIcon} from "react-icons/fa";
+import ExerciseHeader from "../../ExerciseHeader";
 import React, { useState, useRef, useEffect } from "react";
-import Button from "../Button";
+function useExerciseListening(pageId) {
+  const coordinator = useAudio();
+  const audioRef = useListeningRef(null),
+    generation = useListeningRef(0);
+  const [activeId, setActiveId] = useListeningState(null),
+    [error, setError] = useListeningState("");
+  const clearOwned = () => {
+    const current = audioRef.current;
+    if (current) {
+      current.onended = current.onplaying = current.onerror = current.onpause = null;
+      current.pause();
+      current.remove();
+      audioRef.current = null;
+    }
+  };
+  const stop = () => {
+    generation.current++;
+    clearOwned();
+    setActiveId(null);
+    setError("");
+  };
+  const play = (id, sources) => {
+    const queue = (Array.isArray(sources) ? sources : [sources]).filter(Boolean);
+    if (!queue.length) return;
+    stop();
+    const token = generation.current;
+    let index = 0;
+    const next = () => {
+      if (token !== generation.current) return;
+      clearOwned();
+      if (index >= queue.length) {
+        setActiveId(null);
+        return;
+      }
+      const media = new Audio(queue[index++]);
+      media.hidden = true;
+      media.dataset.exerciseListening = pageId;
+      document.body.appendChild(media);
+      audioRef.current = media;
+      const current = () => token === generation.current && audioRef.current === media;
+      const fail = () => {
+        if (!current()) return;
+        generation.current++;
+        clearOwned();
+        setActiveId(null);
+        setError("Audio could not be played. Please try again.");
+      };
+      media.onplaying = () => {
+        if (current()) setActiveId(id);
+      };
+      media.onended = () => {
+        if (current()) next();
+      };
+      media.onerror = fail;
+      media.onpause = () => {
+        if (!current()) return;
+        generation.current++;
+        clearOwned();
+        setActiveId(null);
+      };
+      document.querySelectorAll("audio,video").forEach(other => {
+        if (other !== media) other.pause();
+      });
+      coordinator?.registerAudio(media, null, pageId);
+      media.play().catch(fail);
+    };
+    next();
+  };
+  useListeningEffect(() => () => {
+    generation.current++;
+    const media = audioRef.current;
+    if (media) {
+      media.onended = media.onplaying = media.onerror = media.onpause = null;
+      media.pause();
+      media.remove();
+      audioRef.current = null;
+    }
+  }, []);
+  return {
+    play,
+    stop,
+    activeId,
+    error
+  };
+}
+function renderExerciseSpeaker() {
+  return <span aria-hidden="true" style={{
+    position: "absolute",
+    top: -10,
+    right: -10,
+    width: 22,
+    height: 22,
+    borderRadius: "50%",
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    background: "white",
+    color: "black",
+    boxShadow: "0 1px 3px rgba(0,0,0,.25)",
+    pointerEvents: "none",
+    zIndex: 3
+  }}><ListeningSpeakerIcon size={12} /></span>;
+}
+function renderExerciseAudioText({
+  audio,
+  id,
+  src,
+  label,
+  children
+}) {
+  if (!src || Array.isArray(src) && !src.some(Boolean)) return children;
+  const playing = audio.activeId === id;
+  const keys = event => {
+    if (event.target !== event.currentTarget || event.key !== "Enter" && event.key !== " ") return;
+    event.preventDefault();
+    event.stopPropagation();
+    if (event.type === "keydown" && !event.repeat) audio.play(id, src);
+  };
+  return <span role="button" tabIndex={0} data-listening={id} aria-label={label} onClick={event => {
+    event.stopPropagation();
+    audio.play(id, src);
+  }} onKeyDown={keys} onKeyUp={keys} style={{
+    position: "relative",
+    cursor: "pointer",
+    borderRadius: 6,
+    boxShadow: playing ? "0 0 0 3px #2563eb" : undefined,
+    backgroundColor: playing ? "#dbeafe" : undefined
+  }}>{children}{playing && renderExerciseSpeaker()}</span>;
+}
+
+
+
+const activationKeys = {
+  onKeyDown: (event) => {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    event.preventDefault();
+    event.stopPropagation();
+    if (!event.repeat) event.currentTarget.click();
+  },
+  onKeyUp: (event) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+  },
+};
+const fieldKeys = {
+  onKeyDown: (event) => {
+    if (event.key === "Enter" || event.key === " ") event.stopPropagation();
+  },
+  onKeyUp: (event) => {
+    if (event.key === "Enter" || event.key === " ") event.stopPropagation();
+  },
+};
+
 
 // ─────────────────────────────────────────────
 //  🎨  COLORS
@@ -36,47 +203,32 @@ const SIZES = [2, 4, 8, 14];
 // ─────────────────────────────────────────────
 //  SINGLE CANVAS — receives shared tool state
 // ─────────────────────────────────────────────
-function DrawCanvas({ tool, color, lineWidth, resetKey }) {
+function DrawCanvas({ tool, color, lineWidth, resetKey, label, onAnnounce }) {
   const canvasRef  = useRef(null);
   const isDrawing  = useRef(false);
   const lastPos    = useRef(null);
-  const historyRef = useRef([]);
+  const historyRef = useRef([]), pointerId=useRef(null),generation=useRef(0);
+  const [cursor,setCursor]=useState({x:50,y:50}),[keyboardDrawing,setKeyboardDrawing]=useState(false),[showCursor,setShowCursor]=useState(false);
+  const releasePointer=useCallback(()=>{const id=pointerId.current;pointerId.current=null;if(id!==null&&canvasRef.current?.hasPointerCapture(id))canvasRef.current.releasePointerCapture(id);},[]);
+  const invalidateDrawing=useCallback(()=>{generation.current++;},[]);
 
   // Init / reset canvas to white
-  const initCanvas = () => {
+  const initCanvas = useCallback(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
+    invalidateDrawing();isDrawing.current=false;lastPos.current=null;releasePointer();setKeyboardDrawing(false);
     const rect = canvas.getBoundingClientRect();
-    canvas.width  = rect.width  || 300;
-    canvas.height = rect.height || 300;
+    canvas.width = Math.max(1,Math.round(rect.width || 300));
+    canvas.height = Math.max(1,Math.round(rect.height || 300));
     const ctx = canvas.getContext("2d");
     ctx.fillStyle = "#ffffff";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     historyRef.current = [];
-  };
+  },[releasePointer,invalidateDrawing]);
 
-  useEffect(() => {
-    initCanvas();
-    const ro = new ResizeObserver(() => {
-      const canvas = canvasRef.current;
-      if (!canvas) return;
-      const saved = canvas.toDataURL();
-      const rect  = canvas.getBoundingClientRect();
-      canvas.width  = rect.width;
-      canvas.height = rect.height;
-      const ctx = canvas.getContext("2d");
-      ctx.fillStyle = "#ffffff";
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-      const img = new Image();
-      img.onload = () => ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-      img.src = saved;
-    });
-    ro.observe(canvasRef.current);
-    return () => ro.disconnect();
-  }, []);
-
+  useEffect(()=>{initCanvas();const canvas=canvasRef.current;const observer=new ResizeObserver(()=>{if(!canvas)return;const rect=canvas.getBoundingClientRect();const width=Math.max(1,Math.round(rect.width)),height=Math.max(1,Math.round(rect.height));if(canvas.width===width&&canvas.height===height)return;const saved=document.createElement("canvas");saved.width=canvas.width;saved.height=canvas.height;saved.getContext("2d").drawImage(canvas,0,0);invalidateDrawing();isDrawing.current=false;lastPos.current=null;setKeyboardDrawing(false);releasePointer();canvas.width=width;canvas.height=height;const ctx=canvas.getContext("2d");ctx.fillStyle="#fff";ctx.fillRect(0,0,width,height);ctx.drawImage(saved,0,0,width,height);});observer.observe(canvas);return()=>{observer.disconnect();invalidateDrawing();isDrawing.current=false;releasePointer();};},[initCanvas,releasePointer,invalidateDrawing]);
   // Reset when resetKey changes
-  useEffect(() => { initCanvas(); }, [resetKey]);
+  useEffect(() => { initCanvas(); }, [resetKey,initCanvas]);
 
   const getPos = (e, canvas) => {
     const rect   = canvas.getBoundingClientRect();
@@ -96,6 +248,7 @@ function DrawCanvas({ tool, color, lineWidth, resetKey }) {
 
   const startDraw = (e) => {
     e.preventDefault();
+    invalidateDrawing();
     saveHistory();
     isDrawing.current = true;
     lastPos.current = getPos(e, canvasRef.current);
@@ -135,18 +288,25 @@ function DrawCanvas({ tool, color, lineWidth, resetKey }) {
 
   const stopDraw = () => { isDrawing.current = false; lastPos.current = null; };
 
+
+  const handleUndo=()=>{stopDraw();releasePointer();setKeyboardDrawing(false);if(!historyRef.current.length)return;const canvas=canvasRef.current,token=++generation.current,img=new Image();img.onload=()=>{if(generation.current===token&&canvasRef.current===canvas){const ctx=canvas.getContext("2d");ctx.clearRect(0,0,canvas.width,canvas.height);ctx.drawImage(img,0,0,canvas.width,canvas.height);}};img.src=historyRef.current.pop();onAnnounce(label+" last stroke undone.");};
+  const pointerStart=event=>{if(pointerId.current!==null||event.button!==0)return;stopDraw();setKeyboardDrawing(false);setShowCursor(false);pointerId.current=event.pointerId;event.currentTarget.setPointerCapture(event.pointerId);startDraw(event);};
+  const pointerMove=event=>{if(pointerId.current===event.pointerId)draw(event);};
+  const pointerEnd=event=>{if(pointerId.current!==event.pointerId)return;stopDraw();releasePointer();};
+  const cursorEvent=position=>{const rect=canvasRef.current.getBoundingClientRect();return {preventDefault(){},clientX:rect.left+rect.width*position.x/100,clientY:rect.top+rect.height*position.y/100};};
+  const canvasKeys=event=>{if(event.key==="Tab")return;const directions={ArrowLeft:[-1,0],ArrowRight:[1,0],ArrowUp:[0,-1],ArrowDown:[0,1]};if(directions[event.key]){event.preventDefault();event.stopPropagation();const [dx,dy]=directions[event.key],step=event.shiftKey?5:1,next={x:Math.max(0,Math.min(100,cursor.x+dx*step)),y:Math.max(0,Math.min(100,cursor.y+dy*step))};setCursor(next);setShowCursor(true);if(keyboardDrawing)draw(cursorEvent(next));return;}if(event.key==="Enter"||event.key===" "){event.preventDefault();event.stopPropagation();if(event.repeat||pointerId.current!==null)return;if(keyboardDrawing){stopDraw();setKeyboardDrawing(false);onAnnounce(label+" stroke finished.");}else{startDraw(cursorEvent(cursor));setKeyboardDrawing(true);setShowCursor(true);onAnnounce(label+" drawing. Move with arrows; Enter or Space finishes the stroke.");}}else if(event.key==="Escape"){event.preventDefault();event.stopPropagation();stopDraw();setKeyboardDrawing(false);}else if(event.key==="Backspace"){event.preventDefault();event.stopPropagation();if(!event.repeat)handleUndo();}};
   return (
-    <canvas
+    <><canvas tabIndex={0} data-keyboard-choice role="application" aria-label={`${label} gift drawing canvas. Arrows move; Enter or Space starts or finishes a stroke; Escape finishes; Backspace undoes the last stroke. Drawing is not graded.`} onKeyDown={canvasKeys} onKeyUp={activationKeys.onKeyUp} onFocus={event=>setShowCursor(event.currentTarget.matches(":focus-visible"))} onBlur={()=>{if(keyboardDrawing){stopDraw();setKeyboardDrawing(false);}setShowCursor(false);}} onPointerDown={pointerStart} onPointerMove={pointerMove} onPointerUp={pointerEnd} onPointerCancel={pointerEnd} onLostPointerCapture={pointerEnd}
       ref={canvasRef}
       className={`rad-canvas ${tool === "eraser" ? "rad-canvas--eraser" : ""}`}
-      onMouseDown={startDraw}
-      onMouseMove={draw}
-      onMouseUp={stopDraw}
-      onMouseLeave={stopDraw}
-      onTouchStart={startDraw}
-      onTouchMove={draw}
-      onTouchEnd={stopDraw}
-    />
+      
+      
+      
+      
+      
+      
+      
+    />{showCursor&&<span aria-hidden="true" style={{position:"absolute",left:cursor.x+"%",top:cursor.y+"%",transform:"translate(-50%,-50%)",width:12,height:12,border:"2px solid #2563eb",background:keyboardDrawing?"#dbeafe":"transparent",borderRadius:"50%",pointerEvents:"none"}}/>}</>
   );
 }
 
@@ -154,19 +314,21 @@ function DrawCanvas({ tool, color, lineWidth, resetKey }) {
 //  MAIN COMPONENT
 // ─────────────────────────────────────────────
 export default function WB_ReadDraw_QI() {
+const listening=useExerciseListening("wb_unit4_page26_q1");
+
+  const [announcement,setAnnouncement]=useState("");
   const [tool,      setTool]      = useState("pen");
   const [color,     setColor]     = useState("#000000");
   const [lineWidth, setLineWidth] = useState(3);
   const [resetKey,  setResetKey]  = useState(0);
   const [answer,    setAnswer]    = useState("");
 
-  const handleReset = () => {
-    setResetKey((k) => k + 1);
-    setAnswer("");
-  };
+  const handleReset=()=>{listening.stop();setResetKey(k=>k+1);setAnswer("");setAnnouncement("All drawings and the response cleared.");};
 
   return (
-    <div className="main-container-component">
+    <div data-adapt-scope="Unit4_WB_Unit4_Page26_Q1" className="main-container-component"><span className="sr-only" role="status" aria-live="polite">{listening.error}</span>
+<style>{`[data-adapt-scope="Unit4_WB_Unit4_Page26_Q1"] input:focus-visible, [data-adapt-scope="Unit4_WB_Unit4_Page26_Q1"] [data-keyboard-choice]:focus-visible, [data-adapt-scope="Unit4_WB_Unit4_Page26_Q1"] [data-grid-cell]:focus-visible, [data-adapt-scope="Unit4_WB_Unit4_Page26_Q1"] [data-listening]:focus-visible {outline:4px solid #2563eb !important;outline-offset:3px;border-radius:6px;}`}</style>
+<div className="sr-only" role="status" aria-live="polite" aria-atomic="true">{announcement}</div>
       <style>{`
         /* ── Paragraph ── */
         .rad-paragraph {
@@ -343,18 +505,12 @@ font-size: clamp(15px, 1.9vw, 20px);
         }}
       >
         {/* ── Header ── */}
-        <h1
-          className="WB-header-title-page8"
-          style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
-        >
-          <span className="WB-ex-A">I</span>
-          Read and draw.
-        </h1>
+        <ExerciseHeader subTitle="Compare the three clues carefully, then draw a different gift in each correct column." sectionLetter="I" title={<>Read and draw.</>} />
 
         {/* ── Paragraph ── */}
         <div className="rad-paragraph">
           {PARAGRAPH.map((line, i) => (
-            <p key={i} className="rad-para-line">{line}</p>
+            <p key={i} className="rad-para-line">{renderExerciseAudioText({audio:listening,id:`paragraph-${i}`,src:[clipPage26I1,clipPage26I2,clipPage26I3][i],label:line,children:line})}</p>
           ))}
         </div>
 
@@ -363,13 +519,13 @@ font-size: clamp(15px, 1.9vw, 20px);
 
           {/* Pen / Eraser */}
           <span className="rad-toolbar-label">Tool:</span>
-          <button
+          <button type="button" data-keyboard-choice {...activationKeys}
             className={`rad-tool-btn ${tool === "pen" ? "rad-tool-btn--active" : ""}`}
-            onClick={() => setTool("pen")}
+            aria-pressed={tool==="pen"} onClick={() => setTool("pen")}
           >✏️ Pen</button>
-          <button
+          <button type="button" data-keyboard-choice {...activationKeys}
             className={`rad-tool-btn ${tool === "eraser" ? "rad-tool-btn--active" : ""}`}
-            onClick={() => setTool("eraser")}
+            aria-pressed={tool==="eraser"} onClick={() => setTool("eraser")}
           >🧹 Eraser</button>
 
           <div className="rad-divider" />
@@ -377,7 +533,7 @@ font-size: clamp(15px, 1.9vw, 20px);
           {/* Colors */}
           <span className="rad-toolbar-label">Color:</span>
           {DRAW_COLORS.map((c) => (
-            <div
+            <div role="button" tabIndex={0} data-keyboard-choice {...activationKeys} aria-label={`Pen color ${["black","red","green","blue","orange","purple","yellow","teal"][DRAW_COLORS.indexOf(c)]}`} aria-pressed={color===c&&tool==="pen"}
               key={c}
               className={`rad-color ${color === c && tool === "pen" ? "rad-color--active" : ""}`}
               style={{ background: c }}
@@ -390,7 +546,7 @@ font-size: clamp(15px, 1.9vw, 20px);
           {/* Sizes */}
           <span className="rad-toolbar-label">Size:</span>
           {SIZES.map((s) => (
-            <div
+            <div role="button" tabIndex={0} data-keyboard-choice {...activationKeys} aria-label={`Stroke width ${s}`} aria-pressed={lineWidth===s}
               key={s}
               className={`rad-size ${lineWidth === s ? "rad-size--active" : ""}`}
               style={{ width: s * 2.5, height: s * 2.5 }}
@@ -405,15 +561,15 @@ font-size: clamp(15px, 1.9vw, 20px);
           <thead>
             <tr>
               {COLUMNS.map((col) => (
-                <th key={col} className="rad-th">{col}</th>
+                <th key={col} className="rad-th">{renderExerciseAudioText({audio:listening,id:`heading-${col}`,src:[clipPage26I4,clipPage26I5,clipPage26I6][COLUMNS.indexOf(col)],label:col,children:col})}</th>
               ))}
             </tr>
           </thead>
           <tbody>
             <tr>
               {COLUMNS.map((col) => (
-                <td key={col} className="rad-td">
-                  <DrawCanvas
+                <td style={{position:"relative"}} key={col} className="rad-td">
+                  <DrawCanvas label={col} onAnnounce={setAnnouncement}
                     tool={tool}
                     color={color}
                     lineWidth={lineWidth}
@@ -427,8 +583,8 @@ font-size: clamp(15px, 1.9vw, 20px);
 
         {/* ── Question + input ── */}
         <div className="rad-question-row">
-          <span className="rad-question-text">{QUESTION}</span>
-          <input
+          <span className="rad-question-text">{renderExerciseAudioText({audio:listening,id:"drawing-question",src:missingNew0,label:QUESTION,children:QUESTION})}</span>
+          <input {...fieldKeys} aria-label={QUESTION} title={QUESTION} placeholder="Your own idea"
             type="text"
             className="rad-q-input"
             value={answer}
@@ -440,11 +596,7 @@ font-size: clamp(15px, 1.9vw, 20px);
 
         {/* ── Start Again only ── */}
         <div className="rad-buttons">
-          <Button
-            handleStartAgain={handleReset}
-            checkAnswers={null}
-            handleShowAnswer={null}
-          />
+          <div className="action-buttons-container"><button type="button" aria-label="Start Again" {...activationKeys} onClick={handleReset} className="try-again-button">Start Again ↻</button></div>
         </div>
       </div>
     </div>

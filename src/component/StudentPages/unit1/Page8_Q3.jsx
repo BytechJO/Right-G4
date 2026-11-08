@@ -1,5 +1,19 @@
+import missingNew0 from "../../../assets/audio/G4-Missing/Tim will take his brother and friend..mp3";
+import clipC10 from "../../../assets/audio/ClassBook/Unit 1/Page 8 - C/Item_010_They_will_have_fun_at_the_museum.mp3";
+import clipC9 from "../../../assets/audio/ClassBook/Unit 1/Page 8 - C/Item_009_Tim_will_visit_the_museum_tomorrow.mp3";
+import clipC8 from "../../../assets/audio/ClassBook/Unit 1/Page 8 - C/Item_008_Tim_will_pack_a_lunch.mp3";
+import clipC7 from "../../../assets/audio/ClassBook/Unit 1/Page 8 - C/Item_007_Tim_will_have_to_remember_to_take_his_camera_with_him.mp3";
+import clipC6 from "../../../assets/audio/ClassBook/Unit 1/Page 8 - C/Item_006_have_a_lot_of_fun_at_the_museum_tomorrow.mp3";
+import clipC5 from "../../../assets/audio/ClassBook/Unit 1/Page 8 - C/Item_005_with_him,_so_he_can_take_pictures_in_the_museum._Tim_is_certain_they_wil.mp3";
+import clipC4 from "../../../assets/audio/ClassBook/Unit 1/Page 8 - C/Item_004_in_case_they_get_hungry._He_will_have_to_remember_to_take_his_camera.mp3";
+import clipC3 from "../../../assets/audio/ClassBook/Unit 1/Page 8 - C/Item_003_o'clock_and_arrive_at_the_museum_at_nine_o'clock._Tim_will_pack_a_lunch.mp3";
+import clipC2 from "../../../assets/audio/ClassBook/Unit 1/Page 8 - C/Item_002_his_little_brother_and_friend_with_him._They_will_take_a_bus_at_eight.mp3";
+import clipC1 from "../../../assets/audio/ClassBook/Unit 1/Page 8 - C/Item_001_Tim_will_visit_the_new_Museum_of_Inventions_tomorrow._He_will_take.mp3";
+import {useEffect as useListeningEffect,useRef as useListeningRef,useState as useListeningState} from "react";
+import {useAudio} from "../../../context/AudioContext";
+import {FaVolumeUp as ListeningSpeakerIcon} from "react-icons/fa";
 import React, { useState, useRef } from "react";
-import Button from "../../Button";
+import ExerciseHeader from "../../ExerciseHeader";
 import ValidationAlert from "../../Popup/ValidationAlert";
 
 import sound from "../../../assets/audio/ClassBook/Grade 4/cd5pg8-instruction1-adult-lady_YJxh5Hg5.mp3";
@@ -8,18 +22,183 @@ import sound from "../../../assets/audio/ClassBook/Grade 4/cd5pg8-instruction1-a
 import imgScene from "../../../assets/imgs/pages/Class Book/Right 4 Unit 1 Robots of the Future Folder/Page8/SVG/Asset 1.svg";
 import QuestionAudioPlayer from "../../QuestionAudioPlayer";
 
+function useExerciseListening(pageId) {
+  const coordinator = useAudio();
+  const audioRef = useListeningRef(null),
+    generation = useListeningRef(0);
+  const [activeId, setActiveId] = useListeningState(null),
+    [error, setError] = useListeningState("");
+  const clearOwned = () => {
+    const current = audioRef.current;
+    if (current) {
+      current.onended = current.onplaying = current.onerror = current.onpause = null;
+      current.pause();
+      current.remove();
+      audioRef.current = null;
+    }
+  };
+  const stop = () => {
+    generation.current++;
+    clearOwned();
+    setActiveId(null);
+    setError("");
+  };
+  const play = (id, sources) => {
+    const queue = (Array.isArray(sources) ? sources : [sources]).filter(Boolean);
+    if (!queue.length) return;
+    stop();
+    const token = generation.current;
+    let index = 0;
+    const next = () => {
+      if (token !== generation.current) return;
+      clearOwned();
+      if (index >= queue.length) {
+        setActiveId(null);
+        return;
+      }
+      const media = new Audio(queue[index++]);
+      media.hidden = true;
+      media.dataset.exerciseListening = pageId;
+      document.body.appendChild(media);
+      audioRef.current = media;
+      const current = () => token === generation.current && audioRef.current === media;
+      const fail = () => {
+        if (!current()) return;
+        generation.current++;
+        clearOwned();
+        setActiveId(null);
+        setError("Audio could not be played. Please try again.");
+      };
+      media.onplaying = () => {
+        if (current()) setActiveId(id);
+      };
+      media.onended = () => {
+        if (current()) next();
+      };
+      media.onerror = fail;
+      media.onpause = () => {
+        if (!current()) return;
+        generation.current++;
+        clearOwned();
+        setActiveId(null);
+      };
+      document.querySelectorAll("audio,video").forEach(other => {
+        if (other !== media) other.pause();
+      });
+      coordinator?.registerAudio(media, null, pageId);
+      media.play().catch(fail);
+    };
+    next();
+  };
+  useListeningEffect(() => () => {
+    generation.current++;
+    const media = audioRef.current;
+    if (media) {
+      media.onended = media.onplaying = media.onerror = media.onpause = null;
+      media.pause();
+      media.remove();
+      audioRef.current = null;
+    }
+  }, []);
+  return {
+    play,
+    stop,
+    activeId,
+    error
+  };
+}
+function renderExerciseSpeaker() {
+  return <span aria-hidden="true" style={{
+    position: "absolute",
+    top: -10,
+    right: -10,
+    width: 22,
+    height: 22,
+    borderRadius: "50%",
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    background: "white",
+    color: "black",
+    boxShadow: "0 1px 3px rgba(0,0,0,.25)",
+    pointerEvents: "none",
+    zIndex: 3
+  }}><ListeningSpeakerIcon size={12} /></span>;
+}
+function renderExerciseAudioText({
+  audio,
+  id,
+  src,
+  label,
+  children
+}) {
+  if (!src || Array.isArray(src) && !src.some(Boolean)) return children;
+  const playing = audio.activeId === id;
+  const keys = event => {
+    if (event.target !== event.currentTarget || event.key !== "Enter" && event.key !== " ") return;
+    event.preventDefault();
+    event.stopPropagation();
+    if (event.type === "keydown" && !event.repeat) audio.play(id, src);
+  };
+  return <span role="button" tabIndex={0} data-listening={id} aria-label={label} onClick={event => {
+    event.stopPropagation();
+    audio.play(id, src);
+  }} onKeyDown={keys} onKeyUp={keys} style={{
+    position: "relative",
+    cursor: "pointer",
+    borderRadius: 6,
+    boxShadow: playing ? "0 0 0 3px #2563eb" : undefined,
+    backgroundColor: playing ? "#dbeafe" : undefined
+  }}>{children}{playing && renderExerciseSpeaker()}</span>;
+}
+function renderExerciseAudioGroup({
+  audio,
+  id,
+  src,
+  label,
+  children,
+  style,
+  key: renderKey,
+  ...props
+}) {
+  if (!src || Array.isArray(src) && !src.some(Boolean)) return <div key={renderKey} {...props} style={style}>{children}</div>;
+  const playing = audio.activeId === id;
+  const keys = event => {
+    if (event.target !== event.currentTarget || event.key !== "Enter" && event.key !== " ") return;
+    event.preventDefault();
+    event.stopPropagation();
+    if (event.type === "keydown" && !event.repeat) audio.play(id, src);
+  };
+  return <div key={renderKey} {...props} role="group" aria-roledescription="sentence audio" tabIndex={0} data-listening={id} aria-label={label} onKeyDown={keys} onKeyUp={keys} onClick={event => {
+    if (event.target.closest('input,select,textarea,button,[role="button"]')) return;
+    event.stopPropagation();
+    audio.play(id, src);
+  }} style={{
+    ...style,
+    position: style?.position || "relative",
+    borderRadius: style?.borderRadius || 6,
+    boxShadow: playing ? "0 0 0 3px #2563eb" : style?.boxShadow,
+    backgroundColor: playing ? "#dbeafe" : style?.backgroundColor
+  }}>{children}{playing && renderExerciseSpeaker()}</div>;
+}
+
+// ─────────────────────────────────────────────
+//  🎨  COLORS
+// ─────────────────────────────────────────────
+
+
 // ─────────────────────────────────────────────
 //  🎨  COLORS
 // ─────────────────────────────────────────────
 const BOX_BORDER_DEFAULT = "#2096a6";
-const BOX_BORDER_WRONG   = "#ef4444";
-const BOX_TEXT_DEFAULT   = "#2b2b2b";
-const BOX_TEXT_ANSWER    = "#c81e1e";
-const SENTENCE_COLOR     = "#2b2b2b";
-const LABEL_COLOR        = "#2b2b2b";
-const PARA_COLOR         = "#2b2b2b";
-const WRONG_BADGE_BG     = "#ef4444";
-const WRONG_BADGE_TEXT   = "#ffffff";
+const BOX_BORDER_WRONG = "#ef4444";
+const BOX_TEXT_DEFAULT = "#2b2b2b";
+const BOX_TEXT_ANSWER = "#c81e1e";
+const SENTENCE_COLOR = "#2b2b2b";
+const LABEL_COLOR = "#2b2b2b";
+const PARA_COLOR = "#2b2b2b";
+const WRONG_BADGE_BG = "#ef4444";
+const WRONG_BADGE_TEXT = "#ffffff";
 const captions = [
   {
     start: 0.26,
@@ -48,11 +227,11 @@ const captions = [
   },
   {
     start: 21.92,
-    end: 28.00,
+    end: 28.0,
     text: "He will have to remember to take his camera with him so he can take pictures in the museum.",
   },
   {
-    start: 28.00,
+    start: 28.0,
     end: 32.68,
     text: "Tim is certain they will have a lot of fun at the museum tomorrow.",
   },
@@ -66,84 +245,181 @@ const PARAGRAPH = `Tim will visit the new Museum of Inventions tomorrow. He will
 //  📝  EXERCISE DATA
 // ─────────────────────────────────────────────
 const ITEMS = [
-  { id: "a", sentence: "Tim will have to remember to take his camera with him.", correct: ["4"], answer: "4" },
-  { id: "b", sentence: "Tim will pack a lunch.",                                   correct: ["3"], answer: "3" },
-  { id: "c", sentence: "Tim will visit the museum tomorrow.",                      correct: ["1"], answer: "1" },
-  { id: "d", sentence: "They will have fun at the museum.",                        correct: ["5"], answer: "5" },
-  { id: "e", sentence: "Tim will take his brother and friend.",                    correct: ["2"], answer: "2" },
+  {
+    id: "a",
+    sentence: "Tim will have to remember to take his camera with him.",
+    correct: ["4"],
+    answer: "4",
+  },
+  { id: "b", sentence: "Tim will pack a lunch.", correct: ["3"], answer: "3" },
+  {
+    id: "c",
+    sentence: "Tim will visit the museum tomorrow.",
+    correct: ["1"],
+    answer: "1",
+  },
+  {
+    id: "d",
+    sentence: "They will have fun at the museum.",
+    correct: ["5"],
+    answer: "5",
+  },
+  {
+    id: "e",
+    sentence: "Tim will take his brother and friend.",
+    correct: ["2"],
+    answer: "2",
+  },
 ];
 
 // ─────────────────────────────────────────────
 //  🔧  HELPERS
 // ─────────────────────────────────────────────
+const NUMBER_OPTIONS = ITEMS.map((_, index) => String(index + 1));
+
 const isCorrect = (userVal, correctArr) =>
   correctArr.some((c) => userVal.trim() === c);
 
 // ─────────────────────────────────────────────
 //  COMPONENT
 // ─────────────────────────────────────────────
-export default function WB_ReadNumber_QC() {
-  const [answers,     setAnswers]     = useState({});
-  const [showResults, setShowResults] = useState(false);
-  const [showAns,     setShowAns]     = useState(false);
+const activationKeys = {
+  onKeyDown: (event) => {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    event.preventDefault();
+    event.stopPropagation();
+    if (!event.repeat) event.currentTarget.click();
+  },
+  onKeyUp: (event) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+  },
+};
+const fieldKeys = {
+  onKeyDown: (event) => {
+    if (event.key === "Enter" || event.key === " ") event.stopPropagation();
+  },
+  onKeyUp: (event) => {
+    if (event.key === "Enter" || event.key === " ") event.stopPropagation();
+  },
+};
 
-  const inputRefs = useRef({});
+export default function WB_ReadNumber_QC() {
+  const listening=useExerciseListening("sb_unit1_page8_q3");
+
+  const [answers, setAnswers] = useState({});
+  const [results, setResults] = useState({});
+  const [showAns, setShowAns] = useState(false);
+
+  const resetButtonRef = useRef(null);
+  const [announcement, setAnnouncement] = useState("");
+  const checkDisabled =
+    showAns || ITEMS.every((item) => results[item.id] === "correct");
 
   const handleChange = (id, value) => {
     if (showAns) return;
     const item = ITEMS.find((i) => i.id === id);
-    if (showResults && item && isCorrect(answers[id] || "", item.correct)) return;
-    if (value !== "" && !/^[1-9]$/.test(value)) return;
-    setAnswers((prev) => ({ ...prev, [id]: value }));
-
-    // انتقال تلقائي للتالي
-    if (value.length === 1) {
-      const currentIdx = ITEMS.findIndex((i) => i.id === id);
-      const next = ITEMS[currentIdx + 1];
-      if (next) inputRefs.current[next.id]?.focus();
+    if (!item || results[id] === "correct") return;
+    if (value !== "" && !NUMBER_OPTIONS.includes(value)) return;
+    if (
+      value &&
+      Object.entries(answers).some(
+        ([otherId, number]) => otherId !== id && number === value,
+      )
+    ) {
+      setAnnouncement(`Number ${value} is already used in another sentence.`);
+      return;
     }
+    setAnswers((prev) => ({ ...prev, [id]: value }));
+    setResults((prev) => {
+      const next = { ...prev };
+      delete next[id];
+      return next;
+    });
+
+    setAnnouncement(
+      value
+        ? `Sentence ${id}: number ${value} selected.`
+        : `Sentence ${id}: number cleared.`,
+    );
   };
 
   const handleCheck = () => {
-    if (showAns) return;
+    if (checkDisabled) return;listening.stop();
     const allAnswered = ITEMS.every((item) => answers[item.id]?.trim());
-    if (!allAnswered) { ValidationAlert.info("Please complete all answers first."); return; }
+    if (!allAnswered) {
+      setAnnouncement("Please complete all answers first.");
+      ValidationAlert.info("Please complete all answers first.");
+      return;
+    }
     let score = 0;
-    ITEMS.forEach((item) => { if (isCorrect(answers[item.id] || "", item.correct)) score++; });
-    setShowResults(true);
-    if (score === ITEMS.length)   ValidationAlert.success(`Score: ${score} / ${ITEMS.length}`);
-    else if (score > 0)           ValidationAlert.warning(`Score: ${score} / ${ITEMS.length}`);
-    else                          ValidationAlert.error(`Score: ${score} / ${ITEMS.length}`);
+    ITEMS.forEach((item) => {
+      if (isCorrect(answers[item.id] || "", item.correct)) score++;
+    });
+    const checked = Object.fromEntries(
+      ITEMS.map((item) => [
+        item.id,
+        results[item.id] === "correct" ||
+        isCorrect(answers[item.id] || "", item.correct)
+          ? "correct"
+          : "wrong",
+      ]),
+    );
+    setResults(checked);
+    setAnnouncement(
+      `Score: ${score} out of ${ITEMS.length}. ${ITEMS.map((item) => `Question ${item.id}: ${checked[item.id]}`).join(". ")}`,
+    );
+    if (score === ITEMS.length) {
+      resetButtonRef.current?.focus({ preventScroll: true });
+      ValidationAlert.success(`Score: ${score} / ${ITEMS.length}`);
+    } else if (score > 0)
+      ValidationAlert.warning(`Score: ${score} / ${ITEMS.length}`);
+    else ValidationAlert.error(`Score: ${score} / ${ITEMS.length}`);
   };
 
-  const handleShowAnswer = () => {
+  const handleShowAnswer = () => {listening.stop();
     const filled = {};
-    ITEMS.forEach((item) => { filled[item.id] = item.answer; });
+    ITEMS.forEach((item) => {
+      filled[item.id] = item.answer;
+    });
     setAnswers(filled);
-    setShowResults(false);
+    setResults({});
     setShowAns(true);
+    setAnnouncement("Correct answers shown and locked.");
   };
 
-  const handleReset = () => {
+  const handleReset = () => {listening.stop();
     setAnswers({});
-    setShowResults(false);
+    setResults({});
     setShowAns(false);
+    setAnnouncement("Answers and feedback cleared.");
   };
 
-  const isWrong = (item) => {
-    if (!showResults || showAns) return false;
-    return !isCorrect(answers[item.id] || "", item.correct);
-  };
-
-  const isDisabled = (item) => {
-    if (showAns) return true;
-    if (showResults && isCorrect(answers[item.id] || "", item.correct)) return true;
-    return false;
-  };
+  const isWrong = (item) => !showAns && results[item.id] === "wrong";
+  const isDisabled = (item) => showAns || results[item.id] === "correct";
 
   return (
-    <div className="main-container-component">
+    <div data-listening-scope={"sb_unit1_page8_q3"} className="main-container-component sb-unit1-page8_q3"><style>{`[data-listening-scope="sb_unit1_page8_q3"] [data-listening]:focus-visible{outline:4px solid #2563eb;outline-offset:3px;border-radius:6px;}`}</style><span className="sr-only" role="status" aria-live="polite">{listening.error}</span>
+      <div
+        className="sr-only"
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+      >
+        {announcement}
+      </div>
       <style>{`
+        .sb-unit1-page8_q3 .rnqc-input:focus-visible {
+          outline: 4px solid #2563eb;
+          outline-offset: 3px;
+          border-radius: 8px;
+        }
+        .sb-unit1-page8_q3 select.rnqc-input {
+          appearance: none;
+          cursor: pointer;
+        }
         /* ── Paragraph + image row ── */
         .rnqc-top {
           display: grid;
@@ -267,76 +543,130 @@ export default function WB_ReadNumber_QC() {
         }}
       >
         {/* ── Header ── */}
-        <h1
-          className="WB-header-title-page8"
-          style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
-        >
-          <span className="WB-ex-A">C</span>
-          Listen, read, and number.
-        </h1>
- <div style={{marginTop:"10px"}}>
-        <QuestionAudioPlayer
-          src={sound}
-          captions={captions}
-          stopAtSecond={6}
+        <ExerciseHeader
+          sectionLetter="C"
+          title={"Listen, read, and number."}
+          subTitle={
+            "isten to the whole passage first, then number each statement or picture in the order you hear it."
+          }
         />
-      </div>
+        <div style={{ marginTop: "10px" }}>
+          <QuestionAudioPlayer
+            src={sound}
+            captions={captions}
+            stopAtSecond={6}
+            pageId="sb_unit1_page8_q3"
+          />
+        </div>
         {/* ── Paragraph + Image ── */}
         <div className="rnqc-top">
-          <p className="rnqc-para">{PARAGRAPH}</p>
-          <img src={imgScene} alt="museum" className="rnqc-img" />
+          <p className="rnqc-para">{renderExerciseAudioText({"audio":listening,"id":"paragraph-0","src":clipC1,"label":"Hear Tim will visit the new Museum of Inventions tomorrow. He will take ",children:<>{"Tim will visit the new Museum of Inventions tomorrow. He will take "}</>})}{renderExerciseAudioText({"audio":listening,"id":"paragraph-1","src":clipC2,"label":"Hear his little brother and friend with him. They will take a bus at eight ",children:<>{"his little brother and friend with him. They will take a bus at eight "}</>})}{renderExerciseAudioText({"audio":listening,"id":"paragraph-2","src":clipC3,"label":"Hear o'clock and arrive at the museum at nine o'clock. Tim will pack a lunch ",children:<>{"o'clock and arrive at the museum at nine o'clock. Tim will pack a lunch "}</>})}{renderExerciseAudioText({"audio":listening,"id":"paragraph-3","src":clipC4,"label":"Hear in case they get hungry. He will have to remember to take his camera ",children:<>{"in case they get hungry. He will have to remember to take his camera "}</>})}{renderExerciseAudioText({"audio":listening,"id":"paragraph-4","src":clipC5,"label":"Hear with him, so he can take pictures in the museum. Tim is certain they will ",children:<>{"with him, so he can take pictures in the museum. Tim is certain they will "}</>})}{renderExerciseAudioText({"audio":listening,"id":"paragraph-5","src":clipC6,"label":"Hear have a lot of fun at the museum tomorrow.",children:<>{"have a lot of fun at the museum tomorrow."}</>})}</p>
+          <img
+            src={imgScene}
+            alt="An adult and a child looking at an exhibit in a museum."
+            className="rnqc-img"
+          />
         </div>
 
         {/* ── Items ── */}
+        <p id="sb-unit1-page8-q3-number-help" className="sr-only">
+          Choose a number from 1 to 5 for each sentence. Each number can be used
+          once. Choose the dash to clear an editable answer and make its number
+          available again.
+        </p>
         <div className="rnqc-list">
           {ITEMS.map((item) => {
-            const wrong    = isWrong(item);
-            const value    = answers[item.id] || "";
-            const tColor   = showAns ? BOX_TEXT_ANSWER : BOX_TEXT_DEFAULT;
-            const bColor   = wrong ? BOX_BORDER_WRONG : showAns ? BOX_TEXT_ANSWER : BOX_BORDER_DEFAULT;
+            const wrong = isWrong(item);
+            const value = answers[item.id] || "";
+            const tColor = BOX_TEXT_DEFAULT;
+            const bColor = wrong
+              ? BOX_BORDER_WRONG
+              : isDisabled(item)
+                ? "#16a34a"
+                : BOX_BORDER_DEFAULT;
             const disabled = isDisabled(item);
 
             return (
-              <div key={item.id} className="rnqc-row">
-
+              renderExerciseAudioGroup({"label":`Hear sentence ${item.id}`,"src":[clipC7,clipC8,clipC9,clipC10,missingNew0][ITEMS.findIndex(candidate=>candidate.id===item.id)],"id":`sentence-${item.id}`,"audio":listening,"key":item.id,"className":"rnqc-row",children:<>
                 {/* Label a/b/c... */}
                 <span className="rnqc-label">{item.id}</span>
 
                 {/* Sentence */}
                 <span className="rnqc-sentence">{item.sentence}</span>
 
-                {/* Circle number input */}
+                {/* Number selector */}
                 <div className="rnqc-input-wrap">
-                  <input
-                    ref={(el) => (inputRefs.current[item.id] = el)}
-                    type="text"
-                    maxLength={1}
-                    className={[
-                      "rnqc-input",
-                      wrong   ? "rnqc-input--wrong"  : "",
-                   ].filter(Boolean).join(" ")}
+                  <select
+                    aria-label={`Sentence ${item.id}. ${item.sentence} Choose its order number.`}
+                    aria-invalid={wrong}
+                    aria-describedby="sb-unit1-page8-q3-number-help"
+                    {...fieldKeys}
+                    className={["rnqc-input", wrong ? "rnqc-input--wrong" : ""]
+                      .filter(Boolean)
+                      .join(" ")}
                     value={value}
                     disabled={disabled}
                     onChange={(e) => handleChange(item.id, e.target.value)}
                     style={{ borderColor: bColor, color: tColor }}
-                    spellCheck={false}
-                    autoComplete="off"
-                  />
+                  >
+                    <option
+                      value=""
+                      aria-label="Clear answer; no number selected"
+                    >
+                      —
+                    </option>
+                    {NUMBER_OPTIONS.map((number) => (
+                      <option
+                        key={number}
+                        value={number}
+                        disabled={ITEMS.some(
+                          (other) =>
+                            other.id !== item.id &&
+                            answers[other.id] === number,
+                        )}
+                      >
+                        {number}
+                      </option>
+                    ))}
+                  </select>
                   {wrong && <div className="rnqc-badge">✕</div>}
                 </div>
-
-              </div>
+              </>})
             );
           })}
         </div>
 
         {/* ── Buttons ── */}
         <div className="rnqc-buttons">
-          <Button
-            checkAnswers={handleCheck}
-            handleShowAnswer={handleShowAnswer}
-            handleStartAgain={handleReset}
-          />
+          <div className="action-buttons-container">
+            <button
+              type="button"
+              ref={resetButtonRef}
+              onClick={handleReset}
+              {...activationKeys}
+              className="try-again-button"
+            >
+              Start Again ↻
+            </button>
+            <button
+              type="button"
+              onClick={handleShowAnswer}
+              {...activationKeys}
+              className="show-answer-btn swal-continue"
+            >
+              Show Answer
+            </button>
+            <button
+              type="button"
+              onClick={handleCheck}
+              {...activationKeys}
+              disabled={checkDisabled}
+              style={{ cursor: checkDisabled ? "not-allowed" : "pointer" }}
+              className="check-button2"
+            >
+              Check Answer ✓
+            </button>
+          </div>
         </div>
       </div>
     </div>

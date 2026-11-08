@@ -45,7 +45,7 @@ const stopAtSecond = 2.1;
        
         </div>
      <div style={{margin:"3em 0 2em"}} >
-        <QuestionAudioPlayer
+        <QuestionAudioPlayer pageId="sb_unit6_page3_grammar"
           src={sound}
           captions={captions}
           stopAtSecond={stopAtSecond}
@@ -55,14 +55,14 @@ const stopAtSecond = 2.1;
 
       {/* ✅ شلنا الـ title badge والـ paragraphs، والصورة تملأ كل شي */}
       <div className="w-[60%] mt-2">
-        <img
+        <img alt="Grammar examples using should and should not for advice, with statement and question forms."
           src={image}
           style={{ width: "100%", height: "auto", display: "block" }}
         />
       </div>
 
       <div className="w-[60%]  my-5">
-        <img
+        <img alt="Examples of advice using should and should not."
           style={{ width: "100%", height: "auto", display: "block" , alignSelf : "center" }}
           src={image1}
         />

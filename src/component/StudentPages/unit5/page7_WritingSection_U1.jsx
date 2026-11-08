@@ -19,7 +19,7 @@ const GrammarSection_U1 = () => {
 
       {/* ✅ شلنا الـ title badge والـ paragraphs، والصورة تملأ كل شي */}
       <div className="w-[60%] mt-2">
-        <img
+        <img alt="My Day: a sample daily routine, with a boy cycling. Writing tips: order events, use prepositions and connecting words."
           src={image}
           style={{ width: "100%", height: "auto", display: "block" }}
         />

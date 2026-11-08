@@ -1,33 +1,38 @@
-import React , {useRef} from "react";
+import React from "react";
 import page2 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U3 Folder/Page 16.png";
 import "./WB_unit1.css";
 import arrowBtn from "../../../assets/Page 01/Arrow.svg";
+const activationKeys = {
+  onKeyDown: (event) => {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    event.preventDefault();
+    event.stopPropagation();
+    if (!event.repeat) event.currentTarget.dispatchEvent(new MouseEvent("click",{bubbles:true,cancelable:true}));
+  },
+  onKeyUp: (event) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+  },
+};
+
+
 
 const WB_Unit1_Page4 = ({ openPopup }) => {
-  const audioRef = useRef(null);
-  const captionsExample = [
-    { start: 0, end: 2.29, text: " Page 9, exercise F." },
-    { start: 2.32, end: 4.11, text: "Let's sing." },
-    { start: 4.15, end: 6.0, text: "Good morning, good morning." },
-    {
-      start: 6.04,
-      end: 10.02,
-      text: " How are you? How are you? How are you?",
-    },
-    { start: 10.06, end: 11.19, text: " Good morning, good morning." },
-    { start: 11.23, end: 15.19, text: "You are well? I am too." },
-  ];
+  
+  
 
     return (
-      <div
+      <div data-workbook-page="16" role="group" aria-label="Workbook Unit 3, page 16 exercise launchers"
         className="page1-img-wrapper"
         style={{ backgroundImage: `url(${page2})` }}
-      >
+      ><style>{`[data-workbook-page="16"] :focus-visible {outline:3px solid #2563eb !important;outline-offset:3px;border-radius:6px;}`}</style>
         <div
           className="q2-3 hover:scale-110 transition "
           style={{ overflow: "visible" }}
         >
-          <svg
+          <svg role="button" tabIndex={0} data-keyboard-choice {...activationKeys} aria-label="Open exercise 1"
             width="22"
             height="22"
             viewBox="0 0 90 90"
@@ -51,7 +56,7 @@ const WB_Unit1_Page4 = ({ openPopup }) => {
           className="q3-3 hover:scale-110 transition "
           style={{ overflow: "visible" }}
         >
-          <svg
+          <svg role="button" tabIndex={0} data-keyboard-choice {...activationKeys} aria-label="Open exercise 2"
             width="22"
             height="22"
             viewBox="0 0 90 90"
@@ -74,7 +79,7 @@ const WB_Unit1_Page4 = ({ openPopup }) => {
           className="q4-3 hover:scale-110 transition "
           style={{ overflow: "visible" }}
         >
-          <svg
+          <svg role="button" tabIndex={0} data-keyboard-choice {...activationKeys} aria-label="Open exercise 3"
             width="22"
             height="22"
             viewBox="0 0 90 90"

@@ -1,58 +1,334 @@
-import React, { useState } from "react";
-import Button from "../../Button";
+import clipPage88A8 from "../../../assets/audio/ClassBook/Unit 10/Page 88 - A/Item_008_hour.mp3";
+import clipPage88A7 from "../../../assets/audio/ClassBook/Unit 10/Page 88 - A/Item_007_finished.mp3";
+import clipPage88A6 from "../../../assets/audio/ClassBook/Unit 10/Page 88 - A/Item_006_bored.mp3";
+import clipPage88A5 from "../../../assets/audio/ClassBook/Unit 10/Page 88 - A/Item_005_video_game.mp3";
+import clipPage88A4 from "../../../assets/audio/ClassBook/Unit 10/Page 88 - A/Item_004_together.mp3";
+import clipPage88A3 from "../../../assets/audio/ClassBook/Unit 10/Page 88 - A/Item_003_room.mp3";
+import clipPage88A2 from "../../../assets/audio/ClassBook/Unit 10/Page 88 - A/Item_002_chores.mp3";
+import clipPage88A1 from "../../../assets/audio/ClassBook/Unit 10/Page 88 - A/Item_001_calls.mp3";
+import {
+  useEffect as useListeningEffect,
+  useRef as useListeningRef,
+  useState as useListeningState,
+} from "react";
+import { useAudio } from "../../../context/AudioContext";
+import { FaVolumeUp as ListeningSpeakerIcon } from "react-icons/fa";
+import ExerciseHeader from "../../ExerciseHeader";
+import React, { useState, useRef, useEffect } from "react";
 import ValidationAlert from "../../Popup/ValidationAlert";
+function useExerciseListening(pageId) {
+  const coordinator = useAudio();
+  const audioRef = useListeningRef(null),
+    generation = useListeningRef(0);
+  const [activeId, setActiveId] = useListeningState(null),
+    [error, setError] = useListeningState("");
+  const clearOwned = () => {
+    const current = audioRef.current;
+    if (current) {
+      current.onended =
+        current.onplaying =
+        current.onerror =
+        current.onpause =
+          null;
+      current.pause();
+      current.remove();
+      audioRef.current = null;
+    }
+  };
+  const stop = () => {
+    generation.current++;
+    clearOwned();
+    setActiveId(null);
+    setError("");
+  };
+  const play = (id, sources) => {
+    const queue = (Array.isArray(sources) ? sources : [sources]).filter(
+      Boolean,
+    );
+    if (!queue.length) return;
+    stop();
+    const token = generation.current;
+    let index = 0;
+    const next = () => {
+      if (token !== generation.current) return;
+      clearOwned();
+      if (index >= queue.length) {
+        setActiveId(null);
+        return;
+      }
+      const media = new Audio(queue[index++]);
+      media.hidden = true;
+      media.dataset.exerciseListening = pageId;
+      document.body.appendChild(media);
+      audioRef.current = media;
+      const current = () =>
+        token === generation.current && audioRef.current === media;
+      const fail = () => {
+        if (!current()) return;
+        generation.current++;
+        clearOwned();
+        setActiveId(null);
+        setError("Audio could not be played. Please try again.");
+      };
+      media.onplaying = () => {
+        if (current()) setActiveId(id);
+      };
+      media.onended = () => {
+        if (current()) next();
+      };
+      media.onerror = fail;
+      media.onpause = () => {
+        if (!current()) return;
+        generation.current++;
+        clearOwned();
+        setActiveId(null);
+      };
+      document.querySelectorAll("audio,video").forEach((other) => {
+        if (other !== media) other.pause();
+      });
+      coordinator?.registerAudio(media, null, pageId);
+      media.play().catch(fail);
+    };
+    next();
+  };
+  useListeningEffect(
+    () => () => {
+      generation.current++;
+      const media = audioRef.current;
+      if (media) {
+        media.onended = media.onplaying = media.onerror = media.onpause = null;
+        media.pause();
+        media.remove();
+        audioRef.current = null;
+      }
+    },
+    [],
+  );
+  return {
+    play,
+    stop,
+    activeId,
+    error,
+  };
+}
+function renderExerciseSpeaker() {
+  return (
+    <span
+      aria-hidden="true"
+      style={{
+        position: "absolute",
+        top: -10,
+        right: -10,
+        width: 22,
+        height: 22,
+        borderRadius: "50%",
+        display: "inline-flex",
+        alignItems: "center",
+        justifyContent: "center",
+        background: "white",
+        color: "black",
+        boxShadow: "0 1px 3px rgba(0,0,0,.25)",
+        pointerEvents: "none",
+        zIndex: 3,
+      }}
+    >
+      <ListeningSpeakerIcon size={12} />
+    </span>
+  );
+}
+function renderExerciseAudioText({ audio, id, src, label, children }) {
+  if (!src || (Array.isArray(src) && !src.some(Boolean))) return children;
+  const playing = audio.activeId === id;
+  const keys = (event) => {
+    if (
+      event.target !== event.currentTarget ||
+      (event.key !== "Enter" && event.key !== " ")
+    )
+      return;
+    event.preventDefault();
+    event.stopPropagation();
+    if (event.type === "keydown" && !event.repeat) audio.play(id, src);
+  };
+  return (
+    <span
+      role="button"
+      tabIndex={0}
+      data-listening={id}
+      aria-label={label}
+      onClick={(event) => {
+        event.stopPropagation();
+        audio.play(id, src);
+      }}
+      onKeyDown={keys}
+      onKeyUp={keys}
+      style={{
+        position: "relative",
+        cursor: "pointer",
+        borderRadius: 6,
+        boxShadow: playing ? "0 0 0 3px #2563eb" : undefined,
+        backgroundColor: playing ? "#dbeafe" : undefined,
+      }}
+    >
+      {children}
+      {playing && renderExerciseSpeaker()}
+    </span>
+  );
+}
+
+const activationKeys = {
+  onKeyDown: (event) => {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    event.preventDefault();
+    event.stopPropagation();
+    if (!event.repeat) event.currentTarget.click();
+  },
+  onKeyUp: (event) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+  },
+};
 
 // ─────────────────────────────────────────────
 //  🎨  COLORS
 // ─────────────────────────────────────────────
-const CELL_BORDER_COLOR   = "#2096a6";
-const CELL_BG_DEFAULT     = "#e8eff1";
-const CELL_BG_SELECTING   = "#b2dfdb";
+const CELL_BORDER_COLOR = "#2096a6";
+const CELL_BG_DEFAULT = "#e8eff1";
+const CELL_BG_SELECTING = "#b2dfdb";
 const CELL_TEXT_SELECTING = "#004d40";
-const CELL_BG_WRONG       = "#ffcdd2";
-const CELL_TEXT_WRONG     = "#b71c1c";
-const CELL_TEXT_DEFAULT   = "#263238";
-const CELL_TEXT_FOUND     = "#ffffff";
-const WORD_TEXT_COLOR     = "#37474f";
+const CELL_BG_WRONG = "#ffcdd2";
+const CELL_TEXT_WRONG = "#b71c1c";
+const CELL_TEXT_DEFAULT = "#263238";
+const CELL_TEXT_FOUND = "#ffffff";
+const WORD_TEXT_COLOR = "#37474f";
 
 const FOUND_COLORS = [
-  "#e53935","#e67e22","#43a047","#1e88e5","#8e24aa",
-  "#00897b","#d81b60","#f4511e","#039be5",
+  "#e53935",
+  "#e67e22",
+  "#43a047",
+  "#1e88e5",
+  "#8e24aa",
+  "#00897b",
+  "#d81b60",
+  "#f4511e",
+  "#039be5",
 ];
 
 // ─────────────────────────────────────────────
 //  📝  EXERCISE DATA
 // ─────────────────────────────────────────────
 const GRID = [
-  ["c","a","l","l","s","e","a","d","w"],
-  ["h","r","e","b","t","e","e","o","t"],
-  ["o","o","m","e","o","h","r","e","t"],
-  ["r","o","t","h","s","r","r","m","d"],
-  ["e","m","a","i","o","e","e","i","v"],
-  ["s","m","n","m","m","u","r","d","e"],
-  ["g","i","o","h","m","g","r","o","o"],
-  ["f","t","o","g","e","t","h","e","r"],
-  ["v","i","d","e","o","g","a","m","e"],
+  ["c", "a", "l", "l", "s", "e", "a", "d", "w"],
+  ["h", "r", "e", "b", "t", "e", "e", "o", "t"],
+  ["o", "o", "m", "e", "o", "h", "r", "e", "t"],
+  ["r", "o", "t", "h", "s", "r", "r", "m", "d"],
+  ["e", "m", "a", "i", "o", "e", "e", "i", "v"],
+  ["s", "m", "n", "m", "m", "u", "r", "d", "e"],
+  ["g", "i", "o", "h", "m", "g", "r", "o", "o"],
+  ["f", "t", "o", "g", "e", "t", "h", "e", "r"],
+  ["v", "i", "d", "e", "o", "g", "a", "m", "e"],
 ];
 
 const WORD_DEFS = [
   // calls: row 0, cols 0-4 →
-  { word: "calls",      cells: [[0,0],[0,1],[0,2],[0,3],[0,4]] },
+  {
+    word: "calls",
+    cells: [
+      [0, 0],
+      [0, 1],
+      [0, 2],
+      [0, 3],
+      [0, 4],
+    ],
+  },
   // chores: col 0, rows 0-5 ↓
-  { word: "chores",     cells: [[0,0],[1,0],[2,0],[3,0],[4,0],[5,0]] },
+  {
+    word: "chores",
+    cells: [
+      [0, 0],
+      [1, 0],
+      [2, 0],
+      [3, 0],
+      [4, 0],
+      [5, 0],
+    ],
+  },
   // room: col 1, rows 1-4 ↓
-  { word: "room",       cells: [[1,1],[2,1],[3,1],[4,1]] },
+  {
+    word: "room",
+    cells: [
+      [1, 1],
+      [2, 1],
+      [3, 1],
+      [4, 1],
+    ],
+  },
   // together: row 7, cols 1-8 →
-  { word: "together",   cells: [[7,1],[7,2],[7,3],[7,4],[7,5],[7,6],[7,7],[7,8]] },
+  {
+    word: "together",
+    cells: [
+      [7, 1],
+      [7, 2],
+      [7, 3],
+      [7, 4],
+      [7, 5],
+      [7, 6],
+      [7, 7],
+      [7, 8],
+    ],
+  },
   // video game: row 8, cols 0-8 →
-  { word: "video game", cells: [[8,0],[8,1],[8,2],[8,3],[8,4],[8,5],[8,6],[8,7],[8,8]] },
+  {
+    word: "video game",
+    cells: [
+      [8, 0],
+      [8, 1],
+      [8, 2],
+      [8, 3],
+      [8, 4],
+      [8, 5],
+      [8, 6],
+      [8, 7],
+      [8, 8],
+    ],
+  },
   // bored: diagonal ↓→ rows 1-5, cols 3-7
-  { word: "bored",      cells: [[1,3],[2,4],[3,5],[4,6],[5,7]] },
+  {
+    word: "bored",
+    cells: [
+      [1, 3],
+      [2, 4],
+      [3, 5],
+      [4, 6],
+      [5, 7],
+    ],
+  },
   // tomorrow: diagonal ↓← rows 1-7, cols 8-2 (NOT found valid — kept as placeholder)
   // finished: diagonal ↑→ rows 7-0, cols 0-7
-  { word: "finished",   cells: [[7,0],[6,1],[5,2],[4,3],[3,4],[2,5],[1,6],[0,7]] },
+  {
+    word: "finished",
+    cells: [
+      [7, 0],
+      [6, 1],
+      [5, 2],
+      [4, 3],
+      [3, 4],
+      [2, 5],
+      [1, 6],
+      [0, 7],
+    ],
+  },
   // hour: diagonal ↓→ rows 3-6, cols 3-6
-  { word: "hour",       cells: [[3,3],[4,4],[5,5],[6,6]] },
+  {
+    word: "hour",
+    cells: [
+      [3, 3],
+      [4, 4],
+      [5, 5],
+      [6, 6],
+    ],
+  },
 ];
 
 // Words shown in the word list panel (must match WORD_DEFS)
@@ -65,41 +341,210 @@ const cellKey = (r, c) => `${r}-${c}`;
 
 const getCellsBetween = (a, b) => {
   if (!a || !b) return [];
-  const dr  = b[0] - a[0];
-  const dc  = b[1] - a[1];
-  const len = Math.max(Math.abs(dr), Math.abs(dc));
-  if (len === 0) return [a];
-  if (Math.abs(dr) !== 0 && Math.abs(dc) !== 0 && Math.abs(dr) !== Math.abs(dc)) return [a];
-  const sr = dr === 0 ? 0 : dr / Math.abs(dr);
-  const sc = dc === 0 ? 0 : dc / Math.abs(dc);
-  const cells = [];
-  for (let i = 0; i <= len; i++) cells.push([a[0] + sr * i, a[1] + sc * i]);
-  return cells;
+  const dr = b[0] - a[0],
+    dc = b[1] - a[1],
+    len = Math.max(Math.abs(dr), Math.abs(dc));
+  if (dr !== 0 && dc !== 0 && Math.abs(dr) !== Math.abs(dc)) return [];
+  const cells = Array.from({ length: len + 1 }, (_, i) => [
+    a[0] + i * Math.sign(dr),
+    a[1] + i * Math.sign(dc),
+  ]);
+  return cells.every(([r, col]) => GRID[r]?.[col] !== undefined) ? cells : [];
 };
 
-const checkSelection = (cells, foundNames) => {
-  if (cells.length === 0) return null;
-  const selectedSet = new Set(cells.map(([r, c]) => `${r}-${c}`));
-  for (const def of WORD_DEFS) {
-    if (foundNames.has(def.word)) continue;
-    if (cells.length !== def.cells.length) continue;
-    const defSet = new Set(def.cells.map(([r, c]) => `${r}-${c}`));
-    const isMatch = [...selectedSet].every((k) => defSet.has(k));
-    if (isMatch) return def;
-  }
-  return null;
-};
+const checkSelection = (cells, foundNames) =>
+  WORD_DEFS.find(
+    (def) =>
+      !foundNames.has(def.word) &&
+      cells.length === def.cells.length &&
+      (cells.every(
+        (cell, i) => cellKey(...cell) === cellKey(...def.cells[i]),
+      ) ||
+        cells.every(
+          (cell, i) =>
+            cellKey(...cell) ===
+            cellKey(...def.cells[def.cells.length - 1 - i]),
+        )),
+  ) || null;
 
 // ─────────────────────────────────────────────
 //  COMPONENT
 // ─────────────────────────────────────────────
 export default function WB_WordSearch_QK() {
-  const [selecting,   setSelecting]   = useState(false);
-  const [startCell,   setStartCell]   = useState(null);
+  const listening = useExerciseListening("sb_review9_page1_q1");
+
+  const [, setSelecting] = useState(false);
+  const [startCell, setStartCell] = useState(null);
   const [hoveredCell, setHoveredCell] = useState(null);
-  const [foundWords,  setFoundWords]  = useState([]);
-  const [wrongFlash,  setWrongFlash]  = useState(false);
+  const [foundWords, setFoundWords] = useState([]);
+  const [wrongFlash, setWrongFlash] = useState(false);
   const [answerShown, setAnswerShown] = useState(false);
+  const [completed, setCompleted] = useState(false);
+  const [checked, setChecked] = useState(false);
+  const [activeCell, setActiveCell] = useState([0, 0]);
+  const [announcement, setAnnouncement] = useState("");
+  const resetButtonRef = useRef(null),
+    gridRef = useRef(null),
+    cellRefs = useRef({}),
+    gestureRef = useRef(null);
+  const checkDisabled = answerShown || completed;
+  const release = () => {
+    const g = gestureRef.current;
+    gestureRef.current = null;
+    if (g && gridRef.current?.hasPointerCapture?.(g.id))
+      gridRef.current.releasePointerCapture(g.id);
+  };
+  const cancelSelection = () => {
+    release();
+    setStartCell(null);
+    setHoveredCell(null);
+    setSelecting(false);
+  };
+  useEffect(
+    () => () => {
+      const g = gestureRef.current;
+      gestureRef.current = null;
+      if (g && gridRef.current?.hasPointerCapture?.(g.id))
+        gridRef.current.releasePointerCapture(g.id);
+    },
+    [],
+  );
+  const accept = (a, b) => {
+    if (checkDisabled) return;
+    const cells = getCellsBetween(a, b),
+      match = checkSelection(cells, foundNames);
+    cancelSelection();
+    setChecked(false);
+    if (match) {
+      setFoundWords((prev) => [
+        ...prev,
+        {
+          word: match.word,
+          cells: match.cells,
+          color: FOUND_COLORS[prev.length % FOUND_COLORS.length],
+        },
+      ]);
+      setWrongFlash(false);
+      setAnnouncement(`Found ${match.word}.`);
+    } else {
+      setWrongFlash(true);
+      setAnnouncement("That path is not a new target word. Try again.");
+    }
+  };
+  const activateCell = (r, col) => {
+    if (checkDisabled) return;
+    setWrongFlash(false);
+    if (!startCell) {
+      setStartCell([r, col]);
+      setHoveredCell([r, col]);
+      setSelecting(true);
+      setAnnouncement(
+        `Selection starts at row ${r + 1}, column ${col + 1}. Choose the final letter.`,
+      );
+    } else accept(startCell, [r, col]);
+  };
+  const gridKey = (event, r, col) => {
+    if (event.key === "Tab") return;
+    if (
+      ["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(event.key)
+    ) {
+      event.preventDefault();
+      event.stopPropagation();
+      let nr = r,
+        nc = col;
+      if (event.key === "ArrowLeft") nc = Math.max(0, col - 1);
+      if (event.key === "ArrowRight")
+        nc = Math.min(GRID[r].length - 1, col + 1);
+      if (event.key === "ArrowUp") nr = Math.max(0, r - 1);
+      if (event.key === "ArrowDown") nr = Math.min(GRID.length - 1, r + 1);
+      nc = Math.min(nc, GRID[nr].length - 1);
+      setActiveCell([nr, nc]);
+      if (startCell && !checkDisabled) setHoveredCell([nr, nc]);
+      cellRefs.current[cellKey(nr, nc)]?.focus({ preventScroll: true });
+      return;
+    }
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      event.stopPropagation();
+      if (!event.repeat) activateCell(r, col);
+      return;
+    }
+    if (event.key === "Escape") {
+      event.preventDefault();
+      event.stopPropagation();
+      cancelSelection();
+      setAnnouncement("Selection cancelled.");
+      return;
+    }
+    if (event.key === "Backspace") {
+      event.preventDefault();
+      event.stopPropagation();
+      if (checkDisabled || event.repeat) return;
+      if (startCell) cancelSelection();
+      else setFoundWords((prev) => prev.slice(0, -1));
+      setChecked(false);
+      setWrongFlash(false);
+      setAnnouncement("Last selection undone.");
+    }
+  };
+  const cellAt = (event) => {
+    const node = document
+      .elementFromPoint(event.clientX, event.clientY)
+      ?.closest("[data-grid-cell]");
+    if (!node || !gridRef.current?.contains(node)) return null;
+    return [Number(node.dataset.row), Number(node.dataset.col)];
+  };
+  const pointerStart = (event, r, col) => {
+    if (
+      checkDisabled ||
+      event.button !== 0 ||
+      event.isPrimary === false ||
+      gestureRef.current
+    )
+      return;
+    event.preventDefault();
+    event.stopPropagation();
+    const anchor = startCell || [r, col];
+    gestureRef.current = {
+      id: event.pointerId,
+      anchor,
+      hadAnchor: !!startCell,
+      moved: false,
+      end: [r, col],
+    };
+    setStartCell(anchor);
+    setHoveredCell([r, col]);
+    setSelecting(true);
+    setActiveCell([r, col]);
+    setWrongFlash(false);
+    gridRef.current?.setPointerCapture?.(event.pointerId);
+  };
+  const pointerMove = (event) => {
+    const g = gestureRef.current;
+    if (!g || g.id !== event.pointerId) return;
+    const cell = cellAt(event);
+    if (!cell) return;
+    g.end = cell;
+    g.moved ||= cell[0] !== g.anchor[0] || cell[1] !== g.anchor[1];
+    setHoveredCell(cell);
+  };
+  const pointerEnd = (event) => {
+    const g = gestureRef.current;
+    if (!g || g.id !== event.pointerId) return;
+    const cell = cellAt(event);
+    release();
+    if (!cell) {
+      cancelSelection();
+      return;
+    }
+    if (
+      g.hadAnchor ||
+      g.moved ||
+      cell[0] !== g.anchor[0] ||
+      cell[1] !== g.anchor[1]
+    )
+      accept(g.anchor, cell);
+  };
   const foundNames = new Set(foundWords.map((f) => f.word));
 
   const foundCellMap = {};
@@ -112,66 +557,64 @@ export default function WB_WordSearch_QK() {
   });
 
   const selectionCells = getCellsBetween(startCell, hoveredCell);
-  const selectionKeys  = new Set(selectionCells.map(([r, c]) => cellKey(r, c)));
-
-  const handleMouseDown = (r, c) => {
-    setSelecting(true);
-    setStartCell([r, c]);
-    setHoveredCell([r, c]);
-  };
-
-  const handleMouseEnter = (r, c) => {
-    if (selecting) setHoveredCell([r, c]);
-  };
-
-  const handleMouseUp = () => {
-    if (!selecting) return;
-    setSelecting(false);
-    if (selectionCells.length > 1) {
-      const match = checkSelection(selectionCells, foundNames);
-      if (match) {
-        const color = FOUND_COLORS[foundWords.length % FOUND_COLORS.length];
-        setFoundWords((prev) => [...prev, { word: match.word, cells: match.cells, color }]);
-      } else {
-        setWrongFlash(true);
-        setTimeout(() => setWrongFlash(false), 400);
-      }
-    }
-    setStartCell(null);
-    setHoveredCell(null);
-  };
+  const selectionKeys = new Set(selectionCells.map(([r, c]) => cellKey(r, c)));
 
   const handleReset = () => {
+    listening.stop();
+    cancelSelection();
     setAnswerShown(false);
+    setCompleted(false);
+    setChecked(false);
     setFoundWords([]);
-    setStartCell(null);
-    setHoveredCell(null);
-    setSelecting(false);
     setWrongFlash(false);
+    setActiveCell([0, 0]);
+    setAnnouncement("All discoveries and feedback cleared.");
+    cellRefs.current["0-0"]?.focus({ preventScroll: true });
   };
 
   const handleShowAnswer = () => {
+    listening.stop();
+    cancelSelection();
+    setWrongFlash(false);
     setAnswerShown(true);
+    setChecked(false);
     setFoundWords(
       WORD_DEFS.map((def, i) => ({
-        word:  def.word,
-        cells: def.cells,
+        ...def,
         color: FOUND_COLORS[i % FOUND_COLORS.length],
-      }))
+      })),
     );
+    resetButtonRef.current?.focus({ preventScroll: true });
+    setAnnouncement("All target words shown and locked.");
   };
 
   const handleCheck = () => {
-    if (answerShown) return;
-    if (foundNames.size < WORD_DEFS.length) {
-      ValidationAlert.info("Please find all words first.");
-    } else {
-      ValidationAlert.success(`Score: ${WORD_DEFS.length} / ${WORD_DEFS.length}`);
+    if (checkDisabled) return;
+    listening.stop();
+    cancelSelection();
+    if (!foundWords.length) {
+      ValidationAlert.info("Please find a word first.");
+      setAnnouncement("Please find a word first.");
+      return;
     }
+    setChecked(true);
+    setAnnouncement(`Score: ${foundWords.length} out of ${WORD_DEFS.length}.`);
+    if (foundWords.length === WORD_DEFS.length) {
+      setCompleted(true);
+      resetButtonRef.current?.focus({ preventScroll: true });
+      ValidationAlert.success(
+        `Score: ${foundWords.length} / ${WORD_DEFS.length}`,
+      );
+    } else
+      ValidationAlert.warning(
+        `Score: ${foundWords.length} / ${WORD_DEFS.length}`,
+      );
   };
 
   const getCellStyle = (key, isSelecting, isWrong) => {
-    if (isWrong)     return { background: CELL_BG_WRONG };
+    if ((answerShown || completed) && foundCellMap[key])
+      return { background: "#15803d" };
+    if (isWrong) return { background: CELL_BG_WRONG };
     if (isSelecting) return { background: CELL_BG_SELECTING };
     const colors = foundCellMap[key];
     if (!colors || colors.length === 0) return { background: CELL_BG_DEFAULT };
@@ -188,10 +631,21 @@ export default function WB_WordSearch_QK() {
 
   return (
     <div
+      data-adapt-scope="review9&10_Review9_Page1_Q1"
       className="main-container-component"
-      onMouseUp={handleMouseUp}
-      onMouseLeave={() => { if (selecting) handleMouseUp(); }}
     >
+      <span className="sr-only" role="status" aria-live="polite">
+        {listening.error}
+      </span>
+      <style>{`[data-adapt-scope="review9&10_Review9_Page1_Q1"] input:focus-visible, [data-adapt-scope="review9&10_Review9_Page1_Q1"] [data-keyboard-choice]:focus-visible, [data-adapt-scope="review9&10_Review9_Page1_Q1"] [data-grid-cell]:focus-visible, [data-adapt-scope="review9&10_Review9_Page1_Q1"] [data-listening]:focus-visible {outline:4px solid #2563eb !important;outline-offset:3px;border-radius:6px;} [data-adapt-scope="review9&10_Review9_Page1_Q1"] [data-grid-cell]:focus-visible {outline-offset:-4px;position:relative;z-index:1;} [data-adapt-scope="review9&10_Review9_Page1_Q1"] input[aria-invalid="true"]:focus-visible {border-bottom-color:#ef4444 !important;}`}</style>
+      <div
+        className="sr-only"
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+      >
+        {announcement}
+      </div>
       <style>{`
         .wsk-body {
           display: flex;
@@ -282,38 +736,67 @@ export default function WB_WordSearch_QK() {
         }}
       >
         {/* Header */}
-        <h1
-          className="WB-header-title-page8"
-          style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
-        >
-          <span>A</span>
-          Find and circle the words.
-        </h1>
+        <ExerciseHeader
+          subTitle="Find one target word at a time, then select all its letters before moving to the next word."
+          isReview
+          sectionLetter="A"
+          title={<>Find and circle the words.</>}
+        />
 
         {/* Body */}
         <div className="wsk-body">
-
           {/* Word list */}
           <div className="wsk-word-list">
             {WORD_LIST.map((w) => (
               <span
                 key={w}
                 className={`wsk-word-item ${foundNames.has(w) ? "wsk-word-item--found" : ""}`}
+                style={{
+                  color: checked && !foundNames.has(w) ? "#ef4444" : undefined,
+                }}
               >
-                {w}
+                {renderExerciseAudioText({
+                  audio: listening,
+                  id: `word-${w}`,
+                  src: [
+                    clipPage88A1,
+                    clipPage88A2,
+                    clipPage88A3,
+                    clipPage88A4,
+                    clipPage88A5,
+                    clipPage88A6,
+                    clipPage88A7,
+                    clipPage88A8,
+                  ][WORD_LIST.indexOf(w)],
+                  label: w,
+                  children: w,
+                })}
               </span>
             ))}
           </div>
 
           {/* Grid */}
-          <div className="wsk-grid">
+          <div
+            className="wsk-grid"
+            ref={gridRef}
+            role="group"
+            aria-label="Word search grid. Use arrows to move, Enter or Space to choose endpoints, Escape to cancel, and Backspace to undo."
+            onPointerMove={pointerMove}
+            onPointerUp={pointerEnd}
+            onPointerCancel={(event) => {
+              if (gestureRef.current?.id === event.pointerId) cancelSelection();
+            }}
+            onLostPointerCapture={(event) => {
+              if (gestureRef.current?.id === event.pointerId) cancelSelection();
+            }}
+          >
             {GRID.map((row, r) =>
               row.map((letter, c) => {
-                const key         = cellKey(r, c);
+                const key = cellKey(r, c);
                 const foundColors = foundCellMap[key];
-                const isFound     = foundColors && foundColors.length > 0;
-                const isSel       = selectionKeys.has(key) && !isFound;
-                const isWrong     = isSel && wrongFlash;
+                const isFound = foundColors && foundColors.length > 0;
+                const isSel = selectionKeys.has(key) && !isFound;
+                const isWrong = isSel && wrongFlash;
                 const isSelecting = isSel && !wrongFlash;
 
                 return (
@@ -321,32 +804,76 @@ export default function WB_WordSearch_QK() {
                     key={key}
                     className={[
                       "wsk-cell",
-                      isFound     ? "wsk-cell--found"     : "",
+                      isFound ? "wsk-cell--found" : "",
                       isSelecting ? "wsk-cell--selecting" : "",
-                      isWrong     ? "wsk-cell--wrong"     : "",
-                    ].filter(Boolean).join(" ")}
-                    style={getCellStyle(key, isSelecting, isWrong)}
-                    onMouseDown={() => handleMouseDown(r, c)}
-                    onMouseEnter={() => handleMouseEnter(r, c)}
+                      isWrong ? "wsk-cell--wrong" : "",
+                    ]
+                      .filter(Boolean)
+                      .join(" ")}
+                    style={{
+                      ...getCellStyle(key, isSelecting, isWrong),
+                      touchAction: "none",
+                    }}
+                    role="button"
+                    data-grid-cell
+                    data-row={r}
+                    data-col={c}
+                    tabIndex={
+                      activeCell[0] === r && activeCell[1] === c ? 0 : -1
+                    }
+                    ref={(el) => {
+                      cellRefs.current[key] = el;
+                    }}
+                    aria-label={`Row ${r + 1}, column ${c + 1}: ${letter}${isFound ? ", found" : ""}`}
+                    aria-pressed={isSelecting || !!isFound}
+                    aria-disabled={checkDisabled}
+                    onKeyDown={(event) => gridKey(event, r, c)}
+                    onKeyUp={activationKeys.onKeyUp}
+                    onPointerDown={(event) => pointerStart(event, r, c)}
                   >
                     {letter}
                   </div>
                 );
-              })
+              }),
             )}
           </div>
-
         </div>
 
         {/* Buttons */}
         <div className="wsk-buttons">
-          <Button
-            checkAnswers={handleCheck}
-            handleShowAnswer={handleShowAnswer}
-            handleStartAgain={handleReset}
-          />
+          <div className="action-buttons-container">
+            <button
+              type="button"
+              aria-label="Start Again"
+              {...activationKeys}
+              ref={resetButtonRef}
+              onClick={handleReset}
+              className="try-again-button"
+            >
+              Start Again ↻
+            </button>
+            <button
+              type="button"
+              aria-label="Show Answer"
+              {...activationKeys}
+              onClick={handleShowAnswer}
+              className="show-answer-btn swal-continue"
+            >
+              Show Answer
+            </button>
+            <button
+              type="button"
+              aria-label="Check Answer"
+              {...activationKeys}
+              onClick={handleCheck}
+              disabled={checkDisabled}
+              style={{ cursor: checkDisabled ? "not-allowed" : "pointer" }}
+              className="check-button2"
+            >
+              Check Answer ✓
+            </button>
+          </div>
         </div>
-
       </div>
     </div>
   );

@@ -1,6 +1,167 @@
-import React, { useState } from "react";
-import Button from "../Button";
+import clipPage4D6 from "../../../assets/audio/WorkBook/Unit 1/Page 4 - D/Item_006_He_will_buy_milk.mp3";
+import clipPage4D5 from "../../../assets/audio/WorkBook/Unit 1/Page 4 - D/Item_005_He_will_make_a_vegetarian_spaghetti_dish.mp3";
+import clipPage4D4 from "../../../assets/audio/WorkBook/Unit 1/Page 4 - D/Item_004_Henry_will_go_to_the_store_next_week.mp3";
+import clipPage4D3 from "../../../assets/audio/WorkBook/Unit 1/Page 4 - D/Item_003_He_won't_buy_fruit_for_dessert.mp3";
+import clipPage4D2 from "../../../assets/audio/WorkBook/Unit 1/Page 4 - D/Item_002_Henry_will_go_to_the_store_near_his_house.mp3";
+import clipPage4D1 from "../../../assets/audio/WorkBook/Unit 1/Page 4 - D/Item_001_He_will_buy_juice_to_make_cookies.mp3";
+import {useEffect as useListeningEffect,useRef as useListeningRef,useState as useListeningState} from "react";
+import {useAudio} from "../../../context/AudioContext";
+import {FaVolumeUp as ListeningSpeakerIcon} from "react-icons/fa";
+import ExerciseHeader from "../../ExerciseHeader";
+import React, { useState, useRef } from "react";
 import ValidationAlert from "../../Popup/ValidationAlert";
+function useExerciseListening(pageId) {
+  const coordinator = useAudio();
+  const audioRef = useListeningRef(null),
+    generation = useListeningRef(0);
+  const [activeId, setActiveId] = useListeningState(null),
+    [error, setError] = useListeningState("");
+  const clearOwned = () => {
+    const current = audioRef.current;
+    if (current) {
+      current.onended = current.onplaying = current.onerror = current.onpause = null;
+      current.pause();
+      current.remove();
+      audioRef.current = null;
+    }
+  };
+  const stop = () => {
+    generation.current++;
+    clearOwned();
+    setActiveId(null);
+    setError("");
+  };
+  const play = (id, sources) => {
+    const queue = (Array.isArray(sources) ? sources : [sources]).filter(Boolean);
+    if (!queue.length) return;
+    stop();
+    const token = generation.current;
+    let index = 0;
+    const next = () => {
+      if (token !== generation.current) return;
+      clearOwned();
+      if (index >= queue.length) {
+        setActiveId(null);
+        return;
+      }
+      const media = new Audio(queue[index++]);
+      media.hidden = true;
+      media.dataset.exerciseListening = pageId;
+      document.body.appendChild(media);
+      audioRef.current = media;
+      const current = () => token === generation.current && audioRef.current === media;
+      const fail = () => {
+        if (!current()) return;
+        generation.current++;
+        clearOwned();
+        setActiveId(null);
+        setError("Audio could not be played. Please try again.");
+      };
+      media.onplaying = () => {
+        if (current()) setActiveId(id);
+      };
+      media.onended = () => {
+        if (current()) next();
+      };
+      media.onerror = fail;
+      media.onpause = () => {
+        if (!current()) return;
+        generation.current++;
+        clearOwned();
+        setActiveId(null);
+      };
+      document.querySelectorAll("audio,video").forEach(other => {
+        if (other !== media) other.pause();
+      });
+      coordinator?.registerAudio(media, null, pageId);
+      media.play().catch(fail);
+    };
+    next();
+  };
+  useListeningEffect(() => () => {
+    generation.current++;
+    const media = audioRef.current;
+    if (media) {
+      media.onended = media.onplaying = media.onerror = media.onpause = null;
+      media.pause();
+      media.remove();
+      audioRef.current = null;
+    }
+  }, []);
+  return {
+    play,
+    stop,
+    activeId,
+    error
+  };
+}
+function renderExerciseSpeaker() {
+  return <span aria-hidden="true" style={{
+    position: "absolute",
+    top: -10,
+    right: -10,
+    width: 22,
+    height: 22,
+    borderRadius: "50%",
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    background: "white",
+    color: "black",
+    boxShadow: "0 1px 3px rgba(0,0,0,.25)",
+    pointerEvents: "none",
+    zIndex: 3
+  }}><ListeningSpeakerIcon size={12} /></span>;
+}
+
+function renderExerciseAudioGroup({
+  audio,
+  id,
+  src,
+  label,
+  children,
+  style,
+  key: renderKey,
+  ...props
+}) {
+  if (!src || Array.isArray(src) && !src.some(Boolean)) return <div key={renderKey} {...props} style={style}>{children}</div>;
+  const playing = audio.activeId === id;
+  const keys = event => {
+    if (event.target !== event.currentTarget || event.key !== "Enter" && event.key !== " ") return;
+    event.preventDefault();
+    event.stopPropagation();
+    if (event.type === "keydown" && !event.repeat) audio.play(id, src);
+  };
+  return <div key={renderKey} {...props} role="group" aria-roledescription="sentence audio" tabIndex={0} data-listening={id} aria-label={label} onKeyDown={keys} onKeyUp={keys} onClick={event => {
+    if (event.target.closest('input,select,textarea,button,[role="button"]')) return;
+    event.stopPropagation();
+    audio.play(id, src);
+  }} style={{
+    ...style,
+    position: style?.position || "relative",
+    borderRadius: style?.borderRadius || 6,
+    boxShadow: playing ? "0 0 0 3px #2563eb" : style?.boxShadow,
+    backgroundColor: playing ? "#dbeafe" : style?.backgroundColor
+  }}>{children}{playing && renderExerciseSpeaker()}</div>;
+}
+
+
+const activationKeys = {
+  onKeyDown: (event) => {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    event.preventDefault();
+    event.stopPropagation();
+    if (!event.repeat) event.currentTarget.click();
+  },
+  onKeyUp: (event) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+  },
+};
+
+
 
 // ─────────────────────────────────────────────
 //  🎨  COLORS — كلها قابلة للتعديل
@@ -35,81 +196,50 @@ const ITEMS = [
 //  COMPONENT
 // ─────────────────────────────────────────────
 export default function WB_ReadExerciseC_WriteCheckX_QD() {
+const listening=useExerciseListening("wb_unit1_page4_q2");
+
   const [answers,     setAnswers]     = useState({});   // { [id]: "check" | "cross" }
-  const [showResults, setShowResults] = useState(false);
+  const [, setShowResults] = useState(false);
   const [showAns,     setShowAns]     = useState(false);
+ const [results,setResults] = useState({});
+ const [announcement,setAnnouncement] = useState("");
+ const resetButtonRef = useRef(null);
+ const checkDisabled = showAns || ITEMS.every(item=>results[item.id] === "correct");
 
   // 🔒 بعد check أو show answer
-  const isLocked =  showAns;
+  const isLocked = checkDisabled;
 
   // ── handlers ──────────────────────────────
   // الطالب يختار check أو cross مباشرة
-  const handleSelect = (id, value) => {
-    if (isLocked) return;
-    setAnswers((prev) => {
-      const updated = { ...prev };
-      // لو ضغط نفس الخيار مرتين → يلغيه
-      if (updated[id] === value) delete updated[id];
-      else updated[id] = value;
-      return updated;
-    });
-  };
+  const handleSelect = (id,value) => {if(showAns || results[id] === "correct")return;setAnswers(prev=>({...prev,[id]:value}));setResults(prev=>{const next={...prev};delete next[id];return next;});setAnnouncement("Selection updated.");};
 
-  const handleCheck = () => {
-    if (isLocked) return;
-    const allAnswered = ITEMS.every((item) => answers[item.id] !== undefined);
-    if (!allAnswered) {
-      ValidationAlert.info("Please answer all items first.");
-      return;
-    }
-    let score = 0;
-    ITEMS.forEach((item) => {
-      if (answers[item.id] === item.correct) score++;
-    });
-    setShowResults(true); // 🔒
-    if (score === ITEMS.length)   ValidationAlert.success(`Score: ${score} / ${ITEMS.length}`);
-    else if (score > 0)           ValidationAlert.warning(`Score: ${score} / ${ITEMS.length}`);
-    else                          ValidationAlert.error(`Score: ${score} / ${ITEMS.length}`);
-  };
+  const handleCheck = () => {if(checkDisabled)return;listening.stop();if(!ITEMS.every(item=>answers[item.id] !== undefined && answers[item.id] !== null && answers[item.id] !== "")){ValidationAlert.info("Please choose an answer for each question.");setAnnouncement("Please choose an answer for each question.");return;}const next=Object.fromEntries(ITEMS.map(item=>[item.id,results[item.id] === "correct" || answers[item.id] === item.correct ? "correct":"wrong"]));const score=Object.values(next).filter(value=>value === "correct").length;setResults(next);setShowResults(true);setAnnouncement(`Score: ${score} out of ${ITEMS.length}. Correct answers are locked; incorrect answers can be changed.`);if(score === ITEMS.length){resetButtonRef.current?.focus({preventScroll:true});ValidationAlert.success(`Score: ${score} / ${ITEMS.length}`);}else if(score)ValidationAlert.warning(`Score: ${score} / ${ITEMS.length}`);else ValidationAlert.error(`Score: ${score} / ${ITEMS.length}`);};
 
-  const handleShowAnswer = () => {
-    const filled = {};
-    ITEMS.forEach((item) => { filled[item.id] = item.correct; });
-    setAnswers(filled);
-    setShowResults(false);
-    setShowAns(true); // 🔒
-  };
+  const handleShowAnswer=()=>{listening.stop();setAnswers(Object.fromEntries(ITEMS.map(i=>[i.id,i.correct])));setResults({});setShowResults(false);setShowAns(true);resetButtonRef.current?.focus({preventScroll:true});setAnnouncement("Correct answers shown and locked.");};
 
-  const handleReset = () => {
-    setAnswers({});
-    setShowResults(false);
-    setShowAns(false); // 🔓
-  };
+  const handleReset=()=>{listening.stop();setAnswers({});setResults({});setShowResults(false);setShowAns(false);setAnnouncement("Selections cleared.");};
 
   // ── helpers ───────────────────────────────
-  const isWrong = (item) => {
-    if (!showResults || showAns) return false;
-    return answers[item.id] !== item.correct;
-  };
+  const isWrong=item=>!showAns&&results[item.id]==="wrong";
 
   // ── render two boxes ─────────────────────
   const renderBoxes = (item) => {
     const val   = answers[item.id];
     const wrong = isWrong(item);
 
-    const SingleBox = ({ type }) => {
+    const renderSingleBox = (type) => {
       const selected    = val === type;
       const isThisWrong = wrong && selected; // الغلط على المربع المختار فقط
 
       return (
         <div className="wdc-single-wrap">
-          <div
+          <div role="button" tabIndex={0} data-keyboard-choice {...activationKeys} aria-label={`Question ${item.id}. ${item.text} Choose ${type}.`} aria-pressed={answers[item.id] === type} aria-disabled={showAns || results[item.id] === "correct"}
             className={`wdc-box
               ${selected    ? "wdc-box--selected" : ""}
               ${isThisWrong ? "wdc-box--wrong"    : ""}
             `}
             onClick={() => handleSelect(item.id, type)}
-            style={{ cursor: isLocked ? "default" : "pointer" }}
+            style={(base=>({...base,borderColor:answers[item.id]===type?(showAns||results[item.id]==="correct"?"#16a34a":results[item.id]==="wrong"?"#ef4444":base.borderColor):base.borderColor}))((base=>({...base,borderRadius:8,background:answers[item.id]===type&&!showAns&&results[item.id]===undefined?"#dbeafe":base.background,boxShadow:answers[item.id]===type?`inset 0 0 0 2px ${showAns||results[item.id]==="correct"?"#16a34a":results[item.id]==="wrong"?"#ef4444":"#2563eb"}`:undefined}))({...({ cursor: isLocked ? "default" : "pointer" }),borderRadius:({ cursor: isLocked ? "default" : "pointer" }).borderRadius || "6px",background:answers[item.id] === type && !showAns && results[item.id] === undefined ? "#dbeafe" : ({ cursor: isLocked ? "default" : "pointer" }).background,boxShadow:answers[item.id] === type ? `inset 0 0 0 2px ${showAns || results[item.id] === "correct" ? "#16a34a" : results[item.id] === "wrong" ? "#ef4444" : "#2563eb"}` : undefined}))}
           >
             {/* ✓ */}
             {type === "check" && selected && (
@@ -145,15 +275,17 @@ export default function WB_ReadExerciseC_WriteCheckX_QD() {
 
     return (
       <div className="wdc-boxes-wrap">
-        <SingleBox type="check" />
-        <SingleBox type="cross" />
+        {renderSingleBox("check")}
+        {renderSingleBox("cross")}
       </div>
     );
   };
 
   // ── render ────────────────────────────────
   return (
-    <div className="main-container-component">
+    <div data-adapt-scope="Unit1_WB_Unit1_Page4_Q2" className="main-container-component"><span className="sr-only" role="status" aria-live="polite">{listening.error}</span>
+<style>{`[data-adapt-scope="Unit1_WB_Unit1_Page4_Q2"] input:focus-visible, [data-adapt-scope="Unit1_WB_Unit1_Page4_Q2"] [data-keyboard-choice]:focus-visible, [data-adapt-scope="Unit1_WB_Unit1_Page4_Q2"] [data-grid-cell]:focus-visible, [data-adapt-scope="Unit1_WB_Unit1_Page4_Q2"] [data-listening]:focus-visible {outline:4px solid #2563eb !important;outline-offset:3px;border-radius:6px;} [data-adapt-scope="Unit1_WB_Unit1_Page4_Q2"] [data-grid-cell]:focus-visible {outline-offset:-4px;position:relative;z-index:1;} [data-adapt-scope="Unit1_WB_Unit1_Page4_Q2"] input[aria-invalid="true"]:focus-visible {border-bottom-color:#ef4444 !important;}`}</style>
+<div className="sr-only" role="status" aria-live="polite" aria-atomic="true">{announcement}</div>
       <style>{`
         /* ── List ── */
         .wdc-list {
@@ -279,20 +411,14 @@ font-size: clamp(15px, 1.9vw, 20px);          color: ${SENTENCE_TEXT_COLOR};
         }}
       >
         {/* ── Header ── */}
-        <h1
-          className="WB-header-title-page8"
-          style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
-        >
-          <span className="WB-ex-A">D</span>
-          Read Exercise C. Write{" "}
+        <ExerciseHeader subTitle="Check the picture or text clue carefully, then choose the correct two-way answer for each item." sectionLetter="D" title={<>Read Exercise C. Write{" "}
           <span style={{ color: CHECK_COLOR }}>✓</span> or{" "}
-          <span style={{ color: CROSS_COLOR }}>✗</span>.
-        </h1>
+          <span style={{ color: CROSS_COLOR }}>✗</span>.</>} />
 
         {/* ── Items ── */}
         <div className="wdc-list">
           {ITEMS.map((item) => (
-            <div key={item.id} className="wdc-row">
+            renderExerciseAudioGroup({audio:listening,id:`sentence-${item.id}`,src:[clipPage4D1,clipPage4D2,clipPage4D3,clipPage4D4,clipPage4D5,clipPage4D6][item.id-1],label:item.text,className:"wdc-row",style:undefined,key:item.id,children:<>
 
               {/* Number */}
               <span className="wdc-num">{item.id}</span>
@@ -303,17 +429,17 @@ font-size: clamp(15px, 1.9vw, 20px);          color: ${SENTENCE_TEXT_COLOR};
               {/* Checkbox */}
               {renderBoxes(item)}
 
-            </div>
+            </>})
           ))}
         </div>
 
         {/* ── Buttons ── */}
         <div className="wdc-buttons">
-          <Button
-            checkAnswers={handleCheck}
-            handleShowAnswer={handleShowAnswer}
-            handleStartAgain={handleReset}
-          />
+          <div className="action-buttons-container">
+<button type="button" aria-label="Start Again" {...activationKeys} ref={resetButtonRef} onClick={handleReset} className="try-again-button">Start Again ↻</button>
+<button type="button" aria-label="Show Answer" {...activationKeys} onClick={handleShowAnswer} className="show-answer-btn swal-continue">Show Answer</button>
+<button type="button" aria-label="Check Answer" {...activationKeys} onClick={handleCheck} disabled={checkDisabled} style={{cursor:checkDisabled ? "not-allowed":"pointer"}} className="check-button2">Check Answer ✓</button>
+</div>
         </div>
       </div>
     </div>

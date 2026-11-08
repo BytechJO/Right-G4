@@ -1,6 +1,37 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import ValidationAlert from "../../Popup/ValidationAlert";
 import { FaCheck, FaRedo, FaEye } from "react-icons/fa";
+const activationKeys = {
+  onKeyDown: (event) => {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    event.preventDefault();
+    event.stopPropagation();
+    if (!event.repeat) event.currentTarget.click();
+  },
+  onKeyUp: (event) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+  },
+};
+const fieldKeys = {
+  onKeyDown: (event) => {
+    if (event.key === "Enter" || event.key === " ") event.stopPropagation();
+  },
+  onKeyUp: (event) => {
+    if (event.key === "Enter" || event.key === " ") event.stopPropagation();
+  },
+};
+const normalizeAnswer = (value) =>
+  value
+    .normalize("NFKC")
+    .toLowerCase()
+    .replace(/[\u2018\u2019\u201A\u201B\u0060\u00B4']/g, "")
+    .replace(/[.,!?;:\u2026\u201c\u201d"]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+
 
 const GrammarB = () => {
   const questions = [
@@ -49,14 +80,19 @@ const GrammarB = () => {
   const [locked, setLocked] = useState(false);
   const [showed, setShowed] = useState(false);
 
+  const [announcement,setAnnouncement] = useState("");
+  const resetButtonRef = useRef(null);
+
   const handleSelect = (qId, optIndex) => {
     if (locked || circleErrors[qId] === false) return;
     setSelected((prev) => ({ ...prev, [qId]: optIndex }));
+    setCircleErrors(prev=>{const next={...prev};delete next[qId];return next;});
   };
 
   const handleInputChange = (qId, value) => {
     if (locked || inputErrors[qId] === false) return;
     setInputs((prev) => ({ ...prev, [qId]: value }));
+    setInputErrors(prev=>{const next={...prev};delete next[qId];return next;});
   };
 
   const handleCheck = () => {
@@ -89,7 +125,7 @@ const GrammarB = () => {
       // Input check
       total++;
       const isInputCorrect = q.answers.some(
-        (a) => a.toLowerCase() === inputs[q.id].trim().toLowerCase()
+        (a) => normalizeAnswer(a) === normalizeAnswer(inputs[q.id])
       );
       if (isInputCorrect) {
         correctCount++;
@@ -101,6 +137,7 @@ const GrammarB = () => {
 
     setCircleErrors(newCircleErrors);
     setInputErrors(newInputErrors);
+    setAnnouncement(`Score: ${correctCount} out of ${total}. Correct parts are locked; incorrect parts can be changed.`);
 
     const color =
       correctCount === total ? "green" : correctCount === 0 ? "red" : "orange";
@@ -115,6 +152,7 @@ const GrammarB = () => {
 
     if (correctCount === total) {
       setLocked(true);
+      resetButtonRef.current?.focus({preventScroll:true});
       ValidationAlert.success(msg);
     } else if (correctCount === 0) {
       ValidationAlert.error(msg);
@@ -134,6 +172,8 @@ const GrammarB = () => {
     setInputErrors({});
     setLocked(true);
     setShowed(true);
+    resetButtonRef.current?.focus({preventScroll:true});
+    setAnnouncement("Correct answers shown and locked.");
   };
 
   const handleReset = () => {
@@ -143,10 +183,13 @@ const GrammarB = () => {
     setInputErrors({});
     setLocked(false);
     setShowed(false);
+    setAnnouncement("Selections, answers and feedback cleared.");
   };
 
   return (
-    <div className="mb-6 mx-auto">
+    <div data-adapt-scope="unit4_GrammarB" className="mb-6 mx-auto">
+<style>{`[data-adapt-scope="unit4_GrammarB"] input:focus-visible, [data-adapt-scope="unit4_GrammarB"] [data-keyboard-choice]:focus-visible, [data-adapt-scope="unit4_GrammarB"] [data-grid-cell]:focus-visible {outline:4px solid #2563eb;outline-offset:3px;border-radius:6px;}`}</style>
+<div className="sr-only" role="status" aria-live="polite" aria-atomic="true">{announcement}</div>
       <h5 className="header-title-page8-read mb-8">
         <span className="ex-A-read mr-2">B</span>
         Read, circle, and write.
@@ -185,9 +228,9 @@ const GrammarB = () => {
 
                 return (
                   <div key={optIndex} className="relative">
-                    <span
+                    <span role="button" tabIndex={0} data-keyboard-choice {...activationKeys} aria-label={`Question ${q.id}. ${opt}`} aria-pressed={isSelected} aria-disabled={locked || circleErrors[q.id] === false}
                       onClick={() => handleSelect(q.id, optIndex)}
-                      style={{
+                      style={{...({
                         fontSize: "18px",
                         color: "#1a1a1a",
                         border: `2px solid ${borderColor}`,
@@ -197,7 +240,7 @@ const GrammarB = () => {
                         display: "inline-block",
                         background: "#e8eff1",
                         transition: "all 0.15s",
-                      }}
+                      }),borderColor:isSelected && (showed || circleErrors[q.id] === false) ? "#16a34a" : isSelected && circleErrors[q.id] === true ? "#ef4444" : borderColor}}
                     >
                       {opt}
                     </span>
@@ -238,13 +281,13 @@ const GrammarB = () => {
               </span>
 
               <div className="relative inline-flex items-center flex-1" style={{ minWidth: "150px" }}>
-                <input
+                <input {...fieldKeys} aria-label={`Question ${q.id}. ${q.before} blank ${q.after}`} title={`Question ${q.id}. ${q.before} blank ${q.after}`} placeholder="Word" aria-invalid={inputErrors[q.id] === true}
                   type="text"
                   value={inputs[q.id]}
                   onChange={(e) => handleInputChange(q.id, e.target.value)}
                   disabled={locked || inputErrors[q.id] === false}
                   autoComplete="off"
-                  style={{
+                  style={{...({
                     fontSize: "18px",
                     width: "100%",
                     borderBottom: `1px solid ${inputErrors[q.id] === true ? "#ef4444" : "#333"}`,
@@ -252,7 +295,7 @@ const GrammarB = () => {
                     outline: "none",
                     color: showed ? "#ef4444" : "#1a1a1a",
                     padding: "2px 4px",
-                  }}
+                  }),borderBottomColor:showed || inputErrors[q.id] === false ? "#16a34a" : inputErrors[q.id] === true ? "#ef4444" : "#333",color:"#1a1a1a"}}
                 />
 
                 {/* ❌ Input Error Badge */}
@@ -296,42 +339,42 @@ const GrammarB = () => {
       {/* Buttons */}
       <div className="flex justify-center gap-6 mt-8">
         <div className="relative group">
-          <div
+          <button type="button" aria-label="Start Again" {...activationKeys} ref={resetButtonRef}
             onClick={handleReset}
             className="flex items-center justify-center w-14 h-14 rounded-xl bg-[#ffc107] hover:bg-[#e0a800] cursor-pointer transition shadow-sm"
           >
-            <div className="bg-white p-3 rounded-full shadow">
+            <span className="bg-white p-3 rounded-full shadow">
               <FaRedo size={14} />
-            </div>
-          </div>
+            </span>
+          </button>
           <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-black text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition">
             Reset
           </span>
         </div>
 
         <div className="relative group">
-          <div
+          <button type="button" aria-label="Show Answer" {...activationKeys}
             onClick={handleShow}
             className="flex items-center justify-center w-14 h-14 rounded-xl bg-[#2c78b4] hover:bg-[#1a5a8a] cursor-pointer transition shadow-sm"
           >
-            <div className="bg-white p-3 rounded-full shadow">
+            <span className="bg-white p-3 rounded-full shadow">
               <FaEye size={14} />
-            </div>
-          </div>
+            </span>
+          </button>
           <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-black text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition whitespace-nowrap">
             Show Answer
           </span>
         </div>
 
         <div className="relative group">
-          <div
+          <button type="button" aria-label="Check Answer" {...activationKeys} disabled={locked} style={{cursor:locked ? "not-allowed":"pointer"}}
             onClick={handleCheck}
             className="flex items-center justify-center w-14 h-14 rounded-xl bg-[#55c271] hover:bg-[#449d5a] cursor-pointer transition shadow-sm"
           >
-            <div className="bg-white p-3 rounded-full shadow">
+            <span className="bg-white p-3 rounded-full shadow">
               <FaCheck size={14} />
-            </div>
-          </div>
+            </span>
+          </button>
           <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-black text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition whitespace-nowrap">
             Check Answer
           </span>

@@ -1,5 +1,14 @@
-import React, { useState } from "react";
-import Button from "../Button";
+import clipPage8L6 from "../../../assets/audio/WorkBook/Unit 1/Page 8 - L/Item_006_They_will_run_in_the_race.mp3";
+import clipPage8L5 from "../../../assets/audio/WorkBook/Unit 1/Page 8 - L/Item_005_She_won't_ride_the_horse.mp3";
+import clipPage8L4 from "../../../assets/audio/WorkBook/Unit 1/Page 8 - L/Item_004_She_will_feed_the_chickens.mp3";
+import clipPage8L3 from "../../../assets/audio/WorkBook/Unit 1/Page 8 - L/Item_003_They_won't_fly_a_kite.mp3";
+import clipPage8L2 from "../../../assets/audio/WorkBook/Unit 1/Page 8 - L/Item_002_She_will_eat_some_bread.mp3";
+import clipPage8L1 from "../../../assets/audio/WorkBook/Unit 1/Page 8 - L/Item_001_He_won't_deliver_the_milk_tonight.mp3";
+import {useEffect as useListeningEffect,useRef as useListeningRef,useState as useListeningState} from "react";
+import {useAudio} from "../../../context/AudioContext";
+import {FaVolumeUp as ListeningSpeakerIcon} from "react-icons/fa";
+import ExerciseHeader from "../../ExerciseHeader";
+import React, { useState, useRef } from "react";
 import ValidationAlert from "../../Popup/ValidationAlert";
 
 // ─────────────────────────────────────────────
@@ -10,7 +19,170 @@ import img2 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U1 Fo
 import img3 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U1 Folder/Page 8/Asset 18.svg"; // boys running in race
 import img4 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U1 Folder/Page 8/Asset 19.svg"; // girl riding horse
 import img5 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U1 Folder/Page 8/Asset 15.svg"; // girl eating bread
-import img6 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U1 Folder/Page 8/Asset 29.svg"; // boys flying kite
+import img6 from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U1 Folder/Page 8/Asset 29.svg";
+function useExerciseListening(pageId) {
+  const coordinator = useAudio();
+  const audioRef = useListeningRef(null),
+    generation = useListeningRef(0);
+  const [activeId, setActiveId] = useListeningState(null),
+    [error, setError] = useListeningState("");
+  const clearOwned = () => {
+    const current = audioRef.current;
+    if (current) {
+      current.onended = current.onplaying = current.onerror = current.onpause = null;
+      current.pause();
+      current.remove();
+      audioRef.current = null;
+    }
+  };
+  const stop = () => {
+    generation.current++;
+    clearOwned();
+    setActiveId(null);
+    setError("");
+  };
+  const play = (id, sources) => {
+    const queue = (Array.isArray(sources) ? sources : [sources]).filter(Boolean);
+    if (!queue.length) return;
+    stop();
+    const token = generation.current;
+    let index = 0;
+    const next = () => {
+      if (token !== generation.current) return;
+      clearOwned();
+      if (index >= queue.length) {
+        setActiveId(null);
+        return;
+      }
+      const media = new Audio(queue[index++]);
+      media.hidden = true;
+      media.dataset.exerciseListening = pageId;
+      document.body.appendChild(media);
+      audioRef.current = media;
+      const current = () => token === generation.current && audioRef.current === media;
+      const fail = () => {
+        if (!current()) return;
+        generation.current++;
+        clearOwned();
+        setActiveId(null);
+        setError("Audio could not be played. Please try again.");
+      };
+      media.onplaying = () => {
+        if (current()) setActiveId(id);
+      };
+      media.onended = () => {
+        if (current()) next();
+      };
+      media.onerror = fail;
+      media.onpause = () => {
+        if (!current()) return;
+        generation.current++;
+        clearOwned();
+        setActiveId(null);
+      };
+      document.querySelectorAll("audio,video").forEach(other => {
+        if (other !== media) other.pause();
+      });
+      coordinator?.registerAudio(media, null, pageId);
+      media.play().catch(fail);
+    };
+    next();
+  };
+  useListeningEffect(() => () => {
+    generation.current++;
+    const media = audioRef.current;
+    if (media) {
+      media.onended = media.onplaying = media.onerror = media.onpause = null;
+      media.pause();
+      media.remove();
+      audioRef.current = null;
+    }
+  }, []);
+  return {
+    play,
+    stop,
+    activeId,
+    error
+  };
+}
+function renderExerciseSpeaker() {
+  return <span aria-hidden="true" style={{
+    position: "absolute",
+    top: -10,
+    right: -10,
+    width: 22,
+    height: 22,
+    borderRadius: "50%",
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    background: "white",
+    color: "black",
+    boxShadow: "0 1px 3px rgba(0,0,0,.25)",
+    pointerEvents: "none",
+    zIndex: 3
+  }}><ListeningSpeakerIcon size={12} /></span>;
+}
+function renderExerciseAudioText({
+  audio,
+  id,
+  src,
+  label,
+  children
+}) {
+  if (!src || Array.isArray(src) && !src.some(Boolean)) return children;
+  const playing = audio.activeId === id;
+  const keys = event => {
+    if (event.target !== event.currentTarget || event.key !== "Enter" && event.key !== " ") return;
+    event.preventDefault();
+    event.stopPropagation();
+    if (event.type === "keydown" && !event.repeat) audio.play(id, src);
+  };
+  return <span role="button" tabIndex={0} data-listening={id} aria-label={label} onClick={event => {
+    event.stopPropagation();
+    audio.play(id, src);
+  }} onKeyDown={keys} onKeyUp={keys} style={{
+    position: "relative",
+    cursor: "pointer",
+    borderRadius: 6,
+    boxShadow: playing ? "0 0 0 3px #2563eb" : undefined,
+    backgroundColor: playing ? "#dbeafe" : undefined
+  }}>{children}{playing && renderExerciseSpeaker()}</span>;
+}
+
+
+
+const activationKeys = {
+  onKeyDown: (event) => {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    event.preventDefault();
+    event.stopPropagation();
+    if (!event.repeat) event.currentTarget.click();
+  },
+  onKeyUp: (event) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+  },
+};
+const fieldKeys = {
+  onKeyDown: (event) => {
+    if (event.key === "Enter" || event.key === " ") event.stopPropagation();
+  },
+  onKeyUp: (event) => {
+    if (event.key === "Enter" || event.key === " ") event.stopPropagation();
+  },
+};
+const normalizeAnswer = (value) =>
+  value
+    .normalize("NFKC")
+    .toLowerCase()
+    .replace(/[\u2018\u2019\u201A\u201B\u0060\u00B4']/g, "")
+    .replace(/[.,!?;:\u2026\u201c\u201d"]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+ // boys flying kite
 
 // ─────────────────────────────────────────────
 //  🎨  COLORS — كلها قابلة للتعديل
@@ -65,85 +237,37 @@ const VALID_NUMBERS = ["1","2","3","4","5","6"];
 // ─────────────────────────────────────────────
 //  🔧  NORMALIZE
 // ─────────────────────────────────────────────
-const normalize = (val) => val.trim();
 
-const isCorrectAnswer = (userVal, correct) =>
-  normalize(userVal) === String(correct);
+
+
 
 // ─────────────────────────────────────────────
 //  COMPONENT
 // ─────────────────────────────────────────────
 export default function WB_ReadLookNumber_QL() {
-  const [answers,     setAnswers]     = useState({});
-  const [showResults, setShowResults] = useState(false);
-  const [showAns,     setShowAns]     = useState(false);
+const listening=useExerciseListening("wb_unit1_page8_q2");
 
-  const isLocked =  showAns;
+  const [answers,     setAnswers]     = useState({});
+  const [, setShowResults] = useState(false);
+  const [showAns,     setShowAns]     = useState(false);
+const [results,setResults]=useState({}),[announcement,setAnnouncement]=useState("");const resetButtonRef=useRef(null);const answerTargets=IMAGES.map(img=>({key:img.key,correct:[String(img.correct)],answer:String(img.correct),label:`Picture ${img.key.slice(-1)}. Enter the matching sentence number from 1 to 6. Use each number once.`}));const checkDisabled=showAns||answerTargets.every(item=>results[item.key]==="correct");
+
+  
 
   // ── handlers ──────────────────────────────
-  const handleChange = (key, value) => {
-    if (isLocked) return;
-    // يقبل رقم واحد بس (1-6)
-    if (value !== "" && !VALID_NUMBERS.includes(value)) return;
-    setAnswers((prev) => ({ ...prev, [key]: value }));
-  };
+  const handleChange=(key,value)=>{if(showAns||results[key]==="correct")return;if(value&&!/^[1-6]$/.test(value))return;if(value&&Object.entries(answers).some(([id,v])=>String(id)!==String(key)&&v===value))return;setAnswers(prev=>({...prev,[key]:value}));setResults(prev=>{const next={...prev};delete next[key];return next;});};
 
-  const handleCheck = () => {
-    if (isLocked) return;
-    const allAnswered = IMAGES.every(
-      (img) => answers[img.key] && answers[img.key].trim() !== ""
-    );
-    if (!allAnswered) {
-      ValidationAlert.info("Please number all pictures first.");
-      return;
-    }
-    let score = 0;
-    IMAGES.forEach((img) => {
-      if (isCorrectAnswer(answers[img.key] || "", img.correct)) score++;
-    });
-    setShowResults(true);
-    if (score === IMAGES.length)   ValidationAlert.success(`Score: ${score} / ${IMAGES.length}`);
-    else if (score > 0)            ValidationAlert.warning(`Score: ${score} / ${IMAGES.length}`);
-    else                           ValidationAlert.error(`Score: ${score} / ${IMAGES.length}`);
-  };
+  const handleCheck=()=>{if(checkDisabled)return;listening.stop();if(!answerTargets.every(item=>answers[item.key]?.trim())){ValidationAlert.info("Please complete all answers first.");setAnnouncement("Please complete all answers first.");return;}const next=Object.fromEntries(answerTargets.map(item=>[item.key,results[item.key]==="correct"||item.correct.some(correct=>normalizeAnswer(answers[item.key])===normalizeAnswer(correct))?"correct":"wrong"]));const score=Object.values(next).filter(v=>v==="correct").length;setResults(next);setShowResults(true);setAnnouncement(`Score: ${score} out of ${answerTargets.length}. Correct answers are locked.`);if(score===answerTargets.length){resetButtonRef.current?.focus({preventScroll:true});ValidationAlert.success(`Score: ${score} / ${answerTargets.length}`);}else if(score)ValidationAlert.warning(`Score: ${score} / ${answerTargets.length}`);else ValidationAlert.error(`Score: ${score} / ${answerTargets.length}`);};
 
-  const handleShowAnswer = () => {
-    const filled = {};
-    IMAGES.forEach((img) => { filled[img.key] = String(img.correct); });
-    setAnswers(filled);
-    setShowResults(false);
-    setShowAns(true);
-  };
+  const handleShowAnswer=()=>{listening.stop();setAnswers(Object.fromEntries(answerTargets.map(item=>[item.key,item.answer])));setResults({});setShowResults(false);setShowAns(true);resetButtonRef.current?.focus({preventScroll:true});setAnnouncement("Correct answers shown and locked.");};
 
-  const handleReset = () => {
-    setAnswers({});
-    setShowResults(false);
-    setShowAns(false);
-  };
+  const handleReset=()=>{listening.stop();setAnswers({});setResults({});setShowResults(false);setShowAns(false);setAnnouncement("Answers and feedback cleared.");};
 
   // ── helpers ───────────────────────────────
-  const isWrong = (img) => {
-    if (!showResults || showAns) return false;
-    return !isCorrectAnswer(answers[img.key] || "", img.correct);
-  };
+  const isWrong=img=>!showAns&&results[img.key]==="wrong";
 
   // ── render icon (✓ or ✗) ─────────────────
-  const renderIcon = (type) => (
-    <div className="rln-icon">
-      {type === "check" ? (
-        <svg viewBox="0 0 24 24" className="rln-icon-svg" fill="none">
-          <polyline points="4,13 9,18 20,6"
-            stroke={CHECK_ICON_COLOR} strokeWidth="3"
-            strokeLinecap="round" strokeLinejoin="round"/>
-        </svg>
-      ) : (
-        <svg viewBox="0 0 24 24" className="rln-icon-svg" fill="none">
-          <line x1="5" y1="5" x2="19" y2="19" stroke={CROSS_ICON_COLOR} strokeWidth="3" strokeLinecap="round"/>
-          <line x1="19" y1="5" x2="5" y2="19" stroke={CROSS_ICON_COLOR} strokeWidth="3" strokeLinecap="round"/>
-        </svg>
-      )}
-    </div>
-  );
+  
 
   // ── render one image card ─────────────────
   const renderImageCard = (img) => {
@@ -157,15 +281,15 @@ export default function WB_ReadLookNumber_QL() {
 
         {/* Number input box — top-right corner */}
         <div className="rln-num-box-wrap">
-          <input
+          <input aria-invalid={results[img.key]==="wrong"} placeholder="#" title={answerTargets.find(t=>t.key===img.key)?.label||"Complete this answer"} aria-label={answerTargets.find(t=>t.key===img.key)?.label||"Complete this answer"} {...fieldKeys}
             type="text"
             inputMode="numeric"
             maxLength={1}
             className={`rln-num-box ${wrong ? "rln-num-box--wrong" : ""} ${showAns ? "rln-num-box--answer" : ""}`}
             value={value}
-            disabled={isLocked}
+            disabled={showAns||results[img.key]==="correct"}
             onChange={(e) => handleChange(img.key, e.target.value)}
-            style={{ color: tColor, background: bgColor }}
+            style={(base=>({...base,borderColor:showAns||results[img.key]==="correct"?"#16a34a":results[img.key]==="wrong"?"#ef4444":base.borderColor}))((base=>({...base,borderBottomColor:showAns||results[img.key]==="correct"?"#16a34a":results[img.key]==="wrong"?"#ef4444":base.borderBottomColor}))({ color: tColor, background: bgColor }))}
             spellCheck={false}
             autoComplete="off"
           />
@@ -173,7 +297,7 @@ export default function WB_ReadLookNumber_QL() {
         </div>
 
         {/* Image */}
-        <img src={img.src} alt={`scene-${img.key}`} className="rln-img" />
+        <img src={img.src} alt={({"img-a":"A boy delivering milk, marked with a cross.","img-b":"A girl feeding chickens, marked with a tick.","img-c":"Two boys running, marked with a tick.","img-d":"A girl riding a horse, marked with a cross.","img-e":"A child at a bakery counter, marked with a tick.","img-f":"Two boys with a kite, marked with a cross."})[img.key]} className="rln-img" />
 
         {/* ✓ / ✗ icon — bottom-right corner */}
 
@@ -184,7 +308,9 @@ export default function WB_ReadLookNumber_QL() {
 
   // ── render ────────────────────────────────
   return (
-    <div className="main-container-component">
+    <div data-adapt-scope="Unit1_WB_Unit1_Page8_Q2" className="main-container-component"><span className="sr-only" role="status" aria-live="polite">{listening.error}</span>
+<style>{`[data-adapt-scope="Unit1_WB_Unit1_Page8_Q2"] input:focus-visible, [data-adapt-scope="Unit1_WB_Unit1_Page8_Q2"] [data-keyboard-choice]:focus-visible, [data-adapt-scope="Unit1_WB_Unit1_Page8_Q2"] [data-grid-cell]:focus-visible, [data-adapt-scope="Unit1_WB_Unit1_Page8_Q2"] [data-listening]:focus-visible {outline:4px solid #2563eb !important;outline-offset:3px;border-radius:6px;} [data-adapt-scope="Unit1_WB_Unit1_Page8_Q2"] [data-grid-cell]:focus-visible {outline-offset:-4px;position:relative;z-index:1;} [data-adapt-scope="Unit1_WB_Unit1_Page8_Q2"] input[aria-invalid="true"]:focus-visible {border-bottom-color:#ef4444 !important;}`}</style>
+<div className="sr-only" role="status" aria-live="polite" aria-atomic="true">{announcement}</div>
       <style>{`
         /* ── Sentences ── */
         .rln-sentences {
@@ -337,20 +463,14 @@ export default function WB_ReadLookNumber_QL() {
         }}
       >
         {/* ── Header ── */}
-        <h1
-          className="WB-header-title-page8"
-          style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
-        >
-          <span className="WB-ex-A">L</span>
-          Read, look, and number.
-        </h1>
+        <ExerciseHeader subTitle="Read one line at a time, then place the correct number beside the matching sentence or picture." sectionLetter="L" title={<>Read, look, and number.</>} />
 
         {/* ── Sentences (2 columns) ── */}
         <div className="rln-sentences">
           {SENTENCES.map((s) => (
             <div key={s.id} className="rln-sentence-row">
               <span className="rln-s-num">{s.id}</span>
-              <span className="rln-s-text">{s.text}</span>
+              <span className="rln-s-text">{renderExerciseAudioText({audio:listening,id:`sentence-${s.id}`,src:[clipPage8L1,clipPage8L2,clipPage8L3,clipPage8L4,clipPage8L5,clipPage8L6][s.id-1],label:s.text,children:s.text})}</span>
             </div>
           ))}
         </div>
@@ -362,11 +482,11 @@ export default function WB_ReadLookNumber_QL() {
 
         {/* ── Buttons ── */}
         <div className="rln-buttons">
-          <Button
-            checkAnswers={handleCheck}
-            handleShowAnswer={handleShowAnswer}
-            handleStartAgain={handleReset}
-          />
+          <div className="action-buttons-container">
+<button type="button" aria-label="Start Again" {...activationKeys} ref={resetButtonRef} onClick={handleReset} className="try-again-button">Start Again ↻</button>
+<button type="button" aria-label="Show Answer" {...activationKeys} onClick={handleShowAnswer} className="show-answer-btn swal-continue">Show Answer</button>
+<button type="button" aria-label="Check Answer" {...activationKeys} onClick={handleCheck} disabled={checkDisabled} style={{cursor:checkDisabled ? "not-allowed":"pointer"}} className="check-button2">Check Answer ✓</button>
+</div>
         </div>
       </div>
     </div>

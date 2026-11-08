@@ -1,6 +1,164 @@
-import React, { useState } from "react";
-import Button from "../Button";
+import clipPage59F7 from "../../../assets/audio/WorkBook/Unit 10/Page 59 - F/Item_007_false.mp3";
+import clipPage59F6 from "../../../assets/audio/WorkBook/Unit 10/Page 59 - F/Item_006_true.mp3";
+import clipPage59F5 from "../../../assets/audio/WorkBook/Unit 10/Page 59 - F/Item_005_Oregon_has_many_different_types_of_landscapes.mp3";
+import clipPage59F4 from "../../../assets/audio/WorkBook/Unit 10/Page 59 - F/Item_004_Oregon_has_lots_of_pine_trees.mp3";
+import clipPage59F3 from "../../../assets/audio/WorkBook/Unit 10/Page 59 - F/Item_003_Mt._Hood_has_snow_all_year_round.mp3";
+import clipPage59F2 from "../../../assets/audio/WorkBook/Unit 10/Page 59 - F/Item_002_Oregon_has_oceans,_rivers,_and_deserts.mp3";
+import clipPage59F1 from "../../../assets/audio/WorkBook/Unit 10/Page 59 - F/Item_001_Have_you_ever_been_to_Oregon_Michael_has_been_to_Oregon_many_times._He_t.mp3";
+import {useEffect as useListeningEffect,useRef as useListeningRef,useState as useListeningState} from "react";
+import {useAudio} from "../../../context/AudioContext";
+import {FaVolumeUp as ListeningSpeakerIcon} from "react-icons/fa";
+import ExerciseHeader from "../../ExerciseHeader";
+import React, { useState, useRef } from "react";
 import ValidationAlert from "../../Popup/ValidationAlert";
+function useExerciseListening(pageId) {
+  const coordinator = useAudio();
+  const audioRef = useListeningRef(null),
+    generation = useListeningRef(0);
+  const [activeId, setActiveId] = useListeningState(null),
+    [error, setError] = useListeningState("");
+  const clearOwned = () => {
+    const current = audioRef.current;
+    if (current) {
+      current.onended = current.onplaying = current.onerror = current.onpause = null;
+      current.pause();
+      current.remove();
+      audioRef.current = null;
+    }
+  };
+  const stop = () => {
+    generation.current++;
+    clearOwned();
+    setActiveId(null);
+    setError("");
+  };
+  const play = (id, sources) => {
+    const queue = (Array.isArray(sources) ? sources : [sources]).filter(Boolean);
+    if (!queue.length) return;
+    stop();
+    const token = generation.current;
+    let index = 0;
+    const next = () => {
+      if (token !== generation.current) return;
+      clearOwned();
+      if (index >= queue.length) {
+        setActiveId(null);
+        return;
+      }
+      const media = new Audio(queue[index++]);
+      media.hidden = true;
+      media.dataset.exerciseListening = pageId;
+      document.body.appendChild(media);
+      audioRef.current = media;
+      const current = () => token === generation.current && audioRef.current === media;
+      const fail = () => {
+        if (!current()) return;
+        generation.current++;
+        clearOwned();
+        setActiveId(null);
+        setError("Audio could not be played. Please try again.");
+      };
+      media.onplaying = () => {
+        if (current()) setActiveId(id);
+      };
+      media.onended = () => {
+        if (current()) next();
+      };
+      media.onerror = fail;
+      media.onpause = () => {
+        if (!current()) return;
+        generation.current++;
+        clearOwned();
+        setActiveId(null);
+      };
+      document.querySelectorAll("audio,video").forEach(other => {
+        if (other !== media) other.pause();
+      });
+      coordinator?.registerAudio(media, null, pageId);
+      media.play().catch(fail);
+    };
+    next();
+  };
+  useListeningEffect(() => () => {
+    generation.current++;
+    const media = audioRef.current;
+    if (media) {
+      media.onended = media.onplaying = media.onerror = media.onpause = null;
+      media.pause();
+      media.remove();
+      audioRef.current = null;
+    }
+  }, []);
+  return {
+    play,
+    stop,
+    activeId,
+    error
+  };
+}
+function renderExerciseSpeaker() {
+  return <span aria-hidden="true" style={{
+    position: "absolute",
+    top: -10,
+    right: -10,
+    width: 22,
+    height: 22,
+    borderRadius: "50%",
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    background: "white",
+    color: "black",
+    boxShadow: "0 1px 3px rgba(0,0,0,.25)",
+    pointerEvents: "none",
+    zIndex: 3
+  }}><ListeningSpeakerIcon size={12} /></span>;
+}
+function renderExerciseAudioText({
+  audio,
+  id,
+  src,
+  label,
+  children
+}) {
+  if (!src || Array.isArray(src) && !src.some(Boolean)) return children;
+  const playing = audio.activeId === id;
+  const keys = event => {
+    if (event.target !== event.currentTarget || event.key !== "Enter" && event.key !== " ") return;
+    event.preventDefault();
+    event.stopPropagation();
+    if (event.type === "keydown" && !event.repeat) audio.play(id, src);
+  };
+  return <span role="button" tabIndex={0} data-listening={id} aria-label={label} onClick={event => {
+    event.stopPropagation();
+    audio.play(id, src);
+  }} onKeyDown={keys} onKeyUp={keys} style={{
+    position: "relative",
+    cursor: "pointer",
+    borderRadius: 6,
+    boxShadow: playing ? "0 0 0 3px #2563eb" : undefined,
+    backgroundColor: playing ? "#dbeafe" : undefined
+  }}>{children}{playing && renderExerciseSpeaker()}</span>;
+}
+
+
+
+const activationKeys = {
+  onKeyDown: (event) => {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    event.preventDefault();
+    event.stopPropagation();
+    if (!event.repeat) event.currentTarget.click();
+  },
+  onKeyUp: (event) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+  },
+};
+
+
 
 // ─────────────────────────────────────────────
 //  🎨  COLORS
@@ -45,41 +203,36 @@ const ITEMS = [
 //  COMPONENT
 // ─────────────────────────────────────────────
 export default function WB_ReadCircleTrueFalse_QF() {
+const listening=useExerciseListening("wb_unit10_page59_q2");
+
   const [selected,    setSelected]    = useState({});  // { itemId: "true" | "false" }
-  const [showResults, setShowResults] = useState(false);
+  const [, setShowResults] = useState(false);
   const [showAns,     setShowAns]     = useState(false);
+ const [results,setResults] = useState({});
+ const [announcement,setAnnouncement] = useState("");
+ const resetButtonRef = useRef(null);
+ const checkDisabled = showAns || ITEMS.every(item=>results[item.id] === "correct");
 
-  const isLocked = showResults || showAns;
+  const isLocked = checkDisabled;
 
-  const handleSelect = (itemId, value) => {
-    if (isLocked) return;
-    setSelected((prev) => ({ ...prev, [itemId]: prev[itemId] === value ? null : value }));
-  };
+  const handleSelect = (itemId,value) => {listening.play("choice-"+itemId+"-"+value,value==="true"?clipPage59F6:clipPage59F7);if(showAns || results[itemId] === "correct")return;setSelected(prev=>({...prev,[itemId]:prev[itemId] === value ? null : value}));setResults(prev=>{const next={...prev};delete next[itemId];return next;});setAnnouncement("Selection updated.");};
 
-  const handleCheck = () => {
-    if (isLocked) return;
-    const allAnswered = ITEMS.every((item) => selected[item.id]);
-    if (!allAnswered) { ValidationAlert.info("Please circle true or false for each sentence."); return; }
-    let score = 0;
-    ITEMS.forEach((item) => { if (selected[item.id] === item.correct) score++; });
-    setShowResults(true);
-    if (score === ITEMS.length)   ValidationAlert.success(`Score: ${score} / ${ITEMS.length}`);
-    else if (score > 0)           ValidationAlert.warning(`Score: ${score} / ${ITEMS.length}`);
-    else                          ValidationAlert.error(`Score: ${score} / ${ITEMS.length}`);
-  };
+  const handleCheck = () => {if(checkDisabled)return;listening.stop();if(!ITEMS.every(item=>selected[item.id] !== undefined && selected[item.id] !== null && selected[item.id] !== "")){ValidationAlert.info("Please choose an answer for each question.");setAnnouncement("Please choose an answer for each question.");return;}const next=Object.fromEntries(ITEMS.map(item=>[item.id,results[item.id] === "correct" || selected[item.id] === item.correct ? "correct":"wrong"]));const score=Object.values(next).filter(value=>value === "correct").length;setResults(next);setShowResults(true);setAnnouncement(`Score: ${score} out of ${ITEMS.length}. Correct answers are locked; incorrect answers can be changed.`);if(score === ITEMS.length){resetButtonRef.current?.focus({preventScroll:true});ValidationAlert.success(`Score: ${score} / ${ITEMS.length}`);}else if(score)ValidationAlert.warning(`Score: ${score} / ${ITEMS.length}`);else ValidationAlert.error(`Score: ${score} / ${ITEMS.length}`);};
 
-  const handleShowAnswer = () => {
+  const handleShowAnswer = () => {listening.stop();
     const filled = {};
     ITEMS.forEach((item) => { filled[item.id] = item.correct; });
     setSelected(filled);
     setShowResults(false);
     setShowAns(true);
+ setResults({});resetButtonRef.current?.focus({preventScroll:true});setAnnouncement("Correct answers shown and locked.");
   };
 
-  const handleReset = () => {
+  const handleReset = () => {listening.stop();
     setSelected({});
     setShowResults(false);
     setShowAns(false);
+ setResults({});setAnnouncement("Selections and feedback cleared.");
   };
 
   // حالة الكلمة
@@ -87,12 +240,14 @@ export default function WB_ReadCircleTrueFalse_QF() {
     const isSel = selected[item.id] === value;
     if (!isSel) return "none";
     if (showAns) return "correct";
-    if (showResults) return item.correct === value ? "correct" : "wrong";
+    if (results[item.id] !== undefined) return item.correct === value ? "correct" : "wrong";
     return "selected";
   };
 
   return (
-    <div className="main-container-component">
+    <div data-adapt-scope="Unit10_WB_Unit10_Page59_Q2" className="main-container-component"><span className="sr-only" role="status" aria-live="polite">{listening.error}</span>
+<style>{`[data-adapt-scope="Unit10_WB_Unit10_Page59_Q2"] input:focus-visible, [data-adapt-scope="Unit10_WB_Unit10_Page59_Q2"] [data-keyboard-choice]:focus-visible, [data-adapt-scope="Unit10_WB_Unit10_Page59_Q2"] [data-grid-cell]:focus-visible, [data-adapt-scope="Unit10_WB_Unit10_Page59_Q2"] [data-listening]:focus-visible {outline:4px solid #2563eb !important;outline-offset:3px;border-radius:6px;}`}</style>
+<div className="sr-only" role="status" aria-live="polite" aria-atomic="true">{announcement}</div>
       <style>{`
         /* ── Passage ── */
         .rtf-passage {
@@ -216,19 +371,13 @@ export default function WB_ReadCircleTrueFalse_QF() {
         }}
       >
         {/* ── Header ── */}
-        <h1
-          className="WB-header-title-page8"
-          style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
-        >
-          <span className="WB-ex-A">F</span>
-          Read and circle{" "}
+        <ExerciseHeader subTitle="Check the picture or text clue carefully, then choose the correct two-way answer for each item." sectionLetter="F" title={<>Read and circle{" "}
           <span style={{ color: CIRCLE_COLOR }}>true</span>{" "}
           or{" "}
-          <span style={{ color: CIRCLE_COLOR }}>false</span>.
-        </h1>
+          <span style={{ color: CIRCLE_COLOR }}>false</span>.</>} />
 
         {/* ── Passage ── */}
-        <p className="rtf-passage">{PASSAGE}</p>
+        <p className="rtf-passage">{renderExerciseAudioText({audio:listening,id:"passage",src:clipPage59F1,label:PASSAGE,children:PASSAGE})}</p>
 
         {/* ── Items ── */}
         <div className="rtf-list">
@@ -239,13 +388,13 @@ export default function WB_ReadCircleTrueFalse_QF() {
               <span className="rtf-num">{item.id}</span>
 
               {/* Sentence */}
-              <span className="rtf-sentence">{item.sentence}</span>
+              <span className="rtf-sentence">{renderExerciseAudioText({audio:listening,id:`sentence-${item.id}`,src:[clipPage59F2,clipPage59F3,clipPage59F4,clipPage59F5][item.id-1],label:item.sentence,children:item.sentence})}</span>
 
               {/* True */}
               {["true", "false"].map((value) => {
                 const state = getWordState(item, value);
                 return (
-                  <div
+                  <div data-listening={"choice-"+item.id+"-"+value} style={{position:"relative",borderRadius:999,background:selected[item.id]===value||listening.activeId==="choice-"+item.id+"-"+value?"#dbeafe":undefined,boxShadow:selected[item.id]===value?`inset 0 0 0 2px ${showAns||results[item.id]==="correct"?"#16a34a":results[item.id]==="wrong"?"#ef4444":"#2563eb"}`:undefined,outline:listening.activeId==="choice-"+item.id+"-"+value?"2px solid #2563eb":undefined}} role="button" tabIndex={0} data-keyboard-choice {...activationKeys} aria-label={`Question ${item.id}. ${value}`} aria-pressed={selected[item.id] === value} aria-disabled={showAns || results[item.id] === "correct"}
                     key={value}
                     className={[
                       "rtf-word-wrap",
@@ -256,10 +405,10 @@ export default function WB_ReadCircleTrueFalse_QF() {
                     ].filter(Boolean).join(" ")}
                     onClick={() => handleSelect(item.id, value)}
                   >
-                    <div className="rtf-oval" />
+                    <div style={{borderColor:state==="correct"?"#16a34a":undefined}} className="rtf-oval" />
                     <span className="rtf-word">{value}</span>
                     {state === "wrong" && <div className="rtf-badge">✕</div>}
-                  </div>
+                  {listening.activeId==="choice-"+item.id+"-"+value&&renderExerciseSpeaker()}</div>
                 );
               })}
 
@@ -269,11 +418,11 @@ export default function WB_ReadCircleTrueFalse_QF() {
 
         {/* ── Buttons ── */}
         <div className="rtf-buttons">
-          <Button
-            checkAnswers={handleCheck}
-            handleShowAnswer={handleShowAnswer}
-            handleStartAgain={handleReset}
-          />
+          <div className="action-buttons-container">
+<button type="button" aria-label="Start Again" {...activationKeys} ref={resetButtonRef} onClick={handleReset} className="try-again-button">Start Again ↻</button>
+<button type="button" aria-label="Show Answer" {...activationKeys} onClick={handleShowAnswer} className="show-answer-btn swal-continue">Show Answer</button>
+<button type="button" aria-label="Check Answer" {...activationKeys} onClick={handleCheck} disabled={checkDisabled} style={{cursor:checkDisabled ? "not-allowed":"pointer"}} className="check-button2">Check Answer ✓</button>
+</div>
         </div>
       </div>
     </div>

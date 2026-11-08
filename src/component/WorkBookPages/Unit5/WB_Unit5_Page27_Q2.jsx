@@ -1,6 +1,168 @@
-import React, { useState } from "react";
-import Button from "../Button";
+import clipPage27B11 from "../../../assets/audio/WorkBook/Unit 5/Page 27 - B/Item_011_stomach.mp3";
+import clipPage27B10 from "../../../assets/audio/WorkBook/Unit 5/Page 27 - B/Item_010_drink.mp3";
+import clipPage27B9 from "../../../assets/audio/WorkBook/Unit 5/Page 27 - B/Item_009_back.mp3";
+import clipPage27B8 from "../../../assets/audio/WorkBook/Unit 5/Page 27 - B/Item_008_flu.mp3";
+import clipPage27B7 from "../../../assets/audio/WorkBook/Unit 5/Page 27 - B/Item_007_stay.mp3";
+import clipPage27B6 from "../../../assets/audio/WorkBook/Unit 5/Page 27 - B/Item_006_bed.mp3";
+import clipPage27B5 from "../../../assets/audio/WorkBook/Unit 5/Page 27 - B/Item_005_awful.mp3";
+import clipPage27B4 from "../../../assets/audio/WorkBook/Unit 5/Page 27 - B/Item_004_hurts.mp3";
+import clipPage27B3 from "../../../assets/audio/WorkBook/Unit 5/Page 27 - B/Item_003_head.mp3";
+import clipPage27B2 from "../../../assets/audio/WorkBook/Unit 5/Page 27 - B/Item_002_spoiled.mp3";
+import clipPage27B1 from "../../../assets/audio/WorkBook/Unit 5/Page 27 - B/Item_001_water.mp3";
+import {useEffect as useListeningEffect,useRef as useListeningRef,useState as useListeningState} from "react";
+import {useAudio} from "../../../context/AudioContext";
+import {FaVolumeUp as ListeningSpeakerIcon} from "react-icons/fa";
+import ExerciseHeader from "../../ExerciseHeader";
+import React, { useState, useRef, useEffect } from "react";
 import ValidationAlert from "../../Popup/ValidationAlert";
+function useExerciseListening(pageId) {
+  const coordinator = useAudio();
+  const audioRef = useListeningRef(null),
+    generation = useListeningRef(0);
+  const [activeId, setActiveId] = useListeningState(null),
+    [error, setError] = useListeningState("");
+  const clearOwned = () => {
+    const current = audioRef.current;
+    if (current) {
+      current.onended = current.onplaying = current.onerror = current.onpause = null;
+      current.pause();
+      current.remove();
+      audioRef.current = null;
+    }
+  };
+  const stop = () => {
+    generation.current++;
+    clearOwned();
+    setActiveId(null);
+    setError("");
+  };
+  const play = (id, sources) => {
+    const queue = (Array.isArray(sources) ? sources : [sources]).filter(Boolean);
+    if (!queue.length) return;
+    stop();
+    const token = generation.current;
+    let index = 0;
+    const next = () => {
+      if (token !== generation.current) return;
+      clearOwned();
+      if (index >= queue.length) {
+        setActiveId(null);
+        return;
+      }
+      const media = new Audio(queue[index++]);
+      media.hidden = true;
+      media.dataset.exerciseListening = pageId;
+      document.body.appendChild(media);
+      audioRef.current = media;
+      const current = () => token === generation.current && audioRef.current === media;
+      const fail = () => {
+        if (!current()) return;
+        generation.current++;
+        clearOwned();
+        setActiveId(null);
+        setError("Audio could not be played. Please try again.");
+      };
+      media.onplaying = () => {
+        if (current()) setActiveId(id);
+      };
+      media.onended = () => {
+        if (current()) next();
+      };
+      media.onerror = fail;
+      media.onpause = () => {
+        if (!current()) return;
+        generation.current++;
+        clearOwned();
+        setActiveId(null);
+      };
+      document.querySelectorAll("audio,video").forEach(other => {
+        if (other !== media) other.pause();
+      });
+      coordinator?.registerAudio(media, null, pageId);
+      media.play().catch(fail);
+    };
+    next();
+  };
+  useListeningEffect(() => () => {
+    generation.current++;
+    const media = audioRef.current;
+    if (media) {
+      media.onended = media.onplaying = media.onerror = media.onpause = null;
+      media.pause();
+      media.remove();
+      audioRef.current = null;
+    }
+  }, []);
+  return {
+    play,
+    stop,
+    activeId,
+    error
+  };
+}
+function renderExerciseSpeaker() {
+  return <span aria-hidden="true" style={{
+    position: "absolute",
+    top: -10,
+    right: -10,
+    width: 22,
+    height: 22,
+    borderRadius: "50%",
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    background: "white",
+    color: "black",
+    boxShadow: "0 1px 3px rgba(0,0,0,.25)",
+    pointerEvents: "none",
+    zIndex: 3
+  }}><ListeningSpeakerIcon size={12} /></span>;
+}
+function renderExerciseAudioText({
+  audio,
+  id,
+  src,
+  label,
+  children
+}) {
+  if (!src || Array.isArray(src) && !src.some(Boolean)) return children;
+  const playing = audio.activeId === id;
+  const keys = event => {
+    if (event.target !== event.currentTarget || event.key !== "Enter" && event.key !== " ") return;
+    event.preventDefault();
+    event.stopPropagation();
+    if (event.type === "keydown" && !event.repeat) audio.play(id, src);
+  };
+  return <span role="button" tabIndex={0} data-listening={id} aria-label={label} onClick={event => {
+    event.stopPropagation();
+    audio.play(id, src);
+  }} onKeyDown={keys} onKeyUp={keys} style={{
+    position: "relative",
+    cursor: "pointer",
+    borderRadius: 6,
+    boxShadow: playing ? "0 0 0 3px #2563eb" : undefined,
+    backgroundColor: playing ? "#dbeafe" : undefined
+  }}>{children}{playing && renderExerciseSpeaker()}</span>;
+}
+
+
+
+const activationKeys = {
+  onKeyDown: (event) => {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    event.preventDefault();
+    event.stopPropagation();
+    if (!event.repeat) event.currentTarget.click();
+  },
+  onKeyUp: (event) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+  },
+};
+
+
 
 // ─────────────────────────────────────────────
 //  🎨  COLORS — كلها قابلة للتعديل
@@ -101,12 +263,45 @@ const checkSelection = (cells, foundNames) => {
 //  COMPONENT
 // ─────────────────────────────────────────────
 export default function WB_WordSearch_QK() {
-  const [selecting,   setSelecting]   = useState(false);
+const listening=useExerciseListening("wb_unit5_page27_q2");
+
+  const [,   setSelecting]   = useState(false);
   const [startCell,   setStartCell]   = useState(null);
   const [hoveredCell, setHoveredCell] = useState(null);
   const [foundWords,  setFoundWords]  = useState([]); // [{ word, cells, color }]
   const [wrongFlash,  setWrongFlash]  = useState(false);
 const [answerShown, setAnswerShown] = useState(false);
+  const [completed,setCompleted] = useState(false);
+  const [checked,setChecked] = useState(false);
+  const [activeCell,setActiveCell] = useState([0,0]);
+  const [announcement,setAnnouncement] = useState("");
+  const resetButtonRef = useRef(null), gridRef = useRef(null), cellRefs = useRef({}), gestureRef = useRef(null);
+  const checkDisabled = answerShown || completed;
+  const release = () => {const g=gestureRef.current;gestureRef.current=null;if(g && gridRef.current?.hasPointerCapture?.(g.id))gridRef.current.releasePointerCapture(g.id);};
+  const cancelSelection = () => {release();setStartCell(null);setHoveredCell(null);setSelecting(false);};
+  useEffect(()=>()=>{const g=gestureRef.current;gestureRef.current=null;if(g && gridRef.current?.hasPointerCapture?.(g.id))gridRef.current.releasePointerCapture(g.id);},[]);
+  const accept = (a,b) => {
+    if(checkDisabled)return;
+    const cells=getCellsBetween(a,b), match=checkSelection(cells,foundNames);
+    cancelSelection();setChecked(false);
+    if(match){setFoundWords(prev=>[...prev,{word:match.word,cells:match.cells,color:FOUND_COLORS[prev.length % FOUND_COLORS.length]}]);setWrongFlash(false);setAnnouncement(`Found ${match.word}.`);}
+    else {setWrongFlash(true);setAnnouncement("That path is not a new target word. Try again.");}
+  };
+  const activateCell = (r,col) => {if(checkDisabled)return;setWrongFlash(false);if(!startCell){setStartCell([r,col]);setHoveredCell([r,col]);setSelecting(true);setAnnouncement(`Selection starts at row ${r+1}, column ${col+1}. Choose the final letter.`);}else accept(startCell,[r,col]);};
+  const gridKey = (event,r,col) => {
+    if(event.key === "Tab")return;
+    if(["ArrowLeft","ArrowRight","ArrowUp","ArrowDown"].includes(event.key)){
+      event.preventDefault();event.stopPropagation();let nr=r,nc=col;if(event.key === "ArrowLeft")nc=Math.max(0,col-1);if(event.key === "ArrowRight")nc=Math.min(GRID[r].length-1,col+1);if(event.key === "ArrowUp")nr=Math.max(0,r-1);if(event.key === "ArrowDown")nr=Math.min(GRID.length-1,r+1);nc=Math.min(nc,GRID[nr].length-1);setActiveCell([nr,nc]);if(startCell&&!checkDisabled)setHoveredCell([nr,nc]);cellRefs.current[cellKey(nr,nc)]?.focus({preventScroll:true});return;
+    }
+    if(event.key === "Enter" || event.key === " "){event.preventDefault();event.stopPropagation();if(!event.repeat)activateCell(r,col);return;}
+    if(event.key === "Escape"){event.preventDefault();event.stopPropagation();cancelSelection();setAnnouncement("Selection cancelled.");return;}
+    if(event.key === "Backspace"){event.preventDefault();event.stopPropagation();if(checkDisabled||event.repeat)return;if(startCell)cancelSelection();else setFoundWords(prev=>prev.slice(0,-1));setChecked(false);setWrongFlash(false);setAnnouncement("Last selection undone.");}
+  };
+  const cellAt = event => {const node=document.elementFromPoint(event.clientX,event.clientY)?.closest("[data-grid-cell]");if(!node||!gridRef.current?.contains(node))return null;return [Number(node.dataset.row),Number(node.dataset.col)];};
+  const pointerStart = (event,r,col) => {if(checkDisabled||event.button!==0||event.isPrimary===false||gestureRef.current)return;event.preventDefault();event.stopPropagation();const anchor=startCell||[r,col];gestureRef.current={id:event.pointerId,anchor,hadAnchor:!!startCell,moved:false,end:[r,col]};setStartCell(anchor);setHoveredCell([r,col]);setSelecting(true);setActiveCell([r,col]);setWrongFlash(false);gridRef.current?.setPointerCapture?.(event.pointerId);};
+  const pointerMove = event => {const g=gestureRef.current;if(!g||g.id!==event.pointerId)return;const cell=cellAt(event);if(!cell)return;g.end=cell;g.moved ||= cell[0]!==g.anchor[0]||cell[1]!==g.anchor[1];setHoveredCell(cell);};
+  const pointerEnd = event => {const g=gestureRef.current;if(!g||g.id!==event.pointerId)return;const cell=cellAt(event);release();if(!cell){cancelSelection();return;}if(g.hadAnchor||g.moved||cell[0]!==g.anchor[0]||cell[1]!==g.anchor[1])accept(g.anchor,cell);};
+
   const foundNames = new Set(foundWords.map((f) => f.word));
 
   // خريطة: cellKey → [color1, color2, ...] — تدعم التقاطعات بين كلمتين
@@ -123,67 +318,22 @@ const [answerShown, setAnswerShown] = useState(false);
   const selectionKeys  = new Set(selectionCells.map(([r, c]) => cellKey(r, c)));
 
   // ── handlers ──────────────────────────────
-  const handleMouseDown = (r, c) => {
-    setSelecting(true);
-    setStartCell([r, c]);
-    setHoveredCell([r, c]);
-  };
+  
 
-  const handleMouseEnter = (r, c) => {
-    if (selecting) setHoveredCell([r, c]);
-  };
+  
 
-  const handleMouseUp = () => {
-    if (!selecting) return;
-    setSelecting(false);
-    if (selectionCells.length > 1) {
-      const match = checkSelection(selectionCells, foundNames);
-      if (match) {
-        const color = FOUND_COLORS[foundWords.length % FOUND_COLORS.length];
-        setFoundWords((prev) => [...prev, { word: match.word, cells: match.cells, color }]);
-      } else {
-        setWrongFlash(true);
-        setTimeout(() => setWrongFlash(false), 400);
-      }
-    }
-    setStartCell(null);
-    setHoveredCell(null);
-  };
+  
 
-  const handleReset = () => {
-      setAnswerShown(false); 
-    setFoundWords([]);
-    setStartCell(null);
-    setHoveredCell(null);
-    setSelecting(false);
-    setWrongFlash(false);
-  };
+  const handleReset = () => {listening.stop();cancelSelection();setAnswerShown(false);setCompleted(false);setChecked(false);setFoundWords([]);setWrongFlash(false);setActiveCell([0,0]);setAnnouncement("All discoveries and feedback cleared.");cellRefs.current["0-0"]?.focus({preventScroll:true});};
 
-  const handleShowAnswer = () => {
-    setAnswerShown(true);   
-    setFoundWords(
-      WORD_DEFS.map((def, i) => ({
-        word:  def.word,
-        cells: def.cells,
-        color: FOUND_COLORS[i % FOUND_COLORS.length],
-      }))
-    );
-  };
+  const handleShowAnswer = () => {listening.stop();cancelSelection();setWrongFlash(false);setAnswerShown(true);setChecked(false);setFoundWords(WORD_DEFS.map((def,i)=>({...def,color:FOUND_COLORS[i % FOUND_COLORS.length]})));resetButtonRef.current?.focus({preventScroll:true});setAnnouncement("All target words shown and locked.");};
 
-  const handleCheck = () => {
-      if (answerShown) return;   // ← أضف هذا السطر
+  const handleCheck = () => {if(checkDisabled)return;listening.stop();cancelSelection();if(!foundWords.length){ValidationAlert.info("Please find a word first.");setAnnouncement("Please find a word first.");return;}setChecked(true);setAnnouncement(`Score: ${foundWords.length} out of ${WORD_DEFS.length}.`);if(foundWords.length === WORD_DEFS.length){setCompleted(true);resetButtonRef.current?.focus({preventScroll:true});ValidationAlert.success(`Score: ${foundWords.length} / ${WORD_DEFS.length}`);}else ValidationAlert.warning(`Score: ${foundWords.length} / ${WORD_DEFS.length}`);};
 
-    if (foundNames.size < WORD_DEFS.length) {
-      ValidationAlert.info("Please find all words first.");
-    } else {
-      ValidationAlert.success(`Score: ${WORD_DEFS.length} / ${WORD_DEFS.length}`);
-    }
-  };
-
-  const allFound = foundNames.size === WORD_DEFS.length;
+  
 
   // ── render cell background ────────────────
-const getCellStyle = (key, isSelecting, isWrong) => {
+const getCellStyle = (key, isSelecting, isWrong) => {if((answerShown||completed)&&foundCellMap[key])return {background:"#15803d"};
   if (isWrong)     return { background: CELL_BG_WRONG };
   if (isSelecting) return { background: CELL_BG_SELECTING };
   const colors = foundCellMap[key];
@@ -203,11 +353,13 @@ const getCellStyle = (key, isSelecting, isWrong) => {
 
   // ── render ────────────────────────────────
   return (
-    <div
+    <div data-adapt-scope="Unit5_WB_Unit5_Page27_Q2"
       className="main-container-component"
-      onMouseUp={handleMouseUp}
-      onMouseLeave={() => { if (selecting) handleMouseUp(); }}
-    >
+      
+      
+    ><span className="sr-only" role="status" aria-live="polite">{listening.error}</span>
+<style>{`[data-adapt-scope="Unit5_WB_Unit5_Page27_Q2"] input:focus-visible, [data-adapt-scope="Unit5_WB_Unit5_Page27_Q2"] [data-keyboard-choice]:focus-visible, [data-adapt-scope="Unit5_WB_Unit5_Page27_Q2"] [data-grid-cell]:focus-visible, [data-adapt-scope="Unit5_WB_Unit5_Page27_Q2"] [data-listening]:focus-visible {outline:4px solid #2563eb !important;outline-offset:3px;border-radius:6px;} [data-adapt-scope="Unit5_WB_Unit5_Page27_Q2"] [data-grid-cell]:focus-visible {outline-offset:-4px;position:relative;z-index:1;}`}</style>
+<div className="sr-only" role="status" aria-live="polite" aria-atomic="true">{announcement}</div>
       <style>{`
         /* ── Body: قائمة + جدول ── */
         .wsk-body {
@@ -332,13 +484,7 @@ const getCellStyle = (key, isSelecting, isWrong) => {
         }}
       >
         {/* ── Header ── */}
-        <h1
-          className="WB-header-title-page8"
-          style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
-        >
-          <span className="WB-ex-A">B</span>
-          Find and circle the words.
-        </h1>
+        <ExerciseHeader subTitle="Find one target word at a time, then select all of its letters before moving to the next word." sectionLetter="B" title={<>Find and circle the words.</>} />
 
         {/* ── Body ── */}
         <div className="wsk-body">
@@ -348,15 +494,15 @@ const getCellStyle = (key, isSelecting, isWrong) => {
             {WORD_LIST.map((w) => (
               <span
                 key={w}
-                className={`wsk-word-item ${foundNames.has(w) ? "wsk-word-item--found" : ""}`}
+                className={`wsk-word-item ${foundNames.has(w) ? "wsk-word-item--found" : ""}`} style={{color:checked&&!foundNames.has(w)?"#ef4444":undefined}}
               >
-                {w}
+                {renderExerciseAudioText({audio:listening,id:`word-${w}`,src:[clipPage27B1,clipPage27B2,clipPage27B3,clipPage27B4,clipPage27B5,clipPage27B6,clipPage27B7,clipPage27B8,clipPage27B9,clipPage27B10,clipPage27B11][WORD_LIST.indexOf(w)],label:w,children:w})}
               </span>
             ))}
           </div>
 
           {/* الجدول */}
-          <div className="wsk-grid">
+          <div ref={gridRef} role="group" aria-label="Word search. Arrows move; Enter or Space selects endpoints; Escape cancels; Backspace undoes." style={{touchAction:"none"}} onPointerMove={pointerMove} onPointerUp={pointerEnd} onPointerCancel={event=>{if(gestureRef.current?.id===event.pointerId)cancelSelection();}} onLostPointerCapture={event=>{if(gestureRef.current?.id===event.pointerId)cancelSelection();}} className="wsk-grid">
             {GRID.map((row, r) =>
               row.map((letter, c) => {
                 const key         = cellKey(r, c);
@@ -367,7 +513,7 @@ const getCellStyle = (key, isSelecting, isWrong) => {
                 const isSelecting = isSel && !wrongFlash;
 
                 return (
-                  <div
+                  <div role="button" data-grid-cell data-row={r} data-col={c} tabIndex={activeCell[0]===r&&activeCell[1]===c?0:-1} ref={el=>{cellRefs.current[key]=el;}} aria-label={`Row ${r+1}, column ${c+1}: ${letter}${isFound?", found":""}`} aria-pressed={isSel||!!isFound} aria-disabled={checkDisabled} onKeyDown={event=>gridKey(event,r,c)} onKeyUp={activationKeys.onKeyUp} onPointerDown={event=>pointerStart(event,r,c)}
                     key={key}
                     className={[
                       "wsk-cell",
@@ -376,8 +522,8 @@ const getCellStyle = (key, isSelecting, isWrong) => {
                       isWrong     ? "wsk-cell--wrong"     : "",
                     ].filter(Boolean).join(" ")}
                     style={getCellStyle(key, isSelecting, isWrong)}
-                    onMouseDown={() => handleMouseDown(r, c)}
-                    onMouseEnter={() => handleMouseEnter(r, c)}
+                    
+                    
                   >
                     {letter}
                   </div>
@@ -390,11 +536,11 @@ const getCellStyle = (key, isSelecting, isWrong) => {
 
         {/* ── Buttons ── */}
         <div className="wsk-buttons">
-          <Button
-            checkAnswers={handleCheck}
-            handleShowAnswer={handleShowAnswer}
-            handleStartAgain={handleReset}
-          />
+          <div className="action-buttons-container">
+<button type="button" aria-label="Start Again" {...activationKeys} ref={resetButtonRef} onClick={handleReset} className="try-again-button">Start Again ↻</button>
+<button type="button" aria-label="Show Answer" {...activationKeys} onClick={handleShowAnswer} className="show-answer-btn swal-continue">Show Answer</button>
+<button type="button" aria-label="Check Answer" {...activationKeys} onClick={handleCheck} disabled={checkDisabled} style={{cursor:checkDisabled ? "not-allowed":"pointer"}} className="check-button2">Check Answer ✓</button>
+</div>
         </div>
 
 

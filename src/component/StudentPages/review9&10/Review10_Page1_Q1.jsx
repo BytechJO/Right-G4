@@ -1,11 +1,171 @@
+import clipPage86A5 from "../../../assets/audio/ClassBook/Unit 10/Page 86 - A/Item_005_purchase.mp3";
+import clipPage86A6 from "../../../assets/audio/ClassBook/Unit 10/Page 86 - A/Item_006_casual.mp3";
+import {useEffect as useListeningEffect,useRef as useListeningRef,useState as useListeningState} from "react";
+import {useAudio} from "../../../context/AudioContext";
+import {FaVolumeUp as ListeningSpeakerIcon} from "react-icons/fa";
+import ExerciseHeader from "../../ExerciseHeader";
 import React, { useState, useRef } from "react";
-import Button from "../../Button";
 import ValidationAlert from "../../Popup/ValidationAlert";
 
 // ─────────────────────────────────────────────
 //  🖼️  IMAGE
 // ─────────────────────────────────────────────
 import imgScene from "../../../assets/imgs/pages/Class Book/Right 4 Unit 10 Stella Goes Shopping Folder/Page 90/SVG/Asset 1.svg";
+function useExerciseListening(pageId) {
+  const coordinator = useAudio();
+  const audioRef = useListeningRef(null),
+    generation = useListeningRef(0);
+  const [activeId, setActiveId] = useListeningState(null),
+    [error, setError] = useListeningState("");
+  const clearOwned = () => {
+    const current = audioRef.current;
+    if (current) {
+      current.onended = current.onplaying = current.onerror = current.onpause = null;
+      current.pause();
+      current.remove();
+      audioRef.current = null;
+    }
+  };
+  const stop = () => {
+    generation.current++;
+    clearOwned();
+    setActiveId(null);
+    setError("");
+  };
+  const play = (id, sources) => {
+    const queue = (Array.isArray(sources) ? sources : [sources]).filter(Boolean);
+    if (!queue.length) return;
+    stop();
+    const token = generation.current;
+    let index = 0;
+    const next = () => {
+      if (token !== generation.current) return;
+      clearOwned();
+      if (index >= queue.length) {
+        setActiveId(null);
+        return;
+      }
+      const media = new Audio(queue[index++]);
+      media.hidden = true;
+      media.dataset.exerciseListening = pageId;
+      document.body.appendChild(media);
+      audioRef.current = media;
+      const current = () => token === generation.current && audioRef.current === media;
+      const fail = () => {
+        if (!current()) return;
+        generation.current++;
+        clearOwned();
+        setActiveId(null);
+        setError("Audio could not be played. Please try again.");
+      };
+      media.onplaying = () => {
+        if (current()) setActiveId(id);
+      };
+      media.onended = () => {
+        if (current()) next();
+      };
+      media.onerror = fail;
+      media.onpause = () => {
+        if (!current()) return;
+        generation.current++;
+        clearOwned();
+        setActiveId(null);
+      };
+      document.querySelectorAll("audio,video").forEach(other => {
+        if (other !== media) other.pause();
+      });
+      coordinator?.registerAudio(media, null, pageId);
+      media.play().catch(fail);
+    };
+    next();
+  };
+  useListeningEffect(() => () => {
+    generation.current++;
+    const media = audioRef.current;
+    if (media) {
+      media.onended = media.onplaying = media.onerror = media.onpause = null;
+      media.pause();
+      media.remove();
+      audioRef.current = null;
+    }
+  }, []);
+  return {
+    play,
+    stop,
+    activeId,
+    error
+  };
+}
+function renderExerciseSpeaker() {
+  return <span aria-hidden="true" style={{
+    position: "absolute",
+    top: -10,
+    right: -10,
+    width: 22,
+    height: 22,
+    borderRadius: "50%",
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    background: "white",
+    color: "black",
+    boxShadow: "0 1px 3px rgba(0,0,0,.25)",
+    pointerEvents: "none",
+    zIndex: 3
+  }}><ListeningSpeakerIcon size={12} /></span>;
+}
+function renderExerciseAudioText({
+  audio,
+  id,
+  src,
+  label,
+  children
+}) {
+  if (!src || Array.isArray(src) && !src.some(Boolean)) return children;
+  const playing = audio.activeId === id;
+  const keys = event => {
+    if (event.target !== event.currentTarget || event.key !== "Enter" && event.key !== " ") return;
+    event.preventDefault();
+    event.stopPropagation();
+    if (event.type === "keydown" && !event.repeat) audio.play(id, src);
+  };
+  return <span role="button" tabIndex={0} data-listening={id} aria-label={label} onClick={event => {
+    event.stopPropagation();
+    audio.play(id, src);
+  }} onKeyDown={keys} onKeyUp={keys} style={{
+    position: "relative",
+    cursor: "pointer",
+    borderRadius: 6,
+    boxShadow: playing ? "0 0 0 3px #2563eb" : undefined,
+    backgroundColor: playing ? "#dbeafe" : undefined
+  }}>{children}{playing && renderExerciseSpeaker()}</span>;
+}
+
+
+
+const activationKeys = {
+  onKeyDown: (event) => {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    event.preventDefault();
+    event.stopPropagation();
+    if (!event.repeat) event.currentTarget.click();
+  },
+  onKeyUp: (event) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+  },
+};
+const fieldKeys = {
+  onKeyDown: (event) => {
+    if (event.key === "Enter" || event.key === " ") event.stopPropagation();
+  },
+  onKeyUp: (event) => {
+    if (event.key === "Enter" || event.key === " ") event.stopPropagation();
+  },
+};
+
 
 // ─────────────────────────────────────────────
 //  🎨  COLORS
@@ -91,60 +251,26 @@ const ALL_INPUTS = ITEMS.flatMap((item) =>
 //  COMPONENT
 // ─────────────────────────────────────────────
 export default function WB_WriteVocab_QA() {
+const listening=useExerciseListening("sb_review10_page1_q1");
+
   const [answers,     setAnswers]     = useState({});
-  const [showResults, setShowResults] = useState(false);
+  const [, setShowResults] = useState(false);
   const [showAns,     setShowAns]     = useState(false);
+const [results,setResults]=useState({}),[announcement,setAnnouncement]=useState("");const resetButtonRef=useRef(null);const checkDisabled=showAns||ALL_INPUTS.every(p=>results[p.id]==="correct");
 
   const inputRefs = useRef({});
 
-  const handleChange = (id, value, correct, allParts) => {
-    if (showAns) return;
-    const letter = value.replace(/[^a-zA-Z]/g,"").slice(-1).toLowerCase();
-    setAnswers((prev) => ({ ...prev, [id]: letter }));
+  const handleChange=(id,value,correct,allParts)=>{if(showAns||results[id]==="correct")return;const letter=value.replace(/[^a-zA-Z]/g,"").slice(-1).toLowerCase();setAnswers(prev=>({...prev,[id]:letter}));setResults(prev=>{const next={...prev};delete next[id];return next;});if(letter){const inputs=allParts.filter(p=>p.t==="input"),idx=inputs.findIndex(p=>p.id===id),next=inputs.slice(idx+1).find(p=>results[p.id]!=="correct");if(next)inputRefs.current[next.id]?.focus();}};
 
-    // auto-focus next input in same item
-    if (letter) {
-      const inputs = allParts.filter((p) => p.t === "input");
-      const idx = inputs.findIndex((p) => p.id === id);
-      const next = inputs[idx + 1];
-      if (next && inputRefs.current[next.id]) {
-        inputRefs.current[next.id].focus();
-      }
-    }
-  };
+  const handleCheck=()=>{if(checkDisabled)return;listening.stop();if(!ALL_INPUTS.every(p=>answers[p.id]?.trim())){ValidationAlert.info("Please fill in all missing letters first.");return;}const next=Object.fromEntries(ALL_INPUTS.map(p=>[p.id,answers[p.id]?.toLowerCase()===p.correct.toLowerCase()?"correct":"wrong"]));const score=ITEMS.filter(item=>item.parts.filter(p=>p.t==="input").every(p=>next[p.id]==="correct")).length;setResults(next);setShowResults(true);setAnnouncement(`Score: ${score} out of ${ITEMS.length}. Correct letters are locked.`);if(score===ITEMS.length){resetButtonRef.current?.focus({preventScroll:true});ValidationAlert.success(`Score: ${score} / ${ITEMS.length}`);}else if(score)ValidationAlert.warning(`Score: ${score} / ${ITEMS.length}`);else ValidationAlert.error(`Score: ${score} / ${ITEMS.length}`);};
 
-  const handleCheck = () => {
-    if (showAns) return;
-    const allAnswered = ALL_INPUTS.every((p) => answers[p.id]?.trim());
-    if (!allAnswered) { ValidationAlert.info("Please fill in all missing letters first."); return; }
-    let score = 0;
-    ITEMS.forEach((item) => {
-      const allCorrect = item.parts
-        .filter((p) => p.t === "input")
-        .every((p) => answers[p.id]?.toLowerCase() === p.correct.toLowerCase());
-      if (allCorrect) score++;
-    });
-    setShowResults(true);
-    if (score === ITEMS.length)   ValidationAlert.success(`Score: ${score} / ${ITEMS.length}`);
-    else if (score > 0)           ValidationAlert.warning(`Score: ${score} / ${ITEMS.length}`);
-    else                          ValidationAlert.error(`Score: ${score} / ${ITEMS.length}`);
-  };
+  const handleShowAnswer=()=>{listening.stop();setAnswers(Object.fromEntries(ALL_INPUTS.map(p=>[p.id,p.correct])));setResults({});setShowResults(false);setShowAns(true);resetButtonRef.current?.focus({preventScroll:true});setAnnouncement("Correct words shown and locked.");};
 
-  const handleShowAnswer = () => {
-    const filled = {};
-    ALL_INPUTS.forEach((p) => { filled[p.id] = p.correct; });
-    setAnswers(filled); setShowResults(false); setShowAns(true);
-  };
+  const handleReset=()=>{listening.stop();setAnswers({});setResults({});setShowResults(false);setShowAns(false);setAnnouncement("Letters and feedback cleared.");};
 
-  const handleReset = () => {
-    setAnswers({}); setShowResults(false); setShowAns(false);
-  };
+  const isInputWrong=p=>!showAns&&results[p.id]==="wrong";
 
-  const isInputWrong = (p) =>
-    showResults && !showAns && answers[p.id]?.toLowerCase() !== p.correct.toLowerCase();
-
-  const isInputDisabled = (p) =>
-    showAns || (showResults && answers[p.id]?.toLowerCase() === p.correct.toLowerCase());
+  const isInputDisabled=p=>showAns||results[p.id]==="correct";
 
   const renderParts = (item) =>
     item.parts.map((part, i) => {
@@ -162,7 +288,7 @@ export default function WB_WriteVocab_QA() {
 
       return (
         <span key={part.id} className="wva-letter-wrap">
-          <input
+          <input {...fieldKeys} aria-label={`Word ${item.id}. Missing letter at position ${i+1}.`} title={`Word ${item.id}, letter ${i+1}`} aria-invalid={wrong} onKeyDown={event=>{fieldKeys.onKeyDown(event);if(["ArrowLeft","ArrowRight","Enter"," "].includes(event.key)){event.preventDefault();event.stopPropagation();if(event.repeat)return;const inputs=item.parts.filter(p=>p.t==="input"&&!isInputDisabled(p)),at=inputs.findIndex(p=>p.id===part.id),next=inputs[at+(event.key==="ArrowLeft"||event.shiftKey?-1:1)];if(next)inputRefs.current[next.id]?.focus();}else if(event.key==="Backspace"&&!value){const inputs=item.parts.filter(p=>p.t==="input"&&!isInputDisabled(p)),at=inputs.findIndex(p=>p.id===part.id);if(inputs[at-1])inputRefs.current[inputs[at-1].id]?.focus();}}}
             ref={(el) => { inputRefs.current[part.id] = el; }}
             className={["wva-letter-input", wrong?"wva-letter-input--wrong":"", showAns?"wva-letter-input--answer":""].filter(Boolean).join(" ")}
             type="text"
@@ -170,7 +296,7 @@ export default function WB_WriteVocab_QA() {
             value={value}
             disabled={disabled}
             onChange={(e) => handleChange(part.id, e.target.value, part.correct, item.parts)}
-            style={{ borderBottomColor: ulColor, color }}
+            style={{borderBottomColor:showAns||results[part.id]==="correct"?"#16a34a":ulColor,color:showAns||results[part.id]==="correct"?"#15803d":color}}
             spellCheck={false}
             autoComplete="off"
           />
@@ -180,7 +306,9 @@ export default function WB_WriteVocab_QA() {
     });
 
   return (
-    <div className="main-container-component">
+    <div data-adapt-scope="review9&10_Review10_Page1_Q1" className="main-container-component"><span className="sr-only" role="status" aria-live="polite">{listening.error}</span>
+<style>{`[data-adapt-scope="review9&10_Review10_Page1_Q1"] input:focus-visible, [data-adapt-scope="review9&10_Review10_Page1_Q1"] [data-keyboard-choice]:focus-visible, [data-adapt-scope="review9&10_Review10_Page1_Q1"] [data-grid-cell]:focus-visible, [data-adapt-scope="review9&10_Review10_Page1_Q1"] [data-listening]:focus-visible {outline:4px solid #2563eb !important;outline-offset:3px;border-radius:6px;} [data-adapt-scope="review9&10_Review10_Page1_Q1"] [data-grid-cell]:focus-visible {outline-offset:-4px;position:relative;z-index:1;} [data-adapt-scope="review9&10_Review10_Page1_Q1"] input[aria-invalid="true"]:focus-visible {border-bottom-color:#ef4444 !important;}`}</style>
+<div className="sr-only" role="status" aria-live="polite" aria-atomic="true">{announcement}</div>
       <style>{`
         /* ── Body: items + image ── */
         .wva-body {
@@ -309,13 +437,7 @@ export default function WB_WriteVocab_QA() {
         }}
       >
         {/* ── Header ── */}
-        <h1
-          className="WB-header-title-page8"
-          style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
-        >
-          <span className="WB-ex-A-1">A</span>
-          Write the vocabulary word.
-        </h1>
+        <ExerciseHeader subTitle="Use the picture and given letters as clues, then type the full vocabulary word before checking." isReview sectionLetter="A" title={<>Write the vocabulary word.</>} />
 
         {/* ── Body ── */}
         <div className="wva-body">
@@ -324,24 +446,24 @@ export default function WB_WriteVocab_QA() {
           <div className="wva-list">
             {ITEMS.map((item) => (
               <div key={item.id} className="wva-item">
-                <span className="wva-num">{item.id}</span>
+                <span className="wva-num">{renderExerciseAudioText({audio:listening,id:`word-${item.id}`,src:item.id===2?clipPage86A6:item.id===4?clipPage86A5:null,label:"Listen to vocabulary word "+item.id,children:item.id})}</span>
                 {renderParts(item)}
               </div>
             ))}
           </div>
 
           {/* Image */}
-          <img src={imgScene} alt="scene" className="wva-scene-img" />
+          <img src={imgScene} alt={"People shopping in a mall with an escalator and clothing and shoe shops."} className="wva-scene-img" />
 
         </div>
 
         {/* ── Buttons ── */}
         <div className="wva-buttons">
-          <Button
-            checkAnswers={handleCheck}
-            handleShowAnswer={handleShowAnswer}
-            handleStartAgain={handleReset}
-          />
+          <div className="action-buttons-container">
+<button type="button" aria-label="Start Again" {...activationKeys} ref={resetButtonRef} onClick={handleReset} className="try-again-button">Start Again ↻</button>
+<button type="button" aria-label="Show Answer" {...activationKeys} onClick={handleShowAnswer} className="show-answer-btn swal-continue">Show Answer</button>
+<button type="button" aria-label="Check Answer" {...activationKeys} onClick={handleCheck} disabled={checkDisabled} style={{cursor:checkDisabled ? "not-allowed":"pointer"}} className="check-button2">Check Answer ✓</button>
+</div>
         </div>
       </div>
     </div>

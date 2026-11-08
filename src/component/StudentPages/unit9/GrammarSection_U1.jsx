@@ -2,7 +2,7 @@ import GrammarA from "./GrammarA";
 import GrammarB from "./GrammarB";
 import GrammarC from "./GrammarC";
 
-import image1 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 9 Tom Has Nothing to Do Folder/Page 78/SVG/Asset 3.svg";
+
 import image  from "../../../assets/imgs/pages/Class Book/Right 4 Unit 9 Tom Has Nothing to Do Folder/Page 78/SVG/Asset 3.svg";
 
 import sound from "../../../assets/audio/ClassBook/Grade 4/cd49pg78-grammar-adult-lady_wtToh8l5.mp3";
@@ -55,7 +55,7 @@ const stopAtSecond = 2.32;
        
         </div>
      <div style={{margin:"3em 0 2em"}} >
-        <QuestionAudioPlayer
+        <QuestionAudioPlayer pageId="sb_unit9_page3_grammar"
           src={sound}
           captions={captions}
           stopAtSecond={stopAtSecond}
@@ -65,7 +65,7 @@ const stopAtSecond = 2.32;
 
       {/* ✅ شلنا الـ title badge والـ paragraphs، والصورة تملأ كل شي */}
       <div className="w-[60%] mt-2">
-        <img
+        <img alt={"Grammar examples using because in short answers and complex sentences."}
           src={image}
           style={{ width: "100%", height: "auto", display: "block" }}
         />

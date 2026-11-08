@@ -1,6 +1,25 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import ValidationAlert from "../../Popup/ValidationAlert";
 import { FaCheck, FaRedo, FaEye } from "react-icons/fa";
+
+const activationKeys = {
+  onKeyDown: (event) => {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    event.preventDefault(); event.stopPropagation();
+    if (!event.repeat) event.currentTarget.click();
+  },
+  onKeyUp: (event) => {
+    if (event.key === "Enter" || event.key === " ") { event.preventDefault(); event.stopPropagation(); }
+  },
+};
+const fieldKeys = {
+  onKeyDown: (event) => { if (event.key === "Enter" || event.key === " ") event.stopPropagation(); },
+  onKeyUp: (event) => { if (event.key === "Enter" || event.key === " ") event.stopPropagation(); },
+};
+const normalizeAnswer = (value) => value.normalize("NFKC").toLowerCase()
+  .replace(/[\u2018\u2019\u201A\u201B\u0060\u00B4']/g, "")
+  .replace(/[.,!?;:…“”"]/g, " ").replace(/\s+/g, " ").trim();
+
 
 const ComprehensionA = () => {
   const wordBank = ["How", "Dear", "fine", "will", "Your friend", "going to"];
@@ -21,9 +40,12 @@ const ComprehensionA = () => {
   const [locked, setLocked] = useState(false);
   const [showed, setShowed] = useState(false);
 
+  const resetButtonRef = useRef(null);
+
   const handleChange = (id, value) => {
     if (locked || errors[id] === false) return;
     setAnswers((prev) => ({ ...prev, [id]: value }));
+    setErrors((previous) => { const next = { ...previous }; delete next[id]; return next; });
   };
 
   const handleCheck = () => {
@@ -39,7 +61,7 @@ const ComprehensionA = () => {
     const newErrors = {};
 
     questions.forEach((q) => {
-      if (answers[q.id].trim().toLowerCase() === q.answer.toLowerCase()) {
+      if (normalizeAnswer(answers[q.id]) === normalizeAnswer(q.answer)) {
         correctCount++;
         newErrors[q.id] = false;
       } else {
@@ -63,6 +85,7 @@ const ComprehensionA = () => {
 
     if (correctCount === total) {
       setLocked(true);
+      resetButtonRef.current?.focus({ preventScroll: true });
       ValidationAlert.success(msg);
     } else if (correctCount === 0) {
       ValidationAlert.error(msg);
@@ -85,9 +108,11 @@ const ComprehensionA = () => {
     setShowed(false);
   };
 
-  const Input = ({ id, width = "200px" }) => (
+  const renderInput = ({ id }) => (
     <div className="relative inline-flex items-center">
-      <input
+      <input aria-label={({dear:"Email greeting before William",how:"Blank before are you",fine:"Blank after I am",goingTo:"Blank before have a Sports Day",will:"Blank before play sports",yourFriend:"Email closing before Edward"})[id]}
+                      title={({dear:"Email greeting before William",how:"Blank before are you",fine:"Blank after I am",goingTo:"Blank before have a Sports Day",will:"Blank before play sports",yourFriend:"Email closing before Edward"})[id]}
+                      placeholder="Word(s)" {...fieldKeys}
                 type="text"
         value={answers[id]}
         onChange={(e) => handleChange(id, e.target.value)}
@@ -98,8 +123,8 @@ const ComprehensionA = () => {
           ${
             errors[id] === true
               ? "border-red-500 text-gray-800"
-              : showed
-              ? "border-[#333] text-red-500"
+              : showed || errors[id] === false
+                      ? "border-green-600 text-gray-800"
               : "border-[#333] text-gray-800"
           }
         `}
@@ -130,7 +155,16 @@ const ComprehensionA = () => {
   );
 
   return (
-    <div className="mb-6 mx-auto w-[60%]">
+    <div className="mb-6 mx-auto w-[60%]" data-unit2-scope="page7_WritingA">
+      <style>{`
+        [data-unit2-scope="page7_WritingA"] input:focus-visible,
+        [data-unit2-scope="page7_WritingA"] [data-keyboard-choice]:focus-visible {
+          outline: 4px solid #2563eb;
+          outline-offset: 3px;
+          border-radius: 6px;
+        }
+        
+      `}</style>
       {/* Header + Word Bank */}
       <div className="flex items-start justify-between  gap-4">
         <h5 className="header-title-page8-read">
@@ -174,34 +208,34 @@ top : "3em"}}>
       >
         {/* Line 1: Dear ___ William, */}
         <div className="flex items-end gap-2 flex-wrap">
-          <Input id="dear" width="130px" />
+          {renderInput({ id: "dear" })}
           <span>William,</span>
         </div>
 
         {/* Line 2: How ___ are you? I'm fine ___ . */}
         <div className="flex items-end gap-2 flex-wrap">
-          <Input id="how" width="110px" />
+          {renderInput({ id: "how" })}
           <span>are you? I'm</span>
-          <Input id="fine" width="140px" />
+          {renderInput({ id: "fine" })}
           <span>.</span>
         </div>
 
         {/* Line 3: I'm going to ___ have a Sports Day at my school. We */}
         <div className="flex items-end gap-2 flex-wrap">
           <span>I'm</span>
-          <Input id="goingTo" width="120px" />
+          {renderInput({ id: "goingTo" })}
           <span>have a Sports Day at my school. We</span>
         </div>
 
         {/* Line 4: will ___ play sports for eight hours. I hope I make it! */}
         <div className="flex items-end gap-2 flex-wrap">
-          <Input id="will" width="110px" />
+          {renderInput({ id: "will" })}
           <span>play sports for eight hours. I hope I make it!</span>
         </div>
 
         {/* Line 5: Your friend ___ , */}
         <div className="flex items-end gap-2 flex-wrap">
-          <Input id="yourFriend" width="140px" />
+          {renderInput({ id: "yourFriend" })}
           <span>,</span>
         </div>
 
@@ -214,42 +248,42 @@ top : "3em"}}>
       {/* Buttons */}
       <div className="flex justify-center gap-6 mt-8">
         <div className="relative group">
-          <div
+          <button type="button" aria-label="Start Again" {...activationKeys} ref={resetButtonRef}
             onClick={handleReset}
             className="flex items-center justify-center w-14 h-14 rounded-xl bg-[#ffc107] hover:bg-[#e0a800] cursor-pointer transition shadow-sm"
           >
-            <div className="bg-white p-3 rounded-full shadow">
+            <span className="bg-white p-3 rounded-full shadow">
               <FaRedo size={14} />
-            </div>
-          </div>
+            </span>
+          </button>
           <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-black text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition">
             Reset
           </span>
         </div>
 
         <div className="relative group">
-          <div
+          <button type="button" aria-label="Show Answer" {...activationKeys}
             onClick={handleShow}
             className="flex items-center justify-center w-14 h-14 rounded-xl bg-[#2c78b4] hover:bg-[#1a5a8a] cursor-pointer transition shadow-sm"
           >
-            <div className="bg-white p-3 rounded-full shadow">
+            <span className="bg-white p-3 rounded-full shadow">
               <FaEye size={14} />
-            </div>
-          </div>
+            </span>
+          </button>
           <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-black text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition whitespace-nowrap">
             Show Answer
           </span>
         </div>
 
         <div className="relative group">
-          <div
+          <button type="button" aria-label="Check Answer" {...activationKeys} disabled={locked} style={{ cursor: locked ? "not-allowed" : "pointer" }}
             onClick={handleCheck}
             className="flex items-center justify-center w-14 h-14 rounded-xl bg-[#55c271] hover:bg-[#449d5a] cursor-pointer transition shadow-sm"
           >
-            <div className="bg-white p-3 rounded-full shadow">
+            <span className="bg-white p-3 rounded-full shadow">
               <FaCheck size={14} />
-            </div>
-          </div>
+            </span>
+          </button>
           <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-black text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition whitespace-nowrap">
             Check Answer
           </span>

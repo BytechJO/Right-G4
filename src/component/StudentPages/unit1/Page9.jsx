@@ -8,9 +8,10 @@ const Page9 = ({ openPopup }) => {
 
   return (
     <div
-      className="page1-img-wrapper"
+      className="page1-img-wrapper unit1-page9-launchers"
       style={{ backgroundImage: `url(${page_9})` }}
     >
+    
       <div
         className="click-icon-page9-1 hover:scale-110 transition"
         style={{ overflow: "visible" }}
@@ -19,8 +20,23 @@ const Page9 = ({ openPopup }) => {
           width="22"
           height="22"
           viewBox="0 0 90 90"
+          tabIndex={0}
+          role="button"
+          aria-label="Open exercise 4"
+          onKeyDown={(event) => {
+            if (event.key !== "Enter" && event.key !== " ") return;
+            event.preventDefault();
+            event.stopPropagation();
+            if (!event.repeat) openPopup("exercise", { startIndex: 3 });
+          }}
+          onKeyUp={(event) => {
+            if (event.key === "Enter" || event.key === " ") {
+              event.preventDefault();
+              event.stopPropagation();
+            }
+          }}
           onClick={() => openPopup("exercise", { startIndex: 3 })}
-          style={{ overflow: "visible" }}
+          style={{ overflow: "visible"}}
         >
           <image className="svg-img"
             href={arrowBtn}
@@ -40,6 +56,21 @@ const Page9 = ({ openPopup }) => {
           width="22"
           height="22"
           viewBox="0 0 90 90"
+          tabIndex={0}
+          role="button"
+          aria-label="Open exercise 5"
+          onKeyDown={(event) => {
+            if (event.key !== "Enter" && event.key !== " ") return;
+            event.preventDefault();
+            event.stopPropagation();
+            if (!event.repeat) openPopup("exercise", { startIndex: 4 });
+          }}
+          onKeyUp={(event) => {
+            if (event.key === "Enter" || event.key === " ") {
+              event.preventDefault();
+              event.stopPropagation();
+            }
+          }}
           onClick={() => openPopup("exercise", { startIndex: 4 })}
           style={{ overflow: "visible" }}
         >

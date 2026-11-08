@@ -44,7 +44,7 @@ const stopAtSecond = 2.8;
        
         </div>
      <div style={{margin:"3em 0 2em"}} >
-        <QuestionAudioPlayer
+        <QuestionAudioPlayer pageId="sb_unit3_page24_grammar"
           src={sound}
           captions={captions}
           stopAtSecond={stopAtSecond}
@@ -56,6 +56,7 @@ const stopAtSecond = 2.8;
       <div className="w-[60%] mt-2">
         <img
           src={image}
+          alt="Past of have: She had a bike. Did she have a kitten? She did not have a kitten. Why did she have a kitten?"
           style={{ width: "100%", height: "auto", display: "block" }}
         />
       </div>
@@ -64,6 +65,7 @@ const stopAtSecond = 2.8;
         <img
           style={{ width: "100%", height: "auto", display: "block"  }}
           src={image1}
+          alt="Verb forms: do, did; have, had. Contractions: didn’t, did not; hadn’t, had not; haven’t, have not; can’t, can not; won’t, will not; mustn’t, must not; couldn’t, could not; wouldn’t, would not; shouldn’t, should not."
         />
       </div>
        <div className=" mt-2 space-y-10 w-[60%] ">

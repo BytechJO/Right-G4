@@ -1,6 +1,37 @@
+import ExerciseHeader from "../../ExerciseHeader";
 import React, { useState, useRef } from "react";
-import Button from "../Button";
 import ValidationAlert from "../../Popup/ValidationAlert";
+const activationKeys = {
+  onKeyDown: (event) => {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    event.preventDefault();
+    event.stopPropagation();
+    if (!event.repeat) event.currentTarget.click();
+  },
+  onKeyUp: (event) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+  },
+};
+const fieldKeys = {
+  onKeyDown: (event) => {
+    if (event.key === "Enter" || event.key === " ") event.stopPropagation();
+  },
+  onKeyUp: (event) => {
+    if (event.key === "Enter" || event.key === " ") event.stopPropagation();
+  },
+};
+const normalizeAnswer = (value) =>
+  value
+    .normalize("NFKC")
+    .toLowerCase()
+    .replace(/[\u2018\u2019\u201A\u201B\u0060\u00B4']/g, "")
+    .replace(/[.,!?;:\u2026\u201c\u201d"]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+
 
 // ─────────────────────────────────────────────
 //  🎨  COLORS
@@ -57,45 +88,22 @@ const ALL_INPUTS = ITEMS.flatMap((item) =>
 // ─────────────────────────────────────────────
 //  🔧  NORMALIZE
 // ─────────────────────────────────────────────
-const isCorrect = (userVal, correctArr) =>
-  correctArr.some((c) => userVal.trim().toLowerCase() === c.toLowerCase());
+
 
 // ─────────────────────────────────────────────
 //  COMPONENT
 // ─────────────────────────────────────────────
 export default function WB_UseCodeWrite_QC() {
   const [answers,     setAnswers]     = useState({});
-  const [showResults, setShowResults] = useState(false);
+  const [, setShowResults] = useState(false);
   const [showAns,     setShowAns]     = useState(false);
+const [results,setResults]=useState({}),[announcement,setAnnouncement]=useState("");const resetButtonRef=useRef(null);const answerTargets=ITEMS.flatMap(item=>item.codes.map((code,i)=>({key:`${item.id}-${i}`,correct:[CODE[code]],answer:CODE[code],label:`Word ${item.id}, letter ${i+1}. Decode number ${code} using the visible code table.`})));const readAnswer=key=>answers[key]||"";const checkDisabled=showAns||answerTargets.every(item=>results[item.key]==="correct");
 
   const inputRefs = useRef({});
 
-  const handleChange = (key, value) => {
-    if (showAns) return;
-    const inp = ALL_INPUTS.find((i) => i.key === key);
-    if (showResults && inp && isCorrect(answers[key] || "", inp.correct)) return;
-    if (value.length > 1) return;
-    setAnswers((prev) => ({ ...prev, [key]: value }));
+  const handleChange=(key,value)=>{if(showAns||results[key]==="correct"||value.length>1)return;setAnswers(prev=>({...prev,[key]:value}));setResults(prev=>{const next={...prev};delete next[key];return next;});if(value.length===1){const index=ALL_INPUTS.findIndex(item=>item.key===key),next=ALL_INPUTS.slice(index+1).find(item=>results[item.key]!=="correct");if(next)inputRefs.current[next.key]?.focus({preventScroll:true});}};
 
-    // انتقال تلقائي للتالي
-    if (value.length === 1) {
-      const currentIdx = ALL_INPUTS.findIndex((i) => i.key === key);
-      const next = ALL_INPUTS[currentIdx + 1];
-      if (next) inputRefs.current[next.key]?.focus();
-    }
-  };
-
-  const handleCheck = () => {
-    if (showAns) return;
-    const allAnswered = ALL_INPUTS.every((inp) => answers[inp.key]?.trim());
-    if (!allAnswered) { ValidationAlert.info("Please complete all answers first."); return; }
-    let score = 0;
-    ALL_INPUTS.forEach((inp) => { if (isCorrect(answers[inp.key] || "", inp.correct)) score++; });
-    setShowResults(true);
-    if (score === ALL_INPUTS.length)   ValidationAlert.success(`Score: ${score} / ${ALL_INPUTS.length}`);
-    else if (score > 0)                ValidationAlert.warning(`Score: ${score} / ${ALL_INPUTS.length}`);
-    else                               ValidationAlert.error(`Score: ${score} / ${ALL_INPUTS.length}`);
-  };
+  const handleCheck=()=>{if(checkDisabled)return;if(!answerTargets.every(item=>readAnswer(item.key).trim())){ValidationAlert.info("Please complete all answers first.");setAnnouncement("Please complete all answers first.");return;}const next=Object.fromEntries(answerTargets.map(item=>[item.key,results[item.key]==="correct"||item.correct.some(correct=>normalizeAnswer(readAnswer(item.key))===normalizeAnswer(correct))?"correct":"wrong"]));const score=Object.values(next).filter(v=>v==="correct").length;setResults(next);setShowResults(true);setAnnouncement(`Score: ${score} out of ${answerTargets.length}. Correct answers are locked.`);if(score===answerTargets.length){resetButtonRef.current?.focus({preventScroll:true});ValidationAlert.success(`Score: ${score} / ${answerTargets.length}`);}else if(score)ValidationAlert.warning(`Score: ${score} / ${answerTargets.length}`);else ValidationAlert.error(`Score: ${score} / ${answerTargets.length}`);};
 
   const handleShowAnswer = () => {
     const filled = {};
@@ -103,27 +111,22 @@ export default function WB_UseCodeWrite_QC() {
     setAnswers(filled);
     setShowResults(false);
     setShowAns(true);
-  };
+  setResults({});setAnnouncement("Correct answers shown and locked.");resetButtonRef.current?.focus({preventScroll:true});};
 
   const handleReset = () => {
     setAnswers({});
     setShowResults(false);
     setShowAns(false);
-  };
+  setResults({});setAnnouncement("Answers and feedback cleared.");};
 
-  const isWrong = (inp) => {
-    if (!showResults || showAns) return false;
-    return !isCorrect(answers[inp.key] || "", inp.correct);
-  };
+  const isWrong=key=>!showAns&&results[typeof key==="object"?(key.key??key.id):key]==="wrong";
 
-  const isDisabled = (inp) => {
-    if (showAns) return true;
-    if (showResults && isCorrect(answers[inp.key] || "", inp.correct)) return true;
-    return false;
-  };
+  
 
   return (
-    <div className="main-container-component">
+    <div data-adapt-scope="Unit6_WB_Unit6_Page34_Q1" className="main-container-component">
+<style>{`[data-adapt-scope="Unit6_WB_Unit6_Page34_Q1"] input:focus-visible, [data-adapt-scope="Unit6_WB_Unit6_Page34_Q1"] [data-keyboard-choice]:focus-visible, [data-adapt-scope="Unit6_WB_Unit6_Page34_Q1"] [data-grid-cell]:focus-visible, [data-adapt-scope="Unit6_WB_Unit6_Page34_Q1"] [data-listening]:focus-visible {outline:4px solid #2563eb !important;outline-offset:3px;border-radius:6px;}`}</style>
+<div className="sr-only" role="status" aria-live="polite" aria-atomic="true">{announcement}</div>
       <style>{`
         /* ── Words grid 3 columns ── */
         .ucw-grid {
@@ -276,13 +279,7 @@ export default function WB_UseCodeWrite_QC() {
         }}
       >
         {/* ── Header ── */}
-        <h1
-          className="WB-header-title-page8"
-          style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
-        >
-          <span className="WB-ex-A">C</span>
-          Use the code to write the vocabulary words.
-        </h1>
+        <ExerciseHeader subTitle="Decode one number group at a time using the key, then write the complete vocabulary word before checking." sectionLetter="C" title={<>Use the code to write the vocabulary words.</>} />
 
         {/* ── Words grid ── */}
         <div className="ucw-grid">
@@ -297,12 +294,12 @@ export default function WB_UseCodeWrite_QC() {
                   const value   = answers[key] || "";
                   const tColor  = showAns ? INPUT_ANSWER_COLOR : INPUT_TEXT_COLOR;
                   const uColor  = wrong ? INPUT_UNDERLINE_WRONG : INPUT_UNDERLINE_DEFAULT;
-                  const disabled = isDisabled(inp);
+                  
 
                   return (
                     <div key={key} className="ucw-cell">
                       <div className="ucw-input-wrap">
-                        <input
+                        <input onKeyDown={event=>{fieldKeys.onKeyDown(event);const fieldKey=key,index=ALL_INPUTS.findIndex(item=>item.key===fieldKey);if(["ArrowLeft","ArrowRight","ArrowUp","ArrowDown"].includes(event.key)){event.preventDefault();event.stopPropagation();const backwards=event.key==="ArrowLeft"||event.key==="ArrowUp",list=backwards?ALL_INPUTS.slice(0,index).reverse():ALL_INPUTS.slice(index+1),next=list.find(item=>!showAns&&results[item.key]!=="correct");if(next)inputRefs.current[next.key]?.focus({preventScroll:true});}else if(event.key==="Backspace"&&!answers[fieldKey]&&!showAns&&results[fieldKey]!=="correct"){event.stopPropagation();const previous=ALL_INPUTS.slice(0,index).reverse().find(item=>results[item.key]!=="correct");if(previous){event.preventDefault();inputRefs.current[previous.key]?.focus({preventScroll:true});}}}} aria-invalid={results[key]==="wrong"}  title={answerTargets.find(t=>t.key===key)?.label||"Complete this answer"} aria-label={answerTargets.find(t=>t.key===key)?.label||"Complete this answer"} onKeyUp={fieldKeys.onKeyUp}
                           ref={(el) => (inputRefs.current[key] = el)}
                           type="text"
                           maxLength={1}
@@ -312,9 +309,9 @@ export default function WB_UseCodeWrite_QC() {
                             showAns ? "ucw-input--answer" : "",
                           ].filter(Boolean).join(" ")}
                           value={value}
-                          disabled={disabled}
+                          disabled={showAns||results[key]==="correct"}
                           onChange={(e) => handleChange(key, e.target.value)}
-                          style={{ borderBottomColor: uColor, color: tColor }}
+                          style={(base=>({...base,borderBottomColor:showAns||results[key]==="correct"?"#16a34a":results[key]==="wrong"?"#ef4444":base.borderBottomColor}))({ borderBottomColor: uColor, color: tColor })}
                           spellCheck={false}
                           autoComplete="off"
                         />
@@ -342,11 +339,11 @@ export default function WB_UseCodeWrite_QC() {
 
         {/* ── Buttons ── */}
         <div className="ucw-buttons">
-          <Button
-            checkAnswers={handleCheck}
-            handleShowAnswer={handleShowAnswer}
-            handleStartAgain={handleReset}
-          />
+          <div className="action-buttons-container">
+<button type="button" aria-label="Start Again" {...activationKeys} ref={resetButtonRef} onClick={handleReset} className="try-again-button">Start Again ↻</button>
+<button type="button" aria-label="Show Answer" {...activationKeys} onClick={handleShowAnswer} className="show-answer-btn swal-continue">Show Answer</button>
+<button type="button" aria-label="Check Answer" {...activationKeys} onClick={handleCheck} disabled={checkDisabled} style={{cursor:checkDisabled ? "not-allowed":"pointer"}} className="check-button2">Check Answer ✓</button>
+</div>
         </div>
       </div>
     </div>

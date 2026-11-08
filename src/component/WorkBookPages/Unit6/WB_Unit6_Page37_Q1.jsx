@@ -1,16 +1,154 @@
-import React, { useState, useRef, useEffect } from "react";
-import Button from "../Button";
+import clipPage37I12 from "../../../assets/audio/WorkBook/Unit 6/Page 37 - I/Item_012_go_to_sleep_early.mp3";
+import clipPage37I11 from "../../../assets/audio/WorkBook/Unit 6/Page 37 - I/Item_011_Jack_shouldn't.mp3";
+import clipPage37I10 from "../../../assets/audio/WorkBook/Unit 6/Page 37 - I/Item_010_help_her_mom.mp3";
+import clipPage37I9 from "../../../assets/audio/WorkBook/Unit 6/Page 37 - I/Item_009_Tom_shouldn't.mp3";
+import clipPage37I8 from "../../../assets/audio/WorkBook/Unit 6/Page 37 - I/Item_008_pick_up_her_toys.mp3";
+import clipPage37I7 from "../../../assets/audio/WorkBook/Unit 6/Page 37 - I/Item_007_Harley_should.mp3";
+import clipPage37I6 from "../../../assets/audio/WorkBook/Unit 6/Page 37 - I/Item_006_be_late.mp3";
+import clipPage37I5 from "../../../assets/audio/WorkBook/Unit 6/Page 37 - I/Item_005_Stella_should.mp3";
+import clipPage37I4 from "../../../assets/audio/WorkBook/Unit 6/Page 37 - I/Item_004_get_on_the_bus.mp3";
+import clipPage37I3 from "../../../assets/audio/WorkBook/Unit 6/Page 37 - I/Item_003_Sarah_should.mp3";
+import clipPage37I2 from "../../../assets/audio/WorkBook/Unit 6/Page 37 - I/Item_002_kick_rocks.mp3";
+import clipPage37I1 from "../../../assets/audio/WorkBook/Unit 6/Page 37 - I/Item_001_Helen_should.mp3";
+import {useEffect as useListeningEffect,useRef as useListeningRef,useState as useListeningState} from "react";
+import {useAudio} from "../../../context/AudioContext";
+import {FaVolumeUp as ListeningSpeakerIcon} from "react-icons/fa";
+import ExerciseHeader from "../../ExerciseHeader";
+import React, { useState, useRef, useLayoutEffect } from "react";
 import ValidationAlert from "../../Popup/ValidationAlert";
 
 // ─────────────────────────────────────────────
 //  🖼️  IMAGES
 // ─────────────────────────────────────────────
 import imgHelen  from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U6 Folder/Page 37/SVG/Asset 27.svg";
-import imgSarah  from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U6 Folder/Page 37/SVG/Asset 28.svg";
-import imgStella from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U6 Folder/Page 37/SVG/Asset 29.svg";
-import imgHarley from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U6 Folder/Page 37/SVG/Asset 30.svg";
+import imgSarah  from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U6 Folder/Page 37/SVG/Asset 40.svg";
+import imgStella from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U6 Folder/Page 37/SVG/Asset 30.svg";
+import imgHarley from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U6 Folder/Page 37/SVG/Asset 28.svg";
 import imgTom    from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U6 Folder/Page 37/SVG/Asset 31.svg";
-import imgJack   from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U6 Folder/Page 37/SVG/Asset 40.svg";
+import imgJack   from "../../../assets/imgs/pages/Activity Book/Right Int WB G4 U6 Folder/Page 37/SVG/Asset 29.svg";
+function useExerciseListening(pageId) {
+  const coordinator = useAudio();
+  const audioRef = useListeningRef(null),
+    generation = useListeningRef(0);
+  const [activeId, setActiveId] = useListeningState(null),
+    [error, setError] = useListeningState("");
+  const clearOwned = () => {
+    const current = audioRef.current;
+    if (current) {
+      current.onended = current.onplaying = current.onerror = current.onpause = null;
+      current.pause();
+      current.remove();
+      audioRef.current = null;
+    }
+  };
+  const stop = () => {
+    generation.current++;
+    clearOwned();
+    setActiveId(null);
+    setError("");
+  };
+  const play = (id, sources) => {
+    const queue = (Array.isArray(sources) ? sources : [sources]).filter(Boolean);
+    if (!queue.length) return;
+    stop();
+    const token = generation.current;
+    let index = 0;
+    const next = () => {
+      if (token !== generation.current) return;
+      clearOwned();
+      if (index >= queue.length) {
+        setActiveId(null);
+        return;
+      }
+      const media = new Audio(queue[index++]);
+      media.hidden = true;
+      media.dataset.exerciseListening = pageId;
+      document.body.appendChild(media);
+      audioRef.current = media;
+      const current = () => token === generation.current && audioRef.current === media;
+      const fail = () => {
+        if (!current()) return;
+        generation.current++;
+        clearOwned();
+        setActiveId(null);
+        setError("Audio could not be played. Please try again.");
+      };
+      media.onplaying = () => {
+        if (current()) setActiveId(id);
+      };
+      media.onended = () => {
+        if (current()) next();
+      };
+      media.onerror = fail;
+      media.onpause = () => {
+        if (!current()) return;
+        generation.current++;
+        clearOwned();
+        setActiveId(null);
+      };
+      document.querySelectorAll("audio,video").forEach(other => {
+        if (other !== media) other.pause();
+      });
+      coordinator?.registerAudio(media, null, pageId);
+      media.play().catch(fail);
+    };
+    next();
+  };
+  useListeningEffect(() => () => {
+    generation.current++;
+    const media = audioRef.current;
+    if (media) {
+      media.onended = media.onplaying = media.onerror = media.onpause = null;
+      media.pause();
+      media.remove();
+      audioRef.current = null;
+    }
+  }, []);
+  return {
+    play,
+    stop,
+    activeId,
+    error
+  };
+}
+function renderExerciseSpeaker() {
+  return <span aria-hidden="true" style={{
+    position: "absolute",
+    top: -10,
+    right: -10,
+    width: 22,
+    height: 22,
+    borderRadius: "50%",
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    background: "white",
+    color: "black",
+    boxShadow: "0 1px 3px rgba(0,0,0,.25)",
+    pointerEvents: "none",
+    zIndex: 3
+  }}><ListeningSpeakerIcon size={12} /></span>;
+}
+
+
+
+
+const activationKeys = {
+  onKeyDown: (event) => {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    event.preventDefault();
+    event.stopPropagation();
+    if (!event.repeat) event.currentTarget.click();
+  },
+  onKeyUp: (event) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+  },
+};
+
+
 
 // ─────────────────────────────────────────────
 //  🎨  COLORS
@@ -70,112 +208,80 @@ const IMAGES = [
 //  COMPONENT
 // ─────────────────────────────────────────────
 export default function WB_ReadLookMatch_QI() {
+const listening=useExerciseListening("wb_unit6_page37_q1");
+
   const [matches,     setMatches]     = useState({}); // { leftId: rightId }
   const [selectedLeft, setSelectedLeft] = useState(null);
-  const [showResults,  setShowResults]  = useState(false);
+  const [,  setShowResults]  = useState(false);
   const [showAns,      setShowAns]      = useState(false);
 
-  const leftRefs  = useRef({});
-  const rightRefs = useRef({});
+  
+  
   const svgRef    = useRef(null);
   const containerRef = useRef(null);
 
   const [lines, setLines] = useState([]);
 
   // إعادة رسم الخطوط عند تغيير matches
-  useEffect(() => {
-    recalcLines();
-  }, [matches, showResults, showAns]);
+  
 
-  useEffect(() => {
-    window.addEventListener("resize", recalcLines);
-    return () => window.removeEventListener("resize", recalcLines);
-  }, [matches, showResults, showAns]);
+  
 
-  const recalcLines = () => {
-    if (!svgRef.current || !containerRef.current) return;
-    const container = containerRef.current.getBoundingClientRect();
-    const newLines = [];
+  
 
-    Object.entries(matches).forEach(([leftId, rightId]) => {
-      const leftEl  = leftRefs.current[leftId];
-      const rightEl = rightRefs.current[rightId];
-      if (!leftEl || !rightEl) return;
+useLayoutEffect(() => {
+    const update = () => {
+      if (!containerRef.current) return;
+      const cr = containerRef.current.getBoundingClientRect();
+      const newLines = Object.entries(matches).map(([lid, rid]) => {
+        const lEl = dotRefs.current[`left-${lid}`];
+        const rEl = dotRefs.current[`right-${rid}`];
+        if (!lEl || !rEl) return null;
+        const lr = lEl.getBoundingClientRect();
+        const rr = rEl.getBoundingClientRect();
+        return {
+          id:      `${lid}-${rid}`,
+          leftId:  Number(lid),
+          rightId: Number(rid),
+          x1: (lr.left+lr.width/2-cr.left)/(cr.width/containerRef.current.clientWidth||1),
+          y1: (lr.top+lr.height/2-cr.top)/(cr.height/containerRef.current.clientHeight||1),
+          x2: (rr.left+rr.width/2-cr.left)/(cr.width/containerRef.current.clientWidth||1),
+          y2: (rr.top+rr.height/2-cr.top)/(cr.height/containerRef.current.clientHeight||1),
+        };
+      }).filter(Boolean);
+      setLines(newLines);
+    };
+    let frame;const raf=()=>{cancelAnimationFrame(frame);frame=requestAnimationFrame(update);};const observer=new ResizeObserver(raf);if(containerRef.current)observer.observe(containerRef.current);
+    raf();
+    window.addEventListener("resize", raf);
+    return ()=>{cancelAnimationFrame(frame);observer.disconnect();window.removeEventListener("resize",raf);};
+  }, [matches]);
+const dotRefs=useRef({});const CORRECT_MATCHES=CORRECT_ANSWERS;
+const [results,setResults]=useState({}),[selectedRight,setSelectedRight]=useState(null),[preview,setPreview]=useState(null),[announcement,setAnnouncement]=useState("");const resetButtonRef=useRef(null),endpointRefs=useRef({}),focusFrame=useRef(null);const checkDisabled=showAns||LEFT_ITEMS.every(i=>results[i.id]===true);const lockedLeft=id=>showAns||results[id]===true,lockedRight=id=>showAns||Object.entries(matches).some(([lid,rid])=>rid===id&&results[lid]===true);
+const cancel=()=>{if(focusFrame.current!==null)cancelAnimationFrame(focusFrame.current);focusFrame.current=null;setSelectedLeft(null);setSelectedRight(null);setPreview(null);};
+useLayoutEffect(()=>()=>{if(focusFrame.current!==null)cancelAnimationFrame(focusFrame.current);},[]);
+const focusSide=side=>{if(focusFrame.current!==null)cancelAnimationFrame(focusFrame.current);focusFrame.current=requestAnimationFrame(()=>{focusFrame.current=null;const id=(side==='left'?LEFT_ITEMS:RIGHT_ITEMS).find(i=>!(side==='left'?lockedLeft:lockedRight)(i.id))?.id;endpointRefs.current[side+'-'+id]?.focus({preventScroll:true});});};
+const connect=(lid,rid,keyboard)=>{if(lockedLeft(lid)||lockedRight(rid))return;const next={...matches};Object.keys(next).forEach(k=>{if(Number(k)===lid||next[k]===rid)delete next[k];});next[lid]=rid;setMatches(next);setResults(prev=>Object.fromEntries(Object.entries(prev).filter(([k,v])=>v===true||(Number(k)!==lid&&next[k]===matches[k]))));cancel();setAnnouncement('Connection made.');if(keyboard)focusSide('left');};
+const endpointKeys=(e,side,id)=>{if(e.key==='Escape'){e.preventDefault();e.stopPropagation();cancel();return;}if(['ArrowUp','ArrowDown'].includes(e.key)){e.preventDefault();e.stopPropagation();const values=(side==='left'?LEFT_ITEMS:RIGHT_ITEMS).filter(i=>!(side==='left'?lockedLeft:lockedRight)(i.id)).map(i=>i.id),at=values.indexOf(id),next=values[(at+(e.key==='ArrowDown'?1:-1)+values.length)%values.length];endpointRefs.current[side+'-'+next]?.focus();return;}if(e.key==='Enter'||e.key===' '){e.preventDefault();e.stopPropagation();if(!e.repeat)(side==='left'?handleLeftClick:handleRightClick)(id,true);}};
+const getDotCenter=key=>{const e=dotRefs.current[key],root=containerRef.current;if(!e||!root)return null;const cr=root.getBoundingClientRect(),r=e.getBoundingClientRect();return{x:(r.left-cr.left+r.width/2)/(cr.width/root.clientWidth||1),y:(r.top-cr.top+r.height/2)/(cr.height/root.clientHeight||1)};};
+  
 
-      const lRect = leftEl.getBoundingClientRect();
-      const rRect = rightEl.getBoundingClientRect();
+  const handleLeftClick=(id,keyboard=false)=>{listening.play("left-"+id,(({1:clipPage37I1,2:clipPage37I3,3:clipPage37I5,4:clipPage37I7,5:clipPage37I9,6:clipPage37I11}))[id]);if(lockedLeft(id))return;if(selectedRight!==null){connect(id,selectedRight,keyboard);return;}setSelectedLeft(prev=>prev===id?null:id);setPreview(null);setAnnouncement("Sentence beginning selected. Choose its ending.");if(keyboard&&selectedLeft!==id)focusSide("right");};
 
-      const x1 = lRect.right  - container.left;
-      const y1 = lRect.top + lRect.height / 2 - container.top;
-      const x2 = rRect.left   - container.left;
-      const y2 = rRect.top + rRect.height / 2 - container.top;
+  const handleRightClick=(id,keyboard=false)=>{listening.play("right-"+id,(({"a":clipPage37I2,"b":clipPage37I4,"c":clipPage37I6,"d":clipPage37I8,"e":clipPage37I10,"f":clipPage37I12}))[id]);if(lockedRight(id))return;if(selectedLeft!==null){connect(selectedLeft,id,keyboard);return;}setSelectedRight(prev=>prev===id?null:id);setPreview(null);setAnnouncement("Sentence ending selected. Choose its beginning.");if(keyboard&&selectedRight!==id)focusSide("left");};
 
-      newLines.push({ x1, y1, x2, y2, color: LINE_DEFAULT_COLOR });
-    });
+  const handleCheck=()=>{if(checkDisabled)return;listening.stop();cancel();if(Object.keys(matches).length<LEFT_ITEMS.length){ValidationAlert.info("Please connect all items first.");return;}const next=Object.fromEntries(LEFT_ITEMS.map(i=>[i.id,matches[i.id]===CORRECT_MATCHES[i.id]])),score=Object.values(next).filter(Boolean).length;setResults(next);setShowResults(true);setAnnouncement(`Score: ${score} out of ${LEFT_ITEMS.length}. Correct connections are locked.`);if(score===LEFT_ITEMS.length){resetButtonRef.current?.focus({preventScroll:true});ValidationAlert.success(`Score: ${score} / ${LEFT_ITEMS.length}`);}else if(score)ValidationAlert.warning(`Score: ${score} / ${LEFT_ITEMS.length}`);else ValidationAlert.error(`Score: ${score} / ${LEFT_ITEMS.length}`);};
 
-    setLines(newLines);
-  };
+  const handleShowAnswer=()=>{listening.stop();cancel();setResults({});setMatches({...CORRECT_MATCHES});setShowResults(false);setShowAns(true);resetButtonRef.current?.focus({preventScroll:true});setAnnouncement("Correct connections shown and locked.");};
 
-  const handleLeftClick = (id) => {
-    if (showAns) return;
-    if (showResults && CORRECT_ANSWERS[id] === matches[id]) return;
-    setSelectedLeft(id === selectedLeft ? null : id);
-  };
+  const handleReset=()=>{listening.stop();cancel();setMatches({});setResults({});setShowResults(false);setShowAns(false);setAnnouncement("Connections cleared.");};
 
-  const handleRightClick = (id) => {
-    if (showAns) return;
-    if (!selectedLeft) return;
-    if (showResults && CORRECT_ANSWERS[selectedLeft] === matches[selectedLeft]) return;
-
-    setMatches((prev) => {
-      const updated = { ...prev };
-      // إزالة أي ربط سابق لنفس اليمين
-      Object.keys(updated).forEach((k) => { if (updated[k] === id) delete updated[k]; });
-      updated[selectedLeft] = id;
-      return updated;
-    });
-    setSelectedLeft(null);
-  };
-
-  const handleCheck = () => {
-    if (showAns) return;
-    if (Object.keys(matches).length < LEFT_ITEMS.length) {
-      ValidationAlert.info("Please match all items first.");
-      return;
-    }
-    let score = 0;
-    LEFT_ITEMS.forEach((l) => { if (CORRECT_ANSWERS[l.id] === matches[l.id]) score++; });
-    setShowResults(true);
-    if (score === LEFT_ITEMS.length) ValidationAlert.success(`Score: ${score} / ${LEFT_ITEMS.length}`);
-    else if (score > 0)              ValidationAlert.warning(`Score: ${score} / ${LEFT_ITEMS.length}`);
-    else                             ValidationAlert.error(`Score: ${score} / ${LEFT_ITEMS.length}`);
-  };
-
-  const handleShowAnswer = () => {
-    setMatches({ ...CORRECT_ANSWERS });
-    setShowResults(false);
-    setShowAns(true);
-    setSelectedLeft(null);
-  };
-
-  const handleReset = () => {
-    setMatches({});
-    setShowResults(false);
-    setShowAns(false);
-    setSelectedLeft(null);
-    setLines([]);
-  };
-
-  const getDotColor = (side, id) => {
-    if (side === "left") {
-      if (selectedLeft === id) return DOT_SELECTED_COLOR;
-      if (matches[id]) return showAns ? LINE_CORRECT_COLOR : (showResults ? (CORRECT_ANSWERS[id] === matches[id] ? LINE_CORRECT_COLOR : LINE_WRONG_COLOR) : DOT_DEFAULT_COLOR);
-    }
-    return DOT_DEFAULT_COLOR;
-  };
+  const getDotColor=(side,id)=>{const lid=side==="left"?id:Number(Object.keys(matches).find(lid=>matches[lid]===id));if(showAns||results[lid]===true)return "#16a34a";if(results[lid]===false)return LINE_WRONG_COLOR;if((side==="left"?selectedLeft:selectedRight)===id)return DOT_SELECTED_COLOR;return DOT_DEFAULT_COLOR;};
 
   return (
-    <div className="main-container-component">
+    <div data-adapt-scope="Unit6_WB_Unit6_Page37_Q1" className="main-container-component"><span className="sr-only" role="status" aria-live="polite">{listening.error}</span>
+<style>{`[data-adapt-scope="Unit6_WB_Unit6_Page37_Q1"] input:focus-visible, [data-adapt-scope="Unit6_WB_Unit6_Page37_Q1"] [data-keyboard-choice]:focus-visible, [data-adapt-scope="Unit6_WB_Unit6_Page37_Q1"] [data-grid-cell]:focus-visible, [data-adapt-scope="Unit6_WB_Unit6_Page37_Q1"] [data-listening]:focus-visible {outline:4px solid #2563eb !important;outline-offset:3px;border-radius:6px;}`}</style>
+<div className="sr-only" role="status" aria-live="polite" aria-atomic="true">{announcement}</div>
       <style>{`
         /* ── Matching area ── */
         .rlm2-container {
@@ -324,23 +430,17 @@ export default function WB_ReadLookMatch_QI() {
         }}
       >
         {/* ── Header ── */}
-        <h1
-          className="WB-header-title-page8"
-          style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
-        >
-          <span className="WB-ex-A">I</span>
-          Read, look, and match.
-        </h1>
+        <ExerciseHeader subTitle="Start with one item, then connect it to the word, picture, or sentence that matches before moving on." sectionLetter="I" title={<>Read, look, and match.</>} />
 
         {/* ── Matching rows ── */}
         <div className="rlm2-container" ref={containerRef}>
-          <svg ref={svgRef} className="rlm2-svg">
-            {lines.map((line, i) => (
+          <svg aria-hidden="true" ref={svgRef} className="rlm2-svg">
+            {(()=>{let lid=selectedLeft,rid=selectedRight;if(lid!==null&&preview?.side==="right")rid=preview.id;else if(rid!==null&&preview?.side==="left")lid=preview.id;else return null;if(lockedLeft(lid)||lockedRight(rid))return null;const a=getDotCenter("left-"+lid),b=getDotCenter("right-"+rid);if(!a||!b)return null;return <line data-match-preview x1={a.x} y1={a.y} x2={b.x} y2={b.y} stroke="#2563eb" strokeWidth="2.5" strokeDasharray="6 4"/>;})()}{lines.map((line) => (
               <line
-                key={i}
+                key={line.id}
                 x1={line.x1} y1={line.y1}
                 x2={line.x2} y2={line.y2}
-                stroke={line.color}
+                stroke={showAns||results[line.leftId]===true?"#16a34a":results[line.leftId]===false?LINE_WRONG_COLOR:LINE_DEFAULT_COLOR}
                 strokeWidth="2"
                 strokeDasharray="5,4"
               />
@@ -353,12 +453,12 @@ export default function WB_ReadLookMatch_QI() {
               const dotColorL = getDotColor("left", left.id);
               const dotColorR = DOT_DEFAULT_COLOR;
               const isSelected = selectedLeft === left.id;
-              const isWrongMatch = showResults && !showAns && matches[left.id] && CORRECT_ANSWERS[left.id] !== matches[left.id];
+              const isWrongMatch = !showAns && results[left.id]===false;
 
               return (
                 <React.Fragment key={left.id}>
 {/* Left */}
-<div
+<div data-listening={"left-"+left.id} style={{...({...({}),borderRadius:8,boxShadow:lockedLeft(left.id)?"inset 0 0 0 2px #16a34a":selectedLeft===left.id?"inset 0 0 0 2px #2563eb":undefined,background:selectedLeft===left.id?"#dbeafe":undefined,cursor:lockedLeft(left.id)?"default":"pointer"}),position:"relative",background:listening.activeId==="left-"+left.id?"#dbeafe":({...({}),borderRadius:8,boxShadow:lockedLeft(left.id)?"inset 0 0 0 2px #16a34a":selectedLeft===left.id?"inset 0 0 0 2px #2563eb":undefined,background:selectedLeft===left.id?"#dbeafe":undefined,cursor:lockedLeft(left.id)?"default":"pointer"}).background,boxShadow:[({...({}),borderRadius:8,boxShadow:lockedLeft(left.id)?"inset 0 0 0 2px #16a34a":selectedLeft===left.id?"inset 0 0 0 2px #2563eb":undefined,background:selectedLeft===left.id?"#dbeafe":undefined,cursor:lockedLeft(left.id)?"default":"pointer"}).boxShadow,listening.activeId==="left-"+left.id?"0 0 0 3px #2563eb":null].filter(Boolean).join(", ")||undefined}} role="button" data-keyboard-choice data-match-side="left" data-match-id={left.id} tabIndex={selectedLeft!==null?-1:selectedRight!==null&&lockedLeft(left.id)?-1:0} ref={el=>{endpointRefs.current['left-'+left.id]=el;}} aria-label={left.text} aria-pressed={selectedLeft===left.id} aria-disabled={lockedLeft(left.id)} onKeyDown={e=>endpointKeys(e,'left',left.id)} onKeyUp={activationKeys.onKeyUp} onFocus={()=>setPreview({side:'left',id:left.id})} onMouseEnter={()=>setPreview({side:'left',id:left.id})} onMouseLeave={()=>setPreview(null)}
   className={`rlm2-left${isSelected ? " rlm2-left--selected" : ""}`}
   onClick={() => handleLeftClick(left.id)}
 >
@@ -366,26 +466,26 @@ export default function WB_ReadLookMatch_QI() {
   <span className="rlm2-text">{left.text}</span>
   <div style={{ position: "relative", flexShrink: 0, marginLeft: "auto" , marginRight: "40%" }}>
     <div
-      ref={(el) => (leftRefs.current[left.id] = el)}
+      ref={(el) => (dotRefs.current[`left-${left.id}`] = el)}
       className="rlm2-dot"
       style={{ background: dotColorL }}
     />
     {isWrongMatch && <div className="rlm2-badge">✕</div>}
   </div>
-</div>
+{listening.activeId==="left-"+left.id&&renderExerciseSpeaker()}</div>
 
                   {/* Spacer */}
                   <div className="rlm2-spacer" />
 
                   {/* Right */}
-                  <div className="rlm2-right" onClick={() => handleRightClick(right.id)}>
+                  <div data-listening={"right-"+right.id} style={{...({...({}),borderRadius:8,boxShadow:lockedRight(right.id)?"inset 0 0 0 2px #16a34a":selectedRight===right.id?"inset 0 0 0 2px #2563eb":undefined,background:selectedRight===right.id?"#dbeafe":undefined,cursor:lockedRight(right.id)?"default":"pointer"}),position:"relative",background:listening.activeId==="right-"+right.id?"#dbeafe":({...({}),borderRadius:8,boxShadow:lockedRight(right.id)?"inset 0 0 0 2px #16a34a":selectedRight===right.id?"inset 0 0 0 2px #2563eb":undefined,background:selectedRight===right.id?"#dbeafe":undefined,cursor:lockedRight(right.id)?"default":"pointer"}).background,boxShadow:[({...({}),borderRadius:8,boxShadow:lockedRight(right.id)?"inset 0 0 0 2px #16a34a":selectedRight===right.id?"inset 0 0 0 2px #2563eb":undefined,background:selectedRight===right.id?"#dbeafe":undefined,cursor:lockedRight(right.id)?"default":"pointer"}).boxShadow,listening.activeId==="right-"+right.id?"0 0 0 3px #2563eb":null].filter(Boolean).join(", ")||undefined}} role="button" data-keyboard-choice data-match-side="right" data-match-id={right.id} tabIndex={selectedRight!==null?-1:selectedLeft!==null&&lockedRight(right.id)?-1:0} ref={el=>{endpointRefs.current['right-'+right.id]=el;}} aria-label={right.text} aria-pressed={selectedRight===right.id} aria-disabled={lockedRight(right.id)} onKeyDown={e=>endpointKeys(e,'right',right.id)} onKeyUp={activationKeys.onKeyUp} onFocus={()=>setPreview({side:'right',id:right.id})} onMouseEnter={()=>setPreview({side:'right',id:right.id})} onMouseLeave={()=>setPreview(null)} className="rlm2-right" onClick={() => handleRightClick(right.id)}>
                     <div
-                      ref={(el) => (rightRefs.current[right.id] = el)}
+                      ref={(el) => (dotRefs.current[`right-${right.id}`] = el)}
                       className="rlm2-dot"
                       style={{ background: dotColorR }}
                     />
                     <span className="rlm2-text">{right.text}</span>
-                  </div>
+                  {listening.activeId==="right-"+right.id&&renderExerciseSpeaker()}</div>
 
                 </React.Fragment>
               );
@@ -397,7 +497,7 @@ export default function WB_ReadLookMatch_QI() {
         <div className="rlm2-images">
           {IMAGES.map((img) => (
             <div key={img.name} className="rlm2-img-card">
-              <img src={img.src} alt={img.name} className="rlm2-img" />
+              <img src={img.src} alt={({Helen:"Children boarding a school bus.",Sarah:"A child asleep in bed.",Stella:"A boy kicking a stone.",Harley:"A girl helping an adult wash dishes.",Tom:"A boy falling on the steps outside a house.",Jack:"A girl playing with toys on the floor."})[img.name]} className="rlm2-img" />
               <span className="rlm2-img-name">{img.name}</span>
             </div>
           ))}
@@ -405,11 +505,11 @@ export default function WB_ReadLookMatch_QI() {
 
         {/* ── Buttons ── */}
         <div className="rlm2-buttons">
-          <Button
-            checkAnswers={handleCheck}
-            handleShowAnswer={handleShowAnswer}
-            handleStartAgain={handleReset}
-          />
+          <div className="action-buttons-container">
+<button type="button" aria-label="Start Again" {...activationKeys} ref={resetButtonRef} onClick={handleReset} className="try-again-button">Start Again ↻</button>
+<button type="button" aria-label="Show Answer" {...activationKeys} onClick={handleShowAnswer} className="show-answer-btn swal-continue">Show Answer</button>
+<button type="button" aria-label="Check Answer" {...activationKeys} onClick={handleCheck} disabled={checkDisabled} style={{cursor:checkDisabled ? "not-allowed":"pointer"}} className="check-button2">Check Answer ✓</button>
+</div>
         </div>
       </div>
     </div>

@@ -1,10 +1,22 @@
 import page_5 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 2 Welcome to the Big Apple Folder/Page 14.png";
 import "./Unit2_Page5.css";
 import arrowBtn from "../../../assets/Page 01/Arrow.svg";
+const pageKeys = {
+  onKeyDown: (event) => {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    event.preventDefault(); event.stopPropagation();
+    if (!event.repeat) event.currentTarget.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
+  },
+  onKeyUp: (event) => {
+    if (event.key === "Enter" || event.key === " ") { event.preventDefault(); event.stopPropagation(); }
+  },
+};
+
+
 const Unit2_Page5 = ({ openPopup }) => {
   return (
     <div
-      className="page1-img-wrapper"
+      className="page1-img-wrapper" data-unit2-scope="Unit2_Page5"
       style={{ backgroundImage: `url(${page_5})` }}
     >
       {/* <img src={page_5} /> */}
@@ -13,7 +25,7 @@ const Unit2_Page5 = ({ openPopup }) => {
         className="click-icon-unit2-page5-1 hover:scale-110 transition"
         style={{ overflow: "visible" }}
       >
-        <svg
+        <svg role="button" tabIndex={0} data-keyboard-choice aria-label={"Open exercise 1"} {...pageKeys}
           width="22"
           height="22"
           viewBox="0 0 90 90"
@@ -35,7 +47,7 @@ const Unit2_Page5 = ({ openPopup }) => {
         className="click-icon-unit2-page5-2 hover:scale-110 transition"
         style={{ overflow: "visible" }}
       >
-        <svg
+        <svg role="button" tabIndex={0} data-keyboard-choice aria-label={"Open exercise 2"} {...pageKeys}
           width="22"
           height="22"
           viewBox="0 0 90 90"
@@ -57,7 +69,7 @@ const Unit2_Page5 = ({ openPopup }) => {
         className="click-icon-unit2-page5-3 hover:scale-110 transition"
         style={{ overflow: "visible" }}
       >
-        <svg
+        <svg role="button" tabIndex={0} data-keyboard-choice aria-label={"Open exercise 3"} {...pageKeys}
           width="22"
           height="22"
           viewBox="0 0 90 90"

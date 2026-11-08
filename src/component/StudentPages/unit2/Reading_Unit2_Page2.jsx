@@ -1,6 +1,4 @@
 import React, { useState, useRef } from "react";
-import AudioWithCaption from "../../AudioWithCaption";
-import audioBtn from "../../../assets/Page 01/Audio btn.svg";
 import { useAudio } from "../../../context/AudioContext";
 
 // ======================================================
@@ -9,9 +7,21 @@ import soundAll from "../../../assets/audio/ClassBook/Grade 4/cd1pg20-story-adul
 import "./Reading_Unit2_Page1.css";
 // ======================================================
 
+const pageKeys = {
+  onKeyDown: (event) => {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    event.preventDefault(); event.stopPropagation();
+    if (!event.repeat) event.currentTarget.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
+  },
+  onKeyUp: (event) => {
+    if (event.key === "Enter" || event.key === " ") { event.preventDefault(); event.stopPropagation(); }
+  },
+};
+
+
 const PAGE_ID = "page-21";
 
-const Reading_NewPage = ({ openPopup }) => {
+const Reading_NewPage = () => {
   const { registerAudio, stopCurrent, activePageId } = useAudio();
   const audioRef = useRef(null);
   const [hoveredAreaIndex, setHoveredAreaIndex] = useState(null);
@@ -26,33 +36,6 @@ const Reading_NewPage = ({ openPopup }) => {
     }
   }, [activePageId]);
 
-  const captions = [
-    { start: 0.30,  end: 2.52,  text: "Page 20. Amy's turn." },
-    { start: 2.52,  end: 5.04,  text: "Amy plays on a baseball team." },
-    { start: 5.04,  end: 7.94,  text: "On Saturday, her team will have a big game." },
-    { start: 7.94,  end: 13.28, text: "Amy can't wait. On Saturday, Amy's parents take her to the baseball field." },
-    { start: 13.28, end: 15.64, text: "She's afraid she's going to be late." },
-    { start: 15.64, end: 19.30, text: "She looks at the clock. It's only two o'clock." },
-    { start: 19.30, end: 23.08, text: "She's on time, but everyone is already there." },
-    { start: 23.08, end: 25.56, text: "They're stretching and playing catch." },
-    { start: 25.56, end: 29.80, text: "Amy feels worried. It's a great day for baseball." },
-    { start: 29.80, end: 31.92, text: "Many people come to watch the game." },
-    { start: 31.92, end: 39.50, text: "\"There are many people watching,\" thinks Amy. \"I hope I'm going to do well.\" The game starts." },
-    { start: 39.50, end: 42.76, text: "The first batter on the other team hits the ball to Amy." },
-    { start: 42.76, end: 48.96, text: "She misses the ball. Amy is very worried now. \"Will I hit the ball?\" she thinks." },
-    { start: 48.96, end: 53.72, text: "\"Hey, don't let it get you down,\" says her teammate, Jasmine." },
-    { start: 53.72, end: 58.62, text: "\"You will get the next one. Cheer up.\" Now Amy's team is batting." },
-    { start: 58.62, end: 60.06, text: "It's Amy's turn." },
-    { start: 60.06, end: 63.24, text: "She swings hard and hits the ball into the air." },
-    { start: 63.24, end: 66.26, text: "It soars into the sky like a rocket." },
-    { start: 66.26, end: 68.58, text: "Amy races around the bases." },
-    { start: 68.58, end: 70.56, text: "The other team can't catch the ball." },
-    { start: 70.56, end: 72.44, text: "She touches third base." },
-    { start: 72.44, end: 74.74, text: "She races all the way to the home plate." },
-    { start: 74.74, end: 79.90, text: "It's a home run. \"Hooray! Hooray, Amy!\" everyone cries." },
-    { start: 79.90, end: 84.08, text: "Amy just smiles. She isn't worried anymore." },
-    { start: 84.08, end: 85.54, text: "She has done her best." },
-  ];
 
   const clickableAreas = [
     { x1: 10,   y1: 32.5, x2: 49,   y2: 41,   slice: { startFrom: 56,   stopAt: 66   } },
@@ -102,13 +85,20 @@ const Reading_NewPage = ({ openPopup }) => {
   };
 
   return (
-    <div
+    <div data-reading-page="unit2-2"
       className="page1-img-wrapper"
       onClick={handleImageClick}
       style={{ backgroundImage: `url(${pageImage})` }}
     >
+      <style>{`[data-reading-page="unit2-2"] :focus-visible {
+        outline: 4px solid #2563eb;
+        outline-offset: 3px;
+        border-radius: 6px;
+      }`}</style>
       {clickableAreas.map((area, index) => (
-        <div
+        <div role="button" tabIndex={0} data-reading-control {...pageKeys}
+          aria-label={`Read paragraph ${[5, 6, 8][index]} on page 21`}
+          aria-pressed={activeAreaIndex === index}
           key={index}
           className={`clickable-area ${
             hoveredAreaIndex === index || activeAreaIndex === index ? "highlight" : ""

@@ -8,6 +8,16 @@ import ValidationAlert from "../../Popup/ValidationAlert";
 import img1 from "../../../assets/imgs/pages/Class Book/Right 4 Unit 8 I Lived in the Library Folder/Page 71/SVG/Asset 9.svg";
 import img2 from  "../../../assets/imgs/pages/Class Book/Right 4 Unit 8 I Lived in the Library Folder/Page 71/SVG/Asset 10.svg";
 
+const fieldKeys = {
+  onKeyDown: (event) => {
+    if (event.key === "Enter" || event.key === " ") event.stopPropagation();
+  },
+  onKeyUp: (event) => {
+    if (event.key === "Enter" || event.key === " ") event.stopPropagation();
+  },
+};
+
+
 // ─────────────────────────────────────────────
 //  🎨  COLORS
 // ─────────────────────────────────────────────
@@ -123,7 +133,7 @@ export default function WB_LookWriteQA_QF() {
 
     return (
       <span key={part.id} className="lwqa-input-wrap">
-        <input
+        <input {...fieldKeys} aria-label={part.id.endsWith("q")?"Complete the question using the picture.":"Write the answer for the picture."} title={part.id.endsWith("q")?"Complete the question using the picture.":"Write the answer for the picture."}
           type="text"
           className={[
             "lwqa-input",
@@ -143,7 +153,7 @@ export default function WB_LookWriteQA_QF() {
   };
 
   return (
-    <div className="main-container-component">
+    <div data-keyboard-only="review8_page1_q3" onKeyUp={event=>{if((event.key==="Enter"||event.key===" ")&&event.target.closest("button"))event.stopPropagation();}} onKeyDown={event=>{if((event.key==="Enter"||event.key===" ")&&event.target.closest("button")){event.stopPropagation();if(event.repeat)event.preventDefault();}}} className="main-container-component"><style>{`[data-keyboard-only="review8_page1_q3"] input:focus-visible {outline:4px solid #2563eb !important;outline-offset:3px;border-radius:6px;}`}</style>
       <style>{`
         .lwqa-list {
           display: flex;

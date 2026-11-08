@@ -1,6 +1,178 @@
-import React, { useState } from "react";
-import Button from "../../Button";
+import clipB3 from "../../../assets/audio/ClassBook/Unit 3/Page 26 - B/Item_003_party_a_was_it_Yeah,_great.mp3";
+import clipB2 from "../../../assets/audio/ClassBook/Unit 3/Page 26 - B/Item_002_part_That_best_the_was.mp3";
+import clipB1 from "../../../assets/audio/ClassBook/Unit 3/Page 26 - B/Item_001_all_at_Not.mp3";
+import {useEffect as useListeningEffect,useRef as useListeningRef,useState as useListeningState} from "react";
+import {useAudio} from "../../../context/AudioContext";
+import {FaVolumeUp as ListeningSpeakerIcon} from "react-icons/fa";
+import ExerciseHeader from "../../ExerciseHeader";
+import React, { useState, useRef } from "react";
 import ValidationAlert from "../../Popup/ValidationAlert";
+
+function useExerciseListening(pageId) {
+  const coordinator = useAudio();
+  const audioRef = useListeningRef(null),
+    generation = useListeningRef(0);
+  const [activeId, setActiveId] = useListeningState(null),
+    [error, setError] = useListeningState("");
+  const clearOwned = () => {
+    const current = audioRef.current;
+    if (current) {
+      current.onended = current.onplaying = current.onerror = current.onpause = null;
+      current.pause();
+      current.remove();
+      audioRef.current = null;
+    }
+  };
+  const stop = () => {
+    generation.current++;
+    clearOwned();
+    setActiveId(null);
+    setError("");
+  };
+  const play = (id, sources) => {
+    const queue = (Array.isArray(sources) ? sources : [sources]).filter(Boolean);
+    if (!queue.length) return;
+    stop();
+    const token = generation.current;
+    let index = 0;
+    const next = () => {
+      if (token !== generation.current) return;
+      clearOwned();
+      if (index >= queue.length) {
+        setActiveId(null);
+        return;
+      }
+      const media = new Audio(queue[index++]);
+      media.hidden = true;
+      media.dataset.exerciseListening = pageId;
+      document.body.appendChild(media);
+      audioRef.current = media;
+      const current = () => token === generation.current && audioRef.current === media;
+      const fail = () => {
+        if (!current()) return;
+        generation.current++;
+        clearOwned();
+        setActiveId(null);
+        setError("Audio could not be played. Please try again.");
+      };
+      media.onplaying = () => {
+        if (current()) setActiveId(id);
+      };
+      media.onended = () => {
+        if (current()) next();
+      };
+      media.onerror = fail;
+      media.onpause = () => {
+        if (!current()) return;
+        generation.current++;
+        clearOwned();
+        setActiveId(null);
+      };
+      document.querySelectorAll("audio,video").forEach(other => {
+        if (other !== media) other.pause();
+      });
+      coordinator?.registerAudio(media, null, pageId);
+      media.play().catch(fail);
+    };
+    next();
+  };
+  useListeningEffect(() => () => {
+    generation.current++;
+    const media = audioRef.current;
+    if (media) {
+      media.onended = media.onplaying = media.onerror = media.onpause = null;
+      media.pause();
+      media.remove();
+      audioRef.current = null;
+    }
+  }, []);
+  return {
+    play,
+    stop,
+    activeId,
+    error
+  };
+}
+function renderExerciseSpeaker() {
+  return <span aria-hidden="true" style={{
+    position: "absolute",
+    top: -10,
+    right: -10,
+    width: 22,
+    height: 22,
+    borderRadius: "50%",
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    background: "white",
+    color: "black",
+    boxShadow: "0 1px 3px rgba(0,0,0,.25)",
+    pointerEvents: "none",
+    zIndex: 3
+  }}><ListeningSpeakerIcon size={12} /></span>;
+}
+
+function renderExerciseAudioGroup({
+  audio,
+  id,
+  src,
+  label,
+  children,
+  style,
+  key: renderKey,
+  ...props
+}) {
+  if (!src || Array.isArray(src) && !src.some(Boolean)) return <div key={renderKey} {...props} style={style}>{children}</div>;
+  const playing = audio.activeId === id;
+  const keys = event => {
+    if (event.target !== event.currentTarget || event.key !== "Enter" && event.key !== " ") return;
+    event.preventDefault();
+    event.stopPropagation();
+    if (event.type === "keydown" && !event.repeat) audio.play(id, src);
+  };
+  return <div key={renderKey} {...props} role="group" aria-roledescription="sentence audio" tabIndex={0} data-listening={id} aria-label={label} onKeyDown={keys} onKeyUp={keys} onClick={event => {
+    if (event.target.closest('input,select,textarea,button,[role="button"]')) return;
+    event.stopPropagation();
+    audio.play(id, src);
+  }} style={{
+    ...style,
+    position: style?.position || "relative",
+    borderRadius: style?.borderRadius || 6,
+    boxShadow: playing ? "0 0 0 3px #2563eb" : style?.boxShadow,
+    backgroundColor: playing ? "#dbeafe" : style?.backgroundColor
+  }}>{children}{playing && renderExerciseSpeaker()}</div>;
+}
+
+const activationKeys = {
+  onKeyDown: (event) => {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    event.preventDefault();
+    event.stopPropagation();
+    if (!event.repeat) event.currentTarget.click();
+  },
+  onKeyUp: (event) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+  },
+};
+const fieldKeys = {
+  onKeyDown: (event) => {
+    if (event.key === "Enter" || event.key === " ") event.stopPropagation();
+  },
+  onKeyUp: (event) => {
+    if (event.key === "Enter" || event.key === " ") event.stopPropagation();
+  },
+};
+const normalizeAnswer = (value) =>
+  value
+    .normalize("NFKC")
+    .toLowerCase()
+    .replace(/[\u2018\u2019\u201A\u201B\u0060\u00B4']/g, "")
+    .replace(/[.,!?;:\u2026\u201c\u201d"]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
 
 const INPUT_UNDERLINE_DEFAULT = "#3f3f3f";
 const INPUT_UNDERLINE_WRONG = "#ef4444";
@@ -26,76 +198,107 @@ const ITEMS = [
   {
     id: 3,
     scrambled: "party a was it Yeah, great",
-    correct: ["Yeah, it was quite a party.", "Yeah, it was quite a party"],
-    answer: "Yeah, it was quite a party.",
+    correct: ["Yeah, it was a great party.", "Yeah, it was a great party"],
+    answer: "Yeah, it was a great party.",
   },
 ];
 
-const normalize = (str) =>
-  str
-    .toLowerCase()
-    .replace(/[^a-z0-9'\s]/g, "")
-    .replace(/\s+/g, " ")
-    .trim();
+const normalize = normalizeAnswer;
 
-const isCorrect = (userVal, correctArr) =>
-  correctArr.some((c) => normalize(userVal) === normalize(c));
+const isCorrect = (value, alternatives) =>
+  alternatives.some((answer) => normalize(value) === normalize(answer));
 
 export default function WB_UnscrambleWrite_QB_U3() {
+  const listening=useExerciseListening("sb_unit3_page5_q2");
+
   const [answers, setAnswers] = useState({});
-  const [showResults, setShowResults] = useState(false);
+  const [results, setResults] = useState({});
+  const [announcement, setAnnouncement] = useState("");
+  const resetButtonRef = useRef(null);
+
   const [showAns, setShowAns] = useState(false);
+  const checkDisabled =
+    showAns || ITEMS.every((item) => results[item.id] === "correct");
 
   const handleChange = (id, value) => {
-    if (showAns) return;
-    const item = ITEMS.find((i) => i.id === id);
-    if (showResults && item && isCorrect(answers[id] || "", item.correct))
+    if (
+      showAns ||
+      results[id] === "correct" ||
+      !ITEMS.some((item) => item.id === id)
+    )
       return;
     setAnswers((prev) => ({ ...prev, [id]: value }));
+    setResults((prev) => {
+      const next = { ...prev };
+      delete next[id];
+      return next;
+    });
   };
 
   const handleCheck = () => {
-    if (showAns) return;
-    const allAnswered = ITEMS.every((item) => answers[item.id]?.trim());
-    if (!allAnswered) {
+    if (checkDisabled) return;listening.stop();
+    if (!ITEMS.every((item) => answers[item.id]?.trim())) {
+      setAnnouncement("Please complete all answers first.");
       ValidationAlert.info("Please complete all answers first.");
       return;
     }
-    let score = 0;
-    ITEMS.forEach((item) => {
-      if (isCorrect(answers[item.id] || "", item.correct)) score++;
-    });
-    setShowResults(true);
-    if (score === ITEMS.length)
+    const next = Object.fromEntries(
+      ITEMS.map((item) => [
+        item.id,
+        results[item.id] === "correct" ||
+        isCorrect(answers[item.id] || "", item.correct)
+          ? "correct"
+          : "wrong",
+      ]),
+    );
+    const score = Object.values(next).filter(
+      (result) => result === "correct",
+    ).length;
+    setResults(next);
+    setAnnouncement(
+      `Score: ${score} out of ${ITEMS.length}. Correct answers are locked; incorrect answers can be changed.`,
+    );
+    if (score === ITEMS.length) {
+      resetButtonRef.current?.focus({ preventScroll: true });
       ValidationAlert.success(`Score: ${score} / ${ITEMS.length}`);
-    else if (score > 0)
+    } else if (score > 0)
       ValidationAlert.warning(`Score: ${score} / ${ITEMS.length}`);
     else ValidationAlert.error(`Score: ${score} / ${ITEMS.length}`);
   };
 
-  const handleShowAnswer = () => {
+  const handleShowAnswer = () => {listening.stop();
     const filled = {};
     ITEMS.forEach((item) => {
       filled[item.id] = item.answer;
     });
     setAnswers(filled);
-    setShowResults(false);
+    setResults({});
     setShowAns(true);
+    resetButtonRef.current?.focus({ preventScroll: true });
+    setAnnouncement("Correct answers shown and locked.");
   };
 
-  const handleReset = () => {
+  const handleReset = () => {listening.stop();
     setAnswers({});
-    setShowResults(false);
+    setResults({});
     setShowAns(false);
+    setAnnouncement("Answers and feedback cleared.");
   };
 
-  const isWrong = (item) =>
-    showResults && !showAns && !isCorrect(answers[item.id] || "", item.correct);
-  const isDisabled = (item) =>
-    showAns || (showResults && isCorrect(answers[item.id] || "", item.correct));
+  const isWrong = (item) => !showAns && results[item.id] === "wrong";
+  const isDisabled = (item) => showAns || results[item.id] === "correct";
 
   return (
-    <div className="main-container-component">
+    <div data-listening-scope={"sb_unit3_page5_q2"} data-unit3-scope="Unit3_Page5_Q2" className="main-container-component"><style>{`[data-listening-scope="sb_unit3_page5_q2"] [data-listening]:focus-visible{outline:4px solid #2563eb;outline-offset:3px;border-radius:6px;}`}</style><span className="sr-only" role="status" aria-live="polite">{listening.error}</span>
+      <style>{`[data-unit3-scope="Unit3_Page5_Q2"] input:focus-visible, [data-unit3-scope="Unit3_Page5_Q2"] [data-keyboard-choice]:focus-visible { outline: 4px solid #2563eb; outline-offset: 3px; border-radius: 6px; }`}</style>
+      <div
+        className="sr-only"
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+      >
+        {announcement}
+      </div>
       <style>{`
         .usw3-list { display: flex; flex-direction: column; gap: clamp(55px, 1.8vw, 55px); width: 100%; margin-top : 10%  }
         .usw3-row  { display: flex; align-items: flex-end; gap: clamp(5px, 0.7vw, 9px); min-width: 0; }
@@ -134,35 +337,35 @@ export default function WB_UnscrambleWrite_QB_U3() {
           margin: "0 auto",
         }}
       >
-        <h1
-          className="WB-header-title-page8"
-          style={{
-            margin: 0,
-            display: "flex",
-            alignItems: "center",
-            gap: "12px",
-            flexWrap: "wrap",
-          }}
-        >
-          <span className="WB-ex-A">B</span>
-          Unscramble and write.
-        </h1>
+        <ExerciseHeader
+          sectionLetter="B"
+          title={<>Unscramble and write.</>}
+          subTitle={
+            "Say the correct word or sentence first, then reorder the parts and write the answer before checking."
+          }
+        />
 
         <div className="usw3-list">
           {ITEMS.map((item) => {
             const wrong = isWrong(item);
             const value = answers[item.id] || "";
-            const tColor = showAns ? INPUT_ANSWER_COLOR : INPUT_TEXT_COLOR;
+            const tColor = INPUT_TEXT_COLOR;
             const uColor = wrong
               ? INPUT_UNDERLINE_WRONG
-              : INPUT_UNDERLINE_DEFAULT;
+              : isDisabled(item)
+                ? "#16a34a"
+                : INPUT_UNDERLINE_DEFAULT;
             const disabled = isDisabled(item);
             return (
-              <div key={item.id} className="usw3-row">
+              renderExerciseAudioGroup({"label":`Hear sentence ${item.id}`,"src":[clipB1,clipB2,clipB3][item.id-1],"id":`sentence-${item.id}`,"audio":listening,"key":item.id,"className":"usw3-row",children:<>
                 <span className="usw3-num">{item.id}</span>
                 <span className="usw3-scrambled">{item.scrambled}</span>
                 <div className="usw3-input-wrap">
                   <input
+                    {...fieldKeys}
+                    aria-label={`Question ${item.id}. Unscramble: ${item.scrambled}`}
+                    title={`Question ${item.id}. Unscramble: ${item.scrambled}`}
+                    placeholder="Sentence"
                     type="text"
                     className={[
                       "usw3-input",
@@ -180,17 +383,44 @@ export default function WB_UnscrambleWrite_QB_U3() {
                   />
                   {wrong && <div className="usw3-badge">✕</div>}
                 </div>
-              </div>
+              </>})
             );
           })}
         </div>
 
         <div className="usw3-buttons">
-          <Button
-            checkAnswers={handleCheck}
-            handleShowAnswer={handleShowAnswer}
-            handleStartAgain={handleReset}
-          />
+          <div className="action-buttons-container">
+            <button
+              type="button"
+              aria-label="Start Again"
+              {...activationKeys}
+              ref={resetButtonRef}
+              onClick={handleReset}
+              className="try-again-button"
+            >
+              Start Again ↻
+            </button>
+            <button
+              type="button"
+              aria-label="Show Answer"
+              {...activationKeys}
+              onClick={handleShowAnswer}
+              className="show-answer-btn swal-continue"
+            >
+              Show Answer
+            </button>
+            <button
+              type="button"
+              aria-label="Check Answer"
+              {...activationKeys}
+              onClick={handleCheck}
+              disabled={checkDisabled}
+              style={{ cursor: checkDisabled ? "not-allowed" : "pointer" }}
+              className="check-button2"
+            >
+              Check Answer ✓
+            </button>
+          </div>
         </div>
       </div>
     </div>

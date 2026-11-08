@@ -1,5 +1,21 @@
+import clipPage69E13 from "../../../assets/audio/ClassBook/Unit 8/Page 69 - E/Item_013_and_helped_his_mom_and_dad.mp3";
+import clipPage69E12 from "../../../assets/audio/ClassBook/Unit 8/Page 69 - E/Item_012_He_came_home.mp3";
+import clipPage69E11 from "../../../assets/audio/ClassBook/Unit 8/Page 69 - E/Item_011_and_then_went_to_bed.mp3";
+import clipPage69E10 from "../../../assets/audio/ClassBook/Unit 8/Page 69 - E/Item_010_They_played_soccer.mp3";
+import clipPage69E9 from "../../../assets/audio/ClassBook/Unit 8/Page 69 - E/Item_009_of_eggs_and_toast.mp3";
+import clipPage69E8 from "../../../assets/audio/ClassBook/Unit 8/Page 69 - E/Item_008_He_cleaned_his_room.mp3";
+import clipPage69E7 from "../../../assets/audio/ClassBook/Unit 8/Page 69 - E/Item_007_on_a_field.mp3";
+import clipPage69E6 from "../../../assets/audio/ClassBook/Unit 8/Page 69 - E/Item_006_He_cooked_a_breakfast.mp3";
+import clipPage69E5 from "../../../assets/audio/ClassBook/Unit 8/Page 69 - E/Item_005_dinner_with_his_family._Then,_he_went_to_bed.mp3";
+import clipPage69E4 from "../../../assets/audio/ClassBook/Unit 8/Page 69 - E/Item_004_with_friends._They_played_soccer_on_a_field._He_came_home_and_ate.mp3";
+import clipPage69E3 from "../../../assets/audio/ClassBook/Unit 8/Page 69 - E/Item_003_room_and_helped_his_mom_and_dad._In_the_afternoon,_he_went_out.mp3";
+import clipPage69E2 from "../../../assets/audio/ClassBook/Unit 8/Page 69 - E/Item_002_teeth._He_cooked_a_breakfast_of_eggs_and_toast._He_cleaned_his.mp3";
+import clipPage69E1 from "../../../assets/audio/ClassBook/Unit 8/Page 69 - E/Item_001_Steve_had_a_busy_weekend._He_woke_up_early_and_brushed_his.mp3";
+import {useEffect as useListeningEffect,useRef as useListeningRef,useState as useListeningState} from "react";
+import {useAudio} from "../../../context/AudioContext";
+import {FaVolumeUp as ListeningSpeakerIcon} from "react-icons/fa";
+import ExerciseHeader from "../../ExerciseHeader";
 import React, { useState, useRef, useEffect, useCallback } from "react";
-import Button from "../../Button";
 import ValidationAlert from "../../Popup/ValidationAlert";
 
 // ─────────────────────────────────────────────
@@ -8,6 +24,153 @@ import ValidationAlert from "../../Popup/ValidationAlert";
 import imgScene from "../../../assets/imgs/pages/Class Book/Right 4 Unit 8 I Lived in the Library Folder/Page 69/SVG/Asset 1.svg";
 import sound    from "../../../assets/audio/ClassBook/Grade 4/cd45pg69-instructions-adult-lady_GbFFFTCs.mp3";
 import QuestionAudioPlayer from "../../QuestionAudioPlayer";
+function useExerciseListening(pageId) {
+  const coordinator = useAudio();
+  const audioRef = useListeningRef(null),
+    generation = useListeningRef(0);
+  const [activeId, setActiveId] = useListeningState(null),
+    [error, setError] = useListeningState("");
+  const clearOwned = () => {
+    const current = audioRef.current;
+    if (current) {
+      current.onended = current.onplaying = current.onerror = current.onpause = null;
+      current.pause();
+      current.remove();
+      audioRef.current = null;
+    }
+  };
+  const stop = () => {
+    generation.current++;
+    clearOwned();
+    setActiveId(null);
+    setError("");
+  };
+  const play = (id, sources) => {
+    const queue = (Array.isArray(sources) ? sources : [sources]).filter(Boolean);
+    if (!queue.length) return;
+    stop();
+    const token = generation.current;
+    let index = 0;
+    const next = () => {
+      if (token !== generation.current) return;
+      clearOwned();
+      if (index >= queue.length) {
+        setActiveId(null);
+        return;
+      }
+      const media = new Audio(queue[index++]);
+      media.hidden = true;
+      media.dataset.exerciseListening = pageId;
+      document.body.appendChild(media);
+      audioRef.current = media;
+      const current = () => token === generation.current && audioRef.current === media;
+      const fail = () => {
+        if (!current()) return;
+        generation.current++;
+        clearOwned();
+        setActiveId(null);
+        setError("Audio could not be played. Please try again.");
+      };
+      media.onplaying = () => {
+        if (current()) setActiveId(id);
+      };
+      media.onended = () => {
+        if (current()) next();
+      };
+      media.onerror = fail;
+      media.onpause = () => {
+        if (!current()) return;
+        generation.current++;
+        clearOwned();
+        setActiveId(null);
+      };
+      document.querySelectorAll("audio,video").forEach(other => {
+        if (other !== media) other.pause();
+      });
+      coordinator?.registerAudio(media, null, pageId);
+      media.play().catch(fail);
+    };
+    next();
+  };
+  useListeningEffect(() => () => {
+    generation.current++;
+    const media = audioRef.current;
+    if (media) {
+      media.onended = media.onplaying = media.onerror = media.onpause = null;
+      media.pause();
+      media.remove();
+      audioRef.current = null;
+    }
+  }, []);
+  return {
+    play,
+    stop,
+    activeId,
+    error
+  };
+}
+function renderExerciseSpeaker() {
+  return <span aria-hidden="true" style={{
+    position: "absolute",
+    top: -10,
+    right: -10,
+    width: 22,
+    height: 22,
+    borderRadius: "50%",
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    background: "white",
+    color: "black",
+    boxShadow: "0 1px 3px rgba(0,0,0,.25)",
+    pointerEvents: "none",
+    zIndex: 3
+  }}><ListeningSpeakerIcon size={12} /></span>;
+}
+function renderExerciseAudioText({
+  audio,
+  id,
+  src,
+  label,
+  children
+}) {
+  if (!src || Array.isArray(src) && !src.some(Boolean)) return children;
+  const playing = audio.activeId === id;
+  const keys = event => {
+    if (event.target !== event.currentTarget || event.key !== "Enter" && event.key !== " ") return;
+    event.preventDefault();
+    event.stopPropagation();
+    if (event.type === "keydown" && !event.repeat) audio.play(id, src);
+  };
+  return <span role="button" tabIndex={0} data-listening={id} aria-label={label} onClick={event => {
+    event.stopPropagation();
+    audio.play(id, src);
+  }} onKeyDown={keys} onKeyUp={keys} style={{
+    position: "relative",
+    cursor: "pointer",
+    borderRadius: 6,
+    boxShadow: playing ? "0 0 0 3px #2563eb" : undefined,
+    backgroundColor: playing ? "#dbeafe" : undefined
+  }}>{children}{playing && renderExerciseSpeaker()}</span>;
+}
+
+
+const activationKeys = {
+  onKeyDown: (event) => {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    event.preventDefault();
+    event.stopPropagation();
+    if (!event.repeat) event.currentTarget.click();
+  },
+  onKeyUp: (event) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+  },
+};
+
+
 
 // ─────────────────────────────────────────────
 //  🎨  COLORS
@@ -56,10 +219,21 @@ const RIGHT_ITEMS = [
 //  COMPONENT
 // ─────────────────────────────────────────────
 export default function WB_ListenReadMatch_QE() {
+const listening=useExerciseListening("sb_unit8_page6_q1");
+
   const [connections,  setConnections]  = useState({});
   const [selectedLeft, setSelectedLeft] = useState(null);
   const [showResults,  setShowResults]  = useState(false);
   const [showAns,      setShowAns]      = useState(false);
+
+const [results,setResults]=useState({}),[selectedRight,setSelectedRight]=useState(null),[preview,setPreview]=useState(null),[announcement,setAnnouncement]=useState("");
+const resetButtonRef=useRef(null),endpointRefs=useRef({}),focusFrame=useRef(null);const checkDisabled=showAns||LEFT_ITEMS.every(item=>results[item.id]===true);const orderedRight=()=>[...RIGHT_ITEMS];
+const lockedLeft=id=>showAns||results[id]===true;const lockedRight=name=>showAns||Object.keys(connections).some(id=>connections[id]===name&&results[id]===true);
+const cancelFocus=()=>{if(focusFrame.current!==null)cancelAnimationFrame(focusFrame.current);focusFrame.current=null;};const cancel=()=>{cancelFocus();setSelectedLeft(null);setSelectedRight(null);setPreview(null);};
+useEffect(()=>()=>{if(focusFrame.current!==null)cancelAnimationFrame(focusFrame.current);},[]);
+const focusSide=side=>{cancelFocus();focusFrame.current=requestAnimationFrame(()=>{focusFrame.current=null;const item=side==='left'?LEFT_ITEMS.find(x=>!lockedLeft(x.id)):orderedRight().find(x=>!lockedRight(x.name));endpointRefs.current[side+'-'+(side==='left'?item?.id:item?.name)]?.focus({preventScroll:true});});};
+const connect=(id,name,keyboard)=>{if(lockedLeft(id)||lockedRight(name))return;const next={...connections};Object.keys(next).forEach(k=>{if(Number(k)===id||next[k]===name)delete next[k];});next[id]=name;setConnections(next);setResults(prev=>Object.fromEntries(Object.entries(prev).filter(([key,value])=>value===true||(Number(key)!==id&&next[key]===connections[key]))));cancel();setAnnouncement('Connection made.');if(keyboard)focusSide('left');};
+const endpointKeys=(event,side,value)=>{if(event.key==='Escape'){event.preventDefault();event.stopPropagation();cancel();return;}const items=side==='left'?LEFT_ITEMS.map(x=>x.id):orderedRight().map(x=>x.name);let index=items.indexOf(value);if(['ArrowUp','ArrowDown'].includes(event.key)){event.preventDefault();event.stopPropagation();const available=items.filter(x=>side==='left'?!lockedLeft(x):!lockedRight(x));index=available.indexOf(value);const next=available[(index+(event.key==='ArrowDown'?1:-1)+available.length)%available.length];endpointRefs.current[side+'-'+next]?.focus();return;}if(event.key==='Tab'&&side==='right'){const next=items[index+(event.shiftKey?-1:1)];if(next!==undefined){event.preventDefault();event.stopPropagation();endpointRefs.current['right-'+next]?.focus();}return;}if(event.key==='Enter'||event.key===' '){event.preventDefault();event.stopPropagation();if(!event.repeat)(side==='left'?handleLeftClick:handleRightClick)(value,true);}};
 
   const containerRef = useRef(null);
   const leftRefs     = useRef({});  // dot refs left
@@ -72,63 +246,26 @@ export default function WB_ListenReadMatch_QE() {
     return () => ro.disconnect();
   }, []);
 
-  const getDotCenter = useCallback((el) => {
-    if (!el || !containerRef.current) return null;
-    const cRect = containerRef.current.getBoundingClientRect();
-    const eRect = el.getBoundingClientRect();
-    return {
-      x: eRect.left - cRect.left + eRect.width  / 2,
-      y: eRect.top  - cRect.top  + eRect.height / 2,
-    };
-  }, []);
+  const getDotCenter=useCallback(el=>{if(!el||!containerRef.current)return null;const root=containerRef.current,c=root.getBoundingClientRect(),e=el.getBoundingClientRect(),sx=c.width/root.clientWidth||1,sy=c.height/root.clientHeight||1;return{x:(e.left-c.left+e.width/2)/sx,y:(e.top-c.top+e.height/2)/sy};},[]);
 
   const isCorrect      = (lid, rn) => { const r = RIGHT_ITEMS.find((ri) => ri.name === rn); return r && r.correctLeftId === Number(lid); };
   const connectedRight = (n)  => Object.values(connections).includes(n);
   const connectedLeft  = (id) => Object.prototype.hasOwnProperty.call(connections, id);
-  const lineColor      = useCallback(() => showAns ? LINE_SHOW_ANS : LINE_DEFAULT, [showAns]);
+  const lineColor=id=>showAns||results[id]===true?"#16a34a":results[id]===false?"#ef4444":LINE_DEFAULT;
 
-  const handleLeftClick = (lid) => {
-    if (showAns) return;
-    if (showResults && connectedLeft(lid) && isCorrect(lid, connections[lid])) return;
-    setSelectedLeft((prev) => (prev === lid ? null : lid));
-  };
+  const handleLeftClick=(id,keyboard=false)=>{listening.play(`left-${id}`,[clipPage69E6,clipPage69E8,clipPage69E10,clipPage69E12][id-1]);if(lockedLeft(id))return;if(selectedRight!==null){connect(id,selectedRight,keyboard);return;}setSelectedLeft(prev=>prev===id?null:id);setPreview(null);setAnnouncement('Sentence selected. Choose its match.');if(keyboard&&selectedLeft!==id)focusSide('right');};
 
-  const handleRightClick = (rn) => {
-    if (showAns || selectedLeft === null) return;
-    if (showResults && connectedLeft(selectedLeft) && isCorrect(selectedLeft, connections[selectedLeft])) {
-      setSelectedLeft(null); return;
-    }
-    setConnections((prev) => {
-      const next = { ...prev };
-      Object.keys(next).forEach((k) => { if (next[k] === rn) delete next[k]; });
-      if (next[selectedLeft] && !(showResults && isCorrect(selectedLeft, next[selectedLeft]))) delete next[selectedLeft];
-      next[selectedLeft] = rn;
-      return next;
-    });
-    setSelectedLeft(null);
-    if (showResults) setShowResults(false);
-  };
+  const handleRightClick=(name,keyboard=false)=>{listening.play(`right-${name}`,[clipPage69E7,clipPage69E9,clipPage69E11,clipPage69E13][Number(name.slice(1))-1]);if(lockedRight(name))return;if(selectedLeft!==null){connect(selectedLeft,name,keyboard);return;}setSelectedRight(prev=>prev===name?null:name);setPreview(null);setAnnouncement('Match selected. Choose a sentence.');if(keyboard&&selectedRight!==name)focusSide('left');};
 
-  const handleCheck = () => {
-    if (showAns) return;
-    if (Object.keys(connections).length < LEFT_ITEMS.length) {
-      ValidationAlert.info("Please connect all sentences first."); return;
-    }
-    let score = 0;
-    Object.entries(connections).forEach(([lid, rn]) => { if (isCorrect(lid, rn)) score++; });
-    setShowResults(true);
-    if (score === LEFT_ITEMS.length) ValidationAlert.success(`Score: ${score} / ${LEFT_ITEMS.length}`);
-    else if (score > 0)              ValidationAlert.warning(`Score: ${score} / ${LEFT_ITEMS.length}`);
-    else                             ValidationAlert.error(`Score: ${score} / ${LEFT_ITEMS.length}`);
-  };
+  const handleCheck=()=>{if(checkDisabled)return;listening.stop();cancel();if(Object.keys(connections).length<LEFT_ITEMS.length){ValidationAlert.info('Please connect all sentences first.');return;}const next=Object.fromEntries(LEFT_ITEMS.map(item=>[item.id,isCorrect(item.id,connections[item.id])]));const score=Object.values(next).filter(Boolean).length;setResults(next);setShowResults(true);setAnnouncement(`Score: ${score} out of ${LEFT_ITEMS.length}. Correct connections are locked.`);if(score===LEFT_ITEMS.length){resetButtonRef.current?.focus({preventScroll:true});ValidationAlert.success(`Score: ${score} / ${LEFT_ITEMS.length}`);}else if(score)ValidationAlert.warning(`Score: ${score} / ${LEFT_ITEMS.length}`);else ValidationAlert.error(`Score: ${score} / ${LEFT_ITEMS.length}`);};
 
-  const handleShowAnswer = () => {
+  const handleShowAnswer = () => {listening.stop();
     const ans = {}; RIGHT_ITEMS.forEach((r) => { ans[r.correctLeftId] = r.name; });
-    setConnections(ans); setShowResults(false); setShowAns(true); setSelectedLeft(null);
+    cancel();setResults({});resetButtonRef.current?.focus({preventScroll:true});setAnnouncement("Correct connections shown and locked.");setConnections(ans); setShowResults(false); setShowAns(true); setSelectedLeft(null);
   };
 
-  const handleReset = () => {
-    setConnections({}); setShowResults(false); setShowAns(false); setSelectedLeft(null);
+  const handleReset = () => {listening.stop();
+    cancel();setResults({});setAnnouncement("Connections cleared.");setConnections({}); setShowResults(false); setShowAns(false); setSelectedLeft(null);
   };
 
   const renderLines = () =>
@@ -139,27 +276,21 @@ export default function WB_ListenReadMatch_QE() {
       return (
         <line key={`${lid}-${rn}`}
           x1={p1.x} y1={p1.y} x2={p2.x} y2={p2.y}
-          stroke={lineColor()} strokeWidth="2.5" strokeLinecap="round"
+          stroke={lineColor(lid)} strokeWidth="2.5" strokeLinecap="round"
         />
       );
     });
 
-  const leftDotColor = (id) => {
-    if (selectedLeft === id)           return DOT_SELECTED;
-    if (showAns && connectedLeft(id))  return LINE_SHOW_ANS;
-    return DOT_DEFAULT;
-  };
+  const leftDotColor=id=>lockedLeft(id)?"#16a34a":results[id]===false?"#ef4444":selectedLeft===id||connectedLeft(id)?"#2195a6":LINE_DEFAULT;
 
-  const rightDotColor = (n) => {
-    if (showAns && connectedRight(n)) return LINE_SHOW_ANS;
-    return DOT_DEFAULT;
-  };
+  const rightDotColor=name=>lockedRight(name)?"#16a34a":Object.keys(connections).some(id=>connections[id]===name&&results[id]===false)?"#ef4444":selectedRight===name||connectedRight(name)?"#2195a6":LINE_DEFAULT;
 
-  const isLeftWrong = (id) =>
-    showResults && !showAns && connectedLeft(id) && !isCorrect(id, connections[id]);
+  const isLeftWrong=id=>!showAns&&results[id]===false;
 
   return (
-    <div className="main-container-component">
+    <div onKeyDown={event=>{if(event.key==="Escape"&&(selectedLeft!==null||selectedRight!==null)){event.preventDefault();event.stopPropagation();cancel();setAnnouncement("Selection cancelled.");}}} data-adapt-scope="unit8_Unit8_Page6_Q1" className="main-container-component"><span className="sr-only" role="status" aria-live="polite">{listening.error}</span>
+<style>{`[data-adapt-scope="unit8_Unit8_Page6_Q1"] input:focus-visible, [data-adapt-scope="unit8_Unit8_Page6_Q1"] [data-keyboard-choice]:focus-visible, [data-adapt-scope="unit8_Unit8_Page6_Q1"] [data-grid-cell]:focus-visible, [data-adapt-scope="unit8_Unit8_Page6_Q1"] [data-listening]:focus-visible {outline:4px solid #2563eb !important;outline-offset:3px;border-radius:6px;}`}</style>
+<div className="sr-only" role="status" aria-live="polite" aria-atomic="true">{announcement}</div>
       <style>{`
         /* ── Top: paragraph + image ── */
         .lrm-top {
@@ -339,29 +470,17 @@ export default function WB_ListenReadMatch_QE() {
         }}
       >
         {/* ── Header ── */}
-        <h1
-          className="WB-header-title-page8"
-          style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
-        >
-          <span className="WB-ex-A">E</span>
-          Listen, read, and match.
-        </h1>
+        <ExerciseHeader subTitle="Listen to one item at a time, replay if needed, then connect it to the picture, word, or sentence that matches." sectionLetter="E" title={<>Listen, read, and match.</>} />
 
         {/* ── Audio ── */}
         <div style={{ marginTop: "4px" }}>
-          <QuestionAudioPlayer src={sound} captions={captions} stopAtSecond={5} />
+          <QuestionAudioPlayer pageId="sb_unit8_page6_q1" src={sound} captions={captions} stopAtSecond={5} />
         </div>
 
         {/* ── Top: paragraph + image ── */}
         <div className="lrm-top">
-          <p className="lrm-para">
-            Steve had a busy weekend. He woke up early and brushed his teeth.
-            He cooked a breakfast of eggs and toast. He cleaned his room and
-            helped his mom and dad. In the afternoon, he went out with friends.
-            They played soccer on a field. He came home and ate dinner with his
-            family. Then, he went to bed.
-          </p>
-          <img src={imgScene} alt="scene" className="lrm-scene-img" />
+          <p className="lrm-para">{renderExerciseAudioText({audio:listening,id:"paragraph-1",src:clipPage69E1,label:"Steve had a busy weekend. He woke up early and brushed his ",children:"Steve had a busy weekend. He woke up early and brushed his "})}{renderExerciseAudioText({audio:listening,id:"paragraph-2",src:clipPage69E2,label:"teeth. He cooked a breakfast of eggs and toast. He cleaned his ",children:"teeth. He cooked a breakfast of eggs and toast. He cleaned his "})}{renderExerciseAudioText({audio:listening,id:"paragraph-3",src:clipPage69E3,label:"room and helped his mom and dad. In the afternoon, he went out ",children:"room and helped his mom and dad. In the afternoon, he went out "})}{renderExerciseAudioText({audio:listening,id:"paragraph-4",src:clipPage69E4,label:"with friends. They played soccer on a field. He came home and ate ",children:"with friends. They played soccer on a field. He came home and ate "})}{renderExerciseAudioText({audio:listening,id:"paragraph-5",src:clipPage69E5,label:"dinner with his family. Then, he went to bed.",children:"dinner with his family. Then, he went to bed."})}</p>
+          <img src={imgScene} alt={"A woman holding a baby beside a child at a sink."} className="lrm-scene-img" />
         </div>
 
         {/* ── Matching ── */}
@@ -375,7 +494,7 @@ export default function WB_ListenReadMatch_QE() {
                 const isLk    = showAns || (showResults && connectedLeft(item.id) && isCorrect(item.id, connections[item.id]));
                 const isWrong = isLeftWrong(item.id);
                 return (
-                  <div
+                  <div data-listening={`left-${item.id}`} style={{...({...({}),borderRadius:({}).borderRadius||6,boxShadow:lockedLeft(item.id)?"inset 0 0 0 2px #16a34a":selectedLeft===item.id?"inset 0 0 0 2px #2563eb":undefined,background:selectedLeft===item.id?"#dbeafe":({}).background}),position:"relative",background:listening.activeId===`left-${item.id}`?"#dbeafe":({...({}),borderRadius:({}).borderRadius||6,boxShadow:lockedLeft(item.id)?"inset 0 0 0 2px #16a34a":selectedLeft===item.id?"inset 0 0 0 2px #2563eb":undefined,background:selectedLeft===item.id?"#dbeafe":({}).background}).background,boxShadow:[({...({}),borderRadius:({}).borderRadius||6,boxShadow:lockedLeft(item.id)?"inset 0 0 0 2px #16a34a":selectedLeft===item.id?"inset 0 0 0 2px #2563eb":undefined,background:selectedLeft===item.id?"#dbeafe":({}).background}).boxShadow,listening.activeId===`left-${item.id}`?"0 0 0 2px #2563eb":null].filter(Boolean).join(", ")||undefined}} role="button" tabIndex={0} data-keyboard-choice data-match-side="left" data-match-id={item.id} ref={el=>{endpointRefs.current['left-'+item.id]=el;}} aria-label={item.text} aria-pressed={selectedLeft===item.id} aria-disabled={lockedLeft(item.id)} onKeyDown={event=>endpointKeys(event,'left',item.id)} onKeyUp={activationKeys.onKeyUp} onFocus={()=>setPreview({side:'left',id:item.id})} onMouseEnter={()=>setPreview({side:'left',id:item.id})} onMouseLeave={()=>setPreview(null)}
                     key={item.id}
                     className={["lrm-left-row", isLk ? "lrm-left-row--locked" : ""].filter(Boolean).join(" ")}
                     onClick={() => handleLeftClick(item.id)}
@@ -395,7 +514,7 @@ export default function WB_ListenReadMatch_QE() {
                         </div>
                       </div>
                     </div>
-                  </div>
+                  {listening.activeId===`left-${item.id}`&&renderExerciseSpeaker()}</div>
                 );
               })}
             </div>
@@ -408,7 +527,7 @@ export default function WB_ListenReadMatch_QE() {
               {RIGHT_ITEMS.map((item) => {
                 const isLk = showAns;
                 return (
-                  <div
+                  <div data-listening={`right-${item.name}`} style={{...({...({}),borderRadius:({}).borderRadius||6,boxShadow:lockedRight(item.name)?"inset 0 0 0 2px #16a34a":selectedRight===item.name?"inset 0 0 0 2px #2563eb":undefined,background:selectedRight===item.name?"#dbeafe":({}).background}),position:"relative",background:listening.activeId===`right-${item.name}`?"#dbeafe":({...({}),borderRadius:({}).borderRadius||6,boxShadow:lockedRight(item.name)?"inset 0 0 0 2px #16a34a":selectedRight===item.name?"inset 0 0 0 2px #2563eb":undefined,background:selectedRight===item.name?"#dbeafe":({}).background}).background,boxShadow:[({...({}),borderRadius:({}).borderRadius||6,boxShadow:lockedRight(item.name)?"inset 0 0 0 2px #16a34a":selectedRight===item.name?"inset 0 0 0 2px #2563eb":undefined,background:selectedRight===item.name?"#dbeafe":({}).background}).boxShadow,listening.activeId===`right-${item.name}`?"0 0 0 2px #2563eb":null].filter(Boolean).join(", ")||undefined}} role="button" tabIndex={0} data-keyboard-choice data-match-side="right" data-match-id={item.name} ref={el=>{endpointRefs.current['right-'+item.name]=el;}} aria-label={item.text} aria-pressed={selectedRight===item.name} aria-disabled={lockedRight(item.name)} onKeyDown={event=>endpointKeys(event,'right',item.name)} onKeyUp={activationKeys.onKeyUp} onFocus={()=>setPreview({side:'right',id:item.name})} onMouseEnter={()=>setPreview({side:'right',id:item.name})} onMouseLeave={()=>setPreview(null)}
                     key={item.name}
                     className={["lrm-right-row", isLk ? "lrm-right-row--locked" : ""].filter(Boolean).join(" ")}
                     onClick={() => handleRightClick(item.name)}
@@ -422,23 +541,23 @@ export default function WB_ListenReadMatch_QE() {
                       />
                     </div>
                     <span className="lrm-right-text">{item.text}</span>
-                  </div>
+                  {listening.activeId===`right-${item.name}`&&renderExerciseSpeaker()}</div>
                 );
               })}
             </div>
 
           </div>
 
-          <svg className="lrm-svg">{renderLines()}</svg>
+          <svg aria-hidden="true" className="lrm-svg">{renderLines()}{(()=>{let id=selectedLeft,name=selectedRight;if(id!==null&&preview?.side==='right')name=preview.id;else if(name!==null&&preview?.side==='left')id=preview.id;else return null;if(lockedLeft(id)||lockedRight(name))return null;const a=getDotCenter(leftRefs.current[id]),b=getDotCenter(rightRefs.current[name]);return a&&b?<line data-match-preview x1={a.x} y1={a.y} x2={b.x} y2={b.y} stroke="#2563eb" strokeWidth="2.5" strokeDasharray="6 4"/>:null;})()}</svg>
         </div>
 
         {/* ── Buttons ── */}
         <div className="lrm-buttons">
-          <Button
-            checkAnswers={handleCheck}
-            handleShowAnswer={handleShowAnswer}
-            handleStartAgain={handleReset}
-          />
+          <div className="action-buttons-container">
+<button type="button" aria-label="Start Again" {...activationKeys} ref={resetButtonRef} onClick={handleReset} className="try-again-button">Start Again ↻</button>
+<button type="button" aria-label="Show Answer" {...activationKeys} onClick={handleShowAnswer} className="show-answer-btn swal-continue">Show Answer</button>
+<button type="button" aria-label="Check Answer" {...activationKeys} onClick={handleCheck} disabled={checkDisabled} style={{cursor:checkDisabled ? "not-allowed":"pointer"}} className="check-button2">Check Answer ✓</button>
+</div>
         </div>
       </div>
     </div>

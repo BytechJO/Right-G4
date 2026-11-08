@@ -19,7 +19,7 @@ const GrammarSection_U1 = () => {
 
       {/* ✅ شلنا الـ title badge والـ paragraphs، والصورة تملأ كل شي */}
       <div className="w-[60%] mt-2">
-        <img
+        <img alt="The Earth Sandwich. A report about the crust, mantle, core and how scientists study Earth’s interior. Writing tips: use charts and pictures, put information in a clear order, organize paragraphs, and include a main idea and conclusion."
           src={image}
           style={{ width: "100%", height: "auto", display: "block" }}
         />

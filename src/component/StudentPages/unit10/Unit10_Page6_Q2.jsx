@@ -1,5 +1,18 @@
-import React, { useState } from "react";
-import Button from "../../Button";
+import ExerciseHeader from "../../ExerciseHeader";
+import clipPage87E10 from "../../../assets/audio/ClassBook/Unit 10/Page 87 - E/Item_010_koala.mp3";
+import clipPage87E9 from "../../../assets/audio/ClassBook/Unit 10/Page 87 - E/Item_009_desert.mp3";
+import clipPage87E8 from "../../../assets/audio/ClassBook/Unit 10/Page 87 - E/Item_008_camel.mp3";
+import clipPage87E7 from "../../../assets/audio/ClassBook/Unit 10/Page 87 - E/Item_007_pyramids.mp3";
+import clipPage87E6 from "../../../assets/audio/ClassBook/Unit 10/Page 87 - E/Item_006_tiger.mp3";
+import clipPage87E5 from "../../../assets/audio/ClassBook/Unit 10/Page 87 - E/Item_005_Morocco.mp3";
+import clipPage87E4 from "../../../assets/audio/ClassBook/Unit 10/Page 87 - E/Item_004_Australia.mp3";
+import clipPage87E3 from "../../../assets/audio/ClassBook/Unit 10/Page 87 - E/Item_003_Saudi_Arabia.mp3";
+import clipPage87E2 from "../../../assets/audio/ClassBook/Unit 10/Page 87 - E/Item_002_Egypt.mp3";
+import clipPage87E1 from "../../../assets/audio/ClassBook/Unit 10/Page 87 - E/Item_001_India.mp3";
+import {useEffect as useListeningEffect,useRef as useListeningRef,useState as useListeningState} from "react";
+import {useAudio} from "../../../context/AudioContext";
+import {FaVolumeUp as ListeningSpeakerIcon} from "react-icons/fa";
+import React, { useState, useRef } from "react";
 import ValidationAlert from "../../Popup/ValidationAlert";
 
 import imgIndia from "../../../assets/imgs/pages/Class Book/Right 4 Unit 10 Stella Goes Shopping Folder/Page 87/SVG/Asset 2.svg";
@@ -7,6 +20,161 @@ import imgEgypt from "../../../assets/imgs/pages/Class Book/Right 4 Unit 10 Stel
 import imgSaudiArabia from "../../../assets/imgs/pages/Class Book/Right 4 Unit 10 Stella Goes Shopping Folder/Page 87/SVG/Asset 4.svg";
 import imgAustralia from "../../../assets/imgs/pages/Class Book/Right 4 Unit 10 Stella Goes Shopping Folder/Page 87/SVG/Asset 5.svg";
 import imgMorocco from "../../../assets/imgs/pages/Class Book/Right 4 Unit 10 Stella Goes Shopping Folder/Page 87/SVG/Asset 6.svg";
+function useExerciseListening(pageId) {
+  const coordinator = useAudio();
+  const audioRef = useListeningRef(null),
+    generation = useListeningRef(0);
+  const [activeId, setActiveId] = useListeningState(null),
+    [error, setError] = useListeningState("");
+  const clearOwned = () => {
+    const current = audioRef.current;
+    if (current) {
+      current.onended = current.onplaying = current.onerror = current.onpause = null;
+      current.pause();
+      current.remove();
+      audioRef.current = null;
+    }
+  };
+  const stop = () => {
+    generation.current++;
+    clearOwned();
+    setActiveId(null);
+    setError("");
+  };
+  const play = (id, sources) => {
+    const queue = (Array.isArray(sources) ? sources : [sources]).filter(Boolean);
+    if (!queue.length) return;
+    stop();
+    const token = generation.current;
+    let index = 0;
+    const next = () => {
+      if (token !== generation.current) return;
+      clearOwned();
+      if (index >= queue.length) {
+        setActiveId(null);
+        return;
+      }
+      const media = new Audio(queue[index++]);
+      media.hidden = true;
+      media.dataset.exerciseListening = pageId;
+      document.body.appendChild(media);
+      audioRef.current = media;
+      const current = () => token === generation.current && audioRef.current === media;
+      const fail = () => {
+        if (!current()) return;
+        generation.current++;
+        clearOwned();
+        setActiveId(null);
+        setError("Audio could not be played. Please try again.");
+      };
+      media.onplaying = () => {
+        if (current()) setActiveId(id);
+      };
+      media.onended = () => {
+        if (current()) next();
+      };
+      media.onerror = fail;
+      media.onpause = () => {
+        if (!current()) return;
+        generation.current++;
+        clearOwned();
+        setActiveId(null);
+      };
+      document.querySelectorAll("audio,video").forEach(other => {
+        if (other !== media) other.pause();
+      });
+      coordinator?.registerAudio(media, null, pageId);
+      media.play().catch(fail);
+    };
+    next();
+  };
+  useListeningEffect(() => () => {
+    generation.current++;
+    const media = audioRef.current;
+    if (media) {
+      media.onended = media.onplaying = media.onerror = media.onpause = null;
+      media.pause();
+      media.remove();
+      audioRef.current = null;
+    }
+  }, []);
+  return {
+    play,
+    stop,
+    activeId,
+    error
+  };
+}
+function renderExerciseSpeaker() {
+  return <span aria-hidden="true" style={{
+    position: "absolute",
+    top: -10,
+    right: -10,
+    width: 22,
+    height: 22,
+    borderRadius: "50%",
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    background: "white",
+    color: "black",
+    boxShadow: "0 1px 3px rgba(0,0,0,.25)",
+    pointerEvents: "none",
+    zIndex: 3
+  }}><ListeningSpeakerIcon size={12} /></span>;
+}
+function renderExerciseAudioText({
+  audio,
+  id,
+  src,
+  label,
+  children
+}) {
+  if (!src || Array.isArray(src) && !src.some(Boolean)) return children;
+  const playing = audio.activeId === id;
+  const keys = event => {
+    if (event.target !== event.currentTarget || event.key !== "Enter" && event.key !== " ") return;
+    event.preventDefault();
+    event.stopPropagation();
+    if (event.type === "keydown" && !event.repeat) audio.play(id, src);
+  };
+  return <span role="button" tabIndex={0} data-listening={id} aria-label={label} onClick={event => {
+    event.stopPropagation();
+    audio.play(id, src);
+  }} onKeyDown={keys} onKeyUp={keys} style={{
+    position: "relative",
+    cursor: "pointer",
+    borderRadius: 6,
+    boxShadow: playing ? "0 0 0 3px #2563eb" : undefined,
+    backgroundColor: playing ? "#dbeafe" : undefined
+  }}>{children}{playing && renderExerciseSpeaker()}</span>;
+}
+
+
+
+const activationKeys = {
+  onKeyDown: (event) => {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    event.preventDefault();
+    event.stopPropagation();
+    if (!event.repeat) event.currentTarget.click();
+  },
+  onKeyUp: (event) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+  },
+};
+const fieldKeys = {
+  onKeyDown: (event) => {
+    if (event.key === "Enter" || event.key === " ") event.stopPropagation();
+  },
+  onKeyUp: (event) => {
+    if (event.key === "Enter" || event.key === " ") event.stopPropagation();
+  },
+};
+
 
 const CELL_BORDER = "#2096a6";
 const CELL_BG = "#e8eff1";
@@ -142,6 +310,8 @@ const isSentOk = (v) =>
   SENTENCE_CORRECT.some((c) => normalize(v) === normalize(c));
 
 export default function WB_WordSearch_QE() {
+const listening=useExerciseListening("sb_unit10_page6_q2");
+
   const [selecting, setSelecting] = useState(false);
   const [startCell, setStartCell] = useState(null);
   const [hovered, setHovered] = useState(null);
@@ -152,6 +322,8 @@ export default function WB_WordSearch_QE() {
   const [showRes, setShowRes] = useState(false);
   const [showAns, setShowAns] = useState(false);
 
+  const [announcement,setAnnouncement]=useState("");const [focusCell,setFocusCell]=useState([0,0]);const cellRefs=useRef({});
+const gridKeys=(event,r,col)=>{if(event.key==='Tab')return;if(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(event.key)){event.preventDefault();event.stopPropagation();const nr=Math.max(0,Math.min(GRID.length-1,r+(event.key==='ArrowDown'?1:event.key==='ArrowUp'?-1:0))),nc=Math.max(0,Math.min(GRID[nr].length-1,col+(event.key==='ArrowRight'?1:event.key==='ArrowLeft'?-1:0)));setFocusCell([nr,nc]);cellRefs.current[cellKey(nr,nc)]?.focus();if(selecting)setHovered([nr,nc]);return;}if(event.key==='Escape'){event.preventDefault();event.stopPropagation();setSelecting(false);setStartCell(null);setHovered(null);setAnnouncement('Selection cancelled.');return;}if(event.key==='Enter'||event.key===' '){event.preventDefault();event.stopPropagation();if(event.repeat||showAns)return;if(selecting){const match=checkMatch(selCells,foundNames);onMouseUp();setAnnouncement(match?'Found '+match.word+'.':'That selection does not find a new word.');}else{onMouseDown(r,col);setAnnouncement('First letter selected. Move to the final letter and press Enter or Space.');}}};
   const foundNames = new Set(foundWords.map((f) => f.word));
 
   const foundCellMap = {};
@@ -194,7 +366,7 @@ export default function WB_WordSearch_QE() {
 
   const toggleCountry = (name) => {
     if (showAns) return;
-    setChecked((p) => {
+    setAnnouncement(name+(checked.has(name)?" deselected.":" selected."));setChecked((p) => {
       const n = new Set(p);
       n.has(name) ? n.delete(name) : n.add(name);
       return n;
@@ -202,7 +374,7 @@ export default function WB_WordSearch_QE() {
   };
 
   const handleCheck = () => {
-    if (showAns) return;
+    if (showAns) return;listening.stop();
     if (!sentVal.trim()) {
       ValidationAlert.info("Please complete the sentence.");
       return;
@@ -213,7 +385,7 @@ export default function WB_WordSearch_QE() {
       : ValidationAlert.error("Check your answer.");
   };
 
-  const handleShowAnswer = () => {
+  const handleShowAnswer = () => {listening.stop();
     setShowAns(true);
     setShowRes(false);
     setSentVal(SENTENCE_ANSWER);
@@ -227,8 +399,8 @@ export default function WB_WordSearch_QE() {
     setChecked(new Set(CORRECT_COUNTRIES));
   };
 
-  const handleReset = () => {
-    setFoundWords([]);
+  const handleReset = () => {listening.stop();
+    setFocusCell([0,0]);setAnnouncement("Selections and answer cleared.");setFoundWords([]);
     setChecked(new Set());
     setSentVal("");
     setShowRes(false);
@@ -257,13 +429,15 @@ export default function WB_WordSearch_QE() {
   const sentDisabled = showAns || (showRes && isSentOk(sentVal));
 
   return (
-    <div
+    <div data-adapt-scope="unit10_Unit10_Page6_Q2"
       className="main-container-component"
       onMouseUp={onMouseUp}
       onMouseLeave={() => {
         if (selecting) onMouseUp();
       }}
-    >
+    ><span className="sr-only" role="status" aria-live="polite">{listening.error}</span>
+<style>{`[data-adapt-scope="unit10_Unit10_Page6_Q2"] input:focus-visible, [data-adapt-scope="unit10_Unit10_Page6_Q2"] [data-keyboard-choice]:focus-visible, [data-adapt-scope="unit10_Unit10_Page6_Q2"] [data-grid-cell]:focus-visible, [data-adapt-scope="unit10_Unit10_Page6_Q2"] [data-listening]:focus-visible {outline:4px solid #2563eb !important;outline-offset:3px;border-radius:6px;} [data-adapt-scope="unit10_Unit10_Page6_Q2"] [data-grid-cell]:focus-visible {outline-offset:-4px;position:relative;z-index:1;} [data-adapt-scope="unit10_Unit10_Page6_Q2"] input[aria-invalid="true"]:focus-visible {border-bottom-color:#ef4444 !important;}`}</style>
+<div className="sr-only" role="status" aria-live="polite" aria-atomic="true">{announcement}</div>
       <style>{`
         .wse-countries{display:flex;gap:clamp(10px,1.4vw,20px);align-items:flex-start;flex-wrap:wrap;width:100%;}
         .wse-country{display:flex;flex-direction:column;align-items:center;gap:clamp(4px,0.6vw,8px);flex:1;min-width:clamp(65px,9vw,120px);}
@@ -305,20 +479,12 @@ export default function WB_WordSearch_QE() {
         }}
       >
 
-<div className="WB-header-title-page8"  style={{
-            margin: 0,
-            display: "flex",
-            alignItems: "start",
-            gap: "12px",
-          }}>
-          <span className="WB-ex-A">I</span>
-          <div style={{ display: "block"  }}>
+<ExerciseHeader sectionLetter="I" title={<>
             Find and circle the words.  Then <span className="text-[#D1252B]"> ✓</span>  the countries for each word you find. 
             <div style={{ marginTop: "0" }}>
              One word is not in the puzzle, so one country won’t be checked.
             </div>
-          </div>
-        </div>
+          </>} subTitle="Find each target word in the puzzle first, then check its matching country; remember that one country should stay unchecked." />
  
         <p
           style={{
@@ -338,11 +504,11 @@ export default function WB_WordSearch_QE() {
               <div key={country.name} className="wse-country">
                 <img
                   src={country.src}
-                  alt={country.name}
+                  alt={({India:"A tiger.",Egypt:"Pyramids in a desert.","Saudi Arabia":"Footprints across sand dunes.",Australia:"A koala in a tree.",Morocco:"A camel and its calf."})[country.name]}
                   className="wse-cimg"
                 />
-                <span className="wse-cname">{country.name}</span>
-                <div
+                <span className="wse-cname">{renderExerciseAudioText({audio:listening,id:`country-${country.name}`,src:[clipPage87E1,clipPage87E2,clipPage87E3,clipPage87E4,clipPage87E5][COUNTRIES.indexOf(country)],label:country.name,children:country.name})}</span>
+                <div role="button" tabIndex={0} data-keyboard-choice {...activationKeys} aria-label={`Select ${country.name}`} aria-pressed={on} aria-disabled={showAns}
                   className={[
                     "wse-ccheck",
                     on ? "wse-ccheck--on" : "",
@@ -372,7 +538,7 @@ export default function WB_WordSearch_QE() {
                   .filter(Boolean)
                   .join(" ")}
               >
-                {w}
+                {renderExerciseAudioText({audio:listening,id:`word-${w}`,src:[clipPage87E6,clipPage87E7,clipPage87E8,clipPage87E9,clipPage87E10][WORD_LIST.indexOf(w)],label:w,children:w})}
               </span>
             ))}
           </div>
@@ -386,7 +552,7 @@ export default function WB_WordSearch_QE() {
                 const isWrong = isSel && wrongFlash;
                 const isSeling = isSel && !wrongFlash;
                 return (
-                  <div
+                  <div role="button" tabIndex={focusCell[0]===r&&focusCell[1]===c?0:-1} data-grid-cell ref={el=>{cellRefs.current[key]=el;}} aria-label={`Row ${r+1}, column ${c+1}: ${letter}`} aria-pressed={isFound||isSel} onFocus={()=>setFocusCell([r,c])} onKeyDown={event=>gridKeys(event,r,c)} onKeyUp={activationKeys.onKeyUp}
                     key={key}
                     className={[
                       "wse-cell",
@@ -412,7 +578,7 @@ export default function WB_WordSearch_QE() {
         <div className="wse-sent-area">
           <span className="wse-sent-prefix">{SENTENCE_PREFIX}</span>
           <div className="wse-iwrap">
-            <input
+            <input {...fieldKeys} aria-label="Complete the sentence about where Louis has not been, using the puzzle and pictures." title="Complete the sentence about Louis" placeholder="Your answer"
               type="text"
               className={[
                 "wse-input",
@@ -433,11 +599,11 @@ export default function WB_WordSearch_QE() {
         </div>
 
         <div className="wse-buttons">
-          <Button
-            checkAnswers={handleCheck}
-            handleShowAnswer={handleShowAnswer}
-            handleStartAgain={handleReset}
-          />
+          <div className="action-buttons-container">
+<button type="button" aria-label="Start Again" {...activationKeys} onClick={handleReset} className="try-again-button">Start Again ↻</button>
+<button type="button" aria-label="Show Answer" {...activationKeys} onClick={handleShowAnswer} className="show-answer-btn swal-continue">Show Answer</button>
+<button type="button" aria-label="Check Answer" {...activationKeys} onClick={handleCheck} className="check-button2">Check Answer ✓</button>
+</div>
         </div>
       </div>
     </div>

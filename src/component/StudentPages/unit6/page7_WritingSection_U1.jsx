@@ -19,7 +19,7 @@ const GrammarSection_U1 = () => {
 
       {/* ✅ شلنا الـ title badge والـ paragraphs، والصورة تملأ كل شي */}
       <div className="w-[60%] mt-2">
-        <img
+        <img alt="The Bonsai Tree: a model paragraph with steps for caring for a bonsai tree and writing tips."
           src={image}
           style={{ width: "100%", height: "auto", display: "block" }}
         />

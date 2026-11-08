@@ -1,6 +1,165 @@
+import clipPage16B4 from "../../../assets/audio/WorkBook/Unit 3/Page 16 - B/Item_004_d_l_c_s.mp3";
+import clipPage16B3 from "../../../assets/audio/WorkBook/Unit 3/Page 16 - B/Item_003_b_th.mp3";
+import clipPage16B2 from "../../../assets/audio/WorkBook/Unit 3/Page 16 - B/Item_002_w_er.mp3";
+import clipPage16B1 from "../../../assets/audio/WorkBook/Unit 3/Page 16 - B/Item_001_ye_e_d.mp3";
+import {useEffect as useListeningEffect,useRef as useListeningRef,useState as useListeningState} from "react";
+import {useAudio} from "../../../context/AudioContext";
+import {FaVolumeUp as ListeningSpeakerIcon} from "react-icons/fa";
+import ExerciseHeader from "../../ExerciseHeader";
 import React, { useState, useRef } from "react";
-import Button from "../Button";
 import ValidationAlert from "../../Popup/ValidationAlert";
+function useExerciseListening(pageId) {
+  const coordinator = useAudio();
+  const audioRef = useListeningRef(null),
+    generation = useListeningRef(0);
+  const [activeId, setActiveId] = useListeningState(null),
+    [error, setError] = useListeningState("");
+  const clearOwned = () => {
+    const current = audioRef.current;
+    if (current) {
+      current.onended = current.onplaying = current.onerror = current.onpause = null;
+      current.pause();
+      current.remove();
+      audioRef.current = null;
+    }
+  };
+  const stop = () => {
+    generation.current++;
+    clearOwned();
+    setActiveId(null);
+    setError("");
+  };
+  const play = (id, sources) => {
+    const queue = (Array.isArray(sources) ? sources : [sources]).filter(Boolean);
+    if (!queue.length) return;
+    stop();
+    const token = generation.current;
+    let index = 0;
+    const next = () => {
+      if (token !== generation.current) return;
+      clearOwned();
+      if (index >= queue.length) {
+        setActiveId(null);
+        return;
+      }
+      const media = new Audio(queue[index++]);
+      media.hidden = true;
+      media.dataset.exerciseListening = pageId;
+      document.body.appendChild(media);
+      audioRef.current = media;
+      const current = () => token === generation.current && audioRef.current === media;
+      const fail = () => {
+        if (!current()) return;
+        generation.current++;
+        clearOwned();
+        setActiveId(null);
+        setError("Audio could not be played. Please try again.");
+      };
+      media.onplaying = () => {
+        if (current()) setActiveId(id);
+      };
+      media.onended = () => {
+        if (current()) next();
+      };
+      media.onerror = fail;
+      media.onpause = () => {
+        if (!current()) return;
+        generation.current++;
+        clearOwned();
+        setActiveId(null);
+      };
+      document.querySelectorAll("audio,video").forEach(other => {
+        if (other !== media) other.pause();
+      });
+      coordinator?.registerAudio(media, null, pageId);
+      media.play().catch(fail);
+    };
+    next();
+  };
+  useListeningEffect(() => () => {
+    generation.current++;
+    const media = audioRef.current;
+    if (media) {
+      media.onended = media.onplaying = media.onerror = media.onpause = null;
+      media.pause();
+      media.remove();
+      audioRef.current = null;
+    }
+  }, []);
+  return {
+    play,
+    stop,
+    activeId,
+    error
+  };
+}
+function renderExerciseSpeaker() {
+  return <span aria-hidden="true" style={{
+    position: "absolute",
+    top: -10,
+    right: -10,
+    width: 22,
+    height: 22,
+    borderRadius: "50%",
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    background: "white",
+    color: "black",
+    boxShadow: "0 1px 3px rgba(0,0,0,.25)",
+    pointerEvents: "none",
+    zIndex: 3
+  }}><ListeningSpeakerIcon size={12} /></span>;
+}
+
+function renderExerciseAudioGroup({
+  audio,
+  id,
+  src,
+  label,
+  children,
+  style,
+  key: renderKey,
+  ...props
+}) {
+  if (!src || Array.isArray(src) && !src.some(Boolean)) return <div key={renderKey} {...props} style={style}>{children}</div>;
+  const playing = audio.activeId === id;
+  const keys = event => {
+    if (event.target !== event.currentTarget || event.key !== "Enter" && event.key !== " ") return;
+    event.preventDefault();
+    event.stopPropagation();
+    if (event.type === "keydown" && !event.repeat) audio.play(id, src);
+  };
+  return <div key={renderKey} {...props} role="group" aria-roledescription="sentence audio" tabIndex={0} data-listening={id} aria-label={label} onKeyDown={keys} onKeyUp={keys} onClick={event => {
+    if (event.target.closest('input,select,textarea,button,[role="button"]')) return;
+    event.stopPropagation();
+    audio.play(id, src);
+  }} style={{
+    ...style,
+    position: style?.position || "relative",
+    borderRadius: style?.borderRadius || 6,
+    boxShadow: playing ? "0 0 0 3px #2563eb" : style?.boxShadow,
+    backgroundColor: playing ? "#dbeafe" : style?.backgroundColor
+  }}>{children}{playing && renderExerciseSpeaker()}</div>;
+}
+
+
+const activationKeys = {
+  onKeyDown: (event) => {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    event.preventDefault();
+    event.stopPropagation();
+    if (!event.repeat) event.currentTarget.click();
+  },
+  onKeyUp: (event) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+  },
+};
+
+
 
 // ─────────────────────────────────────────────
 //  🎨  COLORS
@@ -96,61 +255,25 @@ const isItemCorrect = (item, inputs) =>
 //  COMPONENT
 // ─────────────────────────────────────────────
 export default function WB_MissingLetters_F() {
+const listening=useExerciseListening("wb_unit3_page16_q1");
+
   const [inputs,      setInputs]      = useState({});
-  const [showResults, setShowResults] = useState(false);
+  const [, setShowResults] = useState(false);
   const [showAns,     setShowAns]     = useState(false);
+const [results,setResults]=useState({}),[announcement,setAnnouncement]=useState("");const resetButtonRef=useRef(null);const checkDisabled=showAns||ITEMS.every(item=>results[item.id]==="correct");const itemFor=id=>ITEMS.find(item=>Object.hasOwn(item.blanks,id));const fieldLocked=id=>showAns||results[itemFor(id)?.id]==="correct";const moveField=(id,step)=>{let at=ALL_BLANK_IDS.indexOf(id)+step;while(at>=0&&at<ALL_BLANK_IDS.length){const next=ALL_BLANK_IDS[at];if(!fieldLocked(next)){inputRefs.current[next]?.focus();return;}at+=step;}};
 
   const inputRefs = useRef({});
 
-  const isLocked = showAns;
+  
 
   // ── handlers ──────────────────────────────
-  const handleChange = (id, value) => {
-    if (isLocked) return;
-    const val = value.slice(-1);
-    setInputs((prev) => ({ ...prev, [id]: val }));
+  const handleChange=(id,value)=>{if(fieldLocked(id))return;const val=value.slice(-1);if(val&&!/^[a-z]$/i.test(val))return;setInputs(prev=>({...prev,[id]:val}));setResults(prev=>{const next={...prev};delete next[itemFor(id).id];return next;});if(val)moveField(id,1);};
 
-    // انتقل للـ input التالي تلقائياً
-    if (val) {
-      const currentIndex = ALL_BLANK_IDS.indexOf(id);
-      const nextId = ALL_BLANK_IDS[currentIndex + 1];
-      if (nextId && inputRefs.current[nextId]) {
-        inputRefs.current[nextId].focus();
-      }
-    }
-  };
+  const handleKeyDown=(id,event)=>{if(event.key==="Tab")return;event.stopPropagation();if(["ArrowLeft","ArrowRight","Enter"," "].includes(event.key)){event.preventDefault();if(!event.repeat)moveField(id,event.key==="ArrowLeft"?-1:1);}else if(event.key==="Backspace"&&!inputs[id]&&!fieldLocked(id)){event.preventDefault();moveField(id,-1);}};
 
-  const handleKeyDown = (id, e) => {
-    if (isLocked) return;
-    // Backspace: إذا الخانة فاضية، ارجع للسابق
-    if (e.key === "Backspace" && !inputs[id]) {
-      const currentIndex = ALL_BLANK_IDS.indexOf(id);
-      const prevId = ALL_BLANK_IDS[currentIndex - 1];
-      if (prevId && inputRefs.current[prevId]) {
-        inputRefs.current[prevId].focus();
-      }
-    }
-  };
+  const handleCheck=()=>{if(checkDisabled)return;listening.stop();if(!ALL_BLANK_IDS.every(id=>inputs[id]?.trim())){ValidationAlert.info("Please fill in all the blanks first.");return;}const next=Object.fromEntries(ITEMS.map(item=>[item.id,results[item.id]==="correct"||isItemCorrect(item,inputs)?"correct":"wrong"])),score=Object.values(next).filter(v=>v==="correct").length;setResults(next);setShowResults(true);setAnnouncement(`Score: ${score} out of ${ITEMS.length}. Correct words are locked.`);if(score===ITEMS.length){resetButtonRef.current?.focus({preventScroll:true});ValidationAlert.success(`Score: ${score} / ${ITEMS.length}`);}else if(score)ValidationAlert.warning(`Score: ${score} / ${ITEMS.length}`);else ValidationAlert.error(`Score: ${score} / ${ITEMS.length}`);};
 
-  const handleCheck = () => {
-    if (isLocked) return;
-    const allFilled = ITEMS.every((item) =>
-      Object.keys(item.blanks).every((id) => inputs[id]?.trim())
-    );
-    if (!allFilled) {
-      ValidationAlert.info("Please fill in all the blanks first.");
-      return;
-    }
-    let score = 0;
-    ITEMS.forEach((item) => { if (isItemCorrect(item, inputs)) score++; });
-    const total = ITEMS.length;
-    setShowResults(true);
-    if (score === total)  ValidationAlert.success(`Score: ${score} / ${total}`);
-    else if (score > 0)   ValidationAlert.warning(`Score: ${score} / ${total}`);
-    else                  ValidationAlert.error(`Score: ${score} / ${total}`);
-  };
-
-  const handleShowAnswer = () => {
+  const handleShowAnswer = () => {listening.stop();
     const ans = {};
     ITEMS.forEach((item) => {
       Object.entries(item.blanks).forEach(([id, letter]) => { ans[id] = letter; });
@@ -158,25 +281,22 @@ export default function WB_MissingLetters_F() {
     setInputs(ans);
     setShowResults(false);
     setShowAns(true);
-  };
+  setResults({});setAnnouncement("Correct words shown and locked.");resetButtonRef.current?.focus({preventScroll:true});};
 
-  const handleReset = () => {
+  const handleReset = () => {listening.stop();
     setInputs({});
     setShowResults(false);
     setShowAns(false);
-  };
+  setResults({});setAnnouncement("Letters and feedback cleared.");};
 
   // ── helpers ───────────────────────────────
-  const isItemWrong = (item) => {
-    if (!showResults || showAns) return false;
-    return !isItemCorrect(item, inputs);
-  };
+  const isItemWrong=item=>!showAns&&results[item.id]==="wrong";
 
   // ── render one item ───────────────────────
   const renderItem = (item) => {
     const wrong = isItemWrong(item);
     return (
-      <div key={item.id} className="ml-item">
+      renderExerciseAudioGroup({audio:listening,id:`clue-${item.id}`,src:[clipPage16B1,clipPage16B2,clipPage16B3,clipPage16B4][item.id-1],label:`Item ${item.id}. Listen to the printed letters.`,className:"ml-item",style:undefined,key:item.id,children:<>
         <span className="ml-num">{item.id}</span>
 
         <span className="ml-word-wrap">
@@ -188,7 +308,7 @@ export default function WB_MissingLetters_F() {
             const val   = inputs[part.id] || "";
             const isAns = showAns;
             return (
-              <input
+              <input aria-label={`Item ${item.id}, missing letter ${part.id.split("-")[1]}. Use the printed letters as clues.`} title={`Item ${item.id}, missing letter ${part.id.split("-")[1]}`} aria-invalid={wrong} onKeyUp={event=>{if(event.key!=="Tab")event.stopPropagation();}} style={{borderBottomColor:showAns||results[item.id]==="correct"?"#16a34a":wrong?"#ef4444":undefined}}
                 key={i}
                 ref={(el) => { inputRefs.current[part.id] = el; }}
                 type="text"
@@ -199,7 +319,7 @@ export default function WB_MissingLetters_F() {
                   isAns ? "ml-input--answer" : "",
                 ].filter(Boolean).join(" ")}
                 value={val}
-                disabled={isLocked}
+                disabled={fieldLocked(part.id)}
                 onChange={(e) => handleChange(part.id, e.target.value)}
                 onKeyDown={(e) => handleKeyDown(part.id, e)}
                 spellCheck={false}
@@ -211,13 +331,15 @@ export default function WB_MissingLetters_F() {
         </span>
 
         {wrong && <span className="ml-badge">✕</span>}
-      </div>
+      </>})
     );
   };
 
   // ── render ────────────────────────────────
   return (
-    <div className="main-container-component">
+    <div data-adapt-scope="Unit3_WB_Unit3_Page16_Q1" className="main-container-component"><span className="sr-only" role="status" aria-live="polite">{listening.error}</span>
+<style>{`[data-adapt-scope="Unit3_WB_Unit3_Page16_Q1"] input:focus-visible, [data-adapt-scope="Unit3_WB_Unit3_Page16_Q1"] [data-keyboard-choice]:focus-visible, [data-adapt-scope="Unit3_WB_Unit3_Page16_Q1"] [data-grid-cell]:focus-visible, [data-adapt-scope="Unit3_WB_Unit3_Page16_Q1"] [data-listening]:focus-visible {outline:4px solid #2563eb !important;outline-offset:3px;border-radius:6px;}`}</style>
+<div className="sr-only" role="status" aria-live="polite" aria-atomic="true">{announcement}</div>
       <style>{`
         .ml-grid {
           display: grid;
@@ -309,13 +431,7 @@ export default function WB_MissingLetters_F() {
           margin: "0 auto",
         }}
       >
-        <h1
-          className="WB-header-title-page8"
-          style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}
-        >
-          <span className="WB-ex-A">B</span>
-          Write the missing letters.
-        </h1>
+        <ExerciseHeader subTitle="Say the word or expression aloud, use the visible letters as clues, then fill in only the missing letters." sectionLetter="B" title={<>Write the missing letters.</>} />
 
         <div className="ml-grid" style={{ marginTop: "20%" }}>
           {ITEMS.filter((_, i) => i % 2 === 0).map((item, rowIdx) => {
@@ -330,11 +446,11 @@ export default function WB_MissingLetters_F() {
         </div>
 
         <div className="ml-buttons">
-          <Button
-            checkAnswers={handleCheck}
-            handleShowAnswer={handleShowAnswer}
-            handleStartAgain={handleReset}
-          />
+          <div className="action-buttons-container">
+<button type="button" aria-label="Start Again" {...activationKeys} ref={resetButtonRef} onClick={handleReset} className="try-again-button">Start Again ↻</button>
+<button type="button" aria-label="Show Answer" {...activationKeys} onClick={handleShowAnswer} className="show-answer-btn swal-continue">Show Answer</button>
+<button type="button" aria-label="Check Answer" {...activationKeys} onClick={handleCheck} disabled={checkDisabled} style={{cursor:checkDisabled ? "not-allowed":"pointer"}} className="check-button2">Check Answer ✓</button>
+</div>
         </div>
       </div>
     </div>

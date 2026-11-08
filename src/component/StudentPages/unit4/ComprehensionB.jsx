@@ -1,7 +1,38 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import ValidationAlert from "../../Popup/ValidationAlert";
 import { FaCheck, FaRedo, FaEye } from "react-icons/fa";
 import atmosphereImg from "../../../assets/imgs/pages/Class Book/Right 4 Unit 4 Joy Makes a Friend Folder/Page 28/SVG/Asset 24.svg";
+const activationKeys = {
+  onKeyDown: (event) => {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    event.preventDefault();
+    event.stopPropagation();
+    if (!event.repeat) event.currentTarget.click();
+  },
+  onKeyUp: (event) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+  },
+};
+const fieldKeys = {
+  onKeyDown: (event) => {
+    if (event.key === "Enter" || event.key === " ") event.stopPropagation();
+  },
+  onKeyUp: (event) => {
+    if (event.key === "Enter" || event.key === " ") event.stopPropagation();
+  },
+};
+const normalizeAnswer = (value) =>
+  value
+    .normalize("NFKC")
+    .toLowerCase()
+    .replace(/[\u2018\u2019\u201A\u201B\u0060\u00B4']/g, "")
+    .replace(/[.,!?;:\u2026\u201c\u201d"]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+
 
 const ComprehensionB = () => {
   const wordBank = ["thermosphere", "troposphere", "mesosphere", "stratosphere"];
@@ -20,9 +51,13 @@ const ComprehensionB = () => {
   const [locked, setLocked] = useState(false);
   const [showed, setShowed] = useState(false);
 
+  const [announcement,setAnnouncement] = useState("");
+  const resetButtonRef = useRef(null);
+
   const handleChange = (id, value) => {
     if (locked || errors[id] === false) return;
     setAnswers((prev) => ({ ...prev, [id]: value }));
+    setErrors(prev=>{const next={...prev};delete next[id];return next;});
   };
 
   const handleCheck = () => {
@@ -35,7 +70,7 @@ const ComprehensionB = () => {
     let correctCount = 0;
     const newErrors = {};
     questions.forEach((q) => {
-      if (answers[q.id].trim().toLowerCase() === q.answer.toLowerCase()) {
+      if (normalizeAnswer(answers[q.id]) === normalizeAnswer(q.answer)) {
         correctCount++;
         newErrors[q.id] = false;
       } else {
@@ -43,6 +78,7 @@ const ComprehensionB = () => {
       }
     });
     setErrors(newErrors);
+    setAnnouncement(`Score: ${correctCount} out of ${questions.length}. Correct answers are locked; incorrect answers can be changed.`);
     const total = questions.length;
     const color =
       correctCount === total ? "green" : correctCount === 0 ? "red" : "orange";
@@ -55,6 +91,7 @@ const ComprehensionB = () => {
     `;
     if (correctCount === total) {
       setLocked(true);
+      resetButtonRef.current?.focus({preventScroll:true});
       ValidationAlert.success(msg);
     } else if (correctCount === 0) {
       ValidationAlert.error(msg);
@@ -68,6 +105,8 @@ const ComprehensionB = () => {
     setErrors({});
     setLocked(true);
     setShowed(true);
+    resetButtonRef.current?.focus({preventScroll:true});
+    setAnnouncement("Correct answers shown and locked.");
   };
 
   const handleReset = () => {
@@ -75,6 +114,7 @@ const ComprehensionB = () => {
     setErrors({});
     setLocked(false);
     setShowed(false);
+    setAnnouncement("Answers and feedback cleared.");
   };
 
   // المواقع بالنسبة للصورة نفسها (%)
@@ -86,7 +126,9 @@ const ComprehensionB = () => {
   };
 
   return (
-    <div className="mb-6 mx-auto">
+    <div data-adapt-scope="unit4_ComprehensionB" className="mb-6 mx-auto">
+<style>{`[data-adapt-scope="unit4_ComprehensionB"] input:focus-visible, [data-adapt-scope="unit4_ComprehensionB"] [data-keyboard-choice]:focus-visible, [data-adapt-scope="unit4_ComprehensionB"] [data-grid-cell]:focus-visible {outline:4px solid #2563eb;outline-offset:3px;border-radius:6px;}`}</style>
+<div className="sr-only" role="status" aria-live="polite" aria-atomic="true">{announcement}</div>
       <h5 className="header-title-page8-read mb-6">
         <span className="ex-A-read mr-2">B</span>
         Label the layers of the Earth's atmosphere.
@@ -141,7 +183,7 @@ const ComprehensionB = () => {
         >
           <img
             src={atmosphereImg}
-            alt="atmosphere"
+            alt="Earth with a diagram of four atmospheric bands and spaces to label the layers."
             style={{
               width: "80%",
               height: "auto",
@@ -181,13 +223,13 @@ const ComprehensionB = () => {
                 </span>
 
                 <div style={{ position: "relative", flex: 1 }}>
-                  <input
+                  <input {...fieldKeys} aria-label={`Diagram label ${q.id}. Write the layer name.`} title={`Diagram label ${q.id}. Write the layer name.`} placeholder="Answer" aria-invalid={errors[q.id] === true}
                     type="text"
                     value={answers[q.id]}
                     onChange={(e) => handleChange(q.id, e.target.value)}
                     disabled={locked || isCorrect}
                     autoComplete="off"
-                    style={{
+                    style={{...({
                       width: "100%",
                       fontSize: "18px",
                       background: "transparent",
@@ -197,7 +239,17 @@ const ComprehensionB = () => {
                       color: showed ? "#ef4444" :  "#1a1a1a",
                       textAlign: "center",
                       padding: "2px 4px",
-                    }}
+                    }),borderBottomColor:showed || errors[q.id] === false ? "#16a34a" : errors[q.id] === true ? "#ef4444" : ({
+                      width: "100%",
+                      fontSize: "18px",
+                      background: "transparent",
+                      border: "none",
+                      borderBottom: `2px solid ${isError ? "#ef4444": "#333"}`,
+                      outline: "none",
+                      color: showed ? "#ef4444" :  "#1a1a1a",
+                      textAlign: "center",
+                      padding: "2px 4px",
+                    }).borderBottomColor}}
                   />
 
                   {/* ❌ Error Badge */}
@@ -236,42 +288,42 @@ const ComprehensionB = () => {
       {/* Buttons */}
       <div className="flex justify-center gap-6 ">
         <div className="relative group">
-          <div
+          <button type="button" aria-label="Start Again" {...activationKeys} ref={resetButtonRef}
             onClick={handleReset}
             className="flex items-center justify-center w-14 h-14 rounded-xl bg-[#ffc107] hover:bg-[#e0a800] cursor-pointer transition shadow-sm"
           >
-            <div className="bg-white p-3 rounded-full shadow">
+            <span className="bg-white p-3 rounded-full shadow">
               <FaRedo size={14} />
-            </div>
-          </div>
+            </span>
+          </button>
           <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-black text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition">
             Reset
           </span>
         </div>
 
         <div className="relative group">
-          <div
+          <button type="button" aria-label="Show Answer" {...activationKeys}
             onClick={handleShow}
             className="flex items-center justify-center w-14 h-14 rounded-xl bg-[#2c78b4] hover:bg-[#1a5a8a] cursor-pointer transition shadow-sm"
           >
-            <div className="bg-white p-3 rounded-full shadow">
+            <span className="bg-white p-3 rounded-full shadow">
               <FaEye size={14} />
-            </div>
-          </div>
+            </span>
+          </button>
           <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-black text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition whitespace-nowrap">
             Show Answer
           </span>
         </div>
 
         <div className="relative group">
-          <div
+          <button type="button" aria-label="Check Answer" {...activationKeys} disabled={locked} style={{cursor:locked ? "not-allowed":"pointer"}}
             onClick={handleCheck}
             className="flex items-center justify-center w-14 h-14 rounded-xl bg-[#55c271] hover:bg-[#449d5a] cursor-pointer transition shadow-sm"
           >
-            <div className="bg-white p-3 rounded-full shadow">
+            <span className="bg-white p-3 rounded-full shadow">
               <FaCheck size={14} />
-            </div>
-          </div>
+            </span>
+          </button>
           <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-black text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition whitespace-nowrap">
             Check Answer
           </span>
