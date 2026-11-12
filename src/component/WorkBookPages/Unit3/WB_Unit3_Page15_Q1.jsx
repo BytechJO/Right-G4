@@ -15,6 +15,7 @@ import clipPage15A4 from "../../../assets/audio/WorkBook/Unit 3/Page 15 - A/Item
 import clipPage15A3 from "../../../assets/audio/WorkBook/Unit 3/Page 15 - A/Item_003_on_the_table.mp3";
 import clipPage15A2 from "../../../assets/audio/WorkBook/Unit 3/Page 15 - A/Item_002_There_are_many.mp3";
 import clipPage15A1 from "../../../assets/audio/WorkBook/Unit 3/Page 15 - A/Item_001_The_muffins_are.mp3";
+import clipPage15A from "../../../assets/audio/WorkBook/Unit 3/Page 15 - A/friends.mp3";
 import {
   useEffect as useListeningEffect,
   useRef as useListeningRef,
@@ -327,6 +328,7 @@ export default function WB_ReadLookCircleWrite_A() {
         made: missingNew0,
         family: missingNew1,
         yesterday: missingNew2,
+        friends: clipPage15A,
       }[option],
     );
     if (showAns || selectionResults[id] === "correct") return;
@@ -474,7 +476,12 @@ export default function WB_ReadLookCircleWrite_A() {
             {renderExerciseAudioText({
               audio: listening,
               id: `after-${item.id}`,
-              src: item.id === 2 ? clipPage15A3 : item.id === 6 ? missingNew5 : null,
+              src:
+                item.id === 2
+                  ? clipPage15A3
+                  : item.id === 6
+                    ? missingNew5
+                    : null,
               label: item.sentenceAfter,
               children: item.sentenceAfter,
             })}
@@ -560,14 +567,16 @@ export default function WB_ReadLookCircleWrite_A() {
                   {String.fromCharCode(97 + i)}
                 </span>
                 <span
-                  style={{
-                    // borderColor:
-                    //   isSelected && (showAns || selectionResults[item.id])
-                    //     ? showAns || selectionResults[item.id] === "correct"
-                    //       ? "#16a34a"
-                    //       : "#ef4444"
-                    //     : undefined,
-                  }}
+                  style={
+                    {
+                      // borderColor:
+                      //   isSelected && (showAns || selectionResults[item.id])
+                      //     ? showAns || selectionResults[item.id] === "correct"
+                      //       ? "#16a34a"
+                      //       : "#ef4444"
+                      //     : undefined,
+                    }
+                  }
                   className={[
                     "rlcw-opt-text",
                     // circled    ? "rlcw-opt--circled" : "",
